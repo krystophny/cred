@@ -81,8 +81,8 @@ theorem Prob.add_mul (p q r : Prob) : (p +ₚ q) *ₚ r = (p *ₚ r) +ₚ (q *�
   rw [Prob.mul_comm, Prob.mul_comm p r, Prob.mul_comm q r]
   exact Prob.mul_add r p q
 
--- Special case for 1+1-1=1
-axiom Prob.one_add_one_sub_one : (𝟙 +ₚ 𝟙) -ₚ 𝟙 = 𝟙
+-- Derived: 1+1-1=1 follows from add_sub_cancel
+theorem Prob.one_add_one_sub_one : (𝟙 +ₚ 𝟙) -ₚ 𝟙 = 𝟙 := Prob.add_sub_cancel 𝟙 𝟙
 
 -- Non-triviality: 0 ≠ 1
 axiom Prob.zero_ne_one : 𝟘 ≠ 𝟙
@@ -529,8 +529,14 @@ theorem prob_and_one {α : Type} (A : ProbProp α) (x : α) :
 -- E1. Countable summation axiom (new primitive for natural numbers)
 axiom prob_sum : (Nat → Prob) → Prob
 axiom prob_sum_singleton : ∀ n p, prob_sum (fun m => if m = n then p else 𝟘) = p
-axiom prob_sum_zero : prob_sum (fun _ => 𝟘) = 𝟘
 axiom prob_sum_le_one : ∀ f, (∀ n, f n ≤ₚ 𝟙) → prob_sum f ≤ₚ 𝟙
+
+-- Derived: prob_sum_zero from prob_sum_singleton with p=0
+theorem prob_sum_zero : prob_sum (fun _ => 𝟘) = 𝟘 := by
+  have h : prob_sum (fun m => if m = 0 then 𝟘 else 𝟘) = 𝟘 := prob_sum_singleton 0 𝟘
+  have heq : (fun m => if m = 0 then 𝟘 else 𝟘) = (fun _ => 𝟘) := by funext m; simp
+  rw [← heq]
+  exact h
 
 -- E2. Probabilistic natural number: distribution over Nat
 structure ProbNat (α : Type) where
