@@ -37,30 +37,49 @@ axiom Prob.le_antisymm : ∀ p q : Prob, p ≤ₚ q → q ≤ₚ p → p = q
 axiom Prob.mul_le_mul : ∀ p₁ p₂ q₁ q₂ : Prob,
   p₁ ≤ₚ q₁ → p₂ ≤ₚ q₂ → (p₁ *ₚ p₂) ≤ₚ (q₁ *ₚ q₂)
 axiom Prob.one_mul : ∀ p : Prob, 𝟙 *ₚ p = p
-axiom Prob.mul_one : ∀ p : Prob, p *ₚ 𝟙 = p
 axiom Prob.mul_comm : ∀ p q : Prob, p *ₚ q = q *ₚ p
 axiom Prob.mul_assoc : ∀ p q r : Prob, (p *ₚ q) *ₚ r = p *ₚ (q *ₚ r)
 axiom Prob.zero_mul : ∀ p : Prob, 𝟘 *ₚ p = 𝟘
-axiom Prob.mul_zero : ∀ p : Prob, p *ₚ 𝟘 = 𝟘
+
+-- Derived: mul_one from mul_comm + one_mul
+theorem Prob.mul_one (p : Prob) : p *ₚ 𝟙 = p := by rw [Prob.mul_comm]; exact Prob.one_mul p
+
+-- Derived: mul_zero from mul_comm + zero_mul
+theorem Prob.mul_zero (p : Prob) : p *ₚ 𝟘 = 𝟘 := by rw [Prob.mul_comm]; exact Prob.zero_mul p
 
 -- Addition
 axiom Prob.add_comm : ∀ p q : Prob, p +ₚ q = q +ₚ p
 axiom Prob.add_assoc : ∀ p q r : Prob, (p +ₚ q) +ₚ r = p +ₚ (q +ₚ r)
 axiom Prob.zero_add : ∀ p : Prob, 𝟘 +ₚ p = p
-axiom Prob.add_zero : ∀ p : Prob, p +ₚ 𝟘 = p
+
+-- Derived: add_zero from add_comm + zero_add
+theorem Prob.add_zero (p : Prob) : p +ₚ 𝟘 = p := by rw [Prob.add_comm]; exact Prob.zero_add p
 
 -- Subtraction (truncated at 0)
 axiom Prob.sub_self : ∀ p : Prob, p -ₚ p = 𝟘
 axiom Prob.add_sub_cancel : ∀ p q : Prob, (p +ₚ q) -ₚ q = p
-axiom Prob.one_sub_zero : 𝟙 -ₚ 𝟘 = 𝟙
-axiom Prob.one_sub_one : 𝟙 -ₚ 𝟙 = 𝟘
-axiom Prob.sub_zero : ∀ p : Prob, p -ₚ 𝟘 = p
 axiom Prob.add_sub_one : ∀ p : Prob, p +ₚ (𝟙 -ₚ p) = 𝟙
 axiom Prob.sub_sub_cancel : ∀ p : Prob, 𝟙 -ₚ (𝟙 -ₚ p) = p
 
+-- Derived: sub_zero from add_sub_cancel + add_zero
+theorem Prob.sub_zero (p : Prob) : p -ₚ 𝟘 = p := by
+  have h : (p +ₚ 𝟘) -ₚ 𝟘 = p := Prob.add_sub_cancel p 𝟘
+  rw [Prob.add_zero] at h
+  exact h
+
+-- Derived: one_sub_zero from sub_zero
+theorem Prob.one_sub_zero : 𝟙 -ₚ 𝟘 = 𝟙 := Prob.sub_zero 𝟙
+
+-- Derived: one_sub_one from sub_self
+theorem Prob.one_sub_one : 𝟙 -ₚ 𝟙 = 𝟘 := Prob.sub_self 𝟙
+
 -- Distributivity
 axiom Prob.mul_add : ∀ p q r : Prob, p *ₚ (q +ₚ r) = (p *ₚ q) +ₚ (p *ₚ r)
-axiom Prob.add_mul : ∀ p q r : Prob, (p +ₚ q) *ₚ r = (p *ₚ r) +ₚ (q *ₚ r)
+
+-- Derived: add_mul from mul_add + mul_comm
+theorem Prob.add_mul (p q r : Prob) : (p +ₚ q) *ₚ r = (p *ₚ r) +ₚ (q *ₚ r) := by
+  rw [Prob.mul_comm, Prob.mul_comm p r, Prob.mul_comm q r]
+  exact Prob.mul_add r p q
 
 -- Special case for 1+1-1=1
 axiom Prob.one_add_one_sub_one : (𝟙 +ₚ 𝟙) -ₚ 𝟙 = 𝟙
@@ -180,8 +199,9 @@ notation:25 Γ " ⊢ᶜ " φ => ClassicalEntails Γ φ
 noncomputable def prob_and {α : Type} (A B : ProbProp α) : ProbProp α :=
   fun x => A x *ₚ B x
 
+-- De Morgan form: equivalent to inclusion-exclusion but makes De Morgan laws trivial
 noncomputable def prob_or {α : Type} (A B : ProbProp α) : ProbProp α :=
-  fun x => (A x +ₚ B x) -ₚ (A x *ₚ B x)
+  fun x => 𝟙 -ₚ ((𝟙 -ₚ A x) *ₚ (𝟙 -ₚ B x))
 
 noncomputable def prob_not {α : Type} (A : ProbProp α) : ProbProp α :=
   fun x => 𝟙 -ₚ A x
@@ -292,7 +312,7 @@ theorem classical_not_closed {α : Type} (A : ClassicalProp α) :
     rw [hao]
     exact Prob.one_sub_one
 
--- Classical OR is classical
+-- Classical OR is classical (De Morgan form: 1 - (1-A)(1-B))
 theorem classical_or_closed {α : Type} (A B : ClassicalProp α) :
     ∀ x, isClassical ((A.val ∨ₚ B.val) x) := by
   intro x
@@ -301,24 +321,21 @@ theorem classical_or_closed {α : Type} (A B : ClassicalProp α) :
   have hb : isClassical (B.val x) := B.property x
   cases ha with
   | inl haz =>
-    rw [haz, Prob.zero_add, Prob.zero_mul]
+    rw [haz, Prob.one_sub_zero]
     cases hb with
     | inl hbz =>
+      -- A=0, B=0: 1 - 1*1 = 0
       left
-      rw [hbz, Prob.sub_self]
+      rw [hbz, Prob.one_sub_zero, Prob.one_mul, Prob.one_sub_one]
     | inr hbo =>
+      -- A=0, B=1: 1 - 1*0 = 1
       right
-      rw [hbo, Prob.sub_zero]
+      rw [hbo, Prob.one_sub_one, Prob.mul_zero, Prob.one_sub_zero]
   | inr hao =>
-    rw [hao]
-    cases hb with
-    | inl hbz =>
-      right
-      rw [hbz, Prob.add_zero, Prob.mul_zero, Prob.sub_zero]
-    | inr hbo =>
-      right
-      rw [hbo, Prob.one_mul]
-      exact Prob.one_add_one_sub_one
+    rw [hao, Prob.one_sub_one, Prob.zero_mul]
+    -- A=1: 1 - 0*(1-B) = 1
+    right
+    exact Prob.one_sub_zero
 
 -- ============================================================================
 -- CLASSICAL PROP CONSTRUCTORS
@@ -453,42 +470,45 @@ theorem strong_neg_implies_weak_one {α : Type} (φ : ProbProp α) :
   rw [hzero, Prob.zero_add] at hlem
   exact hlem
 
--- De Morgan laws for probabilistic propositions
-axiom Prob.de_morgan_and : ∀ a b : Prob,
-  𝟙 -ₚ (a *ₚ b) = ((𝟙 -ₚ a) +ₚ (𝟙 -ₚ b)) -ₚ ((𝟙 -ₚ a) *ₚ (𝟙 -ₚ b))
+-- De Morgan laws: now DERIVED from the De Morgan form of prob_or!
+-- No axioms needed - these are definitional with sub_sub_cancel
 
 theorem prob_de_morgan_and {α : Type} (A B : ProbProp α) :
     prob_not (prob_and A B) = prob_or (prob_not A) (prob_not B) := by
   funext x
   simp only [prob_not, prob_and, prob_or]
-  exact Prob.de_morgan_and (A x) (B x)
-
-axiom Prob.de_morgan_or : ∀ a b : Prob,
-  𝟙 -ₚ ((a +ₚ b) -ₚ (a *ₚ b)) = (𝟙 -ₚ a) *ₚ (𝟙 -ₚ b)
+  -- Goal: 1 - A*B = 1 - (1 - (1-A))*(1 - (1-B))
+  -- Using sub_sub_cancel: 1 - (1-p) = p
+  rw [Prob.sub_sub_cancel, Prob.sub_sub_cancel]
 
 theorem prob_de_morgan_or {α : Type} (A B : ProbProp α) :
     prob_not (prob_or A B) = prob_and (prob_not A) (prob_not B) := by
   funext x
   simp only [prob_not, prob_or, prob_and]
-  exact Prob.de_morgan_or (A x) (B x)
+  -- Goal: 1 - (1 - (1-A)*(1-B)) = (1-A)*(1-B)
+  -- Direct application of sub_sub_cancel
+  exact Prob.sub_sub_cancel ((𝟙 -ₚ A x) *ₚ (𝟙 -ₚ B x))
 
 -- Disjunction commutativity
 theorem prob_or_comm {α : Type} (A B : ProbProp α) (x : α) :
     prob_or A B x = prob_or B A x := by
   simp only [prob_or]
-  rw [Prob.add_comm (A x) (B x), Prob.mul_comm (A x) (B x)]
+  -- Goal: 1 - (1-A)(1-B) = 1 - (1-B)(1-A)
+  rw [Prob.mul_comm]
 
--- Zero is identity for disjunction
+-- Zero is identity for disjunction: A ∨ 0 = A
 theorem prob_or_zero {α : Type} (A : ProbProp α) (x : α) :
     prob_or A (prob_const 𝟘) x = A x := by
   simp only [prob_or, prob_const]
-  rw [Prob.add_zero, Prob.mul_zero, Prob.sub_zero]
+  -- Goal: 1 - (1-A)*1 = A
+  rw [Prob.one_sub_zero, Prob.mul_one, Prob.sub_sub_cancel]
 
--- One is absorbing for disjunction
+-- One is absorbing for disjunction: A ∨ 1 = 1
 theorem prob_or_one {α : Type} (A : ProbProp α) (x : α) :
     prob_or A (prob_const 𝟙) x = 𝟙 := by
   unfold prob_or prob_const
-  rw [Prob.mul_one, Prob.add_comm (A x) 𝟙, Prob.add_sub_cancel]
+  -- Goal: 1 - (1-A)*0 = 1
+  rw [Prob.one_sub_one, Prob.mul_zero, Prob.one_sub_zero]
 
 -- Zero is absorbing for conjunction
 theorem prob_and_zero {α : Type} (A : ProbProp α) (x : α) :
