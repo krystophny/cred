@@ -217,7 +217,120 @@ The confirmed reduction is modest: 5 axioms eliminated by trivial observations. 
 \label{sec:finite-zorn}
 % ============================================================================
 
-% Content to be added
+We prove that probabilistic Zorn's lemma holds for finite types without any appeal to the Axiom of Choice. This is the foundation for the infinite case.
+
+\subsection{Setup}
+
+Recall from Paper 4:
+
+\begin{definition}[Probabilistic Poset]
+A \emph{probabilistic poset} on type $\alpha$ consists of:
+\[
+P.\mathsf{le} : \alpha \to \alpha \to \Prob
+\]
+with reflexivity ($P.\mathsf{le}(x,x) = \pone$) and transitivity.
+\end{definition}
+
+\begin{definition}[Strict Order]
+$\plt(x,y) := P.\mathsf{le}(x,y) \pmul (\pone \psub P.\mathsf{le}(y,x))$
+\end{definition}
+
+\begin{definition}[$\varepsilon$-Near-Maximal]
+Element $x$ is \emph{$\varepsilon$-near-maximal} if $\forall y,\, \plt(x,y) \ple \varepsilon$.
+\end{definition}
+
+\subsection{The Finite Case}
+
+\begin{theorem}[Finite Probabilistic Zorn]
+\label{thm:finite-zorn}
+Let $\alpha$ be a finite nonempty type with probabilistic poset structure $P$. Then there exists $x \in \alpha$ and $\varepsilon \in \Prob$ such that $x$ is $\varepsilon$-near-maximal.
+\end{theorem}
+
+\begin{proof}
+Since $\alpha$ is finite and nonempty, enumerate it as $\{a_1, \ldots, a_n\}$.
+
+For each $a_i$, define the \emph{maximality defect}:
+\[
+\delta(a_i) := \max_{j \neq i} \plt(a_i, a_j)
+\]
+This measures how far $a_i$ is from being maximal: if $\delta(a_i) = \pzero$, then $a_i$ is truly maximal.
+
+Since $\alpha$ is finite, the minimum exists:
+\[
+\varepsilon^* := \min_{i} \delta(a_i)
+\]
+
+Let $a_{i^*}$ be an element achieving this minimum. Then:
+\[
+\forall j,\, \plt(a_{i^*}, a_j) \leq \delta(a_{i^*}) = \varepsilon^*
+\]
+
+Thus $a_{i^*}$ is $\varepsilon^*$-near-maximal.
+\end{proof}
+
+\begin{remark}[Finite Suprema]
+The proof assumes finite suprema (max/min) exist in $\Prob$. This follows from totality of $\ple$ and decidability of the ordering, or can be taken as an axiom for finite operations on $\Prob$.
+\end{remark}
+
+\begin{remark}[No Choice Used]
+The proof uses only:
+\begin{enumerate}
+    \item Finiteness of $\alpha$ (to enumerate elements)
+    \item Existence of max/min over finite sets (constructive for finite sets)
+    \item Basic properties of $\Prob$
+\end{enumerate}
+No selection from infinite sets is required.
+\end{remark}
+
+\subsection{Strengthening for Classical Posets}
+
+\begin{corollary}[Finite Classical Zorn]
+If $P$ is a \emph{classical} probabilistic poset (all values in $\{\pzero, \pone\}$) on a finite nonempty type, then there exists a maximal element.
+\end{corollary}
+
+\begin{proof}
+By Theorem~\ref{thm:finite-zorn}, there exists an $\varepsilon^*$-near-maximal element $m$.
+
+For classical posets, $\plt(x,y) \in \{\pzero, \pone\}$. If $\varepsilon^* = \pzero$, then $m$ is truly maximal, and we are done.
+
+Suppose for contradiction that $\varepsilon^* = \pone$. Then for every $a_i$, there exists $a_j$ with $\plt(a_i, a_j) = \pone$. Construct a chain: pick any $a_1$, then $a_2$ with $a_1 \plt a_2$, then $a_3$ with $a_2 \plt a_3$, etc. Since $\alpha$ is finite, this chain must eventually repeat: $a_k = a_\ell$ for some $k < \ell$.
+
+By transitivity of $\plt$, we have $a_k \plt a_\ell = a_k$. But $\plt$ is irreflexive (proven in Paper 4: $\plt(x,x) = \pzero$ for all $x$). Contradiction.
+
+Thus $\varepsilon^* = \pzero$ and $m$ is maximal.
+\end{proof}
+
+\subsection{Examples}
+
+\begin{example}[Three-Element Chain]
+Let $\alpha = \{a, b, c\}$ with classical ordering $a < b < c$. Then:
+\begin{itemize}
+    \item $\delta(a) = \max(\plt(a,b), \plt(a,c)) = \max(\pone, \pone) = \pone$
+    \item $\delta(b) = \max(\plt(b,a), \plt(b,c)) = \max(\pzero, \pone) = \pone$
+    \item $\delta(c) = \max(\plt(c,a), \plt(c,b)) = \max(\pzero, \pzero) = \pzero$
+\end{itemize}
+Thus $\varepsilon^* = \min(\pone, \pone, \pzero) = \pzero$, and $c$ is the (unique) maximal element.
+\end{example}
+
+\begin{example}[Probabilistic Triangle]
+Let $\alpha = \{a, b, c\}$ with:
+\[
+P.\mathsf{le}(a,b) = 0.7, \quad P.\mathsf{le}(b,c) = 0.6, \quad P.\mathsf{le}(c,a) = 0.5
+\]
+and symmetrically for reverse directions (summing to 1). This is a ``rock-paper-scissors'' structure with no clear winner. Computing $\delta$ for each element shows $\varepsilon^* > 0$---there is no truly maximal element, only near-maximal ones.
+\end{example}
+
+\subsection{What the Finite Case Establishes}
+
+Theorem~\ref{thm:finite-zorn} shows:
+
+\begin{enumerate}
+    \item \textbf{Finite Zorn is choice-free}: No AC, DC, or CC is needed.
+    \item \textbf{Near-maximality is definable}: Given a finite $\alpha$ with decidable ordering, $\varepsilon^*$ and a witness are definable without additional axioms.
+    \item \textbf{Foundation for infinite case}: The infinite case will use finite approximations.
+\end{enumerate}
+
+The key insight: for finite sets, we never need to \emph{select}---we can \emph{compute} by enumeration.
 
 % ============================================================================
 \section{Part 3: Projective Limits and Infinite Zorn}

@@ -163,7 +163,75 @@ Added remark: ``Trading mono for positivity is not a net reduction. The value is
 \label{sec:review-finite}
 % ============================================================================
 
-% To be added
+\subsection{Submission}
+
+Date: \today
+
+Section 3 (Part 2: Finite Probabilistic Zorn) submitted for review.
+
+\subsection{Reviewer Comments}
+
+\begin{review}{3.1}
+Your ``proof'' of Theorem 2.1 uses $\max$ and $\min$ over $\Prob$ values. But $\Prob$ is abstract---you have not established that it has decidable ordering or that finite suprema exist. This is a gap. Either prove these properties or add them as axioms.
+\end{review}
+
+\begin{response}
+The reviewer identifies a genuine gap. Our axioms include $\ple$ as a total order with antisymmetry, but we have not established decidability or existence of finite suprema.
+
+For a finite set $\{p_1, \ldots, p_n\}$ of $\Prob$ values, we can define:
+\[
+\max(p_1, \ldots, p_n) := p_i \text{ where } \forall j,\, p_j \ple p_i
+\]
+Existence follows from totality of order and finiteness. However, \emph{finding} such $p_i$ requires decidable $\ple$.
+
+We will add a remark noting this gap and the needed assumption (decidable ordering or constructive totality).
+\end{response}
+
+\begin{revision}
+Added Remark 2.2: ``The proof assumes finite suprema exist in $\Prob$. This follows from totality of $\ple$ plus decidability, or can be added as an axiom for finite operations.''
+\end{revision}
+
+\begin{review}{3.2}
+The ``proof'' of Corollary 2.2 (Finite Classical Zorn) claims that $\varepsilon^* = \pone$ leads to an infinite ascending chain, contradicting finiteness. But you have not proven that classical posets with $\varepsilon^* = \pone$ actually have infinite chains. You have only asserted it.
+\end{review}
+
+\begin{response}
+The reviewer is correct that the argument is informal. The formal argument: if $\varepsilon^* = \pone$, then for every $a_i$, there exists $a_j$ with $a_i \plt a_j$ (strictly less). Starting from any $a_1$, we get $a_1 \plt a_2 \plt a_3 \plt \cdots$. In a finite set, this chain must repeat, giving $a_k \plt a_k$ for some $k$, contradicting irreflexivity of $\plt$.
+
+We will make this explicit.
+\end{response}
+
+\begin{revision}
+Proof of Corollary 2.2 expanded with explicit chain construction and contradiction via irreflexivity.
+\end{revision}
+
+\begin{review}{3.3}
+Proposition 2.3 (the $(n-1)/n$ bound) is vague. What does ``generic'' mean? What is ``uniform uncertainty''? Either define these precisely or remove the proposition.
+\end{review}
+
+\begin{response}
+The reviewer is right---this is too vague for a formal paper. The intuition is that for a uniformly random tournament, the expected $\varepsilon^*$ is bounded. However, formalizing this requires a probability distribution over posets, which we have not developed.
+
+We will remove this proposition and replace it with a concrete example.
+\end{response}
+
+\begin{revision}
+Proposition 2.3 removed. Replaced with Example: ``For the 3-element chain $a \plt b \plt c$, we have $\varepsilon^* = 0$ (element $c$ is maximal).''
+\end{revision}
+
+\begin{review}{3.4}
+You claim ``Near-maximality is computable.'' Computable in what model? You are working in Lean's type theory, not a model of computation. Be precise about what computability claim you are making.
+\end{review}
+
+\begin{response}
+Fair point. In Lean's type theory with our axioms, $\Prob$ is not ``computable'' in the standard sense because it is abstract. What we mean is: given a finite enumeration and decidable $\ple$, the construction is definable without additional axioms.
+
+We will rephrase to avoid misusing ``computable.''
+\end{response}
+
+\begin{revision}
+Changed ``computable'' to ``definable from the finite structure without choice principles.''
+\end{revision}
 
 % ============================================================================
 \section{Review Round 4: Projective Limits}
