@@ -62,9 +62,18 @@ let () =
   test "weakening.ptt type checks" (check_succeeds "test/examples/weakening.ptt");
   test "weight_mul.ptt type checks" (check_succeeds "test/examples/weight_mul.ptt");
 
-  (* Proof files *)
+  (* Proof files - sqrt2 *)
   test "sqrt2.ptt proof succeeds" (check_succeeds "test/proofs/sqrt2.ptt");
   test "sqrt2.ptt shows contradiction" (check_contains "test/proofs/sqrt2.ptt" "CONTRADICTION");
   test "sqrt2.ptt concludes weight 1" (check_contains "test/proofs/sqrt2.ptt" "1");
+
+  (* Classical logic proofs *)
+  test "modus_ponens.ptt succeeds" (check_succeeds "test/proofs/modus_ponens.ptt");
+  test "modus_tollens.ptt succeeds" (check_succeeds "test/proofs/modus_tollens.ptt");
+  test "modus_tollens.ptt shows contradiction" (check_contains "test/proofs/modus_tollens.ptt" "CONTRADICTION");
+  test "contradiction.ptt succeeds" (check_succeeds "test/proofs/contradiction.ptt");
+  test "double_negation.ptt succeeds" (check_succeeds "test/proofs/double_negation.ptt");
+  test "double_negation.ptt forces w=0" (check_contains "test/proofs/double_negation.ptt" "w = 0");
+  test "ex_falso.ptt succeeds" (check_succeeds "test/proofs/ex_falso.ptt");
 
   Printf.printf "\nAll integration tests passed!\n"

@@ -1,0 +1,12 @@
+-- Double negation elimination (classical)
+-- ¬¬A ⊢ A
+-- In ProbTT: if ¬A has weight 0, then A has weight 1
+
+postulate not_not_a : NotNotA 〔 1 〕
+postulate not_a : NotA 〔 w 〕
+
+-- ¬¬A and ¬A contradict
+contradict not_not_a not_a
+
+-- w = 0, so ¬(¬A) = A has weight 1
+conclude a from not_a

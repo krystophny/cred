@@ -78,13 +78,30 @@ let add_contradiction state p q =
     Printf.printf "\n  ⚡ CONTRADICTION: %s ⊥ %s\n" p q;
     Printf.printf "     %s 〔 %s 〕\n" p (Weight.to_string jp.weight);
     Printf.printf "     %s 〔 %s 〕\n" q (Weight.to_string jq.weight);
-    (* Both have same weight (derived from same assumption) → weight = 0 *)
-    let w = jp.weight in
-    Printf.printf "     → %s = 0\n" (Weight.to_string w);
-    let state = { state with weight_eqs = (w, Weight.zero) :: state.weight_eqs } in
+    (* Find the weight variable(s) to force to 0 *)
+    (* If both have same weight → that weight = 0 *)
+    (* If one is constant 1 and other is variable w → w = 0 *)
+    let wp = Weight.simplify jp.weight in
+    let wq = Weight.simplify jq.weight in
+    let (forced_weight, forced_str) =
+      if Weight.equal wp wq then
+        (wp, Weight.to_string wp)
+      else if Weight.equal wp Weight.one then
+        (wq, Weight.to_string wq)
+      else if Weight.equal wq Weight.one then
+        (wp, Weight.to_string wp)
+      else
+        (* Both are different variables - force both via product *)
+        (Weight.mul wp wq, Printf.sprintf "%s · %s" (Weight.to_string wp) (Weight.to_string wq))
+    in
+    Printf.printf "     → %s = 0\n" forced_str;
+    let state = { state with weight_eqs = (forced_weight, Weight.zero) :: state.weight_eqs } in
     (* Update judgments to show forced weight *)
     Hashtbl.iter (fun name j ->
-      if Weight.equal (Weight.simplify j.weight) (Weight.simplify w) then
+      let jw = Weight.simplify j.weight in
+      if Weight.equal jw (Weight.simplify forced_weight) ||
+         Weight.equal jw (Weight.simplify wp) ||
+         Weight.equal jw (Weight.simplify wq) then
         Hashtbl.replace state.judgments name { j with status = Forced Weight.zero }
     ) state.judgments;
     Ok state

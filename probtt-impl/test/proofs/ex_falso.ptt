@@ -1,0 +1,16 @@
+-- Ex falso quodlibet (classical limit)
+-- From a contradiction, anything follows
+-- In ProbTT: weight 0 propagates through derivations
+
+postulate p : P 〔 w 〕
+postulate not_p : NotP 〔 w 〕
+
+-- Immediate contradiction
+contradict p not_p
+
+-- Now w = 0, anything derived from w has weight 0
+-- But negation of the assumption has weight 1
+derive q : Q 〔 w 〕 from p by ex_falso
+
+-- The conclusion is that w = 0
+conclude result from p

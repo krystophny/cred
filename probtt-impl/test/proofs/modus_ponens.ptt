@@ -1,0 +1,6 @@
+-- Modus ponens at weight 1 (classical limit)
+-- A, A→B ⊢ B
+
+postulate a : A 〔 1 〕
+postulate a_implies_b : A_implies_B 〔 1 〕
+derive b : B 〔 1 〕 from a by a_implies_b

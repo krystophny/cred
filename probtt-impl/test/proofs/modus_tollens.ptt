@@ -1,0 +1,14 @@
+-- Modus tollens at weight 1 (classical limit)
+-- ¬B, A→B ⊢ ¬A
+-- If A implies B, and B is false, then A is false
+
+postulate a : A 〔 w 〕
+postulate a_implies_b : A_implies_B 〔 1 〕
+derive b : B 〔 w 〕 from a by a_implies_b
+postulate not_b : NotB 〔 1 〕
+
+-- b and not_b contradict at weight w
+contradict b not_b
+
+-- Therefore ¬A at weight 1
+conclude not_a from a
