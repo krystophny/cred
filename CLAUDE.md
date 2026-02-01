@@ -1,111 +1,218 @@
 # CLAUDE.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
-
 ## Project Overview
 
-Research project exploring **probability as a foundational system for mathematics**, with classical logic derived as the degenerate {0,1} case. The goal is to replace logic with probability theory as the primitive, machine-verified from the ground up.
+**ProbTT**: A type theory where weights are primitive, not derived from numbers.
 
-## Build Commands
+The key insight: types and logic EMERGE from weight structure. MLTT is the {0,1} limiting case.
 
-```bash
-cd lean && lake build
-```
-
-## Architecture
-
-### Meta-Level vs Object-Level Separation
-
-The critical discipline is separating:
-- **Metalogic** (Lean's type theory): Used ONLY to define and verify the probabilistic system
-- **Object system** (probabilistic foundations): Where actual mathematics happens, using ONLY probabilistic primitives
+## The Hierarchy
 
 ```
-METALOGIC: Lean's Type Theory (specification language)
-              │ defines
-              ▼
-OBJECT SYSTEM: Probabilistic Foundations (Prob, 𝔼[·|·], ⊢[p])
-              │ contains
-              ▼
-CLASSICAL LOGIC: The {0,1} boundary case
+Weight algebra: (0, 1, ·, ¬, ≤)     ← PRIMITIVE
+        ↓ defines behavior of
+Type formers: ×, +, →, Π, Σ, Id
+        ↓ restricts to {0,1}
+MLTT (Martin-Löf Type Theory)
+        ↓ propositions-as-types
+First-order logic
+        ↓ restricts to decidable
+Classical logic
 ```
 
-### Core Primitives (Object Level)
+Everything derives from the weight structure.
 
-All object-level theorems must use ONLY:
-- `Prob` type with operations (`+ₚ`, `*ₚ`, `-ₚ`, `≤ₚ`, `𝟘`, `𝟙`)
-- `𝔼[f | g]` conditional expectation
-- `Γ ⊢[p] φ` probabilistic entailment (meaning `p ≤ₚ 𝔼[φ | Γ]`)
-- Derived notions built from these
+## Weight Algebra
 
-### Logic Slippage Prevention
+### Minimal Structure (Product De Morgan Algebra)
 
-**Lean's logical connectives (∧, ∨, →, ¬, ∀, ∃) must NEVER appear at the object level** except when explicitly deriving them as the {0,1} special case.
+```
+W = (0, 1, ·, ¬, ≤)
 
-Red flags:
-- `∀ x, P x → Q x` at object level (should be probabilistic)
-- `∃ x, P x` at object level (should be `𝔼[indicator] > 𝟘`)
-- `A ∧ B` at object level (should be `prob_and A B` or `A ∧ₚ B`)
+0 : W                  -- impossibility
+1 : W                  -- certainty
+· : W → W → W          -- multiplication (conjunction)
+¬ : W → W              -- complement, ¬w = 1 - w (negation)
+≤ : W → W → Prop       -- ordering
+```
 
-Lean logic is permitted ONLY for:
-- Defining what probabilistic primitives ARE
-- Metatheorems ABOUT the probabilistic system
-- Proof automation internals
+### Derived Operations
 
-### Key Concepts
+```
+w ∨ v := ¬(¬w · ¬v)    -- De Morgan OR
+      = w + v - w·v    -- probabilistic sum (inclusion-exclusion)
+```
 
-- **Probabilistic entailment**: `Γ ⊢[p] φ` means `p ≤ₚ 𝔼[φ | Γ]`
-- **Cut rule**: `(Γ ⊢[p] φ) → (φ ⊢[q] ψ) → (Γ ⊢[p*q] ψ)`
-- **Strong negation**: `∀ψ, 𝔼[φ | ψ] = 𝟘` (measure zero)
-- **Weak negation**: `¬ₚ φ = fun x => 𝟙 -ₚ φ x` (pointwise complement)
-- **Classical logic**: restriction to `{0,1}`-valued `ProbProp`
-- **LEM as algebra**: `φ x +ₚ (¬ₚ φ) x = 𝟙` (algebraic identity, not logical axiom)
+### What We DON'T Need
+
+- **No addition (+)**: OR derived via De Morgan
+- **No subtraction (-)**: Only complement ¬w = 1-w
+- **No division (/)**: Chain rule is multiplicative
+
+### Axioms (12 total)
+
+Multiplication:
+```
+w · 1 = w                    -- unit
+w · 0 = 0                    -- annihilation
+(u · v) · w = u · (v · w)    -- associativity
+u · v = v · u                -- commutativity
+```
+
+Complement:
+```
+¬0 = 1                       -- complement of zero
+¬1 = 0                       -- complement of one
+¬¬w = w                      -- involution
+```
+
+Order:
+```
+w ≤ w                        -- reflexivity
+u ≤ v ∧ v ≤ w → u ≤ w        -- transitivity
+u ≤ v ∧ v ≤ u → u = v        -- antisymmetry
+0 ≤ w                        -- zero least
+w ≤ 1                        -- one greatest
+```
+
+## Judgments
+
+```
+Γ ⊢ a : A @ w
+```
+
+Meaning: term `a` has type `A` with weight `w`.
+
+- `w = 1`: definitely inhabits
+- `w = 0`: does not inhabit (vacuously true)
+- `0 < w < 1`: partially/probably inhabits
+
+## Key Rules
+
+### Weights Multiply in Elimination
+
+```
+Γ ⊢ f : A → B @ w    Γ ⊢ a : A @ v
+──────────────────────────────────
+        Γ ⊢ f a : B @ w · v
+```
+
+### Type Formers from Weight Operations
+
+| Type | Weight behavior | {0,1} case |
+|------|-----------------|------------|
+| A × B | w · v | Boolean AND |
+| A + B | (via De Morgan) | Boolean OR |
+| ¬A | ¬w | Boolean NOT |
+| A → B | function, weight multiplies | Implication |
+
+## Conditioning (Not Implication!)
+
+### Why No Material Implication
+
+Material implication A → B = ¬A ∨ B has paradoxes:
+- "False implies anything" = True (weird!)
+
+### Chain Rule Instead
+
+```
+P(A,B) = P(A|B) · P(B)
+```
+
+Relates joint, marginal, and conditional. Pure multiplication, no division.
+
+### Conditioning vs Implication
+
+| Concept | What it is | False antecedent |
+|---------|------------|------------------|
+| A → B (logic) | ¬A ∨ B, truth-functional | "True" (lies) |
+| P(A\|B) (probability) | P(A,B)/P(B), needs joint | Indeterminate (honest) |
+
+We use conditioning. It doesn't have the paradoxes.
+
+## Graded Ex Falso
+
+Classical ex falso: ⊥ → A (from false, anything follows)
+
+Probabilistic ex falso: When P(B) = 0, any P(A|B) satisfies the chain rule.
+
+**This is a continuous phenomenon:**
+
+| P(B) | Constraint on P(A\|B) |
+|------|----------------------|
+| 1 | Fully determined |
+| ε (small) | Weakly constrained |
+| 0 | Unconstrained (ex falso) |
+
+Classical logic has only the endpoints. ProbTT has the entire spectrum.
+
+## What We Get
+
+### Without + (just · and ¬)
+
+- Full propositional logic (AND, OR, NOT)
+- First-order logic (∀, ∃ via infinite ·/∨)
+- Bayes chain rule
+- Conditioning
+
+### Would Need + For
+
+- Marginalization: P(A) = Σ_b P(A,b)
+- This is probability-specific, not needed for FOL
+
+## Relationship to Existing Systems
+
+### vs Product Fuzzy Logic
+
+| Aspect | Product fuzzy logic | ProbTT |
+|--------|---------------------|--------|
+| Weight algebra | Same (·, ¬) | Same |
+| Conditioning | No | Yes (chain rule) |
+| Type theory | No | Yes (Π, Σ, Id) |
+| MLTT as limit | No | Yes |
+
+ProbTT = Product fuzzy logic + conditioning + type theory
+
+### vs Graded Type Theory (Granule/Gerty)
+
+| Aspect | Graded types | ProbTT |
+|--------|--------------|--------|
+| Structure | Semiring (needs +) | De Morgan (just · and ¬) |
+| Framing | MLTT + grades | Grades → MLTT |
+| Interpretation | Resource usage | Probability/confidence |
+
+### vs MLTT
+
+ProbTT is MLTT with weights. MLTT is ProbTT restricted to W = {0,1}.
 
 ## File Structure
 
 ```
-lean/
-  lakefile.lean      # Lake build configuration
-  Foundations.lean   # Main Lean 4 formalization
+papers/
+  probtt/
+    probtt.tex    -- The specification (main document)
+    probtt.pdf    -- Built paper
+```
+
+## Build
+
+```bash
+cd papers/probtt && pdflatex probtt.tex
 ```
 
 ## Current Status
 
-All phases implemented. Build: `cd lean && lake build` (zero warnings).
+Paper complete with:
+- Weight algebra (minimal)
+- All type formers (Π, Σ, +, Id)
+- Markov structure (copy, delete)
+- Chain rule (multiplicative Bayes)
+- MLTT embedding theorem
+- Graded ex falso
 
-### Phases A-C: Core Framework (COMPLETE)
-- `Prob` type: ordered semiring in [0,1]
-- `𝔼[f|g]`: conditional expectation primitive
-- `Γ ⊢[p] φ`: probabilistic entailment
-- Proof theory: `axiom_rule`, `weaken`, `cut_rule`, `mono_rule`
-- Classical logic as {0,1} restriction
+## Open Problems
 
-### Phase D: Probabilistic Zorn (COMPLETE)
-- `ProbPoset`: probabilistic partial order with `P.le x y`
-- `prob_lt`: strict ordering `P(x ≤ y) * (1 - P(y ≤ x))`
-- `NearMaximal`: `∀y, prob_lt P x y ≤ ε`
-- `ChainComplete`: every chain has an upper bound
-- `prob_zorn`: chain-complete posets have distributions on near-maximals (axiom)
-- `classical_zorn_from_prob`: classical Zorn as {0,1} special case
-
-### Phase E: Natural Numbers (COMPLETE)
-- `prob_sum`: countable summation primitive
-- `ProbNat`: distributions over Nat (exhaustive + disjoint)
-- `prob_succ_is_n`: successor shifts distribution
-- `peano1`: zero is not a successor
-- `peano2_shift`: successor is injective
-- `det_nat`: deterministic natural numbers
-
-### Phase F: More Proof Rules (COMPLETE)
-- Implication: `prob_implies_refl_classical`, `prob_modus_ponens_classical`
-- Structural: `prob_and_comm`, `prob_and_assoc`, `prob_exchange`, `prob_contraction`
-- Negation: `strong_neg_and`, `strong_neg_implies_weak_one`
-- De Morgan: `prob_de_morgan_and`, `prob_de_morgan_or`
-- Identity/absorption: `prob_or_zero/one`, `prob_and_zero/one`
-
-## Implementation Notes
-
-- Lean 4 v4.14.0 (see `lean/lean-toolchain`)
-- Probability is axiomatized (not constructed from measure theory)
-- Conditional expectation `𝔼[_|_]` is the core primitive
-- Classical logic operations (`∧ₚ`, `∨ₚ`, `¬ₚ`) are `noncomputable` (depend on axiom operations)
+1. **Implementation**: Type checker for ProbTT
+2. **Weight inference**: Can we infer weights from term structure?
+3. **Continuous types**: Extension to measurable spaces
+4. **Dependent weights**: w(x) varying over x in (x:A) → B @ w(x)
