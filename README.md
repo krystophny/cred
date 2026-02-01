@@ -1,59 +1,53 @@
-# ProbTT: Type Theory with Primitive Probability
+# ProbTT: Type Theory with Primitive Weights
 
-A type theory where **probability is primitive**, not derived. MLTT emerges as the {0,1}-fragment.
+A type theory where **weights are primitive**, not numbers.
 
-## The Idea
+## Core Idea
 
-Traditional type theory:
+Judgments carry weights: `Γ ⊢ a : A @ w`
+
+The weight monoid W has:
 ```
-Types → Propositions → Probability (constructed via measure theory)
-```
-
-ProbTT:
-```
-Prob (primitive) → Types, Propositions (derived as {0,1} case)
-```
-
-## Core Innovation: Probabilistic Judgments
-
-Instead of `Γ ⊢ a : A`, we have:
-```
-Γ ⊢ a : A @ p     -- "a has type A with probability p"
+1 : W           -- certainty
+0 : W           -- impossibility
+· : W → W → W   -- combination
+≤ : W → W → Prop
 ```
 
-When `p = 1`: ordinary typing. When `p ∈ (0,1)`: uncertain typing.
+**No addition. No subtraction. No numbers assumed.**
 
-## Logic from Expectation
+## Key Rule
 
-| Classical | ProbTT |
-|-----------|--------|
-| `∀x. P(x)` | `𝔼[P] = 1` |
-| `∃x. P(x)` | `𝔼[P] > 0` |
-| `P → Q` | `𝔼[Q \| P] = 1` |
+Weights multiply in elimination:
+```
+Γ ⊢ f : A → B @ w    Γ ⊢ a : A @ v
+────────────────────────────────────
+       Γ ⊢ f a : B @ w·v
+```
+
+## Instances
+
+| W | Interpretation |
+|---|----------------|
+| {0,1} | MLTT (classical) |
+| [0,1] | Probability |
+| [0,∞] | Costs |
+
+## Files
+
+```
+papers/probtt/probtt.tex   -- The specification
+```
+
+## Build
+
+```bash
+cd papers/probtt && pdflatex probtt.tex
+```
 
 ## Status
 
-- **Sketch**: `papers/probtt/probtt-sketch.tex`
-- **Old Lean code**: `lean/` (axioms-in-MLTT approach, superseded)
-
-The sketch defines:
-- Probabilistic judgments
-- Stochastic function types (Markov kernels)
-- Probabilistic pairs and identity
-- MLTT embedding theorem (the {0,1} case)
-
-## Next Steps
-
-1. Formalize rules precisely
-2. Prove MLTT embedding rigorously
-3. Prototype in Dedukti/Lambdapi
-4. Study metatheory (normalization, consistency)
-
-## Building
-
-```bash
-cd papers/probtt && pdflatex probtt-sketch.tex
-```
+Minimal specification complete. Next: examples, prototype, metatheory.
 
 ## License
 
