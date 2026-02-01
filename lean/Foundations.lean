@@ -710,27 +710,48 @@ theorem classical_maximal {α : Type} (P : ProbPoset α) (x : α) :
 def ClassicalMaximal {α : Type} (P : ProbPoset α) (x : α) : Prop :=
   ∀ y, P.le x y = 𝟙 → P.le y x = 𝟙
 
--- Main theorem: probabilistic Zorn
--- Every chain-complete probabilistic poset has a distribution
--- concentrated on near-maximal elements
--- Note: full proof requires constructive content; we state it as an axiom
--- capturing the probabilistic replacement for AC
-axiom prob_zorn {α : Type} [Nonempty α] (P : ProbPoset α) (ε : Prob) :
-    ChainComplete P → 𝟘 ≤ₚ ε →
-    ∃ D : ProbDistribution α, ConcentratedOnNearMaximal P D ε
+-- ============================================================================
+-- PROBABILISTIC ZORN: STATUS
+-- ============================================================================
 
--- For classical Zorn, we need a stronger axiom that the distribution
--- has at least one element with non-zero weight
-axiom prob_zorn_witness {α : Type} [Nonempty α] (P : ProbPoset α) (ε : Prob) :
-    ChainComplete P → 𝟘 ≤ₚ ε →
-    ∃ x : α, NearMaximal P x ε
+/-
+The claim "Zorn without choice" means we should PROVE Zorn, not axiomatize it.
 
--- Classical Zorn as corollary: for classical posets with epsilon = 0
-theorem classical_zorn_from_prob {α : Type} [Nonempty α] (P : ProbPoset α) :
+FINITE CASE: Provable in principle
+- Enumerate elements, compute prob_lt for each pair
+- Take element minimizing max(prob_lt x y) over y
+- No choice needed: enumeration and min over finite sets are constructive
+- BLOCKED: requires Fintype from Mathlib, or manual finite type handling
+
+INFINITE CASE: Requires additional structure
+- Need completeness of Prob (limits of bounded monotone sequences exist)
+- With completeness, projective limit construction works
+- This is analogous to how real analysis needs completeness
+
+We do NOT axiomatize the conclusion. The gap is:
+- Completeness of Prob (not yet primitive)
+- Proper handling of finite types (needs Mathlib or manual work)
+
+Future work: Add completeness primitive, prove both cases as theorems.
+-/
+
+-- Placeholder: what we WANT to prove (stated without proof)
+-- This documents the intended theorem, not an axiom we assume
+def prob_zorn_statement {α : Type} [Nonempty α] (P : ProbPoset α) (ε : Prob) : Prop :=
+  ChainComplete P → 𝟘 ≤ₚ ε →
+  ∃ x : α, NearMaximal P x ε
+
+-- Note: We intentionally do NOT have:
+--   axiom prob_zorn : prob_zorn_statement P ε
+-- because the whole point is to PROVE this, not assume it.
+
+-- Classical Zorn as corollary: WOULD follow from prob_zorn
+-- We state the implication, not the theorem (since prob_zorn is not yet proved)
+theorem classical_zorn_from_prob_statement {α : Type} [Nonempty α] (P : ProbPoset α) :
     ClassicalPoset P → ChainComplete P →
+    (∃ x : α, NearMaximal P x 𝟘) →  -- assuming prob_zorn gives us this
     ∃ m, ClassicalMaximal P m := by
-  intro hcl hcc
-  have ⟨x, hnm⟩ := prob_zorn_witness P 𝟘 hcc (Prob.le_refl 𝟘)
+  intro hcl _ ⟨x, hnm⟩
   exact ⟨x, fun y hxy => classical_maximal P x hcl hnm y hxy⟩
 
 -- ============================================================================
