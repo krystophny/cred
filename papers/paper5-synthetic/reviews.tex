@@ -307,6 +307,64 @@ Added remark: ``Chain-completeness ensures upper bounds exist for chains. In cla
 \label{sec:review-synthetic}
 % ============================================================================
 
-% To be added
+\subsection{Submission}
+
+Date: \today
+
+Section 5 (Part 4: Synthetic Probability Type Theory) submitted for review.
+
+\subsection{Reviewer Comments}
+
+\begin{review}{5.1}
+The HoTT analogy is still strained. You say paths have ``rich homotopical structure'' while $\Prob \cong [0,1]$ is ``just an interval.'' But $[0,1]$ also has rich structure (contractible, admits metrics, has algebraic operations). The issue is not richness but \emph{type-theoretic relevance}. Paths in HoTT are fundamental because identity types are ubiquitous. What makes $\Prob$ ubiquitous in your system?
+\end{review}
+
+\begin{response}
+The reviewer makes an excellent point. In HoTT, paths arise naturally from identity types, which every type has. In our system, $\Prob$ is introduced specifically for probabilistic reasoning---it is not a universal feature of all types.
+
+The better analogy might be modalities (like the $\sharp$ modality in cohesive HoTT) which impose additional structure selectively. We will revise to acknowledge this.
+\end{response}
+
+\begin{revision}
+Added paragraph: ``Unlike paths, $\Prob$ is not universal. A better analogy may be type-theoretic modalities, which add structure for specific purposes. $\Prob$ would be a `probabilistic modality' capturing uncertainty.''
+\end{revision}
+
+\begin{review}{5.2}
+Your ``speculative rules'' for $\Prob$ are just the axioms restated. If $\pone \pmul p \equiv p$ is definitional, what is the \emph{definition} of $\pmul$? You cannot have definitional equalities without definitions. This section confuses syntax and semantics.
+\end{review}
+
+\begin{response}
+The reviewer is correct. Definitional equality requires a definition. If $\Prob$ is axiomatized, equalities are propositional. If $\Prob$ is constructed (e.g., as Cauchy sequences), then equalities could be definitional but depend on the construction.
+
+We will clarify: the ``speculative rules'' are a wish list for what a synthetic $\Prob$ would provide, not a proposal for how to achieve it.
+\end{response}
+
+\begin{revision}
+Clarified: ``These are desiderata for a synthetic $\Prob$, not a proposal. Achieving definitional equalities would require a construction, not axiomatization.''
+\end{revision}
+
+\begin{review}{5.3}
+You mention Fritz (2020) for Markov categories but provide no citation. This is sloppy scholarship. Either cite properly or do not name-drop.
+\end{review}
+
+\begin{response}
+Apologies. We will add proper citations to the bibliography.
+\end{response}
+
+\begin{revision}
+Added citation: T.\ Fritz, ``A synthetic approach to Markov kernels, conditional independence, and theorems on sufficient statistics,'' Advances in Mathematics 370 (2020).
+\end{revision}
+
+\begin{review}{5.4}
+The section ends with ``These questions define a research program.'' This is a weak conclusion. A paper should conclude with what was achieved, not with open questions. Move the open questions to a ``Future Work'' subsection and write a proper conclusion summarizing Parts 1--4.
+\end{review}
+
+\begin{response}
+The reviewer is right about paper structure. Part 4 is explicitly about open questions, so ending with them is appropriate for that section. But the \emph{paper} conclusion should summarize achievements. We will restructure.
+\end{response}
+
+\begin{revision}
+Part 4 retitled to include ``Open Directions.'' Paper conclusion (Section 6) to summarize proven results from Parts 1--3 and frame Part 4 as future work.
+\end{revision}
 
 \end{document}

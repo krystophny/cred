@@ -473,17 +473,173 @@ Chain-completeness ensures every chain has an upper bound. In classical Zorn, th
 Resolving these gaps would turn Conjecture~\ref{conj:infinite-zorn} into a theorem and allow us to remove the \texttt{prob\_zorn} axiom.
 
 % ============================================================================
-\section{Part 4: Synthetic Probability Type Theory}
+\section{Part 4: Open Directions in Synthetic Probability}
 \label{sec:synthetic}
 % ============================================================================
 
-% Content to be added
+We outline open questions for a fully synthetic treatment of probability, where $\Prob$ and conditional expectation would be primitive type formers rather than axiomatized structures. These questions define future work beyond this paper.
+
+\subsection{The Vision}
+
+In homotopy type theory (HoTT), \emph{paths} are primitive:
+\begin{itemize}
+    \item Formation: For $a, b : A$, there is a type $a =_A b$.
+    \item Introduction: reflexivity $\mathsf{refl}_a : a =_A a$.
+    \item Elimination: path induction (J-rule).
+    \item Computation: $\beta$-rule for J.
+\end{itemize}
+
+Could probability have analogous structure?
+
+\subsection{Open Question: Prob as Type Former}
+
+\begin{quote}
+\textbf{Question 1}: Can $\Prob$ be introduced as a primitive type with formation, introduction, elimination, and computation rules?
+\end{quote}
+
+\subsubsection*{Speculative Rules}
+
+\textbf{Formation}: $\Prob : \mathsf{Type}$.
+
+\textbf{Introduction}: $\pzero, \pone : \Prob$, operations $\padd, \pmul, \psub$.
+
+\textbf{Elimination}: Use $\Prob$ values in computations via operations.
+
+\textbf{Computation}: What are the $\beta$-rules? Desiderata:
+\begin{itemize}
+    \item $\pone \pmul p \equiv p$ (definitional equality?)
+    \item $p \padd \pzero \equiv p$
+\end{itemize}
+
+\begin{remark}
+These are desiderata, not a proposal. Achieving definitional equalities requires a \emph{construction} of $\Prob$, not just axiomatization. With axioms, equalities are propositional (provable but not computational).
+\end{remark}
+
+\subsubsection*{Difficulty}
+
+Unlike identity types, $\Prob$ is not universal---not every type comes with probability structure. A better analogy may be type-theoretic \emph{modalities} (like cohesive $\sharp$), which add structure for specific purposes. $\Prob$ would be a ``probabilistic modality'' capturing uncertainty.
+
+The type-theoretic interest would come from:
+\begin{itemize}
+    \item How $\Prob$ interacts with other types
+    \item Modalities or monads capturing probabilistic computation
+    \item Synthetic measure theory
+\end{itemize}
+
+\subsection{Open Question: Synthetic Conditional Expectation}
+
+\begin{quote}
+\textbf{Question 2}: Can $\E[\cdot|\cdot]$ be given computational rules that determine its behavior?
+\end{quote}
+
+Currently, $\E[f|g]$ is a black box satisfying axioms. A synthetic treatment would specify:
+
+\textbf{Formation}: For $f, g : \ProbProp(\alpha)$, we have $\E[f|g] : \Prob$.
+
+\textbf{Computation rules} (speculative):
+\begin{align*}
+    \E[\mathbf{1}|g] &\equiv \pone \\
+    \E[c \cdot f|g] &\equiv c \pmul \E[f|g] \\
+    \E[f + g|h] &\equiv \E[f|h] \padd \E[g|h]
+\end{align*}
+
+\subsubsection*{Difficulty}
+
+The product rule $\E[fg|h] = \E[f|gh] \cdot \E[g|h]$ involves $gh$ as a new condition. This recursive structure makes computational rules non-obvious.
+
+\subsection{Comparison: Quasi-Borel Spaces}
+
+Quasi-Borel spaces (QBS) provide semantics for probabilistic programming:
+\begin{itemize}
+    \item A QBS is a set $X$ with designated ``random elements'' $\Real \to X$.
+    \item Probability measures are defined via pushforward.
+    \item Avoids measure-theoretic pathologies.
+\end{itemize}
+
+\textbf{Relation to our work}: QBS could provide a semantic foundation for synthetic $\Prob$. Our type-theoretic axioms would be validated by QBS models.
+
+\textbf{Difference}: QBS is a semantic framework; we seek syntactic rules.
+
+\subsection{Comparison: Markov Categories}
+
+Markov categories (Fritz, 2020) axiomatize probabilistic reasoning categorically:
+\begin{itemize}
+    \item Objects: types/spaces
+    \item Morphisms: stochastic maps (Kleisli morphisms for probability monad)
+    \item Structure: copy ($\Delta$), delete ($!$), conditioning
+\end{itemize}
+
+\textbf{Relation to our work}: Our $\ProbProp$ and $\E[\cdot|\cdot]$ could form a Markov category. The categorical axioms might correspond to our CondExp axioms~\cite{fritz2020}.
+
+\textbf{Open question}: Is there a correspondence between our 7 CondExp axioms and the Markov category axioms?
+
+\subsection{Toward Paper 6}
+
+A future Paper 6 could develop:
+\begin{enumerate}
+    \item Formal definition of $\mathsf{ProbProp}$ as a Markov category
+    \item String diagram calculus for probabilistic reasoning
+    \item Categorical proof of probabilistic Zorn
+\end{enumerate}
+
+\subsection{Summary of Open Questions}
+
+\begin{center}
+\begin{tabular}{lp{8cm}}
+\toprule
+Question & Description \\
+\midrule
+Q1 & Can $\Prob$ be a primitive type former with computation rules? \\
+Q2 & What are the computational rules for $\E[\cdot|\cdot]$? \\
+Q3 & How does synthetic $\Prob$ relate to QBS models? \\
+Q4 & What is the correspondence with Markov categories? \\
+Q5 & Can probabilistic Zorn be proven categorically? \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+These questions define a research program. Answering them would establish probability theory as a foundational discipline parallel to (rather than built upon) logic and set theory.
 
 % ============================================================================
 \section{Conclusion}
 % ============================================================================
 
-% Content to be added
+\subsection{Summary of Results}
+
+This paper made progress toward synthetic probability in three directions:
+
+\textbf{Part 1: Axiom Reduction.} We reduced the axiom count from 48 to 43 by proving five axioms follow from commutativity. Two additional axioms (De Morgan laws) would become theorems if $\Prob$ were constructed as $[0,1]$. The reduction is modest but clarifies which axioms are fundamental.
+
+\textbf{Part 2: Finite Zorn.} We proved that probabilistic Zorn holds for finite types without any form of choice (Theorem~\ref{thm:finite-zorn}). The proof is constructive: enumerate elements, compute defects, take minimum. This establishes the foundation for the infinite case.
+
+\textbf{Part 3: Infinite Zorn Strategy.} We sketched how the infinite case follows from projective limits of finite approximations. The key insight---construct distributions rather than select points---explains why probabilistic Zorn should be choice-free. Major gaps remain: formalizing projective consistency and developing a synthetic Kolmogorov extension.
+
+\subsection{The Path Forward}
+
+Completing the program requires:
+\begin{enumerate}
+    \item Formalizing the projective limit argument (fills gaps in Part 3)
+    \item Constructing $\Prob$ as $[0,1]$ (eliminates De Morgan axioms)
+    \item Investigating synthetic type formers for $\Prob$ and $\E[\cdot|\cdot]$ (Part 4)
+\end{enumerate}
+
+If successful, the \texttt{prob\_zorn} axiom becomes a theorem, and probability theory stands as a foundational discipline independent of classical logic and set theory.
+
+\subsection{Philosophical Implications}
+
+The probabilistic approach to foundations inverts the usual hierarchy:
+\begin{center}
+\begin{tabular}{ccc}
+Classical & & Probabilistic \\
+\hline
+Logic & $\to$ & Logic as $\{0,1\}$ case \\
+Sets & $\to$ & Distributions \\
+Choice (AC) & $\to$ & Limit construction \\
+Existence of point & $\to$ & Existence of measure \\
+\end{tabular}
+\end{center}
+
+The last line is key: classical existence (``there exists $x$'') becomes probabilistic existence (``there exists a distribution concentrated on $x$''). The probabilistic version is weaker but often sufficient, and crucially, achievable without selection.
 
 \appendix
 
@@ -497,6 +653,24 @@ Resolving these gaps would turn Conjecture~\ref{conj:infinite-zorn} into a theor
 
 % Code excerpts from Synthetic.lean
 
-\bibliographystyle{plain}
+\begin{thebibliography}{9}
+
+\bibitem{fritz2020}
+T.~Fritz.
+\newblock A synthetic approach to {M}arkov kernels, conditional independence,
+  and theorems on sufficient statistics.
+\newblock {\em Advances in Mathematics}, 370:107239, 2020.
+
+\bibitem{heunen2017}
+C.~Heunen, O.~Kammar, S.~Staton, and H.~Yang.
+\newblock A convenient category for higher-order probability theory.
+\newblock In {\em Proceedings of LICS}, 2017.
+
+\bibitem{hottbook}
+The {Univalent Foundations Program}.
+\newblock {\em Homotopy Type Theory: Univalent Foundations of Mathematics}.
+\newblock Institute for Advanced Study, 2013.
+
+\end{thebibliography}
 
 \end{document}
