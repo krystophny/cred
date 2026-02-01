@@ -16,4 +16,4 @@ unit : ⊤
 unit = ()
 
 exFalso : ⊥ → A
-exFalso e = e
+exFalso e = abort A e

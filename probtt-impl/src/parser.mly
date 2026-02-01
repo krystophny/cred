@@ -221,6 +221,9 @@ term_atom:
   | REFL { TRefl }
   | FST { TVar "fst" }
   | SND { TVar "snd" }
+  | INL { TVar "inl" }
+  | INR { TVar "inr" }
+  | ABORT { TVar "abort" }
   | LPAREN t = term COLON ty = ty RPAREN { TAnn (t, ty) }
 
 (* Weight annotations for ProbTT *)

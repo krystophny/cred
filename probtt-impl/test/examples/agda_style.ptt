@@ -25,6 +25,6 @@ either f g x = case x of inl a → f a | inr b → g b;
 unit : ⊤;
 unit = ();
 
--- Ex falso (needs abort keyword support)
+-- Ex falso requires explicit abort (like Agda's ⊥-elim)
 exFalso : ⊥ → A;
-exFalso e = e
+exFalso e = abort A e

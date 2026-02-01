@@ -8,9 +8,9 @@ id x = x;
 pair : A → B → A × B @ 1;
 pair a b = (a , b);
 
--- Ex falso - works at any weight because Empty elimination
+-- Ex falso requires explicit abort
 exFalso : ⊥ → A @ 1;
-exFalso e = e;
+exFalso e = abort A e;
 
 -- Const function
 const : A → B → A @ 1;

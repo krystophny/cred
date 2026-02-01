@@ -123,8 +123,6 @@ let infer (ctx : Context.t) (t : term) : result =
     | _, _ ->
         let* (inferred, w) = go ctx t in
         if equal_ty inferred expected then Ok w
-        (* Ex falso: a term of type Empty can be used at any type *)
-        else if equal_ty inferred TEmpty then Ok w
         else Error (Error.TypeMismatch { expected; actual = inferred })
   in
   go ctx t
@@ -230,8 +228,6 @@ let check ctx t expected =
     | _, _ ->
         let* (inferred, w) = go ctx t in
         if equal_ty inferred expected then Ok w
-        (* Ex falso: a term of type Empty can be used at any type *)
-        else if equal_ty inferred TEmpty then Ok w
         else Error (Error.TypeMismatch { expected; actual = inferred })
   in
   check_impl ctx t expected
