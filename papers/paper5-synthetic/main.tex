@@ -89,7 +89,128 @@ Infinite prob\_zorn & No & \S\ref{sec:projective-limits} & $-2$ (conjecture) \\
 \label{sec:axiom-reduction}
 % ============================================================================
 
-% Content to be added
+The probabilistic foundations of Papers 1--4 rest on 48 axioms. We systematically analyze which are independent and which are derivable.
+
+\subsection{Current Axiom Inventory}
+
+The axioms fall into six categories:
+
+\begin{center}
+\begin{tabular}{lrl}
+\toprule
+Category & Count & Examples \\
+\midrule
+$\Prob$ type and operations & 7 & $\Prob$, $\pzero$, $\pone$, $\ple$, $\padd$, $\pmul$, $\psub$ \\
+Order structure & 5 & reflexivity, transitivity, antisymmetry, bounds \\
+Multiplication & 7 & identity, commutativity, associativity, monotonicity \\
+Addition & 4 & identity, commutativity, associativity \\
+Subtraction & 7 & self-inverse, cancellation, complement \\
+Distributivity \& misc & 4 & distribution, non-triviality \\
+\midrule
+$\Prob$ subtotal & 34 & \\
+\midrule
+Conditional expectation & 7 & normalization, monotonicity, product, etc. \\
+Countable summation & 5 & $\mathsf{prob\_sum}$ and properties \\
+Probabilistic Zorn & 2 & $\mathsf{prob\_zorn}$, $\mathsf{prob\_zorn\_witness}$ \\
+\midrule
+\textbf{Total} & \textbf{48} & \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\subsection{Derivable Axioms: Commutativity}
+
+Five axioms are immediate consequences of commutativity:
+
+\begin{proposition}[Trivial Reductions]
+\label{prop:trivial-reductions}
+The following five axioms are derivable from other axioms:\footnote{Each derivation is a one-line rewrite, formalized in \texttt{Synthetic.lean}.}
+\begin{enumerate}
+    \item $p \pmul \pone = p$ from $\pone \pmul p = p$ via $\pmul$-commutativity
+    \item $p \padd \pzero = p$ from $\pzero \padd p = p$ via $\padd$-commutativity
+    \item $p \pmul \pzero = \pzero$ from $\pzero \pmul p = \pzero$ via $\pmul$-commutativity
+    \item $(p \padd q) \pmul r = (p \pmul r) \padd (q \pmul r)$ from $r \pmul (p \padd q) = (r \pmul p) \padd (r \pmul q)$ via $\pmul$-commutativity (right-distributivity from left-distributivity)
+    \item $\pone \psub \pone = \pzero$ as the instance $p = \pone$ of $p \psub p = \pzero$
+\end{enumerate}
+\end{proposition}
+
+\begin{proof}
+Each follows by a single rewrite. For example:
+\[
+p \pmul \pone = \pone \pmul p = p
+\]
+where the first equality is $\pmul$-commutativity and the second is the $\mathsf{one\_mul}$ axiom.
+\end{proof}
+
+\textbf{Axiom count: $48 \to 43$.}
+
+\subsection{De Morgan: Axiom vs.\ Theorem}
+
+The De Morgan laws are currently axioms:
+\begin{align}
+\pone \psub (a \pmul b) &= (({\pone \psub a}) \padd ({\pone \psub b})) \psub (({\pone \psub a}) \pmul ({\pone \psub b})) \label{eq:dm-and} \\
+\pone \psub ((a \padd b) \psub (a \pmul b)) &= ({\pone \psub a}) \pmul ({\pone \psub b}) \label{eq:dm-or}
+\end{align}
+
+\begin{proposition}[De Morgan in $[0,1]$]
+If $\Prob$ is constructed as the real interval $[0,1]$, then \eqref{eq:dm-and} and \eqref{eq:dm-or} are theorems.
+\end{proposition}
+
+\begin{proof}
+Standard algebra. For \eqref{eq:dm-and}: expand $(1-a) + (1-b) - (1-a)(1-b)$ to get $1 - ab$.
+\end{proof}
+
+\begin{remark}
+This does \emph{not} derive De Morgan from our current axioms. It shows that \emph{if we construct} $\Prob$ as $[0,1]$, the axioms become theorems. Currently, De Morgan remains axiomatic.
+\end{remark}
+
+\textbf{Status: Axioms, pending $\Prob$ construction.}
+
+\subsection{Conditional Expectation: Monotonicity from Positivity}
+
+\begin{proposition}
+Monotonicity of conditional expectation:
+\[
+(\forall x,\, f(x) \ple f'(x)) \Rightarrow \E[f | g] \ple \E[f' | g]
+\]
+is derivable from additivity plus a \emph{positivity} axiom:
+\[
+(\forall x,\, \pzero \ple f(x)) \Rightarrow \pzero \ple \E[f | g]
+\]
+\end{proposition}
+
+\begin{proof}[Sketch]
+Let $h = f' - f$ (pointwise). Then $h \geq 0$ and $f' = f + h$. By additivity:
+\[
+\E[f' | g] = \E[f | g] \padd \E[h | g]
+\]
+By positivity, $\E[h | g] \geq 0$, so $\E[f' | g] \geq \E[f | g]$.
+\end{proof}
+
+\begin{remark}
+This trades the monotonicity axiom for a positivity axiom---not a net reduction in count. However, positivity is arguably more fundamental: it asserts that expectation preserves non-negativity, from which monotonicity follows. The value is conceptual clarity, not axiom count.
+\end{remark}
+
+\textbf{Status: Reorganization possible, not a net reduction.}
+
+\subsection{Summary of Part 1}
+
+\begin{center}
+\begin{tabular}{lcl}
+\toprule
+Item & Effect & Status \\
+\midrule
+Commutativity reductions & $-5$ axioms & \textbf{Proven} (Lean) \\
+De Morgan laws & $-2$ axioms & Requires $\Prob$ construction \\
+CondExp mono $\leftrightarrow$ positivity & $\pm 0$ axioms & Reorganization only \\
+\midrule
+\textbf{Confirmed reduction} & $48 \to 43$ & \\
+\textbf{With construction} & $43 \to 41$ & \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+The confirmed reduction is modest: 5 axioms eliminated by trivial observations. The De Morgan laws would become theorems if $\Prob$ were constructed as $[0,1]$, but this requires the construction itself---the subject of future work.
 
 % ============================================================================
 \section{Part 2: Finite Probabilistic Zorn}

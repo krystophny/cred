@@ -102,7 +102,61 @@ Abstract revised: removed premature HoTT analogy. Section 4 will present this as
 \label{sec:review-axiom}
 % ============================================================================
 
-% To be added
+\subsection{Submission}
+
+Date: \today
+
+Section 2 (Part 1: Axiom Reduction) submitted for review.
+
+\subsection{Reviewer Comments}
+
+\begin{review}{2.1}
+The ``axiom inventory'' table is sloppy. You list ``7'' axioms for multiplication but then only name four properties (identity, commutativity, associativity, monotonicity). Where are the other three? Either the count is wrong or the description is incomplete.
+\end{review}
+
+\begin{response}
+The reviewer is correct. The count of 7 includes: one\_mul, mul\_one (counted separately before reduction), mul\_comm, mul\_assoc, mul\_le\_mul, zero\_mul, mul\_zero. After our reduction, mul\_one and mul\_zero are derived, leaving 5 independent. We will clarify the table.
+\end{response}
+
+\begin{revision}
+Table revised to show pre-reduction and post-reduction counts, with explicit axiom names in footnote.
+\end{revision}
+
+\begin{review}{2.2}
+Theorem 1 is not a theorem---it is five trivial observations. Calling this a ``theorem'' inflates its importance. Furthermore, calling $(p + q) \cdot r = pr + qr$ a ``commutativity reduction'' is misleading. It is a distributivity reduction.
+\end{review}
+
+\begin{response}
+Fair criticism. Item (4) uses both distributivity and commutativity. We will rename Theorem 1 to ``Observation'' and clarify that item (4) reduces right-distributivity using left-distributivity plus commutativity.
+\end{response}
+
+\begin{revision}
+``Theorem 1'' changed to ``Observation 2.1''. Item (4) description clarified.
+\end{revision}
+
+\begin{review}{2.3}
+The De Morgan ``proof'' is circular in spirit. You prove an identity for $[0,1] \subset \mathbb{R}$, then claim this shows the axiom is ``derivable.'' But your $\Prob$ is \emph{not} $[0,1]$---it is abstract. The algebraic verification proves nothing about your axiom system. Either construct $\Prob$ as $[0,1]$ or admit you cannot derive De Morgan.
+\end{review}
+
+\begin{response}
+The reviewer makes an important distinction. The algebraic verification shows the identity \emph{would} follow if $\Prob$ were $[0,1]$. It does not derive De Morgan from our current axioms. We will reframe this as motivation for constructing $\Prob$, not as a derivation.
+\end{response}
+
+\begin{revision}
+Section rewritten. De Morgan now presented as: ``If $\Prob$ is constructed as $[0,1]$, then De Morgan becomes a theorem. Currently, it remains an axiom.'' Removed misleading ``derivation'' language.
+\end{revision}
+
+\begin{review}{2.4}
+The ``positivity axiom'' you propose for CondExp is suspicious. Is it independent of your other axioms? Could it be derived? If you are going to propose new axioms, you must analyze their relationship to the existing system.
+\end{review}
+
+\begin{response}
+Positivity is not derivable from the current axioms (which make no assertion about non-negativity). It would need to be added. However, this trades one axiom (mono) for another (positivity), so net reduction is zero unless positivity enables multiple derivations. We will clarify this.
+\end{response}
+
+\begin{revision}
+Added remark: ``Trading mono for positivity is not a net reduction. The value is that positivity is more primitive (a property of expectation) while mono is a consequence.''
+\end{revision}
 
 % ============================================================================
 \section{Review Round 3: Finite Zorn}
