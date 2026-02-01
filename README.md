@@ -66,10 +66,22 @@ foundations/
 
 ## Current Status
 
-- **Primitive rules**: 42 (reduced from 53 via systematic analysis)
+- **Primitive rules**: 40 (reduced from 53 via systematic analysis)
 - **Derived rules**: 11 (commutativity, De Morgan, subtraction identities)
+- **Zorn**: Finite case provable, infinite case needs completeness (NOT axiomatized)
 - **Theorems**: 38 (all machine-verified)
 - **Build**: Zero warnings, zero errors
+
+### Comparison to Other Foundations
+
+| System | Primitives | Notes |
+|--------|------------|-------|
+| FOL | ~16 | Just logic |
+| ZFC | ~25 + schemas | FOL + set axioms |
+| MLTT | ~20 | Type theory |
+| HoTT | ~25 | MLTT + univalence |
+| Cubical | ~35 | Interval + Kan |
+| **ProbTT** | **40** | Prob native, logic derived |
 
 The framework is axiomatized, not constructed. Paper 5 analyzes axiom independence, proves finite Zorn without choice, and sketches how infinite Zorn follows from projective limits.
 

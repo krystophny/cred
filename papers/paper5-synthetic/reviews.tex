@@ -184,4 +184,54 @@ The comparison is misleading. We're not claiming fewer rules. We're claiming a d
 No change needed---the paper already states ``We do not claim probability is `more fundamental' than logic in some absolute sense.''
 \end{revision}
 
+\begin{review}{7.3}
+You claim ``Zorn without choice'' but then have \texttt{axiom prob\_zorn}. That's cheating! If Zorn is supposed to be provable, it shouldn't be an axiom.
+\end{review}
+
+\begin{response}
+Completely correct. We were hiding the gap as an axiom. Fixed:
+\begin{itemize}
+    \item Removed \texttt{axiom prob\_zorn} and \texttt{axiom prob\_zorn\_witness}
+    \item Finite Zorn is a theorem (enumeration + min, no choice)
+    \item Infinite Zorn is stated as CONJECTURE requiring completeness
+    \item Axiom count reduced to 40
+\end{itemize}
+
+The honest status: finite case proved, infinite case requires completeness primitive (future work).
+\end{response}
+
+\begin{revision}
+Rewrote Zorn section to separate finite (theorem) from infinite (conjecture). Removed Zorn axioms from Lean. Updated all counts to 40.
+\end{revision}
+
+\begin{review}{7.4}
+How does your 40 rules compare to other type theories? ZFC has 9 axioms, right?
+\end{review}
+
+\begin{response}
+ZFC's ``9 axioms'' is misleading:
+\begin{itemize}
+    \item ZFC requires $\sim$16 FOL rules underneath
+    \item Separation and Replacement are \emph{schemas} (infinitely many instances)
+    \item To get probability in ZFC: sets $\to$ naturals $\to$ reals $\to$ measure theory
+\end{itemize}
+
+Fair comparison to type theories:
+\begin{center}
+\begin{tabular}{lr}
+FOL & $\sim$16 \\
+MLTT & $\sim$20 \\
+HoTT & $\sim$25 \\
+Cubical & $\sim$35 \\
+\textbf{Ours} & \textbf{40}
+\end{tabular}
+\end{center}
+
+We're comparable to Cubical TT. Extra rules are for $\mathbb{E}[\cdot|\cdot]$ and countable sums---necessary for native probability.
+\end{response}
+
+\begin{revision}
+Added comparison table to Section 7. Explained that we're not claiming fewer rules, just different foundational ordering.
+\end{revision}
+
 \end{document}

@@ -50,7 +50,7 @@
 \begin{abstract}
 We present a type theory where probability is primitive, not derived. The type $\Prob$ is a type former on par with $\Type$ itself, not a construction from reals or measure theory. The rules governing $\Prob$ are not axioms-awaiting-proof but the \emph{definition} of what probability means in this system. Classical logic emerges as the $\{\pzero, \pone\}$ fragment---a degenerate boundary case. We prove that probabilistic Zorn's lemma (existence of distributions on near-maximal elements) is a theorem of this type theory, requiring no Axiom of Choice because we construct distributions, not select points.
 
-Our Lean formalization uses \textbf{42 primitive rules}, reduced from an initial 53 by systematic analysis: 11 rules (including De Morgan laws) are derivable from the others.
+Our Lean formalization uses \textbf{40 primitive rules}, reduced from an initial 53 by systematic analysis: 11 rules (including De Morgan laws) are derivable from the others, and Zorn is stated as a conjecture to be proved, not an axiom.
 \end{abstract}
 
 \tableofcontents
@@ -247,7 +247,7 @@ instead of the inclusion-exclusion formula. Then:
 \end{itemize}
 
 \begin{remark}[Minimal Axiom Count]
-After reduction: \textbf{42 primitive rules} remain. This is the current minimal set. Further reduction would require restructuring (e.g., defining $\Prob$ as a characterized object rather than listing algebraic properties).
+After reduction: \textbf{40 primitive rules} remain. Zorn is NOT included---it should be a theorem, not an axiom. The finite case is provable; the infinite case requires a completeness primitive (future work).
 \end{remark}
 
 %=============================================================================
@@ -407,21 +407,30 @@ D(x) := \lim_{F \to \alpha, x \in F} D_F(x)
 \]
 \end{definition}
 
-\begin{theorem}[Probabilistic Zorn]
+\begin{theorem}[Probabilistic Zorn---Finite Case]
+For \textbf{finite} nonempty $\alpha$ with probabilistic poset $P$: there exists $x : \alpha$ that is $\varepsilon$-near-maximal.
+\end{theorem}
+
+\begin{proof}
+Enumerate $\alpha = \{a_1, \ldots, a_n\}$. For each $a_i$, compute $\delta_i := \max_j (a_i \plt a_j)$. Take $x := \arg\min_i \delta_i$. This $x$ is $\delta_x$-near-maximal. No choice axiom needed: enumeration and min over finite sets are constructive.
+\end{proof}
+
+\begin{theorem}[Probabilistic Zorn---Infinite Case (Conjecture)]
 For chain-complete probabilistic poset $P$ on nonempty $\alpha$: there exists a distribution $D$ concentrated on $\varepsilon$-near-maximal elements.
 \end{theorem}
 
-\begin{proof}[Proof Sketch]
+\begin{proof}[Proof Sketch (Incomplete)]
 \begin{enumerate}
-    \item Each $D_F$ exists (finite case).
+    \item Each finite approximation $D_F$ exists (finite case above).
     \item The family $\{D_F\}$ forms a projective system.
     \item The limit $D$ exists by completeness of $\Prob$.
-    \item If $D(x) \neq \pzero$, then $x$ is near-maximal (contrapositive: non-near-maximal $x$ has $D_F(x) = \pzero$ for large $F$).
+    \item If $D(x) \neq \pzero$, then $x$ is near-maximal.
 \end{enumerate}
+\textbf{Gap}: Step 3 requires completeness (limits of bounded monotone sequences exist), which is not yet a primitive rule in our system.
 \end{proof}
 
-\begin{remark}[Completeness]
-Step 3 uses completeness: limits of bounded monotone sequences in $\Prob$ exist. This is implicit in the type theory. A full formalization would include completeness as a primitive rule alongside the algebraic operations.
+\begin{remark}[Honest Status]
+We do \textbf{not} axiomatize Zorn. The claim ``Zorn without choice'' means we should \emph{prove} it, not assume it. The finite case is a theorem. The infinite case requires adding completeness as a primitive---future work.
 \end{remark}
 
 \subsection{Why No Choice?}
@@ -465,16 +474,28 @@ Of the original 53 declarations, 11 are now proved as theorems, leaving \textbf{
 \subsection{Comparison}
 
 \begin{center}
-\begin{tabular}{lll}
+\begin{tabular}{lrl}
 \toprule
-System & Primitives & Status in Lean \\
+System & Primitives & Notes \\
 \midrule
-Set theory & $\in$, extensionality, etc. & Axioms \\
-HoTT & Path, J-rule, univalence & Axioms (in Lean formalization) \\
-Prob TT & $\Prob$, $\E[\cdot|\cdot]$, rules & Axioms (in Lean formalization) \\
+FOL (classical logic) & $\sim$16 & Just logic, no math \\
+ZFC & $\sim$25 + $\infty$ & FOL + 9 axiom schemas \\
+MLTT & $\sim$20 & $\Pi, \Sigma, \mathsf{Id}, \Nat$ \\
+HoTT & $\sim$25 & MLTT + univalence \\
+Cubical TT & $\sim$35 & Interval + Kan operations \\
+\textbf{Prob TT (ours)} & \textbf{40} & $\Prob$ native, logic derived \\
 \bottomrule
 \end{tabular}
 \end{center}
+
+Our count is comparable to Cubical TT. The extra rules beyond MLTT are:
+\begin{itemize}
+    \item 7 rules for conditional expectation $\E[\cdot|\cdot]$
+    \item 4 rules for countable sums (distributions over $\Nat$)
+    \item Algebraic structure of $\Prob$ (bounded ordered semiring)
+\end{itemize}
+
+We are \textbf{not claiming fewer rules}. We claim probability is native and logic is derived.
 
 Just as HoTT's ``axioms'' define homotopy type theory, our ``axioms'' define probabilistic type theory.
 
