@@ -80,6 +80,8 @@ let infer (ctx : Context.t) (t : term) : result =
     | Inr b, TSum (_, b_ty) ->
         check ctx b b_ty
 
+    (* Case elimination: both branches must have equal weight v, result is w·v
+       Reference: Judgment.agda:111-115 (t-case rule) *)
     | Case (e, l, r), result_ty ->
         let* (e_ty, w_e) = go ctx e in
         (match e_ty with
@@ -89,10 +91,10 @@ let infer (ctx : Context.t) (t : term) : result =
              let result_ty_wk = wk_ty result_ty in
              let* w_l = check ctx_l l result_ty_wk in
              let* w_r = check ctx_r r result_ty_wk in
-             if Weight.equal w_l w_r then
+             if Weight.equal (Weight.simplify w_l) (Weight.simplify w_r) then
                Ok (Weight.mul w_e w_l)
              else
-               Ok (Weight.mul w_e w_l)
+               Error (Error.BranchWeightMismatch (w_l, w_r))
          | ty -> Error (Error.NotASum ty))
 
     | Star, TUnit -> Ok Weight.one
@@ -189,6 +191,8 @@ let check ctx t expected =
     | Inr b, TSum (_, b_ty) ->
         check_impl ctx b b_ty
 
+    (* Case elimination: both branches must have equal weight v, result is w·v
+       Reference: Judgment.agda:111-115 (t-case rule) *)
     | Case (e, l, r), result_ty ->
         let* (e_ty, w_e) = go ctx e in
         (match e_ty with
@@ -197,8 +201,11 @@ let check ctx t expected =
              let ctx_r = extend ctx b_ty in
              let result_ty_wk = wk_ty result_ty in
              let* w_l = check_impl ctx_l l result_ty_wk in
-             let* _ = check_impl ctx_r r result_ty_wk in
-             Ok (Weight.mul w_e w_l)
+             let* w_r = check_impl ctx_r r result_ty_wk in
+             if Weight.equal (Weight.simplify w_l) (Weight.simplify w_r) then
+               Ok (Weight.mul w_e w_l)
+             else
+               Error (Error.BranchWeightMismatch (w_l, w_r))
          | ty -> Error (Error.NotASum ty))
 
     | Star, TUnit -> Ok Weight.one

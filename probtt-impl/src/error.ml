@@ -13,6 +13,7 @@ type t =
   | CannotInfer of term
   | WeightNotLeq of Weight.t * Weight.t
   | IdEndpointsNotEqual of term * term
+  | BranchWeightMismatch of Weight.t * Weight.t
   | ParseError of string
   | FileNotFound of string
 
@@ -39,6 +40,9 @@ let pp fmt = function
   | IdEndpointsNotEqual (t1, t2) ->
       Format.fprintf fmt "Identity endpoints not equal: %a vs %a"
         pp_term t1 pp_term t2
+  | BranchWeightMismatch (w1, w2) ->
+      Format.fprintf fmt "Case branches must have equal weights: left=%a, right=%a"
+        Weight.pp w1 Weight.pp w2
   | ParseError msg ->
       Format.fprintf fmt "Parse error: %s" msg
   | FileNotFound path ->
