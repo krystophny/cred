@@ -71,13 +71,16 @@ let check_decl _env (name, ty, term, weight) =
   match Check.check Context.empty term ty with
   | Ok actual_weight ->
       let simplified = Weight.simplify actual_weight in
-      if Weight.leq simplified weight then begin
+      (* Weakening rule (t-weaken): if we have t : A @ actual, we can use it
+         at any declared weight where declared ≤ actual.
+         Higher actual weight can be weakened to lower declared weight. *)
+      if Weight.leq weight simplified then begin
         printf "  OK: %s has weight %a (declared %a)@.@."
           name Weight.pp simplified Weight.pp weight;
         Ok ()
       end else begin
-        printf "  ERROR: weight %a not <= declared %a@.@."
-          Weight.pp simplified Weight.pp weight;
+        printf "  ERROR: declared weight %a not achievable from actual %a@.@."
+          Weight.pp weight Weight.pp simplified;
         Error (Error.WeightNotLeq (weight, simplified))
       end
   | Error e ->

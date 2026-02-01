@@ -239,9 +239,13 @@ let check ctx t expected =
   in
   check_impl ctx t expected
 
+(* Check with weight constraint.
+   Weakening rule (t-weaken): if we prove t : A @ actual, we can use it
+   at any expected_weight where expected_weight ≤ actual.
+   Higher actual weight can be weakened to lower expected weight. *)
 let check_with_weight ctx t expected expected_weight =
   let* actual_weight = check ctx t expected in
-  if Weight.leq actual_weight expected_weight then
+  if Weight.leq expected_weight actual_weight then
     Ok actual_weight
   else
     Error (Error.WeightNotLeq (expected_weight, actual_weight))
