@@ -563,6 +563,32 @@ When $\W = {[0,1]}$ with copy $\Delta : A \to A \times A$ and delete $! : A \to 
 \textbf{Novelty}: De Morgan algebra + type theory + conditioning
 
 %=============================================================================
+\section{Remark on Incompleteness}
+%=============================================================================
+
+G\"odel's incompleteness theorems do not depend on classical logic. They apply to intuitionistic arithmetic, type-theoretic foundations, and constructive systems. The essential requirements are: (1) effective syntax allowing proofs to be encoded as data, (2) sufficient arithmetic to define a provability predicate $\mathsf{Prov}(x)$, and (3) the diagonal lemma, which is purely syntactic.
+
+For ProbTT with $\W = \{\zero, \one\}$, G\"odel applies exactly as it does to MLTT. The system cannot prove its own consistency at weight $\one$.
+
+The case $\W = [0,1]$ raises a subtler question. In ProbTT, weight attaches to \emph{judgments}, not to propositions: the judgment $\Gamma \vdash t : A \at{w}$ says that $t$ inhabits $A$ with weight $w$. This differs from many-valued logics where propositions carry truth values directly.
+
+Consider what a ``graded provability predicate'' might mean:
+\begin{itemize}
+    \item $\mathsf{Prov}_\one(\ulcorner \varphi \urcorner)$: there exists a derivation of $\varphi$ at weight $\one$
+    \item $\mathsf{maxwt}(\ulcorner \varphi \urcorner) = w$: the supremum of weights at which $\varphi$ is derivable
+\end{itemize}
+
+The first is sharp, and G\"odel applies to it directly. The second opens new territory: can ProbTT express and derive statements about partial consistency, such as ``assuming axioms at weight $\one$, the system is consistent at weight $\geq w$''?
+
+If we interpret weights semantically as truth degrees, the G\"odel fixed-point equation $G \leftrightarrow \neg\mathsf{Prov}(\ulcorner G \urcorner)$ transforms. With $\neg w = 1 - w$ and assuming $v(G) \approx v(\mathsf{Prov}(\ulcorner G \urcorner))$:
+\[
+v(G) = 1 - v(G) \quad \Rightarrow \quad v(G) = \tfrac{1}{2}
+\]
+The sentence attains a fixed intermediate value rather than forcing undecidability. However, this interpretation conflates the weight on derivations with truth values on propositions---a conflation that requires careful justification.
+
+We conjecture that the graded structure of ProbTT does not eliminate incompleteness but \emph{attenuates} it: where classical systems face sharp undecidability, ProbTT may express bounded confidence in self-referential statements. Making this precise requires developing the metatheory of ProbTT, particularly the relationship between derivation weights and semantic truth.
+
+%=============================================================================
 \section{Open Problems}
 %=============================================================================
 
@@ -573,6 +599,7 @@ When $\W = {[0,1]}$ with copy $\Delta : A \to A \times A$ and delete $! : A \to 
     \item \textbf{Normalization}: Should follow from MLTT
     \item \textbf{Dependent weights}: $w(x)$ varying over $x$ in $(x : A) \to B \at{w(x)}$
     \item \textbf{Continuous types}: Extension to measurable spaces
+    \item \textbf{Graded metatheory}: Relationship between derivation weights and incompleteness phenomena
 \end{enumerate}
 
 \end{document}
