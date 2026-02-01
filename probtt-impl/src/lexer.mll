@@ -113,6 +113,10 @@ rule token = parse
   | '\xf0' '\x9d' '\x9f' '\x98' { BBZERO }     (* 𝟘 *)
   | '\xf0' '\x9d' '\x9f' '\x99' { BBONE }      (* 𝟙 *)
 
+  (* Weight annotation brackets *)
+  | '\xe3' '\x80' '\x94'       { LWEIGHT }     (* 〔 *)
+  | '\xe3' '\x80' '\x95'       { RWEIGHT }     (* 〕 *)
+
   (* ASCII symbols *)
   | "->"     { ARROW }
   | "=>"     { DARROW }
@@ -127,7 +131,6 @@ rule token = parse
   | ";"      { SEMI }
   | ","      { COMMA }
   | "."      { DOT }
-  | "@"      { AT }
   | "|"      { BAR }
   | "\\"     { LAMBDA }
   | "("      { LPAREN }

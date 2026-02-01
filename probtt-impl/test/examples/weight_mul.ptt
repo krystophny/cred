@@ -1,11 +1,11 @@
 -- Demonstrates weight multiplication in ProbTT
 -- When we apply functions or construct pairs, weights multiply
 
--- Application: f a : B @ w*v when f : A -> B @ w, a : A @ v
+-- Application: f a : B 〔 w·v 〕 when f : A -> B 〔 w 〕, a : A 〔 v 〕
 compose : (A -> B) -> (B -> C) -> A -> C =
   \(f : A -> B). \(g : B -> C). \(x : A). g (f x);
 
--- Pairs: (a, b) : A * B @ w*v when a : A @ w, b : B @ v
+-- Pairs: (a, b) : A * B 〔 w·v 〕 when a : A 〔 w 〕, b : B 〔 v 〕
 swap : A * B -> B * A =
   \(p : A * B). (snd p, fst p);
 

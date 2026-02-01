@@ -9,7 +9,8 @@ open Probtt_lib.Raw
 %token LET IN CASE OF WITH
 %token INFIX INFIXL INFIXR
 %token FORALL SET PROP REFL FST SND INL INR
-%token LAMBDA ARROW DARROW TIMES PLUS EQ COLON SEMI COMMA DOT AT BAR
+%token LAMBDA ARROW DARROW TIMES PLUS EQ COLON SEMI COMMA DOT BAR
+%token LWEIGHT RWEIGHT
 %token LPAREN RPAREN LBRACE RBRACE LBRACKET RBRACKET UNDERSCORE
 %token TOP BOT CDOT NEG EQUIV LEQ TURNSTILE TYCOLON SIGMA PI EPSILON
 %token BBZERO BBONE
@@ -220,10 +221,10 @@ term_atom:
   | INR { TVar "inr" }
   | LPAREN t = term COLON ty = ty RPAREN { TAnn (t, ty) }
 
-(* Weight annotations for ProbTT *)
+(* Weight annotations for ProbTT: 〔 w 〕 *)
 weight_annotation:
   | (* empty *) { None }
-  | AT w = weight { Some w }
+  | LWEIGHT w = weight RWEIGHT { Some w }
 
 weight:
   | w = weight_mul { w }
