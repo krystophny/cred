@@ -4,6 +4,7 @@
 \usepackage{mathtools}
 \usepackage[margin=1in]{geometry}
 \usepackage{stmaryrd}
+\usepackage[round]{natbib}
 
 % Custom inference rule macro
 \newcommand{\infer}[3][]{%
@@ -460,7 +461,7 @@ Case & $\mathsf{case}\,e\,l\,r : C$ & $\mathsf{case}\,e\,l\,r : C \at{w \cdot v}
 \section{Contrast with Cost-Based Graded Types}
 %=============================================================================
 
-Graded type systems like Granule and Gerty use grades to track \emph{resource usage}. ProbTT uses weights to track \emph{inhabitation certainty}. These are philosophically distinct:
+Graded type systems like Granule \citep{orchard2019quantitative} and quantitative type theory \citep{atkey2018syntax} use grades to track \emph{resource usage}. ProbTT uses weights to track \emph{inhabitation certainty}. These are philosophically distinct:
 
 \begin{center}
 \begin{tabular}{l|l|l}
@@ -540,7 +541,7 @@ A \emph{$\W$-weighted category} has:
 \end{itemize}
 \end{definition}
 
-When $\W = {[0,1]}$ with copy $\Delta : A \to A \times A$ and delete $! : A \to \mathbf{1}$, this becomes a \textbf{Markov category}.
+When $\W = {[0,1]}$ with copy $\Delta : A \to A \times A$ and delete $! : A \to \mathbf{1}$, this becomes a \textbf{Markov category} \citep{fritz2020synthetic}.
 
 %=============================================================================
 \section{Summary}
@@ -566,27 +567,29 @@ When $\W = {[0,1]}$ with copy $\Delta : A \to A \times A$ and delete $! : A \to 
 \section{Remark on Incompleteness}
 %=============================================================================
 
-G\"odel's incompleteness theorems do not depend on classical logic. They apply to intuitionistic arithmetic, type-theoretic foundations, and constructive systems. The essential requirements are: (1) effective syntax allowing proofs to be encoded as data, (2) sufficient arithmetic to define a provability predicate $\mathsf{Prov}(x)$, and (3) the diagonal lemma, which is purely syntactic.
+G\"odel's incompleteness theorems do not depend on classical logic \citep{sep-goedel-incompleteness}. They apply to intuitionistic arithmetic and constructive metamathematics \citep{mccarty1991incompleteness}, requiring only: (1) effective syntax allowing proofs to be encoded as data, (2) sufficient arithmetic to define a provability predicate $\mathsf{Prov}(x)$, and (3) the diagonal lemma, which is purely syntactic.
 
 For ProbTT with $\W = \{\zero, \one\}$, G\"odel applies exactly as it does to MLTT. The system cannot prove its own consistency at weight $\one$.
 
-The case $\W = [0,1]$ raises a subtler question. In ProbTT, weight attaches to \emph{judgments}, not to propositions: the judgment $\Gamma \vdash t : A \at{w}$ says that $t$ inhabits $A$ with weight $w$. This differs from many-valued logics where propositions carry truth values directly.
+The case $\W = [0,1]$ raises subtler questions that connect to existing work on graded provability. In Pavelka-style fuzzy logics \citep{pavelka1979fuzzy, hajek1998metamathematics}, one asks not merely ``is $\varphi$ provable?'' but ``to what degree is $\varphi$ provable?'' This tradition studies conditions under which provability degrees coincide with truth degrees---precisely the question relevant to ProbTT.
 
-Consider what a ``graded provability predicate'' might mean:
+A key distinction: in ProbTT, weight attaches to \emph{judgments}, not to propositions. The judgment $\Gamma \vdash t : A \at{w}$ says that $t$ inhabits $A$ with weight $w$. This differs from many-valued logics where propositions carry truth values directly, though the relationship deserves investigation.
+
+Consider what a graded provability predicate might mean:
 \begin{itemize}
     \item $\mathsf{Prov}_\one(\ulcorner \varphi \urcorner)$: there exists a derivation of $\varphi$ at weight $\one$
     \item $\mathsf{maxwt}(\ulcorner \varphi \urcorner) = w$: the supremum of weights at which $\varphi$ is derivable
 \end{itemize}
 
-The first is sharp, and G\"odel applies to it directly. The second opens new territory: can ProbTT express and derive statements about partial consistency, such as ``assuming axioms at weight $\one$, the system is consistent at weight $\geq w$''?
+The first is sharp, and G\"odel applies directly. The second opens new territory explored in paraconsistent logic \citep{sep-logic-paraconsistent, priest2006doubt}: once ``consistency'' and ``negation'' are weakened, incompleteness claims must be reformulated. The da Costa tradition \citep{dacosta1974paraconsistent} shows that weakening explosion changes the shape but not the existence of limitative results.
 
 If we interpret weights semantically as truth degrees, the G\"odel fixed-point equation $G \leftrightarrow \neg\mathsf{Prov}(\ulcorner G \urcorner)$ transforms. With $\neg w = 1 - w$ and assuming $v(G) \approx v(\mathsf{Prov}(\ulcorner G \urcorner))$:
 \[
 v(G) = 1 - v(G) \quad \Rightarrow \quad v(G) = \tfrac{1}{2}
 \]
-The sentence attains a fixed intermediate value rather than forcing undecidability. However, this interpretation conflates the weight on derivations with truth values on propositions---a conflation that requires careful justification.
+The sentence attains a fixed intermediate value rather than forcing undecidability. However, this interpretation conflates the weight on derivations with truth values on propositions---a conflation that requires the kind of careful justification developed for Pavelka logics.
 
-We conjecture that the graded structure of ProbTT does not eliminate incompleteness but \emph{attenuates} it: where classical systems face sharp undecidability, ProbTT may express bounded confidence in self-referential statements. Making this precise requires developing the metatheory of ProbTT, particularly the relationship between derivation weights and semantic truth.
+We conjecture that the graded structure of ProbTT does not eliminate incompleteness but \emph{attenuates} it: where classical systems face sharp undecidability, ProbTT may express bounded confidence in self-referential statements. Making this precise requires developing the metatheory of ProbTT along lines analogous to the metamathematics of fuzzy logic \citep{hajek1998metamathematics}.
 
 %=============================================================================
 \section{Open Problems}
@@ -601,5 +604,8 @@ We conjecture that the graded structure of ProbTT does not eliminate incompleten
     \item \textbf{Continuous types}: Extension to measurable spaces
     \item \textbf{Graded metatheory}: Relationship between derivation weights and incompleteness phenomena
 \end{enumerate}
+
+\bibliographystyle{plainnat}
+\bibliography{probtt}
 
 \end{document}
