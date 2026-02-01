@@ -53,12 +53,4 @@ let () =
     | Error _ -> false
   );
 
-  test "abort : A from Empty" (
-    let ctx = Context.extend Context.empty TEmpty in
-    let abort = Abort (a_ty, Var 0) in
-    match Check.check ctx abort a_ty with
-    | Ok _ -> true
-    | Error _ -> false
-  );
-
   Printf.printf "\nAll type checking tests passed!\n"

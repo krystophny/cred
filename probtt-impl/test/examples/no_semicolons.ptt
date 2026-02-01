@@ -14,6 +14,3 @@ compose f g x = g (f x)
 
 unit : ⊤
 unit = ()
-
-exFalso : ⊥ → A
-exFalso e = abort A e

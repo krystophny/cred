@@ -56,7 +56,6 @@ let infer (ctx : Context.t) (t : term) : result =
     | Inl _ -> Error (Error.CannotInfer t)
     | Inr _ -> Error (Error.CannotInfer t)
     | Case _ -> Error (Error.CannotInfer t)
-    | Abort _ -> Error (Error.CannotInfer t)
     | J _ -> Error (Error.CannotInfer t)
 
   and check ctx t expected : check_result =
@@ -98,10 +97,6 @@ let infer (ctx : Context.t) (t : term) : result =
          | ty -> Error (Error.NotASum ty))
 
     | Star, TUnit -> Ok Weight.one
-
-    | Abort (_, e), _ ->
-        let* w = check ctx e TEmpty in
-        Ok w
 
     | Refl, TId (ty, a, b) ->
         if not (equal_tm a b) then
@@ -167,7 +162,6 @@ let check ctx t expected =
     | Inl _ -> Error (Error.CannotInfer t)
     | Inr _ -> Error (Error.CannotInfer t)
     | Case _ -> Error (Error.CannotInfer t)
-    | Abort _ -> Error (Error.CannotInfer t)
     | J _ -> Error (Error.CannotInfer t)
 
   and check_impl ctx t expected : check_result =
@@ -209,9 +203,6 @@ let check ctx t expected =
          | ty -> Error (Error.NotASum ty))
 
     | Star, TUnit -> Ok Weight.one
-
-    | Abort (_, e), _ ->
-        check_impl ctx e TEmpty
 
     | Refl, TId (ty, a, b) ->
         if not (equal_tm a b) then

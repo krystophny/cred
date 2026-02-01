@@ -40,7 +40,6 @@ let rec equal_tm t1 t2 =
   | Case (e1, l1, r1), Case (e2, l2, r2) ->
       equal_tm e1 e2 && equal_tm l1 l2 && equal_tm r1 r2
   | Star, Star -> true
-  | Abort (ty1, e1), Abort (ty2, e2) -> equal_ty ty1 ty2 && equal_tm e1 e2
   | Refl, Refl -> true
   | J (m1, d1, p1), J (m2, d2, p2) ->
       equal_ty m1 m2 && equal_tm d1 d2 && equal_tm p1 p2
@@ -53,7 +52,6 @@ and equal_ty ty1 ty2 =
   | TSigma (a1, b1), TSigma (a2, b2) -> equal_ty a1 a2 && equal_ty b1 b2
   | TSum (a1, b1), TSum (a2, b2) -> equal_ty a1 a2 && equal_ty b1 b2
   | TUnit, TUnit -> true
-  | TEmpty, TEmpty -> true
   | TId (a1, t1, u1), TId (a2, t2, u2) ->
       equal_ty a1 a2 && equal_tm t1 t2 && equal_tm u1 u2
   | _, _ -> false

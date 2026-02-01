@@ -8,7 +8,7 @@ open Probtt_lib.Raw
 %token MODULE WHERE OPEN IMPORT USING DATA RECORD FIELD
 %token LET IN CASE OF WITH
 %token INFIX INFIXL INFIXR
-%token FORALL SET PROP REFL FST SND INL INR ABORT
+%token FORALL SET PROP REFL FST SND INL INR
 %token LAMBDA ARROW DARROW TIMES PLUS EQ COLON SEMI COMMA DOT AT BAR
 %token LPAREN RPAREN LBRACE RBRACE LBRACKET RBRACKET UNDERSCORE
 %token TOP BOT CDOT NEG EQUIV LEQ TURNSTILE TYCOLON SIGMA PI EPSILON
@@ -147,8 +147,6 @@ ty_atom:
   | SET n = NUM { TySet (Some n) }
   | PROP { TySet (Some 0) }
   | TOP { TyUnit }
-  | BOT { TyEmpty }
-  | BBZERO { TyEmpty }
   | BBONE { TyUnit }
 
 (* Patterns *)
@@ -223,7 +221,6 @@ term_atom:
   | SND { TVar "snd" }
   | INL { TVar "inl" }
   | INR { TVar "inr" }
-  | ABORT { TVar "abort" }
   | LPAREN t = term COLON ty = ty RPAREN { TAnn (t, ty) }
 
 (* Weight annotations for ProbTT *)

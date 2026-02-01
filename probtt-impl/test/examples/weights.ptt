@@ -8,10 +8,6 @@ id x = x;
 pair : A → B → A × B @ 1;
 pair a b = (a , b);
 
--- Ex falso requires explicit abort
-exFalso : ⊥ → A @ 1;
-exFalso e = abort A e;
-
 -- Const function
 const : A → B → A @ 1;
 const x y = x;

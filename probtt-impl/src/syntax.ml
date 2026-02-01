@@ -6,7 +6,6 @@ type ty =
   | TSigma of ty * ty
   | TSum of ty * ty
   | TUnit
-  | TEmpty
   | TId of ty * term * term
 
 and term =
@@ -20,7 +19,6 @@ and term =
   | Inr of term
   | Case of term * term * term
   | Star
-  | Abort of ty * term
   | Refl
   | J of ty * term * term
 
@@ -33,7 +31,6 @@ let rec pp_ty fmt = function
   | TSum (a, b) ->
       Format.fprintf fmt "(%a + %a)" pp_ty a pp_ty b
   | TUnit -> Format.fprintf fmt "Unit"
-  | TEmpty -> Format.fprintf fmt "Empty"
   | TId (a, t1, t2) ->
       Format.fprintf fmt "Id(%a, %a, %a)" pp_ty a pp_term t1 pp_term t2
 
@@ -52,8 +49,6 @@ and pp_term fmt = function
   | Case (e, l, r) ->
       Format.fprintf fmt "(case %a of %a | %a)" pp_term e pp_term l pp_term r
   | Star -> Format.fprintf fmt "*"
-  | Abort (ty, e) ->
-      Format.fprintf fmt "(abort %a %a)" pp_ty ty pp_term e
   | Refl -> Format.fprintf fmt "refl"
   | J (m, d, p) ->
       Format.fprintf fmt "(J %a %a %a)" pp_ty m pp_term d pp_term p

@@ -9,7 +9,6 @@ type t =
   | NotAPair of ty
   | NotASum of ty
   | NotAnIdentity of ty
-  | NotEmpty of ty
   | CannotInfer of term
   | WeightNotLeq of Weight.t * Weight.t
   | IdEndpointsNotEqual of term * term
@@ -31,8 +30,6 @@ let pp fmt = function
       Format.fprintf fmt "Expected sum type, got: %a" pp_ty ty
   | NotAnIdentity ty ->
       Format.fprintf fmt "Expected identity type, got: %a" pp_ty ty
-  | NotEmpty ty ->
-      Format.fprintf fmt "Expected empty type, got: %a" pp_ty ty
   | CannotInfer t ->
       Format.fprintf fmt "Cannot infer type for: %a" pp_term t
   | WeightNotLeq (w1, w2) ->

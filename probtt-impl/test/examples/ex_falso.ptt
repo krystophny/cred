@@ -1,2 +1,0 @@
--- Ex falso: from Empty we can derive anything
-exFalso : Empty -> A = \(e : Empty). abort[A] e

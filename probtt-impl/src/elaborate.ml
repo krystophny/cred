@@ -40,13 +40,6 @@ let rec elab_weight = function
   | WNeg w -> Weight.neg (elab_weight w)
   | WVar x -> Weight.var x
 
-(* Convert a term (parsed in term position) back to a type.
-   This handles cases like `abort A e` where A is parsed as a term. *)
-let rec term_to_ty = function
-  | TVar name -> TyVar name
-  | TApp (f, a) -> TyApp (term_to_ty f, term_to_ty a)
-  | TUnit -> TyUnit
-  | _ -> TyVar "_"  (* Fallback for complex terms *)
 
 let rec elab_ty env = function
   | TyVar "_" -> Syntax.TBase 0
@@ -76,7 +69,6 @@ let rec elab_ty env = function
   | TySum (a, b) ->
       Syntax.TSum (elab_ty env a, elab_ty env b)
   | TyUnit -> Syntax.TUnit
-  | TyEmpty -> Syntax.TEmpty
   | TyId (a, t1, t2) ->
       Syntax.TId (elab_ty env a, elab_term env t1, elab_term env t2)
   | TySet _ -> Syntax.TBase 0
@@ -94,10 +86,6 @@ and elab_term env = function
       Syntax.Inl (elab_term env a)
   | TApp (TVar "inr", a) ->
       Syntax.Inr (elab_term env a)
-  | TApp (TApp (TVar "abort", ty_term), e) ->
-      (* abort A e: A is parsed as term but is actually a type *)
-      let ty = term_to_ty ty_term in
-      Syntax.Abort (elab_ty env ty, elab_term env e)
   | TApp (f, a) ->
       Syntax.App (elab_term env f, elab_term env a)
   | TLam (name, body) ->
@@ -119,8 +107,6 @@ and elab_term env = function
       let env_r = extend_var env y in
       Syntax.Case (e', elab_term env_l l, elab_term env_r r)
   | TUnit -> Syntax.Star
-  | TAbort (ty, e) ->
-      Syntax.Abort (elab_ty env ty, elab_term env e)
   | TRefl -> Syntax.Refl
   | TJ (m, d, p) ->
       Syntax.J (elab_ty env m, elab_term env d, elab_term env p)

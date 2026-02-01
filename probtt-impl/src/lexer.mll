@@ -29,7 +29,6 @@ let () = List.iter (fun (k, v) -> Hashtbl.add keyword_table k v) [
   "snd", SND;
   "inl", INL;
   "inr", INR;
-  "abort", ABORT;
 ]
 
 let lookup_ident s =
