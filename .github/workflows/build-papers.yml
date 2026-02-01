@@ -19,44 +19,16 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Build Paper 1
+      - name: Build ProbTT Sketch
         uses: xu-cheng/latex-action@v3
         with:
-          working_directory: papers/paper1-classical-logic
-          root_file: main.tex
-
-      - name: Build Paper 2
-        uses: xu-cheng/latex-action@v3
-        with:
-          working_directory: papers/paper2-proof-theory
-          root_file: main.tex
-
-      - name: Build Paper 3
-        uses: xu-cheng/latex-action@v3
-        with:
-          working_directory: papers/paper3-natural-numbers
-          root_file: main.tex
-
-      - name: Build Paper 4
-        uses: xu-cheng/latex-action@v3
-        with:
-          working_directory: papers/paper4-zorn-no-choice
-          root_file: main.tex
-
-      - name: Build Paper 5
-        uses: xu-cheng/latex-action@v3
-        with:
-          working_directory: papers/paper5-synthetic
-          root_file: main.tex
+          working_directory: papers/probtt
+          root_file: probtt-sketch.tex
 
       - name: Collect PDFs
         run: |
           mkdir -p dist
-          cp papers/paper1-classical-logic/main.pdf dist/paper1-classical-logic.pdf
-          cp papers/paper2-proof-theory/main.pdf dist/paper2-proof-theory.pdf
-          cp papers/paper3-natural-numbers/main.pdf dist/paper3-natural-numbers.pdf
-          cp papers/paper4-zorn-no-choice/main.pdf dist/paper4-zorn-no-choice.pdf
-          cp papers/paper5-synthetic/main.pdf dist/paper5-synthetic.pdf
+          cp papers/probtt/probtt-sketch.pdf dist/probtt-sketch.pdf
 
       - name: Upload PDFs
         uses: actions/upload-artifact@v4

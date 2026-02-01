@@ -1,100 +1,59 @@
-# Probabilistic Foundations
+# ProbTT: Type Theory with Primitive Probability
 
-[![Build Papers](https://github.com/krystophny/foundations/actions/workflows/build-papers.yml/badge.svg)](https://github.com/krystophny/foundations/actions/workflows/build-papers.yml)
-[![Lean Build](https://github.com/krystophny/foundations/actions/workflows/lean.yml/badge.svg)](https://github.com/krystophny/foundations/actions/workflows/lean.yml)
+A type theory where **probability is primitive**, not derived. MLTT emerges as the {0,1}-fragment.
 
-An alternative axiomatization of mathematics using **probability as the primitive notion**, with classical logic emerging as the degenerate {0,1} boundary case.
+## The Idea
 
-## Papers
+Traditional type theory:
+```
+Types → Propositions → Probability (constructed via measure theory)
+```
 
-Download PDFs from the [latest build artifacts](https://github.com/krystophny/foundations/actions/workflows/build-papers.yml) (click the latest successful run, then download the `papers` artifact).
+ProbTT:
+```
+Prob (primitive) → Types, Propositions (derived as {0,1} case)
+```
 
-| Paper | Title | Status |
-|-------|-------|--------|
-| 1 | [Classical Logic as the {0,1} Boundary Case](papers/paper1-classical-logic/main.tex) | Draft |
-| 2 | [Probabilistic Proof Theory](papers/paper2-proof-theory/main.tex) | Draft |
-| 3 | [Probabilistic Natural Numbers](papers/paper3-natural-numbers/main.tex) | Draft |
-| 4 | [Zorn's Lemma via Distributions](papers/paper4-zorn-no-choice/main.tex) | Draft |
-| 5 | [Synthetic Probability Type Theory](papers/paper5-synthetic/main.tex) | Draft |
-| 6 | Markov Categories for Probabilistic Reasoning | Planned |
+## Core Innovation: Probabilistic Judgments
 
-## Key Ideas
+Instead of `Γ ⊢ a : A`, we have:
+```
+Γ ⊢ a : A @ p     -- "a has type A with probability p"
+```
 
-1. **Probability is primitive**: We axiomatize `Prob` directly, not via measure theory on top of set theory on top of logic.
+When `p = 1`: ordinary typing. When `p ∈ (0,1)`: uncertain typing.
 
-2. **Classical logic is derived**: The logical operations (AND, OR, NOT) are probability algebra restricted to {0,1}. LEM is an algebraic identity, not an axiom.
+## Logic from Expectation
 
-3. **Graded entailment**: `Γ ⊢[p] φ` means "derive φ from Γ with confidence at least p". Classical entailment is the p=1 case.
+| Classical | ProbTT |
+|-----------|--------|
+| `∀x. P(x)` | `𝔼[P] = 1` |
+| `∃x. P(x)` | `𝔼[P] > 0` |
+| `P → Q` | `𝔼[Q \| P] = 1` |
 
-4. **Existence via distributions**: Probabilistic Zorn asserts distributions over near-maximal elements exist, avoiding the selection problem that requires AC in classical Zorn.
+## Status
+
+- **Sketch**: `papers/probtt/probtt-sketch.tex`
+- **Old Lean code**: `lean/` (axioms-in-MLTT approach, superseded)
+
+The sketch defines:
+- Probabilistic judgments
+- Stochastic function types (Markov kernels)
+- Probabilistic pairs and identity
+- MLTT embedding theorem (the {0,1} case)
+
+## Next Steps
+
+1. Formalize rules precisely
+2. Prove MLTT embedding rigorously
+3. Prototype in Dedukti/Lambdapi
+4. Study metatheory (normalization, consistency)
 
 ## Building
 
-### Lean formalization
-
 ```bash
-cd lean && lake build
+cd papers/probtt && pdflatex probtt-sketch.tex
 ```
-
-### Papers (requires LaTeX)
-
-```bash
-cd papers/paper1-classical-logic && pdflatex main.tex
-```
-
-Or use the GitHub Actions workflow which builds all papers automatically.
-
-## Project Structure
-
-```
-foundations/
-├── lean/
-│   ├── Foundations.lean    # Main Lean 4 formalization
-│   ├── Synthetic.lean      # Axiom reduction experiments
-│   ├── lakefile.lean       # Build configuration
-│   └── lean-toolchain      # Lean version (4.14.0)
-├── papers/
-│   ├── paper1-classical-logic/
-│   ├── paper2-proof-theory/
-│   ├── paper3-natural-numbers/
-│   ├── paper4-zorn-no-choice/
-│   └── paper5-synthetic/
-│       ├── main.tex        # Paper content
-│       └── reviews.tex     # Peer review log
-└── README.md
-```
-
-## Current Status
-
-- **Primitive rules**: 40 (reduced from 53 via systematic analysis)
-- **Derived rules**: 11 (commutativity, De Morgan, subtraction identities)
-- **Zorn**: Finite case provable, infinite case needs completeness (NOT axiomatized)
-- **Theorems**: 38 (all machine-verified)
-- **Build**: Zero warnings, zero errors
-
-### Comparison to Other Foundations
-
-| System | Primitives | Notes |
-|--------|------------|-------|
-| FOL | ~16 | Just logic |
-| ZFC | ~25 + schemas | FOL + set axioms |
-| MLTT | ~20 | Type theory |
-| HoTT | ~25 | MLTT + univalence |
-| Cubical | ~35 | Interval + Kan |
-| **ProbTT** | **40** | Prob native, logic derived |
-
-The framework is axiomatized, not constructed. Paper 5 analyzes axiom independence, proves finite Zorn without choice, and sketches how infinite Zorn follows from projective limits.
-
-## Philosophy
-
-This is not a claim that probability is "more fundamental" than logic in an absolute sense. Both are valid starting points. The advantages of the probability-first approach:
-
-- Uncertainty is native, not retrofitted
-- Graded truth values are primitive
-- Some existence proofs become constructive (distributions vs. points)
-- The framework naturally supports probabilistic reasoning
-
-The classical embedding (Papers 1-3) is a **consistency check**: it shows standard mathematics is recoverable. The interesting work happens in the full [0,1] setting, especially Paper 4's treatment of Zorn's lemma.
 
 ## License
 
