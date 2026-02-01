@@ -1,0 +1,59 @@
+name: Build Papers
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'papers/**'
+      - '.github/workflows/build-papers.yml'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'papers/**'
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Build Paper 1
+        uses: xu-cheng/latex-action@v3
+        with:
+          working_directory: papers/paper1-classical-logic
+          root_file: main.tex
+
+      - name: Build Paper 2
+        uses: xu-cheng/latex-action@v3
+        with:
+          working_directory: papers/paper2-proof-theory
+          root_file: main.tex
+
+      - name: Build Paper 3
+        uses: xu-cheng/latex-action@v3
+        with:
+          working_directory: papers/paper3-natural-numbers
+          root_file: main.tex
+
+      - name: Build Paper 4
+        uses: xu-cheng/latex-action@v3
+        with:
+          working_directory: papers/paper4-zorn-no-choice
+          root_file: main.tex
+
+      - name: Collect PDFs
+        run: |
+          mkdir -p dist
+          cp papers/paper1-classical-logic/main.pdf dist/paper1-classical-logic.pdf
+          cp papers/paper2-proof-theory/main.pdf dist/paper2-proof-theory.pdf
+          cp papers/paper3-natural-numbers/main.pdf dist/paper3-natural-numbers.pdf
+          cp papers/paper4-zorn-no-choice/main.pdf dist/paper4-zorn-no-choice.pdf
+
+      - name: Upload PDFs
+        uses: actions/upload-artifact@v4
+        with:
+          name: papers
+          path: dist/*.pdf
+          retention-days: 90

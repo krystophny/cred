@@ -1,0 +1,24 @@
+# LaTeX build artifacts
+papers/**/*.pdf
+papers/**/*.aux
+papers/**/*.log
+papers/**/*.out
+papers/**/*.toc
+papers/**/*.synctex.gz
+papers/**/*.fls
+papers/**/*.fdb_latexmk
+papers/**/*.bbl
+papers/**/*.blg
+
+# Lean build artifacts
+lean/.lake/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Editor files
+*.swp
+*~
+.vscode/
+.idea/

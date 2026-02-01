@@ -1,0 +1,457 @@
+\documentclass[11pt,a4paper]{article}
+
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{mathtools}
+\usepackage{hyperref}
+\usepackage{cleveref}
+\usepackage[margin=1in]{geometry}
+\usepackage{enumitem}
+\usepackage{booktabs}
+\usepackage{bussproofs}
+
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{axiom}{Axiom}
+\newtheorem{remark}[theorem]{Remark}
+\newtheorem{example}[theorem]{Example}
+
+\newcommand{\Prob}{\mathsf{Prob}}
+\newcommand{\ProbProp}{\mathsf{ProbProp}}
+\newcommand{\E}{\mathbb{E}}
+\newcommand{\pand}{\wedge_p}
+\newcommand{\por}{\vee_p}
+\newcommand{\pnot}{\neg_p}
+\newcommand{\pzero}{\mathbb{0}}
+\newcommand{\pone}{\mathbb{1}}
+\newcommand{\ple}{\leq_p}
+\newcommand{\padd}{+_p}
+\newcommand{\pmul}{\cdot_p}
+\newcommand{\psub}{-_p}
+\newcommand{\entails}[1]{\vdash_{#1}}
+
+\title{Probabilistic Proof Theory\\[0.5em]
+\large Sequent Calculus with Confidence Grades}
+
+\author{Probabilistic Foundations Project}
+
+\date{\today}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+We develop a proof theory for probabilistic reasoning where derivations carry confidence grades: $\Gamma \entails{p} \phi$ means ``from $\Gamma$, derive $\phi$ with confidence at least $p$.'' The classical sequent calculus is recovered when $p = \pone$, but the interesting mathematics happens for $p < \pone$. We present four fundamental proof rules---axiom, weakening, cut, and monotonicity---and show how confidence degrades through inference chains. This framework supports reasoning under uncertainty as a first-class citizen, not an afterthought.
+\end{abstract}
+
+\section{Introduction}
+
+\subsection{Classical vs. Probabilistic Entailment}
+
+In classical logic, entailment is binary: either $\Gamma \vdash \phi$ or not. This forces a sharp boundary between ``known'' and ``unknown,'' with no room for partial confidence.
+
+In probabilistic proof theory, entailment is graded:
+\[
+\Gamma \entails{p} \phi
+\]
+This means: ``The confidence in $\phi$ given $\Gamma$ is at least $p$.''
+
+\subsection{Where the Interesting Mathematics Lives}
+
+The classical case $p = \pone$ recovers standard sequent calculus. But the value of this framework is in the $p < \pone$ regime:
+
+\begin{itemize}
+    \item Confidence propagates through proofs: if $\Gamma \entails{p} \phi$ and $\phi \entails{q} \psi$, then $\Gamma \entails{p \pmul q} \psi$
+    \item Approximate reasoning becomes formal: ``likely true'' has precise meaning
+    \item Bounds are compositional: complex derivations have calculable confidence
+\end{itemize}
+
+\subsection{Prerequisites}
+
+This paper assumes familiarity with Paper 1 (the $\Prob$ type and $\ProbProp$). We introduce conditional expectation $\E[\cdot|\cdot]$ as a new primitive.
+
+\section{Conditional Expectation}
+
+\subsection{The Core Primitive}
+
+Conditional expectation is the fundamental operation for reasoning about one proposition given another.
+
+\begin{axiom}[Conditional Expectation]
+There exists an operation:
+\[
+\E[\cdot|\cdot] : \ProbProp(\alpha) \times \ProbProp(\alpha) \to \Prob
+\]
+written $\E[\phi|\Gamma]$, representing the expected value of $\phi$ given $\Gamma$.
+\end{axiom}
+
+\subsection{Axioms for Conditional Expectation}
+
+\begin{axiom}[Normalization]
+$\E[\mathbf{1}|\Gamma] = \pone$ where $\mathbf{1}(x) = \pone$ for all $x$.
+\end{axiom}
+
+\begin{axiom}[Monotonicity]
+If $\phi(x) \ple \psi(x)$ for all $x$, then $\E[\phi|\Gamma] \ple \E[\psi|\Gamma]$.
+\end{axiom}
+
+\begin{axiom}[Self-Conditioning]
+$\E[\phi|\phi] = \pone$.
+\end{axiom}
+
+This captures: if we condition on $\phi$, the expected value of $\phi$ is maximal.
+
+\begin{axiom}[Linearity]
+$\E[c \pmul \phi|\Gamma] = c \pmul \E[\phi|\Gamma]$ for constant $c : \Prob$.
+\end{axiom}
+
+\begin{axiom}[Additivity]
+$\E[\phi \padd \psi|\Gamma] = \E[\phi|\Gamma] \padd \E[\psi|\Gamma]$.
+\end{axiom}
+
+\begin{axiom}[Product Rule]
+$\E[\phi \pmul \psi|\chi] = \E[\phi|\psi \pmul \chi] \pmul \E[\psi|\chi]$.
+\end{axiom}
+
+This is Bayes' theorem in expectation form.
+
+\begin{axiom}[Chain Rule / Tower Law]
+$\E[\psi|\chi] \pmul \E[\phi|\psi] \ple \E[\phi|\chi]$.
+\end{axiom}
+
+Conditioning through an intermediate proposition can only decrease confidence.
+
+\subsection{Interpretation}
+
+Think of $\E[\phi|\Gamma]$ as: ``How much do I expect $\phi$ to be true, given that $\Gamma$ describes my evidence?''
+
+For classical (0/1-valued) propositions, this reduces to conditional probability: $\E[\phi|\Gamma] = P(\phi|\Gamma)$.
+
+For general probabilistic propositions, it is the expected value of the function $\phi$ under the conditional distribution.
+
+\section{Probabilistic Entailment}
+
+\subsection{Definition}
+
+\begin{definition}[Probabilistic Entailment]
+For $\Gamma, \phi : \ProbProp(\alpha)$ and $p : \Prob$, we define:
+\[
+\Gamma \entails{p} \phi \quad :\Leftrightarrow \quad p \ple \E[\phi|\Gamma]
+\]
+\end{definition}
+
+This means: ``The expected value of $\phi$ given $\Gamma$ is at least $p$.''
+
+\begin{remark}
+Higher $p$ is a stronger claim. $\Gamma \entails{\pone} \phi$ is the strongest: perfect confidence.
+\end{remark}
+
+\subsection{Classical Entailment}
+
+\begin{definition}[Classical Entailment]
+For classical propositions $\Gamma, \phi$:
+\[
+\Gamma \vdash^c \phi \quad :\Leftrightarrow \quad \Gamma \entails{\pone} \phi
+\]
+\end{definition}
+
+The classical sequent $\Gamma \vdash \phi$ is the special case of probabilistic entailment with maximal confidence.
+
+\section{Proof Rules}
+
+\subsection{The Four Fundamental Rules}
+
+\begin{theorem}[Axiom Rule]
+For any $\phi : \ProbProp(\alpha)$:
+\[
+\phi \entails{\pone} \phi
+\]
+\end{theorem}
+
+\begin{proof}
+By Self-Conditioning: $\E[\phi|\phi] = \pone$, so $\pone \ple \E[\phi|\phi]$.
+\end{proof}
+
+\begin{theorem}[Weakening]
+If $\Gamma \entails{p} \phi$ and $q \ple p$, then $\Gamma \entails{q} \phi$.
+\end{theorem}
+
+\begin{proof}
+We have $p \ple \E[\phi|\Gamma]$. By transitivity of $\ple$: $q \ple p \ple \E[\phi|\Gamma]$.
+\end{proof}
+
+\begin{remark}
+Weakening \emph{decreases} confidence. This is not ``weakening the hypothesis'' as in classical logic---it is ``accepting lower confidence.''
+\end{remark}
+
+\begin{theorem}[Cut Rule]
+If $\Gamma \entails{p} \phi$ and $\phi \entails{q} \psi$, then $\Gamma \entails{p \pmul q} \psi$.
+\end{theorem}
+
+\begin{proof}
+We have:
+\begin{align*}
+    p &\ple \E[\phi|\Gamma] \\
+    q &\ple \E[\psi|\phi]
+\end{align*}
+By monotonicity of multiplication:
+\[
+p \pmul q \ple \E[\phi|\Gamma] \pmul \E[\psi|\phi]
+\]
+By the Chain Rule:
+\[
+\E[\phi|\Gamma] \pmul \E[\psi|\phi] \ple \E[\psi|\Gamma]
+\]
+By transitivity: $p \pmul q \ple \E[\psi|\Gamma]$.
+\end{proof}
+
+\begin{remark}
+This is the key rule for confidence propagation. Each inference step \emph{multiplies} confidence. A chain of 10 steps, each with confidence 0.9, yields overall confidence $0.9^{10} \approx 0.35$.
+\end{remark}
+
+\begin{theorem}[Monotonicity Rule]
+If $\phi(x) \ple \psi(x)$ for all $x$, and $\Gamma \entails{p} \phi$, then $\Gamma \entails{p} \psi$.
+\end{theorem}
+
+\begin{proof}
+By monotonicity of conditional expectation: $\E[\phi|\Gamma] \ple \E[\psi|\Gamma]$.
+Thus $p \ple \E[\phi|\Gamma] \ple \E[\psi|\Gamma]$.
+\end{proof}
+
+\subsection{Derived Rules}
+
+\begin{corollary}[Transitivity]
+If $\Gamma \entails{p} \phi$, $\phi \entails{q} \psi$, and $\psi \entails{r} \chi$, then:
+\[
+\Gamma \entails{p \pmul q \pmul r} \chi
+\]
+\end{corollary}
+
+\begin{corollary}[Bottom Bound]
+$\Gamma \entails{\pzero} \phi$ for any $\Gamma, \phi$.
+\end{corollary}
+
+\begin{proof}
+$\pzero \ple p$ for all $p$, including $\E[\phi|\Gamma]$.
+\end{proof}
+
+\section{Structural Rules}
+
+\subsection{Exchange}
+
+\begin{theorem}[Exchange]
+If $(A \pand B) \pand \Gamma \entails{p} C$, then $(B \pand A) \pand \Gamma \entails{p} C$.
+\end{theorem}
+
+\begin{proof}
+Since $(A \pand B)(x) = A(x) \pmul B(x) = B(x) \pmul A(x) = (B \pand A)(x)$, the contexts are equal pointwise, so the conditional expectations are equal.
+\end{proof}
+
+\subsection{Contraction (Classical Only)}
+
+\begin{theorem}[Contraction]
+For classical $A$: if $(A \pand A) \pand \Gamma \entails{p} B$, then $A \pand \Gamma \entails{p} B$.
+\end{theorem}
+
+\begin{proof}
+For classical $A$: $(A \pand A)(x) = A(x) \pmul A(x) = A(x)$ (since $\pzero \pmul \pzero = \pzero$ and $\pone \pmul \pone = \pone$).
+\end{proof}
+
+\begin{remark}
+Contraction \emph{fails} for non-classical propositions. If $A(x) = 0.5$, then $(A \pand A)(x) = 0.25 \neq 0.5$. This is a feature, not a bug: in probabilistic reasoning, using evidence twice is not the same as using it once.
+\end{remark}
+
+\subsection{Associativity}
+
+\begin{theorem}[Associativity]
+$((A \pand B) \pand C) \pand \Gamma \entails{p} D$ iff $(A \pand (B \pand C)) \pand \Gamma \entails{p} D$.
+\end{theorem}
+
+\begin{proof}
+Multiplication in $\Prob$ is associative.
+\end{proof}
+
+\section{Example Derivations}
+
+\subsection{Confidence Degradation Chain}
+
+Suppose:
+\begin{itemize}
+    \item $A \entails{0.9} B$ (``$A$ strongly suggests $B$'')
+    \item $B \entails{0.8} C$ (``$B$ moderately suggests $C$'')
+    \item $C \entails{0.7} D$ (``$C$ weakly suggests $D$'')
+\end{itemize}
+
+By repeated application of Cut:
+\[
+A \entails{0.9 \times 0.8 \times 0.7} D = A \entails{0.504} D
+\]
+
+Three ``reasonable'' inferences combine to give only moderate overall confidence.
+
+\subsection{Comparing to Classical Logic}
+
+In classical logic, if $A \vdash B$, $B \vdash C$, $C \vdash D$, then $A \vdash D$ with no degradation.
+
+This corresponds to the special case where all confidences are $\pone$:
+\[
+A \entails{\pone} B, \quad B \entails{\pone} C, \quad C \entails{\pone} D \quad \Rightarrow \quad A \entails{\pone} D
+\]
+
+Classical logic is the idealized limit where every step is perfectly reliable.
+
+\section{The LEM Expectation Identity}
+
+\begin{theorem}[LEM for Expectations]
+For any $\phi, \psi : \ProbProp(\alpha)$:
+\[
+\E[\phi|\psi] \padd \E[\pnot\phi|\psi] = \pone
+\]
+\end{theorem}
+
+\begin{proof}
+By additivity:
+\[
+\E[\phi \padd (\pone \psub \phi)|\psi] = \E[\phi|\psi] \padd \E[\pone \psub \phi|\psi]
+\]
+Since $\phi(x) \padd (\pone \psub \phi(x)) = \pone$ for all $x$, the LHS equals $\E[\mathbf{1}|\psi] = \pone$.
+\end{proof}
+
+\begin{remark}
+This is not ``LEM holds in expectation.'' It is: expectations of a proposition and its negation always sum to 1. The logical law is a consequence of probability algebra.
+\end{remark}
+
+\section{Negation}
+
+\subsection{Weak Negation}
+
+Weak negation is pointwise complement:
+\[
+(\pnot\phi)(x) = \pone \psub \phi(x)
+\]
+
+\subsection{Strong Negation}
+
+\begin{definition}[Strong Negation]
+A proposition $\phi$ is \emph{strongly negated} if $\E[\phi|\psi] = \pzero$ for all $\psi$.
+\end{definition}
+
+This means: $\phi$ has probability zero under every conditioning.
+
+\begin{theorem}
+If $\phi$ is strongly negated, then $\E[\pnot\phi|\psi] = \pone$ for all $\psi$.
+\end{theorem}
+
+\begin{proof}
+By LEM: $\E[\phi|\psi] \padd \E[\pnot\phi|\psi] = \pone$. Since $\E[\phi|\psi] = \pzero$, we get $\E[\pnot\phi|\psi] = \pone$.
+\end{proof}
+
+\subsection{Strong Negation Propagates}
+
+\begin{theorem}
+If $\phi$ is strongly negated, so is $\phi \pand \psi$ for any $\psi$.
+\end{theorem}
+
+\begin{proof}
+$(\phi \pand \psi)(x) = \phi(x) \pmul \psi(x) \ple \phi(x) \pmul \pone = \phi(x)$.
+By monotonicity: $\E[\phi \pand \psi|\chi] \ple \E[\phi|\chi] = \pzero$.
+\end{proof}
+
+\section{Implication}
+
+\subsection{Definition}
+
+\begin{definition}[Probabilistic Implication]
+$(A \to_p B)(x) := \pone \psub (A(x) \pmul (\pone \psub B(x)))$
+\end{definition}
+
+\subsection{Properties (Classical Case)}
+
+\begin{theorem}[Reflexivity]
+For classical $A$: $(A \to_p A)(x) = \pone$.
+\end{theorem}
+
+\begin{proof}
+If $A(x) = \pzero$: $\pone \psub (\pzero \pmul (\pone \psub \pzero)) = \pone \psub \pzero = \pone$.
+If $A(x) = \pone$: $\pone \psub (\pone \pmul (\pone \psub \pone)) = \pone \psub \pzero = \pone$.
+\end{proof}
+
+\begin{theorem}[Modus Ponens Bound]
+For classical $A, B$: $A(x) \pmul (A \to_p B)(x) \ple B(x)$.
+\end{theorem}
+
+\begin{proof}
+Case analysis on $A(x), B(x) \in \{\pzero, \pone\}$.
+\end{proof}
+
+\begin{remark}
+These are exact equalities only for classical propositions. For general probabilistic propositions, implication has more nuanced behavior.
+\end{remark}
+
+\section{Implementation}
+
+\subsection{Lean 4 Code}
+
+\begin{verbatim}
+axiom CondExp {a : Type} : ProbProp a -> ProbProp a -> Prob
+
+notation "E[" f " | " g "]" => CondExp f g
+
+structure ProbEntails {a : Type} (G f : ProbProp a) (p : Prob) where
+  bound : p <= E[f | G]
+
+notation:25 G " |-[" p "] " f => ProbEntails G f p
+
+theorem axiom_rule {a : Type} (f : ProbProp a) : f |-[1] f := by
+  constructor
+  rw [CondExp.self_norm]
+  exact Prob.le_refl 1
+
+theorem cut_rule {a : Type} (G f y : ProbProp a) (p q : Prob) :
+    (G |-[p] f) -> (f |-[q] y) -> (G |-[p * q] y) := by
+  intro h1 h2
+  constructor
+  have hp : p <= E[f | G] := h1.bound
+  have hq : q <= E[y | f] := h2.bound
+  have hmul : (p * q) <= (E[f | G] * E[y | f]) :=
+    Prob.mul_le_mul p q _ _ hp hq
+  have hchain : (E[f | G] * E[y | f]) <= E[y | G] :=
+    CondExp.chain y f G
+  exact Prob.le_trans (p * q) _ _ hmul hchain
+\end{verbatim}
+
+\subsection{Verification Status}
+
+All proof rules are machine-verified in Lean 4.
+
+\section{Discussion}
+
+\subsection{Why Not Just Use Probability Theory?}
+
+Standard probability theory is built on measure theory, which is built on set theory, which is built on classical logic. Our approach inverts this: conditional expectation is primitive, and classical logic is a derived special case.
+
+The advantage is not that we get ``more probability theory''---it is that we get a different foundation where uncertainty is native.
+
+\subsection{Relation to Fuzzy Logic}
+
+Fuzzy logic also has graded truth values, but uses different operations (typically $\min/\max$ for $\land/\lor$). Our operations come from probability theory (product for conjunction, inclusion-exclusion for disjunction).
+
+\subsection{What Comes Next}
+
+\begin{itemize}
+    \item \textbf{Paper 3}: Natural numbers as distributions
+    \item \textbf{Paper 4}: Existence proofs via distributions (no AC)
+    \item \textbf{Paper 5}: Synthetic construction of $\Prob$
+\end{itemize}
+
+\section{Conclusion}
+
+Probabilistic proof theory extends classical sequent calculus with confidence grades. The key insight is that confidence propagates multiplicatively: each inference step can only decrease overall confidence.
+
+The classical case $p = \pone$ is the idealized limit of perfect reliability. The interesting mathematics happens when $p < \pone$, where we can formally reason about uncertainty.
+
+\bibliographystyle{plain}
+
+\end{document}
