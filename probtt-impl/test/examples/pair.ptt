@@ -1,2 +1,3 @@
 -- Pair construction: weights multiply
-mkPair : A -> A -> A * A = \(a : A). \(b : A). (a, b)
+mkPair : A -> A -> A × A
+mkPair a b = (a, b)

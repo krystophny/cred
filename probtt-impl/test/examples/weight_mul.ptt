@@ -2,22 +2,24 @@
 -- When we apply functions or construct pairs, weights multiply
 
 -- Application: f a : B 〔 w·v 〕 when f : A -> B 〔 w 〕, a : A 〔 v 〕
-compose : (A -> B) -> (B -> C) -> A -> C =
-  \(f : A -> B). \(g : B -> C). \(x : A). g (f x);
+compose : (A -> B) -> (B -> C) -> A -> C
+compose f g x = g (f x)
 
--- Pairs: (a, b) : A * B 〔 w·v 〕 when a : A 〔 w 〕, b : B 〔 v 〕
-swap : A * B -> B * A =
-  \(p : A * B). (snd p, fst p);
+-- Pairs: (a, b) : A × B 〔 w·v 〕 when a : A 〔 w 〕, b : B 〔 v 〕
+swap : A × B -> B × A
+swap p = (snd p, fst p)
 
 -- Sum case: weight of scrutinee multiplies branch weight
-either : (A -> C) -> (B -> C) -> A + B -> C =
-  \(f : A -> C). \(g : B -> C). \(x : A + B).
-    case x of inl a -> f a | inr b -> g b;
+either : (A -> C) -> (B -> C) -> A + B -> C
+either f g x = case x of inl a -> f a | inr b -> g b
 
 -- Projections preserve weight
-proj1 : A * B -> A = \(p : A * B). fst p;
-proj2 : A * B -> B = \(p : A * B). snd p;
+proj1 : A × B -> A
+proj1 p = fst p
+
+proj2 : A × B -> B
+proj2 p = snd p
 
 -- Nested pairs
-nest : A -> B -> C -> (A * B) * C =
-  \(a : A). \(b : B). \(c : C). ((a, b), c)
+nest : A -> B -> C -> (A × B) × C
+nest a b c = ((a, b), c)

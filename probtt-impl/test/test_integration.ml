@@ -1,0 +1,70 @@
+(* Integration tests: run CLI on .ptt files *)
+
+let test name cond =
+  if cond then
+    Printf.printf "PASS: %s\n" name
+  else begin
+    Printf.printf "FAIL: %s\n" name;
+    exit 1
+  end
+
+(* Find probtt-impl directory by looking for dune-project *)
+let find_project_root () =
+  let rec go dir =
+    let candidate = Filename.concat dir "dune-project" in
+    if Sys.file_exists candidate then dir
+    else
+      let parent = Filename.dirname dir in
+      if parent = dir then failwith "Could not find project root"
+      else go parent
+  in
+  go (Sys.getcwd ())
+
+let project_root = find_project_root ()
+
+let run_check path =
+  let full_path = Filename.concat project_root path in
+  (* Use the built executable directly *)
+  let exe = Filename.concat project_root "_build/default/src/main.exe" in
+  let cmd = Printf.sprintf "%s check %s 2>&1" exe full_path in
+  let ic = Unix.open_process_in cmd in
+  let buf = Buffer.create 256 in
+  (try
+    while true do
+      Buffer.add_channel buf ic 1
+    done
+  with End_of_file -> ());
+  let status = Unix.close_process_in ic in
+  let output = Buffer.contents buf in
+  (status, output)
+
+let check_succeeds path =
+  let (status, output) = run_check path in
+  if status <> Unix.WEXITED 0 then
+    Printf.eprintf "FAILED: %s\nOutput: %s\n" path output;
+  status = Unix.WEXITED 0
+
+let check_contains path substr =
+  let (_, output) = run_check path in
+  try
+    let _ = Str.search_forward (Str.regexp_string substr) output 0 in
+    true
+  with Not_found ->
+    Printf.eprintf "MISSING '%s' in output:\n%s\n" substr output;
+    false
+
+let () =
+  (* Example files should type check *)
+  test "identity.ptt type checks" (check_succeeds "test/examples/identity.ptt");
+  test "pair.ptt type checks" (check_succeeds "test/examples/pair.ptt");
+  test "simple.ptt type checks" (check_succeeds "test/examples/simple.ptt");
+  test "weights.ptt type checks" (check_succeeds "test/examples/weights.ptt");
+  test "weakening.ptt type checks" (check_succeeds "test/examples/weakening.ptt");
+  test "weight_mul.ptt type checks" (check_succeeds "test/examples/weight_mul.ptt");
+
+  (* Proof files *)
+  test "sqrt2.ptt proof succeeds" (check_succeeds "test/proofs/sqrt2.ptt");
+  test "sqrt2.ptt shows contradiction" (check_contains "test/proofs/sqrt2.ptt" "CONTRADICTION");
+  test "sqrt2.ptt concludes weight 1" (check_contains "test/proofs/sqrt2.ptt" "1");
+
+  Printf.printf "\nAll integration tests passed!\n"

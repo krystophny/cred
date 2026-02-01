@@ -7,3 +7,13 @@
  (name test_check)
  (modules test_check)
  (libraries probtt.lib))
+
+(test
+ (name test_proof)
+ (modules test_proof)
+ (libraries probtt.lib))
+
+(test
+ (name test_integration)
+ (modules test_integration)
+ (libraries probtt.lib str unix))
