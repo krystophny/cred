@@ -18,6 +18,127 @@ BUT:  Probability → Logic (logic is degenerate probability)
 
 Logic's "paradoxes" (LEM debates, Zorn's lemma, AC, Russell) may be artifacts of forcing continuous structure into discrete {0,1} boxes.
 
+---
+
+## CRITICAL: Meta-Level vs Object-Level Separation
+
+### The Architecture
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│  METALOGIC: Lean's Type Theory                                  │
+│  (Used ONLY to define and verify the probabilistic system)      │
+│  - Dependent types, inductive types, tactics                    │
+│  - This is our SPECIFICATION LANGUAGE                           │
+│  - Classical/intuitionistic - doesn't matter, it's scaffolding  │
+└─────────────────────────────────────────────────────────────────┘
+                              │
+                              │ defines, reasons about
+                              ▼
+┌─────────────────────────────────────────────────────────────────┐
+│  OBJECT SYSTEM: Probabilistic Foundations                       │
+│  (Where actual mathematics happens)                             │
+│  - Probability is primitive                                     │
+│  - NO logical connectives except as derived {0,1} cases         │
+│  - This is what REPLACES classical logic for doing math         │
+└─────────────────────────────────────────────────────────────────┘
+                              │
+                              │ contains as degenerate case
+                              ▼
+┌─────────────────────────────────────────────────────────────────┐
+│  CLASSICAL LOGIC: The {0,1} Boundary                            │
+│  (What we currently use - now just a special case)              │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+### ⚠️ DANGER: Logic Slippage ⚠️
+
+**THE CRITICAL DISCIPLINE**: Lean's logical connectives (∧, ∨, →, ¬, ∀, ∃) must NEVER appear at the object level except when explicitly deriving them as the {0,1} special case.
+
+**BAD** (logic slipping into object level):
+```lean
+-- WRONG: Using Lean's ∧ in probabilistic theorem
+theorem bad_example : P(A) > 0 ∧ P(B) > 0 → P(A ∩ B) > 0 := ...
+```
+
+**GOOD** (clean separation):
+```lean
+-- RIGHT: Everything probabilistic at object level
+theorem good_example : prob_positive A → prob_positive B →
+                       prob_positive (prob_intersect A B) := ...
+
+-- Where prob_positive, prob_intersect are OUR primitives,
+-- not Lean's logical connectives
+```
+
+**Rules to enforce**:
+
+1. **Object-level theorems use ONLY**:
+   - `Prob` type and its operations (+, *, ≤)
+   - `𝔼[·|·]` conditional expectation
+   - `⊢[p]` probabilistic entailment
+   - Derived notions built from these
+
+2. **Lean's logic is ONLY for**:
+   - Defining what the probabilistic primitives ARE
+   - Stating metatheorems ABOUT the probabilistic system
+   - Proof automation internals
+
+3. **Test for slippage**: If you can state a theorem using Lean's Prop, you're probably doing it wrong. Object-level statements should be about `Prob` values.
+
+### Why This Matters
+
+If we accidentally use logical reasoning at the object level:
+- We haven't replaced logic, we've just added probability on top
+- The whole project becomes pointless
+- We inherit all the "paradoxes" we're trying to avoid
+
+The analogy: ZFC defines sets using first-order logic, then does mathematics IN sets without constantly invoking the metalogic. We define probability using type theory, then do mathematics IN probability.
+
+### Self-Hosting (Future)
+
+Eventually, a truly probabilistic proof assistant would have:
+- Probabilistic judgments at the KERNEL level
+- Type checking with confidence bounds
+- No classical/intuitionistic metalogic at all
+
+But that's a much harder problem. For now: clean separation is the discipline.
+
+---
+
+## Why Lean 4 (Not Agda)
+
+### Lean is the Better Choice
+
+| Aspect | Lean 4 | Agda |
+|--------|--------|------|
+| **Tooling** | Excellent (LSP, widgets, profiler) | Good but dated |
+| **Community** | Large, growing (Mathlib) | Smaller, academic |
+| **Industry** | Used at AWS, Microsoft | Mostly academic |
+| **Metaprogramming** | First-class (macros, tactics) | Limited |
+| **Performance** | Compiled, fast | Interpreted, slower |
+| **Documentation** | Extensive, improving | Sparse |
+| **Future** | Active development | Maintenance mode |
+
+### Lean-Specific Advantages for This Project
+
+1. **Custom tactics**: We can write tactics for probabilistic bound propagation
+2. **Axiom mechanism**: Clean way to postulate our primitives
+3. **Notation**: Flexible syntax for `𝔼[·|·]` and `⊢[p]`
+4. **Separation from Mathlib**: Can build independent foundation without importing classical math
+5. **Lake build system**: Easy project management
+
+### Migration Path
+
+Our Agda prototype (`agda/Foundations.agda`) translates directly to Lean:
+- `postulate` → `axiom`
+- `record` → `structure`
+- Syntax is similar enough
+
+**Decision: Use Lean 4 as the primary proof assistant.**
+
+---
+
 ## Key Concepts
 
 ### Negation Spectrum
@@ -193,47 +314,47 @@ Logical propositions
 
 ## Proof Assistant Options
 
-### Option A: Agda with Postulates
+### ✅ CHOSEN: Lean 4 with Custom Axioms
+
+- Use Lean's axiom mechanism for probabilistic primitives
+- Build Mathlib-INDEPENDENT foundation (avoid importing classical logic)
+- Excellent tooling, active community, industry adoption
+- Custom tactics for probabilistic reasoning
+
+**Effort**: Medium
+**Risk**: Must be vigilant about logic slippage from Lean's Prop
+
+### Option B: Agda with Postulates (BACKUP)
 
 - Postulate probabilistic axioms
-- Build theory on top
+- Familiar from metalogics project
 - Use --safe where possible, document postulates
 
 **Effort**: Low
-**Risk**: Postulates might be inconsistent
+**Risk**: Postulates might be inconsistent; weaker tooling
 
-### Option B: Lean 4 with Custom Axioms
-
-- Use Lean's axiom mechanism
-- Build Mathlib-independent foundation
-- Good tooling, active community
-
-**Effort**: Medium
-**Risk**: May fight Mathlib conventions
-
-### Option C: Coq with Custom Logic
+### Option C: Coq with Custom Logic (NOT RECOMMENDED)
 
 - Coq allows alternative logics
-- Could define probabilistic logic as alternate foundation
-- Mature ecosystem
+- But: classical bias in ecosystem, declining community
 
 **Effort**: Medium
-**Risk**: Coq's classical bias may interfere
+**Risk**: Fighting the system
 
-### Option D: Build Custom Prover
+### Option D: Build Custom Prover (FUTURE)
 
 - Full control over foundations
-- Probability primitive from day one
-- Could target novel applications (AI, statistical inference)
+- Probability primitive at kernel level
+- The "self-hosting" vision
 
 **Effort**: High (6+ months for minimal viable)
-**Risk**: Maintenance burden, adoption
+**Risk**: Only pursue after Lean prototype validates the approach
 
-### Option E: Hybrid - DSL + Backend
+### Option E: Hybrid DSL (MAYBE LATER)
 
-- DSL for probabilistic proofs
-- Compiles to Agda/Lean/Coq for verification
-- Best of both worlds?
+- DSL for probabilistic proofs with nicer syntax
+- Compiles to Lean 4 for verification
+- Consider after core theory is stable
 
 **Effort**: Medium-High
 **Risk**: Translation correctness
@@ -253,9 +374,9 @@ Logical propositions
 ### Q2: What proof assistant?
 
 - [ ] Agda (familiar from metalogics project)
-- [ ] Lean 4 (better tooling, growing community)
+- [x] **Lean 4** (better tooling, growing community) ← CHOSEN
 - [ ] Coq (mature, but classical bias)
-- [ ] Custom (full control, high effort)
+- [ ] Custom (full control, high effort) ← future self-hosting goal
 - [ ] Hybrid DSL
 
 ### Q3: How to handle convergence/limits?
@@ -353,3 +474,44 @@ The debate is about whether ¬¬A → A.
 Probabilistically: P(A) > 0 does not imply P(A) = 1.
 
 The debate dissolves because we're not in {0,1}. We have a spectrum.
+
+---
+
+## Checklist: Avoiding Logic Slippage
+
+Before any theorem/definition, ask:
+
+1. **Does this use Lean's Prop?** If yes → probably wrong
+2. **Does this use ∧, ∨, →, ¬?** If yes → must be metatheorem only
+3. **Could this be stated purely in terms of Prob and 𝔼?** If yes → do that
+4. **Is this about the system or in the system?**
+   - ABOUT = metatheorem, Lean logic OK
+   - IN = object-level, only probabilistic primitives
+
+### Examples of Correct Separation
+
+**Metatheorem (ABOUT the system)** - Lean logic OK:
+```lean
+-- "If p ≤ q then the bound transfers" - statement ABOUT our system
+theorem bound_mono : p ≤ q → (Γ ⊢[p] φ) → (Γ ⊢[q] φ) := ...
+```
+
+**Object-level theorem (IN the system)** - NO Lean logic:
+```lean
+-- "Probability of union bounded by sum" - theorem IN our system
+theorem union_bound (A B : ProbProp α) :
+  𝔼[ prob_or A B ∣ ctx ] ≤ₚ 𝔼[ A ∣ ctx ] +ₚ 𝔼[ B ∣ ctx ] := ...
+```
+
+Notice: second theorem uses only `≤ₚ`, `+ₚ`, `𝔼`, `prob_or` - all OUR primitives.
+
+### Red Flags
+
+Watch for these patterns that indicate slippage:
+
+- `∀ x, P x → Q x` at object level (should be probabilistic implication)
+- `∃ x, P x` at object level (should be `𝔼[ indicator_P ∣ ctx ] > 𝟘`)
+- `A ∧ B` at object level (should be `prob_and A B`)
+- `¬ A` at object level (should be `complement A` with `𝔼[A] +ₚ 𝔼[¬A] = 𝟙`)
+
+The discipline is: **if it's not about Prob values, it shouldn't be at object level.**
