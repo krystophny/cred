@@ -15,7 +15,7 @@ Download PDFs from the [latest build artifacts](https://github.com/krystophny/fo
 | 2 | [Probabilistic Proof Theory](papers/paper2-proof-theory/main.tex) | Draft |
 | 3 | [Probabilistic Natural Numbers](papers/paper3-natural-numbers/main.tex) | Draft |
 | 4 | [Zorn's Lemma via Distributions](papers/paper4-zorn-no-choice/main.tex) | Draft |
-| 5 | Synthetic Probability Type Theory | Planned |
+| 5 | [Synthetic Probability Type Theory](papers/paper5-synthetic/main.tex) | Draft |
 | 6 | Markov Categories for Probabilistic Reasoning | Planned |
 
 ## Key Ideas
@@ -50,23 +50,28 @@ Or use the GitHub Actions workflow which builds all papers automatically.
 foundations/
 ├── lean/
 │   ├── Foundations.lean    # Main Lean 4 formalization
+│   ├── Synthetic.lean      # Axiom reduction experiments
 │   ├── lakefile.lean       # Build configuration
 │   └── lean-toolchain      # Lean version (4.14.0)
 ├── papers/
 │   ├── paper1-classical-logic/
 │   ├── paper2-proof-theory/
 │   ├── paper3-natural-numbers/
-│   └── paper4-zorn-no-choice/
+│   ├── paper4-zorn-no-choice/
+│   └── paper5-synthetic/
+│       ├── main.tex        # Paper content
+│       └── reviews.tex     # Peer review log
 └── README.md
 ```
 
 ## Current Status
 
 - **Axioms**: 48 (Prob type, conditional expectation, countable sum, probabilistic Zorn)
-- **Theorems**: 33 (all machine-verified)
+- **Independent axioms**: 43 (5 proven derivable via commutativity, see Paper 5)
+- **Theorems**: 38 (all machine-verified)
 - **Build**: Zero warnings, zero errors
 
-The framework is axiomatized, not constructed. Paper 5 aims to provide a synthetic construction of `Prob` from type-theoretic primitives, which would turn many axioms into theorems.
+The framework is axiomatized, not constructed. Paper 5 analyzes axiom independence, proves finite Zorn without choice, and sketches how infinite Zorn follows from projective limits.
 
 ## Philosophy
 
