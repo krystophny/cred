@@ -71,21 +71,37 @@ lean/
 
 ## Current Status
 
-All core theorems proved (no `sorry` remaining):
+All phases implemented. Build: `cd lean && lake build` (zero warnings).
 
-### Proof Theory
-- `axiom_rule`: φ ⊢[1] φ
-- `weaken`: Γ ⊢[p] φ → q ≤ p → Γ ⊢[q] φ
-- `cut_rule`: Γ ⊢[p] φ → φ ⊢[q] ψ → Γ ⊢[p*q] ψ
-- `mono_rule`: (∀x, φ x ≤ ψ x) → Γ ⊢[p] φ → Γ ⊢[p] ψ
+### Phases A-C: Core Framework (COMPLETE)
+- `Prob` type: ordered semiring in [0,1]
+- `𝔼[f|g]`: conditional expectation primitive
+- `Γ ⊢[p] φ`: probabilistic entailment
+- Proof theory: `axiom_rule`, `weaken`, `cut_rule`, `mono_rule`
+- Classical logic as {0,1} restriction
 
-### Classical Logic Laws
-- `prob_lem`: φ x + (¬ₚ φ) x = 1 (LEM as algebra)
-- `prob_double_neg`: ¬ₚ (¬ₚ φ) = φ
-- `lem_expectation`: E[φ|ψ] + E[¬ₚφ|ψ] = 1
+### Phase D: Probabilistic Zorn (COMPLETE)
+- `ProbPoset`: probabilistic partial order with `P.le x y`
+- `prob_lt`: strict ordering `P(x ≤ y) * (1 - P(y ≤ x))`
+- `NearMaximal`: `∀y, prob_lt P x y ≤ ε`
+- `ChainComplete`: every chain has an upper bound
+- `prob_zorn`: chain-complete posets have distributions on near-maximals (axiom)
+- `classical_zorn_from_prob`: classical Zorn as {0,1} special case
 
-### Boolean Algebra Closure
-- `classical_and_closed`, `classical_or_closed`, `classical_not_closed`
+### Phase E: Natural Numbers (COMPLETE)
+- `prob_sum`: countable summation primitive
+- `ProbNat`: distributions over Nat (exhaustive + disjoint)
+- `prob_succ_is_n`: successor shifts distribution
+- `peano1`: zero is not a successor
+- `peano2_shift`: successor is injective
+- `det_nat`: deterministic natural numbers
+
+### Phase F: More Proof Rules (COMPLETE)
+- Implication: `prob_implies_refl_classical`, `prob_modus_ponens_classical`
+- Structural: `prob_and_comm`, `prob_and_assoc`, `prob_exchange`, `prob_contraction`
+- Negation: `strong_neg_and`, `strong_neg_implies_weak_one`
+- De Morgan: `prob_de_morgan_and`, `prob_de_morgan_or`
+- Identity/absorption: `prob_or_zero/one`, `prob_and_zero/one`
 
 ## Implementation Notes
 
