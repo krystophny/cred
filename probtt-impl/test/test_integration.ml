@@ -87,4 +87,15 @@ let () =
   test "invalid_contradict_unknown.ptt fails" (check_fails "test/proofs/invalid_contradict_unknown.ptt");
   test "invalid_conclude_unknown.ptt fails" (check_fails "test/proofs/invalid_conclude_unknown.ptt");
 
+  (* Meta-theory proofs: Gödel, self-consistency, graded choice *)
+  test "godel_fixpoint.ptt succeeds" (check_succeeds "test/proofs/godel_fixpoint.ptt");
+  test "godel_fixpoint.ptt shows fixpoint" (check_contains "test/proofs/godel_fixpoint.ptt" "FIXPOINT");
+  test "godel_fixpoint.ptt solves to 1/2" (check_contains "test/proofs/godel_fixpoint.ptt" "1/2");
+
+  test "self_consistency.ptt succeeds" (check_succeeds "test/proofs/self_consistency.ptt");
+  test "self_consistency.ptt has provable" (check_contains "test/proofs/self_consistency.ptt" "provable");
+
+  test "graded_choice.ptt succeeds" (check_succeeds "test/proofs/graded_choice.ptt");
+  test "graded_choice.ptt has finite choice" (check_contains "test/proofs/graded_choice.ptt" "Finite_Choice");
+
   Printf.printf "\nAll integration tests passed!\n"

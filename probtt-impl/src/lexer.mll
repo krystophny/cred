@@ -36,6 +36,10 @@ let () = List.iter (fun (k, v) -> Hashtbl.add keyword_table k v) [
   "by", BY;
   "contradict", CONTRADICT;
   "conclude", CONCLUDE;
+  (* Meta-theory keywords *)
+  "provable", PROVABLE;
+  "fixpoint", FIXPOINT;
+  "encode", ENCODE;
 ]
 
 let lookup_ident s =
@@ -134,6 +138,7 @@ rule token = parse
   | "+"      { PLUS }
   | "*"      { TIMES }
   | "="      { EQ }
+  | "/"      { SLASH }
   | ":"      { COLON }
   | ";"      { SEMI }
   | ","      { COMMA }

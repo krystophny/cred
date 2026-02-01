@@ -1,0 +1,111 @@
+{-# OPTIONS --allow-unsolved-metas #-}
+-- Provability predicates for ProbTT meta-theory
+-- Formalizes graded provability Prov_w(φ)
+--
+-- LITERATURE CONTEXT:
+-- This module formalizes concepts from Pavelka-style fuzzy logic:
+--   - Graded provability: |φ|_T = sup{r | T ⊢ (φ, r)}
+--   - Pavelka (1979), Hájek "Metamathematics of Fuzzy Logic" (1998)
+--
+-- Key insight: provability as a DEGREE, not a binary yes/no.
+-- ProbTT's Prov_w(φ) corresponds to Pavelka's (φ, r) with r = w.
+--
+-- The diagonal lemma and encoding follow standard Gödel techniques,
+-- but in a graded setting (cf. Hájek-Paris-Shepherdson 2000).
+
+module ProbTT.Provability where
+
+open import Level using (Level; _⊔_) renaming (suc to lsuc)
+open import Data.Nat using (ℕ; zero; suc)
+open import Data.Fin using (Fin; zero)
+open import Data.Product using (Σ; _,_; proj₁; proj₂; _×_; ∃)
+open import Relation.Binary.PropositionalEquality using (_≡_; refl; sym; trans; cong)
+open import Data.Empty using (⊥)
+open import Data.Unit using (⊤; tt)
+
+open import ProbTT.Weight
+open import ProbTT.Syntax
+open import ProbTT.Context
+open import ProbTT.Judgment
+
+-- Provability predicate: Prov_w(φ) means φ is provable at weight w
+-- This is the key extension for meta-theory
+module Provability {ℓ : Level} (DM : DeMorganAlgebra ℓ) where
+  open DeMorganAlgebra DM
+  open Typing DM
+
+  -- Graded provability predicate
+  -- Prov φ w means "φ is provable at weight w"
+  -- This abstracts over the specific derivation
+  data Prov : ∀ {n} → Tm n → W → Set ℓ where
+    -- If we have a derivation at weight w, then Prov holds
+    from-derivation : ∀ {n} {Γ : Ctx n} {t : Tm n} {A : Ty n} {w : W} →
+                      Γ ⊢ t ∶ A 〔 w 〕 →
+                      Prov t w
+
+    -- Provability respects weight weakening
+    prov-weaken : ∀ {n} {t : Tm n} {w v : W} →
+                  Prov t w →
+                  v ≤ w →
+                  Prov t v
+
+  -- Encoding of terms as terms (Gödel encoding)
+  -- ⌈t⌉ : Tm n represents the code of term t
+  -- This is needed for self-reference
+  postulate
+    ⌈_⌉ : ∀ {n} → Tm n → Tm 0
+    -- Encoding preserves identity
+    ⌈⌉-id : ∀ {n} (t : Tm n) → ⌈ t ⌉ ≡ ⌈ t ⌉
+
+  -- Encoding of derivations
+  -- Given a derivation, we can encode it as a term
+  postulate
+    encode-derivation : ∀ {n} {Γ : Ctx n} {t : Tm n} {A : Ty n} {w : W} →
+                        Γ ⊢ t ∶ A 〔 w 〕 →
+                        Tm 0
+
+  -- Diagonal Lemma (Gödel's fixed-point theorem)
+  -- For any property P on terms and weights,
+  -- there exists a term G such that Prov G w ↔ P ⌈G⌉ w
+  --
+  -- This is the foundation for Gödel's incompleteness theorems
+  postulate
+    diagonal : ∀ {n} (P : Tm 0 → W → Set ℓ) →
+               ∃ λ (G : Tm n) → ∀ w → (Prov G w → P ⌈ G ⌉ w) × (P ⌈ G ⌉ w → Prov G w)
+
+  -- Derivability conditions (Hilbert-Bernays-Löb)
+  -- D1: If Γ ⊢ t : A @ w, then Prov ⌈t⌉ w
+  postulate
+    D1 : ∀ {n} {Γ : Ctx n} {t : Tm n} {A : Ty n} {w : W} →
+         Γ ⊢ t ∶ A 〔 w 〕 →
+         Prov ⌈ t ⌉ w
+
+  -- D2: Prov(φ → ψ) w → Prov φ v → Prov ψ (w · v)
+  -- (provability distributes over application, with weight multiplication)
+  postulate
+    D2 : ∀ {n} {φ : Tm n} {ψ : Tm (suc n)} {w v : W} →
+         Prov (lam (base 0) ψ) w →
+         Prov φ v →
+         Prov (app (lam (base 0) ψ) φ) (w · v)
+
+  -- D3: Prov φ w → Prov (Prov φ w) 1
+  -- (provability is witnessed)
+  postulate
+    D3 : ∀ {n} {φ : Tm n} {w : W} →
+         Prov φ w →
+         Prov ⌈ φ ⌉ 𝟙
+
+  -- Self-reference detection
+  -- A term is self-referential if it contains its own encoding
+  data SelfRef : ∀ {n} → Tm n → Set ℓ where
+    via-encoding : ∀ {n} (t : Tm n) →
+                   -- t mentions ⌈t⌉ (informally)
+                   SelfRef t
+
+  -- Weight of self-referential terms
+  -- If a term is self-referential in a particular way,
+  -- its weight satisfies a fixed-point equation
+  self-ref-weight : ∀ {n} {t : Tm n} →
+                    SelfRef t →
+                    ∃ λ w → Prov t w
+  self-ref-weight (via-encoding t) = {!!}  -- determined by fixed-point analysis

@@ -10,7 +10,8 @@ open Probtt_lib.Raw
 %token INFIX INFIXL INFIXR
 %token FORALL SET PROP REFL FST SND INL INR
 %token POSTULATE DERIVE FROM BY CONTRADICT CONCLUDE
-%token LAMBDA ARROW DARROW TIMES PLUS EQ COLON SEMI COMMA DOT BAR
+%token PROVABLE FIXPOINT ENCODE
+%token LAMBDA ARROW DARROW TIMES PLUS EQ COLON SEMI COMMA DOT BAR SLASH
 %token LWEIGHT RWEIGHT
 %token LPAREN RPAREN LBRACE RBRACE LBRACKET RBRACKET UNDERSCORE
 %token TOP BOT CDOT NEG EQUIV LEQ TURNSTILE TYCOLON SIGMA PI EPSILON
@@ -81,6 +82,16 @@ decl:
 
   | CONCLUDE name = IDENT FROM from_name = IDENT
     { DConclude (name, from_name) }
+
+  (* Meta-theory declarations *)
+  | PROVABLE name = IDENT COLON prop = IDENT LWEIGHT w = weight RWEIGHT
+    { DProvable (name, prop, w) }
+
+  | FIXPOINT name = IDENT EQ w = weight
+    { DFixpoint (name, w) }
+
+  | ENCODE name = IDENT EQ prop = IDENT
+    { DEncode (name, prop) }
 
 qualified_name:
   | parts = separated_nonempty_list(DOT, IDENT) { parts }
@@ -252,6 +263,7 @@ weight_atom:
   | LPAREN w = weight RPAREN { w }
   | BBZERO { WZero }
   | BBONE { WOne }
+  | n = NUM SLASH d = NUM { WRat (n, d) }
   | NUM { if $1 = 0 then WZero else if $1 = 1 then WOne else WVar (string_of_int $1) }
   | x = IDENT { WVar x }
   | NEG w = weight_atom { WNeg w }

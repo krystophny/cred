@@ -174,6 +174,80 @@ Classical logic has only the endpoints. ProbTT has the entire spectrum.
 
 ProbTT is MLTT with weights. MLTT is ProbTT restricted to W = {0,1}.
 
+## Prior Art and Literature Context
+
+### What Already Exists
+
+**1. Pavelka-style Fuzzy Logic (Graded Provability)**
+
+Pavelka (1979) and Hájek (1998) developed logics where provability has degrees:
+- Degree of provability: `|φ|_T = sup{r | T ⊢ (φ, r)}`
+- "True = provable to any degree below 1" is standard
+- ProbTT's `Γ ⊢ A @ w` is very close to Pavelka's graded formulas `(φ, r)`
+
+Key reference: Hájek, *Metamathematics of Fuzzy Logic* (1998)
+
+**2. Self-Reference Fixed Points (w = ¬w → w = 1/2)**
+
+The liar paradox in fuzzy logic yields fixed points at intermediate values:
+- Hájek, Paris, Shepherdson, "The Liar Paradox and Fuzzy Logic" (JSL 2000)
+- Shows how 1/2 arises as stable value under self-referential evaluation
+- ProbTT's Gödel fixed point is in this tradition
+
+**3. Logics of Formal Inconsistency (LFIs)**
+
+da Costa's C-systems and LFIs have object-level consistency operators:
+- `◦A` means "A is consistent"
+- "Gentle explosion": from A, ¬A, and ◦A derive anything
+- Without ◦A, contradiction doesn't explode
+- ProbTT gates explosion by weight instead of a special connective
+
+**4. Paraconsistent Fuzzy Logics**
+
+Recent work (2024-2026) on degree-preserving Gödel logics with involutive negation:
+- Graded non-explosion
+- Careful study of negation/explosion behavior
+- Close to ProbTT's "graded ex falso"
+
+### What's New in ProbTT
+
+The existing literature provides:
+- ✓ Graded provability degrees
+- ✓ Self-reference fixed points at 1/2
+- ✓ Graded consistency notions
+- ✓ Non-explosive contradiction handling
+
+ProbTT's **novel contributions**:
+
+1. **Dependent type theory packaging**: Π/Σ/Id interact with weights as first-class structure
+2. **Weights primitive, MLTT as limit**: Not "MLTT + grades" but "grades → MLTT"
+3. **Conditioning replaces implication**: No residuated implication, just multiplicative chain rule
+4. **De Morgan algebra, not t-norm**: Minimal structure (just · and ¬, no +)
+
+### Key Citations
+
+| Topic | Primary Reference |
+|-------|-------------------|
+| Graded provability | Hájek 1998, Pavelka 1979 |
+| Self-reference/liar | Hájek-Paris-Shepherdson 2000 |
+| LFIs/paraconsistency | da Costa 1974, Carnielli-Coniglio 2016 |
+| Degree-preserving logics | Recent work 2024-2026 |
+| Graded type theory | Orchard et al. (Granule) |
+
+### Positioning Summary
+
+```
+Fuzzy Logic (Pavelka/Hájek)     ProbTT             Graded Types (Granule)
+         ↓                         ↓                        ↓
+   Graded provability         Weights as           Resource-tracking
+   + truth degrees            foundation           on MLTT
+         ↓                         ↓                        ↓
+   Standard implication       Conditioning         Semiring grades
+   (residuum)                 (multiplicative)     (needs +)
+```
+
+ProbTT takes the graded provability insights from fuzzy logic and rebuilds dependent type theory from scratch, with conditioning (not implication) as the fundamental connective.
+
 ## File Structure
 
 ```

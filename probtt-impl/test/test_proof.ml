@@ -72,4 +72,59 @@ let () =
     | Error _ -> false
   );
 
+  (* Provability predicate *)
+  test "provable declaration works" (
+    let decls = [
+      Proof.Provable ("p", "P", w)
+    ] in
+    match Proof.check_proof decls with
+    | Ok state ->
+        Hashtbl.mem state.provables "p"
+    | Error _ -> false
+  );
+
+  (* Fixpoint resolution: w = ¬w → w = 1/2 *)
+  test "fixpoint w = ¬w resolves to 1/2" (
+    let godel_w = Weight.Neg (Weight.Var "godel_w") in
+    let decls = [
+      Proof.Fixpoint ("godel_w", godel_w)
+    ] in
+    match Proof.check_proof decls with
+    | Ok state ->
+        (match Hashtbl.find_opt state.fixpoints "godel_w" with
+         | Some r -> Weight.rat_equal r Weight.rat_half
+         | None -> false)
+    | Error _ -> false
+  );
+
+  (* Encoding declaration *)
+  test "encode declaration works" (
+    let decls = [
+      Proof.Encode ("G", "Unprovable_G")
+    ] in
+    match Proof.check_proof decls with
+    | Ok state ->
+        Hashtbl.mem state.encodings "G"
+    | Error _ -> false
+  );
+
+  (* Combined proof with fixpoint *)
+  test "godel proof with fixpoint" (
+    let w = Weight.var "w" in
+    let decls = [
+      Proof.Encode ("G", "Unprov_G");
+      Proof.Postulate ("g", "G", w);
+      Proof.Derive ("g_claims", "Prov_G_zero", w, Proof.From ("g", "self_reference"));
+      Proof.Fixpoint ("godel_w", Weight.Neg (Weight.Var "godel_w"));
+      Proof.Provable ("godel_provability", "G", Weight.Var "1/2")
+    ] in
+    match Proof.check_proof decls with
+    | Ok state ->
+        (* Verify fixpoint was solved to 1/2 *)
+        (match Hashtbl.find_opt state.fixpoints "godel_w" with
+         | Some r -> Weight.rat_equal r Weight.rat_half
+         | None -> false)
+    | Error _ -> false
+  );
+
   Printf.printf "\nAll proof checker tests passed!\n"

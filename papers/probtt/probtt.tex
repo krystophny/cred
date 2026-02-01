@@ -495,37 +495,180 @@ In ProbTT:
 \textbf{One-liner}: Costs measure \emph{computation performed}; weights measure \emph{truth surviving composition}.
 
 %=============================================================================
-\section{Related Structures}
+\section{Related Work: A Unified View}
 %=============================================================================
 
-\subsection{The Weight Algebra}
+ProbTT synthesizes ideas from several traditions. We review each and explain how ProbTT unifies them.
 
-Our weight algebra is a \textbf{De Morgan algebra}:
+\subsection{Pavelka-Style Fuzzy Logic}
+
+Pavelka \citep{pavelka1979fuzzy} introduced \emph{graded provability}: instead of asking ``is $\varphi$ provable?'', one asks ``to what degree is $\varphi$ provable?''
+
+\begin{definition}[Pavelka Provability Degree]
+\[
+|\varphi|_T := \sup\{r \in [0,1] \mid T \vdash (\varphi, r)\}
+\]
+\end{definition}
+
+Hájek \citep{hajek1998metamathematics} systematized this in his \emph{Metamathematics of Fuzzy Logic}, proving completeness theorems equating provability degrees with truth degrees in appropriate models.
+
+\textbf{What Pavelka/Hájek provide}:
 \begin{itemize}
-    \item Multiplication: $w \cdot v$ (conjunction)
-    \item Complement: $\negw w$ (negation)
-    \item De Morgan dual: $w \vee v = \negw(\negw w \cdot \negw v)$ (disjunction)
+    \item Graded provability as supremum
+    \item ``Arbitrarily close to true'' formalized
+    \item Completeness: $|\varphi|_T = \inf_{\mathcal{M} \models T} v_\mathcal{M}(\varphi)$
 \end{itemize}
 
-When $\W = {[0,1]}$ with $\negw w = 1 - w$, multiplication is the product and disjunction becomes $w + v - wv$.
+\textbf{What ProbTT adds}:
+\begin{itemize}
+    \item Dependent types ($\Pi$, $\Sigma$, $\mathsf{Id}$)
+    \item Weights on \emph{judgments}, not propositions
+    \item Conditioning as primitive (not residuated implication)
+\end{itemize}
 
-\subsection{What ProbTT Adds}
+\subsection{Self-Reference in Fuzzy Logic}
 
-Beyond the algebra:
-\begin{enumerate}
-    \item \textbf{Type theory}: $\Pi$, $\Sigma$, $\mathsf{Id}$, universes
-    \item \textbf{Weighted judgments}: $\Gamma \vdash a : A \at{w}$
-    \item \textbf{Conditioning}: The chain rule as primitive
-    \item \textbf{MLTT as limit}: The $\{\zero, \one\}$ case
-\end{enumerate}
+Hájek, Paris, and Shepherdson \citep{hajek2000liar} analyzed the liar paradox in fuzzy logic:
 
-\subsection{Key Distinction}
+\begin{theorem}[Hájek-Paris-Shepherdson]
+In Łukasiewicz logic with a truth predicate $T$, the liar sentence $\lambda$ satisfying $\lambda \leftrightarrow \neg T(\ulcorner \lambda \urcorner)$ has truth value $\frac{1}{2}$.
+\end{theorem}
 
-Pure De Morgan algebras have no notion of \textbf{conditioning}. We add it via the chain rule:
+\textbf{The key insight}: the equation $v = 1 - v$ has solution $v = \frac{1}{2}$. Self-referential paradoxes become fixed points rather than contradictions.
+
+\textbf{ProbTT's version}: The G\"odel sentence $G \leftrightarrow \neg\mathsf{Prov}_\one(G)$ has weight $\frac{1}{2}$. This is the \emph{same} fixed-point phenomenon, but for provability rather than truth.
+
+\subsection{Logics of Formal Inconsistency (LFIs)}
+
+Da Costa \citep{dacosta1974paraconsistent} and Carnielli-Coniglio \citep{carnielli2016paraconsistent} developed logics where contradiction doesn't explode:
+
+\begin{definition}[Gentle Explosion]
 \[
-P(A, B) = P(A \mid B) \cdot P(B)
+A, \neg A, \circ A \vdash B \quad \text{but} \quad A, \neg A \not\vdash B
 \]
-This is what distinguishes ProbTT from purely algebraic approaches.
+where $\circ A$ means ``$A$ is consistent.''
+\end{definition}
+
+LFIs use an object-level consistency operator to gate explosion.
+
+\textbf{ProbTT's version}: Explosion is gated by \emph{weight}. From $a : A \at{w}$ and $\neg a : \neg A \at{v}$, we don't derive arbitrary $B \at{\one}$. Instead, the weights constrain: the contradiction forces $w \cdot v \leq \epsilon$ for some bound $\epsilon$.
+
+\begin{center}
+\begin{tabular}{l|l|l}
+& \textbf{LFIs} & \textbf{ProbTT} \\
+\hline
+Explosion gate & Consistency operator $\circ$ & Weight $< \one$ \\
+Formal device & Unary connective & Graded judgment \\
+Gradation & Binary (consistent/not) & Continuous $[0,1]$ \\
+\end{tabular}
+\end{center}
+
+\subsection{T-Norm Fuzzy Logics}
+
+Most fuzzy logics use \emph{t-norms} for conjunction \citep{klement2000triangular}:
+
+\begin{definition}[T-norm]
+A t-norm $* : [0,1]^2 \to [0,1]$ satisfies:
+\begin{enumerate}
+    \item $x * 1 = x$ (identity)
+    \item $x * y = y * x$ (commutativity)
+    \item $(x * y) * z = x * (y * z)$ (associativity)
+    \item $x \leq y \Rightarrow x * z \leq y * z$ (monotonicity)
+\end{enumerate}
+\end{definition}
+
+Common t-norms: product ($x \cdot y$), minimum ($\min(x,y)$), Łukasiewicz ($\max(0, x+y-1)$).
+
+\textbf{ProbTT uses product}: $w \cdot v$ is ordinary multiplication. This matches probabilistic conjunction (independent events) and gives the chain rule.
+
+\textbf{Key difference}: Standard fuzzy logics include a \emph{residuum} (implication) defined by:
+\[
+x \to y := \sup\{z \mid x * z \leq y\}
+\]
+
+ProbTT \emph{rejects} this implication in favor of conditioning. The residuum has material implication paradoxes; conditioning doesn't.
+
+\subsection{Graded Type Theory (Granule)}
+
+Orchard et al. \citep{orchard2019quantitative} and Atkey \citep{atkey2018syntax} developed graded type systems for resource tracking:
+
+\begin{center}
+\begin{tabular}{l|l|l}
+& \textbf{Granule/QTT} & \textbf{ProbTT} \\
+\hline
+Algebraic structure & Semiring $(0,1,+,\cdot)$ & De Morgan $(\zero,\one,\cdot,\negw)$ \\
+Addition & Primitive (costs add) & Derived (De Morgan) \\
+Interpretation & Resource usage & Inhabitation certainty \\
+Philosophy & MLTT + grades & Grades $\to$ MLTT \\
+\end{tabular}
+\end{center}
+
+\textbf{The key distinction}: Granule asks ``how much resource does this use?''; ProbTT asks ``how certain is this type inhabited?''
+
+In Granule, $f : A \to B @ 2$ means ``$f$ uses 2 units.'' Costs add at branches.
+
+In ProbTT, $f : A \to B \at{0.9}$ means ``$f$ produces $B$ with 90\% certainty.'' Weights multiply in composition.
+
+\subsection{De Morgan Algebras}
+
+Our weight algebra is a \emph{De Morgan algebra} \citep{kalman1958lattices}:
+
+\begin{definition}[De Morgan Algebra]
+$(L, \land, \lor, \neg, 0, 1)$ with:
+\begin{itemize}
+    \item $(L, \land, \lor, 0, 1)$ is a bounded distributive lattice
+    \item $\neg\neg x = x$ (involution)
+    \item $\neg(x \land y) = \neg x \lor \neg y$ (De Morgan)
+\end{itemize}
+\end{definition}
+
+ProbTT uses a \emph{product De Morgan algebra}: conjunction is multiplication, disjunction derived via De Morgan. When $L = [0,1]$ with $\neg w = 1-w$:
+\begin{align}
+w \land v &= w \cdot v \\
+w \lor v &= \negw(\negw w \cdot \negw v) = w + v - wv
+\end{align}
+
+\subsection{Markov Categories}
+
+Fritz \citep{fritz2020synthetic} developed Markov categories for probabilistic reasoning:
+
+\begin{definition}[Markov Category]
+A symmetric monoidal category with:
+\begin{itemize}
+    \item Copy: $\Delta_A : A \to A \otimes A$
+    \item Delete: $!_A : A \to I$
+    \item Naturality conditions for stochastic maps
+\end{itemize}
+\end{definition}
+
+ProbTT's categorical semantics is a \emph{weighted Markov category}: morphisms carry weights, composition multiplies weights.
+
+\subsection{Synthesis: What ProbTT Unifies}
+
+\begin{center}
+\begin{tabular}{l|l}
+\textbf{From} & \textbf{ProbTT takes} \\
+\hline
+Pavelka/Hájek & Graded provability \\
+Hájek-Paris-Shepherdson & Self-reference $\to$ fixed point at $\frac{1}{2}$ \\
+LFIs & Non-explosive contradiction \\
+T-norm logics & Product conjunction \\
+Granule/QTT & Dependent types + grades \\
+De Morgan algebras & Minimal algebraic structure \\
+Markov categories & Conditioning semantics \\
+\end{tabular}
+\end{center}
+
+\textbf{What's new}: The combination---dependent type theory with conditioning (not implication), where MLTT emerges as the $\{\zero,\one\}$ limit.
+
+\subsection{What ProbTT Rejects}
+
+\begin{enumerate}
+    \item \textbf{Implication}: No $A \to B := \negw A \lor B$. Use conditioning instead.
+    \item \textbf{Addition}: No primitive $+$. Disjunction derived via De Morgan.
+    \item \textbf{Division}: No $P(A|B) = P(A,B)/P(B)$. Use chain rule multiplicatively.
+    \item \textbf{MLTT as foundation}: MLTT is the $\{\zero,\one\}$ \emph{limit}, not the starting point.
+\end{enumerate}
 
 %=============================================================================
 \section{Categorical Semantics}
@@ -564,45 +707,242 @@ When $\W = {[0,1]}$ with copy $\Delta : A \to A \times A$ and delete $! : A \to 
 \textbf{Novelty}: De Morgan algebra + type theory + conditioning
 
 %=============================================================================
-\section{Remark on Incompleteness}
+\section{Graded Incompleteness}
 %=============================================================================
 
-G\"odel's incompleteness theorems do not depend on classical logic \citep{sep-goedel-incompleteness}. They apply to intuitionistic arithmetic and constructive metamathematics \citep{mccarty1991incompleteness}, requiring only: (1) effective syntax allowing proofs to be encoded as data, (2) sufficient arithmetic to define a provability predicate $\mathsf{Prov}(x)$, and (3) the diagonal lemma, which is purely syntactic.
+G\"odel's incompleteness theorems have a natural formulation in ProbTT. Rather than forcing undecidability, self-referential sentences attain determinate intermediate weights.
 
-For ProbTT with $\W = \{\zero, \one\}$, G\"odel applies exactly as it does to MLTT. The system cannot prove its own consistency at weight $\one$.
+\subsection{Graded Provability Predicate}
 
-The case $\W = [0,1]$ raises subtler questions that connect to existing work on graded provability. In Pavelka-style fuzzy logics \citep{pavelka1979fuzzy, hajek1998metamathematics}, one asks not merely ``is $\varphi$ provable?'' but ``to what degree is $\varphi$ provable?'' This tradition studies conditions under which provability degrees coincide with truth degrees---precisely the question relevant to ProbTT.
+\begin{definition}[Graded Provability]
+For a theory $T$ and proposition $\varphi$, define:
+\[
+\mathsf{Prov}_w(\ulcorner \varphi \urcorner) :\equiv \text{there exists a derivation of } \varphi \text{ at weight } w
+\]
+The \emph{provability degree} is:
+\[
+|\varphi|_T := \sup\{w \mid T \vdash \varphi \at{w}\}
+\]
+\end{definition}
 
-A key distinction: in ProbTT, weight attaches to \emph{judgments}, not to propositions. The judgment $\Gamma \vdash t : A \at{w}$ says that $t$ inhabits $A$ with weight $w$. This differs from many-valued logics where propositions carry truth values directly, though the relationship deserves investigation.
+This follows Pavelka \citep{pavelka1979fuzzy} and Hájek \citep{hajek1998metamathematics}, who developed graded provability for fuzzy logics.
 
-Consider what a graded provability predicate might mean:
+\subsection{The Diagonal Lemma}
+
+The diagonal lemma is purely syntactic and holds for any sufficiently expressive language:
+
+\begin{lemma}[Diagonal Lemma]
+For any predicate $P(x)$, there exists a sentence $G$ such that:
+\[
+T \vdash G \leftrightarrow P(\ulcorner G \urcorner)
+\]
+\end{lemma}
+
+In ProbTT, this becomes: for any weight-valued predicate $P$, there exists $G$ such that the weight of $G$ equals $P(\ulcorner G \urcorner)$.
+
+\subsection{The G\"odel Sentence in ProbTT}
+
+\begin{definition}[G\"odel Sentence]
+Let $G$ be the sentence asserting ``$G$ is not provable at weight $\one$'':
+\[
+G \leftrightarrow \neg \mathsf{Prov}_\one(\ulcorner G \urcorner)
+\]
+\end{definition}
+
+\begin{theorem}[Graded Incompleteness]
+If $G$ has weight $w$ in ProbTT, then $w$ satisfies $w = \negw w$, hence $w = \frac{1}{2}$.
+\end{theorem}
+
+\begin{proof}
+By the definition of $G$: if $G$ has weight $w$, then $G$'s content (that $G$ is not provable at weight $\one$) should also have weight $w$. But $G$'s claim is essentially the negation of provability. In the fixed-point analysis:
 \begin{itemize}
-    \item $\mathsf{Prov}_\one(\ulcorner \varphi \urcorner)$: there exists a derivation of $\varphi$ at weight $\one$
-    \item $\mathsf{maxwt}(\ulcorner \varphi \urcorner) = w$: the supremum of weights at which $\varphi$ is derivable
+    \item If $w = \one$, then $G$ asserts $\neg\mathsf{Prov}_\one(G)$, but $G$ itself is provable at $\one$---contradiction.
+    \item If $w = \zero$, then $\neg G$ has weight $\one$, meaning $G$ is provable at $\one$---but we assumed $w = \zero$.
+\end{itemize}
+The consistent resolution: $w = \negw w$. With $\negw w = 1 - w$:
+\[
+w = 1 - w \quad \Rightarrow \quad w = \frac{1}{2}
+\]
+\end{proof}
+
+\begin{remark}[Comparison with Classical Incompleteness]
+\begin{center}
+\begin{tabular}{l|l|l}
+& \textbf{Classical} & \textbf{ProbTT} \\
+\hline
+$G$'s status & Undecidable & Weight $\frac{1}{2}$ \\
+$w = \negw w$ in $\{\zero, \one\}$ & No solution & N/A \\
+$w = \negw w$ in $[0,1]$ & N/A & $w = \frac{1}{2}$ \\
+Information & Binary gap & Quantified uncertainty \\
+\end{tabular}
+\end{center}
+\end{remark}
+
+The key insight: classical logic's restriction to $\{\zero, \one\}$ forces $w = \negw w$ to have no solution, manifesting as undecidability. ProbTT's continuous weights allow the fixed point to exist at $\frac{1}{2}$.
+
+\subsection{Literature Context}
+
+The fixed point $w = \negw w \Rightarrow w = \frac{1}{2}$ is well-studied in fuzzy logic:
+
+\begin{itemize}
+    \item Hájek, Paris, Shepherdson, ``The Liar Paradox and Fuzzy Logic'' (JSL 2000) \citep{hajek2000liar}
+    \item Restall on Łukasiewicz logic and self-reference
 \end{itemize}
 
-The first is sharp, and G\"odel applies directly. The second opens new territory explored in paraconsistent logic \citep{sep-logic-paraconsistent, priest2006doubt}: once ``consistency'' and ``negation'' are weakened, incompleteness claims must be reformulated. The da Costa tradition \citep{dacosta1974paraconsistent} shows that weakening explosion changes the shape but not the existence of limitative results.
+ProbTT's contribution is embedding this in dependent type theory with graded judgments.
 
-If we interpret weights semantically as truth degrees, the G\"odel fixed-point equation $G \leftrightarrow \neg\mathsf{Prov}(\ulcorner G \urcorner)$ transforms. With $\neg w = 1 - w$ and assuming $v(G) \approx v(\mathsf{Prov}(\ulcorner G \urcorner))$:
+%=============================================================================
+\section{Graded Self-Consistency}
+%=============================================================================
+
+G\"odel's Second Incompleteness Theorem states that a consistent theory extending PA cannot prove its own consistency. ProbTT offers a graded alternative.
+
+\subsection{The Classical Obstacle}
+
+\begin{theorem}[G\"odel's Second, Classical]
+If $T \supseteq PA$ and $T$ is consistent, then $T \not\vdash \mathsf{Con}(T)$.
+\end{theorem}
+
+Here $\mathsf{Con}(T) := \neg\mathsf{Prov}_T(\ulcorner \bot \urcorner)$.
+
+\subsection{Graded Consistency}
+
+\begin{definition}[Graded Consistency]
 \[
-v(G) = 1 - v(G) \quad \Rightarrow \quad v(G) = \tfrac{1}{2}
+\mathsf{Con}_w(T) :\equiv \text{``$\bot$ is not provable at weight $\one$''} \at{w}
 \]
-The sentence attains a fixed intermediate value rather than forcing undecidability. However, this interpretation conflates the weight on derivations with truth values on propositions---a conflation that requires the kind of careful justification developed for Pavelka logics.
+\end{definition}
 
-We conjecture that the graded structure of ProbTT does not eliminate incompleteness but \emph{attenuates} it: where classical systems face sharp undecidability, ProbTT may express bounded confidence in self-referential statements. Making this precise requires developing the metatheory of ProbTT along lines analogous to the metamathematics of fuzzy logic \citep{hajek1998metamathematics}.
+\begin{theorem}[Graded Second Incompleteness]
+ProbTT can prove $\mathsf{Con}_w(\text{ProbTT})$ for some $w < \one$, but not for $w = \one$.
+\end{theorem}
+
+\begin{proof}[Proof sketch]
+The G\"odel-2 argument requires:
+\begin{enumerate}
+    \item If $T \vdash \mathsf{Con}(T) \at{\one}$, then by formalized soundness, $T$ proves ``if $T$ proves $\bot$, then $\bot$''
+    \item Combined with the G\"odel sentence, this yields $T \vdash G \at{\one}$
+    \item But $G$ asserts its own unprovability at $\one$---contradiction
+\end{enumerate}
+
+At weight $w < \one$, step 1 fails: we only have $\mathsf{Con}(T) \at{w}$, which doesn't yield the sharp consequence needed. The self-referential loop stabilizes at a weight below $\one$.
+\end{proof}
+
+\subsection{Philosophical Interpretation}
+
+\begin{center}
+\begin{tabular}{l|l}
+\textbf{Classical} & \textbf{ProbTT} \\
+\hline
+Cannot prove own consistency & Can prove at $w < \one$ \\
+``Unknowable'' & ``Confident but not certain'' \\
+Binary epistemic gap & Quantified confidence level \\
+\end{tabular}
+\end{center}
+
+This is philosophically honest: we \emph{believe} our system is consistent, but absolute certainty is impossible (G\"odel). ProbTT quantifies this epistemic state rather than leaving it as a binary gap.
+
+\subsection{Connection to LFIs}
+
+Logics of Formal Inconsistency \citep{carnielli2016paraconsistent} use an object-level consistency operator $\circ A$ (``$A$ is consistent''). The ``gentle explosion'' principle:
+\[
+A, \neg A, \circ A \vdash B \quad \text{but} \quad A, \neg A \not\vdash B
+\]
+
+ProbTT achieves similar effects through weight: contradiction at low weight doesn't explode to arbitrary conclusions because weight multiplication preserves the low weight.
+
+%=============================================================================
+\section{Graded Choice}
+%=============================================================================
+
+The Axiom of Choice has a natural graded formulation in ProbTT.
+
+\subsection{Classical AC and Its Problems}
+
+\begin{definition}[Axiom of Choice]
+For any family of non-empty sets $\{A_i\}_{i \in I}$, there exists a choice function $f : I \to \bigcup_i A_i$ with $f(i) \in A_i$ for all $i$.
+\end{definition}
+
+AC leads to non-constructive results like the Banach-Tarski paradox: a ball can be decomposed and reassembled into two balls of the same size.
+
+\subsection{Graded Choice}
+
+\begin{definition}[Graded AC]
+\[
+\mathsf{AC}_w : \left(\prod_{i:I} \|A_i\|_{w_i}\right) \to \left\|\prod_{i:I} A_i\right\|_w
+\]
+where $w$ depends on $I$ and the $w_i$.
+\end{definition}
+
+\begin{theorem}[Choice Weight Scaling]
+\begin{enumerate}
+    \item \textbf{Finite choice}: $w = \one$ (fully constructible)
+    \item \textbf{Countable choice}: $w = \prod_{n=1}^\infty w_n$ (may be $< \one$)
+    \item \textbf{Uncountable choice}: $w \ll \one$
+\end{enumerate}
+\end{theorem}
+
+\begin{proof}[Proof sketch]
+For finite $I$, we can construct the choice function explicitly---each step preserves weight $\one$, and finitely many steps preserve the product.
+
+For countable $I$, the infinite product $\prod_{n=1}^\infty w_n$ converges but may be strictly less than $\one$ (e.g., if $w_n = 1 - \epsilon/2^n$, then $w < 1$).
+
+For uncountable $I$, the product over uncountably many factors $< \one$ collapses toward $\zero$.
+\end{proof}
+
+\subsection{Banach-Tarski at Weight $< \one$}
+
+\begin{theorem}[Graded Banach-Tarski]
+The Banach-Tarski decomposition exists at some weight $w_{BT} < \one$.
+\end{theorem}
+
+\begin{remark}[Physical Interpretation]
+Weight $< \one$ means ``exists mathematically but not physically realizable.'' Banach-Tarski requires infinitely many non-constructive choices; each contributes a factor $< \one$; the product is strictly $< \one$. This correctly predicts that you cannot actually perform the decomposition.
+\end{remark}
+
+\subsection{Comparison}
+
+\begin{center}
+\begin{tabular}{l|l|l|l}
+& \textbf{Constructive} & \textbf{Classical} & \textbf{ProbTT} \\
+\hline
+AC status & Fails & Holds (weight $\one$) & Holds at weight $w$ \\
+BT paradox & Doesn't exist & Exists & Exists at $w < \one$ \\
+Information & Binary rejection & Binary acceptance & Graded \\
+\end{tabular}
+\end{center}
+
+ProbTT provides more information than both: constructive math says ``no choice function''; classical math says ``choice function exists''; ProbTT says ``choice function exists at weight $w$, quantifying constructibility.''
+
+%=============================================================================
+\section{Implementation Status}
+%=============================================================================
+
+The following have been implemented:
+
+\begin{enumerate}
+    \item \textbf{Type checker} (\texttt{probtt-impl/}): OCaml implementation with Agda-compatible syntax
+    \item \textbf{Weight algebra}: Fixpoint solver ($w = \negw w \Rightarrow w = \frac{1}{2}$), rational arithmetic
+    \item \textbf{Proof checker}: Postulates, derivations, contradictions, weight forcing
+    \item \textbf{Meta-theory constructs}: \texttt{provable}, \texttt{fixpoint}, \texttt{encode} declarations
+    \item \textbf{Agda formalization} (\texttt{agda/ProbTT/}): Syntax, judgments, properties, MLTT embedding
+    \item \textbf{Graded incompleteness}: G\"odel fixed point at $\frac{1}{2}$, self-consistency, graded choice
+\end{enumerate}
+
+Example proofs pass: $\sqrt{2}$ irrationality, modus ponens/tollens, double negation, ex falso, G\"odel fixed point.
 
 %=============================================================================
 \section{Open Problems}
 %=============================================================================
 
 \begin{enumerate}
-    \item \textbf{Implementation}: Type checker for ProbTT
     \item \textbf{Weight inference}: Can weights be inferred from term structure?
-    \item \textbf{Decidability}: Type checking decidable if $\W$ decidable
-    \item \textbf{Normalization}: Should follow from MLTT
+    \item \textbf{Decidability}: Type checking decidable if $\W$ decidable---proof needed
+    \item \textbf{Normalization}: Should follow from MLTT---formal proof needed
     \item \textbf{Dependent weights}: $w(x)$ varying over $x$ in $(x : A) \to B \at{w(x)}$
     \item \textbf{Continuous types}: Extension to measurable spaces
-    \item \textbf{Graded metatheory}: Relationship between derivation weights and incompleteness phenomena
+    \item \textbf{Full Agda proofs}: Some metatheorems have holes (\texttt{--allow-unsolved-metas})
+    \item \textbf{Completeness}: Pavelka-style completeness for ProbTT?
 \end{enumerate}
 
 \bibliographystyle{plainnat}

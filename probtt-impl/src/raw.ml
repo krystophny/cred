@@ -18,6 +18,7 @@ type weight =
   | WMul of weight * weight
   | WNeg of weight
   | WVar of name
+  | WRat of int * int  (* numerator, denominator for rational weights like 1/2 *)
 
 type term =
   | TVar of name
@@ -64,6 +65,10 @@ and decl =
   | DDerive of name * name * weight * name * name  (* name, prop, weight, from, by *)
   | DContradict of name * name                 (* two contradictory props *)
   | DConclude of name * name                   (* conclusion, from *)
+  (* Meta-theory declarations for Gödel/consistency *)
+  | DProvable of name * name * weight          (* Prov_w(φ): name, prop, weight *)
+  | DFixpoint of name * weight                 (* fixpoint name = weight_expr *)
+  | DEncode of name * name                     (* encode name = prop (Gödel encoding) *)
 
 and assoc = ALeft | ARight | ANone
 

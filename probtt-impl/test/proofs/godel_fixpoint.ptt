@@ -1,0 +1,48 @@
+-- Gödel Fixed Point in ProbTT
+--
+-- NOTE: This file DEMONSTRATES the proof checker syntax.
+-- The actual metatheory is formalized in agda/ProbTT/Incompleteness.agda
+--
+-- LITERATURE: Hájek-Paris-Shepherdson, "The Liar Paradox and Fuzzy Logic" (2000)
+-- The w = 1-w → w = 1/2 result is standard in fuzzy logic self-reference.
+--
+-- Classical: G is undecidable (neither provable nor refutable)
+-- ProbTT: G has weight 1/2 (the fixed point of negation)
+--
+-- G = "G has weight 0" = "G is unprovable at weight 1"
+-- If G @ w, then by G's content, w should equal 0
+-- But if w = 0, then ¬G @ 1, so G @ 1 (contradiction)
+-- Resolution: w = ¬w, which has unique solution w = 1/2
+
+-- Encode the Gödel sentence
+encode G = Unprov_G
+
+-- The Gödel sentence asserts its own unprovability
+-- G ↔ ¬Prov_1(G)
+-- If Prov(G) @ w, then G's meaning implies w should satisfy w = ¬w
+
+-- Assume G at some weight w
+postulate g : G 〔 w 〕
+
+-- Self-reference: G claims "Prov(G) @ 0"
+-- So if G @ w, then Prov(G) @ 0 should hold
+derive g_claims : Prov_G_zero 〔 w 〕 from g by self_reference
+
+-- But we assumed Prov(G) @ w, not 0
+-- The only consistent resolution: w = ¬w
+
+-- Solve the fixpoint equation: w = ¬w → w = 1/2
+fixpoint godel_w = ¬godel_w
+
+-- The Gödel sentence has determinate weight 1/2
+-- This is not undecidability - it's maximal uncertainty
+-- At w = 1/2, "G is somewhat true" and "G is somewhat false" both hold
+-- This is the unique stable equilibrium
+
+-- Provability of G at weight 1/2
+provable godel_provability : G 〔 1/2 〕
+
+-- Key insight: Classical logic only has {0,1}
+-- The equation w = ¬w has no solution in {0,1}
+-- Hence classical undecidability
+-- But in [0,1], w = 1-w has the solution w = 1/2

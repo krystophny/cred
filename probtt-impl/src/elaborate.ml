@@ -39,6 +39,7 @@ let rec elab_weight = function
   | WMul (a, b) -> Weight.mul (elab_weight a) (elab_weight b)
   | WNeg w -> Weight.neg (elab_weight w)
   | WVar x -> Weight.var x
+  | WRat (n, d) -> Weight.of_rational { Weight.num = n; Weight.den = d }
 
 
 let rec elab_ty env = function
@@ -220,6 +221,9 @@ let process_decls env decls =
     | DDerive _ :: rest -> process env acc rest
     | DContradict _ :: rest -> process env acc rest
     | DConclude _ :: rest -> process env acc rest
+    | DProvable _ :: rest -> process env acc rest
+    | DFixpoint _ :: rest -> process env acc rest
+    | DEncode _ :: rest -> process env acc rest
   in
   process env [] decls
 
@@ -256,6 +260,15 @@ let extract_proof_decls decls =
         go (Proof.Contradict (p, q) :: acc) rest
     | DConclude (name, from_name) :: rest ->
         go (Proof.Negate (name, from_name) :: acc) rest
+    | DProvable (name, prop, w) :: rest ->
+        let proof_decl = Proof.Provable (name, prop, elab_weight w) in
+        go (proof_decl :: acc) rest
+    | DFixpoint (name, w) :: rest ->
+        let proof_decl = Proof.Fixpoint (name, elab_weight w) in
+        go (proof_decl :: acc) rest
+    | DEncode (name, prop) :: rest ->
+        let proof_decl = Proof.Encode (name, prop) in
+        go (proof_decl :: acc) rest
     | _ :: rest -> go acc rest
   in
   go [] decls
@@ -263,6 +276,7 @@ let extract_proof_decls decls =
 (* Check if a program contains proof declarations *)
 let has_proof_decls decls =
   List.exists (function
-    | DPostulate _ | DDerive _ | DContradict _ | DConclude _ -> true
+    | DPostulate _ | DDerive _ | DContradict _ | DConclude _
+    | DProvable _ | DFixpoint _ | DEncode _ -> true
     | _ -> false
   ) decls

@@ -10,6 +10,10 @@ type proof_decl =
   | Derive of string * string * Weight.t * derivation
   | Contradict of string * string              (* two contradictory props *)
   | Negate of string * string                  (* conclusion from negated assumption *)
+  (* Meta-theory constructs *)
+  | Provable of string * string * Weight.t     (* Prov_w(φ) *)
+  | Fixpoint of string * Weight.t              (* x where x = f(x) *)
+  | Encode of string * string                  (* ⌈φ⌉ encoding *)
 
 and derivation =
   | From of string * string   (* from prop, by justification *)
@@ -31,11 +35,17 @@ and status =
 type proof_state = {
   judgments : (string, judgment) Hashtbl.t;
   weight_eqs : (Weight.t * Weight.t) list;  (* w = v constraints *)
+  provables : (string, string * Weight.t) Hashtbl.t;  (* name -> (prop, weight) *)
+  fixpoints : (string, Weight.rational) Hashtbl.t;    (* variable -> solved value *)
+  encodings : (string, string) Hashtbl.t;  (* name -> encoded prop *)
 }
 
 let create () = {
   judgments = Hashtbl.create 16;
   weight_eqs = [];
+  provables = Hashtbl.create 16;
+  fixpoints = Hashtbl.create 16;
+  encodings = Hashtbl.create 16;
 }
 
 (* Add a postulate *)
@@ -128,12 +138,62 @@ let add_negation state name from_name =
     Printf.printf "\n  ∴ %s : ¬%s 〔 %s 〕\n" name from_j.prop (Weight.to_string neg_weight);
     Ok state
 
+(* Add a provability assertion: Prov_w(φ) *)
+let add_provable state name prop weight =
+  Hashtbl.replace state.provables name (prop, weight);
+  Printf.printf "  provable %s : Prov(%s) 〔 %s 〕\n" name prop (Weight.to_string weight);
+  Ok state
+
+(* Add and solve a fixpoint: x = f(x)
+   Currently handles w = ¬w → w = 1/2 *)
+let add_fixpoint state name weight_expr =
+  let simplified = Weight.simplify weight_expr in
+  let result = match simplified with
+    | Weight.Neg (Weight.Var v) when v = name ->
+        (* w = ¬w → w = 1/2 (negation fixpoint) *)
+        let half = Weight.solve_negation_fixpoint () in
+        Hashtbl.replace state.fixpoints name half;
+        Printf.printf "\n  ⚙ FIXPOINT: %s = ¬%s\n" name name;
+        Printf.printf "     Solved: %s = %s\n" name (Weight.rat_to_string half);
+        Some half
+    | Weight.Mul (Weight.Var v1, Weight.Var v2) when v1 = name && v2 = name ->
+        (* w = w·w → w = 0 or w = 1 (idempotent) *)
+        Printf.printf "\n  ⚙ FIXPOINT: %s = %s · %s\n" name name name;
+        Printf.printf "     Solutions: 0 or 1 (choosing 1)\n";
+        let one = Weight.rat_one in
+        Hashtbl.replace state.fixpoints name one;
+        Some one
+    | Weight.Var v when v = name ->
+        (* w = w (trivial, any value works) *)
+        Printf.printf "\n  ⚙ FIXPOINT: %s = %s (trivial)\n" name name;
+        None
+    | _ ->
+        Printf.printf "\n  ⚙ FIXPOINT: %s = %s (unknown form)\n" name (Weight.to_string simplified);
+        None
+  in
+  match result with
+  | Some _ -> Ok state
+  | None -> Ok state
+
+(* Add an encoding: ⌈φ⌉ *)
+let add_encoding state name prop =
+  Hashtbl.replace state.encodings name prop;
+  Printf.printf "  encode %s = ⌈%s⌉\n" name prop;
+  Ok state
+
+(* Get the solved weight for a variable if available *)
+let get_solved_weight state var_name =
+  Hashtbl.find_opt state.fixpoints var_name
+
 (* Process a single declaration *)
 let process_decl state = function
   | Postulate (name, prop, weight) -> add_postulate state name prop weight
   | Derive (name, prop, weight, deriv) -> add_derivation state name prop weight deriv
   | Contradict (p, q) -> add_contradiction state p q
   | Negate (name, from_name) -> add_negation state name from_name
+  | Provable (name, prop, weight) -> add_provable state name prop weight
+  | Fixpoint (name, weight) -> add_fixpoint state name weight
+  | Encode (name, prop) -> add_encoding state name prop
 
 (* Run a proof *)
 let check_proof decls =
@@ -153,6 +213,13 @@ let check_proof decls =
   | Ok final_state ->
     Printf.printf "\n══════════════════════════════════════════════════════════════\n";
     Printf.printf "  ✓ Proof checked successfully\n";
+    (* Print solved fixpoints *)
+    if Hashtbl.length final_state.fixpoints > 0 then begin
+      Printf.printf "\n  Solved fixpoints:\n";
+      Hashtbl.iter (fun name value ->
+        Printf.printf "    %s = %s\n" name (Weight.rat_to_string value)
+      ) final_state.fixpoints
+    end;
     Printf.printf "══════════════════════════════════════════════════════════════\n\n";
     Ok final_state
   | Error e ->

@@ -69,3 +69,97 @@ let to_string w =
   pp fmt w;
   Format.pp_print_flush fmt ();
   Buffer.contents buf
+
+(* Rational weight representation for exact computation *)
+type rational = { num: int; den: int }
+
+let gcd a b =
+  let rec go a b = if b = 0 then a else go b (a mod b) in
+  go (abs a) (abs b)
+
+let rat_normalize r =
+  if r.den = 0 then { num = 0; den = 1 }
+  else
+    let g = gcd r.num r.den in
+    let sign = if r.den < 0 then -1 else 1 in
+    { num = sign * r.num / g; den = sign * r.den / g }
+
+let rat_zero = { num = 0; den = 1 }
+let rat_one = { num = 1; den = 1 }
+let rat_half = { num = 1; den = 2 }
+
+let rat_mul a b = rat_normalize { num = a.num * b.num; den = a.den * b.den }
+let rat_neg a = rat_normalize { num = a.den - a.num; den = a.den }
+let rat_equal a b =
+  let a' = rat_normalize a in
+  let b' = rat_normalize b in
+  a'.num = b'.num && a'.den = b'.den
+
+let rat_to_string r =
+  let r' = rat_normalize r in
+  if r'.den = 1 then string_of_int r'.num
+  else Printf.sprintf "%d/%d" r'.num r'.den
+
+(* Try to evaluate weight to rational *)
+let rec to_rational = function
+  | Zero -> Some rat_zero
+  | One -> Some rat_one
+  | Neg w ->
+      (match to_rational w with
+       | Some r -> Some (rat_neg r)
+       | None -> None)
+  | Mul (a, b) ->
+      (match to_rational a, to_rational b with
+       | Some ra, Some rb -> Some (rat_mul ra rb)
+       | _, _ -> None)
+  | Var _ -> None
+
+(* Solve w = ¬w for fixed point
+   ¬w = 1 - w, so w = 1 - w implies 2w = 1, w = 1/2 *)
+let solve_negation_fixpoint () = rat_half
+
+(* General fixed point detection: given f(w), find w where w = f(w)
+   For w = ¬w: solution is 1/2
+   For w = w·w: solutions are 0 and 1 *)
+let solve_fixpoint f_of_w w =
+  let simplified = simplify (f_of_w (Var w)) in
+  match simplified with
+  | Neg (Var v) when v = w ->
+      (* w = ¬w → w = 1/2 *)
+      Some rat_half
+  | Mul (Var v1, Var v2) when v1 = w && v2 = w ->
+      (* w = w·w → w = 0 or w = 1 *)
+      Some rat_one
+  | _ ->
+      (* Check if it's the identity: w = w *)
+      if equal simplified (Var w) then None
+      else None
+
+(* Constraint system for weight solving *)
+type constraint_t =
+  | CEqual of t * t
+  | CLeq of t * t
+  | CFixpoint of string * (t -> t)
+
+(* Solve a list of constraints, returning variable assignments *)
+let solve_constraints constraints =
+  let bindings = Hashtbl.create 8 in
+  List.iter (function
+    | CEqual (Var v, Zero) | CEqual (Zero, Var v) ->
+        Hashtbl.replace bindings v rat_zero
+    | CEqual (Var v, One) | CEqual (One, Var v) ->
+        Hashtbl.replace bindings v rat_one
+    | CFixpoint (v, f) ->
+        (match solve_fixpoint f v with
+         | Some r -> Hashtbl.replace bindings v r
+         | None -> ())
+    | _ -> ()
+  ) constraints;
+  Hashtbl.fold (fun k v acc -> (k, v) :: acc) bindings []
+
+(* Create weight from rational *)
+let of_rational r =
+  let r' = rat_normalize r in
+  if r'.num = 0 then Zero
+  else if r'.num = r'.den then One
+  else Var (rat_to_string r')
