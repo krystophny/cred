@@ -68,7 +68,6 @@ let rec elab_ty env = function
       Syntax.TSigma (a', b')
   | TySum (a, b) ->
       Syntax.TSum (elab_ty env a, elab_ty env b)
-  | TyUnit -> Syntax.TUnit
   | TyId (a, t1, t2) ->
       Syntax.TId (elab_ty env a, elab_term env t1, elab_term env t2)
   | TySet _ -> Syntax.TBase 0
@@ -106,12 +105,11 @@ and elab_term env = function
       let env_l = extend_var env x in
       let env_r = extend_var env y in
       Syntax.Case (e', elab_term env_l l, elab_term env_r r)
-  | TUnit -> Syntax.Star
   | TRefl -> Syntax.Refl
   | TJ (m, d, p) ->
       Syntax.J (elab_ty env m, elab_term env d, elab_term env p)
   | TAnn (t, _ty) -> elab_term env t
-  | THole -> Syntax.Star
+  | THole -> Syntax.Var 0  (* placeholder - holes are not properly supported *)
   | TLet (name, _ty, t, body) ->
       let t' = elab_term env t in
       let env' = extend_var env name in
@@ -232,8 +230,8 @@ let elab_decl _env decl =
         | Some raw_w -> elab_weight raw_w
         | None -> Weight.one
       in
-      (name, ty', Syntax.Star, weight)
+      (name, ty', Syntax.Refl, weight)  (* placeholder term *)
   | DDef (name, pats, body) ->
       let term = wrap_lambdas_with_types empty_env pats [] body in
       (name, Syntax.TBase 0, term, Weight.one)
-  | _ -> ("", Syntax.TBase 0, Syntax.Star, Weight.one)
+  | _ -> ("", Syntax.TBase 0, Syntax.Refl, Weight.one)  (* placeholder term *)

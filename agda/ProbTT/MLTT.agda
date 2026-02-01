@@ -12,16 +12,31 @@ open import ProbTT.Substitution
 open import ProbTT.Context
 open import ProbTT.Judgment
 
--- MLTT is ProbTT with W = {false, true} (Boolean De Morgan algebra)
--- At weight true (= 𝟙), we get standard MLTT
--- At weight false (= 𝟘), judgments are vacuously satisfied
+-- ═══════════════════════════════════════════════════════════════════════════
+-- MLTT Fragment Embedding
+-- ═══════════════════════════════════════════════════════════════════════════
+--
+-- Pure ProbTT is the fragment of MLTT with:
+--   - Π-types (dependent functions)
+--   - Σ-types (dependent pairs)
+--   - +-types (coproducts/sums)
+--   - Id-types (identity/equality)
+--
+-- NOT included in pure ProbTT:
+--   - Unit type (𝟙): Certainty is weight 𝟙 on any type, not a special type
+--   - Empty type (𝟘): Impossibility is weight 𝟘 on any type, not a special type
+--
+-- Full MLTT with Unit and Empty would require extending ProbTT's syntax.
+-- The key insight: Pure ProbTT avoids the philosophical question
+-- "what TYPE is weight 0/1?" by using weights directly.
+-- ═══════════════════════════════════════════════════════════════════════════
 
 open BoolDM
 
 -- Import ProbTT typing with Boolean weights
 open Typing BoolDM
 
--- Standard MLTT typing (no weights)
+-- Standard MLTT typing (no weights) - fragment without Unit/Empty
 -- This is the target of the embedding
 data _⊢mltt_∶_ : ∀ {n} → Ctx n → Tm n → Ty n → Set where
   -- Variable
@@ -70,15 +85,6 @@ data _⊢mltt_∶_ : ∀ {n} → Ctx n → Tm n → Ty n → Set where
               (Γ , B) ⊢mltt r ∶ wkTy C →
               Γ ⊢mltt case e l r ∶ C
 
-  -- 𝟙-Intro
-  mltt-star : ∀ {n} {Γ : Ctx n} →
-              Γ ⊢mltt star ∶ 𝟙'
-
-  -- 𝟘-Elim
-  mltt-abort : ∀ {n} {Γ : Ctx n} {A : Ty n} {e : Tm n} →
-               Γ ⊢mltt e ∶ 𝟘' →
-               Γ ⊢mltt abort A e ∶ A
-
   -- Id-Intro
   mltt-refl : ∀ {n} {Γ : Ctx n} {A : Ty n} {a : Tm n} →
               Γ ⊢mltt a ∶ A →
@@ -88,77 +94,66 @@ data _⊢mltt_∶_ : ∀ {n} → Ctx n → Tm n → Ty n → Set where
   mltt-J : ∀ {n} {Γ : Ctx n} {A : Ty n} {a b : Tm n}
              {M : Ty (suc (suc n))} {d p : Tm n} →
            Γ ⊢mltt p ∶ Id A a b →
-           Γ ⊢mltt d ∶ (M [ a ]ₜ [ refl' ]ₜ) →
-           Γ ⊢mltt J M d p ∶ (M [ b ]ₜ [ p ]ₜ)
+           Γ ⊢mltt d ∶ (M [ refl' , a ]₂ₜ) →
+           Γ ⊢mltt J M d p ∶ (M [ p , b ]₂ₜ)
 
 -- Key fact: true · true = true in Boolean algebra
 -- This means weights compose trivially at weight 1
 ∧-true-true : true ∧B true ≡ true
 ∧-true-true = refl
 
--- Embedding: MLTT → ProbTT @ true
+-- Helper for weight substitution
+subst-weight : ∀ {n} {Γ : Ctx n} {t : Tm n} {A : Ty n} {w w' : Bool} →
+               Γ ⊢ t ∶ A 〔 w 〕 →
+               w ≡ w' →
+               Γ ⊢ t ∶ A 〔 w' 〕
+subst-weight d refl = d
+
+-- Embedding: MLTT → ProbTT 〔 true 〕
 -- An MLTT judgment becomes a ProbTT judgment at weight 𝟙
 embed : ∀ {n} {Γ : Ctx n} {t : Tm n} {A : Ty n} →
         Γ ⊢mltt t ∶ A →
-        Γ ⊢ t ∶ A @ true
+        Γ ⊢ t ∶ A 〔 true 〕
 embed (mltt-var i) = t-var i
 embed (mltt-lam d) = t-lam (embed d)
 embed (mltt-app df da) = subst-weight (t-app (embed df) (embed da)) ∧-true-true
-  where
-    subst-weight : ∀ {n} {Γ : Ctx n} {t : Tm n} {A : Ty n} {w w' : Bool} →
-                   Γ ⊢ t ∶ A @ w →
-                   w ≡ w' →
-                   Γ ⊢ t ∶ A @ w'
-    subst-weight d refl = d
 embed (mltt-pair da db) = subst-weight (t-pair (embed da) (embed db)) ∧-true-true
-  where
-    subst-weight : ∀ {n} {Γ : Ctx n} {t : Tm n} {A : Ty n} {w w' : Bool} →
-                   Γ ⊢ t ∶ A @ w →
-                   w ≡ w' →
-                   Γ ⊢ t ∶ A @ w'
-    subst-weight d refl = d
 embed (mltt-fst d) = t-fst (embed d)
 embed (mltt-snd d) = t-snd (embed d)
 embed (mltt-inl d) = t-inl (embed d)
 embed (mltt-inr d) = t-inr (embed d)
 embed (mltt-case de dl dr) = subst-weight (t-case (embed de) (embed dl) (embed dr)) ∧-true-true
-  where
-    subst-weight : ∀ {n} {Γ : Ctx n} {t : Tm n} {A : Ty n} {w w' : Bool} →
-                   Γ ⊢ t ∶ A @ w →
-                   w ≡ w' →
-                   Γ ⊢ t ∶ A @ w'
-    subst-weight d refl = d
-embed mltt-star = t-star
-embed (mltt-abort d) = t-abort (embed d)
 embed (mltt-refl d) = t-refl (embed d)
 embed (mltt-J dp dd) = subst-weight (t-J (embed dp) (embed dd)) ∧-true-true
-  where
-    subst-weight : ∀ {n} {Γ : Ctx n} {t : Tm n} {A : Ty n} {w w' : Bool} →
-                   Γ ⊢ t ∶ A @ w →
-                   w ≡ w' →
-                   Γ ⊢ t ∶ A @ w'
-    subst-weight d refl = d
 
--- Collapse: ProbTT @ true → MLTT
+-- Lemma: if w ∧ v = true then w = true and v = true
+∧-true-inv : ∀ {w v} → w ∧B v ≡ true → w ≡ true
+∧-true-inv {true} {true} refl = refl
+
+∧-true-inv-right : ∀ {w v} → w ∧B v ≡ true → v ≡ true
+∧-true-inv-right {true} {true} refl = refl
+
+-- Collapse: ProbTT 〔 true 〕 → MLTT
 -- A ProbTT judgment at weight 𝟙 gives an MLTT judgment
--- This requires the derivation to be at exactly weight true (not just ≤ true)
 collapse : ∀ {n} {Γ : Ctx n} {t : Tm n} {A : Ty n} →
-           Γ ⊢ t ∶ A @ true →
+           Γ ⊢ t ∶ A 〔 true 〕 →
            Γ ⊢mltt t ∶ A
 collapse (t-var i) = mltt-var i
 collapse (t-weaken d ≤-true) = collapse d
 collapse (t-lam d) = mltt-lam (collapse d)
-collapse (t-app {w = true} {v = true} df da) = mltt-app (collapse df) (collapse da)
-collapse (t-pair {w = true} {v = true} da db) = mltt-pair (collapse da) (collapse db)
+collapse (t-app {w = w} {v = v} df da) with w | v | refl
+... | true | true | _ = mltt-app (collapse df) (collapse da)
+collapse (t-pair {w = w} {v = v} da db) with w | v | refl
+... | true | true | _ = mltt-pair (collapse da) (collapse db)
 collapse (t-fst d) = mltt-fst (collapse d)
 collapse (t-snd d) = mltt-snd (collapse d)
 collapse (t-inl d) = mltt-inl (collapse d)
 collapse (t-inr d) = mltt-inr (collapse d)
-collapse (t-case {w = true} {v = true} de dl dr) = mltt-case (collapse de) (collapse dl) (collapse dr)
-collapse t-star = mltt-star
-collapse (t-abort d) = mltt-abort (collapse d)
+collapse (t-case {w = w} {v = v} de dl dr) with w | v | refl
+... | true | true | _ = mltt-case (collapse de) (collapse dl) (collapse dr)
 collapse (t-refl d) = mltt-refl (collapse d)
-collapse (t-J {w = true} {v = true} dp dd) = mltt-J (collapse dp) (collapse dd)
+collapse (t-J {w = w} {v = v} dp dd) with w | v | refl
+... | true | true | _ = mltt-J (collapse dp) (collapse dd)
 
 -- Round-trip: embed then collapse is identity
 embed-collapse : ∀ {n} {Γ : Ctx n} {t : Tm n} {A : Ty n}
@@ -181,15 +176,30 @@ embed-collapse (mltt-snd d) = cong mltt-snd (embed-collapse d)
 embed-collapse (mltt-inl d) = cong mltt-inl (embed-collapse d)
 embed-collapse (mltt-inr d) = cong mltt-inr (embed-collapse d)
 embed-collapse (mltt-case de dl dr) = cong₃ mltt-case (embed-collapse de) (embed-collapse dl) (embed-collapse dr)
-  where
-    cong₃ : ∀ {A B C D : Set} (f : A → B → C → D) {x₁ x₂ y₁ y₂ z₁ z₂} →
-            x₁ ≡ x₂ → y₁ ≡ y₂ → z₁ ≡ z₂ → f x₁ y₁ z₁ ≡ f x₂ y₂ z₂
-    cong₃ f refl refl refl = refl
-embed-collapse mltt-star = refl
-embed-collapse (mltt-abort d) = cong mltt-abort (embed-collapse d)
 embed-collapse (mltt-refl d) = cong mltt-refl (embed-collapse d)
 embed-collapse (mltt-J dp dd) = cong₂ mltt-J (embed-collapse dp) (embed-collapse dd)
   where
     cong₂ : ∀ {A B C : Set} (f : A → B → C) {x₁ x₂ : A} {y₁ y₂ : B} →
             x₁ ≡ x₂ → y₁ ≡ y₂ → f x₁ y₁ ≡ f x₂ y₂
     cong₂ f refl refl = refl
+
+-- ═══════════════════════════════════════════════════════════════════════════
+-- Note on Full MLTT
+-- ═══════════════════════════════════════════════════════════════════════════
+--
+-- Full MLTT includes Unit (𝟙) and Empty (𝟘) types with:
+--   - 𝟙-Intro: ⋆ : 𝟙
+--   - 𝟘-Elim: If e : 𝟘 then abort A e : A (explosion principle)
+--
+-- In pure ProbTT, we intentionally omit these because:
+--   1. Certainty is weight 𝟙 on any type, not a special Unit type
+--   2. Impossibility is weight 𝟘 on any type, not a special Empty type
+--   3. This avoids "what TYPE is weight 0/1?" - a philosophical issue
+--
+-- GRADED EX FALSO works without Empty type:
+--   If a : A @ 𝟘, then f a : B 〔 w 〕·𝟘 = 𝟘 automatically.
+--   Weight 𝟘 propagates through all operations. No explosion needed.
+--
+-- To embed full MLTT with Unit/Empty, one would need to extend
+-- ProbTT's syntax to include these types and their typing rules.
+-- ═══════════════════════════════════════════════════════════════════════════

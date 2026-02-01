@@ -14,12 +14,6 @@ let () =
 
   let a_ty = TBase 0 in
 
-  test "star : Unit @ 1" (
-    match Check.check Context.empty Star TUnit with
-    | Ok w -> Weight.equal w Weight.one
-    | Error _ -> false
-  );
-
   test "var 0 in context" (
     let ctx = Context.extend Context.empty a_ty in
     match Check.infer ctx (Var 0) with

@@ -7,7 +7,6 @@ let rec rename_ty (r : int -> int) = function
   | TPi (a, b) -> TPi (rename_ty r a, rename_ty (lift_ren r) b)
   | TSigma (a, b) -> TSigma (rename_ty r a, rename_ty (lift_ren r) b)
   | TSum (a, b) -> TSum (rename_ty r a, rename_ty r b)
-  | TUnit -> TUnit
   | TId (a, t1, t2) -> TId (rename_ty r a, rename_tm r t1, rename_tm r t2)
 
 and rename_tm (r : int -> int) = function
@@ -20,7 +19,6 @@ and rename_tm (r : int -> int) = function
   | Inl t -> Inl (rename_tm r t)
   | Inr t -> Inr (rename_tm r t)
   | Case (e, l, r') -> Case (rename_tm r e, rename_tm (lift_ren r) l, rename_tm (lift_ren r) r')
-  | Star -> Star
   | Refl -> Refl
   | J (m, d, p) -> J (rename_ty (lift_ren (lift_ren r)) m, rename_tm r d, rename_tm r p)
 
@@ -40,7 +38,6 @@ let rec subst_ty (s : sub) = function
   | TPi (a, b) -> TPi (subst_ty s a, subst_ty (lift_sub s) b)
   | TSigma (a, b) -> TSigma (subst_ty s a, subst_ty (lift_sub s) b)
   | TSum (a, b) -> TSum (subst_ty s a, subst_ty s b)
-  | TUnit -> TUnit
   | TId (a, t1, t2) -> TId (subst_ty s a, subst_tm s t1, subst_tm s t2)
 
 and subst_tm (s : sub) = function
@@ -53,7 +50,6 @@ and subst_tm (s : sub) = function
   | Inl t -> Inl (subst_tm s t)
   | Inr t -> Inr (subst_tm s t)
   | Case (e, l, r) -> Case (subst_tm s e, subst_tm (lift_sub s) l, subst_tm (lift_sub s) r)
-  | Star -> Star
   | Refl -> Refl
   | J (m, d, p) -> J (subst_ty (lift_sub (lift_sub s)) m, subst_tm s d, subst_tm s p)
 

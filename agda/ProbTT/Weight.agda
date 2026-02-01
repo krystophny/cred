@@ -31,12 +31,13 @@ record DeMorganAlgebra (ℓ : Level) : Set (suc ℓ) where
     ¬-𝟙    : ¬ 𝟙 ≡ 𝟘
     ¬-invol : ∀ w → ¬ (¬ w) ≡ w
 
-    -- Order axioms (5)
+    -- Order axioms (6)
     ≤-refl     : ∀ w → w ≤ w
     ≤-trans    : ∀ {u v w} → u ≤ v → v ≤ w → u ≤ w
     ≤-antisym  : ∀ {u v} → u ≤ v → v ≤ u → u ≡ v
     𝟘-least    : ∀ w → 𝟘 ≤ w
     𝟙-greatest : ∀ w → w ≤ 𝟙
+    ·-≤-self   : ∀ w v → w · v ≤ w  -- multiplication decreases (w·v ≤ w)
 
   -- Derived: De Morgan disjunction
   -- w ∨ v = ¬(¬w · ¬v)
@@ -120,6 +121,11 @@ module BoolDM where
   true-greatest : ∀ w → w ≤B true
   true-greatest w = ≤-true
 
+  -- Multiplication decreases: w ∧ v ≤ w
+  ∧-≤-self : ∀ w v → (w ∧B v) ≤B w
+  ∧-≤-self false v = ≤-false
+  ∧-≤-self true  v = true-greatest v
+
   -- The complete Boolean De Morgan algebra
   BoolDM : DeMorganAlgebra _
   BoolDM = record
@@ -143,6 +149,7 @@ module BoolDM where
     ; ≤-antisym   = ≤B-antisym
     ; 𝟘-least     = false-least
     ; 𝟙-greatest  = true-greatest
+    ; ·-≤-self    = ∧-≤-self
     }
 
 open BoolDM public using (BoolDM)
@@ -152,7 +159,7 @@ module DeMorganLaws {ℓ : Level} (DM : DeMorganAlgebra ℓ) where
   open DeMorganAlgebra DM
 
   private
-    cong₂ : ∀ {A B C : Set ℓ} (f : A → B → C) {x y u v : A} →
+    cong₂ : ∀ {A B C : Set ℓ} (f : A → B → C) {x y : A} {u v : B} →
             x ≡ y → u ≡ v → f x u ≡ f y v
     cong₂ f refl refl = refl
 

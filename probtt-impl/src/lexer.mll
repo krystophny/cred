@@ -73,7 +73,7 @@ let check_layout lexbuf =
 (* Mark that we've seen a token that can end a declaration *)
 let can_end_decl = function
   | IDENT _ | RPAREN | RBRACE | RBRACKET | NUM _ | REFL | UNDERSCORE
-  | TOP | BOT | SET | PROP | BBONE | BBZERO -> true
+  | SET | PROP | BBZERO -> true
   | _ -> false
 }
 

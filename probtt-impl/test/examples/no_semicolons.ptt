@@ -11,6 +11,3 @@ swap p = (snd p , fst p)
 
 compose : (A → B) → (B → C) → A → C
 compose f g x = g (f x)
-
-unit : ⊤
-unit = ()

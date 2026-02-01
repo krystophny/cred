@@ -30,7 +30,6 @@ type term =
   | TInl of term
   | TInr of term
   | TCase of term * (name * term) * (name * term)
-  | TUnit
   | TRefl
   | TJ of ty * term * term
   | TAnn of term * ty
@@ -45,7 +44,6 @@ and ty =
   | TyPi of name * implicit * ty * ty
   | TySigma of name * ty * ty
   | TySum of ty * ty
-  | TyUnit
   | TyId of ty * term * term
   | TySet of int option
 

@@ -47,8 +47,6 @@ let infer (ctx : Context.t) (t : term) : result =
              Ok (result_ty, w)
          | ty -> Error (Error.NotAPair ty))
 
-    | Star -> Ok (TUnit, Weight.one)
-
     | Refl -> Error (Error.CannotInfer Refl)
 
     | Lam _ -> Error (Error.CannotInfer t)
@@ -95,8 +93,6 @@ let infer (ctx : Context.t) (t : term) : result =
              else
                Error (Error.BranchWeightMismatch (w_l, w_r))
          | ty -> Error (Error.NotASum ty))
-
-    | Star, TUnit -> Ok Weight.one
 
     | Refl, TId (ty, a, b) ->
         if not (equal_tm a b) then
@@ -154,8 +150,6 @@ let check ctx t expected =
              Ok (result_ty, w)
          | ty -> Error (Error.NotAPair ty))
 
-    | Star -> Ok (TUnit, Weight.one)
-
     | Refl -> Error (Error.CannotInfer Refl)
     | Lam _ -> Error (Error.CannotInfer t)
     | Pair _ -> Error (Error.CannotInfer t)
@@ -201,8 +195,6 @@ let check ctx t expected =
              else
                Error (Error.BranchWeightMismatch (w_l, w_r))
          | ty -> Error (Error.NotASum ty))
-
-    | Star, TUnit -> Ok Weight.one
 
     | Refl, TId (ty, a, b) ->
         if not (equal_tm a b) then

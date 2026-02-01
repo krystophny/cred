@@ -146,8 +146,6 @@ ty_atom:
   | SET { TySet None }
   | SET n = NUM { TySet (Some n) }
   | PROP { TySet (Some 0) }
-  | TOP { TyUnit }
-  | BBONE { TyUnit }
 
 (* Patterns *)
 pattern:
@@ -213,7 +211,6 @@ term_arg:
 term_atom:
   | LPAREN t = term RPAREN { t }
   | LPAREN a = term COMMA b = term RPAREN { TPair (a, b) }
-  | LPAREN RPAREN { TUnit }
   | x = IDENT { TVar x }
   | UNDERSCORE { THole }
   | REFL { TRefl }

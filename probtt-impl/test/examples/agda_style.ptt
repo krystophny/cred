@@ -19,8 +19,4 @@ compose f g x = g (f x);
 
 -- Sum elimination
 either : (A → C) → (B → C) → A + B → C;
-either f g x = case x of inl a → f a | inr b → g b;
-
--- Unit
-unit : ⊤;
-unit = ()
+either f g x = case x of inl a → f a | inr b → g b
