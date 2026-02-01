@@ -133,27 +133,39 @@ embed (mltt-J dp dd) = subst-weight (t-J (embed dp) (embed dd)) ∧-true-true
 ∧-true-inv-right : ∀ {w v} → w ∧B v ≡ true → v ≡ true
 ∧-true-inv-right {true} {true} refl = refl
 
+-- Helper to transport typing judgment along weight equality
+transport-weight : ∀ {n} {Γ : Ctx n} {t : Tm n} {A : Ty n} {w w' : Bool} →
+                   Γ ⊢ t ∶ A 〔 w 〕 → w ≡ w' → Γ ⊢ t ∶ A 〔 w' 〕
+transport-weight d refl = d
+
 -- Collapse: ProbTT 〔 true 〕 → MLTT
 -- A ProbTT judgment at weight 𝟙 gives an MLTT judgment
-collapse : ∀ {n} {Γ : Ctx n} {t : Tm n} {A : Ty n} →
-           Γ ⊢ t ∶ A 〔 true 〕 →
-           Γ ⊢mltt t ∶ A
-collapse (t-var i) = mltt-var i
-collapse (t-weaken d ≤-true) = collapse d
-collapse (t-lam d) = mltt-lam (collapse d)
-collapse (t-app {w = w} {v = v} df da) with w | v | refl
-... | true | true | _ = mltt-app (collapse df) (collapse da)
-collapse (t-pair {w = w} {v = v} da db) with w | v | refl
-... | true | true | _ = mltt-pair (collapse da) (collapse db)
-collapse (t-fst d) = mltt-fst (collapse d)
-collapse (t-snd d) = mltt-snd (collapse d)
-collapse (t-inl d) = mltt-inl (collapse d)
-collapse (t-inr d) = mltt-inr (collapse d)
-collapse (t-case {w = w} {v = v} de dl dr) with w | v | refl
-... | true | true | _ = mltt-case (collapse de) (collapse dl) (collapse dr)
-collapse (t-refl d) = mltt-refl (collapse d)
-collapse (t-J {w = w} {v = v} dp dd) with w | v | refl
-... | true | true | _ = mltt-J (collapse dp) (collapse dd)
+-- We use mutual recursion with an explicit weight parameter
+mutual
+  collapse : ∀ {n} {Γ : Ctx n} {t : Tm n} {A : Ty n} →
+             Γ ⊢ t ∶ A 〔 true 〕 →
+             Γ ⊢mltt t ∶ A
+  collapse d = collapse' d refl
+
+  collapse' : ∀ {n} {Γ : Ctx n} {t : Tm n} {A : Ty n} {w : Bool} →
+              Γ ⊢ t ∶ A 〔 w 〕 → w ≡ true →
+              Γ ⊢mltt t ∶ A
+  collapse' (t-var i) refl = mltt-var i
+  collapse' (t-weaken d ≤-true) refl = collapse' d refl
+  collapse' (t-lam d) refl = mltt-lam (collapse' d refl)
+  collapse' (t-app {w = true} {v = true} df da) refl =
+    mltt-app (collapse' df refl) (collapse' da refl)
+  collapse' (t-pair {w = true} {v = true} da db) refl =
+    mltt-pair (collapse' da refl) (collapse' db refl)
+  collapse' (t-fst d) refl = mltt-fst (collapse' d refl)
+  collapse' (t-snd d) refl = mltt-snd (collapse' d refl)
+  collapse' (t-inl d) refl = mltt-inl (collapse' d refl)
+  collapse' (t-inr d) refl = mltt-inr (collapse' d refl)
+  collapse' (t-case {w = true} {v = true} de dl dr) refl =
+    mltt-case (collapse' de refl) (collapse' dl refl) (collapse' dr refl)
+  collapse' (t-refl d) refl = mltt-refl (collapse' d refl)
+  collapse' (t-J {w = true} {v = true} dp dd) refl =
+    mltt-J (collapse' dp refl) (collapse' dd refl)
 
 -- Round-trip: embed then collapse is identity
 embed-collapse : ∀ {n} {Γ : Ctx n} {t : Tm n} {A : Ty n}
