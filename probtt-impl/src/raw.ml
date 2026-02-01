@@ -59,6 +59,11 @@ and decl =
   | DImport of string list * name list option
   | DInfix of assoc * int * name
   | DComment of string
+  (* Proof declarations *)
+  | DPostulate of name * name * weight         (* name, prop, weight *)
+  | DDerive of name * name * weight * name * name  (* name, prop, weight, from, by *)
+  | DContradict of name * name                 (* two contradictory props *)
+  | DConclude of name * name                   (* conclusion, from *)
 
 and assoc = ALeft | ARight | ANone
 

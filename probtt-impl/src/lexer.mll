@@ -29,6 +29,13 @@ let () = List.iter (fun (k, v) -> Hashtbl.add keyword_table k v) [
   "snd", SND;
   "inl", INL;
   "inr", INR;
+  (* Proof keywords *)
+  "postulate", POSTULATE;
+  "derive", DERIVE;
+  "from", FROM;
+  "by", BY;
+  "contradict", CONTRADICT;
+  "conclude", CONCLUDE;
 ]
 
 let lookup_ident s =

@@ -215,6 +215,11 @@ let process_decls env decls =
     | DImport _ :: rest -> process env acc rest
     | DInfix _ :: rest -> process env acc rest
     | DComment _ :: rest -> process env acc rest
+    (* Skip proof declarations in normal elaboration *)
+    | DPostulate _ :: rest -> process env acc rest
+    | DDerive _ :: rest -> process env acc rest
+    | DContradict _ :: rest -> process env acc rest
+    | DConclude _ :: rest -> process env acc rest
   in
   process env [] decls
 
@@ -235,3 +240,29 @@ let elab_decl _env decl =
       let term = wrap_lambdas_with_types empty_env pats [] body in
       (name, Syntax.TBase 0, term, Weight.one)
   | _ -> ("", Syntax.TBase 0, Syntax.Refl, Weight.one)  (* placeholder term *)
+
+(* Extract proof declarations from a program *)
+let extract_proof_decls decls =
+  let rec go acc = function
+    | [] -> List.rev acc
+    | DPostulate (name, prop, w) :: rest ->
+        let proof_decl = Proof.Postulate (name, prop, elab_weight w) in
+        go (proof_decl :: acc) rest
+    | DDerive (name, prop, w, from_name, by_name) :: rest ->
+        let proof_decl = Proof.Derive (name, prop, elab_weight w,
+                                       Proof.From (from_name, by_name)) in
+        go (proof_decl :: acc) rest
+    | DContradict (p, q) :: rest ->
+        go (Proof.Contradict (p, q) :: acc) rest
+    | DConclude (name, from_name) :: rest ->
+        go (Proof.Negate (name, from_name) :: acc) rest
+    | _ :: rest -> go acc rest
+  in
+  go [] decls
+
+(* Check if a program contains proof declarations *)
+let has_proof_decls decls =
+  List.exists (function
+    | DPostulate _ | DDerive _ | DContradict _ | DConclude _ -> true
+    | _ -> false
+  ) decls

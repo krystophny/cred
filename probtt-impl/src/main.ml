@@ -2,7 +2,7 @@
 
 open Probtt_lib
 
-let usage = "Usage: probtt <command> <file>\n\nCommands:\n  check <file>  Check a ProbTT/Agda file\n  infer <file>  Infer types in a ProbTT/Agda file\n"
+let usage = "Usage: probtt <command> [file]\n\nCommands:\n  check <file>  Check a ProbTT/Agda file\n  infer <file>  Infer types in a ProbTT/Agda file\n  proof sqrt2   Run the √2 irrationality proof\n"
 
 let read_file path =
   try
@@ -121,15 +121,24 @@ let run_check path =
           printf "ERROR: %a@." Error.pp e;
           exit 1
       | Ok raw_decls ->
-          let decls = Elaborate.elab_program raw_decls in
-          let results = List.map (check_decl []) decls in
-          let errors = List.filter Result.is_error results in
-          if errors = [] then begin
-            printf "All declarations checked successfully.@.";
-            exit 0
+          (* Check if this is a proof file *)
+          if Elaborate.has_proof_decls raw_decls then begin
+            printf "Detected proof declarations, running proof checker...@.@.";
+            let proof_decls = Elaborate.extract_proof_decls raw_decls in
+            match Proof.check_proof proof_decls with
+            | Ok _ -> exit 0
+            | Error _ -> exit 1
           end else begin
-            printf "%d error(s) found.@." (List.length errors);
-            exit 1
+            let decls = Elaborate.elab_program raw_decls in
+            let results = List.map (check_decl []) decls in
+            let errors = List.filter Result.is_error results in
+            if errors = [] then begin
+              printf "All declarations checked successfully.@.";
+              exit 0
+            end else begin
+              printf "%d error(s) found.@." (List.length errors);
+              exit 1
+            end
           end
 
 let run_infer path =
@@ -157,10 +166,22 @@ let run_infer path =
             exit 1
           end
 
+let run_proof name =
+  match name with
+  | "sqrt2" ->
+      (match Proof.run_sqrt2_proof () with
+       | Ok _ -> exit 0
+       | Error _ -> exit 1)
+  | _ ->
+      Printf.printf "Unknown proof: %s\n" name;
+      Printf.printf "Available proofs: sqrt2\n";
+      exit 1
+
 let () =
   match Array.to_list Sys.argv with
   | [_; "check"; path] -> run_check path
   | [_; "infer"; path] -> run_infer path
+  | [_; "proof"; name] -> run_proof name
   | _ ->
       print_string usage;
       exit 1

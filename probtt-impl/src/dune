@@ -1,7 +1,7 @@
 (library
  (name probtt_lib)
  (public_name probtt.lib)
- (modules weight syntax subst context eval error check raw elaborate)
+ (modules weight syntax subst context eval error check raw elaborate proof)
  (libraries str))
 
 (executable

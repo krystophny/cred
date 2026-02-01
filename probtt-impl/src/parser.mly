@@ -9,6 +9,7 @@ open Probtt_lib.Raw
 %token LET IN CASE OF WITH
 %token INFIX INFIXL INFIXR
 %token FORALL SET PROP REFL FST SND INL INR
+%token POSTULATE DERIVE FROM BY CONTRADICT CONCLUDE
 %token LAMBDA ARROW DARROW TIMES PLUS EQ COLON SEMI COMMA DOT BAR
 %token LWEIGHT RWEIGHT
 %token LPAREN RPAREN LBRACE RBRACE LBRACKET RBRACKET UNDERSCORE
@@ -67,6 +68,19 @@ decl:
     { DInfix (ALeft, n, op) }
   | INFIXR n = NUM op = operator_name
     { DInfix (ARight, n, op) }
+
+  (* Proof declarations *)
+  | POSTULATE name = IDENT COLON prop = IDENT LWEIGHT w = weight RWEIGHT
+    { DPostulate (name, prop, w) }
+
+  | DERIVE name = IDENT COLON prop = IDENT LWEIGHT w = weight RWEIGHT FROM from_name = IDENT BY by_name = IDENT
+    { DDerive (name, prop, w, from_name, by_name) }
+
+  | CONTRADICT p = IDENT q = IDENT
+    { DContradict (p, q) }
+
+  | CONCLUDE name = IDENT FROM from_name = IDENT
+    { DConclude (name, from_name) }
 
 qualified_name:
   | parts = separated_nonempty_list(DOT, IDENT) { parts }
