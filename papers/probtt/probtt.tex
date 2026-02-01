@@ -4,24 +4,24 @@
 \usepackage{mathtools}
 \usepackage{proof}
 \usepackage[margin=1in]{geometry}
-\usepackage{enumitem}
 \usepackage{stmaryrd}
 
 \newtheorem{definition}{Definition}[section]
 \newtheorem{remark}{Remark}[section]
 \newtheorem{theorem}{Theorem}[section]
 \newtheorem{lemma}[theorem]{Lemma}
-\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{example}[theorem]{Example}
 
-% Basic notation
+\newcommand{\W}{\mathsf{W}}
+\newcommand{\Type}{\mathsf{Type}}
 \newcommand{\ctx}{\;\mathsf{ctx}}
 \newcommand{\type}{\;\mathsf{type}}
-\newcommand{\Prob}{\mathbb{P}}
-\newcommand{\Type}{\mathsf{Type}}
-\newcommand{\Nat}{\mathbb{N}}
 \newcommand{\at}[1]{\,@\,#1}
+\newcommand{\one}{\mathbf{1}}
+\newcommand{\zero}{\mathbf{0}}
 
-\title{ProbTT: Type Theory with Primitive Probability}
+\title{ProbTT: Type Theory with Primitive Weights\\[0.5em]
+\large Minimal Axiomatization}
 
 \author{Probabilistic Foundations Project}
 \date{\today}
@@ -31,451 +31,484 @@
 \maketitle
 
 \begin{abstract}
-We define a type theory where probability is primitive. Judgments have the form $\Gamma \vdash a : A \at{p}$, meaning ``$a$ inhabits $A$ with weight $p$.'' The weight $p$ is itself a term of type $\Prob$. When weights are restricted to $\{0,1\}$, we recover Martin-L\"of Type Theory. We give precise formation, introduction, elimination, and computation rules, and sketch the categorical semantics in Markov categories.
+We define a type theory where judgments carry \emph{weights} from a primitive weight monoid $\W$. The monoid has multiplication, unit, zero, and order---but NO addition or subtraction. This is the minimal structure needed for combining uncertainties. When $\W = \{\zero, \one\}$, we recover Martin-L\"of Type Theory. When $\W = [0,1]$, we get probabilistic typing. The weight structure is axiomatized, not constructed from real numbers.
 \end{abstract}
 
 \tableofcontents
 
 %=============================================================================
-\section{Syntax}
+\section{The Weight Monoid}
 %=============================================================================
 
-\subsection{Pre-terms and Pre-types}
+\subsection{Minimal Structure}
 
-We define raw syntax first, then typing rules.
+We do NOT assume numbers. We axiomatize the minimal structure needed for weights.
 
-\begin{definition}[Raw Terms]
-\begin{align*}
-p, q, r &::= 0 \mid 1 \mid p + q \mid p \cdot q \mid p - q \mid x && \text{(probability terms)} \\
-a, b, c &::= x \mid \lambda x.a \mid a\,b \mid (a,b) \mid \pi_1 a \mid \pi_2 a \mid \mathsf{refl} \mid J(\ldots) && \text{(terms)} \\
-A, B, C &::= \Prob \mid A \to_p B \mid \Sigma_p(x:A).B \mid \mathsf{Id}_A(a,b) \mid \Type_i && \text{(types)}
-\end{align*}
+\begin{definition}[Weight Monoid]
+$\W$ is a type with:
+\begin{itemize}
+    \item Elements: $\one : \W$ (certainty), $\zero : \W$ (impossibility)
+    \item Operation: $(\cdot) : \W \to \W \to \W$ (combination)
+    \item Order: $(\leq) : \W \to \W \to \Type$ (sub-weight)
+\end{itemize}
 \end{definition}
 
-\begin{remark}
-The subscript $p$ on $\to_p$ and $\Sigma_p$ is a \emph{weight annotation}---a term of type $\Prob$. This is the key novelty: type formers carry probability weights.
+\begin{definition}[Weight Axioms]
+The following equations and laws hold:
+\begin{align}
+w \cdot \one &= w \tag{unit-right} \\
+\one \cdot w &= w \tag{unit-left} \\
+w \cdot \zero &= \zero \tag{annihilate-right} \\
+\zero \cdot w &= \zero \tag{annihilate-left} \\
+(u \cdot v) \cdot w &= u \cdot (v \cdot w) \tag{assoc} \\
+u \cdot v &= v \cdot u \tag{comm}
+\end{align}
+\end{definition}
+
+\begin{definition}[Order Axioms]
+\begin{align}
+w &\leq w \tag{refl} \\
+u \leq v \land v \leq w &\Rightarrow u \leq w \tag{trans} \\
+u \leq v \land v \leq u &\Rightarrow u = v \tag{antisym} \\
+\zero &\leq w \tag{zero-least} \\
+w &\leq \one \tag{one-greatest} \\
+u \leq v &\Rightarrow u \cdot w \leq v \cdot w \tag{mono}
+\end{align}
+\end{definition}
+
+\begin{remark}[What We DON'T Have]
+\begin{itemize}
+    \item NO addition $+$
+    \item NO subtraction $-$
+    \item NO complement $\one - w$
+    \item NO intermediate values (yet)
+\end{itemize}
+This is a \textbf{bounded ordered commutative monoid}, not a semiring.
 \end{remark}
 
-\subsection{Judgments}
+\subsection{Examples}
+
+\begin{example}[Boolean Weights]
+$\W = \{\zero, \one\}$ with $\one \cdot \one = \one$, else $\zero$.
+
+This gives classical logic: certain or impossible, nothing between.
+\end{example}
+
+\begin{example}[Probability Weights]
+$\W = [0,1] \subset \mathbb{R}$ with ordinary multiplication.
+
+This gives probabilistic reasoning.
+\end{example}
+
+\begin{example}[Discrete Weights]
+$\W = \{0, \frac{1}{n}, \frac{2}{n}, \ldots, 1\}$ for fixed $n$.
+
+Finite, decidable, approximates probability.
+\end{example}
+
+\begin{example}[Tropical Weights]
+$\W = [0, \infty]$ with $u \cdot v = u + v$ (tropical multiplication).
+
+This gives cost/distance semantics instead of probability.
+\end{example}
+
+%=============================================================================
+\section{Judgments}
+%=============================================================================
 
 \begin{definition}[Judgment Forms]
-ProbTT has five judgment forms:
 \begin{enumerate}
-    \item $\Gamma \ctx$ \hfill (context validity)
-    \item $\Gamma \vdash A \type$ \hfill (type validity)
-    \item $\Gamma \vdash a : A$ \hfill (typing)
-    \item $\Gamma \vdash a \equiv b : A$ \hfill (definitional equality)
-    \item $\Gamma \vdash p : \Prob$ \hfill (probability term)
+    \item $\Gamma \ctx$ \hfill (valid context)
+    \item $\Gamma \vdash A \type$ \hfill (valid type)
+    \item $\Gamma \vdash a : A \at{w}$ \hfill (weighted typing)
+    \item $\Gamma \vdash a \equiv b : A \at{w}$ \hfill (weighted equality)
 \end{enumerate}
+where $w$ is a closed term of type $\W$.
 \end{definition}
 
-\begin{remark}[No @ Annotation on Judgments]
-Unlike the sketch, we do NOT write $\Gamma \vdash a : A \at{p}$. Instead, the weight $p$ appears \emph{inside} the type: $A \to_p B$ means ``function that produces output with weight $p$.'' This avoids the question ``what does the annotation mean?''---the weight is part of the type structure.
-\end{remark}
-
-%=============================================================================
-\section{The Probability Type}
-%=============================================================================
-
-\subsection{Formation}
-
-\begin{gather}
-\infer[\textsc{Prob-Form}]
-  {\Gamma \vdash \Prob \type}
-  {\Gamma \ctx}
-\end{gather}
-
-$\Prob$ is a type in any valid context.
-
-\subsection{Introduction}
-
-\begin{gather}
-\infer[\textsc{Prob-Zero}]
-  {\Gamma \vdash 0 : \Prob}
-  {\Gamma \ctx}
-\qquad
-\infer[\textsc{Prob-One}]
-  {\Gamma \vdash 1 : \Prob}
-  {\Gamma \ctx}
-\\[1em]
-\infer[\textsc{Prob-Add}]
-  {\Gamma \vdash p + q : \Prob}
-  {\Gamma \vdash p : \Prob & \Gamma \vdash q : \Prob}
-\\[1em]
-\infer[\textsc{Prob-Mul}]
-  {\Gamma \vdash p \cdot q : \Prob}
-  {\Gamma \vdash p : \Prob & \Gamma \vdash q : \Prob}
-\\[1em]
-\infer[\textsc{Prob-Sub}]
-  {\Gamma \vdash p - q : \Prob}
-  {\Gamma \vdash p : \Prob & \Gamma \vdash q : \Prob}
-\end{gather}
-
-\subsection{Equations}
-
-$\Prob$ satisfies the equations of a bounded semiring with subtraction:
-\begin{align}
-p + q &\equiv q + p & p \cdot q &\equiv q \cdot p \\
-(p + q) + r &\equiv p + (q + r) & (p \cdot q) \cdot r &\equiv p \cdot (q \cdot r) \\
-p + 0 &\equiv p & p \cdot 1 &\equiv p \\
-p \cdot 0 &\equiv 0 & p \cdot (q + r) &\equiv p \cdot q + p \cdot r \\
-p - p &\equiv 0 & p + (1 - p) &\equiv 1 \\
-1 - (1 - p) &\equiv p & (p + q) - q &\equiv p
-\end{align}
-
-These are definitional equalities (computation rules).
-
-\subsection{Elimination}
-
-There is no general eliminator for $\Prob$. We cannot ``case split'' on whether $p = 0$ or $p = 1$ in general. This is crucial: probability is not Boolean.
-
-However, in the \emph{semantics}, $\Prob$ is interpreted as $[0,1]$, and type-checking may use real-number reasoning.
-
-%=============================================================================
-\section{Weighted Function Types}
-%=============================================================================
-
-The key innovation: functions carry a \emph{weight} indicating the probability of producing a valid output.
-
-\subsection{Formation}
-
-\begin{gather}
-\infer[\textsc{Fun-Form}]
-  {\Gamma \vdash (x : A) \to_p B \type}
-  {\Gamma \vdash A \type & \Gamma, x : A \vdash B \type & \Gamma, x : A \vdash p : \Prob}
-\end{gather}
-
-Read $(x : A) \to_p B$ as: ``given $x : A$, produce $b : B$ with weight $p(x)$.''
-
-When $B$ does not depend on $x$, write $A \to_p B$.
-
-\subsection{Introduction}
-
-\begin{gather}
-\infer[\textsc{Fun-Intro}]
-  {\Gamma \vdash \lambda x.b : (x : A) \to_p B}
-  {\Gamma, x : A \vdash b : B & \Gamma, x : A \vdash p : \Prob}
-\end{gather}
-
-The weight $p$ is determined by the function's specification, not inferred from the body.
-
-\subsection{Elimination}
-
-\begin{gather}
-\infer[\textsc{Fun-Elim}]
-  {\Gamma \vdash f\,a : B[a/x] \at{p[a/x]}}
-  {\Gamma \vdash f : (x : A) \to_p B & \Gamma \vdash a : A}
-\end{gather}
-
-\begin{remark}
-Here we use $\at{p[a/x]}$ as an annotation on the \emph{result}, not on the judgment. This means: the term $f\,a$ has type $B[a/x]$, but carries weight $p[a/x]$.
-
-We need to formalize what ``carries weight'' means. Two options:
-\begin{enumerate}
-    \item \textbf{Refinement types}: $f\,a : \{y : B[a/x] \mid \mathsf{weight}(y) = p[a/x]\}$
-    \item \textbf{Weighted types}: A separate judgment $\Gamma \vdash a : A \at{p}$ where $\at{p}$ is sugar for a weighted type.
-\end{enumerate}
-
-We take option 2 for clarity.
-\end{remark}
-
-\subsection{Weighted Judgment (Derived)}
-
-\begin{definition}[Weighted Typing]
-Define $\Gamma \vdash a : A \at{p}$ as sugar for:
-\[
-\Gamma \vdash a : A \times_{\mathsf{wt}} p
-\]
-where $A \times_{\mathsf{wt}} p$ is a type of pairs $(a, p)$ with $a : A$ and $p : \Prob$, subject to coherence.
-\end{definition}
-
-Actually, this gets complicated. Let's take a different approach.
-
-%=============================================================================
-\section{Alternative: Judgments with Weights}
-%=============================================================================
-
-We now take the weights seriously as part of the judgment.
-
-\subsection{Judgment Forms (Revised)}
-
-\begin{definition}[Weighted Judgments]
-\begin{enumerate}
-    \item $\Gamma \ctx$ \hfill (context validity)
-    \item $\Gamma \vdash A \type$ \hfill ($A$ is a type)
-    \item $\Gamma \vdash a : A \at{p}$ \hfill ($a$ has type $A$ with weight $p$)
-    \item $\Gamma \vdash a \equiv b : A \at{p}$ \hfill ($a$ equals $b$ at $A$ with weight $p$)
-\end{enumerate}
-where $p$ is a \textbf{closed term} of type $\Prob$.
-\end{definition}
-
-\begin{remark}[Weight Semantics]
-$\Gamma \vdash a : A \at{p}$ means: in context $\Gamma$, the term $a$ is a valid element of $A$ with ``probability mass'' $p$. Think of this as:
+\begin{remark}[Interpretation]
+$\Gamma \vdash a : A \at{w}$ means: term $a$ inhabits type $A$ with weight $w$.
 \begin{itemize}
-    \item $p = 1$: $a$ definitely inhabits $A$
-    \item $p = 0$: $a$ does not inhabit $A$ (vacuously true)
-    \item $0 < p < 1$: $a$ partially inhabits $A$
+    \item $w = \one$: $a$ definitely inhabits $A$
+    \item $w = \zero$: $a$ does not inhabit $A$ (vacuously true)
+    \item $\zero < w < \one$: $a$ partially/probably inhabits $A$
 \end{itemize}
-The categorical semantics makes this precise: weighted typing corresponds to morphisms in a Markov category.
 \end{remark}
 
-\subsection{Structural Rules}
+%=============================================================================
+\section{Structural Rules}
+%=============================================================================
+
+\subsection{Contexts}
+
+\begin{gather}
+\infer[\textsc{Ctx-Empty}]
+  {\cdot \ctx}
+  {}
+\\[1em]
+\infer[\textsc{Ctx-Ext}]
+  {\Gamma, x : A \ctx}
+  {\Gamma \ctx & \Gamma \vdash A \type}
+\end{gather}
+
+Contexts have no weights---they list available assumptions.
+
+\subsection{Variables}
+
+\begin{gather}
+\infer[\textsc{Var}]
+  {\Gamma, x : A, \Delta \vdash x : A \at{\one}}
+  {}
+\end{gather}
+
+Variables have weight $\one$: if $x : A$ is assumed, then $x$ definitely has type $A$.
+
+\subsection{Weakening}
 
 \begin{gather}
 \infer[\textsc{Weaken}]
-  {\Gamma \vdash a : A \at{q}}
-  {\Gamma \vdash a : A \at{p} & q \leq p}
-\\[1em]
-\infer[\textsc{Var}]
-  {\Gamma, x : A, \Delta \vdash x : A \at{1}}
-  {\Gamma \vdash A \type}
+  {\Gamma \vdash a : A \at{v}}
+  {\Gamma \vdash a : A \at{w} & v \leq w}
 \end{gather}
 
-Variables have weight 1: if $x : A$ is in context, then $x$ definitely has type $A$.
+If $a : A$ with weight $w$, then $a : A$ with any smaller weight $v$.
 
-\subsection{Prob Rules (Weighted)}
+\subsection{Substitution}
 
 \begin{gather}
-\infer[\textsc{Prob-Intro}]
-  {\Gamma \vdash p : \Prob \at{1}}
-  {\Gamma \vdash p : \Prob \text{ (by syntax)}}
+\infer[\textsc{Subst}]
+  {\Gamma \vdash b[a/x] : B[a/x] \at{w \cdot v}}
+  {\Gamma \vdash a : A \at{w} & \Gamma, x : A \vdash b : B \at{v}}
 \end{gather}
 
-Every well-formed probability term has weight 1 (probability values are certain).
+Substituting a weighted term multiplies weights.
 
-\subsection{Function Rules (Weighted)}
+%=============================================================================
+\section{Weight Type}
+%=============================================================================
+
+\begin{gather}
+\infer[\textsc{W-Form}]
+  {\Gamma \vdash \W \type}
+  {\Gamma \ctx}
+\\[1em]
+\infer[\textsc{W-Zero}]
+  {\Gamma \vdash \zero : \W \at{\one}}
+  {\Gamma \ctx}
+\qquad
+\infer[\textsc{W-One}]
+  {\Gamma \vdash \one : \W \at{\one}}
+  {\Gamma \ctx}
+\\[1em]
+\infer[\textsc{W-Mul}]
+  {\Gamma \vdash u \cdot v : \W \at{\one}}
+  {\Gamma \vdash u : \W \at{\one} & \Gamma \vdash v : \W \at{\one}}
+\end{gather}
+
+Weight terms have weight $\one$: the weights themselves are certain.
+
+%=============================================================================
+\section{Function Types}
+%=============================================================================
+
+\subsection{Formation}
 
 \begin{gather}
 \infer[\textsc{Fun-Form}]
   {\Gamma \vdash (x : A) \to B \type}
   {\Gamma \vdash A \type & \Gamma, x : A \vdash B \type}
-\\[1em]
-\infer[\textsc{Fun-Intro}]
-  {\Gamma \vdash \lambda x.b : (x : A) \to B \at{p}}
-  {\Gamma, x : A \vdash b : B \at{p}}
-\\[1em]
-\infer[\textsc{Fun-Elim}]
-  {\Gamma \vdash f\,a : B[a/x] \at{p \cdot q}}
-  {\Gamma \vdash f : (x : A) \to B \at{p} & \Gamma \vdash a : A \at{q}}
-\\[1em]
-\infer[\textsc{Fun-Beta}]
-  {\Gamma \vdash (\lambda x.b)\,a \equiv b[a/x] : B[a/x] \at{p}}
-  {\Gamma, x : A \vdash b : B \at{p} & \Gamma \vdash a : A \at{1}}
 \end{gather}
 
-\begin{remark}[Weight Multiplication]
-In \textsc{Fun-Elim}, the output weight is $p \cdot q$: the product of the function's weight and the argument's weight. This models:
-\begin{itemize}
-    \item Uncertain function applied to certain argument: weight $p$
-    \item Certain function applied to uncertain argument: weight $q$
-    \item Both uncertain: weight $p \cdot q$
-\end{itemize}
-\end{remark}
+Function types are certain---no weight on type formation.
 
-\subsection{Pair Rules (Weighted)}
+\subsection{Introduction}
+
+\begin{gather}
+\infer[\textsc{Fun-Intro}]
+  {\Gamma \vdash \lambda x. b : (x : A) \to B \at{w}}
+  {\Gamma, x : A \vdash b : B \at{w}}
+\end{gather}
+
+A function has weight $w$ if its body has weight $w$ (uniformly in $x$).
+
+\subsection{Elimination}
+
+\begin{gather}
+\infer[\textsc{Fun-Elim}]
+  {\Gamma \vdash f\,a : B[a/x] \at{w \cdot v}}
+  {\Gamma \vdash f : (x : A) \to B \at{w} & \Gamma \vdash a : A \at{v}}
+\end{gather}
+
+\textbf{Key rule}: weights multiply. Uncertain function applied to uncertain argument gives product weight.
+
+\subsection{Computation}
+
+\begin{gather}
+\infer[\textsc{Fun-$\beta$}]
+  {\Gamma \vdash (\lambda x. b)\,a \equiv b[a/x] : B[a/x] \at{w}}
+  {\Gamma, x : A \vdash b : B \at{w} & \Gamma \vdash a : A \at{\one}}
+\end{gather}
+
+$\beta$-reduction preserves weight (when argument is certain).
+
+%=============================================================================
+\section{Pair Types}
+%=============================================================================
+
+\subsection{Formation}
 
 \begin{gather}
 \infer[\textsc{Pair-Form}]
-  {\Gamma \vdash \Sigma(x : A).B \type}
+  {\Gamma \vdash \Sigma(x : A). B \type}
   {\Gamma \vdash A \type & \Gamma, x : A \vdash B \type}
-\\[1em]
-\infer[\textsc{Pair-Intro}]
-  {\Gamma \vdash (a, b) : \Sigma(x : A).B \at{p \cdot q}}
-  {\Gamma \vdash a : A \at{p} & \Gamma \vdash b : B[a/x] \at{q}}
-\\[1em]
-\infer[\textsc{Pair-Fst}]
-  {\Gamma \vdash \pi_1\,t : A \at{p}}
-  {\Gamma \vdash t : \Sigma(x : A).B \at{p}}
-\\[1em]
-\infer[\textsc{Pair-Snd}]
-  {\Gamma \vdash \pi_2\,t : B[\pi_1 t/x] \at{p}}
-  {\Gamma \vdash t : \Sigma(x : A).B \at{p}}
 \end{gather}
 
-Pair introduction multiplies weights (joint probability). Projection preserves weight.
+\subsection{Introduction}
 
-\subsection{Identity Rules (Weighted)}
+\begin{gather}
+\infer[\textsc{Pair-Intro}]
+  {\Gamma \vdash (a, b) : \Sigma(x : A). B \at{w \cdot v}}
+  {\Gamma \vdash a : A \at{w} & \Gamma \vdash b : B[a/x] \at{v}}
+\end{gather}
+
+Pair weight = product of component weights. (Joint probability.)
+
+\subsection{Elimination}
+
+\begin{gather}
+\infer[\textsc{Pair-Fst}]
+  {\Gamma \vdash \pi_1\,t : A \at{w}}
+  {\Gamma \vdash t : \Sigma(x : A). B \at{w}}
+\\[1em]
+\infer[\textsc{Pair-Snd}]
+  {\Gamma \vdash \pi_2\,t : B[\pi_1 t / x] \at{w}}
+  {\Gamma \vdash t : \Sigma(x : A). B \at{w}}
+\end{gather}
+
+Projections preserve weight.
+
+%=============================================================================
+\section{Identity Types}
+%=============================================================================
+
+\subsection{Formation}
 
 \begin{gather}
 \infer[\textsc{Id-Form}]
   {\Gamma \vdash \mathsf{Id}_A(a, b) \type}
-  {\Gamma \vdash a : A \at{1} & \Gamma \vdash b : A \at{1}}
-\\[1em]
-\infer[\textsc{Id-Intro}]
-  {\Gamma \vdash \mathsf{refl}_a : \mathsf{Id}_A(a, a) \at{p}}
-  {\Gamma \vdash a : A \at{p}}
-\\[1em]
-\infer[\textsc{Id-Elim}]
-  {\Gamma \vdash J(P, d, e) : P(b, e) \at{p \cdot q}}
-  {\begin{array}{c}
-    \Gamma, x : A, y : \mathsf{Id}_A(a, x) \vdash P(x, y) \type \\
-    \Gamma \vdash d : P(a, \mathsf{refl}_a) \at{p} \\
-    \Gamma \vdash e : \mathsf{Id}_A(a, b) \at{q}
-  \end{array}}
+  {\Gamma \vdash a : A \at{\one} & \Gamma \vdash b : A \at{\one}}
 \end{gather}
 
-\begin{remark}
-Identity formation requires weight 1 for both endpoints---we only form $\mathsf{Id}_A(a,b)$ when $a$ and $b$ definitely exist. But a proof of identity can have lower weight.
-\end{remark}
+Identity types require certain endpoints.
+
+\subsection{Introduction}
+
+\begin{gather}
+\infer[\textsc{Id-Intro}]
+  {\Gamma \vdash \mathsf{refl} : \mathsf{Id}_A(a, a) \at{w}}
+  {\Gamma \vdash a : A \at{w}}
+\end{gather}
+
+Reflexivity has the same weight as the term.
+
+\subsection{Elimination}
+
+\begin{gather}
+\infer[\textsc{Id-Elim}]
+  {\Gamma \vdash J(d, e) : P[b, e] \at{w \cdot v}}
+  {\begin{array}{c}
+    \Gamma, x : A, p : \mathsf{Id}_A(a, x) \vdash P \type \\
+    \Gamma \vdash d : P[a, \mathsf{refl}] \at{w} \\
+    \Gamma \vdash e : \mathsf{Id}_A(a, b) \at{v}
+  \end{array}}
+\end{gather}
 
 %=============================================================================
 \section{Universes}
 %=============================================================================
 
 \begin{gather}
-\infer[\textsc{Univ-Form}]
+\infer[\textsc{Univ}]
   {\Gamma \vdash \Type_i \type}
   {\Gamma \ctx}
 \\[1em]
-\infer[\textsc{Univ-Cumul}]
-  {\Gamma \vdash A : \Type_{i+1} \at{1}}
-  {\Gamma \vdash A : \Type_i \at{1}}
-\\[1em]
-\infer[\textsc{Prob-Univ}]
-  {\Gamma \vdash \Prob : \Type_0 \at{1}}
+\infer[\textsc{W-Univ}]
+  {\Gamma \vdash \W : \Type_0 \at{\one}}
   {\Gamma \ctx}
+\\[1em]
+\infer[\textsc{El}]
+  {\Gamma \vdash A \type}
+  {\Gamma \vdash A : \Type_i \at{\one}}
 \end{gather}
 
-$\Prob$ lives in the lowest universe. Types-as-terms have weight 1 (types are certain).
+Types-as-terms have weight $\one$. The weight monoid lives in $\Type_0$.
 
 %=============================================================================
-\section{MLTT as Fragment}
+\section{MLTT Embedding}
 %=============================================================================
 
-\begin{theorem}[MLTT Embedding]
-Restrict to judgments where all weights are $1$. Then:
-\begin{enumerate}
-    \item $\Gamma \vdash a : A \at{1}$ becomes $\Gamma \vdash a : A$
-    \item Weight multiplication $1 \cdot 1 = 1$ is trivial
-    \item All ProbTT rules reduce to MLTT rules
-    \item Weakening with $q \leq 1$ where $q = 1$ is trivial
-\end{enumerate}
+\begin{theorem}
+Let $\W = \{\zero, \one\}$ with $\one \cdot \one = \one$, else $\zero$.
+
+Then ProbTT judgments reduce to MLTT judgments:
+\begin{itemize}
+    \item $\Gamma \vdash a : A \at{\one}$ becomes $\Gamma \vdash a : A$
+    \item $\Gamma \vdash a : A \at{\zero}$ is vacuously true (ignore)
+    \item All rules with $w \cdot v$ compute: $\one \cdot \one = \one$, else $\zero$
+\end{itemize}
 \end{theorem}
 
 \begin{proof}
-By inspection of each rule. When $p = q = 1$:
+By inspection. When weights are Boolean:
 \begin{itemize}
-    \item \textsc{Fun-Elim}: weight $1 \cdot 1 = 1$
-    \item \textsc{Pair-Intro}: weight $1 \cdot 1 = 1$
-    \item \textsc{Id-Elim}: weight $1 \cdot 1 = 1$
+    \item \textsc{Fun-Elim}: $\one \cdot \one = \one$, so certain function + certain argument = certain result
+    \item \textsc{Pair-Intro}: $\one \cdot \one = \one$, so certain components = certain pair
+    \item \textsc{Weaken}: $v \leq w$ with $v, w \in \{\zero, \one\}$ is trivial when $w = \one$
 \end{itemize}
-The rules become exactly MLTT rules with weight annotations erased.
+The rules become exactly MLTT.
 \end{proof}
+
+%=============================================================================
+\section{What We Gain}
+%=============================================================================
+
+\subsection{Graded Reasoning}
+
+With $\W = [0, 1]$:
+
+\begin{itemize}
+    \item $f : A \to B \at{0.9}$ means: $f$ produces valid output 90\% of the time
+    \item $(a, b) : A \times B \at{0.8 \cdot 0.7}$ means: joint probability 0.56
+    \item Composition multiplies: uncertain reasoning chains degrade gracefully
+\end{itemize}
+
+\subsection{Resource Interpretation}
+
+With $\W = [0, \infty]$ (tropical):
+
+\begin{itemize}
+    \item $a : A \at{c}$ means: producing $a$ costs $c$
+    \item Composition adds costs (since tropical $\cdot$ is $+$)
+    \item This gives cost-aware type theory
+\end{itemize}
+
+\subsection{Possibility Interpretation}
+
+With $\W = \{\zero, ?, \one\}$ (three-valued):
+
+\begin{itemize}
+    \item $\one$ = definitely true
+    \item $?$ = possibly true
+    \item $\zero$ = definitely false
+    \item $? \cdot ? = ?$, $\one \cdot ? = ?$, etc.
+\end{itemize}
+
+%=============================================================================
+\section{What About Addition?}
+%=============================================================================
+
+We deliberately omitted $+$. Where would we need it?
+
+\subsection{Disjunction}
+
+In probability: $P(A \vee B) = P(A) + P(B) - P(A \wedge B)$.
+
+But this requires both $+$ AND $-$. Without them, we can still have sum types:
+
+\begin{gather}
+\infer[\textsc{Sum-Form}]
+  {\Gamma \vdash A + B \type}
+  {\Gamma \vdash A \type & \Gamma \vdash B \type}
+\\[1em]
+\infer[\textsc{Sum-InL}]
+  {\Gamma \vdash \mathsf{inl}\,a : A + B \at{w}}
+  {\Gamma \vdash a : A \at{w}}
+\\[1em]
+\infer[\textsc{Sum-InR}]
+  {\Gamma \vdash \mathsf{inr}\,b : A + B \at{w}}
+  {\Gamma \vdash b : B \at{w}}
+\end{gather}
+
+The weight of $\mathsf{inl}\,a$ is just $w$---no addition involved.
+
+\subsection{Negation}
+
+Classical negation uses complement: $\neg P = 1 - P$.
+
+Without $-$, we define negation as:
+\[
+\neg A := A \to \mathbf{0}
+\]
+
+A proof of $\neg A$ with weight $w$ is a function that, given $a : A$, produces $\bot$ with weight $w$. This works without subtraction.
+
+\subsection{When We'd Need Addition}
+
+\begin{itemize}
+    \item Mixing independent distributions
+    \item Bayesian update (needs $+$ and $-$)
+    \item Expected value (needs integration)
+\end{itemize}
+
+For these, extend $\W$ to a semiring. But the \textbf{core type theory works without}.
 
 %=============================================================================
 \section{Categorical Semantics}
 %=============================================================================
 
-\subsection{Markov Categories}
-
-\begin{definition}[Markov Category]
-A \emph{Markov category} is a symmetric monoidal category $(\mathcal{C}, \otimes, I)$ with:
-\begin{enumerate}
-    \item A commutative comonoid structure on each object: $\mathsf{copy}_A : A \to A \otimes A$, $\mathsf{del}_A : A \to I$
-    \item Compatibility with the monoidal structure
-\end{enumerate}
-\end{definition}
-
-Examples: $\mathsf{Stoch}$ (measurable spaces with Markov kernels), $\mathsf{FinStoch}$ (finite sets with stochastic matrices).
-
-\subsection{Interpretation}
-
+\begin{definition}[Weighted Category]
+A \emph{$\W$-weighted category} has:
 \begin{itemize}
-    \item $\llbracket \Prob \rrbracket = [0,1]$
-    \item $\llbracket A \to B \at{p} \rrbracket$ = morphism $A \to B$ in the Markov category, scaled by $p$
-    \item $\llbracket \Gamma \vdash a : A \at{p} \rrbracket$ = morphism $\llbracket \Gamma \rrbracket \to \llbracket A \rrbracket$ with ``mass'' $p$
-    \item Contexts $\Gamma$ interpret as products
-    \item Weight multiplication = composition of scaled morphisms
+    \item Objects (types)
+    \item For each $w : \W$, a set of morphisms $\mathrm{Hom}_w(A, B)$
+    \item Identity: $\mathrm{id}_A \in \mathrm{Hom}_\one(A, A)$
+    \item Composition: $f \in \mathrm{Hom}_w(A, B)$, $g \in \mathrm{Hom}_v(B, C)$ gives $g \circ f \in \mathrm{Hom}_{w \cdot v}(A, C)$
 \end{itemize}
+\end{definition}
 
 \begin{theorem}[Soundness]
-If $\Gamma \vdash a : A \at{p}$ is derivable, then $\llbracket a \rrbracket : \llbracket \Gamma \rrbracket \to \llbracket A \rrbracket$ is a valid morphism in the Markov category with appropriate scaling.
+ProbTT has a sound interpretation in $\W$-weighted categories:
+\begin{itemize}
+    \item $\llbracket A \rrbracket$ = object
+    \item $\llbracket \Gamma \vdash a : A \at{w} \rrbracket$ = morphism in $\mathrm{Hom}_w(\llbracket \Gamma \rrbracket, \llbracket A \rrbracket)$
+    \item Weight multiplication = composition
+\end{itemize}
 \end{theorem}
 
-\begin{proof}
-By induction on derivations. The key cases:
-\begin{itemize}
-    \item \textsc{Fun-Elim}: Composition of morphisms, scaling factors multiply
-    \item \textsc{Pair-Intro}: Product of morphisms, independent probabilities multiply
-    \item \textsc{Weaken}: Scaling by smaller factor is valid (sub-probability)
-\end{itemize}
-\end{proof}
+When $\W = [0,1]$, this becomes a Markov category.
 
 %=============================================================================
-\section{Logic from Probability}
+\section{Summary}
 %=============================================================================
 
-\subsection{Propositions as Types with Weight}
+\textbf{Primitive}: Weight monoid $\W$ with $\zero, \one, \cdot, \leq$.
 
-In MLTT, propositions are types (Curry-Howard). In ProbTT:
-\begin{center}
-\emph{Propositions are types, proofs have weights.}
-\end{center}
+\textbf{Judgments}: $\Gamma \vdash a : A \at{w}$.
 
-\begin{definition}[Probabilistic Proposition]
-A proposition $P$ is a type. A proof of $P$ with confidence $p$ is a term $a : P \at{p}$.
-\end{definition}
+\textbf{Key rule}: Weights multiply in elimination.
 
-\subsection{Logical Connectives}
+\textbf{MLTT}: The $\W = \{\zero, \one\}$ case.
 
-\begin{align}
-P \wedge Q &:= \Sigma(\_:P).Q && \text{(conjunction = pair)} \\
-P \vee Q &:= P + Q && \text{(disjunction = sum, needs sum types)} \\
-P \Rightarrow Q &:= P \to Q && \text{(implication = function)} \\
-\neg P &:= P \to \mathbf{0} && \text{(negation = function to empty)} \\
-\forall(x:A).P(x) &:= (x:A) \to P(x) && \text{(universal = dependent function)} \\
-\exists(x:A).P(x) &:= \Sigma(x:A).P(x) && \text{(existential = dependent pair)}
-\end{align}
+\textbf{Probability}: The $\W = [0,1]$ case.
 
-\subsection{Weight Interpretation}
-
-\begin{itemize}
-    \item $a : P \wedge Q \at{p \cdot q}$ means: proof of $P$ with weight $p$, proof of $Q$ with weight $q$, joint weight $p \cdot q$
-    \item $f : P \Rightarrow Q \at{p}$ means: given proof of $P$, produce proof of $Q$ with weight $p$
-    \item $a : \forall(x:A).P(x) \at{p}$ means: for all $x$, prove $P(x)$ with weight $p$ (uniform bound)
-\end{itemize}
-
-\subsection{Classical Logic}
-
-When weights are $\{0, 1\}$:
-\begin{itemize}
-    \item $a : P \at{1}$ = definite proof of $P$
-    \item $a : P \at{0}$ = no proof (vacuous)
-    \item Weight multiplication = conjunction
-    \item This gives classical propositional reasoning
-\end{itemize}
+\textbf{No addition needed} for core type theory.
 
 %=============================================================================
 \section{Open Problems}
 %=============================================================================
 
 \begin{enumerate}
-    \item \textbf{Sum Types}: How do weighted sum types work? $A + B \at{p}$ where the weight might differ for left vs.\ right injection.
+    \item \textbf{Weight inference}: Can we infer $w$ from term structure?
 
-    \item \textbf{Normalization}: Does ProbTT normalize? The weight annotations don't affect computation, so this should follow from MLTT normalization.
+    \item \textbf{Decidability}: Type checking is decidable if $\W$ is decidable.
 
-    \item \textbf{Decidability}: Type checking requires comparing elements of $\Prob$. This is decidable if $\Prob$ is interpreted as rationals, undecidable for reals.
+    \item \textbf{Normalization}: Should follow from MLTT since weights don't affect reduction.
 
-    \item \textbf{Weight Inference}: Can we infer weights from term structure, or must they be explicit?
+    \item \textbf{Adding structure}: When do we need $+$, $-$, integration?
 
-    \item \textbf{Continuous Distributions}: For measure-theoretic probability, we need integration. Can we add $\int : (A \to \Prob) \to \Prob$ as a primitive?
+    \item \textbf{Dependent weights}: What if $w$ depends on $x$ in $(x : A) \to B \at{w(x)}$?
 
-    \item \textbf{Conditioning}: How do we express $\Gamma \vdash a : A \at{p \mid q}$ (conditional probability)?
+    \item \textbf{Conditioning}: How to express $P(A \mid B)$?
 \end{enumerate}
-
-%=============================================================================
-\section{Summary}
-%=============================================================================
-
-ProbTT extends type theory with:
-\begin{enumerate}
-    \item Primitive type $\Prob$ with bounded semiring structure
-    \item Weighted judgments $\Gamma \vdash a : A \at{p}$
-    \item Weight multiplication in elimination rules
-    \item MLTT as the $\{0,1\}$-fragment
-    \item Semantics in Markov categories
-\end{enumerate}
-
-The key insight: \textbf{logic is certain reasoning} (weight 1), \textbf{probability is uncertain reasoning} (weight in $(0,1)$). ProbTT unifies both.
 
 \end{document}
