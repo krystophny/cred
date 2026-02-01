@@ -5,7 +5,7 @@
 \usepackage[margin=1in]{geometry}
 \usepackage{stmaryrd}
 
-% Custom inference rule macro (replaces proof.sty)
+% Custom inference rule macro
 \newcommand{\infer}[3][]{%
   \genfrac{}{}{0.4pt}{0}{#3}{#2}\;\textsc{\footnotesize #1}%
 }
@@ -23,9 +23,10 @@
 \newcommand{\at}[1]{\,@\,#1}
 \newcommand{\one}{\mathbf{1}}
 \newcommand{\zero}{\mathbf{0}}
+\newcommand{\negw}{\neg}
 
 \title{ProbTT: Type Theory with Primitive Weights\\[0.5em]
-\large Minimal Axiomatization}
+\large A Product De Morgan Type Theory}
 
 \author{Probabilistic Foundations Project}
 \date{\today}
@@ -35,30 +36,30 @@
 \maketitle
 
 \begin{abstract}
-We define a type theory where judgments carry \emph{weights} from a primitive weight monoid $\W$. The monoid has multiplication, unit, zero, and order---but NO addition or subtraction. This is the minimal structure needed for combining uncertainties. When $\W = \{\zero, \one\}$, we recover Martin-L\"of Type Theory. When $\W = [0,1]$, we get probabilistic typing. With Markov category structure (copy, delete, disintegration), we get conditioning and Bayes' rule. The weight structure is axiomatized, not constructed from real numbers.
+We define a type theory where judgments carry \emph{weights} from a De Morgan algebra. The algebra has multiplication, complement, zero, one, and order---with disjunction derived via De Morgan duality. When $\W = \{\zero, \one\}$, we recover Martin-L\"of Type Theory. When $\W = {[0,1]}$, we get probabilistic typing with conditioning via the chain rule (not division). The key insight: types and logic \emph{emerge} from weight structure. This is product fuzzy logic lifted to type theory, with conditioning as the key addition.
 \end{abstract}
 
 \tableofcontents
 
 %=============================================================================
-\section{The Weight Monoid}
+\section{The Weight Algebra}
 %=============================================================================
 
-\subsection{Minimal Structure}
+\subsection{Product De Morgan Structure}
 
-We do NOT assume numbers. We axiomatize the minimal structure needed for weights.
+We axiomatize a minimal structure: multiplication and complement. Disjunction is derived.
 
-\begin{definition}[Weight Monoid]
+\begin{definition}[Weight Algebra]
 $\W$ is a type with:
 \begin{itemize}
-    \item Elements: $\one : \W$ (certainty), $\zero : \W$ (impossibility)
-    \item Operation: $(\cdot) : \W \to \W \to \W$ (combination)
-    \item Order: $(\leq) : \W \to \W \to \Type$ (sub-weight)
+    \item Constants: $\one : \W$ (certainty), $\zero : \W$ (impossibility)
+    \item Multiplication: $(\cdot) : \W \to \W \to \W$ (conjunction)
+    \item Complement: $\negw : \W \to \W$ (negation)
+    \item Order: $(\leq) : \W \to \W \to \Type$
 \end{itemize}
 \end{definition}
 
-\begin{definition}[Weight Axioms]
-The following equations and laws hold:
+\begin{definition}[Multiplication Axioms]
 \begin{align}
 w \cdot \one &= w \tag{unit-right} \\
 \one \cdot w &= w \tag{unit-left} \\
@@ -69,51 +70,82 @@ u \cdot v &= v \cdot u \tag{comm}
 \end{align}
 \end{definition}
 
+\begin{definition}[Complement Axioms]
+\begin{align}
+\negw \zero &= \one \tag{neg-zero} \\
+\negw \one &= \zero \tag{neg-one} \\
+\negw \negw w &= w \tag{involution}
+\end{align}
+\end{definition}
+
 \begin{definition}[Order Axioms]
 \begin{align}
 w &\leq w \tag{refl} \\
 u \leq v \land v \leq w &\Rightarrow u \leq w \tag{trans} \\
 u \leq v \land v \leq u &\Rightarrow u = v \tag{antisym} \\
 \zero &\leq w \tag{zero-least} \\
-w &\leq \one \tag{one-greatest} \\
-u \leq v &\Rightarrow u \cdot w \leq v \cdot w \tag{mono}
+w &\leq \one \tag{one-greatest}
 \end{align}
 \end{definition}
 
-\begin{remark}[What We DON'T Have]
-\begin{itemize}
-    \item NO addition $+$
-    \item NO subtraction $-$
-    \item NO complement $\one - w$
-    \item NO intermediate values (yet)
-\end{itemize}
-This is a \textbf{bounded ordered commutative monoid}, not a semiring.
-\end{remark}
+\subsection{Derived Operations}
 
-\subsection{Examples}
+\begin{definition}[De Morgan Disjunction]
+\[
+w \vee v := \negw(\negw w \cdot \negw v)
+\]
+\end{definition}
 
-\begin{example}[Boolean Weights]
-$\W = \{\zero, \one\}$ with $\one \cdot \one = \one$, else $\zero$.
+When $\W = {[0,1]}$ with $\negw w = 1 - w$, we get:
+\[
+w \vee v = 1 - (1-w)(1-v) = w + v - wv
+\]
+This is the \textbf{probabilistic sum} (inclusion-exclusion for independent events).
 
-This gives classical logic: certain or impossible, nothing between.
+\begin{theorem}[De Morgan Laws]
+\begin{align}
+\negw(w \cdot v) &= \negw w \vee \negw v \\
+\negw(w \vee v) &= \negw w \cdot \negw v
+\end{align}
+\end{theorem}
+
+\begin{proof}
+Direct calculation from definitions.
+\end{proof}
+
+\subsection{What We Have vs What We Don't}
+
+\begin{center}
+\begin{tabular}{l|l}
+\textbf{Primitive} & \textbf{Derived} \\
+\hline
+$\cdot$ (multiplication/AND) & $\vee$ (De Morgan OR) \\
+$\negw$ (complement/NOT) & $\to$ (implication, if needed) \\
+$\zero, \one$ (constants) & \\
+$\leq$ (order) &
+\end{tabular}
+\end{center}
+
+\textbf{NOT primitive}: addition $+$, subtraction $-$, division $/$.
+
+\subsection{Instances}
+
+\begin{example}[Boolean: $\W = \{\zero, \one\}$]
+$\one \cdot \one = \one$, else $\zero$. $\negw \zero = \one$, $\negw \one = \zero$.
+
+This is classical Boolean logic.
 \end{example}
 
-\begin{example}[Probability Weights]
-$\W = [0,1] \subset \mathbb{R}$ with ordinary multiplication.
+\begin{example}[Probability: $\W = {[0,1]}$]
+$w \cdot v = w \times v$ (ordinary multiplication). $\negw w = 1 - w$.
 
-This gives probabilistic reasoning.
+This is product fuzzy logic / probabilistic reasoning.
 \end{example}
 
-\begin{example}[Discrete Weights]
-$\W = \{0, \frac{1}{n}, \frac{2}{n}, \ldots, 1\}$ for fixed $n$.
+\begin{example}[Three-valued: $\W = \{\zero, ?, \one\}$]
+$? \cdot ? = ?$, $\negw ? = ?$.
 
-Finite, decidable, approximates probability.
-\end{example}
-
-\begin{example}[Tropical Weights]
-$\W = [0, \infty]$ with $u \cdot v = u + v$ (tropical multiplication).
-
-This gives cost/distance semantics instead of probability.
+Kleene's strong three-valued logic.
 \end{example}
 
 %=============================================================================
@@ -127,7 +159,6 @@ This gives cost/distance semantics instead of probability.
     \item $\Gamma \vdash a : A \at{w}$ \hfill (weighted typing)
     \item $\Gamma \vdash a \equiv b : A \at{w}$ \hfill (weighted equality)
 \end{enumerate}
-where $w$ is a closed term of type $\W$.
 \end{definition}
 
 \begin{remark}[Interpretation]
@@ -143,318 +174,260 @@ $\Gamma \vdash a : A \at{w}$ means: term $a$ inhabits type $A$ with weight $w$.
 \section{Structural Rules}
 %=============================================================================
 
-\subsection{Contexts}
-
 \begin{gather}
 \infer[\textsc{Ctx-Empty}]
   {\cdot \ctx}
   {}
-\\[1em]
+\qquad
 \infer[\textsc{Ctx-Ext}]
   {\Gamma, x : A \ctx}
   {\Gamma \ctx \quad \Gamma \vdash A \type}
-\end{gather}
-
-Contexts have no weights---they list available assumptions.
-
-\subsection{Variables}
-
-\begin{gather}
+\\[1em]
 \infer[\textsc{Var}]
   {\Gamma, x : A, \Delta \vdash x : A \at{\one}}
   {}
-\end{gather}
-
-Variables have weight $\one$: if $x : A$ is assumed, then $x$ definitely has type $A$.
-
-\subsection{Weakening}
-
-\begin{gather}
+\\[1em]
 \infer[\textsc{Weaken}]
   {\Gamma \vdash a : A \at{v}}
   {\Gamma \vdash a : A \at{w} \quad v \leq w}
-\end{gather}
-
-If $a : A$ with weight $w$, then $a : A$ with any smaller weight $v$.
-
-\subsection{Substitution}
-
-\begin{gather}
+\\[1em]
 \infer[\textsc{Subst}]
   {\Gamma \vdash b[a/x] : B[a/x] \at{w \cdot v}}
   {\Gamma \vdash a : A \at{w} \quad \Gamma, x : A \vdash b : B \at{v}}
 \end{gather}
 
-Substituting a weighted term multiplies weights.
+%=============================================================================
+\section{Type Formers}
+%=============================================================================
 
-%=============================================================================
-\section{Weight Type}
-%=============================================================================
+\subsection{Functions (Dependent)}
 
 \begin{gather}
-\infer[\textsc{W-Form}]
-  {\Gamma \vdash \W \type}
-  {\Gamma \ctx}
-\\[1em]
-\infer[\textsc{W-Zero}]
-  {\Gamma \vdash \zero : \W \at{\one}}
-  {\Gamma \ctx}
-\qquad
-\infer[\textsc{W-One}]
-  {\Gamma \vdash \one : \W \at{\one}}
-  {\Gamma \ctx}
-\\[1em]
-\infer[\textsc{W-Mul}]
-  {\Gamma \vdash u \cdot v : \W \at{\one}}
-  {\Gamma \vdash u : \W \at{\one} \quad \Gamma \vdash v : \W \at{\one}}
-\end{gather}
-
-Weight terms have weight $\one$: the weights themselves are certain.
-
-%=============================================================================
-\section{Function Types}
-%=============================================================================
-
-\subsection{Formation}
-
-\begin{gather}
-\infer[\textsc{Fun-Form}]
+\infer[\textsc{$\Pi$-Form}]
   {\Gamma \vdash (x : A) \to B \type}
   {\Gamma \vdash A \type \quad \Gamma, x : A \vdash B \type}
-\end{gather}
-
-Function types are certain---no weight on type formation.
-
-\subsection{Introduction}
-
-\begin{gather}
-\infer[\textsc{Fun-Intro}]
+\\[1em]
+\infer[\textsc{$\Pi$-Intro}]
   {\Gamma \vdash \lambda x. b : (x : A) \to B \at{w}}
   {\Gamma, x : A \vdash b : B \at{w}}
-\end{gather}
-
-A function has weight $w$ if its body has weight $w$ (uniformly in $x$).
-
-\subsection{Elimination}
-
-\begin{gather}
-\infer[\textsc{Fun-Elim}]
+\\[1em]
+\infer[\textsc{$\Pi$-Elim}]
   {\Gamma \vdash f\,a : B[a/x] \at{w \cdot v}}
   {\Gamma \vdash f : (x : A) \to B \at{w} \quad \Gamma \vdash a : A \at{v}}
 \end{gather}
 
-\textbf{Key rule}: weights multiply. Uncertain function applied to uncertain argument gives product weight.
+\textbf{Key rule}: weights multiply in elimination.
 
-\subsection{Computation}
-
-\begin{gather}
-\infer[\textsc{Fun-$\beta$}]
-  {\Gamma \vdash (\lambda x. b)\,a \equiv b[a/x] : B[a/x] \at{w}}
-  {\Gamma, x : A \vdash b : B \at{w} \quad \Gamma \vdash a : A \at{\one}}
-\end{gather}
-
-$\beta$-reduction preserves weight (when argument is certain).
-
-%=============================================================================
-\section{Pair Types}
-%=============================================================================
-
-\subsection{Formation}
+\subsection{Pairs (Dependent)}
 
 \begin{gather}
-\infer[\textsc{Pair-Form}]
+\infer[\textsc{$\Sigma$-Form}]
   {\Gamma \vdash \Sigma(x : A). B \type}
   {\Gamma \vdash A \type \quad \Gamma, x : A \vdash B \type}
-\end{gather}
-
-\subsection{Introduction}
-
-\begin{gather}
-\infer[\textsc{Pair-Intro}]
+\\[1em]
+\infer[\textsc{$\Sigma$-Intro}]
   {\Gamma \vdash (a, b) : \Sigma(x : A). B \at{w \cdot v}}
   {\Gamma \vdash a : A \at{w} \quad \Gamma \vdash b : B[a/x] \at{v}}
-\end{gather}
-
-Pair weight = product of component weights. (Joint probability.)
-
-\subsection{Elimination}
-
-\begin{gather}
-\infer[\textsc{Pair-Fst}]
+\\[1em]
+\infer[\textsc{$\Sigma$-Elim$_1$}]
   {\Gamma \vdash \pi_1\,t : A \at{w}}
   {\Gamma \vdash t : \Sigma(x : A). B \at{w}}
-\\[1em]
-\infer[\textsc{Pair-Snd}]
+\qquad
+\infer[\textsc{$\Sigma$-Elim$_2$}]
   {\Gamma \vdash \pi_2\,t : B[\pi_1 t / x] \at{w}}
   {\Gamma \vdash t : \Sigma(x : A). B \at{w}}
 \end{gather}
 
-Projections preserve weight.
+Pair weight = product of component weights (joint probability).
 
-%=============================================================================
-\section{Identity Types}
-%=============================================================================
+\subsection{Sums (Coproducts)}
 
-\subsection{Formation}
+\begin{gather}
+\infer[\textsc{$+$-Form}]
+  {\Gamma \vdash A + B \type}
+  {\Gamma \vdash A \type \quad \Gamma \vdash B \type}
+\\[1em]
+\infer[\textsc{$+$-Intro$_L$}]
+  {\Gamma \vdash \mathsf{inl}\,a : A + B \at{w}}
+  {\Gamma \vdash a : A \at{w}}
+\qquad
+\infer[\textsc{$+$-Intro$_R$}]
+  {\Gamma \vdash \mathsf{inr}\,b : A + B \at{w}}
+  {\Gamma \vdash b : B \at{w}}
+\end{gather}
+
+\subsection{Empty and Unit}
+
+\begin{gather}
+\infer[\textsc{$\mathbf{0}$-Form}]
+  {\Gamma \vdash \mathbf{0} \type}
+  {\Gamma \ctx}
+\qquad
+\infer[\textsc{$\mathbf{0}$-Elim}]
+  {\Gamma \vdash \mathsf{abort}\,e : A \at{w}}
+  {\Gamma \vdash e : \mathbf{0} \at{w}}
+\\[1em]
+\infer[\textsc{$\mathbf{1}$-Form}]
+  {\Gamma \vdash \mathbf{1} \type}
+  {\Gamma \ctx}
+\qquad
+\infer[\textsc{$\mathbf{1}$-Intro}]
+  {\Gamma \vdash \star : \mathbf{1} \at{\one}}
+  {\Gamma \ctx}
+\end{gather}
+
+\subsection{Identity}
 
 \begin{gather}
 \infer[\textsc{Id-Form}]
   {\Gamma \vdash \mathsf{Id}_A(a, b) \type}
   {\Gamma \vdash a : A \at{\one} \quad \Gamma \vdash b : A \at{\one}}
-\end{gather}
-
-Identity types require certain endpoints.
-
-\subsection{Introduction}
-
-\begin{gather}
+\\[1em]
 \infer[\textsc{Id-Intro}]
   {\Gamma \vdash \mathsf{refl} : \mathsf{Id}_A(a, a) \at{w}}
   {\Gamma \vdash a : A \at{w}}
 \end{gather}
 
-Reflexivity has the same weight as the term.
-
-\subsection{Elimination}
-
-\begin{gather}
-\infer[\textsc{Id-Elim}]
-  {\Gamma \vdash J(d, e) : P[b, e] \at{w \cdot v}}
-  {\begin{array}{c}
-    \Gamma, x : A, p : \mathsf{Id}_A(a, x) \vdash P \type \\
-    \Gamma \vdash d : P[a, \mathsf{refl}] \at{w} \\
-    \Gamma \vdash e : \mathsf{Id}_A(a, b) \at{v}
-  \end{array}}
-\end{gather}
-
 %=============================================================================
-\section{Universes}
+\section{Negation}
 %=============================================================================
 
-\begin{gather}
-\infer[\textsc{Univ}]
-  {\Gamma \vdash \Type_i \type}
-  {\Gamma \ctx}
-\\[1em]
-\infer[\textsc{W-Univ}]
-  {\Gamma \vdash \W : \Type_0 \at{\one}}
-  {\Gamma \ctx}
-\\[1em]
-\infer[\textsc{El}]
-  {\Gamma \vdash A \type}
-  {\Gamma \vdash A : \Type_i \at{\one}}
-\end{gather}
+There are two approaches to negation:
 
-Types-as-terms have weight $\one$. The weight monoid lives in $\Type_0$.
+\subsection{Type-Theoretic Negation}
 
-%=============================================================================
-\section{MLTT Embedding}
-%=============================================================================
-
-\begin{theorem}
-Let $\W = \{\zero, \one\}$ with $\one \cdot \one = \one$, else $\zero$.
-
-Then ProbTT judgments reduce to MLTT judgments:
-\begin{itemize}
-    \item $\Gamma \vdash a : A \at{\one}$ becomes $\Gamma \vdash a : A$
-    \item $\Gamma \vdash a : A \at{\zero}$ is vacuously true (ignore)
-    \item All rules with $w \cdot v$ compute: $\one \cdot \one = \one$, else $\zero$
-\end{itemize}
-\end{theorem}
-
-\begin{proof}
-By inspection. When weights are Boolean:
-\begin{itemize}
-    \item \textsc{Fun-Elim}: $\one \cdot \one = \one$, so certain function + certain argument = certain result
-    \item \textsc{Pair-Intro}: $\one \cdot \one = \one$, so certain components = certain pair
-    \item \textsc{Weaken}: $v \leq w$ with $v, w \in \{\zero, \one\}$ is trivial when $w = \one$
-\end{itemize}
-The rules become exactly MLTT.
-\end{proof}
-
-%=============================================================================
-\section{What We Gain}
-%=============================================================================
-
-\subsection{Graded Reasoning}
-
-With $\W = [0, 1]$:
-
-\begin{itemize}
-    \item $f : A \to B \at{0.9}$ means: $f$ produces valid output 90\% of the time
-    \item $(a, b) : A \times B \at{0.8 \cdot 0.7}$ means: joint probability 0.56
-    \item Composition multiplies: uncertain reasoning chains degrade gracefully
-\end{itemize}
-
-\subsection{Resource Interpretation}
-
-With $\W = [0, \infty]$ (tropical):
-
-\begin{itemize}
-    \item $a : A \at{c}$ means: producing $a$ costs $c$
-    \item Composition adds costs (since tropical $\cdot$ is $+$)
-    \item This gives cost-aware type theory
-\end{itemize}
-
-\subsection{Possibility Interpretation}
-
-With $\W = \{\zero, ?, \one\}$ (three-valued):
-
-\begin{itemize}
-    \item $\one$ = definitely true
-    \item $?$ = possibly true
-    \item $\zero$ = definitely false
-    \item $? \cdot ? = ?$, $\one \cdot ? = ?$, etc.
-\end{itemize}
-
-%=============================================================================
-\section{What About Addition?}
-%=============================================================================
-
-We deliberately omitted $+$. Where would we need it?
-
-\subsection{Disjunction}
-
-In probability: $P(A \vee B) = P(A) + P(B) - P(A \wedge B)$.
-
-But this requires both $+$ AND $-$. Without them, we can still have sum types:
-
-\begin{gather}
-\infer[\textsc{Sum-Form}]
-  {\Gamma \vdash A + B \type}
-  {\Gamma \vdash A \type \quad \Gamma \vdash B \type}
-\\[1em]
-\infer[\textsc{Sum-InL}]
-  {\Gamma \vdash \mathsf{inl}\,a : A + B \at{w}}
-  {\Gamma \vdash a : A \at{w}}
-\\[1em]
-\infer[\textsc{Sum-InR}]
-  {\Gamma \vdash \mathsf{inr}\,b : A + B \at{w}}
-  {\Gamma \vdash b : B \at{w}}
-\end{gather}
-
-The weight of $\mathsf{inl}\,a$ is just $w$---no addition involved.
-
-\subsection{Negation}
-
-Classical negation uses complement: $\neg P = 1 - P$.
-
-Without $-$, we define negation as:
 \[
 \neg A := A \to \mathbf{0}
 \]
 
-A proof of $\neg A$ with weight $w$ is a function that, given $a : A$, produces $\bot$ with weight $w$. This works without subtraction.
+A proof of $\neg A$ is a function from $A$ to the empty type.
 
-\subsection{When We'd Need Addition}
+\subsection{Weight Negation}
 
+For a term $a : A \at{w}$, we can consider $\negw w$ as the ``complementary weight.''
+
+In $\W = {[0,1]}$: if $P(A) = w$, then $P(\neg A) = 1 - w = \negw w$.
+
+\begin{remark}[Relationship]
+Type-theoretic negation ($A \to \mathbf{0}$) corresponds to weight negation in the following sense: if $a : A \at{w}$ with $w > \zero$, then there is no $f : A \to \mathbf{0} \at{\one}$.
+\end{remark}
+
+%=============================================================================
+\section{Conditioning (Not Implication)}
+%=============================================================================
+
+\subsection{Why Not Material Implication}
+
+Material implication $A \to B := \negw A \vee B$ has paradoxes:
 \begin{itemize}
-    \item Mixing independent distributions
-    \item Bayesian update (needs $+$ and $-$)
-    \item Expected value (needs integration)
+    \item $\mathsf{False} \to \mathsf{Anything} = \mathsf{True}$ (ex falso)
+    \item $\mathsf{Anything} \to \mathsf{True} = \mathsf{True}$
 \end{itemize}
 
-For these, extend $\W$ to a semiring. But the \textbf{core type theory works without}.
+We use \textbf{conditioning} instead of implication.
+
+\subsection{Chain Rule}
+
+The fundamental equation is:
+\[
+P(A, B) = P(A \mid B) \cdot P(B) = P(B \mid A) \cdot P(A)
+\]
+
+This is \textbf{multiplicative}---no division needed!
+
+\begin{gather}
+\infer[\textsc{Chain}]
+  {\Gamma \vdash (a, b) : A \times B \at{u \cdot v}}
+  {\Gamma \vdash a : A \at{u} \quad \Gamma \vdash b \mid a : B \at{v}}
+\end{gather}
+
+The conditional $b \mid a$ is \textbf{primitive}. We don't compute it by division; we assert it exists when the chain rule holds.
+
+\subsection{Conditioning vs Implication}
+
+\begin{center}
+\begin{tabular}{l|l|l}
+& \textbf{Implication} $A \to B$ & \textbf{Conditioning} $A \mid B$ \\
+\hline
+Formula & $\negw A \vee B$ & $P(A,B) / P(B)$ \\
+Computable from & $A$ and $B$ alone & Joint $P(A,B)$ \\
+False antecedent & ``True'' (lies) & Indeterminate (honest) \\
+In logic & Yes & No \\
+In probability & No & Yes \\
+\end{tabular}
+\end{center}
+
+\subsection{Graded Ex Falso}
+
+What about $P(A \mid B)$ when $P(B) = 0$?
+
+In classical logic: $\bot \to A$ is always true (ex falso quodlibet).
+
+In ProbTT: when $b : B \at{\zero}$:
+\[
+(a, b) : A \times B \at{\zero \cdot w} = \at{\zero}
+\]
+The conditional $a \mid b$ can have \emph{any} weight---the joint is already zero.
+
+\textbf{Key insight}: Ex falso is the $w = 0$ limit of a continuous phenomenon:
+\begin{itemize}
+    \item $w = \one$: Evidence fully constrains conclusions
+    \item $w = \epsilon$: Evidence weakly constrains conclusions
+    \item $w = \zero$: Evidence imposes no constraint (ex falso)
+\end{itemize}
+
+Classical logic has only the endpoints; ProbTT has the entire spectrum.
+
+%=============================================================================
+\section{MLTT as the $\{\zero, \one\}$ Case}
+%=============================================================================
+
+\begin{theorem}[MLTT Embedding]
+When $\W = \{\zero, \one\}$, ProbTT reduces to MLTT:
+\begin{itemize}
+    \item $\Gamma \vdash a : A \at{\one}$ becomes $\Gamma \vdash a : A$
+    \item $\Gamma \vdash a : A \at{\zero}$ is vacuously satisfied
+    \item Weight operations: $\one \cdot \one = \one$, else $\zero$
+    \item Complement: $\negw\zero = \one$, $\negw\one = \zero$
+    \item De Morgan OR: $w \vee v = \negw(\negw w \cdot \negw v)$ gives Boolean OR
+\end{itemize}
+\end{theorem}
+
+\begin{proof}
+By inspection. All weight operations compute to Boolean.
+\end{proof}
+
+%=============================================================================
+\section{Relationship to Fuzzy Logic}
+%=============================================================================
+
+\subsection{What We Share}
+
+Our weight algebra is exactly \textbf{Product fuzzy logic}:
+\begin{itemize}
+    \item Product t-norm: $w \cdot v$ (multiplication)
+    \item Standard negation: $\negw w = 1 - w$ (complement)
+    \item Probabilistic sum: $w \vee v = w + v - wv$ (De Morgan)
+\end{itemize}
+
+This is a well-studied \textbf{De Morgan algebra}.
+
+\subsection{What We Add}
+
+\begin{enumerate}
+    \item \textbf{Type theory}: $\Pi$, $\Sigma$, $\mathsf{Id}$, universes
+    \item \textbf{Weighted judgments}: $\Gamma \vdash a : A \at{w}$
+    \item \textbf{Conditioning}: The chain rule as primitive
+    \item \textbf{MLTT as limit}: The $\{\zero, \one\}$ case
+\end{enumerate}
+
+Fuzzy logic has no conditioning. We add it via the chain rule.
+
+\subsection{Summary}
+
+\[
+\text{ProbTT} = \text{Product Fuzzy Logic} + \text{Type Theory} + \text{Conditioning}
+\]
 
 %=============================================================================
 \section{Categorical Semantics}
@@ -464,181 +437,45 @@ For these, extend $\W$ to a semiring. But the \textbf{core type theory works wit
 A \emph{$\W$-weighted category} has:
 \begin{itemize}
     \item Objects (types)
-    \item For each $w : \W$, a set of morphisms $\mathrm{Hom}_w(A, B)$
+    \item For each $w : \W$, morphisms $\mathrm{Hom}_w(A, B)$
     \item Identity: $\mathrm{id}_A \in \mathrm{Hom}_\one(A, A)$
     \item Composition: $f \in \mathrm{Hom}_w(A, B)$, $g \in \mathrm{Hom}_v(B, C)$ gives $g \circ f \in \mathrm{Hom}_{w \cdot v}(A, C)$
 \end{itemize}
 \end{definition}
 
-\begin{theorem}[Soundness]
-ProbTT has a sound interpretation in $\W$-weighted categories:
-\begin{itemize}
-    \item $\llbracket A \rrbracket$ = object
-    \item $\llbracket \Gamma \vdash a : A \at{w} \rrbracket$ = morphism in $\mathrm{Hom}_w(\llbracket \Gamma \rrbracket, \llbracket A \rrbracket)$
-    \item Weight multiplication = composition
-\end{itemize}
-\end{theorem}
-
-When $\W = [0,1]$, this becomes a Markov category.
+When $\W = {[0,1]}$ with copy $\Delta : A \to A \times A$ and delete $! : A \to \mathbf{1}$, this becomes a \textbf{Markov category}.
 
 %=============================================================================
 \section{Summary}
 %=============================================================================
 
-\textbf{Primitive}: Weight monoid $\W$ with $\zero, \one, \cdot, \leq$.
+\textbf{Weight algebra}: $(\zero, \one, \cdot, \negw, \leq)$ --- Product De Morgan
 
-\textbf{Judgments}: $\Gamma \vdash a : A \at{w}$.
+\textbf{Derived}: $w \vee v = \negw(\negw w \cdot \negw v)$ --- De Morgan OR
 
-\textbf{Key rule}: Weights multiply in elimination.
+\textbf{Judgments}: $\Gamma \vdash a : A \at{w}$
 
-\textbf{MLTT}: The $\W = \{\zero, \one\}$ case.
+\textbf{Key rule}: Weights multiply in elimination
 
-\textbf{Probability}: The $\W = [0,1]$ case.
+\textbf{Conditioning}: Chain rule $P(A,B) = P(A|B) \cdot P(B)$, no division
 
-\textbf{Markov structure}: Copy, delete, disintegration give conditioning.
+\textbf{MLTT}: The $\W = \{\zero, \one\}$ case
 
-\textbf{Chain rule}: $P(A|B) \cdot P(B) = P(A) \cdot P(B|A)$ (no division needed).
+\textbf{Probability}: The $\W = {[0,1]}$ case
 
-\textbf{No addition needed} for core type theory.
-
-%=============================================================================
-\section{Markov Structure and Bayes' Rule}
-%=============================================================================
-
-When $\W = [0,1]$, our weighted category becomes a \emph{Markov category}. This gives us conditioning and Bayes' rule without assuming real numbers as primitive.
-
-\subsection{Markov Category Structure}
-
-\begin{definition}[Copy and Delete]
-A Markov category has additional structure:
-\begin{itemize}
-    \item \textbf{Copy}: $\Delta_A : A \to A \times A$ (diagonal)
-    \item \textbf{Delete}: $!_A : A \to \mathbf{1}$ (terminal)
-\end{itemize}
-satisfying commutative comonoid laws.
-\end{definition}
-
-In ProbTT, these are:
-\begin{gather}
-\infer[\textsc{Copy}]
-  {\Gamma \vdash \Delta\,a : A \times A \at{w}}
-  {\Gamma \vdash a : A \at{w}}
-\\[1em]
-\infer[\textsc{Delete}]
-  {\Gamma \vdash !\,a : \mathbf{1} \at{\one}}
-  {\Gamma \vdash a : A \at{w}}
-\end{gather}
-
-Copy preserves weight (the same evidence supports both copies). Delete always succeeds with weight $\one$.
-
-\subsection{Conditioning and Disintegration}
-
-\begin{definition}[Joint and Marginal]
-Given $f : \Gamma \to A \times B \at{w}$:
-\begin{itemize}
-    \item \textbf{Marginal}: $\pi_1 \circ f : \Gamma \to A$ and $\pi_2 \circ f : \Gamma \to B$
-    \item \textbf{Joint}: The original $f$ encodes the joint distribution
-\end{itemize}
-\end{definition}
-
-\begin{definition}[Disintegration]
-A morphism $f : \Gamma \to A \times B \at{w}$ \emph{disintegrates} if there exist:
-\begin{itemize}
-    \item $g : \Gamma \to A \at{v}$ (marginal on $A$)
-    \item $h : \Gamma \times A \to B \at{u}$ (conditional $B$ given $A$)
-\end{itemize}
-such that $f = \langle g, h \circ (\mathrm{id} \times g) \rangle$ with $w = v \cdot u$.
-\end{definition}
-
-\subsection{Chain Rule (Weak Bayes)}
-
-\begin{theorem}[Chain Rule]
-In a Markov category admitting disintegration, the chain rule holds:
-
-Given joint $P(A, B)$ that disintegrates as:
-\[
-P(A, B) = P(A) \cdot P(B \mid A)
-\]
-there exists (by symmetry) another disintegration:
-\[
-P(A, B) = P(B) \cdot P(A \mid B)
-\]
-Therefore:
-\[
-P(A \mid B) \cdot P(B) = P(A) \cdot P(B \mid A)
-\]
-\end{theorem}
-
-\begin{remark}
-This is \textbf{Bayes' rule in multiplicative form}---no division required! The weight monoid needs only multiplication. Division would give the ``strong'' form $P(A \mid B) = P(A) \cdot P(B \mid A) / P(B)$, but we avoid it to stay minimal.
-\end{remark}
-
-\subsection{Conditioning in ProbTT}
-
-Conditioning is expressed via the chain rule, not division:
-
-\begin{gather}
-\infer[\textsc{Chain}]
-  {\Gamma \vdash (a, b) : A \times B \at{u \cdot v}}
-  {\Gamma \vdash a : A \at{u} \quad \Gamma \vdash b \mid a : B \at{v}}
-\end{gather}
-
-Read: ``joint weight = marginal $\times$ conditional.'' The conditional $b \mid a$ is \emph{primitive}---we don't compute it by division, we assert it exists when the chain rule holds.
-
-\begin{remark}[No Division Needed]
-In the {0,1} case, conditioning is trivial: $P(B \mid A) = 1$ when $A \Rightarrow B$, else $0$.
-
-For $\W = [0,1]$, conditioning exists but we express it multiplicatively. This keeps the weight monoid minimal (no division operation required).
-\end{remark}
-
-\begin{remark}[Graded Ex Falso]
-What about $P(A \mid B)$ when $P(B) = 0$? This is the probabilistic \textbf{ex falso quodlibet}.
-
-In classical logic: $\bot \to A$ (from absurdity, anything follows).
-
-In ProbTT: when $b : B \at{\zero}$, we have for any $a$:
-\[
-(a, b) : A \times B \at{\zero \cdot w} = \at{\zero}
-\]
-The conditional $a \mid b$ can have \emph{any} weight---it's vacuously satisfied because the joint is already zero.
-
-\textbf{Key insight}: Ex falso is the $w = 0$ limit of a \emph{continuous} phenomenon:
-\begin{itemize}
-    \item $w = \one$: Evidence fully constrains conclusions (classical implication)
-    \item $w = \epsilon$ (small): Evidence weakly constrains conclusions
-    \item $w = \zero$: Evidence imposes no constraint (ex falso)
-\end{itemize}
-Classical logic has only the endpoints; ProbTT has the entire spectrum.
-\end{remark}
-
-\subsection{What Markov Categories Give Us}
-
-\begin{enumerate}
-    \item \textbf{Copying}: $\Delta$ lets us use the same evidence twice
-    \item \textbf{Marginalization}: Delete/project to ``forget'' components
-    \item \textbf{Conditioning}: Disintegration extracts conditionals from joints
-    \item \textbf{Chain rule}: $P(A, B) = P(A) \cdot P(B \mid A)$ (multiplicative Bayes)
-    \item \textbf{Independence}: $P(A, B) = P(A) \cdot P(B)$ when conditional equals marginal
-\end{enumerate}
-
-All without assuming real numbers or division---just the weight monoid with multiplication.
+\textbf{Novelty}: Product fuzzy logic + type theory + conditioning
 
 %=============================================================================
 \section{Open Problems}
 %=============================================================================
 
 \begin{enumerate}
-    \item \textbf{Weight inference}: Can we infer $w$ from term structure?
-
-    \item \textbf{Decidability}: Type checking is decidable if $\W$ is decidable.
-
-    \item \textbf{Normalization}: Should follow from MLTT since weights don't affect reduction.
-
-    \item \textbf{Dependent weights}: What if $w$ depends on $x$ in $(x : A) \to B \at{w(x)}$?
-
-    \item \textbf{Continuous types}: Extension to measurable spaces?
-
-    \item \textbf{Implementation}: Type checker for ProbTT?
+    \item \textbf{Implementation}: Type checker for ProbTT
+    \item \textbf{Weight inference}: Can weights be inferred from term structure?
+    \item \textbf{Decidability}: Type checking decidable if $\W$ decidable
+    \item \textbf{Normalization}: Should follow from MLTT
+    \item \textbf{Dependent weights}: $w(x)$ varying over $x$ in $(x : A) \to B \at{w(x)}$
+    \item \textbf{Continuous types}: Extension to measurable spaces
 \end{enumerate}
 
 \end{document}
