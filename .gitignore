@@ -10,9 +10,6 @@ papers/**/*.fdb_latexmk
 papers/**/*.bbl
 papers/**/*.blg
 
-# Lean build artifacts
-lean/.lake/
-
 # OS files
 .DS_Store
 Thumbs.db
