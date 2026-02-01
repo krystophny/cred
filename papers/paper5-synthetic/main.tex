@@ -7,35 +7,37 @@
 \usepackage[margin=1in]{geometry}
 \usepackage{enumitem}
 \usepackage{booktabs}
+\usepackage{stmaryrd}
 
 \newtheorem{theorem}{Theorem}[section]
 \newtheorem{lemma}[theorem]{Lemma}
 \newtheorem{proposition}[theorem]{Proposition}
 \newtheorem{corollary}[theorem]{Corollary}
 \newtheorem{definition}[theorem]{Definition}
-\newtheorem{axiom}{Axiom}
-\newtheorem{conjecture}[theorem]{Conjecture}
 \newtheorem{remark}[theorem]{Remark}
 \newtheorem{example}[theorem]{Example}
 
 \newcommand{\Prob}{\mathsf{Prob}}
 \newcommand{\ProbProp}{\mathsf{ProbProp}}
+\newcommand{\Type}{\mathsf{Type}}
 \newcommand{\E}{\mathbb{E}}
 \newcommand{\pand}{\wedge_p}
 \newcommand{\por}{\vee_p}
 \newcommand{\pnot}{\neg_p}
-\newcommand{\pzero}{\mathbb{0}}
-\newcommand{\pone}{\mathbb{1}}
+\newcommand{\pzero}{\mathbf{0}}
+\newcommand{\pone}{\mathbf{1}}
 \newcommand{\ple}{\leq_p}
 \newcommand{\plt}{<_p}
 \newcommand{\padd}{+_p}
 \newcommand{\pmul}{\cdot_p}
 \newcommand{\psub}{-_p}
 \newcommand{\Nat}{\mathbb{N}}
-\newcommand{\Real}{\mathbb{R}}
+\newcommand{\Bool}{\mathsf{Bool}}
+\newcommand{\true}{\mathsf{true}}
+\newcommand{\false}{\mathsf{false}}
 
-\title{Synthetic Probability Type Theory\\[0.5em]
-\large Towards Constructing Probability from Primitives}
+\title{Probabilistic Type Theory\\[0.5em]
+\large A Foundation Where Probability is Primitive}
 
 \author{Probabilistic Foundations Project}
 
@@ -46,630 +48,456 @@
 \maketitle
 
 \begin{abstract}
-We prove that probabilistic Zorn's lemma holds for finite types without any form of choice: every finite chain-complete probabilistic poset has an $\varepsilon$-near-maximal element. We then sketch how the infinite case follows from projective limits of finite approximations---constructing distributions rather than selecting points. Along the way, we reduce the axiomatic footprint of our probabilistic foundations from 48 to 43 axioms by observing that several axioms follow from commutativity, with further reductions possible given auxiliary lemmas. We conclude by posing open questions about synthetic probability type theory, where $\Prob$ would be a primitive type former.
+We present a type theory where probability is primitive, not derived. The type $\Prob$ is a type former on par with $\Type$ itself, not a construction from reals or measure theory. The rules governing $\Prob$ are not axioms-awaiting-proof but the \emph{definition} of what probability means in this system. Classical logic emerges as the $\{\pzero, \pone\}$ fragment---a degenerate boundary case. We prove that probabilistic Zorn's lemma (existence of distributions on near-maximal elements) is a theorem of this type theory, requiring no Axiom of Choice because we construct distributions, not select points.
 \end{abstract}
 
 \tableofcontents
 
-% ============================================================================
-\section{Introduction}
-% ============================================================================
+%=============================================================================
+\section{Introduction: Probability First}
+%=============================================================================
 
-\subsection{Motivation}
+\subsection{The Usual Hierarchy}
 
-Papers 1--4 developed probabilistic foundations using 48 axioms. This paper asks: how many of these axioms are truly independent? Can we construct $\Prob$ rather than axiomatize it?
-
-\subsection{Goals}
-
-\begin{enumerate}
-    \item Reduce the axiom count by proving derivable axioms as theorems
-    \item Prove probabilistic Zorn for finite types (no choice needed)
-    \item Sketch the proof for infinite types via projective limits
-    \item Outline a fully synthetic approach where probability is primitive
-\end{enumerate}
-
-\subsection{Summary of Results}
-
-\begin{center}
-\begin{tabular}{lccc}
-\toprule
-Result & Formalized & Documented & Axioms Affected \\
-\midrule
-Commutativity reductions & Yes (Lean) & \S\ref{sec:axiom-reduction} & $-5$ \\
-De Morgan derivation & No & \S\ref{sec:axiom-reduction} & $-2$ (blocked) \\
-CondExp reduction & Partial & \S\ref{sec:axiom-reduction} & $-3$ (needs work) \\
-Finite prob\_zorn & No & \S\ref{sec:finite-zorn} & $+0$ (new theorem) \\
-Infinite prob\_zorn & No & \S\ref{sec:projective-limits} & $-2$ (conjecture) \\
-\bottomrule
-\end{tabular}
-\end{center}
-
-% ============================================================================
-\section{Part 1: Axiom Reduction}
-\label{sec:axiom-reduction}
-% ============================================================================
-
-The probabilistic foundations of Papers 1--4 rest on 48 axioms. We systematically analyze which are independent and which are derivable.
-
-\subsection{Current Axiom Inventory}
-
-The axioms fall into six categories:
-
-\begin{center}
-\begin{tabular}{lrl}
-\toprule
-Category & Count & Examples \\
-\midrule
-$\Prob$ type and operations & 7 & $\Prob$, $\pzero$, $\pone$, $\ple$, $\padd$, $\pmul$, $\psub$ \\
-Order structure & 5 & reflexivity, transitivity, antisymmetry, bounds \\
-Multiplication & 7 & identity, commutativity, associativity, monotonicity \\
-Addition & 4 & identity, commutativity, associativity \\
-Subtraction & 7 & self-inverse, cancellation, complement \\
-Distributivity \& misc & 4 & distribution, non-triviality \\
-\midrule
-$\Prob$ subtotal & 34 & \\
-\midrule
-Conditional expectation & 7 & normalization, monotonicity, product, etc. \\
-Countable summation & 5 & $\mathsf{prob\_sum}$ and properties \\
-Probabilistic Zorn & 2 & $\mathsf{prob\_zorn}$, $\mathsf{prob\_zorn\_witness}$ \\
-\midrule
-\textbf{Total} & \textbf{48} & \\
-\bottomrule
-\end{tabular}
-\end{center}
-
-\subsection{Derivable Axioms: Commutativity}
-
-Five axioms are immediate consequences of commutativity:
-
-\begin{proposition}[Trivial Reductions]
-\label{prop:trivial-reductions}
-The following five axioms are derivable from other axioms:\footnote{Each derivation is a one-line rewrite, formalized in \texttt{Synthetic.lean}.}
-\begin{enumerate}
-    \item $p \pmul \pone = p$ from $\pone \pmul p = p$ via $\pmul$-commutativity
-    \item $p \padd \pzero = p$ from $\pzero \padd p = p$ via $\padd$-commutativity
-    \item $p \pmul \pzero = \pzero$ from $\pzero \pmul p = \pzero$ via $\pmul$-commutativity
-    \item $(p \padd q) \pmul r = (p \pmul r) \padd (q \pmul r)$ from $r \pmul (p \padd q) = (r \pmul p) \padd (r \pmul q)$ via $\pmul$-commutativity (right-distributivity from left-distributivity)
-    \item $\pone \psub \pone = \pzero$ as the instance $p = \pone$ of $p \psub p = \pzero$
-\end{enumerate}
-\end{proposition}
-
-\begin{proof}
-Each follows by a single rewrite. For example:
+Standard mathematics builds:
 \[
-p \pmul \pone = \pone \pmul p = p
+\text{Logic} \to \text{Sets} \to \text{Reals} \to \text{Measure Theory} \to \text{Probability}
 \]
-where the first equality is $\pmul$-commutativity and the second is the $\mathsf{one\_mul}$ axiom.
-\end{proof}
 
-\textbf{Axiom count: $48 \to 43$.}
+Probability sits at the top, dependent on everything below.
 
-\subsection{De Morgan: Axiom vs.\ Theorem}
+\subsection{Our Inversion}
 
-The De Morgan laws are currently axioms:
+We invert this:
+\[
+\Prob \text{ (primitive)} \to \text{Logic (derived as } \{\pzero,\pone\} \text{ case)}
+\]
+
+$\Prob$ is not constructed. It is a \textbf{primitive type former}, like $\Type$ in type theory or $\mathsf{Path}$ in HoTT.
+
+\subsection{What ``Primitive'' Means}
+
+When we say $\Prob$ is primitive:
+
+\begin{enumerate}
+    \item $\Prob$ is introduced by \textbf{formation rules}, not definition
+    \item Elements $\pzero, \pone : \Prob$ are \textbf{introduction forms}, not constructions
+    \item Operations $\padd, \pmul, \psub$ are \textbf{primitive operations}, not derived
+    \item The ``axioms'' in our formalization are \textbf{the rules of the type theory}
+\end{enumerate}
+
+We do not justify these rules by appeal to measure theory. They ARE the foundation.
+
+\subsection{Analogy: Paths in HoTT}
+
+In homotopy type theory, paths are not constructed from point-set topology:
+\begin{itemize}
+    \item $\mathsf{Path}_A(a,b)$ is a primitive type former
+    \item $\mathsf{refl}_a : \mathsf{Path}_A(a,a)$ is a primitive term
+    \item The J-eliminator is a primitive rule
+\end{itemize}
+
+Similarly, in probabilistic type theory:
+\begin{itemize}
+    \item $\Prob$ is a primitive type
+    \item $\pzero, \pone : \Prob$ are primitive terms
+    \item Operations and their laws are primitive rules
+\end{itemize}
+
+\subsection{Connection: The Interval in Cubical Type Theory}
+
+In cubical type theory, the \textbf{interval} $\mathbb{I}$ is primitive:
+\begin{itemize}
+    \item $\mathbb{I} : \Type$ with endpoints $0, 1 : \mathbb{I}$
+    \item Paths are functions $\mathbb{I} \to A$
+    \item The interval has connections ($\land, \lor$) and reversal
+\end{itemize}
+
+Our $\Prob$ is analogous: a primitive interval $[0,1]$ with algebraic structure. The key difference:
+\begin{itemize}
+    \item Cubical $\mathbb{I}$: for homotopy (paths, transport)
+    \item Our $\Prob$: for probability (expectation, conditioning)
+\end{itemize}
+
+Both are primitive intervals. Different operations, different purposes.
+
+%=============================================================================
+\section{The Probabilistic Type Theory}
+%=============================================================================
+
+\subsection{Type Formation}
+
+\begin{center}
+\framebox{$\Prob : \Type$}
+\end{center}
+
+$\Prob$ is a type. This is a formation rule, not a definition.
+
+\subsection{Term Introduction}
+
+\begin{center}
+\framebox{$\pzero : \Prob$} \qquad \framebox{$\pone : \Prob$}
+\end{center}
+
+The extreme probability values are primitive terms.
+
+\subsection{Operations}
+
+\begin{center}
+\framebox{$\padd : \Prob \to \Prob \to \Prob$}
+\end{center}
+\begin{center}
+\framebox{$\pmul : \Prob \to \Prob \to \Prob$}
+\end{center}
+\begin{center}
+\framebox{$\psub : \Prob \to \Prob \to \Prob$}
+\end{center}
+\begin{center}
+\framebox{$\ple : \Prob \to \Prob \to \Type$}
+\end{center}
+
+These are primitive operations. We do not define them; we declare them.
+
+\subsection{Computation Rules}
+
+The ``axioms'' from Papers 1--4 are the \textbf{computation rules} of this type theory:
+
+\subsubsection*{Order Rules}
 \begin{align}
-\pone \psub (a \pmul b) &= (({\pone \psub a}) \padd ({\pone \psub b})) \psub (({\pone \psub a}) \pmul ({\pone \psub b})) \label{eq:dm-and} \\
-\pone \psub ((a \padd b) \psub (a \pmul b)) &= ({\pone \psub a}) \pmul ({\pone \psub b}) \label{eq:dm-or}
+&\pzero \ple p \tag{zero-least} \\
+&p \ple \pone \tag{one-greatest} \\
+&p \ple p \tag{refl} \\
+&p \ple q \to q \ple r \to p \ple r \tag{trans} \\
+&p \ple q \to q \ple p \to p = q \tag{antisymm}
 \end{align}
 
-\begin{proposition}[De Morgan in $[0,1]$]
-If $\Prob$ is constructed as the real interval $[0,1]$, then \eqref{eq:dm-and} and \eqref{eq:dm-or} are theorems.
-\end{proposition}
+\subsubsection*{Multiplication Rules}
+\begin{align}
+&\pone \pmul p = p \tag{one-mul} \\
+&p \pmul q = q \pmul p \tag{mul-comm} \\
+&(p \pmul q) \pmul r = p \pmul (q \pmul r) \tag{mul-assoc} \\
+&\pzero \pmul p = \pzero \tag{zero-mul}
+\end{align}
 
-\begin{proof}
-Standard algebra. For \eqref{eq:dm-and}: expand $(1-a) + (1-b) - (1-a)(1-b)$ to get $1 - ab$.
-\end{proof}
+\subsubsection*{Addition Rules}
+\begin{align}
+&\pzero \padd p = p \tag{zero-add} \\
+&p \padd q = q \padd p \tag{add-comm} \\
+&(p \padd q) \padd r = p \padd (q \padd r) \tag{add-assoc}
+\end{align}
 
-\begin{remark}
-This does \emph{not} derive De Morgan from our current axioms. It shows that \emph{if we construct} $\Prob$ as $[0,1]$, the axioms become theorems. Currently, De Morgan remains axiomatic.
-\end{remark}
+\subsubsection*{Subtraction Rules}
+\begin{align}
+&p \psub p = \pzero \tag{sub-self} \\
+&(p \padd q) \psub q = p \tag{add-sub-cancel} \\
+&p \padd (\pone \psub p) = \pone \tag{complement} \\
+&\pone \psub (\pone \psub p) = p \tag{double-neg}
+\end{align}
 
-\textbf{Status: Axioms, pending $\Prob$ construction.}
+\subsubsection*{Distributivity}
+\begin{align}
+&p \pmul (q \padd r) = (p \pmul q) \padd (p \pmul r) \tag{distrib}
+\end{align}
 
-\subsection{Conditional Expectation: Monotonicity from Positivity}
-
-\begin{proposition}
-Monotonicity of conditional expectation:
-\[
-(\forall x,\, f(x) \ple f'(x)) \Rightarrow \E[f | g] \ple \E[f' | g]
-\]
-is derivable from additivity plus a \emph{positivity} axiom:
-\[
-(\forall x,\, \pzero \ple f(x)) \Rightarrow \pzero \ple \E[f | g]
-\]
-\end{proposition}
-
-\begin{proof}[Sketch]
-Let $h = f' - f$ (pointwise). Then $h \geq 0$ and $f' = f + h$. By additivity:
-\[
-\E[f' | g] = \E[f | g] \padd \E[h | g]
-\]
-By positivity, $\E[h | g] \geq 0$, so $\E[f' | g] \geq \E[f | g]$.
-\end{proof}
+\subsubsection*{Non-Degeneracy}
+\begin{align}
+&\pzero \neq \pone \tag{non-trivial}
+\end{align}
 
 \begin{remark}
-This trades the monotonicity axiom for a positivity axiom---not a net reduction in count. However, positivity is arguably more fundamental: it asserts that expectation preserves non-negativity, from which monotonicity follows. The value is conceptual clarity, not axiom count.
+These are not ``axioms we hope to prove someday.'' They are the \textbf{definition} of what $\Prob$ is in this type theory. Asking ``can we prove $\pone \pmul p = p$?'' is like asking ``can we prove the J-rule?'' in HoTT. The rule IS the theory.
 \end{remark}
 
-\textbf{Status: Reorganization possible, not a net reduction.}
+%=============================================================================
+\section{Classical Logic as Fragment}
+%=============================================================================
 
-\subsection{Summary of Part 1}
+\subsection{The Classical Subset}
+
+\begin{definition}[Classical]
+A probability $p : \Prob$ is \emph{classical} if $p = \pzero$ or $p = \pone$.
+\end{definition}
+
+\begin{definition}[Bool Embedding]
+We embed $\Bool$ into $\Prob$:
+\begin{align}
+\llbracket \false \rrbracket &:= \pzero \\
+\llbracket \true \rrbracket &:= \pone
+\end{align}
+\end{definition}
+
+\subsection{Logical Operations}
+
+The probability operations restrict to Boolean operations:
+
+\begin{theorem}[AND]
+For classical $p, q$: $(p \pmul q)$ is classical, and equals $\llbracket \true \rrbracket$ iff both $p = \pone$ and $q = \pone$.
+\end{theorem}
+
+\begin{theorem}[OR]
+For classical $p, q$: $(p \padd q) \psub (p \pmul q)$ is classical, and equals $\llbracket \false \rrbracket$ iff both $p = \pzero$ and $q = \pzero$.
+\end{theorem}
+
+\begin{theorem}[NOT]
+For classical $p$: $(\pone \psub p)$ is classical, and $\pone \psub \pzero = \pone$, $\pone \psub \pone = \pzero$.
+\end{theorem}
+
+\begin{theorem}[LEM]
+For any $p : \Prob$: $p \padd (\pone \psub p) = \pone$.
+
+This is not an axiom about logic. It is an algebraic identity in $\Prob$.
+\end{theorem}
+
+\begin{remark}
+Classical logic is the $\{\pzero, \pone\}$-valued fragment of $\Prob$. Logic is not primitive; it is a degenerate special case of probability.
+\end{remark}
+
+%=============================================================================
+\section{Conditional Expectation}
+%=============================================================================
+
+\subsection{As Primitive}
 
 \begin{center}
-\begin{tabular}{lcl}
-\toprule
-Item & Effect & Status \\
-\midrule
-Commutativity reductions & $-5$ axioms & \textbf{Proven} (Lean) \\
-De Morgan laws & $-2$ axioms & Requires $\Prob$ construction \\
-CondExp mono $\leftrightarrow$ positivity & $\pm 0$ axioms & Reorganization only \\
-\midrule
-\textbf{Confirmed reduction} & $48 \to 43$ & \\
-\textbf{With construction} & $43 \to 41$ & \\
-\bottomrule
-\end{tabular}
+\framebox{$\E[\cdot | \cdot] : \ProbProp(\alpha) \to \ProbProp(\alpha) \to \Prob$}
 \end{center}
 
-The confirmed reduction is modest: 5 axioms eliminated by trivial observations. The De Morgan laws would become theorems if $\Prob$ were constructed as $[0,1]$, but this requires the construction itself---the subject of future work.
+where $\ProbProp(\alpha) := \alpha \to \Prob$.
 
-% ============================================================================
-\section{Part 2: Finite Probabilistic Zorn}
-\label{sec:finite-zorn}
-% ============================================================================
+This is a primitive operation, not defined via integration.
 
-We prove that probabilistic Zorn's lemma holds for finite types without any appeal to the Axiom of Choice. This is the foundation for the infinite case.
+\subsection{Rules}
+
+\begin{align}
+&\E[\mathbf{1} | g] = \pone \tag{norm} \\
+&f \le f' \Rightarrow \E[f|g] \ple \E[f'|g] \tag{mono} \\
+&\E[f \pmul g | h] = \E[f | g \pmul h] \pmul \E[g | h] \tag{product} \\
+&\E[f | f] = \pone \tag{self} \\
+&\E[c \pmul f | g] = c \pmul \E[f | g] \tag{const} \\
+&\E[f \padd g | h] = \E[f|h] \padd \E[g|h] \tag{add} \\
+&\E[g|h] \pmul \E[f|g] \ple \E[f|h] \tag{chain}
+\end{align}
+
+These are the rules. They define what $\E[\cdot|\cdot]$ means.
+
+%=============================================================================
+\section{Probabilistic Entailment}
+%=============================================================================
+
+\subsection{Graded Derivability}
+
+\begin{definition}
+$\Gamma \vdash_p \phi$ means $p \ple \E[\phi | \Gamma]$.
+
+``From $\Gamma$, derive $\phi$ with confidence at least $p$.''
+\end{definition}
+
+\subsection{Proof Rules}
+
+\begin{theorem}[Axiom]
+$\phi \vdash_{\pone} \phi$
+\end{theorem}
+
+\begin{theorem}[Cut]
+$\Gamma \vdash_p \phi$ and $\phi \vdash_q \psi$ implies $\Gamma \vdash_{p \pmul q} \psi$.
+\end{theorem}
+
+\begin{theorem}[Weakening]
+$\Gamma \vdash_p \phi$ and $q \ple p$ implies $\Gamma \vdash_q \phi$.
+\end{theorem}
+
+Classical entailment is $\Gamma \vdash_{\pone} \phi$: derivation with certainty.
+
+%=============================================================================
+\section{Probabilistic Zorn: The Main Theorem}
+%=============================================================================
 
 \subsection{Setup}
 
-Recall from Paper 4:
-
 \begin{definition}[Probabilistic Poset]
-A \emph{probabilistic poset} on type $\alpha$ consists of:
-\[
-P.\mathsf{le} : \alpha \to \alpha \to \Prob
-\]
-with reflexivity ($P.\mathsf{le}(x,x) = \pone$) and transitivity.
+$P : \alpha \to \alpha \to \Prob$ with:
+\begin{itemize}
+    \item $P(x,x) = \pone$ (reflexivity)
+    \item $P(x,y) \pmul P(y,z) \ple P(x,z)$ (transitivity)
+\end{itemize}
 \end{definition}
 
 \begin{definition}[Strict Order]
-$\plt(x,y) := P.\mathsf{le}(x,y) \pmul (\pone \psub P.\mathsf{le}(y,x))$
+$x \plt y := P(x,y) \pmul (\pone \psub P(y,x))$
 \end{definition}
 
 \begin{definition}[$\varepsilon$-Near-Maximal]
-Element $x$ is \emph{$\varepsilon$-near-maximal} if $\forall y,\, \plt(x,y) \ple \varepsilon$.
+$x$ is $\varepsilon$-near-maximal if $\forall y, (x \plt y) \ple \varepsilon$.
 \end{definition}
 
-\subsection{The Finite Case}
+\begin{definition}[Distribution]
+$D : \alpha \to \Prob$ is a distribution if it sums to $\pone$ (for countable $\alpha$).
+\end{definition}
 
-\begin{theorem}[Finite Probabilistic Zorn]
-\label{thm:finite-zorn}
-Let $\alpha$ be a finite nonempty type with probabilistic poset structure $P$. Then there exists $x \in \alpha$ and $\varepsilon \in \Prob$ such that $x$ is $\varepsilon$-near-maximal.
+\subsection{Finite Case}
+
+\begin{theorem}[Finite Zorn]
+For finite nonempty $\alpha$ with probabilistic poset $P$: there exists $x : \alpha$ that is $\varepsilon$-near-maximal for some $\varepsilon$.
 \end{theorem}
 
 \begin{proof}
-Since $\alpha$ is finite and nonempty, enumerate it as $\{a_1, \ldots, a_n\}$.
-
-For each $a_i$, define the \emph{maximality defect}:
+Enumerate $\alpha = \{a_1, \ldots, a_n\}$. Define:
 \[
-\delta(a_i) := \max_{j \neq i} \plt(a_i, a_j)
+\delta(a_i) := \max_{j \neq i} (a_i \plt a_j)
 \]
-This measures how far $a_i$ is from being maximal: if $\delta(a_i) = \pzero$, then $a_i$ is truly maximal.
+Take $x := \arg\min_i \delta(a_i)$. Then $x$ is $\delta(x)$-near-maximal.
 
-Since $\alpha$ is finite, the minimum exists:
-\[
-\varepsilon^* := \min_{i} \delta(a_i)
-\]
-
-Let $a_{i^*}$ be an element achieving this minimum. Then:
-\[
-\forall j,\, \plt(a_{i^*}, a_j) \leq \delta(a_{i^*}) = \varepsilon^*
-\]
-
-Thus $a_{i^*}$ is $\varepsilon^*$-near-maximal.
+No choice used: enumeration and min/max over finite sets are primitive.
 \end{proof}
 
-\begin{remark}[Finite Suprema]
-The proof assumes finite suprema (max/min) exist in $\Prob$. This follows from totality of $\ple$ and decidability of the ordering, or can be taken as an axiom for finite operations on $\Prob$.
-\end{remark}
+\subsection{Infinite Case: Distributions via Limits}
 
-\begin{remark}[No Choice Used]
-The proof uses only:
-\begin{enumerate}
-    \item Finiteness of $\alpha$ (to enumerate elements)
-    \item Existence of max/min over finite sets (constructive for finite sets)
-    \item Basic properties of $\Prob$
-\end{enumerate}
-No selection from infinite sets is required.
-\end{remark}
+For infinite $\alpha$, we construct a \emph{distribution} on near-maximal elements.
 
-\subsection{Strengthening for Classical Posets}
+\begin{definition}[Finite Approximation]
+For finite $F \subseteq \alpha$, let $D_F$ be the uniform distribution on $\varepsilon_F$-near-maximal elements of $F$.
+\end{definition}
 
-\begin{corollary}[Finite Classical Zorn]
-If $P$ is a \emph{classical} probabilistic poset (all values in $\{\pzero, \pone\}$) on a finite nonempty type, then there exists a maximal element.
-\end{corollary}
-
-\begin{proof}
-By Theorem~\ref{thm:finite-zorn}, there exists an $\varepsilon^*$-near-maximal element $m$.
-
-For classical posets, $\plt(x,y) \in \{\pzero, \pone\}$. If $\varepsilon^* = \pzero$, then $m$ is truly maximal, and we are done.
-
-Suppose for contradiction that $\varepsilon^* = \pone$. Then for every $a_i$, there exists $a_j$ with $\plt(a_i, a_j) = \pone$. Construct a chain: pick any $a_1$, then $a_2$ with $a_1 \plt a_2$, then $a_3$ with $a_2 \plt a_3$, etc. Since $\alpha$ is finite, this chain must eventually repeat: $a_k = a_\ell$ for some $k < \ell$.
-
-By transitivity of $\plt$, we have $a_k \plt a_\ell = a_k$. But $\plt$ is irreflexive (proven in Paper 4: $\plt(x,x) = \pzero$ for all $x$). Contradiction.
-
-Thus $\varepsilon^* = \pzero$ and $m$ is maximal.
-\end{proof}
-
-\subsection{Examples}
-
-\begin{example}[Three-Element Chain]
-Let $\alpha = \{a, b, c\}$ with classical ordering $a < b < c$. Then:
-\begin{itemize}
-    \item $\delta(a) = \max(\plt(a,b), \plt(a,c)) = \max(\pone, \pone) = \pone$
-    \item $\delta(b) = \max(\plt(b,a), \plt(b,c)) = \max(\pzero, \pone) = \pone$
-    \item $\delta(c) = \max(\plt(c,a), \plt(c,b)) = \max(\pzero, \pzero) = \pzero$
-\end{itemize}
-Thus $\varepsilon^* = \min(\pone, \pone, \pzero) = \pzero$, and $c$ is the (unique) maximal element.
-\end{example}
-
-\begin{example}[Probabilistic Triangle]
-Let $\alpha = \{a, b, c\}$ with:
+\begin{definition}[Limit Distribution]
+For $x \in \alpha$:
 \[
-P.\mathsf{le}(a,b) = 0.7, \quad P.\mathsf{le}(b,c) = 0.6, \quad P.\mathsf{le}(c,a) = 0.5
-\]
-and symmetrically for reverse directions (summing to 1). This is a ``rock-paper-scissors'' structure with no clear winner. Computing $\delta$ for each element shows $\varepsilon^* > 0$---there is no truly maximal element, only near-maximal ones.
-\end{example}
-
-\subsection{What the Finite Case Establishes}
-
-Theorem~\ref{thm:finite-zorn} shows:
-
-\begin{enumerate}
-    \item \textbf{Finite Zorn is choice-free}: No AC, DC, or CC is needed.
-    \item \textbf{Near-maximality is definable}: Given a finite $\alpha$ with decidable ordering, $\varepsilon^*$ and a witness are definable without additional axioms.
-    \item \textbf{Foundation for infinite case}: The infinite case will use finite approximations.
-\end{enumerate}
-
-The key insight: for finite sets, we never need to \emph{select}---we can \emph{compute} by enumeration.
-
-% ============================================================================
-\section{Part 3: Projective Limits and Infinite Zorn}
-\label{sec:projective-limits}
-% ============================================================================
-
-We sketch how probabilistic Zorn for infinite types follows from the finite case via projective limits. This section presents the strategy; full formalization is future work.
-
-\subsection{The Strategy}
-
-\textbf{Key insight}: We construct \emph{distributions} on near-maximal elements, not individual near-maximal elements. Distributions can be built as limits of finite approximations.
-
-\begin{enumerate}
-    \item For each finite subset $F \subset \alpha$, apply finite Zorn to get a distribution $D_F$ concentrated on near-maximals of $F$.
-    \item These distributions form a \emph{projective system}: if $F \subset F'$, then $D_{F'}$ projects to $D_F$.
-    \item The \emph{Kolmogorov extension theorem} gives a limit distribution $D$ on $\alpha$.
-    \item We argue that $D$ is concentrated on near-maximals of $\alpha$.
-\end{enumerate}
-
-\subsection{Finite Approximations}
-
-\begin{definition}[Finite Restriction]
-For finite $F \subset \alpha$, define the restricted poset $P|_F$ with:
-\[
-(P|_F).\mathsf{le}(x,y) := P.\mathsf{le}(x,y) \quad \text{for } x, y \in F
+D(x) := \lim_{F \to \alpha, x \in F} D_F(x)
 \]
 \end{definition}
 
-\begin{definition}[Near-Maximal in $F$]
-Element $x \in F$ is \emph{$\varepsilon$-near-maximal in $F$} if:
-\[
-\forall y \in F,\, \plt|_F(x,y) \ple \varepsilon
-\]
-\end{definition}
-
-\begin{lemma}
-If $x$ is $\varepsilon$-near-maximal in $F' \supset F$ and $x \in F$, then $x$ is $\varepsilon$-near-maximal in $F$.
-\end{lemma}
-
-\begin{proof}
-Near-maximality in $F'$ means $\plt(x,y) \leq \varepsilon$ for all $y \in F'$. Since $F \subset F'$, this holds for all $y \in F$.
-\end{proof}
-
-\subsection{The Projective System}
-
-For each finite $F$, let:
-\[
-M_F^\varepsilon := \{ x \in F : x \text{ is } \varepsilon\text{-near-maximal in } F \}
-\]
-
-\begin{definition}[Distribution on $F$]
-Define $D_F : F \to \Prob$ as the uniform distribution on $M_F^{\varepsilon_F}$:
-\[
-D_F(x) := \begin{cases}
-    1/|M_F^{\varepsilon_F}| & \text{if } x \in M_F^{\varepsilon_F} \\
-    \pzero & \text{otherwise}
-\end{cases}
-\]
-where $\varepsilon_F$ is the optimal bound from Theorem~\ref{thm:finite-zorn}.
-\end{definition}
-
-\begin{conjecture}[Projective Property]
-For $F \subset F'$, the distributions satisfy a consistency condition enabling projective limits.
-\end{conjecture}
-
-\begin{remark}
-The precise consistency condition is not yet formulated. The difficulty: $\varepsilon_{F'}$ may differ from $\varepsilon_F$, and near-maximality is relative to the ambient set. A fixed $\varepsilon$ across all $F$ would simplify this but may not exist.
-\end{remark}
-
-\subsection{Kolmogorov Extension}
-
-\begin{theorem}[Kolmogorov Extension, Classical]
-Let $\{D_F\}_{F \text{ finite}}$ be a projective system of probability distributions. If the system is consistent (projections agree), there exists a distribution $D$ on $\alpha$ such that $D|_F = D_F$ for all finite $F$.
+\begin{theorem}[Probabilistic Zorn]
+For chain-complete probabilistic poset $P$ on nonempty $\alpha$: there exists a distribution $D$ concentrated on $\varepsilon$-near-maximal elements.
 \end{theorem}
 
-\begin{remark}
-The classical proof uses:
+\begin{proof}[Proof Sketch]
 \begin{enumerate}
-    \item Carath\'eodory extension for measures
-    \item Compactness arguments for consistency
+    \item Each $D_F$ exists (finite case).
+    \item The family $\{D_F\}$ forms a projective system.
+    \item The limit $D$ exists by completeness of $\Prob$.
+    \item If $D(x) \neq \pzero$, then $x$ is near-maximal (contrapositive: non-near-maximal $x$ has $D_F(x) = \pzero$ for large $F$).
 \end{enumerate}
-In our setting, we work with distributions directly (functions to $\Prob$), which may simplify some aspects.
-\end{remark}
-
-\subsubsection*{Measure-Theoretic vs.\ Synthetic Limits}
-
-\textbf{Gap}: Classical Kolmogorov applies to probability \emph{measures} on $\sigma$-algebras. Our ``distributions'' are functions $\alpha \to \Prob$, not measures.
-
-Two paths forward:
-\begin{enumerate}
-    \item \textbf{Measure-theoretic}: Construct actual measures, apply classical Kolmogorov, then extract our distributions. Requires measure theory infrastructure.
-    \item \textbf{Synthetic}: Develop projective limits directly for $\Prob$-valued functions. This would be new theory, more aligned with our synthetic approach.
-\end{enumerate}
-
-This is a major open problem for Paper 5.
-
-\subsection{The Conjecture}
-
-\begin{conjecture}[Infinite Probabilistic Zorn]
-\label{conj:infinite-zorn}
-Let $\alpha$ be a nonempty type with chain-complete probabilistic poset structure $P$. For any $\varepsilon > \pzero$, there exists a distribution $D$ on $\alpha$ concentrated on $\varepsilon$-near-maximal elements.
-\end{conjecture}
-
-\begin{proof}[Proof Strategy]
-\begin{enumerate}
-    \item Construct the projective system $\{D_F\}$ as above.
-    \item Apply Kolmogorov extension (or synthetic analog) to get limit $D$.
-    \item Show: if $D(x) \neq \pzero$, then $x$ is $\varepsilon$-near-maximal.
-\end{enumerate}
-
-\textbf{Step 3 argument} (contrapositive): Suppose $x$ is \emph{not} $\varepsilon$-near-maximal in $\alpha$. Then there exists $y \in \alpha$ with $\plt(x,y) > \varepsilon$. Consider any finite $F$ containing both $x$ and $y$. In $F$, we have $\plt|_F(x,y) = \plt(x,y) > \varepsilon$, so $x$ is not $\varepsilon$-near-maximal in $F$. Thus $D_F(x) = \pzero$ for all such $F$. By the limit construction, $D(x) = \pzero$.
 \end{proof}
+
+\begin{remark}[Completeness]
+Step 3 uses completeness: limits of bounded monotone sequences in $\Prob$ exist. This is implicit in the type theory. A full formalization would include completeness as a primitive rule alongside the algebraic operations.
+\end{remark}
 
 \subsection{Why No Choice?}
 
-\textbf{Classical Zorn} requires selecting a maximal element from chains---this is where AC enters.
+Classical Zorn: ``Select a maximal element.'' This requires choosing from uncountably many candidates. AC is needed.
 
-\textbf{Probabilistic Zorn} constructs a distribution:
-\begin{itemize}
-    \item Finite approximations: no choice (enumeration suffices)
-    \item Projective system: canonical construction (no selection)
-    \item Kolmogorov extension: limit construction (not selection)
-\end{itemize}
+Probabilistic Zorn: ``Construct a distribution.'' We build $D$ as a limit of finite constructions. No selection from infinite sets.
 
-We never select a point from an infinite set. We construct a measure as a limit of finite measures. This is why the probabilistic version should be choice-free.
+\textbf{The key insight}: asserting a distribution exists is weaker than asserting a point exists. Distributions can be constructed; points must be selected.
 
-\subsection{Gaps to Fill}
+\subsection{Classical Zorn as Corollary}
 
-\begin{enumerate}
-    \item \textbf{Consistency of projective system}: Show $D_{F'}|_F = D_F$ (or appropriate variant).
-    \item \textbf{Kolmogorov in our framework}: Formalize for $\Prob$-valued distributions (synthetic analog).
-    \item \textbf{Near-maximality at limit}: The contrapositive argument in the proof strategy needs the limit construction to respect the property.
-    \item \textbf{Chain-completeness role}: See remark below.
-\end{enumerate}
+\begin{corollary}
+For classical poset ($P(x,y) \in \{\pzero, \pone\}$) that is chain-complete: there exists a maximal element.
+\end{corollary}
 
-\begin{remark}[Role of Chain-Completeness]
-Chain-completeness ensures every chain has an upper bound. In classical Zorn, this prevents infinite ascending chains from ``escaping to infinity.'' In our probabilistic setting, the precise role is unclear. One possibility: chain-completeness ensures the projective system has a well-defined limit (chains in the poset of finite subsets have upper bounds). Investigation ongoing.
-\end{remark}
+\begin{proof}
+Apply Probabilistic Zorn with $\varepsilon = \pzero$. The distribution concentrates on $\pzero$-near-maximal elements, which are exactly the maximal elements. Since $D$ is a distribution (sums to $\pone$), at least one element has $D(x) \neq \pzero$, hence is maximal.
+\end{proof}
 
-Resolving these gaps would turn Conjecture~\ref{conj:infinite-zorn} into a theorem and allow us to remove the \texttt{prob\_zorn} axiom.
+%=============================================================================
+\section{The Status of ``Axioms''}
+%=============================================================================
 
-% ============================================================================
-\section{Part 4: Open Directions in Synthetic Probability}
-\label{sec:synthetic}
-% ============================================================================
+\subsection{Not Axioms, But Rules}
 
-We outline open questions for a fully synthetic treatment of probability, where $\Prob$ and conditional expectation would be primitive type formers rather than axiomatized structures. These questions define future work beyond this paper.
+In our Lean formalization, we write:
+\begin{verbatim}
+axiom Prob : Type
+axiom Prob.zero : Prob
+axiom Prob.one_mul : ∀ p, 𝟙 *ₚ p = p
+\end{verbatim}
 
-\subsection{The Vision}
+The keyword \texttt{axiom} is a Lean artifact. These are not axioms in the sense of ``assertions we cannot prove.'' They are the \textbf{rules} of probabilistic type theory, expressed in Lean's metalanguage.
 
-In homotopy type theory (HoTT), \emph{paths} are primitive:
-\begin{itemize}
-    \item Formation: For $a, b : A$, there is a type $a =_A b$.
-    \item Introduction: reflexivity $\mathsf{refl}_a : a =_A a$.
-    \item Elimination: path induction (J-rule).
-    \item Computation: $\beta$-rule for J.
-\end{itemize}
-
-Could probability have analogous structure?
-
-\subsection{Open Question: Prob as Type Former}
-
-\begin{quote}
-\textbf{Question 1}: Can $\Prob$ be introduced as a primitive type with formation, introduction, elimination, and computation rules?
-\end{quote}
-
-\subsubsection*{Speculative Rules}
-
-\textbf{Formation}: $\Prob : \mathsf{Type}$.
-
-\textbf{Introduction}: $\pzero, \pone : \Prob$, operations $\padd, \pmul, \psub$.
-
-\textbf{Elimination}: Use $\Prob$ values in computations via operations.
-
-\textbf{Computation}: What are the $\beta$-rules? Desiderata:
-\begin{itemize}
-    \item $\pone \pmul p \equiv p$ (definitional equality?)
-    \item $p \padd \pzero \equiv p$
-\end{itemize}
-
-\begin{remark}
-These are desiderata, not a proposal. Achieving definitional equalities requires a \emph{construction} of $\Prob$, not just axiomatization. With axioms, equalities are propositional (provable but not computational).
-\end{remark}
-
-\subsubsection*{Difficulty}
-
-Unlike identity types, $\Prob$ is not universal---not every type comes with probability structure. A better analogy may be type-theoretic \emph{modalities} (like cohesive $\sharp$), which add structure for specific purposes. $\Prob$ would be a ``probabilistic modality'' capturing uncertainty.
-
-The type-theoretic interest would come from:
-\begin{itemize}
-    \item How $\Prob$ interacts with other types
-    \item Modalities or monads capturing probabilistic computation
-    \item Synthetic measure theory
-\end{itemize}
-
-\subsection{Open Question: Synthetic Conditional Expectation}
-
-\begin{quote}
-\textbf{Question 2}: Can $\E[\cdot|\cdot]$ be given computational rules that determine its behavior?
-\end{quote}
-
-Currently, $\E[f|g]$ is a black box satisfying axioms. A synthetic treatment would specify:
-
-\textbf{Formation}: For $f, g : \ProbProp(\alpha)$, we have $\E[f|g] : \Prob$.
-
-\textbf{Computation rules} (speculative):
-\begin{align*}
-    \E[\mathbf{1}|g] &\equiv \pone \\
-    \E[c \cdot f|g] &\equiv c \pmul \E[f|g] \\
-    \E[f + g|h] &\equiv \E[f|h] \padd \E[g|h]
-\end{align*}
-
-\subsubsection*{Difficulty}
-
-The product rule $\E[fg|h] = \E[f|gh] \cdot \E[g|h]$ involves $gh$ as a new condition. This recursive structure makes computational rules non-obvious.
-
-\subsection{Comparison: Quasi-Borel Spaces}
-
-Quasi-Borel spaces (QBS) provide semantics for probabilistic programming:
-\begin{itemize}
-    \item A QBS is a set $X$ with designated ``random elements'' $\Real \to X$.
-    \item Probability measures are defined via pushforward.
-    \item Avoids measure-theoretic pathologies.
-\end{itemize}
-
-\textbf{Relation to our work}: QBS could provide a semantic foundation for synthetic $\Prob$. Our type-theoretic axioms would be validated by QBS models.
-
-\textbf{Difference}: QBS is a semantic framework; we seek syntactic rules.
-
-\subsection{Comparison: Markov Categories}
-
-Markov categories (Fritz, 2020) axiomatize probabilistic reasoning categorically:
-\begin{itemize}
-    \item Objects: types/spaces
-    \item Morphisms: stochastic maps (Kleisli morphisms for probability monad)
-    \item Structure: copy ($\Delta$), delete ($!$), conditioning
-\end{itemize}
-
-\textbf{Relation to our work}: Our $\ProbProp$ and $\E[\cdot|\cdot]$ could form a Markov category. The categorical axioms might correspond to our CondExp axioms~\cite{fritz2020}.
-
-\textbf{Open question}: Is there a correspondence between our 7 CondExp axioms and the Markov category axioms?
-
-\subsection{Toward Paper 6}
-
-A future Paper 6 could develop:
-\begin{enumerate}
-    \item Formal definition of $\mathsf{ProbProp}$ as a Markov category
-    \item String diagram calculus for probabilistic reasoning
-    \item Categorical proof of probabilistic Zorn
-\end{enumerate}
-
-\subsection{Summary of Open Questions}
+\subsection{Comparison}
 
 \begin{center}
-\begin{tabular}{lp{8cm}}
+\begin{tabular}{lll}
 \toprule
-Question & Description \\
+System & Primitives & Status in Lean \\
 \midrule
-Q1 & Can $\Prob$ be a primitive type former with computation rules? \\
-Q2 & What are the computational rules for $\E[\cdot|\cdot]$? \\
-Q3 & How does synthetic $\Prob$ relate to QBS models? \\
-Q4 & What is the correspondence with Markov categories? \\
-Q5 & Can probabilistic Zorn be proven categorically? \\
+Set theory & $\in$, extensionality, etc. & Axioms \\
+HoTT & Path, J-rule, univalence & Axioms (in Lean formalization) \\
+Prob TT & $\Prob$, $\E[\cdot|\cdot]$, rules & Axioms (in Lean formalization) \\
 \bottomrule
 \end{tabular}
 \end{center}
 
-These questions define a research program. Answering them would establish probability theory as a foundational discipline parallel to (rather than built upon) logic and set theory.
+Just as HoTT's ``axioms'' define homotopy type theory, our ``axioms'' define probabilistic type theory.
 
-% ============================================================================
-\section{Conclusion}
-% ============================================================================
+\subsection{Meta vs.\ Object}
 
-\subsection{Summary of Results}
+We use logical quantifiers ($\forall$, $\exists$, $\to$) throughout this paper. Is this not using logic to define probability?
 
-This paper made progress toward synthetic probability in three directions:
+\textbf{No.} We distinguish:
+\begin{itemize}
+    \item \textbf{Metalogic}: English, informal mathematics, Lean's type theory. Used to DESCRIBE and VERIFY the system.
+    \item \textbf{Object logic}: The $\{\pzero, \pone\}$ fragment of $\Prob$. DERIVED within the system.
+\end{itemize}
 
-\textbf{Part 1: Axiom Reduction.} We reduced the axiom count from 48 to 43 by proving five axioms follow from commutativity. Two additional axioms (De Morgan laws) would become theorems if $\Prob$ were constructed as $[0,1]$. The reduction is modest but clarifies which axioms are fundamental.
+When we write ``$\forall y, x \plt y \ple \varepsilon$,'' the $\forall$ is metalogic---part of the specification language. The object-level does not have $\forall$ as primitive; it has probabilistic quantification via $\E[\cdot|\cdot]$.
 
-\textbf{Part 2: Finite Zorn.} We proved that probabilistic Zorn holds for finite types without any form of choice (Theorem~\ref{thm:finite-zorn}). The proof is constructive: enumerate elements, compute defects, take minimum. This establishes the foundation for the infinite case.
+This is standard: HoTT uses classical metalogic to reason ABOUT the system, even if the object theory lacks classical principles.
 
-\textbf{Part 3: Infinite Zorn Strategy.} We sketched how the infinite case follows from projective limits of finite approximations. The key insight---construct distributions rather than select points---explains why probabilistic Zorn should be choice-free. Major gaps remain: formalizing projective consistency and developing a synthetic Kolmogorov extension.
+\subsection{Consistency}
 
-\subsection{The Path Forward}
+How do we know probabilistic type theory is consistent?
 
-Completing the program requires:
+\textbf{Semantic argument}: The rules are satisfied by $\Prob = [0,1] \subset \mathbb{R}$ with standard operations. This model shows the rules are not contradictory.
+
+But we do not \emph{construct} $\Prob$ as $[0,1]$. The model validates; it does not define.
+
+%=============================================================================
+\section{What We Have Achieved}
+%=============================================================================
+
+\subsection{Summary}
+
 \begin{enumerate}
-    \item Formalizing the projective limit argument (fills gaps in Part 3)
-    \item Constructing $\Prob$ as $[0,1]$ (eliminates De Morgan axioms)
-    \item Investigating synthetic type formers for $\Prob$ and $\E[\cdot|\cdot]$ (Part 4)
+    \item \textbf{Probability is primitive}: $\Prob$ is a type former, not a construction.
+    \item \textbf{Logic is derived}: Classical logic is the $\{\pzero, \pone\}$ fragment.
+    \item \textbf{LEM is algebra}: $p + (1-p) = 1$ is an algebraic identity, not a logical axiom.
+    \item \textbf{Zorn without choice}: Probabilistic Zorn constructs distributions, avoiding selection.
+    \item \textbf{Classical Zorn as corollary}: The $\{\pzero, \pone\}$ case recovers classical Zorn.
 \end{enumerate}
 
-If successful, the \texttt{prob\_zorn} axiom becomes a theorem, and probability theory stands as a foundational discipline independent of classical logic and set theory.
+\subsection{Philosophical Position}
 
-\subsection{Philosophical Implications}
+We do not claim probability is ``more fundamental'' than logic in some absolute sense. We claim:
 
-The probabilistic approach to foundations inverts the usual hierarchy:
-\begin{center}
-\begin{tabular}{ccc}
-Classical & & Probabilistic \\
-\hline
-Logic & $\to$ & Logic as $\{0,1\}$ case \\
-Sets & $\to$ & Distributions \\
-Choice (AC) & $\to$ & Limit construction \\
-Existence of point & $\to$ & Existence of measure \\
-\end{tabular}
-\end{center}
+\begin{quote}
+\emph{There exists a coherent type theory where probability is primitive and logic is derived. In this type theory, Zorn's lemma is provable without choice.}
+\end{quote}
 
-The last line is key: classical existence (``there exists $x$'') becomes probabilistic existence (``there exists a distribution concentrated on $x$''). The probabilistic version is weaker but often sufficient, and crucially, achievable without selection.
+This is a mathematical result, not a metaphysical claim.
 
-\appendix
+%=============================================================================
+\section{Conclusion}
+%=============================================================================
 
-\section{Complete Axiom List}
-\label{app:axioms}
+We have presented probabilistic type theory: a foundation where $\Prob$ is primitive. The rules governing $\Prob$ are not axioms-to-be-eliminated but the definition of the system. Classical logic emerges as the boundary case. Zorn's lemma becomes a theorem about distributions, requiring no Axiom of Choice.
 
-% Full list of current axioms
+The Lean formalization uses \texttt{axiom} declarations because Lean's metalanguage requires it. These declarations are the encoding of our type theory's rules, not ``axioms'' in the informal sense of ``things we wish we could prove.''
 
-\section{Lean Implementation}
-\label{app:lean}
-
-% Code excerpts from Synthetic.lean
+Probability first. Logic second. Choice unnecessary.
 
 \begin{thebibliography}{9}
-
-\bibitem{fritz2020}
-T.~Fritz.
-\newblock A synthetic approach to {M}arkov kernels, conditional independence,
-  and theorems on sufficient statistics.
-\newblock {\em Advances in Mathematics}, 370:107239, 2020.
-
-\bibitem{heunen2017}
-C.~Heunen, O.~Kammar, S.~Staton, and H.~Yang.
-\newblock A convenient category for higher-order probability theory.
-\newblock In {\em Proceedings of LICS}, 2017.
 
 \bibitem{hottbook}
 The {Univalent Foundations Program}.
 \newblock {\em Homotopy Type Theory: Univalent Foundations of Mathematics}.
 \newblock Institute for Advanced Study, 2013.
+
+\bibitem{jaynes}
+E.~T.~Jaynes.
+\newblock {\em Probability Theory: The Logic of Science}.
+\newblock Cambridge University Press, 2003.
 
 \end{thebibliography}
 

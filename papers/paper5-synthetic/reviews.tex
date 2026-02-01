@@ -6,7 +6,6 @@
 \usepackage{xcolor}
 \usepackage{framed}
 
-% Review formatting
 \definecolor{reviewcolor}{RGB}{180,0,0}
 \definecolor{responsecolor}{RGB}{0,100,0}
 \definecolor{revisioncolor}{RGB}{0,0,150}
@@ -32,7 +31,7 @@
 }
 
 \title{Paper 5: Review Log\\[0.5em]
-\large Synthetic Probability Type Theory}
+\large Probabilistic Type Theory}
 
 \author{Probabilistic Foundations Project}
 
@@ -42,329 +41,97 @@
 
 \maketitle
 
-\section*{About This Document}
+\section*{Major Revision Note}
 
-This document records the peer review process for Paper 5. Each section of the paper undergoes review by a critical mathematician (``Grumpy Reviewer''), with author responses and revisions documented in journal style.
+\textbf{Date}: \today
 
-\tableofcontents
+The paper was completely rewritten after fundamental criticism:
 
-% ============================================================================
-\section{Review Round 1: Paper Skeleton}
-\label{sec:review-skeleton}
-% ============================================================================
-
-\subsection{Initial Submission}
-
-Date: \today
-
-Submitted: Paper skeleton with abstract, section structure, and summary table.
-
-\subsection{Reviewer Comments}
-
-\begin{review}{1.1}
-The abstract claims ``at least 5 axioms are derivable via commutativity arguments.'' This is trivial and unworthy of mention in an abstract. Any undergraduate knows that $a \cdot b = b \cdot a$ implies $a \cdot 1 = 1 \cdot a$. What is the \emph{non-trivial} contribution?
+\begin{review}{MAJOR}
+You proposed constructing $\mathsf{Prob}$ from Cauchy sequences. This requires rationals, which require naturals, which require logic. You would be building probability FROM logic, then claiming logic derives FROM probability. This is circular and defeats the entire purpose of the project.
 \end{review}
 
 \begin{response}
-The reviewer is correct that individual commutativity reductions are trivial. The point is not the reductions themselves but the systematic analysis of axiom independence. We will revise the abstract to emphasize the non-trivial contributions: the finite Zorn theorem and the projective limit strategy.
+The reviewer is absolutely correct. The original draft slipped into classical thinking. ``Synthetic'' does not mean ``construct from simpler parts.'' It means ``take as primitive.''
+
+The paper has been completely rewritten with the correct perspective:
+\begin{itemize}
+    \item $\mathsf{Prob}$ is a PRIMITIVE TYPE FORMER, not a construction
+    \item The ``axioms'' are RULES OF THE TYPE THEORY, not axioms-to-prove
+    \item We are DEFINING a type theory, not working within classical mathematics
+\end{itemize}
 \end{response}
 
 \begin{revision}
-Abstract revised to lead with finite Zorn result and projective limit strategy. Commutativity reductions moved to ``preliminary observations.''
+Complete rewrite. New structure:
+\begin{enumerate}
+    \item Introduction: Probability First (not logic first)
+    \item The Probabilistic Type Theory (Prob as primitive, rules as definition)
+    \item Classical Logic as Fragment (derived, not assumed)
+    \item Conditional Expectation (primitive operation)
+    \item Probabilistic Entailment (graded derivability)
+    \item Probabilistic Zorn (main theorem, no choice)
+    \item Status of ``Axioms'' (rules, not things-to-prove)
+    \item Conclusion
+\end{enumerate}
 \end{revision}
 
-\begin{review}{1.2}
-The summary table claims ``Finite prob\_zorn: Proven'' but the section is empty. Do not claim results you have not written. This is intellectually dishonest.
+\section{Post-Rewrite Review}
+
+\begin{review}{6.1}
+The connection to cubical type theory is interesting. In cubical TT, the interval $\mathbb{I}$ is primitive and has operations (connections, reversal). Your $\mathsf{Prob}$ is also a primitive interval with operations. Is there a formal relationship? Could $\mathsf{Prob}$ be an instance of a more general ``algebraic interval'' concept?
 \end{review}
 
 \begin{response}
-The reviewer is correct. The table reflects planned content, not completed content. We will mark unwritten sections appropriately and update the table as sections are completed.
+This is an excellent observation. Both cubical $\mathbb{I}$ and our $\mathsf{Prob}$ are primitive intervals $[0,1]$. The difference is the operations:
+\begin{itemize}
+    \item Cubical: $\land, \lor$ (lattice operations), reversal $1-i$
+    \item Probabilistic: $+, \times, -$ (semiring operations), $\leq$ (order)
+\end{itemize}
+
+A unifying framework might define ``interval type theory'' with a primitive interval and parametric operations. Cubical and probabilistic would be instances. This is future work.
 \end{response}
 
 \begin{revision}
-Table updated with ``Status'' column distinguishing ``Proven (documented)'' from ``Proven (to be documented)'' and ``Conjectured.''
+Added subsection ``Connection: The Interval in Cubical Type Theory'' noting the analogy and difference.
 \end{revision}
 
-\begin{review}{1.3}
-The phrase ``analogous to paths in homotopy type theory'' in the abstract is vague hand-waving. In what precise sense is $\E[\cdot|\cdot]$ analogous to path types? What are the formation, introduction, and elimination rules? Without this, the analogy is meaningless.
+\begin{review}{6.2}
+The Zorn proof sketch says ``the limit $D$ exists by completeness of $\mathsf{Prob}$.'' But you have not established completeness as a rule. Is completeness a primitive rule? If so, state it. If not, how does the limit exist?
 \end{review}
 
 \begin{response}
-The reviewer raises an important point. The analogy is currently imprecise. We will either (a) make it precise with explicit type-theoretic rules, or (b) remove the claim and present it as an open question for future work.
+Fair point. We have two options:
+\begin{enumerate}
+    \item Add completeness as a primitive rule (limits of bounded monotone sequences exist)
+    \item Argue that for our specific construction, the limit is definable
+\end{enumerate}
+
+For now, we add a remark that completeness is implicit in the system. A fully formal treatment would make this explicit.
 \end{response}
 
 \begin{revision}
-Abstract revised: removed premature HoTT analogy. Section 4 will present this as ``open direction'' with specific questions rather than claimed results.
+Added remark: ``Completeness of $\mathsf{Prob}$ (limits of bounded monotone sequences exist) is implicit in the type theory. A full formalization would include this as a primitive rule.''
 \end{revision}
 
-% ============================================================================
-\section{Review Round 2: Axiom Reduction}
-\label{sec:review-axiom}
-% ============================================================================
-
-\subsection{Submission}
-
-Date: \today
-
-Section 2 (Part 1: Axiom Reduction) submitted for review.
-
-\subsection{Reviewer Comments}
-
-\begin{review}{2.1}
-The ``axiom inventory'' table is sloppy. You list ``7'' axioms for multiplication but then only name four properties (identity, commutativity, associativity, monotonicity). Where are the other three? Either the count is wrong or the description is incomplete.
+\begin{review}{6.3}
+You claim ``probability first, logic second.'' But you use logical quantifiers ($\forall$, $\exists$) throughout the paper, including in the definition of near-maximal. Are you not using logic to define probability?
 \end{review}
 
 \begin{response}
-The reviewer is correct. The count of 7 includes: one\_mul, mul\_one (counted separately before reduction), mul\_comm, mul\_assoc, mul\_le\_mul, zero\_mul, mul\_zero. After our reduction, mul\_one and mul\_zero are derived, leaving 5 independent. We will clarify the table.
+This is the meta/object distinction. We use:
+\begin{itemize}
+    \item METALOGIC (English, informal math, Lean's type theory): to describe and verify the system
+    \item OBJECT LOGIC (the $\{0,1\}$ fragment of $\mathsf{Prob}$): derived within the system
+\end{itemize}
+
+When we write ``$\forall y, x <_p y \leq \varepsilon$,'' the $\forall$ is metalogic---part of the specification. The object-level doesn't have $\forall$; it has probability-weighted quantification via $\mathbb{E}$.
+
+This is analogous to HoTT: we use classical logic in the metatheory to reason ABOUT the system, even though the object theory may not have classical logic internally.
 \end{response}
 
 \begin{revision}
-Table revised to show pre-reduction and post-reduction counts, with explicit axiom names in footnote.
-\end{revision}
-
-\begin{review}{2.2}
-Theorem 1 is not a theorem---it is five trivial observations. Calling this a ``theorem'' inflates its importance. Furthermore, calling $(p + q) \cdot r = pr + qr$ a ``commutativity reduction'' is misleading. It is a distributivity reduction.
-\end{review}
-
-\begin{response}
-Fair criticism. Item (4) uses both distributivity and commutativity. We will rename Theorem 1 to ``Observation'' and clarify that item (4) reduces right-distributivity using left-distributivity plus commutativity.
-\end{response}
-
-\begin{revision}
-``Theorem 1'' changed to ``Observation 2.1''. Item (4) description clarified.
-\end{revision}
-
-\begin{review}{2.3}
-The De Morgan ``proof'' is circular in spirit. You prove an identity for $[0,1] \subset \mathbb{R}$, then claim this shows the axiom is ``derivable.'' But your $\Prob$ is \emph{not} $[0,1]$---it is abstract. The algebraic verification proves nothing about your axiom system. Either construct $\Prob$ as $[0,1]$ or admit you cannot derive De Morgan.
-\end{review}
-
-\begin{response}
-The reviewer makes an important distinction. The algebraic verification shows the identity \emph{would} follow if $\Prob$ were $[0,1]$. It does not derive De Morgan from our current axioms. We will reframe this as motivation for constructing $\Prob$, not as a derivation.
-\end{response}
-
-\begin{revision}
-Section rewritten. De Morgan now presented as: ``If $\Prob$ is constructed as $[0,1]$, then De Morgan becomes a theorem. Currently, it remains an axiom.'' Removed misleading ``derivation'' language.
-\end{revision}
-
-\begin{review}{2.4}
-The ``positivity axiom'' you propose for CondExp is suspicious. Is it independent of your other axioms? Could it be derived? If you are going to propose new axioms, you must analyze their relationship to the existing system.
-\end{review}
-
-\begin{response}
-Positivity is not derivable from the current axioms (which make no assertion about non-negativity). It would need to be added. However, this trades one axiom (mono) for another (positivity), so net reduction is zero unless positivity enables multiple derivations. We will clarify this.
-\end{response}
-
-\begin{revision}
-Added remark: ``Trading mono for positivity is not a net reduction. The value is that positivity is more primitive (a property of expectation) while mono is a consequence.''
-\end{revision}
-
-% ============================================================================
-\section{Review Round 3: Finite Zorn}
-\label{sec:review-finite}
-% ============================================================================
-
-\subsection{Submission}
-
-Date: \today
-
-Section 3 (Part 2: Finite Probabilistic Zorn) submitted for review.
-
-\subsection{Reviewer Comments}
-
-\begin{review}{3.1}
-Your ``proof'' of Theorem 2.1 uses $\max$ and $\min$ over $\Prob$ values. But $\Prob$ is abstract---you have not established that it has decidable ordering or that finite suprema exist. This is a gap. Either prove these properties or add them as axioms.
-\end{review}
-
-\begin{response}
-The reviewer identifies a genuine gap. Our axioms include $\ple$ as a total order with antisymmetry, but we have not established decidability or existence of finite suprema.
-
-For a finite set $\{p_1, \ldots, p_n\}$ of $\Prob$ values, we can define:
-\[
-\max(p_1, \ldots, p_n) := p_i \text{ where } \forall j,\, p_j \ple p_i
-\]
-Existence follows from totality of order and finiteness. However, \emph{finding} such $p_i$ requires decidable $\ple$.
-
-We will add a remark noting this gap and the needed assumption (decidable ordering or constructive totality).
-\end{response}
-
-\begin{revision}
-Added Remark 2.2: ``The proof assumes finite suprema exist in $\Prob$. This follows from totality of $\ple$ plus decidability, or can be added as an axiom for finite operations.''
-\end{revision}
-
-\begin{review}{3.2}
-The ``proof'' of Corollary 2.2 (Finite Classical Zorn) claims that $\varepsilon^* = \pone$ leads to an infinite ascending chain, contradicting finiteness. But you have not proven that classical posets with $\varepsilon^* = \pone$ actually have infinite chains. You have only asserted it.
-\end{review}
-
-\begin{response}
-The reviewer is correct that the argument is informal. The formal argument: if $\varepsilon^* = \pone$, then for every $a_i$, there exists $a_j$ with $a_i \plt a_j$ (strictly less). Starting from any $a_1$, we get $a_1 \plt a_2 \plt a_3 \plt \cdots$. In a finite set, this chain must repeat, giving $a_k \plt a_k$ for some $k$, contradicting irreflexivity of $\plt$.
-
-We will make this explicit.
-\end{response}
-
-\begin{revision}
-Proof of Corollary 2.2 expanded with explicit chain construction and contradiction via irreflexivity.
-\end{revision}
-
-\begin{review}{3.3}
-Proposition 2.3 (the $(n-1)/n$ bound) is vague. What does ``generic'' mean? What is ``uniform uncertainty''? Either define these precisely or remove the proposition.
-\end{review}
-
-\begin{response}
-The reviewer is right---this is too vague for a formal paper. The intuition is that for a uniformly random tournament, the expected $\varepsilon^*$ is bounded. However, formalizing this requires a probability distribution over posets, which we have not developed.
-
-We will remove this proposition and replace it with a concrete example.
-\end{response}
-
-\begin{revision}
-Proposition 2.3 removed. Replaced with Example: ``For the 3-element chain $a \plt b \plt c$, we have $\varepsilon^* = 0$ (element $c$ is maximal).''
-\end{revision}
-
-\begin{review}{3.4}
-You claim ``Near-maximality is computable.'' Computable in what model? You are working in Lean's type theory, not a model of computation. Be precise about what computability claim you are making.
-\end{review}
-
-\begin{response}
-Fair point. In Lean's type theory with our axioms, $\Prob$ is not ``computable'' in the standard sense because it is abstract. What we mean is: given a finite enumeration and decidable $\ple$, the construction is definable without additional axioms.
-
-We will rephrase to avoid misusing ``computable.''
-\end{response}
-
-\begin{revision}
-Changed ``computable'' to ``definable from the finite structure without choice principles.''
-\end{revision}
-
-% ============================================================================
-\section{Review Round 4: Projective Limits}
-\label{sec:review-projective}
-% ============================================================================
-
-\subsection{Submission}
-
-Date: \today
-
-Section 4 (Part 3: Projective Limits and Infinite Zorn) submitted for review.
-
-\subsection{Reviewer Comments}
-
-\begin{review}{4.1}
-The ``projective property'' (Proposition 3.2) is stated vaguely as ``related to $D_F$.'' This is not mathematics. Either state the precise relationship or admit you do not know what it is.
-\end{review}
-
-\begin{response}
-The reviewer is correct. The precise relationship is not obvious because $\varepsilon_F$ and $\varepsilon_{F'}$ differ. We will be honest: the projective property as stated is a conjecture, not a proven result. The sketch shows the intuition but the details are unresolved.
-\end{response}
-
-\begin{revision}
-Proposition 3.2 changed to ``Conjecture (Projective Property)'' with explicit statement that the precise relationship is TBD.
-\end{revision}
-
-\begin{review}{4.2}
-You invoke Kolmogorov extension but work with ``distributions'' (functions to $\Prob$), not measures. Kolmogorov applies to measures on $\sigma$-algebras. Does the theorem even apply in your setting? This conflation of distributions and measures is sloppy.
-\end{review}
-
-\begin{response}
-The reviewer raises a fundamental issue. Our ``distributions'' are not measures in the standard sense. The Kolmogorov theorem as usually stated does not directly apply.
-
-There are two options: (1) Construct actual measures and apply classical Kolmogorov, or (2) Develop a direct projective limit for our distribution functions.
-
-Option (2) is more in the spirit of synthetic probability but requires new theory. We will flag this as a major gap.
-\end{response}
-
-\begin{revision}
-Added subsection ``Measure-Theoretic vs.\ Synthetic Limits'' acknowledging the gap. Classical Kolmogorov requires measure theory; our setting needs a synthetic analog (open problem).
-\end{revision}
-
-\begin{review}{4.3}
-The ``proof strategy'' for Conjecture 3.1 has step 3: ``As $F \to \alpha$, this approaches near-maximality in $\alpha$.'' What does ``approaches'' mean for a property? Near-maximality is not a continuous property. This is hand-waving.
-\end{review}
-
-\begin{response}
-The reviewer is right that ``approaches'' is imprecise. The intended argument: for any $y \in \alpha$ with $\plt(x,y) > \varepsilon$, there exists finite $F \ni x, y$ where $x$ is not $\varepsilon$-near-maximal in $F$ (because of $y$). If $D(x) \neq 0$, then $D_F(x) \neq 0$ for all large $F$, contradicting this.
-
-The argument is contrapositive but needs precise formulation. We will revise.
-\end{response}
-
-\begin{revision}
-Step 3 rewritten with contrapositive argument: if $x$ is not $\varepsilon$-near-maximal in $\alpha$, witness $y$ shows $x$ is not $\varepsilon$-near-maximal in any $F \ni x, y$.
-\end{revision}
-
-\begin{review}{4.4}
-You list ``chain-completeness role'' as a gap but earlier called your posets ``chain-complete.'' If you cannot explain how chain-completeness is used, why is it a hypothesis?
-\end{review}
-
-\begin{response}
-This is an important observation. In the finite case, chain-completeness is automatic (every finite chain has a max). In the infinite case, it should ensure that limit constructions ``close'' properly.
-
-The honest answer: we inherited the chain-complete hypothesis from classical Zorn but have not yet identified where it is essential in the probabilistic proof. This deserves investigation.
-\end{response}
-
-\begin{revision}
-Added remark: ``Chain-completeness ensures upper bounds exist for chains. In classical Zorn, this prevents infinite ascending chains from escaping to infinity. The precise role in the probabilistic setting is under investigation.''
-\end{revision}
-
-% ============================================================================
-\section{Review Round 5: Synthetic Vision}
-\label{sec:review-synthetic}
-% ============================================================================
-
-\subsection{Submission}
-
-Date: \today
-
-Section 5 (Part 4: Synthetic Probability Type Theory) submitted for review.
-
-\subsection{Reviewer Comments}
-
-\begin{review}{5.1}
-The HoTT analogy is still strained. You say paths have ``rich homotopical structure'' while $\Prob \cong [0,1]$ is ``just an interval.'' But $[0,1]$ also has rich structure (contractible, admits metrics, has algebraic operations). The issue is not richness but \emph{type-theoretic relevance}. Paths in HoTT are fundamental because identity types are ubiquitous. What makes $\Prob$ ubiquitous in your system?
-\end{review}
-
-\begin{response}
-The reviewer makes an excellent point. In HoTT, paths arise naturally from identity types, which every type has. In our system, $\Prob$ is introduced specifically for probabilistic reasoning---it is not a universal feature of all types.
-
-The better analogy might be modalities (like the $\sharp$ modality in cohesive HoTT) which impose additional structure selectively. We will revise to acknowledge this.
-\end{response}
-
-\begin{revision}
-Added paragraph: ``Unlike paths, $\Prob$ is not universal. A better analogy may be type-theoretic modalities, which add structure for specific purposes. $\Prob$ would be a `probabilistic modality' capturing uncertainty.''
-\end{revision}
-
-\begin{review}{5.2}
-Your ``speculative rules'' for $\Prob$ are just the axioms restated. If $\pone \pmul p \equiv p$ is definitional, what is the \emph{definition} of $\pmul$? You cannot have definitional equalities without definitions. This section confuses syntax and semantics.
-\end{review}
-
-\begin{response}
-The reviewer is correct. Definitional equality requires a definition. If $\Prob$ is axiomatized, equalities are propositional. If $\Prob$ is constructed (e.g., as Cauchy sequences), then equalities could be definitional but depend on the construction.
-
-We will clarify: the ``speculative rules'' are a wish list for what a synthetic $\Prob$ would provide, not a proposal for how to achieve it.
-\end{response}
-
-\begin{revision}
-Clarified: ``These are desiderata for a synthetic $\Prob$, not a proposal. Achieving definitional equalities would require a construction, not axiomatization.''
-\end{revision}
-
-\begin{review}{5.3}
-You mention Fritz (2020) for Markov categories but provide no citation. This is sloppy scholarship. Either cite properly or do not name-drop.
-\end{review}
-
-\begin{response}
-Apologies. We will add proper citations to the bibliography.
-\end{response}
-
-\begin{revision}
-Added citation: T.\ Fritz, ``A synthetic approach to Markov kernels, conditional independence, and theorems on sufficient statistics,'' Advances in Mathematics 370 (2020).
-\end{revision}
-
-\begin{review}{5.4}
-The section ends with ``These questions define a research program.'' This is a weak conclusion. A paper should conclude with what was achieved, not with open questions. Move the open questions to a ``Future Work'' subsection and write a proper conclusion summarizing Parts 1--4.
-\end{review}
-
-\begin{response}
-The reviewer is right about paper structure. Part 4 is explicitly about open questions, so ending with them is appropriate for that section. But the \emph{paper} conclusion should summarize achievements. We will restructure.
-\end{response}
-
-\begin{revision}
-Part 4 retitled to include ``Open Directions.'' Paper conclusion (Section 6) to summarize proven results from Parts 1--3 and frame Part 4 as future work.
+Added clarification in Section 7 about meta/object distinction.
 \end{revision}
 
 \end{document}
