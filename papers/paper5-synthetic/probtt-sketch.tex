@@ -1,0 +1,402 @@
+\documentclass[11pt,a4paper]{article}
+
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{mathtools}
+\usepackage{proof}  % for inference rules
+\usepackage[margin=1in]{geometry}
+\usepackage{enumitem}
+
+\newtheorem{definition}{Definition}[section]
+\newtheorem{remark}{Remark}[section]
+\newtheorem{theorem}{Theorem}[section]
+
+% Judgments
+\newcommand{\ctx}{\;\mathsf{ctx}}
+\newcommand{\type}{\;\mathsf{type}}
+\newcommand{\Prob}{\mathsf{Prob}}
+\newcommand{\E}{\mathbb{E}}
+\newcommand{\pmark}[1]{@\, #1}  % probability annotation
+
+\title{ProbTT: A Sketch\\[0.5em]
+\large Type Theory with Primitive Probability}
+
+\author{Working Notes}
+\date{\today}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+We sketch a type theory where probability is the primitive notion, not types or propositions. The judgment $\Gamma \vdash a : A \pmark{p}$ means ``$a$ inhabits $A$ with probability $p$.'' When all probabilities are in $\{0,1\}$, we recover Martin-L\"of Type Theory.
+\end{abstract}
+
+%=============================================================================
+\section{Design Principles}
+%=============================================================================
+
+\begin{enumerate}
+    \item $\Prob$ is the only primitive type
+    \item All other types are $\Prob$-valued families
+    \item Judgments carry probability annotations
+    \item MLTT is the $\{0,1\}$-fragment
+    \item No appeal to ``external'' logic in the rules
+\end{enumerate}
+
+%=============================================================================
+\section{Judgments}
+%=============================================================================
+
+\subsection{Basic Judgments}
+
+\begin{definition}[Judgments]
+ProbTT has four judgment forms:
+\begin{align}
+\Gamma &\ctx \pmark{p} && \text{$\Gamma$ is a valid context with prob $p$} \\
+\Gamma &\vdash A \type \pmark{p} && \text{$A$ is a type in context $\Gamma$ with prob $p$} \\
+\Gamma &\vdash a : A \pmark{p} && \text{$a$ has type $A$ with prob $p$} \\
+\Gamma &\vdash a \equiv b : A \pmark{p} && \text{$a$ equals $b$ at type $A$ with prob $p$}
+\end{align}
+\end{definition}
+
+\begin{remark}[Interpretation]
+$\Gamma \vdash a : A \pmark{p}$ means: given the assumptions in $\Gamma$, the probability that $a$ is a valid element of $A$ is at least $p$.
+
+When $p = 1$: ordinary (certain) typing.
+When $p = 0$: the judgment is vacuously true.
+\end{remark}
+
+\subsection{Probability Ordering}
+
+We assume $\Prob$ has:
+\begin{itemize}
+    \item Elements $0, 1 : \Prob$
+    \item Operations $+, \cdot, -$ (bounded)
+    \item Order $\leq$ with $0 \leq p \leq 1$
+\end{itemize}
+
+Key rule: if $\Gamma \vdash J \pmark{p}$ and $q \leq p$, then $\Gamma \vdash J \pmark{q}$.
+
+%=============================================================================
+\section{Structural Rules}
+%=============================================================================
+
+\subsection{Context Formation}
+
+\begin{gather}
+\infer[\textsc{Ctx-Empty}]
+  {\cdot \ctx \pmark{1}}
+  {}
+\\[1em]
+\infer[\textsc{Ctx-Ext}]
+  {\Gamma, x : A \ctx \pmark{p \cdot q}}
+  {\Gamma \ctx \pmark{p} & \Gamma \vdash A \type \pmark{q}}
+\end{gather}
+
+\begin{remark}
+Context extension multiplies probabilities: if the context is valid with prob $p$ and the new type is valid with prob $q$, the extended context is valid with prob $p \cdot q$.
+\end{remark}
+
+\subsection{Weakening and Substitution}
+
+\begin{gather}
+\infer[\textsc{Weak}]
+  {\Gamma \vdash J \pmark{q}}
+  {\Gamma \vdash J \pmark{p} & q \leq p}
+\\[1em]
+\infer[\textsc{Subst}]
+  {\Gamma \vdash B[a/x] \type \pmark{p \cdot q}}
+  {\Gamma \vdash a : A \pmark{p} & \Gamma, x : A \vdash B \type \pmark{q}}
+\end{gather}
+
+%=============================================================================
+\section{The Prob Type}
+%=============================================================================
+
+\subsection{Formation and Introduction}
+
+\begin{gather}
+\infer[\textsc{Prob-Form}]
+  {\Gamma \vdash \Prob \type \pmark{1}}
+  {\Gamma \ctx \pmark{p}}
+\\[1em]
+\infer[\textsc{Prob-Zero}]
+  {\Gamma \vdash 0 : \Prob \pmark{1}}
+  {\Gamma \ctx \pmark{p}}
+\qquad
+\infer[\textsc{Prob-One}]
+  {\Gamma \vdash 1 : \Prob \pmark{1}}
+  {\Gamma \ctx \pmark{p}}
+\end{gather}
+
+\begin{remark}
+$\Prob$ is always a type with certainty. Its elements $0$ and $1$ are always valid with certainty. The probability annotation tracks uncertainty about \emph{other} judgments, not about $\Prob$ itself.
+\end{remark}
+
+\subsection{Operations}
+
+\begin{gather}
+\infer[\textsc{Prob-Add}]
+  {\Gamma \vdash p + q : \Prob \pmark{1}}
+  {\Gamma \vdash p : \Prob \pmark{1} & \Gamma \vdash q : \Prob \pmark{1}}
+\\[1em]
+\infer[\textsc{Prob-Mul}]
+  {\Gamma \vdash p \cdot q : \Prob \pmark{1}}
+  {\Gamma \vdash p : \Prob \pmark{1} & \Gamma \vdash q : \Prob \pmark{1}}
+\\[1em]
+\infer[\textsc{Prob-Sub}]
+  {\Gamma \vdash p - q : \Prob \pmark{1}}
+  {\Gamma \vdash p : \Prob \pmark{1} & \Gamma \vdash q : \Prob \pmark{1}}
+\end{gather}
+
+%=============================================================================
+\section{Stochastic Function Types}
+%=============================================================================
+
+Instead of ordinary $\Pi$-types, we have \textbf{Markov kernels}: stochastic functions.
+
+\subsection{Formation}
+
+\begin{gather}
+\infer[\textsc{Markov-Form}]
+  {\Gamma \vdash (A \leadsto B) \type \pmark{p \cdot q}}
+  {\Gamma \vdash A \type \pmark{p} & \Gamma, x : A \vdash B \type \pmark{q}}
+\end{gather}
+
+Read $A \leadsto B$ as ``stochastic map from $A$ to $B$.''
+
+\subsection{Introduction}
+
+\begin{gather}
+\infer[\textsc{Markov-Intro}]
+  {\Gamma \vdash (\lambda^p x. b) : (A \leadsto B) \pmark{r}}
+  {\Gamma, x : A \vdash b : B \pmark{p} & r = \E_x[p]}
+\end{gather}
+
+\begin{remark}
+A stochastic function $\lambda^p x. b$ produces output $b$ with probability $p$ (which may depend on $x$). The overall probability $r$ is the expected value of $p$ over inputs.
+\end{remark}
+
+\subsection{Elimination (Application)}
+
+\begin{gather}
+\infer[\textsc{Markov-Elim}]
+  {\Gamma \vdash f(a) : B[a/x] \pmark{p \cdot q}}
+  {\Gamma \vdash f : (A \leadsto B) \pmark{p} & \Gamma \vdash a : A \pmark{q}}
+\end{gather}
+
+Probabilities multiply: uncertain function applied to uncertain argument.
+
+\subsection{Computation}
+
+\begin{gather}
+\infer[\textsc{Markov-Beta}]
+  {\Gamma \vdash (\lambda^p x. b)(a) \equiv b[a/x] : B[a/x] \pmark{p}}
+  {\Gamma, x : A \vdash b : B \pmark{p} & \Gamma \vdash a : A \pmark{1}}
+\end{gather}
+
+%=============================================================================
+\section{Deterministic Functions as Special Case}
+%=============================================================================
+
+\begin{definition}[Deterministic Function]
+A \textbf{deterministic function type} is:
+\[
+A \to B \;:=\; A \leadsto B \text{ where all internal probabilities are } 1
+\]
+\end{definition}
+
+\begin{gather}
+\infer[\textsc{Pi-Form}]
+  {\Gamma \vdash (A \to B) \type \pmark{p \cdot q}}
+  {\Gamma \vdash A \type \pmark{p} & \Gamma, x : A \vdash B \type \pmark{q}}
+\\[1em]
+\infer[\textsc{Pi-Intro}]
+  {\Gamma \vdash (\lambda x. b) : (A \to B) \pmark{1}}
+  {\Gamma, x : A \vdash b : B \pmark{1}}
+\end{gather}
+
+\begin{remark}
+When the body $b$ has type $B$ with probability $1$ for all $x$, the function is deterministic. This recovers MLTT's $\Pi$-type.
+\end{remark}
+
+%=============================================================================
+\section{Probabilistic Pairs}
+%=============================================================================
+
+\subsection{Formation}
+
+\begin{gather}
+\infer[\textsc{Sigma-Form}]
+  {\Gamma \vdash (\Sigma x : A. B) \type \pmark{p \cdot q}}
+  {\Gamma \vdash A \type \pmark{p} & \Gamma, x : A \vdash B \type \pmark{q}}
+\end{gather}
+
+\subsection{Introduction}
+
+\begin{gather}
+\infer[\textsc{Sigma-Intro}]
+  {\Gamma \vdash (a, b)^{p \cdot q} : (\Sigma x : A. B) \pmark{p \cdot q}}
+  {\Gamma \vdash a : A \pmark{p} & \Gamma \vdash b : B[a/x] \pmark{q}}
+\end{gather}
+
+\begin{remark}
+A pair exists with the product of the probabilities of its components. This models a joint distribution.
+\end{remark}
+
+\subsection{Elimination}
+
+\begin{gather}
+\infer[\textsc{Sigma-Fst}]
+  {\Gamma \vdash \pi_1(t) : A \pmark{p}}
+  {\Gamma \vdash t : (\Sigma x : A. B) \pmark{p}}
+\\[1em]
+\infer[\textsc{Sigma-Snd}]
+  {\Gamma \vdash \pi_2(t) : B[\pi_1(t)/x] \pmark{p}}
+  {\Gamma \vdash t : (\Sigma x : A. B) \pmark{p}}
+\end{gather}
+
+%=============================================================================
+\section{Probabilistic Identity}
+%=============================================================================
+
+\subsection{Formation}
+
+\begin{gather}
+\infer[\textsc{Id-Form}]
+  {\Gamma \vdash (a =_A b) \type \pmark{p \cdot q}}
+  {\Gamma \vdash a : A \pmark{p} & \Gamma \vdash b : A \pmark{q}}
+\end{gather}
+
+\subsection{Introduction}
+
+\begin{gather}
+\infer[\textsc{Id-Refl}]
+  {\Gamma \vdash \mathsf{refl}_a : (a =_A a) \pmark{p}}
+  {\Gamma \vdash a : A \pmark{p}}
+\end{gather}
+
+\begin{remark}
+Reflexivity holds with the same probability as the term's existence. If $a : A \pmark{0.7}$, then $\mathsf{refl}_a : (a = a) \pmark{0.7}$.
+\end{remark}
+
+\subsection{Elimination (J-rule)}
+
+\begin{gather}
+\infer[\textsc{Id-J}]
+  {\Gamma \vdash J(P, d, a, b, e) : P(b, e) \pmark{p \cdot q}}
+  {\begin{array}{c}
+    \Gamma, x : A, y : a =_A x \vdash P(x, y) \type \pmark{1} \\
+    \Gamma \vdash d : P(a, \mathsf{refl}_a) \pmark{p} \\
+    \Gamma \vdash e : (a =_A b) \pmark{q}
+  \end{array}}
+\end{gather}
+
+%=============================================================================
+\section{Quantifiers as Expectations}
+%=============================================================================
+
+This is the key to ``logic from probability.''
+
+\subsection{Universal Quantification}
+
+\begin{definition}[Probabilistic $\forall$]
+\[
+\forall^p (x : A). P(x) \;:=\; \E_x[P(x)] \geq p
+\]
+``For all $x$ in $A$, $P(x)$ holds with probability at least $p$ on average.''
+\end{definition}
+
+Classical $\forall$ is $\forall^1$: the expectation equals 1, meaning $P(x)$ holds with certainty for all $x$.
+
+\subsection{Existential Quantification}
+
+\begin{definition}[Probabilistic $\exists$]
+\[
+\exists^p (x : A). P(x) \;:=\; \E_x[P(x)] \geq p
+\]
+For existence, we typically want $p > 0$: some $x$ satisfies $P$ with positive probability.
+\end{definition}
+
+Classical $\exists$ is $\exists^{>0}$: the expectation is positive.
+
+\subsection{Implication}
+
+\begin{definition}[Probabilistic Implication]
+\[
+P \to^p Q \;:=\; \E[Q \mid P] \geq p
+\]
+``Given $P$, the probability of $Q$ is at least $p$.''
+\end{definition}
+
+Classical implication is $\to^1$: $\E[Q \mid P] = 1$, i.e., $P$ implies $Q$ with certainty.
+
+%=============================================================================
+\section{Classical Logic as $\{0,1\}$-Fragment}
+%=============================================================================
+
+\begin{theorem}[MLTT Embedding]
+When all probability annotations are restricted to $\{0, 1\}$:
+\begin{enumerate}
+    \item $\Gamma \vdash a : A \pmark{1}$ becomes $\Gamma \vdash a : A$ (ordinary typing)
+    \item $\Gamma \vdash a : A \pmark{0}$ becomes vacuously true (no information)
+    \item Stochastic functions $A \leadsto B$ with $p = 1$ become ordinary functions $A \to B$
+    \item $\forall^1$ becomes classical $\forall$
+    \item $\exists^{>0}$ with $\{0,1\}$ probabilities becomes classical $\exists$
+\end{enumerate}
+\end{theorem}
+
+\begin{proof}[Proof Sketch]
+When $p \in \{0,1\}$, multiplication is conjunction ($1 \cdot 1 = 1$, else $0$), and the probabilistic rules collapse to MLTT rules.
+\end{proof}
+
+%=============================================================================
+\section{What's Missing}
+%=============================================================================
+
+This sketch is incomplete. Open questions:
+
+\begin{enumerate}
+    \item \textbf{Normalization}: Does ProbTT normalize? What's the computation model?
+
+    \item \textbf{Decidability}: Is type checking decidable? Probably not in general (involves comparing probabilities).
+
+    \item \textbf{Universes}: How do probabilistic universes work? Is $\Prob : \mathsf{Type}_0 \pmark{1}$?
+
+    \item \textbf{Inductive types}: How do we define $\mathbb{N}$ probabilistically? As distributions?
+
+    \item \textbf{Conditional expectation}: We used $\E[\cdot | \cdot]$ informally. Needs primitive rules.
+
+    \item \textbf{Measure theory}: For continuous distributions, we need more than discrete $\Prob$. Integration?
+
+    \item \textbf{Consistency}: Is there a model? (Yes: take $\Prob = [0,1]$ and interpret stochastic functions as Markov kernels.)
+\end{enumerate}
+
+%=============================================================================
+\section{Comparison}
+%=============================================================================
+
+\begin{center}
+\begin{tabular}{lll}
+\textbf{System} & \textbf{Primitive} & \textbf{Derived} \\
+\hline
+MLTT & Types, $\Pi$, $\Sigma$, $\mathsf{Id}$ & (logic via Curry-Howard) \\
+HoTT & + paths, univalence & + homotopy \\
+Cubical & + interval $\mathbb{I}$, Kan & + computational univalence \\
+\textbf{ProbTT} & $\Prob$, $\leadsto$, $\E$ & MLTT (as $\{0,1\}$ case)
+\end{tabular}
+\end{center}
+
+%=============================================================================
+\section{Next Steps}
+%=============================================================================
+
+\begin{enumerate}
+    \item Formalize the rules precisely (fix the $\E$ notation)
+    \item Prove MLTT embedding theorem rigorously
+    \item Define inductive types (ProbNat, etc.)
+    \item Implement in Dedukti/Lambdapi to test
+    \item Study metatheory (normalization, consistency)
+\end{enumerate}
+
+\end{document}
