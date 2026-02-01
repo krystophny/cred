@@ -1,0 +1,4 @@
+-- INVALID: Reference to unknown judgment
+-- Should fail: derives from non-existent premise
+
+derive q : Q 〔 w 〕 from nonexistent by magic

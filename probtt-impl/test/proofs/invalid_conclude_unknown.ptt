@@ -1,0 +1,4 @@
+-- INVALID: Conclude from unknown judgment
+-- Should fail: negating a non-existent assumption
+
+conclude result from nonexistent

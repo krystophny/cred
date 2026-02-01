@@ -41,8 +41,14 @@ let run_check path =
 let check_succeeds path =
   let (status, output) = run_check path in
   if status <> Unix.WEXITED 0 then
-    Printf.eprintf "FAILED: %s\nOutput: %s\n" path output;
+    Printf.eprintf "FAILED (expected success): %s\nOutput: %s\n" path output;
   status = Unix.WEXITED 0
+
+let check_fails path =
+  let (status, output) = run_check path in
+  if status = Unix.WEXITED 0 then
+    Printf.eprintf "FAILED (expected failure): %s\nOutput: %s\n" path output;
+  status <> Unix.WEXITED 0
 
 let check_contains path substr =
   let (_, output) = run_check path in
@@ -75,5 +81,10 @@ let () =
   test "double_negation.ptt succeeds" (check_succeeds "test/proofs/double_negation.ptt");
   test "double_negation.ptt forces w=0" (check_contains "test/proofs/double_negation.ptt" "w = 0");
   test "ex_falso.ptt succeeds" (check_succeeds "test/proofs/ex_falso.ptt");
+
+  (* Invalid proofs - must be rejected *)
+  test "invalid_unknown_ref.ptt fails" (check_fails "test/proofs/invalid_unknown_ref.ptt");
+  test "invalid_contradict_unknown.ptt fails" (check_fails "test/proofs/invalid_contradict_unknown.ptt");
+  test "invalid_conclude_unknown.ptt fails" (check_fails "test/proofs/invalid_conclude_unknown.ptt");
 
   Printf.printf "\nAll integration tests passed!\n"
