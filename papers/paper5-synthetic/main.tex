@@ -337,7 +337,140 @@ The key insight: for finite sets, we never need to \emph{select}---we can \emph{
 \label{sec:projective-limits}
 % ============================================================================
 
-% Content to be added
+We sketch how probabilistic Zorn for infinite types follows from the finite case via projective limits. This section presents the strategy; full formalization is future work.
+
+\subsection{The Strategy}
+
+\textbf{Key insight}: We construct \emph{distributions} on near-maximal elements, not individual near-maximal elements. Distributions can be built as limits of finite approximations.
+
+\begin{enumerate}
+    \item For each finite subset $F \subset \alpha$, apply finite Zorn to get a distribution $D_F$ concentrated on near-maximals of $F$.
+    \item These distributions form a \emph{projective system}: if $F \subset F'$, then $D_{F'}$ projects to $D_F$.
+    \item The \emph{Kolmogorov extension theorem} gives a limit distribution $D$ on $\alpha$.
+    \item We argue that $D$ is concentrated on near-maximals of $\alpha$.
+\end{enumerate}
+
+\subsection{Finite Approximations}
+
+\begin{definition}[Finite Restriction]
+For finite $F \subset \alpha$, define the restricted poset $P|_F$ with:
+\[
+(P|_F).\mathsf{le}(x,y) := P.\mathsf{le}(x,y) \quad \text{for } x, y \in F
+\]
+\end{definition}
+
+\begin{definition}[Near-Maximal in $F$]
+Element $x \in F$ is \emph{$\varepsilon$-near-maximal in $F$} if:
+\[
+\forall y \in F,\, \plt|_F(x,y) \ple \varepsilon
+\]
+\end{definition}
+
+\begin{lemma}
+If $x$ is $\varepsilon$-near-maximal in $F' \supset F$ and $x \in F$, then $x$ is $\varepsilon$-near-maximal in $F$.
+\end{lemma}
+
+\begin{proof}
+Near-maximality in $F'$ means $\plt(x,y) \leq \varepsilon$ for all $y \in F'$. Since $F \subset F'$, this holds for all $y \in F$.
+\end{proof}
+
+\subsection{The Projective System}
+
+For each finite $F$, let:
+\[
+M_F^\varepsilon := \{ x \in F : x \text{ is } \varepsilon\text{-near-maximal in } F \}
+\]
+
+\begin{definition}[Distribution on $F$]
+Define $D_F : F \to \Prob$ as the uniform distribution on $M_F^{\varepsilon_F}$:
+\[
+D_F(x) := \begin{cases}
+    1/|M_F^{\varepsilon_F}| & \text{if } x \in M_F^{\varepsilon_F} \\
+    \pzero & \text{otherwise}
+\end{cases}
+\]
+where $\varepsilon_F$ is the optimal bound from Theorem~\ref{thm:finite-zorn}.
+\end{definition}
+
+\begin{conjecture}[Projective Property]
+For $F \subset F'$, the distributions satisfy a consistency condition enabling projective limits.
+\end{conjecture}
+
+\begin{remark}
+The precise consistency condition is not yet formulated. The difficulty: $\varepsilon_{F'}$ may differ from $\varepsilon_F$, and near-maximality is relative to the ambient set. A fixed $\varepsilon$ across all $F$ would simplify this but may not exist.
+\end{remark}
+
+\subsection{Kolmogorov Extension}
+
+\begin{theorem}[Kolmogorov Extension, Classical]
+Let $\{D_F\}_{F \text{ finite}}$ be a projective system of probability distributions. If the system is consistent (projections agree), there exists a distribution $D$ on $\alpha$ such that $D|_F = D_F$ for all finite $F$.
+\end{theorem}
+
+\begin{remark}
+The classical proof uses:
+\begin{enumerate}
+    \item Carath\'eodory extension for measures
+    \item Compactness arguments for consistency
+\end{enumerate}
+In our setting, we work with distributions directly (functions to $\Prob$), which may simplify some aspects.
+\end{remark}
+
+\subsubsection*{Measure-Theoretic vs.\ Synthetic Limits}
+
+\textbf{Gap}: Classical Kolmogorov applies to probability \emph{measures} on $\sigma$-algebras. Our ``distributions'' are functions $\alpha \to \Prob$, not measures.
+
+Two paths forward:
+\begin{enumerate}
+    \item \textbf{Measure-theoretic}: Construct actual measures, apply classical Kolmogorov, then extract our distributions. Requires measure theory infrastructure.
+    \item \textbf{Synthetic}: Develop projective limits directly for $\Prob$-valued functions. This would be new theory, more aligned with our synthetic approach.
+\end{enumerate}
+
+This is a major open problem for Paper 5.
+
+\subsection{The Conjecture}
+
+\begin{conjecture}[Infinite Probabilistic Zorn]
+\label{conj:infinite-zorn}
+Let $\alpha$ be a nonempty type with chain-complete probabilistic poset structure $P$. For any $\varepsilon > \pzero$, there exists a distribution $D$ on $\alpha$ concentrated on $\varepsilon$-near-maximal elements.
+\end{conjecture}
+
+\begin{proof}[Proof Strategy]
+\begin{enumerate}
+    \item Construct the projective system $\{D_F\}$ as above.
+    \item Apply Kolmogorov extension (or synthetic analog) to get limit $D$.
+    \item Show: if $D(x) \neq \pzero$, then $x$ is $\varepsilon$-near-maximal.
+\end{enumerate}
+
+\textbf{Step 3 argument} (contrapositive): Suppose $x$ is \emph{not} $\varepsilon$-near-maximal in $\alpha$. Then there exists $y \in \alpha$ with $\plt(x,y) > \varepsilon$. Consider any finite $F$ containing both $x$ and $y$. In $F$, we have $\plt|_F(x,y) = \plt(x,y) > \varepsilon$, so $x$ is not $\varepsilon$-near-maximal in $F$. Thus $D_F(x) = \pzero$ for all such $F$. By the limit construction, $D(x) = \pzero$.
+\end{proof}
+
+\subsection{Why No Choice?}
+
+\textbf{Classical Zorn} requires selecting a maximal element from chains---this is where AC enters.
+
+\textbf{Probabilistic Zorn} constructs a distribution:
+\begin{itemize}
+    \item Finite approximations: no choice (enumeration suffices)
+    \item Projective system: canonical construction (no selection)
+    \item Kolmogorov extension: limit construction (not selection)
+\end{itemize}
+
+We never select a point from an infinite set. We construct a measure as a limit of finite measures. This is why the probabilistic version should be choice-free.
+
+\subsection{Gaps to Fill}
+
+\begin{enumerate}
+    \item \textbf{Consistency of projective system}: Show $D_{F'}|_F = D_F$ (or appropriate variant).
+    \item \textbf{Kolmogorov in our framework}: Formalize for $\Prob$-valued distributions (synthetic analog).
+    \item \textbf{Near-maximality at limit}: The contrapositive argument in the proof strategy needs the limit construction to respect the property.
+    \item \textbf{Chain-completeness role}: See remark below.
+\end{enumerate}
+
+\begin{remark}[Role of Chain-Completeness]
+Chain-completeness ensures every chain has an upper bound. In classical Zorn, this prevents infinite ascending chains from ``escaping to infinity.'' In our probabilistic setting, the precise role is unclear. One possibility: chain-completeness ensures the projective system has a well-defined limit (chains in the poset of finite subsets have upper bounds). Investigation ongoing.
+\end{remark}
+
+Resolving these gaps would turn Conjecture~\ref{conj:infinite-zorn} into a theorem and allow us to remove the \texttt{prob\_zorn} axiom.
 
 % ============================================================================
 \section{Part 4: Synthetic Probability Type Theory}

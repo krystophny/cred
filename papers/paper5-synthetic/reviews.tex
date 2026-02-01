@@ -238,7 +238,69 @@ Changed ``computable'' to ``definable from the finite structure without choice p
 \label{sec:review-projective}
 % ============================================================================
 
-% To be added
+\subsection{Submission}
+
+Date: \today
+
+Section 4 (Part 3: Projective Limits and Infinite Zorn) submitted for review.
+
+\subsection{Reviewer Comments}
+
+\begin{review}{4.1}
+The ``projective property'' (Proposition 3.2) is stated vaguely as ``related to $D_F$.'' This is not mathematics. Either state the precise relationship or admit you do not know what it is.
+\end{review}
+
+\begin{response}
+The reviewer is correct. The precise relationship is not obvious because $\varepsilon_F$ and $\varepsilon_{F'}$ differ. We will be honest: the projective property as stated is a conjecture, not a proven result. The sketch shows the intuition but the details are unresolved.
+\end{response}
+
+\begin{revision}
+Proposition 3.2 changed to ``Conjecture (Projective Property)'' with explicit statement that the precise relationship is TBD.
+\end{revision}
+
+\begin{review}{4.2}
+You invoke Kolmogorov extension but work with ``distributions'' (functions to $\Prob$), not measures. Kolmogorov applies to measures on $\sigma$-algebras. Does the theorem even apply in your setting? This conflation of distributions and measures is sloppy.
+\end{review}
+
+\begin{response}
+The reviewer raises a fundamental issue. Our ``distributions'' are not measures in the standard sense. The Kolmogorov theorem as usually stated does not directly apply.
+
+There are two options: (1) Construct actual measures and apply classical Kolmogorov, or (2) Develop a direct projective limit for our distribution functions.
+
+Option (2) is more in the spirit of synthetic probability but requires new theory. We will flag this as a major gap.
+\end{response}
+
+\begin{revision}
+Added subsection ``Measure-Theoretic vs.\ Synthetic Limits'' acknowledging the gap. Classical Kolmogorov requires measure theory; our setting needs a synthetic analog (open problem).
+\end{revision}
+
+\begin{review}{4.3}
+The ``proof strategy'' for Conjecture 3.1 has step 3: ``As $F \to \alpha$, this approaches near-maximality in $\alpha$.'' What does ``approaches'' mean for a property? Near-maximality is not a continuous property. This is hand-waving.
+\end{review}
+
+\begin{response}
+The reviewer is right that ``approaches'' is imprecise. The intended argument: for any $y \in \alpha$ with $\plt(x,y) > \varepsilon$, there exists finite $F \ni x, y$ where $x$ is not $\varepsilon$-near-maximal in $F$ (because of $y$). If $D(x) \neq 0$, then $D_F(x) \neq 0$ for all large $F$, contradicting this.
+
+The argument is contrapositive but needs precise formulation. We will revise.
+\end{response}
+
+\begin{revision}
+Step 3 rewritten with contrapositive argument: if $x$ is not $\varepsilon$-near-maximal in $\alpha$, witness $y$ shows $x$ is not $\varepsilon$-near-maximal in any $F \ni x, y$.
+\end{revision}
+
+\begin{review}{4.4}
+You list ``chain-completeness role'' as a gap but earlier called your posets ``chain-complete.'' If you cannot explain how chain-completeness is used, why is it a hypothesis?
+\end{review}
+
+\begin{response}
+This is an important observation. In the finite case, chain-completeness is automatic (every finite chain has a max). In the infinite case, it should ensure that limit constructions ``close'' properly.
+
+The honest answer: we inherited the chain-complete hypothesis from classical Zorn but have not yet identified where it is essential in the probabilistic proof. This deserves investigation.
+\end{response}
+
+\begin{revision}
+Added remark: ``Chain-completeness ensures upper bounds exist for chains. In classical Zorn, this prevents infinite ascending chains from escaping to infinity. The precise role in the probabilistic setting is under investigation.''
+\end{revision}
 
 % ============================================================================
 \section{Review Round 5: Synthetic Vision}
