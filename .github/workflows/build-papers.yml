@@ -19,16 +19,16 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Build ProbTT Sketch
+      - name: Build ProbTT
         uses: xu-cheng/latex-action@v3
         with:
           working_directory: papers/probtt
-          root_file: probtt-sketch.tex
+          root_file: probtt.tex
 
       - name: Collect PDFs
         run: |
           mkdir -p dist
-          cp papers/probtt/probtt-sketch.pdf dist/probtt-sketch.pdf
+          cp papers/probtt/probtt.pdf dist/probtt.pdf
 
       - name: Upload PDFs
         uses: actions/upload-artifact@v4
