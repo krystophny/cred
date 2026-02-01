@@ -26,7 +26,7 @@
 \newcommand{\negw}{\neg}
 
 \title{ProbTT: Type Theory with Primitive Weights\\[0.5em]
-\large A Product De Morgan Type Theory}
+\large Weights from a De Morgan Algebra}
 
 \author{Probabilistic Foundations Project}
 \date{\today}
@@ -36,7 +36,7 @@
 \maketitle
 
 \begin{abstract}
-We define a type theory where judgments carry \emph{weights} from a De Morgan algebra. The algebra has multiplication, complement, zero, one, and order---with disjunction derived via De Morgan duality. When $\W = \{\zero, \one\}$, we recover Martin-L\"of Type Theory. When $\W = {[0,1]}$, we get probabilistic typing with conditioning via the chain rule (not division). The key insight: types and logic \emph{emerge} from weight structure. This is product fuzzy logic lifted to type theory, with conditioning as the key addition.
+We define a type theory where judgments carry \emph{weights} from a De Morgan algebra. The algebra has multiplication, complement, zero, one, and order---with disjunction derived via De Morgan duality. When $\W = \{\zero, \one\}$, we recover Martin-L\"of Type Theory. When $\W = {[0,1]}$, we get probabilistic typing with conditioning via the chain rule (not division). The key insight: types and logic \emph{emerge} from weight structure. We add conditioning as a primitive, distinguishing this from purely algebraic approaches.
 \end{abstract}
 
 \tableofcontents
@@ -398,22 +398,23 @@ By inspection. All weight operations compute to Boolean.
 \end{proof}
 
 %=============================================================================
-\section{Relationship to Fuzzy Logic}
+\section{Related Structures}
 %=============================================================================
 
-\subsection{What We Share}
+\subsection{The Weight Algebra}
 
-Our weight algebra is exactly \textbf{Product fuzzy logic}:
+Our weight algebra is a \textbf{De Morgan algebra}:
 \begin{itemize}
-    \item Product t-norm: $w \cdot v$ (multiplication)
-    \item Standard negation: $\negw w = 1 - w$ (complement)
-    \item Probabilistic sum: $w \vee v = w + v - wv$ (De Morgan)
+    \item Multiplication: $w \cdot v$ (conjunction)
+    \item Complement: $\negw w$ (negation)
+    \item De Morgan dual: $w \vee v = \negw(\negw w \cdot \negw v)$ (disjunction)
 \end{itemize}
 
-This is a well-studied \textbf{De Morgan algebra}.
+When $\W = {[0,1]}$ with $\negw w = 1 - w$, multiplication is the product and disjunction becomes $w + v - wv$.
 
-\subsection{What We Add}
+\subsection{What ProbTT Adds}
 
+Beyond the algebra:
 \begin{enumerate}
     \item \textbf{Type theory}: $\Pi$, $\Sigma$, $\mathsf{Id}$, universes
     \item \textbf{Weighted judgments}: $\Gamma \vdash a : A \at{w}$
@@ -421,13 +422,13 @@ This is a well-studied \textbf{De Morgan algebra}.
     \item \textbf{MLTT as limit}: The $\{\zero, \one\}$ case
 \end{enumerate}
 
-Fuzzy logic has no conditioning. We add it via the chain rule.
+\subsection{Key Distinction}
 
-\subsection{Summary}
-
+Pure De Morgan algebras have no notion of \textbf{conditioning}. We add it via the chain rule:
 \[
-\text{ProbTT} = \text{Product Fuzzy Logic} + \text{Type Theory} + \text{Conditioning}
+P(A, B) = P(A \mid B) \cdot P(B)
 \]
+This is what distinguishes ProbTT from purely algebraic approaches.
 
 %=============================================================================
 \section{Categorical Semantics}
@@ -463,7 +464,7 @@ When $\W = {[0,1]}$ with copy $\Delta : A \to A \times A$ and delete $! : A \to 
 
 \textbf{Probability}: The $\W = {[0,1]}$ case
 
-\textbf{Novelty}: Product fuzzy logic + type theory + conditioning
+\textbf{Novelty}: De Morgan algebra + type theory + conditioning
 
 %=============================================================================
 \section{Open Problems}

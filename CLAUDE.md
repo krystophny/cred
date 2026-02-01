@@ -162,17 +162,6 @@ Classical logic has only the endpoints. ProbTT has the entire spectrum.
 
 ## Relationship to Existing Systems
 
-### vs Product Fuzzy Logic
-
-| Aspect | Product fuzzy logic | ProbTT |
-|--------|---------------------|--------|
-| Weight algebra | Same (·, ¬) | Same |
-| Conditioning | No | Yes (chain rule) |
-| Type theory | No | Yes (Π, Σ, Id) |
-| MLTT as limit | No | Yes |
-
-ProbTT = Product fuzzy logic + conditioning + type theory
-
 ### vs Graded Type Theory (Granule/Gerty)
 
 | Aspect | Graded types | ProbTT |
