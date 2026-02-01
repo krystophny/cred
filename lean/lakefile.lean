@@ -10,3 +10,6 @@ package foundations where
 @[default_target]
 lean_lib Foundations where
   roots := #[`Foundations]
+
+lean_lib Synthetic where
+  roots := #[`Synthetic]

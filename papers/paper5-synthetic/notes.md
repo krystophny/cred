@@ -666,3 +666,37 @@ is the limit concentrated on near-maximals of A?
 8. Synthetic CondExp (like synthetic paths in HoTT)
 9. Full prob_zorn for arbitrary types
 10. Remove all axioms except type formers
+
+---
+
+# IMPLEMENTATION: Synthetic.lean
+
+Created `lean/Synthetic.lean` with:
+
+## Proven Theorems (axiom reduction)
+1. `mul_one_from_one_mul`: p * 1 = p (from 1 * p = p + commutativity)
+2. `add_zero_from_zero_add`: p + 0 = p (from 0 + p = p + commutativity)
+3. `mul_zero_from_zero_mul`: p * 0 = 0 (from 0 * p = 0 + commutativity)
+4. `add_mul_from_mul_add`: (p+q)*r = p*r + q*r (from distributivity + commutativity)
+5. `one_sub_one_from_sub_self`: 1 - 1 = 0 (instance of sub_self)
+
+## Blocked Derivations
+
+**De Morgan**: Algebraically correct but formalization needs axioms for:
+- Subtraction associativity with addition
+- Handling truncated subtraction
+
+**CondExp mono from positivity**: Partially proven, needs:
+- `Prob.add_sub_of_le`: p ≤ q → p + (q - p) = q
+- `Prob.sub_nonneg_of_le`: p ≤ q → 0 ≤ q - p
+- `Prob.le_add_of_nonneg`: 0 ≤ q → p ≤ p + q
+
+## Conclusion
+
+**5 axioms eliminated** by commutativity arguments (already proven).
+
+**7 more axioms** (De Morgan, some CondExp) could be eliminated with ~3 additional subtraction axioms.
+
+Net: Current 48 → 43 (proven) → potentially 36 (with subtraction axioms).
+
+The subtraction axioms are true for [0,1] ⊂ ℝ and would become theorems if Prob were constructed.
