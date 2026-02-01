@@ -700,3 +700,78 @@ Created `lean/Synthetic.lean` with:
 Net: Current 48 → 43 (proven) → potentially 36 (with subtraction axioms).
 
 The subtraction axioms are true for [0,1] ⊂ ℝ and would become theorems if Prob were constructed.
+
+---
+
+# FINAL REPORT: Paper 5 Strategy
+
+## Executive Summary
+
+Paper 5 aims to construct Prob synthetically, eliminating axioms. After three passes of analysis and implementation experiments:
+
+### What We Can Do Now
+
+1. **Eliminate 5 axioms** via commutativity (proven in Synthetic.lean)
+2. **Prove finite prob_zorn** (strategy clear, needs Fintype infrastructure)
+3. **Outline projective limit argument** for infinite prob_zorn
+
+### What Requires More Work
+
+1. **De Morgan derivation**: Algebra works, Lean formalization blocked by truncated subtraction
+2. **CondExp reduction**: 7 → 4 axioms possible with positivity + subtraction axioms
+3. **Full Prob construction**: Either use Mathlib or build from Cauchy sequences
+
+### Recommended Paper 5 Structure
+
+**Part 1: Axiom Reduction** (immediate)
+- Document the 5 derivable axioms
+- Show De Morgan is algebraically derivable (informal)
+- Discuss what construction would achieve
+
+**Part 2: Finite prob_zorn** (short-term)
+- Prove for finite types (no choice needed)
+- Key lemma: finite posets have maximal elements
+
+**Part 3: Projective Limit Sketch** (medium-term)
+- Define projective system of finite approximations
+- Sketch Kolmogorov extension argument
+- State as conjecture: full prob_zorn follows
+
+**Part 4: Synthetic Type Theory** (long-term vision)
+- Prob as primitive type former (like HoTT paths)
+- CondExp with computational rules
+- Comparison to quasi-Borel spaces, Markov categories
+
+## Open Gaps (Ordered by Difficulty)
+
+| Gap | Description | Path to Resolution |
+|-----|-------------|-------------------|
+| Commutativity reductions | Prove remaining symmetric axioms | Trivial, already done |
+| De Morgan | Formalize algebraic proof | Add 3 subtraction axioms |
+| Finite prob_zorn | Prove for Fintype | Add Fintype, DecidableEq |
+| CondExp reduction | 7 → 4 axioms | Add positivity axiom |
+| Prob construction | Build [0,1] | Use Mathlib or Cauchy |
+| Kolmogorov extension | Projective limits | Needs completeness |
+| Full prob_zorn | Arbitrary types | Needs Kolmogorov |
+| Synthetic CondExp | Computational rules | Research: what are β/η rules? |
+
+## Axiom Budget
+
+```
+Current:      48 axioms
+After Pass 1: 43 axioms (5 commutativity reductions)
+After Pass 2: 36 axioms (De Morgan + CondExp with helper axioms)
+After Pass 3: ~30 axioms (with Prob construction)
+Ultimate:     ~5 type formers (Prob, CondExp, prob_sum as primitives)
+```
+
+## Conclusion
+
+Paper 5 is feasible in stages:
+1. **v1**: Document reductions, prove finite case, sketch infinite
+2. **v2**: Construct Prob, prove De Morgan, reduce CondExp
+3. **v3**: Full synthetic treatment with computational rules
+
+The key insight remains: **distributions are easier to construct than points**.
+This is why prob_zorn should be provable without choice—we never select,
+we only construct measures as limits of finite approximations.
