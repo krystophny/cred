@@ -1,0 +1,135 @@
+\documentclass[11pt,a4paper]{article}
+
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{mathtools}
+\usepackage{hyperref}
+\usepackage{cleveref}
+\usepackage[margin=1in]{geometry}
+\usepackage{enumitem}
+\usepackage{booktabs}
+
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{axiom}{Axiom}
+\newtheorem{conjecture}[theorem]{Conjecture}
+\newtheorem{remark}[theorem]{Remark}
+\newtheorem{example}[theorem]{Example}
+
+\newcommand{\Prob}{\mathsf{Prob}}
+\newcommand{\ProbProp}{\mathsf{ProbProp}}
+\newcommand{\E}{\mathbb{E}}
+\newcommand{\pand}{\wedge_p}
+\newcommand{\por}{\vee_p}
+\newcommand{\pnot}{\neg_p}
+\newcommand{\pzero}{\mathbb{0}}
+\newcommand{\pone}{\mathbb{1}}
+\newcommand{\ple}{\leq_p}
+\newcommand{\plt}{<_p}
+\newcommand{\padd}{+_p}
+\newcommand{\pmul}{\cdot_p}
+\newcommand{\psub}{-_p}
+\newcommand{\Nat}{\mathbb{N}}
+\newcommand{\Real}{\mathbb{R}}
+
+\title{Synthetic Probability Type Theory\\[0.5em]
+\large Towards Constructing Probability from Primitives}
+
+\author{Probabilistic Foundations Project}
+
+\date{\today}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+We prove that probabilistic Zorn's lemma holds for finite types without any form of choice: every finite chain-complete probabilistic poset has an $\varepsilon$-near-maximal element. We then sketch how the infinite case follows from projective limits of finite approximations---constructing distributions rather than selecting points. Along the way, we reduce the axiomatic footprint of our probabilistic foundations from 48 to 43 axioms by observing that several axioms follow from commutativity, with further reductions possible given auxiliary lemmas. We conclude by posing open questions about synthetic probability type theory, where $\Prob$ would be a primitive type former.
+\end{abstract}
+
+\tableofcontents
+
+% ============================================================================
+\section{Introduction}
+% ============================================================================
+
+\subsection{Motivation}
+
+Papers 1--4 developed probabilistic foundations using 48 axioms. This paper asks: how many of these axioms are truly independent? Can we construct $\Prob$ rather than axiomatize it?
+
+\subsection{Goals}
+
+\begin{enumerate}
+    \item Reduce the axiom count by proving derivable axioms as theorems
+    \item Prove probabilistic Zorn for finite types (no choice needed)
+    \item Sketch the proof for infinite types via projective limits
+    \item Outline a fully synthetic approach where probability is primitive
+\end{enumerate}
+
+\subsection{Summary of Results}
+
+\begin{center}
+\begin{tabular}{lccc}
+\toprule
+Result & Formalized & Documented & Axioms Affected \\
+\midrule
+Commutativity reductions & Yes (Lean) & \S\ref{sec:axiom-reduction} & $-5$ \\
+De Morgan derivation & No & \S\ref{sec:axiom-reduction} & $-2$ (blocked) \\
+CondExp reduction & Partial & \S\ref{sec:axiom-reduction} & $-3$ (needs work) \\
+Finite prob\_zorn & No & \S\ref{sec:finite-zorn} & $+0$ (new theorem) \\
+Infinite prob\_zorn & No & \S\ref{sec:projective-limits} & $-2$ (conjecture) \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+% ============================================================================
+\section{Part 1: Axiom Reduction}
+\label{sec:axiom-reduction}
+% ============================================================================
+
+% Content to be added
+
+% ============================================================================
+\section{Part 2: Finite Probabilistic Zorn}
+\label{sec:finite-zorn}
+% ============================================================================
+
+% Content to be added
+
+% ============================================================================
+\section{Part 3: Projective Limits and Infinite Zorn}
+\label{sec:projective-limits}
+% ============================================================================
+
+% Content to be added
+
+% ============================================================================
+\section{Part 4: Synthetic Probability Type Theory}
+\label{sec:synthetic}
+% ============================================================================
+
+% Content to be added
+
+% ============================================================================
+\section{Conclusion}
+% ============================================================================
+
+% Content to be added
+
+\appendix
+
+\section{Complete Axiom List}
+\label{app:axioms}
+
+% Full list of current axioms
+
+\section{Lean Implementation}
+\label{app:lean}
+
+% Code excerpts from Synthetic.lean
+
+\bibliographystyle{plain}
+
+\end{document}

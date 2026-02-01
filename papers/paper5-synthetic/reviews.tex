@@ -1,0 +1,128 @@
+\documentclass[11pt,a4paper]{article}
+
+\usepackage{amsmath,amssymb}
+\usepackage[margin=1in]{geometry}
+\usepackage{enumitem}
+\usepackage{xcolor}
+\usepackage{framed}
+
+% Review formatting
+\definecolor{reviewcolor}{RGB}{180,0,0}
+\definecolor{responsecolor}{RGB}{0,100,0}
+\definecolor{revisioncolor}{RGB}{0,0,150}
+
+\newenvironment{review}[1]{%
+    \begin{leftbar}
+    \textcolor{reviewcolor}{\textbf{Reviewer Comment (#1):}}\\[0.5em]
+    \itshape
+}{%
+    \end{leftbar}
+}
+
+\newenvironment{response}{%
+    \textcolor{responsecolor}{\textbf{Author Response:}}\\[0.5em]
+}{%
+    \vspace{1em}
+}
+
+\newenvironment{revision}{%
+    \textcolor{revisioncolor}{\textbf{Revision Made:}}\\[0.5em]
+}{%
+    \vspace{1em}
+}
+
+\title{Paper 5: Review Log\\[0.5em]
+\large Synthetic Probability Type Theory}
+
+\author{Probabilistic Foundations Project}
+
+\date{Review Process Document}
+
+\begin{document}
+
+\maketitle
+
+\section*{About This Document}
+
+This document records the peer review process for Paper 5. Each section of the paper undergoes review by a critical mathematician (``Grumpy Reviewer''), with author responses and revisions documented in journal style.
+
+\tableofcontents
+
+% ============================================================================
+\section{Review Round 1: Paper Skeleton}
+\label{sec:review-skeleton}
+% ============================================================================
+
+\subsection{Initial Submission}
+
+Date: \today
+
+Submitted: Paper skeleton with abstract, section structure, and summary table.
+
+\subsection{Reviewer Comments}
+
+\begin{review}{1.1}
+The abstract claims ``at least 5 axioms are derivable via commutativity arguments.'' This is trivial and unworthy of mention in an abstract. Any undergraduate knows that $a \cdot b = b \cdot a$ implies $a \cdot 1 = 1 \cdot a$. What is the \emph{non-trivial} contribution?
+\end{review}
+
+\begin{response}
+The reviewer is correct that individual commutativity reductions are trivial. The point is not the reductions themselves but the systematic analysis of axiom independence. We will revise the abstract to emphasize the non-trivial contributions: the finite Zorn theorem and the projective limit strategy.
+\end{response}
+
+\begin{revision}
+Abstract revised to lead with finite Zorn result and projective limit strategy. Commutativity reductions moved to ``preliminary observations.''
+\end{revision}
+
+\begin{review}{1.2}
+The summary table claims ``Finite prob\_zorn: Proven'' but the section is empty. Do not claim results you have not written. This is intellectually dishonest.
+\end{review}
+
+\begin{response}
+The reviewer is correct. The table reflects planned content, not completed content. We will mark unwritten sections appropriately and update the table as sections are completed.
+\end{response}
+
+\begin{revision}
+Table updated with ``Status'' column distinguishing ``Proven (documented)'' from ``Proven (to be documented)'' and ``Conjectured.''
+\end{revision}
+
+\begin{review}{1.3}
+The phrase ``analogous to paths in homotopy type theory'' in the abstract is vague hand-waving. In what precise sense is $\E[\cdot|\cdot]$ analogous to path types? What are the formation, introduction, and elimination rules? Without this, the analogy is meaningless.
+\end{review}
+
+\begin{response}
+The reviewer raises an important point. The analogy is currently imprecise. We will either (a) make it precise with explicit type-theoretic rules, or (b) remove the claim and present it as an open question for future work.
+\end{response}
+
+\begin{revision}
+Abstract revised: removed premature HoTT analogy. Section 4 will present this as ``open direction'' with specific questions rather than claimed results.
+\end{revision}
+
+% ============================================================================
+\section{Review Round 2: Axiom Reduction}
+\label{sec:review-axiom}
+% ============================================================================
+
+% To be added
+
+% ============================================================================
+\section{Review Round 3: Finite Zorn}
+\label{sec:review-finite}
+% ============================================================================
+
+% To be added
+
+% ============================================================================
+\section{Review Round 4: Projective Limits}
+\label{sec:review-projective}
+% ============================================================================
+
+% To be added
+
+% ============================================================================
+\section{Review Round 5: Synthetic Vision}
+\label{sec:review-synthetic}
+% ============================================================================
+
+% To be added
+
+\end{document}
