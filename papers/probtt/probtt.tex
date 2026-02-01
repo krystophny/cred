@@ -2,9 +2,13 @@
 
 \usepackage{amsmath,amssymb,amsthm}
 \usepackage{mathtools}
-\usepackage{proof}
 \usepackage[margin=1in]{geometry}
 \usepackage{stmaryrd}
+
+% Custom inference rule macro (replaces proof.sty)
+\newcommand{\infer}[3][]{%
+  \genfrac{}{}{0.4pt}{0}{#3}{#2}\;\textsc{\footnotesize #1}%
+}
 
 \newtheorem{definition}{Definition}[section]
 \newtheorem{remark}{Remark}[section]
@@ -31,7 +35,7 @@
 \maketitle
 
 \begin{abstract}
-We define a type theory where judgments carry \emph{weights} from a primitive weight monoid $\W$. The monoid has multiplication, unit, zero, and order---but NO addition or subtraction. This is the minimal structure needed for combining uncertainties. When $\W = \{\zero, \one\}$, we recover Martin-L\"of Type Theory. When $\W = [0,1]$, we get probabilistic typing. The weight structure is axiomatized, not constructed from real numbers.
+We define a type theory where judgments carry \emph{weights} from a primitive weight monoid $\W$. The monoid has multiplication, unit, zero, and order---but NO addition or subtraction. This is the minimal structure needed for combining uncertainties. When $\W = \{\zero, \one\}$, we recover Martin-L\"of Type Theory. When $\W = [0,1]$, we get probabilistic typing. With Markov category structure (copy, delete, disintegration), we get conditioning and Bayes' rule. The weight structure is axiomatized, not constructed from real numbers.
 \end{abstract}
 
 \tableofcontents
@@ -148,7 +152,7 @@ $\Gamma \vdash a : A \at{w}$ means: term $a$ inhabits type $A$ with weight $w$.
 \\[1em]
 \infer[\textsc{Ctx-Ext}]
   {\Gamma, x : A \ctx}
-  {\Gamma \ctx & \Gamma \vdash A \type}
+  {\Gamma \ctx \quad \Gamma \vdash A \type}
 \end{gather}
 
 Contexts have no weights---they list available assumptions.
@@ -168,7 +172,7 @@ Variables have weight $\one$: if $x : A$ is assumed, then $x$ definitely has typ
 \begin{gather}
 \infer[\textsc{Weaken}]
   {\Gamma \vdash a : A \at{v}}
-  {\Gamma \vdash a : A \at{w} & v \leq w}
+  {\Gamma \vdash a : A \at{w} \quad v \leq w}
 \end{gather}
 
 If $a : A$ with weight $w$, then $a : A$ with any smaller weight $v$.
@@ -178,7 +182,7 @@ If $a : A$ with weight $w$, then $a : A$ with any smaller weight $v$.
 \begin{gather}
 \infer[\textsc{Subst}]
   {\Gamma \vdash b[a/x] : B[a/x] \at{w \cdot v}}
-  {\Gamma \vdash a : A \at{w} & \Gamma, x : A \vdash b : B \at{v}}
+  {\Gamma \vdash a : A \at{w} \quad \Gamma, x : A \vdash b : B \at{v}}
 \end{gather}
 
 Substituting a weighted term multiplies weights.
@@ -202,7 +206,7 @@ Substituting a weighted term multiplies weights.
 \\[1em]
 \infer[\textsc{W-Mul}]
   {\Gamma \vdash u \cdot v : \W \at{\one}}
-  {\Gamma \vdash u : \W \at{\one} & \Gamma \vdash v : \W \at{\one}}
+  {\Gamma \vdash u : \W \at{\one} \quad \Gamma \vdash v : \W \at{\one}}
 \end{gather}
 
 Weight terms have weight $\one$: the weights themselves are certain.
@@ -216,7 +220,7 @@ Weight terms have weight $\one$: the weights themselves are certain.
 \begin{gather}
 \infer[\textsc{Fun-Form}]
   {\Gamma \vdash (x : A) \to B \type}
-  {\Gamma \vdash A \type & \Gamma, x : A \vdash B \type}
+  {\Gamma \vdash A \type \quad \Gamma, x : A \vdash B \type}
 \end{gather}
 
 Function types are certain---no weight on type formation.
@@ -236,7 +240,7 @@ A function has weight $w$ if its body has weight $w$ (uniformly in $x$).
 \begin{gather}
 \infer[\textsc{Fun-Elim}]
   {\Gamma \vdash f\,a : B[a/x] \at{w \cdot v}}
-  {\Gamma \vdash f : (x : A) \to B \at{w} & \Gamma \vdash a : A \at{v}}
+  {\Gamma \vdash f : (x : A) \to B \at{w} \quad \Gamma \vdash a : A \at{v}}
 \end{gather}
 
 \textbf{Key rule}: weights multiply. Uncertain function applied to uncertain argument gives product weight.
@@ -246,7 +250,7 @@ A function has weight $w$ if its body has weight $w$ (uniformly in $x$).
 \begin{gather}
 \infer[\textsc{Fun-$\beta$}]
   {\Gamma \vdash (\lambda x. b)\,a \equiv b[a/x] : B[a/x] \at{w}}
-  {\Gamma, x : A \vdash b : B \at{w} & \Gamma \vdash a : A \at{\one}}
+  {\Gamma, x : A \vdash b : B \at{w} \quad \Gamma \vdash a : A \at{\one}}
 \end{gather}
 
 $\beta$-reduction preserves weight (when argument is certain).
@@ -260,7 +264,7 @@ $\beta$-reduction preserves weight (when argument is certain).
 \begin{gather}
 \infer[\textsc{Pair-Form}]
   {\Gamma \vdash \Sigma(x : A). B \type}
-  {\Gamma \vdash A \type & \Gamma, x : A \vdash B \type}
+  {\Gamma \vdash A \type \quad \Gamma, x : A \vdash B \type}
 \end{gather}
 
 \subsection{Introduction}
@@ -268,7 +272,7 @@ $\beta$-reduction preserves weight (when argument is certain).
 \begin{gather}
 \infer[\textsc{Pair-Intro}]
   {\Gamma \vdash (a, b) : \Sigma(x : A). B \at{w \cdot v}}
-  {\Gamma \vdash a : A \at{w} & \Gamma \vdash b : B[a/x] \at{v}}
+  {\Gamma \vdash a : A \at{w} \quad \Gamma \vdash b : B[a/x] \at{v}}
 \end{gather}
 
 Pair weight = product of component weights. (Joint probability.)
@@ -296,7 +300,7 @@ Projections preserve weight.
 \begin{gather}
 \infer[\textsc{Id-Form}]
   {\Gamma \vdash \mathsf{Id}_A(a, b) \type}
-  {\Gamma \vdash a : A \at{\one} & \Gamma \vdash b : A \at{\one}}
+  {\Gamma \vdash a : A \at{\one} \quad \Gamma \vdash b : A \at{\one}}
 \end{gather}
 
 Identity types require certain endpoints.
@@ -418,7 +422,7 @@ But this requires both $+$ AND $-$. Without them, we can still have sum types:
 \begin{gather}
 \infer[\textsc{Sum-Form}]
   {\Gamma \vdash A + B \type}
-  {\Gamma \vdash A \type & \Gamma \vdash B \type}
+  {\Gamma \vdash A \type \quad \Gamma \vdash B \type}
 \\[1em]
 \infer[\textsc{Sum-InL}]
   {\Gamma \vdash \mathsf{inl}\,a : A + B \at{w}}
@@ -491,7 +495,109 @@ When $\W = [0,1]$, this becomes a Markov category.
 
 \textbf{Probability}: The $\W = [0,1]$ case.
 
+\textbf{Markov structure}: Copy, delete, disintegration give conditioning.
+
+\textbf{Bayes' rule}: Follows from symmetric disintegration.
+
 \textbf{No addition needed} for core type theory.
+
+%=============================================================================
+\section{Markov Structure and Bayes' Rule}
+%=============================================================================
+
+When $\W = [0,1]$, our weighted category becomes a \emph{Markov category}. This gives us conditioning and Bayes' rule without assuming real numbers as primitive.
+
+\subsection{Markov Category Structure}
+
+\begin{definition}[Copy and Delete]
+A Markov category has additional structure:
+\begin{itemize}
+    \item \textbf{Copy}: $\Delta_A : A \to A \times A$ (diagonal)
+    \item \textbf{Delete}: $!_A : A \to \mathbf{1}$ (terminal)
+\end{itemize}
+satisfying commutative comonoid laws.
+\end{definition}
+
+In ProbTT, these are:
+\begin{gather}
+\infer[\textsc{Copy}]
+  {\Gamma \vdash \Delta\,a : A \times A \at{w}}
+  {\Gamma \vdash a : A \at{w}}
+\\[1em]
+\infer[\textsc{Delete}]
+  {\Gamma \vdash !\,a : \mathbf{1} \at{\one}}
+  {\Gamma \vdash a : A \at{w}}
+\end{gather}
+
+Copy preserves weight (the same evidence supports both copies). Delete always succeeds with weight $\one$.
+
+\subsection{Conditioning and Disintegration}
+
+\begin{definition}[Joint and Marginal]
+Given $f : \Gamma \to A \times B \at{w}$:
+\begin{itemize}
+    \item \textbf{Marginal}: $\pi_1 \circ f : \Gamma \to A$ and $\pi_2 \circ f : \Gamma \to B$
+    \item \textbf{Joint}: The original $f$ encodes the joint distribution
+\end{itemize}
+\end{definition}
+
+\begin{definition}[Disintegration]
+A morphism $f : \Gamma \to A \times B \at{w}$ \emph{disintegrates} if there exist:
+\begin{itemize}
+    \item $g : \Gamma \to A \at{v}$ (marginal on $A$)
+    \item $h : \Gamma \times A \to B \at{u}$ (conditional $B$ given $A$)
+\end{itemize}
+such that $f = \langle g, h \circ (\mathrm{id} \times g) \rangle$ with $w = v \cdot u$.
+\end{definition}
+
+\subsection{Bayes' Rule}
+
+\begin{theorem}[Bayesian Inversion]
+In a Markov category admitting disintegration, Bayes' rule holds:
+
+Given joint $P(A, B)$ that disintegrates as:
+\[
+P(A, B) = P(A) \cdot P(B \mid A)
+\]
+there exists (by symmetry) another disintegration:
+\[
+P(A, B) = P(B) \cdot P(A \mid B)
+\]
+Therefore:
+\[
+P(A \mid B) = \frac{P(A) \cdot P(B \mid A)}{P(B)}
+\]
+\end{theorem}
+
+\begin{remark}
+This requires the extended weight monoid with division (or just the existence of the alternative disintegration). The key insight: \textbf{Bayes' rule is a structural property of disintegration}, not a numerical formula.
+\end{remark}
+
+\subsection{Conditioning in ProbTT}
+
+We add a conditioning primitive:
+
+\begin{gather}
+\infer[\textsc{Cond}]
+  {\Gamma \vdash a \mid b : A \at{w / v}}
+  {\Gamma \vdash (a, b) : A \times B \at{w} \quad \Gamma \vdash b : B \at{v} \quad v \neq \zero}
+\end{gather}
+
+Read: ``the weight of $a$ given $b$'' is $w/v$ where $w$ is the joint weight and $v$ is the marginal weight of $b$.
+
+This requires extending $\W$ with division (or working in $\W = (0, 1]$ where division is total).
+
+\subsection{What Markov Categories Give Us}
+
+\begin{enumerate}
+    \item \textbf{Copying}: $\Delta$ lets us use the same evidence twice
+    \item \textbf{Marginalization}: Delete/project to ``forget'' components
+    \item \textbf{Conditioning}: Disintegration extracts conditionals from joints
+    \item \textbf{Bayes' rule}: Follows from symmetric disintegration
+    \item \textbf{Independence}: $P(A, B) = P(A) \cdot P(B)$ when disintegration is trivial
+\end{enumerate}
+
+All without assuming real numbers---just the categorical structure.
 
 %=============================================================================
 \section{Open Problems}
@@ -504,11 +610,13 @@ When $\W = [0,1]$, this becomes a Markov category.
 
     \item \textbf{Normalization}: Should follow from MLTT since weights don't affect reduction.
 
-    \item \textbf{Adding structure}: When do we need $+$, $-$, integration?
+    \item \textbf{Division}: When $\W$ lacks division, how to handle conditioning?
 
     \item \textbf{Dependent weights}: What if $w$ depends on $x$ in $(x : A) \to B \at{w(x)}$?
 
-    \item \textbf{Conditioning}: How to express $P(A \mid B)$?
+    \item \textbf{Measure zero}: How to handle $P(B) = 0$ in conditioning?
+
+    \item \textbf{Continuous types}: Extension to measurable spaces?
 \end{enumerate}
 
 \end{document}
