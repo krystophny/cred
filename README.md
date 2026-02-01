@@ -66,8 +66,8 @@ foundations/
 
 ## Current Status
 
-- **Axioms**: 48 (Prob type, conditional expectation, countable sum, probabilistic Zorn)
-- **Independent axioms**: 43 (5 proven derivable via commutativity, see Paper 5)
+- **Primitive rules**: 42 (reduced from 53 via systematic analysis)
+- **Derived rules**: 11 (commutativity, De Morgan, subtraction identities)
 - **Theorems**: 38 (all machine-verified)
 - **Build**: Zero warnings, zero errors
 

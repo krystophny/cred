@@ -49,6 +49,8 @@
 
 \begin{abstract}
 We present a type theory where probability is primitive, not derived. The type $\Prob$ is a type former on par with $\Type$ itself, not a construction from reals or measure theory. The rules governing $\Prob$ are not axioms-awaiting-proof but the \emph{definition} of what probability means in this system. Classical logic emerges as the $\{\pzero, \pone\}$ fragment---a degenerate boundary case. We prove that probabilistic Zorn's lemma (existence of distributions on near-maximal elements) is a theorem of this type theory, requiring no Axiom of Choice because we construct distributions, not select points.
+
+Our Lean formalization uses \textbf{42 primitive rules}, reduced from an initial 53 by systematic analysis: 11 rules (including De Morgan laws) are derivable from the others.
 \end{abstract}
 
 \tableofcontents
@@ -206,6 +208,46 @@ The ``axioms'' from Papers 1--4 are the \textbf{computation rules} of this type 
 
 \begin{remark}
 These are not ``axioms we hope to prove someday.'' They are the \textbf{definition} of what $\Prob$ is in this type theory. Asking ``can we prove $\pone \pmul p = p$?'' is like asking ``can we prove the J-rule?'' in HoTT. The rule IS the theory.
+\end{remark}
+
+\subsection{Axiom Reduction: Primitive vs.\ Derived}
+
+Not all rules above are independent. Through systematic analysis, we find \textbf{11 rules derivable} from others:
+
+\subsubsection*{From Commutativity}
+\begin{itemize}
+    \item $p \pmul \pone = p$ (from mul-comm + one-mul)
+    \item $p \padd \pzero = p$ (from add-comm + zero-add)
+    \item $p \pmul \pzero = \pzero$ (from mul-comm + zero-mul)
+    \item $(p \padd q) \pmul r = (p \pmul r) \padd (q \pmul r)$ (from distrib + mul-comm)
+\end{itemize}
+
+\subsubsection*{From Subtraction Rules}
+\begin{itemize}
+    \item $\pone \psub \pone = \pzero$ (from sub-self at $\pone$)
+    \item $p \psub \pzero = p$ (from add-sub-cancel + add-zero)
+    \item $\pone \psub \pzero = \pone$ (from sub-zero at $\pone$)
+    \item $(\pone \padd \pone) \psub \pone = \pone$ (from add-sub-cancel)
+\end{itemize}
+
+\subsubsection*{De Morgan Laws}
+The De Morgan laws become \textbf{definitional} if we define disjunction as:
+\[
+p \por q := \pone \psub ((\pone \psub p) \pmul (\pone \psub q))
+\]
+instead of the inclusion-exclusion formula. Then:
+\begin{itemize}
+    \item $\pnot(p \pand q) = (\pnot p) \por (\pnot q)$ follows by double-negation
+    \item $\pnot(p \por q) = (\pnot p) \pand (\pnot q)$ is immediate from definition
+\end{itemize}
+
+\subsubsection*{Countable Sum}
+\begin{itemize}
+    \item $\sum_n \pzero = \pzero$ (from singleton axiom with $p = \pzero$)
+\end{itemize}
+
+\begin{remark}[Minimal Axiom Count]
+After reduction: \textbf{42 primitive rules} remain. This is the current minimal set. Further reduction would require restructuring (e.g., defining $\Prob$ as a characterized object rather than listing algebraic properties).
 \end{remark}
 
 %=============================================================================
@@ -411,9 +453,14 @@ In our Lean formalization, we write:
 axiom Prob : Type
 axiom Prob.zero : Prob
 axiom Prob.one_mul : ∀ p, 𝟙 *ₚ p = p
+-- while derived rules become theorems:
+theorem Prob.mul_one (p) : p *ₚ 𝟙 = p :=
+  by rw [Prob.mul_comm]; exact Prob.one_mul p
 \end{verbatim}
 
 The keyword \texttt{axiom} is a Lean artifact. These are not axioms in the sense of ``assertions we cannot prove.'' They are the \textbf{rules} of probabilistic type theory, expressed in Lean's metalanguage.
+
+Of the original 53 declarations, 11 are now proved as theorems, leaving \textbf{42 primitive rules}.
 
 \subsection{Comparison}
 

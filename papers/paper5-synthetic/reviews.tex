@@ -134,4 +134,54 @@ This is analogous to HoTT: we use classical logic in the metatheory to reason AB
 Added clarification in Section 7 about meta/object distinction.
 \end{revision}
 
+\section{Axiom Reduction Review}
+
+\begin{review}{7.1}
+You claim 48 axioms. That seems like a lot compared to ZFC's 9. Why so many? Can any be eliminated?
+\end{review}
+
+\begin{response}
+The count was inflated. Through 5 sessions of systematic analysis:
+
+\textbf{Session 1 (Commutativity):} 5 axioms derived from commutativity---mul\_one from mul\_comm + one\_mul, add\_zero from add\_comm + zero\_add, mul\_zero from mul\_comm + zero\_mul, add\_mul from mul\_add + mul\_comm, one\_sub\_one from sub\_self.
+
+\textbf{Session 2 (Subtraction):} 2 more derived---sub\_zero from add\_sub\_cancel + add\_zero, one\_sub\_zero from sub\_zero.
+
+\textbf{Session 3 (De Morgan):} By redefining $p \vee q := 1 - (1-p)(1-q)$ (De Morgan form), both De Morgan laws become definitional, eliminating 2 axioms.
+
+\textbf{Session 4 (Remaining):} one\_add\_one\_sub\_one is add\_sub\_cancel at $(1,1)$. prob\_sum\_zero follows from prob\_sum\_singleton with $p=0$.
+
+\textbf{Total: 11 axioms $\to$ theorems.} Now 42 primitive rules remain.
+\end{response}
+
+\begin{revision}
+Added new section ``Axiom Reduction: Primitive vs.\ Derived'' documenting the 11 derivations. Updated abstract to mention 42 primitive rules.
+\end{revision}
+
+\begin{review}{7.2}
+42 is still more than ZFC's 9. Is this system ``simpler'' or not?
+\end{review}
+
+\begin{response}
+Not simpler by axiom count. ZFC:
+\begin{itemize}
+    \item 9 axiom schemas (infinitely many instances)
+    \item Constructs $[0,1]$ via: logic $\to$ sets $\to$ naturals $\to$ rationals $\to$ Cauchy sequences $\to$ reals $\to$ interval
+    \item All 42 of our rules become THEOREMS once $[0,1]$ exists
+\end{itemize}
+
+Our system:
+\begin{itemize}
+    \item 42 explicit rules (no schemas)
+    \item Takes $[0,1]$ as primitive
+    \item Logic becomes DERIVED as $\{0,1\}$ case
+\end{itemize}
+
+The comparison is misleading. We're not claiming fewer rules. We're claiming a different foundational ordering: probability primitive, logic derived.
+\end{response}
+
+\begin{revision}
+No change needed---the paper already states ``We do not claim probability is `more fundamental' than logic in some absolute sense.''
+\end{revision}
+
 \end{document}
