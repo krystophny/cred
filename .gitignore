@@ -10,6 +10,14 @@ papers/**/*.fdb_latexmk
 papers/**/*.bbl
 papers/**/*.blg
 
+# Agda build artifacts
+agda/_build/
+**/*.agdai
+
+# OCaml/Dune build artifacts
+probtt-impl/_build/
+**/*.install
+
 # OS files
 .DS_Store
 Thumbs.db
