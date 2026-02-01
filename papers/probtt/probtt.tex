@@ -497,7 +497,7 @@ When $\W = [0,1]$, this becomes a Markov category.
 
 \textbf{Markov structure}: Copy, delete, disintegration give conditioning.
 
-\textbf{Bayes' rule}: Follows from symmetric disintegration.
+\textbf{Chain rule}: $P(A|B) \cdot P(B) = P(A) \cdot P(B|A)$ (no division needed).
 
 \textbf{No addition needed} for core type theory.
 
@@ -550,10 +550,10 @@ A morphism $f : \Gamma \to A \times B \at{w}$ \emph{disintegrates} if there exis
 such that $f = \langle g, h \circ (\mathrm{id} \times g) \rangle$ with $w = v \cdot u$.
 \end{definition}
 
-\subsection{Bayes' Rule}
+\subsection{Chain Rule (Weak Bayes)}
 
-\begin{theorem}[Bayesian Inversion]
-In a Markov category admitting disintegration, Bayes' rule holds:
+\begin{theorem}[Chain Rule]
+In a Markov category admitting disintegration, the chain rule holds:
 
 Given joint $P(A, B)$ that disintegrates as:
 \[
@@ -565,27 +565,51 @@ P(A, B) = P(B) \cdot P(A \mid B)
 \]
 Therefore:
 \[
-P(A \mid B) = \frac{P(A) \cdot P(B \mid A)}{P(B)}
+P(A \mid B) \cdot P(B) = P(A) \cdot P(B \mid A)
 \]
 \end{theorem}
 
 \begin{remark}
-This requires the extended weight monoid with division (or just the existence of the alternative disintegration). The key insight: \textbf{Bayes' rule is a structural property of disintegration}, not a numerical formula.
+This is \textbf{Bayes' rule in multiplicative form}---no division required! The weight monoid needs only multiplication. Division would give the ``strong'' form $P(A \mid B) = P(A) \cdot P(B \mid A) / P(B)$, but we avoid it to stay minimal.
 \end{remark}
 
 \subsection{Conditioning in ProbTT}
 
-We add a conditioning primitive:
+Conditioning is expressed via the chain rule, not division:
 
 \begin{gather}
-\infer[\textsc{Cond}]
-  {\Gamma \vdash a \mid b : A \at{w / v}}
-  {\Gamma \vdash (a, b) : A \times B \at{w} \quad \Gamma \vdash b : B \at{v} \quad v \neq \zero}
+\infer[\textsc{Chain}]
+  {\Gamma \vdash (a, b) : A \times B \at{u \cdot v}}
+  {\Gamma \vdash a : A \at{u} \quad \Gamma \vdash b \mid a : B \at{v}}
 \end{gather}
 
-Read: ``the weight of $a$ given $b$'' is $w/v$ where $w$ is the joint weight and $v$ is the marginal weight of $b$.
+Read: ``joint weight = marginal $\times$ conditional.'' The conditional $b \mid a$ is \emph{primitive}---we don't compute it by division, we assert it exists when the chain rule holds.
 
-This requires extending $\W$ with division (or working in $\W = (0, 1]$ where division is total).
+\begin{remark}[No Division Needed]
+In the {0,1} case, conditioning is trivial: $P(B \mid A) = 1$ when $A \Rightarrow B$, else $0$.
+
+For $\W = [0,1]$, conditioning exists but we express it multiplicatively. This keeps the weight monoid minimal (no division operation required).
+\end{remark}
+
+\begin{remark}[Graded Ex Falso]
+What about $P(A \mid B)$ when $P(B) = 0$? This is the probabilistic \textbf{ex falso quodlibet}.
+
+In classical logic: $\bot \to A$ (from absurdity, anything follows).
+
+In ProbTT: when $b : B \at{\zero}$, we have for any $a$:
+\[
+(a, b) : A \times B \at{\zero \cdot w} = \at{\zero}
+\]
+The conditional $a \mid b$ can have \emph{any} weight---it's vacuously satisfied because the joint is already zero.
+
+\textbf{Key insight}: Ex falso is the $w = 0$ limit of a \emph{continuous} phenomenon:
+\begin{itemize}
+    \item $w = \one$: Evidence fully constrains conclusions (classical implication)
+    \item $w = \epsilon$ (small): Evidence weakly constrains conclusions
+    \item $w = \zero$: Evidence imposes no constraint (ex falso)
+\end{itemize}
+Classical logic has only the endpoints; ProbTT has the entire spectrum.
+\end{remark}
 
 \subsection{What Markov Categories Give Us}
 
@@ -593,11 +617,11 @@ This requires extending $\W$ with division (or working in $\W = (0, 1]$ where di
     \item \textbf{Copying}: $\Delta$ lets us use the same evidence twice
     \item \textbf{Marginalization}: Delete/project to ``forget'' components
     \item \textbf{Conditioning}: Disintegration extracts conditionals from joints
-    \item \textbf{Bayes' rule}: Follows from symmetric disintegration
-    \item \textbf{Independence}: $P(A, B) = P(A) \cdot P(B)$ when disintegration is trivial
+    \item \textbf{Chain rule}: $P(A, B) = P(A) \cdot P(B \mid A)$ (multiplicative Bayes)
+    \item \textbf{Independence}: $P(A, B) = P(A) \cdot P(B)$ when conditional equals marginal
 \end{enumerate}
 
-All without assuming real numbers---just the categorical structure.
+All without assuming real numbers or division---just the weight monoid with multiplication.
 
 %=============================================================================
 \section{Open Problems}
@@ -610,13 +634,11 @@ All without assuming real numbers---just the categorical structure.
 
     \item \textbf{Normalization}: Should follow from MLTT since weights don't affect reduction.
 
-    \item \textbf{Division}: When $\W$ lacks division, how to handle conditioning?
-
     \item \textbf{Dependent weights}: What if $w$ depends on $x$ in $(x : A) \to B \at{w(x)}$?
 
-    \item \textbf{Measure zero}: How to handle $P(B) = 0$ in conditioning?
-
     \item \textbf{Continuous types}: Extension to measurable spaces?
+
+    \item \textbf{Implementation}: Type checker for ProbTT?
 \end{enumerate}
 
 \end{document}
