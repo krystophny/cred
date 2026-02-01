@@ -1,0 +1,2 @@
+-- Unit introduction at weight 1
+unit : Unit = ()

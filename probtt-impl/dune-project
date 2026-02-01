@@ -1,0 +1,12 @@
+(lang dune 3.0)
+(using menhir 2.1)
+(name probtt)
+(generate_opam_files true)
+
+(package
+ (name probtt)
+ (synopsis "ProbTT: A probabilistically-weighted type theory")
+ (depends
+  (ocaml (>= 4.14))
+  (menhir (>= 20220210))
+  (dune (>= 3.0))))

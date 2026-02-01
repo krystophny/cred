@@ -1,0 +1,2 @@
+-- Identity function
+id : A -> A = \(x : A). x

@@ -1,0 +1,16 @@
+(library
+ (name probtt_lib)
+ (public_name probtt.lib)
+ (modules weight syntax subst context eval error check raw elaborate)
+ (libraries str))
+
+(executable
+ (name main)
+ (public_name probtt)
+ (modules main parser lexer)
+ (libraries probtt_lib))
+
+(menhir
+ (modules parser))
+
+(ocamllex lexer)

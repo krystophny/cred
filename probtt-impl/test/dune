@@ -1,0 +1,9 @@
+(test
+ (name test_weight)
+ (modules test_weight)
+ (libraries probtt.lib))
+
+(test
+ (name test_check)
+ (modules test_check)
+ (libraries probtt.lib))

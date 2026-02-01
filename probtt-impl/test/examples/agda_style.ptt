@@ -1,0 +1,30 @@
+-- Agda-style syntax example for ProbTT
+-- Note: declarations separated by semicolons (layout rules not yet implemented)
+
+-- Type signature separate from definition
+id : A → A;
+id x = x;
+
+-- Multiple arguments
+const : A → B → A;
+const x y = x;
+
+-- With explicit type annotation
+swap : A × B → B × A;
+swap p = (snd p , fst p);
+
+-- Lambda syntax
+compose : (A → B) → (B → C) → A → C;
+compose f g x = g (f x);
+
+-- Sum elimination
+either : (A → C) → (B → C) → A + B → C;
+either f g x = case x of inl a → f a | inr b → g b;
+
+-- Unit
+unit : ⊤;
+unit = ();
+
+-- Ex falso (needs abort keyword support)
+exFalso : ⊥ → A;
+exFalso e = e
