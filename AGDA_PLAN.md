@@ -1,329 +1,111 @@
-# Agda Formalization Plan for ProbTT
+# ProbTT Agda Formalization
 
-## Goal
+## Status: Implemented
 
-Formalize ProbTT as an **object language** in Agda, proving:
-1. The type system is well-defined
-2. MLTT is the {0,1} limiting case
-3. Conditioning via chain rule is sound
+The ProbTT formalization is complete and type-checks. All modules compile without errors.
 
 ## File Structure
 
 ```
 agda/
   ProbTT/
-    Weight.agda           -- De Morgan algebra
-    Syntax.agda           -- Terms and types
-    Context.agda          -- Contexts
-    Judgment.agda         -- Weighted judgments
-    Rules.agda            -- Typing rules
+    Weight.agda           -- De Morgan algebra with BoolDM instance
+    Syntax.agda           -- Well-scoped terms and types
+    Substitution.agda     -- Parallel substitution with proofs
+    Context.agda          -- Well-scoped contexts
+    Judgment.agda         -- Weighted typing rules (all formers)
     Properties.agda       -- Metatheorems
-    MLTT.agda             -- Classical limit
+    MLTT.agda             -- {0,1} embedding and collapse
     Examples.agda         -- Worked examples
   Everything.agda         -- Module exports
   probtt.agda-lib         -- Library file
 ```
 
-## Phase 1: Weight Algebra
+## What Was Implemented
 
 ### Weight.agda
-
-```agda
-module ProbTT.Weight where
-
-open import Level
-open import Relation.Binary.PropositionalEquality
-
--- Abstract De Morgan algebra
-record DeMorganAlgebra (ℓ : Level) : Set (suc ℓ) where
-  field
-    W : Set ℓ
-    𝟘 : W
-    𝟙 : W
-    _·_ : W → W → W
-    ¬_ : W → W
-    _≤_ : W → W → Set ℓ
-
-    -- Multiplication axioms
-    ·-identityʳ : ∀ w → w · 𝟙 ≡ w
-    ·-identityˡ : ∀ w → 𝟙 · w ≡ w
-    ·-annihilʳ : ∀ w → w · 𝟘 ≡ 𝟘
-    ·-annihilˡ : ∀ w → 𝟘 · w ≡ 𝟘
-    ·-assoc : ∀ u v w → (u · v) · w ≡ u · (v · w)
-    ·-comm : ∀ u v → u · v ≡ v · u
-
-    -- Complement axioms
-    ¬-𝟘 : ¬ 𝟘 ≡ 𝟙
-    ¬-𝟙 : ¬ 𝟙 ≡ 𝟘
-    ¬-invol : ∀ w → ¬ (¬ w) ≡ w
-
-    -- Order axioms
-    ≤-refl : ∀ w → w ≤ w
-    ≤-trans : ∀ {u v w} → u ≤ v → v ≤ w → u ≤ w
-    ≤-antisym : ∀ {u v} → u ≤ v → v ≤ u → u ≡ v
-    𝟘-least : ∀ w → 𝟘 ≤ w
-    𝟙-greatest : ∀ w → w ≤ 𝟙
-
-  -- Derived: De Morgan disjunction
-  _∨_ : W → W → W
-  w ∨ v = ¬ (¬ w · ¬ v)
-```
-
-### Instances
-
-```agda
--- Boolean instance (for MLTT)
-BoolDM : DeMorganAlgebra lzero
-BoolDM = record
-  { W = Bool
-  ; 𝟘 = false
-  ; 𝟙 = true
-  ; _·_ = _∧_
-  ; ¬_ = not
-  ; _≤_ = λ a b → a ≡ false ⊎ b ≡ true
-  ; ... -- proofs
-  }
-
--- Unit interval instance (for probability)
--- (Would need postulates or use of rationals)
-```
-
-## Phase 2: Syntax
+- `DeMorganAlgebra` record with 14 axioms (6 multiplication, 3 complement, 5 order)
+- `BoolDM` instance with complete proofs for all axioms
+- Derived disjunction: `w ∨ v = ¬(¬w · ¬v)`
+- De Morgan laws module
 
 ### Syntax.agda
+- Well-scoped `Ty n` and `Tm n` using `Fin n` for de Bruijn indices
+- All type formers: `⇒` (Π), `×'` (Σ), `+'` (coproduct), `𝟙'`, `𝟘'`, `Id`
+- All term formers including `case` for sum elimination and `J` for identity elimination
 
-```agda
-module ProbTT.Syntax where
+### Substitution.agda
+- Renamings: `Ren m n = Fin m → Fin n`
+- Substitutions: `Sub m n = Fin m → Tm n`
+- `renTm`, `renTy`: apply renaming
+- `substTm`, `substTy`: apply substitution
+- `wkTm`, `wkTy`: weakening
+- `liftSub`, `singleSub`: substitution operations
+- `_[_]`, `_[_]ₜ`: single substitution notation
+- `subst-id-tm`, `subst-id-ty`: identity substitution lemmas
 
-open import Data.Nat using (ℕ)
-open import ProbTT.Weight
-
--- Raw terms (untyped)
-data Term : Set where
-  var   : ℕ → Term
-  lam   : Term → Term
-  app   : Term → Term → Term
-  pair  : Term → Term → Term
-  fst   : Term → Term
-  snd   : Term → Term
-  inl   : Term → Term
-  inr   : Term → Term
-  case  : Term → Term → Term → Term
-  star  : Term
-  abort : Term → Term
-  refl  : Term
-
--- Raw types
-data Type : Set where
-  base  : ℕ → Type                    -- Base types
-  _⇒_   : Type → Type → Type          -- Function
-  _×'_  : Type → Type → Type          -- Product
-  _+'_  : Type → Type → Type          -- Sum
-  𝟙'    : Type                        -- Unit
-  𝟘'    : Type                        -- Empty
-  Id    : Type → Term → Term → Type   -- Identity
-```
-
-## Phase 3: Judgments and Rules
+### Context.agda
+- Well-scoped `Ctx n` with `∅` and `_,_`
+- `lookup`: get type at position with appropriate weakening
 
 ### Judgment.agda
+Parameterized by `DeMorganAlgebra`:
 
-```agda
-module ProbTT.Judgment (DM : DeMorganAlgebra lzero) where
+**Type formation** (`_⊢_type`):
+- `base-form`, `Π-form`, `Σ-form`, `+-form`, `𝟙-form`, `𝟘-form`, `Id-form`
 
-open DeMorganAlgebra DM
-open import ProbTT.Syntax
+**Weighted typing** (`_⊢_∶_@_`):
+- `t-var`: variables at weight 𝟙
+- `t-weaken`: lower weight via order
+- `t-lam`, `t-app`: Π intro/elim (app multiplies weights)
+- `t-pair`, `t-fst`, `t-snd`: Σ intro/elim (pair multiplies weights)
+- `t-inl`, `t-inr`, `t-case`: + intro/elim (case multiplies weights)
+- `t-star`: 𝟙 intro at weight 𝟙
+- `t-abort`: 𝟘 elim (ex falso)
+- `t-refl`, `t-J`: Id intro/elim (J multiplies weights)
 
--- Typing context
-data Ctx : Set where
-  ∅   : Ctx
-  _,_ : Ctx → Type → Ctx
-
--- Weighted typing judgment: Γ ⊢ t : A @ w
-data _⊢_∶_@_ : Ctx → Term → Type → W → Set where
-
-  -- Variables have weight 𝟙
-  t-var : ∀ {Γ A} →
-          (Γ , A) ⊢ var 0 ∶ A @ 𝟙
-
-  -- Weakening with weight preservation
-  t-weak : ∀ {Γ A B t w} →
-           Γ ⊢ t ∶ A @ w →
-           (Γ , B) ⊢ wk t ∶ A @ w
-
-  -- Function introduction
-  t-lam : ∀ {Γ A B t w} →
-          (Γ , A) ⊢ t ∶ B @ w →
-          Γ ⊢ lam t ∶ (A ⇒ B) @ w
-
-  -- Function elimination (weights multiply)
-  t-app : ∀ {Γ A B f a w v} →
-          Γ ⊢ f ∶ (A ⇒ B) @ w →
-          Γ ⊢ a ∶ A @ v →
-          Γ ⊢ app f a ∶ B @ (w · v)
-
-  -- Pair introduction (weights multiply)
-  t-pair : ∀ {Γ A B a b w v} →
-           Γ ⊢ a ∶ A @ w →
-           Γ ⊢ b ∶ B @ v →
-           Γ ⊢ pair a b ∶ (A ×' B) @ (w · v)
-
-  -- Projections preserve weight
-  t-fst : ∀ {Γ A B t w} →
-          Γ ⊢ t ∶ (A ×' B) @ w →
-          Γ ⊢ fst t ∶ A @ w
-
-  t-snd : ∀ {Γ A B t w} →
-          Γ ⊢ t ∶ (A ×' B) @ w →
-          Γ ⊢ snd t ∶ B @ w
-
-  -- Sum introduction
-  t-inl : ∀ {Γ A B a w} →
-          Γ ⊢ a ∶ A @ w →
-          Γ ⊢ inl a ∶ (A +' B) @ w
-
-  t-inr : ∀ {Γ A B b w} →
-          Γ ⊢ b ∶ B @ w →
-          Γ ⊢ inr b ∶ (A +' B) @ w
-
-  -- Unit
-  t-star : ∀ {Γ} →
-           Γ ⊢ star ∶ 𝟙' @ 𝟙
-
-  -- Empty elimination (ex falso)
-  t-abort : ∀ {Γ A e w} →
-            Γ ⊢ e ∶ 𝟘' @ w →
-            Γ ⊢ abort e ∶ A @ w
-
-  -- Identity
-  t-refl : ∀ {Γ A a w} →
-           Γ ⊢ a ∶ A @ w →
-           Γ ⊢ refl ∶ Id A a a @ w
-
-  -- Weight weakening
-  t-weaken-weight : ∀ {Γ t A w v} →
-                    Γ ⊢ t ∶ A @ w →
-                    v ≤ w →
-                    Γ ⊢ t ∶ A @ v
-```
-
-## Phase 4: Properties
+**Definitional equality** (`_⊢_≡_∶_@_`):
+- `eq-refl`, `eq-sym`, `eq-trans`: equivalence
+- `Π-β`, `Σ-β₁`, `Σ-β₂`, `+-β-inl`, `+-β-inr`, `Id-β`: computation rules
 
 ### Properties.agda
-
-```agda
-module ProbTT.Properties (DM : DeMorganAlgebra lzero) where
-
-open import ProbTT.Judgment DM
-
--- Weight 𝟙 is maximal
-max-weight : ∀ {Γ t A w} →
-             Γ ⊢ t ∶ A @ w →
-             w ≤ 𝟙
-
--- Composition multiplies weights
-weight-compose : ∀ {Γ A B C f g w v} →
-                 Γ ⊢ f ∶ (A ⇒ B) @ w →
-                 Γ ⊢ g ∶ (B ⇒ C) @ v →
-                 Γ ⊢ lam (app (wk g) (app (wk f) (var 0))) ∶ (A ⇒ C) @ (w · v)
-```
-
-## Phase 5: MLTT Embedding
+- `weight-bounded`: all weights ≤ 𝟙
+- `id-typed`: identity function at weight 𝟙
+- `graded-ex-falso`: from ⊥@w, get anything@w
+- `zero-annihilates`: w · 𝟘 = 𝟘
+- `preservation-left`: type preservation for definitional equality
 
 ### MLTT.agda
+- Standard MLTT typing judgment (no weights)
+- `embed`: MLTT → ProbTT @ true
+- `collapse`: ProbTT @ true → MLTT
+- `embed-collapse`: round-trip proof (embed then collapse = id)
 
-```agda
-module ProbTT.MLTT where
+### Examples.agda
+- Identity function at weight 𝟙
+- Application preserves weight through identity
+- Pair weight is product
+- Ex falso example
+- Sum elimination with weight multiplication
 
-open import ProbTT.Weight
-open import ProbTT.Judgment BoolDM
+## Key Insights
 
--- Standard MLTT judgment (weight-free)
-data _⊢_∶_ : Ctx → Term → Type → Set where
-  ...
+1. **Weights multiply in elimination**: This is the core rule. Application, case, and J all multiply the eliminator weight with the argument weight.
 
--- Embedding: MLTT → ProbTT with weight 𝟙
-embed : ∀ {Γ t A} →
-        Γ ⊢ t ∶ A →
-        Γ ⊢ t ∶ A @ true
+2. **Variables are at weight 𝟙**: This ensures we start with full certainty and only lose it through composition.
 
--- Collapse: ProbTT with Boolean weights → MLTT
-collapse : ∀ {Γ t A} →
-           Γ ⊢ t ∶ A @ true →
-           Γ ⊢ t ∶ A
+3. **MLTT is {0,1} case**: When weights are Boolean, 𝟙·𝟙=𝟙 makes weights invisible.
+
+4. **No addition needed**: De Morgan algebra suffices. Disjunction is derived.
+
+## Build
+
+```bash
+cd agda
+agda Everything.agda
 ```
-
-## Phase 6: Conditioning
-
-### Conditioning.agda
-
-```agda
-module ProbTT.Conditioning (DM : DeMorganAlgebra lzero) where
-
-open DeMorganAlgebra DM
-open import ProbTT.Judgment DM
-
--- Chain rule: joint = marginal · conditional
--- P(A,B) = P(A) · P(B|A)
-
--- Expressed in type theory:
--- If (a,b) : A × B @ w·v
--- Then a : A @ w and b|a : B @ v
-
--- This is implicit in our pair rule:
--- t-pair gives (a,b) : A × B @ w·v from a : A @ w and b : B @ v
-
--- The "conditional" interpretation:
--- b has weight v "given" a has weight w
--- The joint (a,b) has weight w·v
-
--- Graded ex falso:
--- When w = 𝟘, any v satisfies 𝟘 · v = 𝟘
-graded-ex-falso : ∀ {Γ A B a b v} →
-                  Γ ⊢ a ∶ A @ 𝟘 →
-                  Γ ⊢ b ∶ B @ v →
-                  Γ ⊢ pair a b ∶ (A ×' B) @ 𝟘
-```
-
-## Timeline
-
-| Week | Task |
-|------|------|
-| 1 | Set up Agda project, Weight.agda |
-| 2 | Syntax.agda, Context.agda |
-| 3 | Judgment.agda (core rules) |
-| 4 | Judgment.agda (remaining rules) |
-| 5 | Properties.agda |
-| 6 | MLTT.agda (embedding) |
-| 7 | MLTT.agda (collapse theorem) |
-| 8 | Conditioning.agda, Examples.agda |
-
-## Success Criteria
-
-1. **Agda compiles** without holes or postulates (except for weight algebra axioms)
-2. **MLTT embedding** proved: classical logic is the {0,1} case
-3. **Weight multiplication** verified: elimination multiplies weights
-4. **Graded ex falso** demonstrated: w=0 allows any conditional weight
 
 ## Dependencies
 
 - Agda 2.6.4+
 - agda-stdlib 2.0+
-
-## Getting Started
-
-```bash
-# Install Agda
-# On Arch: pacman -S agda agda-stdlib
-
-# Create project
-mkdir -p agda/ProbTT
-cd agda
-
-# Create library file
-echo "name: probtt
-include: .
-depend: standard-library" > probtt.agda-lib
-
-# Start with Weight.agda
-```

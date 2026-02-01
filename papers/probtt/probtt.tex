@@ -254,7 +254,13 @@ Pair weight = product of component weights (joint probability).
 \infer[\textsc{$+$-Intro$_R$}]
   {\Gamma \vdash \mathsf{inr}\,b : A + B \at{w}}
   {\Gamma \vdash b : B \at{w}}
+\\[1em]
+\infer[\textsc{$+$-Elim}]
+  {\Gamma \vdash \mathsf{case}\,e\,\mathsf{of}\,\mathsf{inl}\,x \Rightarrow l \mid \mathsf{inr}\,y \Rightarrow r : C \at{w \cdot v}}
+  {\Gamma \vdash e : A + B \at{w} \quad \Gamma, x : A \vdash l : C \at{v} \quad \Gamma, y : B \vdash r : C \at{v}}
 \end{gather}
+
+\textbf{Key rule}: weights multiply in sum elimination. The scrutinee weight $w$ combines with the branch weight $v$ to give joint weight $w \cdot v$.
 
 \subsection{Empty and Unit}
 
@@ -286,7 +292,44 @@ Pair weight = product of component weights (joint probability).
 \infer[\textsc{Id-Intro}]
   {\Gamma \vdash \mathsf{refl} : \mathsf{Id}_A(a, a) \at{w}}
   {\Gamma \vdash a : A \at{w}}
+\\[1em]
+\infer[\textsc{Id-Elim}]
+  {\Gamma \vdash J(M, d, p) : M[b, p] \at{w \cdot v}}
+  {\Gamma \vdash p : \mathsf{Id}_A(a, b) \at{w} \quad \Gamma \vdash d : M[a, \mathsf{refl}] \at{v}}
 \end{gather}
+
+The J eliminator transports along an identity proof. Weights multiply: the proof weight $w$ combines with the base case weight $v$.
+
+%=============================================================================
+\section{Computation Rules}
+%=============================================================================
+
+The computation (beta) rules reduce eliminator-intro pairs. In each case, weight multiplication is preserved.
+
+\subsection{$\Pi$-Computation}
+\[
+(\lambda x. b)\,a \equiv b[a/x] : B[a/x] \at{w \cdot v}
+\]
+when $\Gamma, x : A \vdash b : B \at{w}$ and $\Gamma \vdash a : A \at{v}$.
+
+\subsection{$\Sigma$-Computation}
+\begin{align}
+\pi_1(a, b) &\equiv a : A \at{w \cdot v} \\
+\pi_2(a, b) &\equiv b : B[a/x] \at{w \cdot v}
+\end{align}
+when $\Gamma \vdash a : A \at{w}$ and $\Gamma \vdash b : B[a/x] \at{v}$.
+
+\subsection{$+$-Computation}
+\begin{align}
+\mathsf{case}\,(\mathsf{inl}\,a)\,l\,r &\equiv l[a/x] : C \at{w \cdot v} \\
+\mathsf{case}\,(\mathsf{inr}\,b)\,l\,r &\equiv r[b/y] : C \at{w \cdot v}
+\end{align}
+
+\subsection{Id-Computation}
+\[
+J(M, d, \mathsf{refl}) \equiv d : M[a, \mathsf{refl}] \at{w \cdot v}
+\]
+when $\Gamma \vdash a : A \at{w}$ and $\Gamma \vdash d : M[a, \mathsf{refl}] \at{v}$.
 
 %=============================================================================
 \section{Negation}
@@ -396,6 +439,59 @@ When $\W = \{\zero, \one\}$, ProbTT reduces to MLTT:
 \begin{proof}
 By inspection. All weight operations compute to Boolean.
 \end{proof}
+
+\subsection{Side-by-Side Comparison}
+
+\begin{center}
+\begin{tabular}{l|l|l}
+\textbf{Rule} & \textbf{MLTT} & \textbf{ProbTT} \\
+\hline
+Variable & $x : A \vdash x : A$ & $x : A \vdash x : A \at{\one}$ \\
+Application & $f\,a : B[a/x]$ & $f\,a : B[a/x] \at{w \cdot v}$ \\
+Pair & $(a, b) : \Sigma A\,B$ & $(a, b) : \Sigma A\,B \at{w \cdot v}$ \\
+Projection & $\pi_1 t : A$ & $\pi_1 t : A \at{w}$ \\
+Case & $\mathsf{case}\,e\,l\,r : C$ & $\mathsf{case}\,e\,l\,r : C \at{w \cdot v}$ \\
+\end{tabular}
+\end{center}
+
+\textbf{Key observation}: In MLTT, all judgments are implicitly at weight $\one$. Since $\one \cdot \one = \one$, weight multiplication is invisible. ProbTT makes this structure explicit and generalizes it to arbitrary weights.
+
+%=============================================================================
+\section{Contrast with Cost-Based Graded Types}
+%=============================================================================
+
+Graded type systems like Granule and Gerty use grades to track \emph{resource usage}. ProbTT uses weights to track \emph{inhabitation certainty}. These are philosophically distinct:
+
+\begin{center}
+\begin{tabular}{l|l|l}
+& \textbf{Cost-Based (Granule)} & \textbf{ProbTT} \\
+\hline
+Algebraic structure & Semiring $(0, 1, +, \cdot)$ & De Morgan $(\zero, \one, \cdot, \negw)$ \\
+Addition & Primitive (branch costs add) & Derived via De Morgan \\
+Philosophy & Decorate MLTT with grades & Logic \emph{emerges} from grades \\
+Implication & Material implication exists & Implication \emph{rejected} \\
+Interpretation & Costs accumulate & Weights condition/constrain \\
+MLTT relationship & MLTT is axiomatic & MLTT is \emph{derivative} \\
+\end{tabular}
+\end{center}
+
+\textbf{Key distinction}: Cost-based systems ask ``how much resource does this computation use?'' ProbTT asks ``how certain are we that this type is inhabited?''
+
+In cost-based grading:
+\begin{itemize}
+    \item $f : A \to B @ 2$ means ``$f$ uses 2 units of resource''
+    \item Costs add at branches: if one branch costs 3 and another costs 5, total cost is at most 5
+    \item The semiring axiom $0 + x = x$ reflects ``zero cost contributes nothing''
+\end{itemize}
+
+In ProbTT:
+\begin{itemize}
+    \item $f : A \to B \at{0.9}$ means ``$f$ produces $B$ with 90\% certainty''
+    \item Weights multiply in composition: chaining 90\% and 80\% gives 72\%
+    \item The De Morgan axiom $\zero \cdot w = \zero$ reflects ``impossible antecedent gives impossible conclusion''
+\end{itemize}
+
+\textbf{One-liner}: Costs measure \emph{computation performed}; weights measure \emph{truth surviving composition}.
 
 %=============================================================================
 \section{Related Structures}

@@ -1,0 +1,3 @@
+name: probtt
+include: .
+depend: standard-library-2.0
