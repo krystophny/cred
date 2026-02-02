@@ -7,6 +7,7 @@ module CredTT.Everything where
 import CredTT.Syntax
 import CredTT.Substitution
 import CredTT.Credence
+import CredTT.Interval  -- [0,1] interval algebra
 import CredTT.Context
 
 -- Neighbourhood semantics (stability definitions)
