@@ -112,12 +112,14 @@ let kind_of_stability = function
   | Neighbourhood.Unknown -> KUnknown
 
 (* Add a postulate *)
+(* LIMITATION (Issue #123): Credence inference for postulates is not implemented.
+   The original code had dead if-else that did nothing. For now, postulates
+   use their declared credence directly. To implement inference:
+   - Generate fresh inference variable when credence is Infer
+   - Add constraint relating declared credence to context
+   - Solve constraints after all postulates are processed *)
 let add_postulate state name prop credence =
-  (* If credence needs inference, generate fresh variable *)
-  let actual_credence =
-    if needs_inference credence then credence
-    else credence
-  in
+  let actual_credence = credence in
   (* Compute stability from credence *)
   let stability = Neighbourhood.classify actual_credence in
   let j = { name; prop; credence = actual_credence; stability; status = Assumed } in
