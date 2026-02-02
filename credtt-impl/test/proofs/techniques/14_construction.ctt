@@ -1,5 +1,10 @@
 -- Constructive Proof (Existence with Witness)
 --
+-- STATUS: CONCEPTUAL (Issue #159)
+-- This file EXPLAINS how constructive proofs work with witness credences,
+-- but no actual Sigma type with witness extraction is demonstrated. The
+-- `derive` with witness credence multiplication is a DESIGN concept.
+--
 -- Classical: Prove exists x. P(x) by exhibiting witness
 -- CredTT: Witness comes with credence certificate
 --         Existence @ c_witness * c_property

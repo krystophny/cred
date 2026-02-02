@@ -114,12 +114,16 @@ let rec equal w1 w2 =
   | Neg w1', Neg w2' -> equal w1' w2'
   | _, _ -> false
 
+(* LIMITATION (Issue #158): Credence comparison only handles simple cases.
+   Cannot compare symbolic expressions like `c1 * c2 <= c3` or `sup x. f(x) <= d`.
+   Returns true if equal (reflexivity), false otherwise for complex cases.
+   To fix: implement interval arithmetic or constraint-based comparison. *)
 let leq w1 w2 =
   match simplify w1, simplify w2 with
   | Zero, _ -> true
   | _, One -> true
   | Rat (n1, d1), Rat (n2, d2) -> n1 * d2 <= n2 * d1  (* compare by cross-multiply *)
-  | w1', w2' -> equal w1' w2'
+  | w1', w2' -> equal w1' w2'  (* fallback: reflexive equality only *)
 
 let rec pp fmt = function
   | Zero -> Format.fprintf fmt "0"
