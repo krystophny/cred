@@ -48,26 +48,28 @@ type t =
    STABILITY CLASSIFICATION
    ============================================================
 
-   We now distinguish:
-   - Stable: c is a non-zero post-fixed point (c ≤ c · s for some s)
-   - Vanishing: c degenerates to 0 under iteration
-   - Idempotent: c · c = c (self-stable interior point)
+   Classification based on order-theoretic dynamics:
+   - Robust: c = 1 exactly (maximal element, preserved under all operations)
+   - Vanishing: c = 0 exactly (minimal element, absorbed by all operations)
+   - Idempotent: c * c = c (only 0 and 1 for standard multiplication)
+   - Interior: 0 < c < 1 (degenerates under iteration in Archimedean algebra)
    - Unknown: cannot determine from structure alone
 
-   The OLD classification (Stable1, Unstable0, Interior) was WRONG
-   because it implied only {0,1} endpoints matter.
-
-   The NEW classification tracks DYNAMIC BEHAVIOR. *)
+   KEY INSIGHT: In standard [0,1] with multiplication, ONLY 0 and 1 are
+   idempotent. Any interior point 0 < c < 1 satisfies c * c < c, meaning
+   iteration c^n -> 0 as n -> infinity (Archimedean property). *)
 
 type stability =
-  | Robust          (* Non-zero post-fixed point of dynamics *)
-  | Vanishing       (* Degenerates to 0 under iteration *)
-  | Idempotent      (* c · c = c (self-stable, may be interior) *)
+  | Robust          (* c = 1: maximal, preserved under multiplication *)
+  | Vanishing       (* c = 0: minimal, absorbed by multiplication *)
+  | Idempotent      (* c * c = c (only 0 and 1 for real multiplication) *)
+  | Interior        (* 0 < c < 1: degenerates under iteration *)
   | Unknown         (* Cannot determine *)
 
 (* For backwards compatibility with existing code *)
 let stable1 = Robust
 let unstable0 = Vanishing
+let degenerate = Vanishing
 
 (* ============================================================
    ALGEBRAIC ANALYSIS
@@ -114,19 +116,19 @@ let perturb (c : Credence.t) ~(epsilon : Credence.rational) : t =
       Interval { lo = lo'; hi = hi'; lo_closed = true; hi_closed = true }
   | None -> Full
 
-(* Check if a credence is idempotent: c · c = c *)
+(* Check if a credence is idempotent: c * c = c
+   In standard [0,1] multiplication, only 0 and 1 are idempotent.
+   For any 0 < c < 1: c * c < c (strictly decreases). *)
 let is_idempotent (c : Credence.t) : bool =
   match Credence.simplify c with
-  | Credence.One -> true      (* 1 · 1 = 1 *)
-  | Credence.Zero -> true     (* 0 · 0 = 0 *)
+  | Credence.One -> true      (* 1 * 1 = 1 *)
+  | Credence.Zero -> true     (* 0 * 0 = 0 *)
   | _ ->
-      (* Check algebraically: c · c = c iff c ∈ {0, 1} for concrete,
-         but symbolic expressions might be idempotent too *)
       match Credence.to_rational c with
       | Some r ->
           Credence.rat_equal r Credence.rat_zero ||
           Credence.rat_equal r Credence.rat_one
-      | None -> false  (* cannot determine for symbolic *)
+      | None -> false  (* symbolic: cannot determine *)
 
 (* Check if credence is a post-fixed point under multiplication by s:
    c ≤ c · s (i.e., multiplication by s doesn't decrease c) *)
@@ -156,23 +158,32 @@ let is_post_fixed_point (c : Credence.t) (s : Credence.t) : bool =
    - Is c absorbed by s? (c · s = c)
    - Does c strictly decrease under s? *)
 
+(* Classify a credence based on its dynamic behavior.
+   For concrete rationals, we can determine exactly.
+   For symbolic expressions, we propagate through structure. *)
 let rec classify (c : Credence.t) : stability =
   match Credence.simplify c with
-  | Credence.One -> Robust      (* 1 is robust: preserved under any s ≤ 1 *)
+  | Credence.One -> Robust      (* 1 is robust: preserved under any s <= 1 *)
   | Credence.Zero -> Vanishing  (* 0 is the vanishing point *)
   | Credence.Neg inner ->
-      (* Negation swaps 0 ↔ 1 at extremes *)
+      (* Negation: ~c = 1 - c, swaps 0 <-> 1 at extremes, maps interior to interior *)
       (match classify inner with
-       | Robust -> Vanishing
-       | Vanishing -> Robust
-       | Idempotent -> Idempotent  (* neg of idempotent might not be *)
+       | Robust -> Vanishing     (* ~1 = 0 *)
+       | Vanishing -> Robust     (* ~0 = 1 *)
+       | Interior -> Interior    (* ~c for 0<c<1 gives 0<1-c<1 *)
+       | Idempotent -> Idempotent
        | Unknown -> Unknown)
   | Credence.Mul (a, b) ->
-      (* Product behavior depends on both factors *)
+      (* Product behavior: c1 * c2
+         - 0 * x = 0 (absorbing)
+         - 1 * x = x (identity)
+         - interior * interior = interior (stays in (0,1)) *)
       (match classify a, classify b with
-       | Vanishing, _ | _, Vanishing -> Vanishing  (* 0 · x = 0 *)
-       | Robust, other | other, Robust -> other    (* 1 · x = x *)
-       | Idempotent, Idempotent -> Idempotent      (* product of idempotents *)
+       | Vanishing, _ | _, Vanishing -> Vanishing  (* 0 * x = 0 *)
+       | Robust, other | other, Robust -> other    (* 1 * x = x *)
+       | Interior, Interior -> Interior            (* product of interiors is interior *)
+       | Interior, Idempotent | Idempotent, Interior -> Interior
+       | Idempotent, Idempotent -> Idempotent
        | Unknown, _ | _, Unknown -> Unknown)
   | Credence.Var _ -> Unknown
   | Credence.Infer _ -> Unknown
@@ -181,25 +192,35 @@ let rec classify (c : Credence.t) : stability =
       (match classify body with
        | Robust -> Robust
        | Vanishing -> Vanishing
-       | _ -> Unknown)
+       | Interior -> Interior
+       | s -> s)
   | Credence.Inf (_, body) ->
       (match classify body with
        | Robust -> Robust
        | Vanishing -> Vanishing
-       | _ -> Unknown)
+       | Interior -> Interior
+       | s -> s)
 
-(* Classify stability from a neighbourhood *)
+(* Classify stability from a neighbourhood.
+   KEY INSIGHT: Interior points 0 < c < 1 are NOT idempotent.
+   Only 0 and 1 satisfy c * c = c for real multiplication. *)
 let classify_neighbourhood (n : t) : stability =
   match n with
   | Point r ->
       if Credence.rat_equal r Credence.rat_one then Robust
       else if Credence.rat_equal r Credence.rat_zero then Vanishing
-      else Idempotent  (* Interior point - check if idempotent *)
+      else Interior  (* 0 < c < 1: degenerates under iteration *)
   | Interval { lo; hi; _ } ->
       if Credence.rat_equal lo Credence.rat_one &&
          Credence.rat_equal hi Credence.rat_one then Robust
       else if Credence.rat_equal lo Credence.rat_zero &&
               Credence.rat_equal hi Credence.rat_zero then Vanishing
+      else if rat_gt lo Credence.rat_zero &&
+              rat_lt hi Credence.rat_one then Interior  (* interval in (0,1) *)
+      else if Credence.rat_equal lo Credence.rat_zero then
+        if Credence.rat_equal hi Credence.rat_one then Unknown  (* full interval *)
+        else Interior  (* [0, c) or [0, c] with c < 1 contains interior *)
+      else if Credence.rat_equal hi Credence.rat_one then Interior  (* (c, 1] contains interior *)
       else Unknown
   | Full -> Unknown
   | Empty -> Vanishing
@@ -292,23 +313,26 @@ let union (n1 : t) (n2 : t) : t =
    ============================================================
 
    These rules follow from order theory:
-   - Robust · Robust = Robust (non-zero · non-zero > 0 in upper half)
-   - Vanishing · anything = Vanishing (0 is absorbing for vanishing)
-   - Idempotent · Idempotent might stay idempotent
-   - neg flips Robust ↔ Vanishing *)
+   - Robust * Robust = Robust (1 * 1 = 1)
+   - Vanishing * anything = Vanishing (0 * x = 0)
+   - Interior * Interior = Interior (product of interior stays interior)
+   - neg flips Robust <-> Vanishing, Interior stays Interior *)
 
 let stability_of_app (s1 : stability) (s2 : stability) : stability =
   match s1, s2 with
   | Vanishing, _ | _, Vanishing -> Vanishing
   | Robust, other | other, Robust -> other
+  | Interior, Interior -> Interior
+  | Interior, Idempotent | Idempotent, Interior -> Interior
   | Idempotent, Idempotent -> Idempotent
   | Unknown, _ | _, Unknown -> Unknown
 
 let stability_of_neg (s : stability) : stability =
   match s with
-  | Robust -> Vanishing
-  | Vanishing -> Robust
-  | Idempotent -> Idempotent  (* May or may not hold for complement *)
+  | Robust -> Vanishing       (* ~1 = 0 *)
+  | Vanishing -> Robust       (* ~0 = 1 *)
+  | Interior -> Interior      (* ~c for 0<c<1 gives 0<1-c<1 *)
+  | Idempotent -> Idempotent
   | Unknown -> Unknown
 
 let stability_of_compose (s1 : stability) (s2 : stability) : stability =
@@ -324,39 +348,62 @@ let stability_of_sigma_elim (pair_stability : stability) : stability =
    ITERATION AND CONVERGENCE
    ============================================================
 
-   The key question: what is inf_n (c · sⁿ)?
+   The key question: what is inf_n (c * s^n)?
 
    In ARCHIMEDEAN algebras (like real [0,1]):
-   - s < 1 implies sⁿ → 0
-   - s = 1 implies sⁿ = 1
+   - 0 < s < 1 implies s^n -> 0 as n -> infinity
+   - s = 1 implies s^n = 1
+   - s = 0 implies s^n = 0 for n >= 1
 
-   In NON-ARCHIMEDEAN algebras:
-   - s < 1 does NOT imply sⁿ → 0
-   - There can be idempotent s where sⁿ = s for all n
-   - Example: s · s = s with 0 < s < 1
+   CredTT uses standard [0,1] multiplication which IS Archimedean.
+   For any 0 < c < 1, c^n -> 0 as n -> infinity.
 
-   CredTT does NOT assume Archimedeanicity!
-
-   Therefore: "s < 1 implies degradation" is WRONG in general.
-   The correct statement is:
-   "c is stable under s iff inf_n (c · sⁿ) > 0" *)
+   This means:
+   - c = 0: preserved (c * s^n = 0)
+   - c = 1, s = 1: preserved (1 * 1^n = 1)
+   - c = 1, 0 < s < 1: degenerates (1 * s^n -> 0)
+   - 0 < c < 1: degenerates (c * s^n -> 0 for any s < 1) *)
 
 type iteration_behavior =
-  | Preserves        (* c · sⁿ = c for all n *)
-  | Converges_nonzero  (* inf_n (c · sⁿ) > 0 *)
-  | Degenerates      (* inf_n (c · sⁿ) = 0 *)
-  | Unknown_limit    (* cannot determine *)
+  | Preserves          (* c * s^n = c for all n *)
+  | Converges_nonzero  (* inf_n (c * s^n) > 0, but not constant *)
+  | Degenerates        (* inf_n (c * s^n) = 0 *)
+  | Unknown_limit      (* cannot determine *)
 
-(* Analyze iteration behavior *)
+(* Analyze iteration behavior for concrete rational credences.
+   Uses the Archimedean property of [0,1]: for 0 < r < 1, r^n -> 0. *)
 let iteration_behavior (c : Credence.t) (s : Credence.t) : iteration_behavior =
   match Credence.simplify c, Credence.simplify s with
-  | Credence.Zero, _ -> Preserves    (* 0 · sⁿ = 0 *)
-  | _, Credence.One -> Preserves     (* c · 1ⁿ = c *)
-  | Credence.One, Credence.Zero -> Degenerates  (* 1 · 0ⁿ = 0 for n > 0 *)
+  | Credence.Zero, _ -> Preserves      (* 0 * s^n = 0 *)
+  | _, Credence.One -> Preserves       (* c * 1^n = c *)
+  | Credence.One, Credence.Zero -> Degenerates  (* 1 * 0^n = 0 for n > 0 *)
+  | Credence.One, _ ->
+      (* c = 1, s is something else *)
+      (match Credence.to_rational s with
+       | Some rs ->
+           if Credence.rat_equal rs Credence.rat_one then Preserves
+           else if Credence.rat_equal rs Credence.rat_zero then Degenerates
+           else Degenerates  (* 1 * s^n -> 0 for 0 < s < 1 *)
+       | None -> Unknown_limit)
+  | _, Credence.Zero -> Degenerates    (* c * 0^n = 0 for n > 0, any c *)
   | _ ->
-      (* For symbolic/interior, we cannot determine without
-         knowing if the algebra is Archimedean *)
-      Unknown_limit
+      (* Both c and s are non-trivial; check if we have rational values *)
+      (match Credence.to_rational c, Credence.to_rational s with
+       | Some rc, Some rs ->
+           if Credence.rat_equal rc Credence.rat_zero then Preserves
+           else if Credence.rat_equal rs Credence.rat_one then Preserves
+           else if Credence.rat_equal rs Credence.rat_zero then Degenerates
+           else
+             (* 0 < c, s < 1: Archimedean property -> degenerates *)
+             Degenerates
+       | Some rc, None ->
+           if Credence.rat_equal rc Credence.rat_zero then Preserves
+           else Unknown_limit
+       | None, Some rs ->
+           if Credence.rat_equal rs Credence.rat_one then Preserves
+           else if Credence.rat_equal rs Credence.rat_zero then Degenerates
+           else Unknown_limit
+       | None, None -> Unknown_limit)
 
 (* Check if step is non-degrading: c · s ≥ c
    This is exactly when s is the identity for c *)
@@ -390,6 +437,9 @@ let is_stable (s : stability) : bool =
 let is_unstable (s : stability) : bool =
   s = Vanishing
 
+let is_interior (s : stability) : bool =
+  s = Interior
+
 let is_contractive (step_stability : stability) : bool =
   step_stability = Robust
 
@@ -400,6 +450,7 @@ let pp_stability fmt = function
   | Robust -> Format.fprintf fmt "Robust"
   | Vanishing -> Format.fprintf fmt "Vanishing"
   | Idempotent -> Format.fprintf fmt "Idempotent"
+  | Interior -> Format.fprintf fmt "Interior"
   | Unknown -> Format.fprintf fmt "Unknown"
 
 let pp_rational fmt r =
