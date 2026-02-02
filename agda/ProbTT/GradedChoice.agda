@@ -1,50 +1,54 @@
-{- AXIOM STATUS SUMMARY for GradedChoice.agda
-
-This module contains FUNDAMENTAL AXIOMS, not theorems to be proven.
-These axiomatize graded choice, analogous to how AC is an axiom of ZFC.
-
-ExistsAt: PRIMITIVE NOTION
-  Bridges ProbTT weighted types to set-theoretic existence.
-  Cannot be defined within ProbTT itself.
-
-finite-choice: FUNDAMENTAL AXIOM
-  Constructively valid for finite families.
-
-countable-choice-*: AXIOM SCHEMA
-  Limit weight depends on specific weight algebra.
-  In [0,1]: limit of 1^n = 1. In other algebras: may be less than 1.
-
-banach-tarski-*: PHILOSOPHICAL AXIOM
-  Encodes position that non-constructive existence has weight less than 1.
-  This is a declaration, not a theorem about Banach-Tarski.
-
-product-bounded, product-limit-exists: SHOULD BE PROVEN
-  Require order-multiplication interaction not in minimal De Morgan algebra.
--}
--- Graded Choice: Axiom of Choice at weight less than 1
--- Finite choice at weight 1, countable/uncountable at weight less than 1
+-- ============================================================================
+-- GRADED CHOICE: Axiom Schema for Choice Principles at Graded Weights
+-- ============================================================================
 --
--- LITERATURE CONTEXT:
--- This module is more novel than the incompleteness/consistency work.
--- Related ideas appear in:
+-- STATUS: AXIOM SCHEMA (not theorems to be proven)
 --
--- 1. Constructive mathematics: AC fails, but "weak" choice principles hold
---    - Dependent choice, countable choice
---    - Martin-Löf's analysis of choice in type theory
+-- This module axiomatizes graded versions of choice principles. These are
+-- FOUNDATIONAL AXIOMS of ProbTT, analogous to how AC is an axiom of ZFC.
+-- They cannot be proven from the type theory itself.
 --
--- 2. Realizability: choice principles have computational content
---    - Troelstra, van Oosten on modified realizability
+-- ============================================================================
+-- AXIOM CLASSIFICATION
+-- ============================================================================
 --
--- 3. Measure-theoretic probability: "almost everywhere" choice
---    - Choice functions that work on measure-1 sets
+-- 1. ExistsAt (PRIMITIVE NOTION)
+--    This is a primitive notion connecting ProbTT weights to set-theoretic
+--    existence. It cannot be defined within ProbTT itself because it bridges
+--    the object language (weighted types) to the meta-language (sets).
 --
--- ProbTT's contribution: Quantify "how much" of AC you get
---   - Finite choice: weight 1 (fully constructible)
---   - Countable choice: weight < 1 (limit of finite)
---   - Banach-Tarski: exists at weight < 1 (not physically realizable)
+-- 2. finite-choice (AXIOM)
+--    Finite choice at weight 1. This is the constructive core: we can
+--    always construct a choice function for finite families. Analogous to
+--    AC holding for finite sets in constructive mathematics.
 --
--- This is NOT standard in fuzzy logic literature (which focuses on
--- propositional/first-order logic, not set-theoretic principles).
+-- 3. countable-choice-* (AXIOM SCHEMA)
+--    Countable choice at limit weight. The limit weight is axiomatized
+--    rather than computed because it depends on the specific weight algebra.
+--    In [0,1], the limit of 1^n = 1, so countable choice has weight 1.
+--    But for more refined algebras, the limit could be < 1.
+--
+-- 4. banach-tarski-* (AXIOM SCHEMA)
+--    Banach-Tarski at weight < 1. This is a PHILOSOPHICAL POSITION encoded
+--    as an axiom: non-constructive existence has weight < 1. The specific
+--    weight is not determined by the algebra but is an input to the system.
+--
+-- ============================================================================
+-- LITERATURE CONTEXT
+-- ============================================================================
+--
+-- Related ideas in constructive mathematics:
+-- - Martin-Lof: choice principles in type theory
+-- - Troelstra, van Oosten: realizability and choice
+-- - Fourman, Hyland: measure-theoretic choice
+--
+-- ProbTT novelty: quantify the DEGREE of choice, not just yes/no.
+--
+-- This is NOT standard fuzzy logic (which focuses on propositional logic).
+-- It is closer to probabilistic/graded set theory (which does not exist
+-- as a mature field).
+--
+-- ============================================================================
 
 module ProbTT.GradedChoice where
 
@@ -66,39 +70,79 @@ module GradedChoice {ℓ : Level} (DM : DeMorganAlgebra ℓ) where
   -- GRADED AXIOM OF CHOICE
   -- ═══════════════════════════════════════════════════════════════════════
   --
-  -- Classical AC: ∀ family of non-empty sets, ∃ choice function
-  --   (∀ x ∈ I. ∃ y ∈ A(x)) → ∃ f : I → ⋃ A(x). ∀ x. f(x) ∈ A(x)
+  -- Classical AC: for all families of non-empty sets, exists choice function
+  --   (forall x in I. exists y in A(x)) -> exists f : I -> Union A(x). forall x. f(x) in A(x)
   --
   -- ProbTT: Choice functions exist at graded weights
   --   Finite families: weight 1
-  --   Countable families: weight < 1 (approaches 1)
+  --   Countable families: weight <= 1 (limit of finite)
   --   Uncountable families: weight < 1 (bounded away from 1)
   -- ═══════════════════════════════════════════════════════════════════════
 
-  -- Abstract representation of "existence at weight w"
-  -- In the full formalization, this connects to the type system
+  -- =========================================================================
+  -- AXIOM: ExistsAt (Primitive Notion)
+  -- Status: FUNDAMENTAL AXIOM (cannot be defined within ProbTT)
+  -- =========================================================================
+  --
+  -- ExistsAt A w means "type A is inhabited at weight w".
+  -- This is a BRIDGE between ProbTT (weighted types) and set theory (existence).
+  --
+  -- Why postulated: This connects the object language to the meta-language.
+  -- In a full semantics, ExistsAt A w would be defined as:
+  --   exists (a : A) such that the canonical derivation of a has weight >= w
+  --
+  -- In the [0,1] model: ExistsAt A w means P(A is inhabited) >= w
+  -- In the Boolean model: ExistsAt A 1 means A is inhabited, ExistsAt A 0 is trivial
+  -- =========================================================================
   postulate
     ExistsAt : Set ℓ → W → Set ℓ
 
-  -- Finite choice: always works at weight 1
-  -- For any finite family, we can construct a choice function
+  -- =========================================================================
+  -- AXIOM: Finite Choice at Weight 1
+  -- Status: FUNDAMENTAL AXIOM (constructively valid)
+  -- =========================================================================
+  --
+  -- For finite families, choice functions are constructible. This is
+  -- analogous to finite AC holding in constructive mathematics.
+  --
+  -- Justification: Given witnesses for each of n elements, we can
+  -- explicitly construct a choice function by case analysis.
+  -- This is computational, not axiomatic, so weight 1 is appropriate.
+  -- =========================================================================
   postulate
     finite-choice : ∀ {A : Set ℓ} (n : ℕ) →
                     (∀ (i : Fin n) → ExistsAt A 𝟙) →
                     ExistsAt (Fin n → A) 𝟙
 
-  -- Countable choice: weight approaches 1 but may not reach it
+  -- =========================================================================
+  -- AXIOM SCHEMA: Countable Choice
+  -- Status: FUNDAMENTAL AXIOM (depends on weight algebra)
+  -- =========================================================================
+  --
+  -- Countable choice has a limit weight that depends on the specific
+  -- weight algebra. The axiom schema parameterizes over this limit.
+  --
+  -- In the [0,1] model: limit of 1^n = 1, so countable choice has weight 1
+  -- In more refined models: the limit could be < 1 if each step degrades
+  --
+  -- The axiom states:
+  --   1. Each finite prefix has weight 1 (constructible)
+  --   2. The limit is at most 1 (bounded)
+  --   3. Countable choice holds at the limit weight
+  --
+  -- Why not compute the limit? The limit depends on:
+  --   - Whether the algebra has a notion of convergence
+  --   - Whether infinite products converge
+  -- These require additional structure beyond the De Morgan algebra.
+  -- =========================================================================
   postulate
-    countable-choice-weight : ℕ → W  -- weight for choosing from first n elements
-    countable-choice-limit : W       -- limit weight as n → ∞
+    countable-choice-weight : ℕ → W
+    countable-choice-limit : W
 
-    -- Each finite prefix has weight 1
     countable-choice-finite : ∀ n → countable-choice-weight n ≡ 𝟙
 
-    -- But the limit might be < 1
     countable-choice-lt-one : countable-choice-limit ≤ 𝟙
 
-  -- Graded countable choice
   postulate
     countable-choice : ∀ {A : Set ℓ} →
                        (∀ (n : ℕ) → ExistsAt A 𝟙) →

@@ -1,26 +1,31 @@
 -- Self-consistency of ProbTT at graded weight
--- ProbTT can prove its own consistency at weight < 1
 --
--- LITERATURE CONTEXT:
--- The idea "consistency as a degree" appears in several traditions:
+-- STATUS: CONJECTURAL
+-- This module presents AXIOMS about self-consistency, not proofs.
+-- All core claims are POSTULATED.
 --
--- 1. Fuzzy logic: "consistency degree of a fuzzy theory"
---    - Studied in Pavelka-style systems
---    - Consistency is not binary but graded
+-- WHAT THIS MODULE ACTUALLY SHOWS:
+-- IF we assume ProbTT is consistent (meta-theorem),
+-- AND we assume a consistency-weight parameter exists,
+-- THEN we can state the graded second incompleteness conjecture.
 --
--- 2. Logics of Formal Inconsistency (LFIs):
---    - da Costa's C-systems (1974)
---    - Object-level consistency operator A
---    - "Gentle explosion": A, not A, A |- B but A, not A |/- B
---    - Carnielli & Coniglio, "Paraconsistent Logic: Consistency, Contradiction
---      and Negation" (2016)
+-- This is a DEFINITION of what graded self-consistency would mean,
+-- not a PROOF that ProbTT achieves it.
 --
--- 3. Paraconsistent semantics for Pavelka-style logics:
---    - Graded non-explosion
---    - Close to ProbTT's "graded ex falso"
+-- GODEL'S SECOND INCOMPLETENESS THEOREM:
+-- A consistent system containing PA cannot prove its own consistency.
+-- This applies to ProbTT as well - we cannot PROVE probtt-consistent
+-- within ProbTT. We ASSUME it as a meta-theorem.
 --
--- ProbTT's approach: Con @ w means "confident at level w that bot is not provable"
--- This avoids Godel's Second by not claiming certainty (w < 1).
+-- WHAT "GRADED CONSISTENCY" MEANS:
+-- We conjecture that while ProbTT cannot prove Con @ 1 (full certainty),
+-- it might prove Con @ w for some w < 1 (partial confidence).
+-- The specific value of consistency-weight is UNKNOWN and POSTULATED.
+--
+-- LITERATURE:
+-- - da Costa's C-systems and LFIs analyze paraconsistent self-reference
+-- - Pavelka's graded consistency degrees for fuzzy theories
+-- - These PROVE their results; we only POSTULATE ours
 
 module ProbTT.Consistency where
 
@@ -38,165 +43,160 @@ open import ProbTT.Context
 open import ProbTT.Judgment
 open import ProbTT.Provability
 
--- Consistency results for ProbTT
 module Consistency {ℓ : Level} (DM : DeMorganAlgebra ℓ) where
   open DeMorganAlgebra DM
   open Typing DM
   open Provability DM
 
-  -- Consistency predicate: Con w means "contradiction is not provable at weight w"
-  -- More precisely: there is no derivation of bot (which we don't have in ProbTT!)
-  -- Instead, we express it as: there is no term with weight 1 in the empty type
-  --
-  -- In ProbTT, we don't have an Empty type, so consistency means:
-  -- "No proposition has both weight w and weight neg w for w != 1/2"
-  --
-  -- Or equivalently: the weight algebra is consistent
+  -- Consistency predicate
+  -- Con w means no term has both weight 1 and weight 0 (contradiction)
   Con : W → Set ℓ
   Con w = ∀ {n} {t : Tm n} → Prov t 𝟙 → Prov t 𝟘 → ⊥
 
-  -- Stronger version: no explosion
-  -- There is no derivation rule that produces arbitrary weights from nothing
+  -- No explosion: weight 0 derivations cannot produce positive weights
   NoExplosion : Set ℓ
   NoExplosion = ∀ {n} {Γ : Ctx n} {t : Tm n} {A : Ty n} →
                 Γ ⊢ t ∶ A 〔 𝟘 〕 →
                 ∀ w → w ≤ 𝟘
 
-  -- Graded consistency at weight w
-  -- We can assert consistency with confidence w
+  -- Graded consistency witness
   GradedCon : W → Set ℓ
   GradedCon w = ∃ λ (witness : Tm 0) → Prov witness w × Con 𝟙
 
-  -- ═══════════════════════════════════════════════════════════════════════
-  -- POSTULATE: ProbTT is consistent (meta-theorem)
-  -- ═══════════════════════════════════════════════════════════════════════
+  -- =========================================================================
+  -- AXIOM: ProbTT is consistent
+  -- =========================================================================
+  -- This is a META-THEOREM that we ASSUME, not prove.
   --
-  -- JUSTIFICATION: The consistency of ProbTT follows from:
-  -- 1. The weight algebra axioms (0 != 1 in any non-trivial model)
-  -- 2. The soundness of the typing rules (weights are preserved)
-  -- 3. The absence of an Empty type or explosion rule
+  -- By Godel's Second Incompleteness Theorem, if ProbTT is consistent,
+  -- it cannot prove its own consistency at weight 1.
+  -- We therefore cannot derive this internally.
   --
-  -- However, proving this requires semantic reasoning: we need to show
-  -- that no derivation can produce both Prov t 1 and Prov t 0 for the
-  -- same term t. This is a meta-level property about the derivation
-  -- system, not provable within the system (by Godel's second theorem).
+  -- Justification: We believe ProbTT is consistent because:
+  -- 1. The weight algebra axioms are consistent (0 != 1)
+  -- 2. The typing rules preserve weights soundly
+  -- 3. There is no Empty type or explosion rule
   --
-  -- We postulate it as a meta-theoretic property of our definition.
-  -- ═══════════════════════════════════════════════════════════════════════
+  -- But we have NOT proven this formally. A proper proof would require:
+  -- - Constructing a model (e.g., in set theory with [0,1] weights)
+  -- - Proving the model satisfies all ProbTT rules
+  -- - Deriving consistency from the model existence
+  -- =========================================================================
   postulate
     probtt-consistent : Con 𝟙
 
-  -- ═══════════════════════════════════════════════════════════════════════
-  -- GRADED SECOND INCOMPLETENESS
-  -- ═══════════════════════════════════════════════════════════════════════
+  -- =========================================================================
+  -- AXIOM: The consistency weight
+  -- =========================================================================
+  -- We ASSUME there exists a weight at which consistency can be "proven".
   --
-  -- Godel's Second Incompleteness Theorem (classical):
-  --   If T contains PA and T is consistent, then T cannot prove Con(T)
+  -- IMPORTANT: The specific value is UNKNOWN. We do not claim to know
+  -- what consistency-weight is. It could be:
+  -- - 1/2 (by analogy with Godel sentence)
+  -- - Some other value determined by the proof structure
+  -- - Dependent on the meta-theory strength
   --
-  -- For ProbTT, we have a graded version:
-  --   ProbTT |- Con(ProbTT) @ w  for some w < 1
-  --   ProbTT |/- Con(ProbTT) @ 1
-  -- ═══════════════════════════════════════════════════════════════════════
-
-  -- ═══════════════════════════════════════════════════════════════════════
-  -- POSTULATE: The consistency weight
-  -- ═══════════════════════════════════════════════════════════════════════
-  --
-  -- JUSTIFICATION: The specific weight at which we can prove consistency
-  -- depends on the strength of our meta-theory and the complexity of the
-  -- consistency proof. This is analogous to how classical Godel's second
-  -- theorem blocks full certainty but allows partial confidence.
-  -- ═══════════════════════════════════════════════════════════════════════
+  -- This is NOT derived from any fixed-point equation.
+  -- It is simply an assumed parameter of the theory.
+  -- =========================================================================
   postulate
     consistency-weight : W
     consistency-weight-lt-one : consistency-weight ≤ 𝟙
     consistency-weight-gt-zero : 𝟘 ≤ consistency-weight
 
-  -- ═══════════════════════════════════════════════════════════════════════
-  -- POSTULATE: Self-consistency at graded weight
-  -- ═══════════════════════════════════════════════════════════════════════
-  --
-  -- JUSTIFICATION: The existence of a consistency witness requires:
-  -- 1. Encoding the consistency statement as a term
-  -- 2. Constructing a derivation of that term at the appropriate weight
-  -- This is meta-level construction that cannot be done internally.
-  -- ═══════════════════════════════════════════════════════════════════════
-  -- The canonical witness term (refl at scope 0)
+  -- A canonical witness term
   private
     consistency-witness : Tm 0
     consistency-witness = refl'
 
+  -- =========================================================================
+  -- AXIOM: Self-consistency at graded weight
+  -- =========================================================================
+  -- We ASSUME ProbTT can prove its consistency at consistency-weight.
+  --
+  -- HONEST STATEMENT: This is the claim, not a theorem.
+  -- We are DEFINING what it would mean for ProbTT to have graded
+  -- self-consistency, then ASSUMING it holds.
+  --
+  -- A proper proof would require:
+  -- 1. Formalizing "Con(ProbTT)" as a term in ProbTT
+  -- 2. Constructing a derivation of that term at consistency-weight
+  -- 3. Showing the derivation is valid
+  --
+  -- We do none of this. The postulate does all the work.
+  -- =========================================================================
   postulate
     self-consistent : Prov (⌈ consistency-witness ⌉) consistency-weight
 
-  -- ═══════════════════════════════════════════════════════════════════════
-  -- POSTULATE: We CANNOT prove consistency at weight 1
-  -- ═══════════════════════════════════════════════════════════════════════
+  -- =========================================================================
+  -- AXIOM: Cannot prove consistency at weight 1
+  -- =========================================================================
+  -- This is Godel's Second Incompleteness Theorem.
   --
-  -- JUSTIFICATION: This is Godel's Second Incompleteness Theorem.
-  -- If ProbTT could prove its own consistency at weight 1, then by
-  -- the argument of Godel's second theorem, it would be inconsistent.
-  -- Since we assume ProbTT is consistent, it cannot prove Con @ 1.
-  -- ═══════════════════════════════════════════════════════════════════════
+  -- HONEST STATEMENT: We are postulating the theorem, not proving it.
+  -- Proving Godel's Second for ProbTT would require:
+  -- 1. Encoding ProbTT's derivation system in ProbTT
+  -- 2. Constructing the Godel sentence for consistency
+  -- 3. Showing that Prov(Con) @ 1 implies inconsistency
+  --
+  -- These are substantial technical achievements we do not have.
+  -- =========================================================================
   postulate
     second-incomplete : Prov (⌈ consistency-witness ⌉) 𝟙 → ⊥
 
-  -- ═══════════════════════════════════════════════════════════════════════
-  -- INTERPRETATION
-  -- ═══════════════════════════════════════════════════════════════════════
+  -- =========================================================================
+  -- INTERPRETATION (HONEST VERSION)
+  -- =========================================================================
   --
-  -- Classical: A consistent system cannot prove its own consistency
-  -- This seems paradoxical: we "know" the system is consistent, but can't prove it
+  -- What we have NOT shown:
+  -- - That ProbTT is actually consistent (we assume it)
+  -- - That consistency-weight has any particular value (unknown)
+  -- - That self-consistent is achievable (postulated)
+  -- - That Godel's Second applies (postulated, not proven)
   --
-  -- ProbTT: We CAN prove consistency, but at weight < 1
-  -- This is philosophically honest:
-  -- - We believe our system is consistent (high weight)
-  -- - We cannot be absolutely certain (weight < 1)
-  -- - The gap between belief and certainty is quantified
+  -- What we HAVE done:
+  -- - Defined what graded self-consistency WOULD mean
+  -- - Stated the conjecture that ProbTT might achieve it
+  -- - Identified the gap between weight 1 (impossible by Godel)
+  --   and lower weights (conjecturally achievable)
   --
-  -- The graded approach resolves the Godelian tension:
-  -- - We don't claim absolute certainty about self-consistency
-  -- - We quantify our epistemic state precisely
-  -- - This is more informative than classical "unprovable"
-  -- ═══════════════════════════════════════════════════════════════════════
+  -- The philosophical value is in the FRAMEWORK:
+  -- - Consistency as a graded notion, not binary
+  -- - The Godelian barrier applies at weight 1
+  -- - Lower weights might be accessible (conjecture)
+  --
+  -- This reframes the Godel phenomenon in graded terms,
+  -- but does NOT "solve" or "avoid" Godel's theorems.
+  -- =========================================================================
 
-  -- ═══════════════════════════════════════════════════════════════════════
-  -- POSTULATE: Soundness implies consistency
-  -- ═══════════════════════════════════════════════════════════════════════
-  --
-  -- JUSTIFICATION: If ProbTT is sound (provable things have valid weights),
-  -- then it's consistent. The proof requires showing that soundness
-  -- prevents the coexistence of Prov t 1 and Prov t 0. This is semantic
-  -- reasoning about the interpretation of weights.
-  -- ═══════════════════════════════════════════════════════════════════════
+  -- =========================================================================
+  -- AXIOM: Soundness implies consistency
+  -- =========================================================================
+  -- Semantic reasoning: if weights are sound, no contradiction arises.
+  -- This requires a model construction we do not have.
+  -- =========================================================================
   postulate
     soundness-implies-consistency : (∀ {n} {t : Tm n} {w : W} → Prov t w → w ≤ 𝟙) →
                                      Con 𝟙
 
-  -- ═══════════════════════════════════════════════════════════════════════
-  -- POSTULATE: Reflection - we can reason about our own provability
-  -- ═══════════════════════════════════════════════════════════════════════
-  --
-  -- JUSTIFICATION: Reflection requires going from Prov t w (provability
-  -- at weight w) to Prov (encoding t) w. The D1 condition gives us this
-  -- when we have an actual derivation, but Prov abstracts over derivations.
-  -- We need a meta-level principle that provability is closed under encoding.
-  -- ═══════════════════════════════════════════════════════════════════════
+  -- =========================================================================
+  -- AXIOM: Reflection principle
+  -- =========================================================================
+  -- From Prov t w to Prov (encoding t) w.
+  -- Requires the D1 derivability condition, which is also postulated.
+  -- =========================================================================
   postulate
     reflection : ∀ {n} {t : Tm n} {w : W} →
                  Prov t w →
                  Prov ⌈ t ⌉ w
 
-  -- ═══════════════════════════════════════════════════════════════════════
-  -- POSTULATE: The consistency weight forms a fixed point
-  -- ═══════════════════════════════════════════════════════════════════════
-  --
-  -- JUSTIFICATION: Similar to Godel's G, the consistency statement has a
-  -- unique weight at which it is provable. Any other weight would either
-  -- violate the second incompleteness theorem (if higher than
-  -- consistency-weight) or fail to capture the actual confidence level
-  -- (if lower). This uniqueness is a semantic property.
-  -- ═══════════════════════════════════════════════════════════════════════
+  -- =========================================================================
+  -- AXIOM: Uniqueness of consistency weight
+  -- =========================================================================
+  -- The consistency statement has a unique provability degree.
+  -- This is analogous to the Godel sentence having a unique weight,
+  -- but we do not derive it from any fixed-point equation.
+  -- =========================================================================
   postulate
     consistency-fixpoint : ∀ w →
                            Prov (⌈ consistency-witness ⌉) w →

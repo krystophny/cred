@@ -1,23 +1,53 @@
-{- AXIOM STATUS SUMMARY for Normalization.agda
+-- Normalization for ProbTT via Tait-style logical relations
+--
+-- ============================================================================
+-- AXIOM STATUS SUMMARY
+-- ============================================================================
+--
+-- This module contains a SKETCH of the normalization proof for ProbTT.
+-- The structure follows standard Tait-style logical relations (reducibility
+-- candidates), but several lemmas are postulated rather than proven.
+--
+-- POSTULATE CATEGORIES:
+--
+-- 1. TERMINATING PRAGMA (line ~153)
+--    Status: ACCEPTABLE with justification
+--    Reason: Termination holds by well-founded induction on type structure.
+--    Agda cannot verify because substitution B[a] does not syntactically
+--    decrease type size. The true termination argument uses:
+--      - Types are well-founded under subterm ordering
+--      - B[a] has the same TYPE COMPLEXITY as B (substitution preserves structure)
+--      - The recursive calls are on strict subterms of the original type
+--    A proper fix would use sized types or well-founded recursion combinators.
+--
+-- 2. REDUCIBILITY CANDIDATE LEMMAS (postulate-fun-*, postulate-pair-*)
+--    Status: SHOULD BE PROVEN
+--    Reason: These are standard lemmas in Tait-style normalization proofs.
+--    They are provable but require careful reasoning about:
+--      - Reducibility at function types (Girard's method)
+--      - Backward closure under reduction
+--      - Neutral term inclusion
+--    References: Girard "Proofs and Types", Ch. 6; Harper PFPL Ch. 47
+--
+-- 3. FUNDAMENTAL THEOREM LEMMAS (postulate-lam-fundamental, etc.)
+--    Status: SHOULD BE PROVEN
+--    Reason: These establish that well-typed terms inhabit their semantic
+--    interpretations. They follow from the typing rules and the definition
+--    of reducibility candidates. Standard but tedious induction.
+--
+-- 4. WEIGHT-IRRELEVANT-REDUCTION
+--    Status: SHOULD BE PROVEN
+--    Reason: This states that reduction preserves typability (subject
+--    reduction). It is a standard metatheorem and depends on the
+--    substitution lemma from Properties.agda.
+--
+-- KEY INSIGHT: Weights do not affect reduction
+-- The beta rules are purely syntactic. Weights only determine WHICH terms
+-- are well-typed, not how they reduce. Therefore, normalization in ProbTT
+-- is identical to normalization in MLTT.
+--
+-- ============================================================================
 
-TERMINATING pragma (line ~154): ACCEPTABLE
-  Termination holds by well-founded induction on type complexity.
-  Agda cannot verify because substitution B[a] does not syntactically decrease.
-  Reference: Harper PFPL Ch. 47, Abel "Normalization by Evaluation"
-
-weight-irrelevant-reduction: SHOULD BE PROVEN
-  Subject reduction. Depends on substitution lemma from Properties.agda.
-
-postulate-fun-*, postulate-pair-*: SHOULD BE PROVEN
-  Standard Tait-style reducibility candidate lemmas.
-  Reference: Girard "Proofs and Types" Ch. 6
-
-postulate-lam-fundamental, etc: SHOULD BE PROVEN
-  Fundamental theorem cases. Standard but tedious induction.
-
-KEY INSIGHT: Weights do not affect reduction. Normalization in ProbTT
-is identical to normalization in MLTT.
--}
 module ProbTT.Normalization where
 
 open import Level using (Level; _⊔_) renaming (suc to lsuc)
@@ -140,9 +170,26 @@ module Normalization {ℓ : Level} (DM : DeMorganAlgebra ℓ) where
   WeaklyNormalizing : ∀ {n} -> Tm n -> Set
   WeaklyNormalizing t = ∃ λ nf -> (t ⟶* nf) × Normal nf
 
-  -- Key insight: weights don't affect reduction
-  -- The beta rules are purely syntactic. Weights only constrain WHICH terms
-  -- are well-typed, not how they reduce.
+  -- =========================================================================
+  -- POSTULATE: Subject Reduction (weight-irrelevant-reduction)
+  -- Status: SHOULD BE PROVEN (depends on substitution lemma)
+  -- =========================================================================
+  --
+  -- This states that if t reduces to t' and t is well-typed, then t' is
+  -- well-typed (possibly at a different weight). This is the subject
+  -- reduction theorem.
+  --
+  -- Why possibly different weight: Consider (lam A b) applied to a.
+  -- If lam A b : A -> B @ w and a : A @ v, then (lam A b) a : B @ w*v.
+  -- After beta reduction, b[a] : B[a] @ w*v (same weight).
+  -- But the reduction itself does not change the weight.
+  --
+  -- Proof sketch: Case analysis on the reduction rule.
+  -- Each beta rule preserves typing by the substitution lemma.
+  -- Congruence rules follow by induction.
+  --
+  -- Dependency: Properties.agda subst-typed
+  -- =========================================================================
   postulate
     weight-irrelevant-reduction : ∀ {n} {t t' : Tm n} {Γ : Ctx n} {A : Ty n} {w : W} ->
       (t ⟶ t') -> Γ ⊢ t ∶ A 〔 w 〕 -> ∃ λ w' -> Γ ⊢ t' ∶ A 〔 w' 〕
@@ -163,11 +210,40 @@ module Normalization {ℓ : Level} (DM : DeMorganAlgebra ℓ) where
       backward-closed : ∀ {t t'} -> t ⟶ t' -> carrier t' -> carrier t
       neutral-in : ∀ {t} -> Neutral t -> carrier t
 
-  -- The interpretation of types as reducibility candidates
-  -- This is the core of the normalization proof.
-  -- Note: Termination is structural on types, but Agda cannot verify
-  -- because substitution B[a] doesn't decrease the size measure.
-  -- The actual termination argument uses type well-foundedness.
+  -- =========================================================================
+  -- TERMINATING PRAGMA JUSTIFICATION
+  -- Status: ACCEPTABLE (termination holds but Agda cannot verify)
+  -- =========================================================================
+  --
+  -- The interpretation function is structurally recursive on types.
+  -- Agda cannot verify termination because:
+  --   1. In the function case (A => B), we recurse on B[a] for arbitrary a
+  --   2. Syntactically, B[a] is not a subterm of (A => B)
+  --
+  -- Why termination DOES hold:
+  --   1. Type STRUCTURE is preserved by substitution
+  --      - B[a] has exactly the same type formers as B
+  --      - The substitution only affects term components (in Id types)
+  --   2. The recursive calls are on strict structural subterms:
+  --      - For A => B, we recurse on A and (structurally) B
+  --      - For A x B, we recurse on A and B
+  --      - For A + B, we recurse on A and B
+  --      - For Id A a b, we recurse on A (terms a,b do not affect recursion)
+  --   3. Base types are the base case with no recursion
+  --
+  -- Proper fix: Use sized types or well-founded recursion on type complexity.
+  -- The complexity measure is:
+  --   |base i|     = 0
+  --   |A => B|     = 1 + max(|A|, |B|)
+  --   |A x B|      = 1 + max(|A|, |B|)
+  --   |A + B|      = 1 + max(|A|, |B|)
+  --   |Id A a b|   = 1 + |A|
+  --
+  -- This measure is preserved by term substitution and strictly decreases
+  -- in all recursive calls.
+  --
+  -- Reference: Harper PFPL Ch. 47, Abel "Normalization by Evaluation"
+  -- =========================================================================
   {-# TERMINATING #-}
   mutual
     ⟦_⟧ : ∀ {n} (A : Ty n) -> Candidate A
@@ -182,7 +258,33 @@ module Normalization {ℓ : Level} (DM : DeMorganAlgebra ℓ) where
     ⟦ A +' B ⟧ = sum-candidate A B
     ⟦ Id A a b ⟧ = id-candidate A a b
 
-    -- Function types: f ∈ ⟦A ⇒ B⟧ iff for all a ∈ ⟦A⟧, f a ∈ ⟦B[a]⟧
+    -- =========================================================================
+    -- POSTULATES: Reducibility Candidate Properties for Function Types
+    -- Status: SHOULD BE PROVEN (standard Tait-style lemmas)
+    -- =========================================================================
+    --
+    -- These three lemmas establish that the function type interpretation
+    -- forms a valid reducibility candidate. They are standard in the
+    -- literature but require careful reasoning.
+    --
+    -- postulate-fun-normalizing:
+    --   If f satisfies the functional property (applies well to all reducible
+    --   arguments), then f normalizes. Proof: apply f to a fresh variable,
+    --   use that application normalizes, extract that f normalizes.
+    --
+    -- postulate-fun-backward:
+    --   Backward closure under reduction. If f reduces to f' and f' is
+    --   reducible, then f is reducible. Proof: for any reducible a,
+    --   (app f a) reduces to (app f' a) which is reducible, so (app f a)
+    --   is reducible by backward closure at the result type.
+    --
+    -- postulate-fun-neutral:
+    --   Neutral terms are reducible. Proof: for any reducible a, (app f a)
+    --   is neutral (since f is neutral), hence reducible by the neutral
+    --   inclusion property at the result type.
+    --
+    -- Reference: Girard "Proofs and Types" Ch. 6, Tait's method
+    -- =========================================================================
     fun-candidate : ∀ {n} (A : Ty n) (B : Ty (suc n)) -> Candidate (A ⇒ B)
     fun-candidate {n} A B = record
       { carrier = carrier-fun
@@ -198,7 +300,31 @@ module Normalization {ℓ : Level} (DM : DeMorganAlgebra ℓ) where
           postulate-fun-backward : ∀ {f f'} -> f ⟶ f' -> carrier-fun f' -> carrier-fun f
           postulate-fun-neutral : ∀ {f} -> Neutral f -> carrier-fun f
 
-    -- Pair types: p ∈ ⟦A ×' B⟧ iff fst p ∈ ⟦A⟧ and snd p ∈ ⟦B[fst p]⟧
+    -- =========================================================================
+    -- POSTULATES: Reducibility Candidate Properties for Pair Types
+    -- Status: SHOULD BE PROVEN (standard Tait-style lemmas)
+    -- =========================================================================
+    --
+    -- Similar to function types, these establish that pairs form a valid
+    -- reducibility candidate.
+    --
+    -- postulate-pair-normalizing:
+    --   If both projections are reducible, the pair normalizes.
+    --   Proof: fst p and snd p normalize, so p normalizes (pairs normalize
+    --   iff both components normalize).
+    --
+    -- postulate-pair-backward:
+    --   Backward closure. If p reduces to p' and p' is reducible, then p
+    --   is reducible. Proof: fst p reduces to fst p' (congruence), and
+    --   fst p' is reducible, so fst p is reducible by backward closure.
+    --   Similarly for snd.
+    --
+    -- postulate-pair-neutral:
+    --   Neutral pairs are reducible. Proof: fst p and snd p are neutral
+    --   (since p is neutral), hence reducible.
+    --
+    -- Reference: Harper PFPL Ch. 47
+    -- =========================================================================
     pair-candidate : ∀ {n} (A : Ty n) (B : Ty (suc n)) -> Candidate (A ×' B)
     pair-candidate {n} A B = record
       { carrier = carrier-pair
@@ -232,8 +358,52 @@ module Normalization {ℓ : Level} (DM : DeMorganAlgebra ℓ) where
       ; neutral-in = λ {t} ne -> t P, refl* P, nf-ne ne
       }
 
-  -- The fundamental theorem: all well-typed terms are in their type's candidate
-  -- This is proved by induction on the typing derivation.
+  -- =========================================================================
+  -- FUNDAMENTAL THEOREM: Well-typed terms are reducible
+  -- =========================================================================
+  --
+  -- This is the main lemma of Tait-style normalization. It states that
+  -- every well-typed term belongs to the reducibility candidate for its type.
+  --
+  -- The proof proceeds by induction on the typing derivation. Most cases
+  -- are straightforward, but several require auxiliary lemmas that are
+  -- postulated here.
+  --
+  -- =========================================================================
+  -- POSTULATES IN FUNDAMENTAL THEOREM
+  -- Status: SHOULD BE PROVEN (standard but require infrastructure)
+  -- =========================================================================
+  --
+  -- postulate-lam-fundamental:
+  --   For lambda abstractions, we need to show that (app (lam A b) a) is
+  --   reducible when a is reducible. This requires:
+  --   1. Beta reduction: (app (lam A b) a) reduces to b[a]
+  --   2. Substitution lemma: b[a] is well-typed
+  --   3. IH: b[a] is reducible (induction on typing derivation)
+  --   4. Backward closure: since b[a] is reducible and (lam A b) a reduces
+  --      to it, (lam A b) a is reducible
+  --
+  -- postulate-pair-fundamental:
+  --   For pairs, we need fst (pair a b) and snd (pair a b) reducible.
+  --   This requires backward closure: fst (pair a b) reduces to a,
+  --   and a is reducible by IH.
+  --
+  -- postulate-sum-fundamental-inl/inr:
+  --   For injections, we need inl a (or inr b) to normalize.
+  --   This follows because a normalizes and Normal is preserved by inl.
+  --
+  -- postulate-case-fundamental:
+  --   For case analysis, we need case e l r to normalize.
+  --   This requires analyzing whether e is neutral or canonical.
+  --
+  -- postulate-refl-fundamental:
+  --   For reflexivity, refl is normal, hence trivially reducible.
+  --
+  -- postulate-J-fundamental:
+  --   For J elimination, we need J M d p to normalize.
+  --   This requires analyzing whether p is neutral or refl.
+  --
+  -- =========================================================================
   fundamental : ∀ {n} {Γ : Ctx n} {t : Tm n} {A : Ty n} {w : W} ->
                 Γ ⊢ t ∶ A 〔 w 〕 ->
                 Candidate.carrier ⟦ A ⟧ t
