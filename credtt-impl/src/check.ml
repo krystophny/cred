@@ -47,7 +47,7 @@ let infer_full (ctx : Context.t) (t : term) : full_result =
     | Var i ->
         (match lookup ctx i with
          | Some ty ->
-             (* Variables have credence 1, which is Stable1 *)
+             (* Variables have credence 1, which is Stable1 (t-var rule) *)
              Ok { ty; credence = Credence.one; stability = Neighbourhood.Robust }
          | None -> Error (Error.UnboundVariable i))
 
@@ -114,7 +114,8 @@ let infer_full (ctx : Context.t) (t : term) : full_result =
         check_against ctx b b_ty
 
     (* Case elimination: both branches must have equal credence v, result is c*v
-       Reference: Judgment.agda:111-115 (t-case rule) *)
+       Reference: Judgment.agda:132-136 (t-case rule)
+       Context extends with types only; credences multiply at result *)
     | Case (e, l, r), result_ty ->
         let* e_res = go ctx e in
         (match e_res.ty with
