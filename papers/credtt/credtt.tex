@@ -421,6 +421,8 @@ This is \textbf{multiplicative}---no division needed!
 
 The conditional $b \mid a$ is \textbf{primitive}. We don't compute it by division; we assert it exists when the chain rule holds.
 
+\textbf{Formalization status}: The conditional judgment $b \mid a : B \at{v}$ is a \emph{meta-level} notion used to express the chain rule. The Agda formalization does not include a term-level conditional operator $(\_ \mid \_)$; instead, the chain rule is captured by the Sigma-type introduction rule which computes joint credence as the product of component credences. Full term-level conditioning would require extending the syntax with a conditional term former and appropriate computation rules---this remains future work.
+
 \subsection{Conditioning vs Implication}
 
 \begin{center}
@@ -921,7 +923,9 @@ When credences are restricted to $\{\zero,\one\}$:
 \end{enumerate}
 \end{theorem}
 
-\begin{proof}[Proof sketch (order-theoretic)]
+\begin{proof}[Proof sketch (order-theoretic; see Collapse.agda)]
+\textbf{Formalization status}: The Agda file \texttt{Collapse.agda} proves claims (1)--(4) mechanically for the Boolean De Morgan algebra. The MLTT correspondence (5) is demonstrated structurally via judgment records but full integration with the term language requires additional work (tracked in GitHub issue \#57).
+
 In the Boolean algebra $\{\zero,\one\}$:
 \begin{enumerate}
     \item \textbf{Fixed points of $T_s$}: For any operator $T_s(c) = c \cdot s$:
@@ -1424,7 +1428,7 @@ CredTT provides more information than both: constructive math says ``no choice f
         \item Credence forcing from contradictions
         \item Negation fixpoint solving
     \end{itemize}
-    \item \textbf{Agda formalization} (\texttt{agda/CredTT/}): Syntax, judgments, MLTT embedding theorem
+    \item \textbf{Agda formalization} (\texttt{agda/CredTT/}): Syntax, typing rules with credence multiplication, MLTT embedding theorem. Note: Agda has credence-annotated \emph{typing rules} (in \texttt{Judgment.agda}) but not a \emph{type-checking algorithm}---the OCaml implementation provides the algorithmic type checker while Agda provides the specification
 \end{enumerate}
 
 \subsection{What Is NOT Implemented}
