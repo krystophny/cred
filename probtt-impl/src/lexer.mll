@@ -40,6 +40,9 @@ let () = List.iter (fun (k, v) -> Hashtbl.add keyword_table k v) [
   "provable", PROVABLE;
   "fixpoint", FIXPOINT;
   "encode", ENCODE;
+  (* Dependent weight keywords *)
+  "sup", SUP;
+  "inf", WINF;  (* INF conflicts with infix *)
 ]
 
 let lookup_ident s =

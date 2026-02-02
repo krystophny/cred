@@ -154,6 +154,56 @@ module BoolDM where
 
 open BoolDM public using (BoolDM)
 
+-- Dependent weight type: weights indexed by elements of a type A
+-- W(A) represents a function A → W
+module DependentWeight {ℓ} (DM : DeMorganAlgebra ℓ) where
+  open DeMorganAlgebra DM
+
+  -- Weight function: assigns a weight to each element of type A
+  WFun : Set ℓ → Set ℓ
+  WFun A = A → W
+
+  -- Constant weight function: same weight for all elements
+  const-wf : ∀ {A : Set ℓ} → W → WFun A
+  const-wf w _ = w
+
+  -- Supremum of a weight function: upper bound over all values
+  -- sup(w) = smallest v such that w(x) ≤ v for all x
+  -- For finite types, this is just the maximum
+  -- For general types, we need a postulate or work within a specific model
+  postulate
+    sup : ∀ {A : Set ℓ} → WFun A → W
+    sup-upper : ∀ {A : Set ℓ} (wf : WFun A) (a : A) → wf a ≤ sup wf
+    sup-least : ∀ {A : Set ℓ} (wf : WFun A) (v : W) →
+                (∀ a → wf a ≤ v) → sup wf ≤ v
+
+  -- Infimum of a weight function: lower bound over all values
+  -- inf(w) = largest v such that v ≤ w(x) for all x
+  postulate
+    inf : ∀ {A : Set ℓ} → WFun A → W
+    inf-lower : ∀ {A : Set ℓ} (wf : WFun A) (a : A) → inf wf ≤ wf a
+    inf-greatest : ∀ {A : Set ℓ} (wf : WFun A) (v : W) →
+                   (∀ a → v ≤ wf a) → v ≤ inf wf
+
+  -- Pointwise multiplication of weight functions
+  _·wf_ : ∀ {A : Set ℓ} → WFun A → WFun A → WFun A
+  (wf₁ ·wf wf₂) a = wf₁ a · wf₂ a
+
+  -- Pointwise negation of weight functions
+  ¬wf : ∀ {A : Set ℓ} → WFun A → WFun A
+  ¬wf wf a = ¬ (wf a)
+
+  -- Key property: uniform weight is a special case of dependent weight
+  -- sup(const w) = w and inf(const w) = w
+  postulate
+    sup-const : ∀ {A : Set ℓ} (w : W) → sup (const-wf {A = A} w) ≡ w
+    inf-const : ∀ {A : Set ℓ} (w : W) → inf (const-wf {A = A} w) ≡ w
+
+  -- Integration/expected value (for probabilistic interpretation)
+  -- In the [0,1] model: ∫ w(x) dP(x) where P is the distribution over A
+  -- For the abstract algebra, we use sup as the primary operation
+  -- (integration requires additional structure like measure/summation)
+
 -- De Morgan laws (derived)
 module DeMorganLaws {ℓ : Level} (DM : DeMorganAlgebra ℓ) where
   open DeMorganAlgebra DM
