@@ -523,6 +523,11 @@ module TechniqueSummary where
 module ConcreteExamples where
   open ClassicalTechniques
 
+  -- STATUS: Examples in comments only - see issue #105 for adding executable code.
+  -- The examples below use concrete numerics (0.9, 0.855, etc.) which require
+  -- importing CredTT.Interval. This module uses abstract DeMorganAlgebra.
+  -- For executable concrete examples, see: credtt-impl/test/test_neighbourhood.ml
+
   {-
   Example 1: Modus Ponens with Credence
   Classical: A, A -> B |- B

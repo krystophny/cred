@@ -23,6 +23,12 @@
 -- A proposition at zero credence
 postulate absurdity : False @ 0
 
+-- EXECUTABLE: derive anything from zero credence
+derive anything : Anything @ 1 from absurdity by ex_falso
+
+-- This works because ex_falso checks that absurdity has credence 0,
+-- then allows deriving ANY proposition at credence 1 (vacuously true)
+
 -- From zero credence, anything follows at credence 1
 -- This is because P(A|False) is undefined/vacuous
 -- We can set it to any value, including 1
