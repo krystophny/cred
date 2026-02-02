@@ -1,17 +1,26 @@
-{- AXIOM STATUS SUMMARY for Credence.agda (DependentCredence module)
+{- CREDTT CREDENCE ALGEBRA
+   ========================
 
-sup, sup-upper, sup-least: COMPLETENESS EXTENSION
-  The De Morgan algebra does not include completeness.
-  These axioms extend the algebra to a complete lattice.
-  For Bool: sup = OR (trivially finite).
-  For [0,1]: sup exists by completeness of reals.
+   AXIOM SUMMARY (following user's exact formalization):
 
-inf, inf-lower, inf-greatest: COMPLETENESS EXTENSION
-  Same as sup. For Bool: inf = AND.
+   CORE CREDENCE ALGEBRA (CA):
+   1. (W, ≤, 0, 1) bounded partial order (O1-O5)
+   2. (W, ·, 1) commutative monoid with annihilator 0 (M1-M4)
+   3. · monotone in each argument (M5)
+   4. ¬ involutive antitone map swapping 0 and 1 (N1-N3)
 
-sup-const, inf-const: SHOULD BE PROVEN
-  Given inhabited index type, sup/inf of constant function equals constant.
-  Requires index type to be non-empty.
+   ω-ITERATION STRUCTURE (IT):
+   5. ω-infimum operator infω : (ℕ → W) → W with glb laws (I1-I2)
+   6. Scott continuity: w · infω(x) = infω(n → w · x(n)) (C1)
+
+   EXPLICITLY EXCLUDED:
+   - ARCH (Archimedean axiom): ∀s<1. infₙ(sⁿ) = 0
+     This would collapse interior stability. CredTT does NOT assume this.
+     ProbTT (real probability semantics) would add this as an extra axiom.
+
+   KEY INSIGHT:
+   Without ARCH, there can be idempotent elements e with e·e = e and 0 < e < 1.
+   These give INTERIOR STABILITY - the core innovation of CredTT.
 -}
 module CredTT.Credence where
 
@@ -21,6 +30,7 @@ open import Data.Bool using (Bool; true; false; _∧_; not)
 open import Data.Sum using (_⊎_; inj₁; inj₂)
 open import Data.Empty using (⊥; ⊥-elim)
 open import Data.Unit using (⊤; tt)
+open import Data.Product using (_×_; _,_)
 
 -- De Morgan Algebra: multiplication, complement, order
 -- No addition! Disjunction derived via De Morgan duality.
@@ -63,6 +73,86 @@ record DeMorganAlgebra (ℓ : Level) : Set (suc ℓ) where
   infixl 7 _·_
   infixl 6 _∨_
   infix  4 _≤_
+
+-- ============================================================================
+-- ω-ITERATION STRUCTURE
+-- ============================================================================
+-- This is the minimal extra structure needed for proof dynamics.
+-- It allows talking about long proofs, recursion, and induction.
+
+open import Data.Nat as Nat using (ℕ; zero; suc)
+
+-- Record extending De Morgan algebra with ω-infima
+record IterationAlgebra (ℓ : Level) : Set (Level.suc ℓ) where
+  field
+    -- Underlying De Morgan algebra
+    algebra : DeMorganAlgebra ℓ
+
+  open DeMorganAlgebra algebra public
+
+  -- Sequences (ω-chains)
+  Seq : Set ℓ
+  Seq = ℕ → C
+
+  field
+    -- ω-infimum operator: greatest lower bound of a sequence
+    infω : Seq → C
+
+    -- (I1) Lower bound: infω(x) ≤ x(n) for all n
+    infω-lower : ∀ (x : Seq) (n : ℕ) → infω x ≤ x n
+
+    -- (I2) Greatest: if y ≤ x(n) for all n, then y ≤ infω(x)
+    infω-greatest : ∀ (x : Seq) (y : C) → (∀ n → y ≤ x n) → y ≤ infω x
+
+    -- (C1) Scott continuity: · distributes over ω-infima
+    -- w · infω(x) = infω(n ↦ w · x(n))
+    ·-infω-distrib : ∀ (w : C) (x : Seq) →
+                     w · infω x ≡ infω (λ n → w · x n)
+
+  -- Derived: ω-supremum via negation (De Morgan duality)
+  supω : Seq → C
+  supω x = ¬ (infω (λ n → ¬ (x n)))
+
+  -- Powers: s⁰ = 1, s^(n+1) = sⁿ · s
+  _^_ : C → ℕ → C
+  s ^ zero    = 𝟙
+  s ^ (suc n) = (s ^ n) · s
+
+  -- Asymptotic credence under repeating step s:
+  -- Iter(c, s) = infω(n ↦ c · sⁿ)
+  Iter : C → C → C
+  Iter c s = infω (λ n → c · (s ^ n))
+
+  -- Stability under step s: Iter(c, s) > 0
+  Stable : C → C → Set ℓ
+  Stable c s = (Iter c s ≤ 𝟘 → ⊥) × (𝟘 ≤ Iter c s)
+
+  -- Degeneration under step s: Iter(c, s) = 0
+  Degenerate : C → C → Set ℓ
+  Degenerate c s = Iter c s ≡ 𝟘
+
+  -- Invariant under step: c = c · s
+  Invariant : C → C → Set ℓ
+  Invariant c s = c ≡ c · s
+
+-- ============================================================================
+-- ARCHIMEDEAN AXIOM (EXPLICITLY NOT INCLUDED IN CORE)
+-- ============================================================================
+-- This axiom would collapse interior stability. DO NOT assume it in CredTT!
+-- ProbTT (probability semantics over [0,1]) would include this.
+
+module ArchimedeanAxiom {ℓ : Level} (IA : IterationAlgebra ℓ) where
+  open IterationAlgebra IA
+
+  -- ARCH: For all s < 1, infₙ(sⁿ) = 0
+  -- This says "non-unit steps eventually degrade everything to zero"
+  -- TRUE in [0,1] with real multiplication
+  -- FALSE in algebras with interior idempotents
+  ARCH : Set ℓ
+  ARCH = ∀ (s : C) → (s ≤ 𝟙) → (s ≡ 𝟙 → ⊥) → infω (λ n → s ^ n) ≡ 𝟘
+
+  -- With ARCH, only s = 1 preserves credence under iteration
+  -- Without ARCH, interior fixed points are possible
 
 -- Boolean De Morgan algebra: the {0,1} case
 -- This is what gives us MLTT when used as credences
