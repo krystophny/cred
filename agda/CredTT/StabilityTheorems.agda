@@ -71,9 +71,40 @@ module OperatorDynamics {ℓ : Level} (DM : DeMorganAlgebra ℓ) where
   s ^ zero = 𝟙
   s ^ suc n = (s ^ n) · s
 
-  -- Note: iterate n c s from DynamicsDefs computes c * s^n
-  -- The relationship iterate n c s = c * (s ^ n) holds by induction,
-  -- but proving it requires careful handling of associativity.
+  -- Relationship: iterate n c s = c * (s ^ n)
+  -- Proven by induction on n
+  iterate-power : ∀ (n : ℕ) (c s : C) → iterate n c s ≡ c · (s ^ n)
+  iterate-power zero c s = sym (·-identityʳ c)
+  iterate-power (Data.Nat.suc n) c s =
+    let ih : iterate n c s ≡ c · (s ^ n)
+        ih = iterate-power n c s
+        step1 : iterate (Data.Nat.suc n) c s ≡ (iterate n c s) · s
+        step1 = refl
+        step2 : (iterate n c s) · s ≡ (c · (s ^ n)) · s
+        step2 = cong (_· s) ih
+        step3 : (c · (s ^ n)) · s ≡ c · ((s ^ n) · s)
+        step3 = ·-assoc c (s ^ n) s
+    in trans step2 step3
+
+  -- Power laws
+  power-zero : ∀ (s : C) → s ^ 0 ≡ 𝟙
+  power-zero s = refl
+
+  power-one : ∀ (s : C) → s ^ 1 ≡ s
+  power-one s = ·-identityˡ s
+
+  power-mul : ∀ (s : C) (m n : ℕ) → (s ^ m) · (s ^ n) ≡ s ^ (m Data.Nat.+ n)
+  power-mul s zero n = ·-identityˡ (s ^ n)
+  power-mul s (Data.Nat.suc m) n =
+    let ih : (s ^ m) · (s ^ n) ≡ s ^ (m Data.Nat.+ n)
+        ih = power-mul s m n
+        step1 : ((s ^ m) · s) · (s ^ n) ≡ (s ^ m) · (s · (s ^ n))
+        step1 = ·-assoc (s ^ m) s (s ^ n)
+        step2 : s · (s ^ n) ≡ (s ^ n) · s
+        step2 = ·-comm s (s ^ n)
+        step3 : (s ^ m) · ((s ^ n) · s) ≡ ((s ^ m) · (s ^ n)) · s
+        step3 = sym (·-assoc (s ^ m) (s ^ n) s)
+    in trans step1 (trans (cong ((s ^ m) ·_) step2) (trans step3 (cong (_· s) ih)))
 
 -- ============================================================================
 -- PRESERVATION LEMMAS: How operators preserve stability properties

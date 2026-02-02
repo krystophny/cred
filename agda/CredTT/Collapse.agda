@@ -320,6 +320,19 @@ module DynamicsCollapse where
   bool-induction-valid true refl = InductionDynamics.classical-induction BoolDM
     (𝟙-greatest 𝟘 , (λ ()))
 
+  -- Iteration with false step degenerates to false (after any positive number of steps)
+  iteration-false-degenerates : ∀ (c : Bool) (n : ℕ) →
+    iterate (Data.Nat.suc n) c false ≡ false
+  iteration-false-degenerates c zero = ·-annihilʳ c
+  iteration-false-degenerates c (Data.Nat.suc n) =
+    trans (cong (_· false) (iteration-false-degenerates c n)) (·-annihilˡ false)
+
+  -- Both Bool elements are idempotent (this is why dynamics are trivial)
+  -- Idempotent c means c = c * c, so we prove c * c = c and apply sym
+  all-bool-idempotent : ∀ (c : Bool) → Idempotent c
+  all-bool-idempotent true  = refl
+  all-bool-idempotent false = refl
+
 -- ============================================================================
 -- COMPLETE COLLAPSE THEOREM
 -- ============================================================================
@@ -358,6 +371,40 @@ module CompleteCollapse where
     (CredTTJudgment-Sketch.credence j ≡ true × MLTTJudgment-Sketch) ⊎
     (CredTTJudgment-Sketch.credence j ≡ false × ⊤)
   judgment-correspondence-sketch = collapse-theorem-sketch
+
+  -- 6. All Bool elements are idempotent (key to trivial dynamics)
+  all-idempotent : ∀ (c : Bool) → Idempotent c
+  all-idempotent = DynamicsCollapse.all-bool-idempotent
+
+  -- 7. Iteration with step true preserves credence
+  iteration-preserving : ∀ (c : Bool) (n : ℕ) → iterate n c true ≡ c
+  iteration-preserving = DynamicsCollapse.iteration-immediate
+
+  -- 8. Post-fixed point condition is trivially satisfied for all Bool credences
+  -- when step = true (since c * true = c and c <= c)
+  all-postfixed-at-true : ∀ (c : Bool) → PostFixedPoint c true
+  all-postfixed-at-true c = subst (c ≤_) (sym (·-identityʳ c)) (≤-refl c)
+
+  -- 9. The collapse is total: every CredTT[Bool] judgment has a unique classification
+  -- Helper: true cannot be unstable (bounded away from one)
+  -- Unstable₀ true means there exists b with b < 1 and true ≤ b
+  -- But true is maximal, so true ≤ b implies b = true, contradicting b < 1
+  true-not-unstable : Unstable₀ true → ⊥
+  true-not-unstable (true  , (b≤1 , b≢1) , true≤b) = b≢1 refl
+  true-not-unstable (false , (b≤1 , b≢1) , ())
+
+  -- Helper: false cannot be stable (bounded away from zero)
+  -- Stable₁ false means there exists b with 0 < b and b ≤ false
+  -- But false is minimal, so b ≤ false implies b = false, contradicting 0 < b
+  false-not-stable : Stable₁ false → ⊥
+  false-not-stable (true  , (0≤b , 0≢b) , ())
+  false-not-stable (false , (0≤b , 0≢b) , b≤false) = 0≢b refl
+
+  collapse-total : ∀ (c : Bool) →
+    ((c ≡ true) × Stable₁ c × (Unstable₀ c → ⊥)) ⊎
+    ((c ≡ false) × Unstable₀ c × (Stable₁ c → ⊥))
+  collapse-total true  = inj₁ (refl , true-always-stable , true-not-unstable)
+  collapse-total false = inj₂ (refl , false-always-unstable , false-not-stable)
 
 -- ============================================================================
 -- SUMMARY: WHY THE COLLAPSE MATTERS
