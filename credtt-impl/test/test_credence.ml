@@ -77,7 +77,7 @@ let () =
     | None -> false
   );
 
-  (* Constraint solver tests *)
+  (* Constraint solver tests - basic equality *)
   test "solve_constraints [c = 0]" (
     let constraints = [CEqual (Var "c", Zero)] in
     let solutions = solve_constraints constraints in
@@ -91,6 +91,133 @@ let () =
     match List.assoc_opt "c" solutions with
     | Some r -> rat_equal r rat_half
     | None -> false
+  );
+
+  (* Extended constraint solver tests - rational binding *)
+  test "solve_constraints [c = 1/2]" (
+    let constraints = [CEqual (Var "c", Rat (1, 2))] in
+    let solutions = solve_constraints constraints in
+    match List.assoc_opt "c" solutions with
+    | Some r -> rat_equal r rat_half
+    | None -> false
+  );
+  test "solve_constraints [c = 3/4]" (
+    let constraints = [CEqual (Var "c", Rat (3, 4))] in
+    let solutions = solve_constraints constraints in
+    match List.assoc_opt "c" solutions with
+    | Some r -> rat_equal r { num = 3; den = 4 }
+    | None -> false
+  );
+
+  (* Variable-to-variable equality *)
+  test "solve_constraints [a = b, b = 1]" (
+    let constraints = [CEqual (Var "a", Var "b"); CEqual (Var "b", One)] in
+    let solutions = solve_constraints constraints in
+    let a_val = List.assoc_opt "a" solutions in
+    let b_val = List.assoc_opt "b" solutions in
+    match a_val, b_val with
+    | Some ra, Some rb -> rat_equal ra rat_one && rat_equal rb rat_one
+    | Some ra, None -> rat_equal ra rat_one
+    | None, Some rb -> rat_equal rb rat_one
+    | None, None -> false
+  );
+
+  (* Negation constraints *)
+  test "solve_constraints [neg c = 1] -> c = 0" (
+    let constraints = [CEqual (Neg (Var "c"), One)] in
+    let solutions = solve_constraints constraints in
+    match List.assoc_opt "c" solutions with
+    | Some r -> rat_equal r rat_zero
+    | None -> false
+  );
+  test "solve_constraints [neg c = 0] -> c = 1" (
+    let constraints = [CEqual (Neg (Var "c"), Zero)] in
+    let solutions = solve_constraints constraints in
+    match List.assoc_opt "c" solutions with
+    | Some r -> rat_equal r rat_one
+    | None -> false
+  );
+
+  (* Product constraints *)
+  test "solve_constraints [a * b = 1] -> a = 1, b = 1" (
+    let constraints = [CEqual (Mul (Var "a", Var "b"), One)] in
+    let solutions = solve_constraints constraints in
+    let a_val = List.assoc_opt "a" solutions in
+    let b_val = List.assoc_opt "b" solutions in
+    match a_val, b_val with
+    | Some ra, Some rb -> rat_equal ra rat_one && rat_equal rb rat_one
+    | _, _ -> false
+  );
+  test "solve_constraints [1 * c = 1/2] -> c = 1/2" (
+    let constraints = [CEqual (Mul (One, Var "c"), Rat (1, 2))] in
+    let solutions = solve_constraints constraints in
+    match List.assoc_opt "c" solutions with
+    | Some r -> rat_equal r rat_half
+    | None -> false
+  );
+
+  (* CLeq constraints *)
+  test "solve_constraints_full [c <= 1/2, c >= 1/2] -> c = 1/2" (
+    let constraints = [CLeq (Var "c", Rat (1, 2)); CLeq (Rat (1, 2), Var "c")] in
+    match solve_constraints_full constraints with
+    | Solved solutions ->
+        (match List.assoc_opt "c" solutions with
+         | Some r -> rat_equal r rat_half
+         | None -> false)
+    | Conflict _ -> false
+  );
+  test "solve_constraints_full [0 <= c <= 1] no conflict" (
+    let constraints = [CLeq (Zero, Var "c"); CLeq (Var "c", One)] in
+    match solve_constraints_full constraints with
+    | Solved _ -> true
+    | Conflict _ -> false
+  );
+
+  (* Conflict detection *)
+  test "solve_constraints_full [c = 0, c = 1] -> Conflict" (
+    let constraints = [CEqual (Var "c", Zero); CEqual (Var "c", One)] in
+    match solve_constraints_full constraints with
+    | Conflict _ -> true
+    | Solved _ -> false
+  );
+  test "solve_constraints_full [1 = 0] -> Conflict" (
+    let constraints = [CEqual (One, Zero)] in
+    match solve_constraints_full constraints with
+    | Conflict _ -> true
+    | Solved _ -> false
+  );
+  test "solve_constraints_full [1 <= 0] -> Conflict (ordering)" (
+    let constraints = [CLeq (One, Zero)] in
+    match solve_constraints_full constraints with
+    | Conflict _ -> true
+    | Solved _ -> false
+  );
+
+  (* Propagation tests *)
+  test "solve_constraints [a = b, b = c, c = 1/4]" (
+    let constraints = [
+      CEqual (Var "a", Var "b");
+      CEqual (Var "b", Var "c");
+      CEqual (Var "c", Rat (1, 4))
+    ] in
+    let solutions = solve_constraints constraints in
+    (* With union-find, all three vars should unify to the root which has value 1/4 *)
+    let has_quarter = List.exists (fun (_, r) -> rat_equal r { num = 1; den = 4 }) solutions in
+    has_quarter
+  );
+
+  (* Mixed constraints *)
+  test "solve_constraints [c = 1/2, d = neg c] -> d = 1/2" (
+    let constraints = [
+      CEqual (Var "c", Rat (1, 2));
+      CEqual (Var "d", Neg (Var "c"))
+    ] in
+    let solutions = solve_constraints constraints in
+    match List.assoc_opt "c" solutions, List.assoc_opt "d" solutions with
+    | Some rc, Some rd ->
+        rat_equal rc rat_half && rat_equal rd rat_half
+    | Some rc, None -> rat_equal rc rat_half
+    | _, _ -> false
   );
 
   (* Dependent credence tests *)

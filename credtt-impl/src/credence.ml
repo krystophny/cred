@@ -158,6 +158,13 @@ let rat_equal a b =
   let b' = rat_normalize b in
   a'.num = b'.num && a'.den = b'.den
 
+let rat_lt a b =
+  let a' = rat_normalize a in
+  let b' = rat_normalize b in
+  a'.num * b'.den < b'.num * a'.den
+
+let rat_leq a b = rat_equal a b || rat_lt a b
+
 let rat_to_string r =
   let r' = rat_normalize r in
   if r'.den = 1 then string_of_int r'.num
@@ -213,21 +220,231 @@ type constraint_t =
   | CLeq of t * t
   | CFixpoint of string * (t -> t)
 
-(* Solve a list of constraints, returning variable assignments *)
-let solve_constraints constraints =
-  let bindings = Hashtbl.create 8 in
-  List.iter (function
-    | CEqual (Var v, Zero) | CEqual (Zero, Var v) ->
-        Hashtbl.replace bindings v rat_zero
-    | CEqual (Var v, One) | CEqual (One, Var v) ->
-        Hashtbl.replace bindings v rat_one
+(* Constraint solver result *)
+type solve_result =
+  | Solved of (string * rational) list
+  | Conflict of string
+
+(* Variable bounds for ordering constraints *)
+type var_bounds = {
+  mutable lower: rational option;
+  mutable upper: rational option;
+}
+
+(* Constraint solver state *)
+type solver_state = {
+  bindings: (string, rational) Hashtbl.t;
+  equivalences: (string, string) Hashtbl.t;
+  bounds: (string, var_bounds) Hashtbl.t;
+  mutable changed: bool;
+}
+
+let create_solver () = {
+  bindings = Hashtbl.create 16;
+  equivalences = Hashtbl.create 16;
+  bounds = Hashtbl.create 16;
+  changed = false;
+}
+
+let find_root state v =
+  let rec go v =
+    match Hashtbl.find_opt state.equivalences v with
+    | Some parent when parent <> v -> go parent
+    | _ -> v
+  in go v
+
+let get_bounds state v =
+  let root = find_root state v in
+  match Hashtbl.find_opt state.bounds root with
+  | Some b -> b
+  | None ->
+      let b = { lower = None; upper = None } in
+      Hashtbl.add state.bounds root b;
+      b
+
+let update_lower state v r =
+  let b = get_bounds state v in
+  match b.lower with
+  | None -> b.lower <- Some r; state.changed <- true
+  | Some old when rat_lt old r -> b.lower <- Some r; state.changed <- true
+  | _ -> ()
+
+let update_upper state v r =
+  let b = get_bounds state v in
+  match b.upper with
+  | None -> b.upper <- Some r; state.changed <- true
+  | Some old when rat_lt r old -> b.upper <- Some r; state.changed <- true
+  | _ -> ()
+
+let check_bounds_consistent state v =
+  let b = get_bounds state v in
+  match b.lower, b.upper with
+  | Some lo, Some hi -> rat_leq lo hi
+  | _ -> true
+
+let bind_var state v r =
+  let root = find_root state v in
+  match Hashtbl.find_opt state.bindings root with
+  | Some existing ->
+      if not (rat_equal existing r) then
+        Error (Printf.sprintf "Conflict: %s bound to both %s and %s"
+          v (rat_to_string existing) (rat_to_string r))
+      else Ok ()
+  | None ->
+      Hashtbl.replace state.bindings root r;
+      state.changed <- true;
+      let b = get_bounds state root in
+      b.lower <- Some r;
+      b.upper <- Some r;
+      Ok ()
+
+let unify_vars state v1 v2 =
+  let r1 = find_root state v1 in
+  let r2 = find_root state v2 in
+  if r1 <> r2 then begin
+    Hashtbl.replace state.equivalences r2 r1;
+    state.changed <- true;
+    match Hashtbl.find_opt state.bindings r1, Hashtbl.find_opt state.bindings r2 with
+    | Some b1, Some b2 when not (rat_equal b1 b2) ->
+        Error (Printf.sprintf "Conflict: unifying %s=%s with %s=%s"
+          v1 (rat_to_string b1) v2 (rat_to_string b2))
+    | None, Some b2 ->
+        Hashtbl.replace state.bindings r1 b2;
+        Ok ()
+    | _, _ -> Ok ()
+  end else Ok ()
+
+let try_eval_to_rational state c =
+  let rec go = function
+    | Zero -> Some rat_zero
+    | One -> Some rat_one
+    | Rat (n, d) -> Some (rat_normalize { num = n; den = d })
+    | Var v ->
+        let root = find_root state v in
+        Hashtbl.find_opt state.bindings root
+    | Neg w ->
+        (match go w with
+         | Some r -> Some (rat_neg r)
+         | None -> None)
+    | Mul (a, b) ->
+        (match go a, go b with
+         | Some ra, Some rb -> Some (rat_mul ra rb)
+         | _, _ -> None)
+    | Infer _ | DepVar _ | Sup _ | Inf _ -> None
+  in go c
+
+let extract_var = function
+  | Var v -> Some v
+  | _ -> None
+
+let process_equal state c1 c2 =
+  match simplify c1, simplify c2 with
+  | Var v1, Var v2 -> unify_vars state v1 v2
+  | Var v, c | c, Var v ->
+      (match try_eval_to_rational state c with
+       | Some r -> bind_var state v r
+       | None ->
+           match extract_var c with
+           | Some v2 -> unify_vars state v v2
+           | None -> Ok ())
+  | Neg (Var v), c | c, Neg (Var v) ->
+      (match try_eval_to_rational state c with
+       | Some r -> bind_var state v (rat_neg r)
+       | None -> Ok ())
+  | Mul (Var v1, Var v2), c | c, Mul (Var v1, Var v2) ->
+      (match try_eval_to_rational state c with
+       | Some r when rat_equal r rat_zero ->
+           Ok ()
+       | Some r when rat_equal r rat_one ->
+           let res1 = bind_var state v1 rat_one in
+           let res2 = bind_var state v2 rat_one in
+           (match res1, res2 with
+            | Ok (), Ok () -> Ok ()
+            | Error e, _ | _, Error e -> Error e)
+       | _ -> Ok ())
+  | Mul (Var v, c), r | Mul (c, Var v), r | r, Mul (Var v, c) | r, Mul (c, Var v) ->
+      (match try_eval_to_rational state c, try_eval_to_rational state r with
+       | Some rc, Some rr when rat_equal rc rat_one -> bind_var state v rr
+       | Some rc, Some rr when rat_equal rr rat_zero && not (rat_equal rc rat_zero) ->
+           bind_var state v rat_zero
+       | _, _ -> Ok ())
+  | c1', c2' ->
+      match try_eval_to_rational state c1', try_eval_to_rational state c2' with
+      | Some r1, Some r2 when not (rat_equal r1 r2) ->
+          Error (Printf.sprintf "Conflict: %s != %s" (rat_to_string r1) (rat_to_string r2))
+      | _, _ -> Ok ()
+
+let process_leq state c1 c2 =
+  match simplify c1, simplify c2 with
+  | Var v, c ->
+      (match try_eval_to_rational state c with
+       | Some r -> update_upper state v r; Ok ()
+       | None -> Ok ())
+  | c, Var v ->
+      (match try_eval_to_rational state c with
+       | Some r -> update_lower state v r; Ok ()
+       | None -> Ok ())
+  | c1', c2' ->
+      match try_eval_to_rational state c1', try_eval_to_rational state c2' with
+      | Some r1, Some r2 when not (rat_leq r1 r2) ->
+          Error (Printf.sprintf "Ordering conflict: %s > %s"
+            (rat_to_string r1) (rat_to_string r2))
+      | _, _ -> Ok ()
+
+let propagate_bounds state =
+  Hashtbl.iter (fun v _ ->
+    let root = find_root state v in
+    if not (Hashtbl.mem state.bindings root) then
+      let b = get_bounds state root in
+      match b.lower, b.upper with
+      | Some lo, Some hi when rat_equal lo hi ->
+          ignore (bind_var state root lo)
+      | _, _ -> ()
+  ) state.bounds
+
+let solve_constraints_full constraints =
+  let state = create_solver () in
+  let process_constraint c =
+    match c with
+    | CEqual (c1, c2) -> process_equal state c1 c2
+    | CLeq (c1, c2) -> process_leq state c1 c2
     | CFixpoint (v, f) ->
         (match solve_fixpoint f v with
-         | Some r -> Hashtbl.replace bindings v r
-         | None -> ())
-    | _ -> ()
-  ) constraints;
-  Hashtbl.fold (fun k v acc -> (k, v) :: acc) bindings []
+         | Some r -> bind_var state v r
+         | None -> Ok ())
+  in
+  let rec iterate max_iters =
+    if max_iters <= 0 then Ok ()
+    else begin
+      state.changed <- false;
+      let results = List.map process_constraint constraints in
+      let errors = List.filter_map (function Error e -> Some e | Ok () -> None) results in
+      match errors with
+      | e :: _ -> Error e
+      | [] ->
+          propagate_bounds state;
+          Hashtbl.iter (fun v _ ->
+            if not (check_bounds_consistent state v) then
+              state.changed <- false
+          ) state.bounds;
+          if state.changed then iterate (max_iters - 1)
+          else Ok ()
+    end
+  in
+  match iterate 100 with
+  | Error e -> Conflict e
+  | Ok () ->
+      let result = Hashtbl.fold (fun k v acc ->
+        let root = find_root state k in
+        if root = k then (k, v) :: acc else acc
+      ) state.bindings [] in
+      Solved result
+
+(* Legacy interface for backward compatibility *)
+let solve_constraints constraints =
+  match solve_constraints_full constraints with
+  | Solved bindings -> bindings
+  | Conflict _ -> []
 
 (* Create credence from rational *)
 let of_rational r =
