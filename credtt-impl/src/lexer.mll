@@ -55,7 +55,11 @@ let lookup_ident s =
   try Hashtbl.find keyword_table s
   with Not_found -> IDENT s
 
-(* Layout state for indentation-sensitive parsing *)
+(* Layout state for indentation-sensitive parsing
+   NOTE: This layout_state infrastructure is UNUSED in the current implementation.
+   Layout handling (SEMI insertion for newlines at column 0) is done in main.ml's
+   make_layout_lexer wrapper instead. This code remains for potential future use
+   if layout handling is moved into the lexer proper. See GitHub issue #96. *)
 type layout_state = {
   mutable pending_semi : bool;
   mutable last_line : int;
