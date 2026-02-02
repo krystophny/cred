@@ -259,84 +259,42 @@ let add_provable state name prop credence =
   Ok state
 
 (* Add and solve a fixpoint: x = f(x)
-   Handles these patterns:
-   - c = neg c -> c = 1/2 (negation fixpoint)
-   - c = c*c -> c = 0 or c = 1 (idempotent, choosing 1)
-   - c = c*k for constant k -> c = 0 (if k != 1), identity (if k = 1)
-   - c = c -> identity (trivially satisfied)
-   - c = neg(neg c) -> identity (by involution)
-
-   For patterns we cannot solve, returns Error with description. *)
+   Delegates to Credence.solve_fixpoint_ext for pattern matching.
+   Handles inference variable case specially (not supported by solve_fixpoint_ext). *)
 let add_fixpoint state name credence_expr =
   let simplified = Credence.simplify credence_expr in
   Printf.printf "\n  FIXPOINT: %s = %s\n" name (Credence.to_string simplified);
 
+  (* Special case: inference variable fixpoints need extra bookkeeping *)
   match simplified with
-  | Credence.Neg (Credence.Var v) when v = name ->
-      (* c = neg c -> c = 1/2 (negation fixpoint) *)
-      let half = Credence.solve_negation_fixpoint () in
-      Hashtbl.replace state.fixpoints name half;
-      Printf.printf "     Solved: %s = %s\n" name (Credence.rat_to_string half);
-      Ok state
-
   | Credence.Neg (Credence.Infer n) ->
-      (* Inference variable fixpoint: ?n = neg ?n -> ?n = 1/2 *)
       let half = Credence.solve_negation_fixpoint () in
       Hashtbl.replace state.fixpoints name half;
       Printf.printf "     Solved: %s = %s (inference variable)\n" name (Credence.rat_to_string half);
       state.infer_ctx.fixpoints <- (n, fun x -> Credence.Neg x) :: state.infer_ctx.fixpoints;
       Ok state
-
-  | Credence.Mul (Credence.Var v1, Credence.Var v2) when v1 = name && v2 = name ->
-      (* c = c*c -> c = 0 or c = 1 (idempotent). Both are valid; choosing 1 (non-trivial). *)
-      Printf.printf "     Solutions: 0 or 1 (both valid idempotent fixpoints)\n";
-      Printf.printf "     Choosing: %s = 1\n" name;
-      let one = Credence.rat_one in
-      Hashtbl.replace state.fixpoints name one;
-      Ok state
-
-  | Credence.Mul (Credence.Var v, k) when v = name ->
-      (* c = c*k: if k=1 then identity, otherwise c=0 *)
-      (match Credence.to_rational k with
-       | Some rk when Credence.rat_equal rk Credence.rat_one ->
-           Printf.printf "     Identity: c = c*1 holds for any c\n";
-           Ok state
-       | Some _ ->
-           Printf.printf "     Solved: %s = 0 (c = c*k with k != 1 implies c = 0)\n" name;
-           Hashtbl.replace state.fixpoints name Credence.rat_zero;
-           Ok state
-       | None ->
-           Error (Printf.sprintf "Cannot solve %s = %s * %s: non-constant coefficient"
-                    name name (Credence.to_string k)))
-
-  | Credence.Mul (k, Credence.Var v) when v = name ->
-      (* k*c = c: symmetric case *)
-      (match Credence.to_rational k with
-       | Some rk when Credence.rat_equal rk Credence.rat_one ->
-           Printf.printf "     Identity: c = 1*c holds for any c\n";
-           Ok state
-       | Some _ ->
-           Printf.printf "     Solved: %s = 0 (c = k*c with k != 1 implies c = 0)\n" name;
-           Hashtbl.replace state.fixpoints name Credence.rat_zero;
-           Ok state
-       | None ->
-           Error (Printf.sprintf "Cannot solve %s = %s * %s: non-constant coefficient"
-                    name (Credence.to_string k) name))
-
-  | Credence.Neg (Credence.Neg (Credence.Var v)) when v = name ->
-      (* c = neg(neg c) is identity by involution *)
-      Printf.printf "     Identity: c = neg(neg c) holds for any c (involution)\n";
-      Ok state
-
-  | Credence.Var v when v = name ->
-      (* c = c is trivially satisfied *)
-      Printf.printf "     Identity: %s = %s holds for any value (trivial)\n" name name;
-      Ok state
-
   | _ ->
-      (* Pattern not recognized - return error with description *)
-      Error (Printf.sprintf "Cannot solve fixpoint %s = %s: unrecognized pattern"
-               name (Credence.to_string simplified))
+      (* Delegate to solve_fixpoint_ext for all standard patterns *)
+      let f_of_c _ = simplified in
+      match Credence.solve_fixpoint_ext f_of_c name with
+      | Credence.FPSolved r ->
+          Hashtbl.replace state.fixpoints name r;
+          Printf.printf "     Solved: %s = %s\n" name (Credence.rat_to_string r);
+          Ok state
+      | Credence.FPMultiple (r :: _) ->
+          (* Multiple solutions - choose first (non-trivial) *)
+          Printf.printf "     Multiple solutions available\n";
+          Printf.printf "     Choosing: %s = %s\n" name (Credence.rat_to_string r);
+          Hashtbl.replace state.fixpoints name r;
+          Ok state
+      | Credence.FPMultiple [] ->
+          Error (Printf.sprintf "Fixpoint %s has empty solution set" name)
+      | Credence.FPIdentity ->
+          Printf.printf "     Identity: holds for any value\n";
+          Ok state
+      | Credence.FPUnsolvable reason ->
+          Error (Printf.sprintf "Cannot solve fixpoint %s = %s: %s"
+                   name (Credence.to_string simplified) reason)
 
 (* Add an encoding *)
 let add_encoding state name prop =

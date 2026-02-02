@@ -173,4 +173,50 @@ let () =
     equal (infer_derivation_credence ~from_credence:c ~step:"self_reference") c
   );
 
+  (* Test negation steps: should compute complement (1-c) *)
+  test "infer_derivation_credence negates for 'negate' step" (
+    equal (infer_derivation_credence ~from_credence:Zero ~step:"negate") One &&
+    equal (infer_derivation_credence ~from_credence:One ~step:"negate") Zero
+  );
+
+  test "infer_derivation_credence negates for 'negation' step" (
+    equal (infer_derivation_credence ~from_credence:Zero ~step:"negation") One &&
+    equal (infer_derivation_credence ~from_credence:One ~step:"negation") Zero
+  );
+
+  test "infer_derivation_credence negates for 'complement' step" (
+    equal (infer_derivation_credence ~from_credence:Zero ~step:"complement") One
+  );
+
+  (* Contrapositive is a LOGICAL EQUIVALENCE, so it preserves credence *)
+  test "infer_derivation_credence preserves credence for 'contrapositive' step" (
+    let c = Var "c" in
+    equal (infer_derivation_credence ~from_credence:c ~step:"contrapositive") c &&
+    equal (infer_derivation_credence ~from_credence:One ~step:"contrapositive") One &&
+    equal (infer_derivation_credence ~from_credence:Zero ~step:"contrapositive") Zero
+  );
+
+  (* Test other preserving steps *)
+  test "infer_derivation_credence preserves for logical equivalence steps" (
+    let c = Var "c" in
+    equal (infer_derivation_credence ~from_credence:c ~step:"symmetry") c &&
+    equal (infer_derivation_credence ~from_credence:c ~step:"rewrite") c &&
+    equal (infer_derivation_credence ~from_credence:c ~step:"unfold") c &&
+    equal (infer_derivation_credence ~from_credence:c ~step:"fold") c
+  );
+
+  (* Test projection steps *)
+  test "infer_derivation_credence preserves for projection steps" (
+    let c = Var "c" in
+    equal (infer_derivation_credence ~from_credence:c ~step:"fst") c &&
+    equal (infer_derivation_credence ~from_credence:c ~step:"snd") c &&
+    equal (infer_derivation_credence ~from_credence:c ~step:"project") c
+  );
+
+  (* Test unknown steps preserve credence (conservative default) *)
+  test "infer_derivation_credence preserves for unknown steps" (
+    let c = Var "c" in
+    equal (infer_derivation_credence ~from_credence:c ~step:"some_unknown_step") c
+  );
+
   Printf.printf "\nAll credence inference tests passed!\n"
