@@ -196,6 +196,25 @@ embed-collapse (mltt-J dp dd) = cong₂ mltt-J (embed-collapse dp) (embed-collap
     cong₂ f refl refl = refl
 
 -- =========================================================================
+-- FORMALIZATION STATUS (Issue #76)
+-- =========================================================================
+--
+-- PROVEN:
+--   - embed : MLTT -> CredTT[true]
+--   - collapse : CredTT[true] -> MLTT
+--   - embed-collapse : collapse (embed d) ≡ d
+--
+-- NOT YET PROVEN:
+--   - collapse-embed : embed (collapse d) ≡ d
+--     This second round-trip is needed for a full isomorphism.
+--     The difficulty is that CredTT derivations may have multiple
+--     forms (e.g., t-weaken), so collapse loses structure.
+--
+-- CLAIM: The embedding is a one-sided comparison (MLTT embeds into CredTT).
+--        Full isomorphism would require collapse-embed.
+-- =========================================================================
+
+-- =========================================================================
 -- Note on Full MLTT
 -- =========================================================================
 --

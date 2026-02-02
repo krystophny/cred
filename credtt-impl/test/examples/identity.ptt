@@ -1,3 +1,3 @@
--- Identity function
-id : A -> A
+-- Identity function (using Nat as the base type)
+id : Nat -> Nat
 id x = x
