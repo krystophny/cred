@@ -167,6 +167,13 @@ module DegenerationLemmas {ℓ : Level} (DM : DeMorganAlgebra ℓ) where
 -- ============================================================================
 -- RECOVERED CLASSICAL PROOF TECHNIQUES (dynamics version)
 -- ============================================================================
+--
+-- NOTE (Issue #132): Several functions below are identity functions (e.g.,
+-- case-dynamics, deduction-dynamics, pi-intro-dynamics, rewriting-dynamics).
+-- This is INTENTIONAL and CORRECT. These techniques preserve the post-fixed
+-- property unchanged - the identity function IS the proof that "if c is
+-- post-fixed under s, then c is still post-fixed under s after the operation."
+-- The trivial proof documents that these operations do NOT change dynamics.
 
 module ClassicalRecovery {ℓ : Level} (DM : DeMorganAlgebra ℓ) where
   open DeMorganAlgebra DM

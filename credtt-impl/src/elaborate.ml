@@ -44,7 +44,11 @@ let rec elab_credence = function
   | CVar x -> Credence.var x
   | CRat (n, d) -> Credence.of_rational { Credence.num = n; Credence.den = d }
   | CInfer -> Credence.fresh_infer ()
-  | CDep (x, _) -> Credence.dep_var x 0  (* de Bruijn index 0 for innermost bound var *)
+  (* LIMITATION (Issue #128): CDep elaboration loses de Bruijn index information.
+     Always uses index 0 regardless of actual binding depth. The credence part
+     of CDep (x, c) is ignored. Correct implementation would look up x in env
+     to get actual binding depth and use the credence appropriately. *)
+  | CDep (x, _) -> Credence.dep_var x 0
   | CSup (x, c) -> Credence.sup x (elab_credence c)
   | CInf (x, c) -> Credence.inf x (elab_credence c)
 
