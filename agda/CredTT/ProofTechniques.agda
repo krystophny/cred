@@ -37,7 +37,7 @@
    - 18. StructuralRules: exchange-example (concrete function)
 
    NOT YET FORMALIZED (comments/templates):
-   - 15. Refutation: Requires contradiction predicate (issue #157)
+   - 15. Refutation: Requires contradiction predicate (no tracking issue)
    - 17. Analogy: Requires concrete interval algebra
    - 19. StrongInduction: Requires k-deep recursion schema (issue #155)
    - 20. Contrapositive: Region-based, needs more infrastructure
@@ -309,7 +309,7 @@ module ClassicalTechniques {ℓ} (DM : DeMorganAlgebra ℓ) where
 
   -- 15. REFUTATION
   -- DYNAMICS: Drive credence to 0 (degeneration)
-  -- STATUS: Not yet formalized (see issue #157)
+  -- STATUS: Not yet formalized (no tracking issue)
   module Refutation where
     -- Classical: derive bottom (contradiction leads to falsum)
     -- CredTT: iterate until credence degenerates to 0
