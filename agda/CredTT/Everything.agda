@@ -38,6 +38,9 @@ import CredTT.Examples
 -- Proof techniques (all 28 with concrete examples)
 import CredTT.ProofTechniques
 
+-- Metatheory: Subject Reduction and Progress (Issues #186, #187)
+import CredTT.Metatheory
+
 -- Meta-theoretic results (depend on provability)
 import CredTT.Incompleteness
 import CredTT.Consistency

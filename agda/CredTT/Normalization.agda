@@ -404,7 +404,7 @@ module Normalization {ℓ : Level} (DM : DeMorganAlgebra ℓ) where
   --   This requires analyzing whether p is neutral or refl.
   --
   -- =========================================================================
-  fundamental : ∀ {n} {Γ : Ctx n} {t : Tm n} {A : Ty n} {w : W} ->
+  fundamental : ∀ {n} {Γ : Ctx n} {t : Tm n} {A : Ty n} {w : C} ->
                 Γ ⊢ t ∶ A 〔 w 〕 ->
                 Candidate.carrier ⟦ A ⟧ t
   fundamental {Γ = Γ} (t-var i) = Candidate.neutral-in ⟦ lookup Γ i ⟧ (ne-var i)
@@ -413,7 +413,7 @@ module Normalization {ℓ : Level} (DM : DeMorganAlgebra ℓ) where
     postulate-lam-fundamental a d a∈
     where
       postulate
-        postulate-lam-fundamental : ∀ {n} {Γ : Ctx n} {A : Ty n} {B : Ty (suc n)} {b : Tm (suc n)} {w : W} (a : Tm n) ->
+        postulate-lam-fundamental : ∀ {n} {Γ : Ctx n} {A : Ty n} {B : Ty (suc n)} {b : Tm (suc n)} {w : C} (a : Tm n) ->
           (Γ , A) ⊢ b ∶ B 〔 w 〕 -> Candidate.carrier ⟦ A ⟧ a -> Candidate.carrier ⟦ B [ a ]ₜ ⟧ (app (lam A b) a)
   fundamental (t-app {a = a} df da) =
     let f∈ = fundamental df
@@ -423,7 +423,7 @@ module Normalization {ℓ : Level} (DM : DeMorganAlgebra ℓ) where
     postulate-pair-fundamental da db
     where
       postulate
-        postulate-pair-fundamental : ∀ {n} {Γ : Ctx n} {A : Ty n} {B : Ty (suc n)} {a b : Tm n} {w v : W} ->
+        postulate-pair-fundamental : ∀ {n} {Γ : Ctx n} {A : Ty n} {B : Ty (suc n)} {a b : Tm n} {w v : C} ->
           Γ ⊢ a ∶ A 〔 w 〕 -> Γ ⊢ b ∶ (B [ a ]ₜ) 〔 v 〕 ->
           Candidate.carrier ⟦ A ⟧ (fst (pair a b)) × Candidate.carrier ⟦ B [ fst (pair a b) ]ₜ ⟧ (snd (pair a b))
   fundamental (t-fst d) = proj₁ (fundamental d)
@@ -442,9 +442,9 @@ module Normalization {ℓ : Level} (DM : DeMorganAlgebra ℓ) where
     postulate-case-fundamental de dl dr
     where
       postulate
-        postulate-case-fundamental : ∀ {n} {Γ : Ctx n} {A B C : Ty n} {e : Tm n} {l r : Tm (suc n)} {w v : W} ->
-          Γ ⊢ e ∶ (A +' B) 〔 w 〕 -> (Γ , A) ⊢ l ∶ wkTy C 〔 v 〕 -> (Γ , B) ⊢ r ∶ wkTy C 〔 v 〕 ->
-          Candidate.carrier ⟦ C ⟧ (case e l r)
+        postulate-case-fundamental : ∀ {n} {Γ : Ctx n} {A B D : Ty n} {e : Tm n} {l r : Tm (suc n)} {w v : C} ->
+          Γ ⊢ e ∶ (A +' B) 〔 w 〕 -> (Γ , A) ⊢ l ∶ wkTy D 〔 v 〕 -> (Γ , B) ⊢ r ∶ wkTy D 〔 v 〕 ->
+          Candidate.carrier ⟦ D ⟧ (case e l r)
   fundamental (t-refl {A = A} {a = a} d) =
     postulate-refl-fundamental A a (fundamental d)
     where
@@ -455,12 +455,12 @@ module Normalization {ℓ : Level} (DM : DeMorganAlgebra ℓ) where
     postulate-J-fundamental dp dd
     where
       postulate
-        postulate-J-fundamental : ∀ {n} {Γ : Ctx n} {A : Ty n} {a b : Tm n} {M : Ty (suc (suc n))} {d p : Tm n} {w v : W} ->
+        postulate-J-fundamental : ∀ {n} {Γ : Ctx n} {A : Ty n} {a b : Tm n} {M : Ty (suc (suc n))} {d p : Tm n} {w v : C} ->
           Γ ⊢ p ∶ Id A a b 〔 w 〕 -> Γ ⊢ d ∶ (M [ refl' , a ]₂ₜ) 〔 v 〕 ->
           Candidate.carrier ⟦ M [ p , b ]₂ₜ ⟧ (J M d p)
 
   -- Main theorem: weak normalization for all well-typed terms
-  weak-normalization : ∀ {n} {Γ : Ctx n} {t : Tm n} {A : Ty n} {w : W} ->
+  weak-normalization : ∀ {n} {Γ : Ctx n} {t : Tm n} {A : Ty n} {w : C} ->
                        Γ ⊢ t ∶ A 〔 w 〕 ->
                        WeaklyNormalizing t
   weak-normalization {A = A} d = Candidate.normalizing ⟦ A ⟧ (fundamental d)
