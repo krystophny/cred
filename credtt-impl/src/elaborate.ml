@@ -4,6 +4,34 @@ open Raw
 
 module StringMap = Map.Make(String)
 
+(* Hole tracking: maps hole IDs to their expected types and source positions *)
+type hole_info = {
+  hole_expected_ty : Syntax.ty option;
+  hole_depth : int;
+}
+
+module HoleCtx = struct
+  let counter = ref 0
+  let holes : (int, hole_info) Hashtbl.t = Hashtbl.create 16
+
+  let fresh ~depth () =
+    let n = !counter in
+    incr counter;
+    Hashtbl.add holes n { hole_expected_ty = None; hole_depth = depth };
+    n
+
+  let reset () =
+    counter := 0;
+    Hashtbl.clear holes
+
+  let get_info n = Hashtbl.find_opt holes n
+
+  let all_holes () =
+    Hashtbl.fold (fun id info acc -> (id, info) :: acc) holes []
+
+  let has_unsolved () = Hashtbl.length holes > 0
+end
+
 type env = {
   vars : int StringMap.t;
   depth : int;
@@ -41,7 +69,7 @@ let rec elab_credence = function
   | CVar x -> Credence.var x
   | CRat (n, d) -> Credence.of_rational { Credence.num = n; Credence.den = d }
   | CInfer -> Credence.fresh_infer ()
-  | CDep (x, _) -> Credence.dep_var x 0  (* de Bruijn index 0 for innermost bound var *)
+  | CDep (x, _) -> Credence.dep_var x 0
   | CSup (x, c) -> Credence.sup x (elab_credence c)
   | CInf (x, c) -> Credence.inf x (elab_credence c)
 
@@ -114,7 +142,9 @@ and elab_term env = function
   | TJ (m, d, p) ->
       Syntax.J (elab_ty env m, elab_term env d, elab_term env p)
   | TAnn (t, _ty) -> elab_term env t
-  | THole -> Syntax.Var 0  (* placeholder - holes are not properly supported *)
+  | THole ->
+      let hole_id = HoleCtx.fresh ~depth:env.depth () in
+      Syntax.Hole hole_id
   | TLet (name, _ty, t, body) ->
       let t' = elab_term env t in
       let env' = extend_var env name in
@@ -141,22 +171,18 @@ let wrap_lambdas_with_types env pats arg_infos body =
   let rec go env pats infos =
     match pats, infos with
     | [], [] -> elab_term env body
-    (* No more patterns but still have implicit args - insert lambdas *)
     | [], { arg_ty; arg_name; is_implicit = true } :: rest_infos ->
         let ty' = elab_ty env arg_ty in
         let env' = extend_var env arg_name in
         Syntax.Lam (ty', go env' [] rest_infos)
-    (* No more patterns but explicit args remain - error case, insert anyway *)
     | [], { arg_ty; arg_name; is_implicit = false } :: rest_infos ->
         let ty' = elab_ty env arg_ty in
         let env' = extend_var env arg_name in
         Syntax.Lam (ty', go env' [] rest_infos)
-    (* Implicit arg without pattern - insert lambda and continue *)
     | pats, { arg_ty; arg_name; is_implicit = true } :: rest_infos ->
         let ty' = elab_ty env arg_ty in
         let env' = extend_var env arg_name in
         Syntax.Lam (ty', go env' pats rest_infos)
-    (* Explicit pattern with type info *)
     | PVar name :: rest_pats, { arg_ty; is_implicit = false; _ } :: rest_infos ->
         let ty' = elab_ty env arg_ty in
         let env' = extend_var env name in
@@ -169,7 +195,6 @@ let wrap_lambdas_with_types env pats arg_infos body =
         let ty' = elab_ty env arg_ty in
         let env' = extend_var env "_" in
         Syntax.Lam (ty', go env' rest_pats rest_infos)
-    (* Pattern without type info - use placeholder type *)
     | pat :: rest_pats, [] ->
         let env' = match pat with
           | PVar name -> extend_var env name
@@ -220,7 +245,6 @@ let process_decls env decls =
     | DImport _ :: rest -> process env acc rest
     | DInfix _ :: rest -> process env acc rest
     | DComment _ :: rest -> process env acc rest
-    (* Skip proof declarations in normal elaboration *)
     | DPostulate _ :: rest -> process env acc rest
     | DDerive _ :: rest -> process env acc rest
     | DContradict _ :: rest -> process env acc rest
@@ -245,11 +269,11 @@ let elab_decl _env decl =
         | Some raw_c -> elab_credence raw_c
         | None -> Credence.one
       in
-      (name, ty', Syntax.Refl, credence)  (* placeholder term *)
+      (name, ty', Syntax.Refl, credence)
   | DDef (name, pats, body) ->
       let term = wrap_lambdas_with_types empty_env pats [] body in
       (name, Syntax.TBase 0, term, Credence.one)
-  | _ -> ("", Syntax.TBase 0, Syntax.Refl, Credence.one)  (* placeholder term *)
+  | _ -> ("", Syntax.TBase 0, Syntax.Refl, Credence.one)
 
 (* Extract proof declarations from a program *)
 let extract_proof_decls decls =
@@ -291,3 +315,18 @@ let has_proof_decls decls =
     | DStable _ | DUnstable _ -> true
     | _ -> false
   ) decls
+
+(* Hole management *)
+let reset_holes () = HoleCtx.reset ()
+
+let get_unsolved_holes () = HoleCtx.all_holes ()
+
+let has_unsolved_holes () = HoleCtx.has_unsolved ()
+
+let report_unsolved_holes () =
+  let holes = HoleCtx.all_holes () in
+  if holes = [] then []
+  else
+    List.map (fun (id, info) ->
+      Error.UnsolvedHole { hole_id = id; expected_ty = info.hole_expected_ty }
+    ) holes
