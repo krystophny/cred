@@ -114,45 +114,25 @@ module DynamicsDefs {ℓ : Level} (DM : DeMorganAlgebra ℓ) where
   Interior c = Positive c × SubUnity c
 
   -- Stability under a specific step
+  -- Formulated using existential witness: c is stable under s if there exists
+  -- a positive lower bound that all iterations stay above
+  -- This avoids the need for infimum computation (complete lattice axioms)
   StableUnder : C → C → Set ℓ
-  StableUnder c s = (iterate-limit c s ≢ 𝟘)
-    where
-      -- The limit exists when iteration stabilizes
-      iterate-limit : C → C → C
-      iterate-limit c s = c  -- Placeholder: in general, this is the infimum
+  StableUnder c s = Σ C (λ bound → Positive bound × (∀ n → bound ≤ iterate n c s))
 
-      _≢_ : C → C → Set ℓ
-      x ≢ y = x ≡ y → ⊥
+  _≢_ : C → C → Set ℓ
+  x ≢ y = x ≡ y → ⊥
 
   -- ============================================================================
-  -- ADDITIONAL AXIOMS (not derivable from De Morgan algebra)
+  -- PROPERTIES FROM DE MORGAN ALGEBRA AXIOMS
   -- ============================================================================
-  -- These properties are REQUIRED for the dynamics framework but are NOT
-  -- provable from the minimal De Morgan algebra axioms in Credence.agda.
-  -- See GitHub issues for tracking:
-  --   #42: These 4 postulates must be theorems or added as axioms
-  --   #147: DeMorganAlgebra missing ·-mono axiom needed elsewhere
+  -- These properties are now provided by DeMorganAlgebra in Credence.agda
+  -- (previously postulated, now axioms - see issue #42, #147)
 
-  postulate
-    -- Non-triviality: 0 and 1 are distinct
-    -- NOT provable: De Morgan axioms are satisfied by trivial 1-element algebra
-    -- Required for meaningful stability analysis (see issue #42)
-    𝟘≢𝟙 : 𝟘 ≡ 𝟙 → ⊥
-
-    -- Anti-monotonicity of negation: if c1 <= c2, then ~c2 <= ~c1
-    -- NOT provable from current axioms: would need order-negation interaction
-    -- In [0,1]: ~c = 1-c is obviously antitone (see issue #42)
-    ¬-antitone : ∀ {c₁ c₂} → c₁ ≤ c₂ → ¬ c₂ ≤ ¬ c₁
-
-    -- Monotonicity of multiplication in both arguments
-    -- NOT provable: only have ·-≤-self (c · d ≤ c) in current axioms
-    -- Should be added to DeMorganAlgebra (see issue #147)
-    ·-mono : ∀ {a b c d} → a ≤ c → b ≤ d → (a · b) ≤ (c · d)
-
-    -- Positivity preservation: positive * positive = positive
-    -- NOT provable: requires strict order properties not in axioms
-    -- In well-behaved algebras (e.g., [0,1]) this holds trivially (see issue #42)
-    ·-positive : ∀ {c₁ c₂} → Positive c₁ → Positive c₂ → Positive (c₁ · c₂)
+  -- Positivity preservation wrapper that matches the Positive type
+  positive-preserved : ∀ {c₁ c₂} → Positive c₁ → Positive c₂ → Positive (c₁ · c₂)
+  positive-preserved {c₁} {c₂} (0≤c₁ , 0≢c₁) (0≤c₂ , 0≢c₂) =
+    DeMorganAlgebra.·-positive DM 0≤c₁ 0≢c₁ 0≤c₂ 0≢c₂
 
   -- ============================================================================
   -- TRIVIAL FIXED POINTS (extremal cases)
@@ -343,7 +323,7 @@ module StabilityDefs {ℓ : Level} (DM : DeMorganAlgebra ℓ) where
 
   ·-preserves-stable : ∀ {c₁ c₂} → Stable₁ c₁ → Stable₁ c₂ → Stable₁ (c₁ · c₂)
   ·-preserves-stable {c₁} {c₂} (b₁ , pos₁ , bound₁) (b₂ , pos₂ , bound₂) =
-    b₁ · b₂ , ·-positive pos₁ pos₂ , ·-mono bound₁ bound₂
+    b₁ · b₂ , positive-preserved pos₁ pos₂ , ·-mono bound₁ bound₂
 
   ¬-flips-stable : ∀ {c} → Stable₁ c → Unstable₀ (¬ c)
   ¬-flips-stable {c} (b , (0≤b , 0≢b) , b≤c) =

@@ -143,6 +143,22 @@ postulate
   *F-≤-self-proof : ∀ (f g : Frac) → (f *F g) ≤F f
 
 postulate
+  -- Non-triviality: 0 /= 1 (trivial for fractions but stated for completeness)
+  zero≢one-frac : frac-zero ≡ frac-one → ⊥
+
+  -- Negation is antitone: if f1 <= f2, then ~f2 <= ~f1
+  ¬F-antitone-proof : ∀ {f₁ f₂ : Frac} → f₁ ≤F f₂ → ¬F f₂ ≤F ¬F f₁
+
+  -- Monotonicity of multiplication: if a <= c and b <= d, then a*b <= c*d
+  *F-mono-proof : ∀ {a b c d : Frac} → a ≤F c → b ≤F d → (a *F b) ≤F (c *F d)
+
+  -- Positivity preservation: positive * positive = positive
+  *F-positive-proof : ∀ {c₁ c₂ : Frac} →
+    (frac-zero ≤F c₁) → (frac-zero ≡ c₁ → ⊥) →
+    (frac-zero ≤F c₂) → (frac-zero ≡ c₂ → ⊥) →
+    (frac-zero ≤F (c₁ *F c₂)) × (frac-zero ≡ (c₁ *F c₂) → ⊥)
+
+postulate
   ≈-to-≡ : ∀ {f g : Frac} → f ≈ g → f ≡ g
 
 -- ============================================================================
@@ -239,6 +255,10 @@ module IntervalDM where
     ; 𝟘-least     = zero-least
     ; 𝟙-greatest  = one-greatest
     ; ·-≤-self    = *F-≤-self-proof
+    ; 𝟘≢𝟙        = zero≢one-frac
+    ; ¬-antitone  = λ {c₁} {c₂} → ¬F-antitone-proof {c₁} {c₂}
+    ; ·-mono      = λ {a} {b} {c} {d} → *F-mono-proof {a} {b} {c} {d}
+    ; ·-positive  = λ {c₁} {c₂} → *F-positive-proof {c₁} {c₂}
     }
 
 open IntervalDM public using (IntervalDM; 𝟘I; 𝟙I; _·I_; ¬I; _≤I_; I)
