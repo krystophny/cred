@@ -288,11 +288,17 @@ theorem disj_assoc (c₁ c₂ c₃ : Credence) : (c₁ ⊔ c₂) ⊔ c₃ = c₁
   ext
   simp only [disj_val, zero_val, mul_zero, add_zero, sub_zero]
 
+@[simp] theorem zero_disj (c : Credence) : (0 : Credence) ⊔ c = c := by
+  rw [disj_comm, disj_zero]
+
 /-- 1 is absorbing for disjunction -/
 @[simp] theorem disj_one (c : Credence) : c ⊔ 1 = 1 := by
   ext
   simp only [disj_val, one_val, mul_one]
   linarith [c.le_one]
+
+@[simp] theorem one_disj (c : Credence) : (1 : Credence) ⊔ c = 1 := by
+  rw [disj_comm, disj_one]
 
 /-- De Morgan: ~(A ⊗ B) = ~A ⊔ ~B -/
 theorem de_morgan_conj (c₁ c₂ : Credence) : ~(c₁ ⊗ c₂) = ~c₁ ⊔ ~c₂ := by
