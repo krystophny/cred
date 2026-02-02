@@ -36,10 +36,16 @@ let () = List.iter (fun (k, v) -> Hashtbl.add keyword_table k v) [
   "by", BY;
   "contradict", CONTRADICT;
   "conclude", CONCLUDE;
+  "negate", NEGATE;
   (* Meta-theory keywords *)
   "provable", PROVABLE;
   "fixpoint", FIXPOINT;
   "encode", ENCODE;
+  (* Stability keywords *)
+  "stable", STABLE;
+  "unstable", UNSTABLE;
+  (* Credence keywords *)
+  "neg", NEG;
   (* Dependent credence keywords *)
   "sup", SUP;
   "inf", WINF;  (* INF conflicts with infix *)
@@ -147,6 +153,7 @@ rule token = parse
   | ","      { COMMA }
   | "."      { DOT }
   | "|"      { BAR }
+  | "@"      { AT }
   | "\\"     { LAMBDA }
   | "("      { LPAREN }
   | ")"      { RPAREN }

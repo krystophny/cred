@@ -17,8 +17,8 @@
 -- If we use P(k1), P(k2), ..., P(km) in the proof:
 -- Each use multiplies: c_{k1} * c_{k2} * ... * c_{km}
 
-postulate base : P_0 [ 1 ]
-postulate strong_step : strong_IH_to_P_n [ 1 ]
+postulate base : P_0 @ 1
+postulate strong_step : strong_IH_to_P_n @ 1
 
 -- If step uses just ONE previous case:
 -- Same as regular induction: c_n = c_0 * step^n

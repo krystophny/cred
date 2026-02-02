@@ -15,10 +15,10 @@
 -- If ONE instance has credence 0.1, universal might have 0.1
 
 -- Body of universal at uniform credence 1
-postulate body : n_plus_0_eq_n [ 1 ]
+postulate body : n_plus_0_eq_n @ 1
 
 -- Universal generalization: credence = inf{1} = 1
-derive forall_result : forall_n_plus_0_eq_n [ 1 ] from body by pi_intro
+derive forall_result : forall_n_plus_0_eq_n @ 1 from body by pi_intro
 
 stable body
 stable forall_result

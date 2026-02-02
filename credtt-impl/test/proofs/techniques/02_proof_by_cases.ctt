@@ -11,10 +11,10 @@
 -- CredTT gives: C at credence min(c1, c2) with combined stability
 
 -- Case 1: Non-negative case at credence c1
-postulate case_nonneg : abs_n_geq_0_when_nonneg [ c1 ]
+postulate case_nonneg : abs_n_geq_0_when_nonneg @ c1
 
 -- Case 2: Negative case at credence c2
-postulate case_neg : abs_n_geq_0_when_neg [ c2 ]
+postulate case_neg : abs_n_geq_0_when_neg @ c2
 
 -- In classical logic: both cases proven -> conclusion proven
 -- In CredTT: stability of result depends on BOTH branches
@@ -23,15 +23,15 @@ postulate case_neg : abs_n_geq_0_when_neg [ c2 ]
 -- If either branch is unstable, result may be unstable
 
 -- Stable branches (credence 1)
-postulate stable_case1 : case1_result [ 1 ]
-postulate stable_case2 : case2_result [ 1 ]
+postulate stable_case1 : case1_result @ 1
+postulate stable_case2 : case2_result @ 1
 
 -- Both stable -> result stable
 stable stable_case1
 stable stable_case2
 
 -- Weak branch (credence c < 1)
-postulate weak_case : weak_result [ c ]
+postulate weak_case : weak_result @ c
 
 -- Combining stable and weak:
 -- stable * weak = weak (credence degrades)

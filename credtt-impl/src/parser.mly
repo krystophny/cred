@@ -9,9 +9,11 @@ open Credtt_lib.Raw
 %token LET IN CASE OF WITH
 %token INFIX INFIXL INFIXR
 %token FORALL SET PROP REFL FST SND INL INR
-%token POSTULATE DERIVE FROM BY CONTRADICT CONCLUDE
+%token POSTULATE DERIVE FROM BY CONTRADICT CONCLUDE NEGATE
 %token PROVABLE FIXPOINT ENCODE
+%token STABLE UNSTABLE
 %token SUP WINF
+%token AT
 %token LAMBDA ARROW DARROW TIMES PLUS EQ COLON SEMI COMMA DOT BAR SLASH
 %token LWEIGHT RWEIGHT
 %token LPAREN RPAREN LBRACE RBRACE LBRACKET RBRACKET UNDERSCORE
@@ -71,11 +73,25 @@ decl:
   | INFIXR n = NUM op = operator_name
     { DInfix (ARight, n, op) }
 
-  (* Proof declarations *)
+  (* Proof declarations - @ notation (preferred) *)
+  | POSTULATE name = IDENT COLON prop = IDENT AT c = credence
+    { DPostulate (name, prop, c) }
+
+  | DERIVE name = IDENT COLON prop = IDENT AT c = credence FROM from_name = IDENT BY by_name = justification
+    { DDerive (name, prop, c, from_name, by_name) }
+
+  (* Proof declarations - bracket notation (legacy, kept for compatibility) *)
+  | POSTULATE name = IDENT COLON prop = IDENT LBRACKET c = credence RBRACKET
+    { DPostulate (name, prop, c) }
+
+  | DERIVE name = IDENT COLON prop = IDENT LBRACKET c = credence RBRACKET FROM from_name = IDENT BY by_name = justification
+    { DDerive (name, prop, c, from_name, by_name) }
+
+  (* Proof declarations - unicode bracket notation (kept for compatibility) *)
   | POSTULATE name = IDENT COLON prop = IDENT LWEIGHT c = credence RWEIGHT
     { DPostulate (name, prop, c) }
 
-  | DERIVE name = IDENT COLON prop = IDENT LWEIGHT c = credence RWEIGHT FROM from_name = IDENT BY by_name = IDENT
+  | DERIVE name = IDENT COLON prop = IDENT LWEIGHT c = credence RWEIGHT FROM from_name = IDENT BY by_name = justification
     { DDerive (name, prop, c, from_name, by_name) }
 
   | CONTRADICT p = IDENT q = IDENT
@@ -84,7 +100,25 @@ decl:
   | CONCLUDE name = IDENT FROM from_name = IDENT
     { DConclude (name, from_name) }
 
-  (* Meta-theory declarations *)
+  | NEGATE name = IDENT FROM from_name = IDENT
+    { DConclude (name, from_name) }
+
+  (* Stability assertions *)
+  | STABLE name = IDENT
+    { DStable name }
+
+  | UNSTABLE name = IDENT
+    { DUnstable name }
+
+  (* Meta-theory declarations - @ notation (preferred) *)
+  | PROVABLE name = IDENT COLON prop = IDENT AT c = credence
+    { DProvable (name, prop, c) }
+
+  (* Meta-theory declarations - bracket notation (legacy) *)
+  | PROVABLE name = IDENT COLON prop = IDENT LBRACKET c = credence RBRACKET
+    { DProvable (name, prop, c) }
+
+  (* Meta-theory declarations - unicode bracket notation *)
   | PROVABLE name = IDENT COLON prop = IDENT LWEIGHT c = credence RWEIGHT
     { DProvable (name, prop, c) }
 
@@ -100,6 +134,13 @@ qualified_name:
 operator_name:
   | IDENT { $1 }
   | OPERATOR { $1 }
+
+(* Justification names for derive statements - includes keywords that can be used as justifications *)
+justification:
+  | IDENT { $1 }
+  | NEGATE { "negate" }
+  | STABLE { "stable" }
+  | UNSTABLE { "unstable" }
 
 where_block:
   | ds = indented_block { ds }

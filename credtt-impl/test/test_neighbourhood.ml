@@ -238,4 +238,101 @@ let () =
   test "is_unstable_near_zero Zero = true" (is_unstable_near_zero Zero);
   test "is_unstable_near_zero One = false" (not (is_unstable_near_zero One));
 
+  (* ============================================================
+     ORDER-THEORETIC DYNAMICS TESTS
+     ============================================================ *)
+
+  (* Post-fixed point tests: c ≤ c · s *)
+  test "is_post_fixed_point Zero s = true (0 ≤ 0·s)" (
+    is_post_fixed_point Zero One
+  );
+  test "is_post_fixed_point c One = true (c ≤ c·1 = c)" (
+    is_post_fixed_point One One && is_post_fixed_point (Var "c") One
+  );
+  test "is_post_fixed_point One Zero = false (1 ≤ 0 is false)" (
+    not (is_post_fixed_point One Zero)
+  );
+
+  (* Idempotent tests: c · c = c *)
+  test "is_idempotent One = true (1·1 = 1)" (is_idempotent One);
+  test "is_idempotent Zero = true (0·0 = 0)" (is_idempotent Zero);
+  test "is_idempotent (Var x) = false (cannot determine)" (
+    not (is_idempotent (Var "x"))
+  );
+
+  (* Iteration behavior tests *)
+  test "iteration_behavior One s = Preserves (1·s^n = 1·s = s-dependent)" (
+    match iteration_behavior One One with
+    | Preserves -> true
+    | _ -> false
+  );
+  test "iteration_behavior Zero s = Preserves (0·s^n = 0)" (
+    match iteration_behavior Zero (Var "s") with
+    | Preserves -> true
+    | _ -> false
+  );
+  test "iteration_behavior (Var x) s = Unknown_limit" (
+    match iteration_behavior (Var "x") (Var "s") with
+    | Unknown_limit -> true
+    | _ -> false
+  );
+
+  (* Classify dynamics tests *)
+  test "classify (Mul (One, Zero)) = Vanishing" (
+    match classify (Mul (One, Zero)) with
+    | Vanishing -> true
+    | _ -> false
+  );
+  test "classify (Mul (One, One)) = Robust" (
+    match classify (Mul (One, One)) with
+    | Robust -> true
+    | _ -> false
+  );
+  test "classify (Neg (Neg One)) = Robust" (
+    match classify (Neg (Neg One)) with
+    | Robust -> true
+    | _ -> false
+  );
+
+  (* Stability propagation through application *)
+  test "stability_of_app Robust Robust = Robust (1·1 = 1)" (
+    match stability_of_app Robust Robust with
+    | Robust -> true
+    | _ -> false
+  );
+  test "stability_of_app Robust Vanishing = Vanishing (1·0 = 0)" (
+    match stability_of_app Robust Vanishing with
+    | Vanishing -> true
+    | _ -> false
+  );
+  test "stability_of_app Idempotent Idempotent = Idempotent" (
+    match stability_of_app Idempotent Idempotent with
+    | Idempotent -> true
+    | _ -> false
+  );
+
+  (* Stability of negation *)
+  test "stability_of_neg Unknown = Unknown" (
+    match stability_of_neg Unknown with
+    | Unknown -> true
+    | _ -> false
+  );
+  test "stability_of_neg Idempotent = Idempotent" (
+    match stability_of_neg Idempotent with
+    | Idempotent -> true
+    | _ -> false
+  );
+
+  (* Stability of composition *)
+  test "stability_of_compose Robust Unknown = Unknown" (
+    match stability_of_compose Robust Unknown with
+    | Unknown -> true
+    | _ -> false
+  );
+  test "stability_of_compose Vanishing Robust = Vanishing" (
+    match stability_of_compose Vanishing Robust with
+    | Vanishing -> true
+    | _ -> false
+  );
+
   Printf.printf "\nAll neighbourhood tests passed!\n"

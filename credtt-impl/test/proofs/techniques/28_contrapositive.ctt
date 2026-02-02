@@ -17,7 +17,7 @@
 -- But in CredTT, the equivalence is NOT exact!
 
 -- Direct: A -> B @ c
-postulate direct : A_implies_B [ c ]
+postulate direct : A_implies_B @ c
 
 -- Contrapositive: ~B -> ~A @ ?
 -- NOT the same credence!
@@ -60,7 +60,7 @@ postulate direct : A_implies_B [ c ]
 -- They arrive at related but not identical conclusions
 
 -- Stable1 implication:
-postulate stable_impl : A_implies_B [ 1 ]
+postulate stable_impl : A_implies_B @ 1
 stable stable_impl
 
 -- Contrapositive is also stable (negation of stable endpoint)

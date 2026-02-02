@@ -11,7 +11,7 @@
 -- LOWER BOUND: c(A) >= bound
 -- "We're at least this confident in A"
 
-postulate hypothesis : H [ c ]
+postulate hypothesis : H @ c
 
 -- Prove: c >= 0.9 (high confidence)
 -- This is a meta-assertion about credence
