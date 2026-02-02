@@ -10,12 +10,13 @@
 module CredTT.Collapse where
 
 open import Level using (Level; suc; _⊔_)
-open import Relation.Binary.PropositionalEquality using (_≡_; refl; sym; trans; cong)
+open import Relation.Binary.PropositionalEquality using (_≡_; refl; sym; trans; cong; subst)
 open import Data.Bool using (Bool; true; false; _∧_; not)
 open import Data.Sum using (_⊎_; inj₁; inj₂)
 open import Data.Product using (_×_; _,_; proj₁; proj₂; Σ; ∃)
 open import Data.Empty using (⊥; ⊥-elim)
 open import Data.Unit using (⊤; tt)
+open import Data.Nat using (ℕ; zero; suc)
 
 open import CredTT.Credence
 open import CredTT.Neighbourhood
@@ -248,6 +249,45 @@ module DeMorganCollapse where
   or-correct true  false = refl
   or-correct false true  = refl
   or-correct false false = refl
+
+-- ============================================================================
+-- DYNAMICS COLLAPSE
+-- ============================================================================
+
+-- In Bool, operator dynamics are trivial
+
+module DynamicsCollapse where
+  open BoolDM
+  open DeMorganAlgebra BoolDM
+  open DynamicsDefs BoolDM
+
+  -- All operators are either identity or annihilation
+  operator-trivial : ∀ (c s : Bool) →
+    (s ≡ true × c · s ≡ c) ⊎ (s ≡ false × c · s ≡ false)
+  operator-trivial c true  = inj₁ (refl , ·-identityʳ c)
+  operator-trivial c false = inj₂ (refl , ·-annihilʳ c)
+
+  -- Iteration in Bool stabilizes immediately
+  -- If s = true, c · sⁿ = c for all n
+  -- If s = false, c · sⁿ = false for all n > 0
+  iteration-immediate : ∀ (c : Bool) (n : ℕ) →
+    iterate n c true ≡ c
+  iteration-immediate c zero    = refl
+  iteration-immediate c (suc n) =
+    trans (cong (λ x → x · true) (iteration-immediate c n)) (·-identityʳ c)
+
+  -- No post-fixed point can degrade (only 0 and 1 exist)
+  no-degradation : ∀ (c : Bool) → (c ≡ true → PostFixedPoint c true) ×
+                                   (c ≡ false → Invariant false true)
+  no-degradation c =
+    (λ eq → subst (λ x → x ≤ x · true) (sym eq)
+           (subst (true ≤_) (sym (·-identityʳ true)) (≤-refl true))) ,
+    (λ _ → sym (·-annihilˡ true))
+
+  -- Classical induction is always valid in Bool (trivially)
+  bool-induction-valid : ∀ (c : Bool) → c ≡ true → InductionDynamics.InductionValid BoolDM c true
+  bool-induction-valid true refl = InductionDynamics.classical-induction BoolDM
+    (𝟙-greatest 𝟘 , (λ ()))
 
 -- ============================================================================
 -- SUMMARY: WHY THE COLLAPSE MATTERS
