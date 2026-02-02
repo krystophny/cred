@@ -17,6 +17,8 @@ type t =
   | StabilityRequired of string * string  (* name, required_stability *)
   | ParseError of string
   | FileNotFound of string
+  | UnsupportedHole  (* Issue #56: holes are not properly supported *)
+  | UnsupportedConstruct of string  (* Issue #59: placeholder for unsupported constructs *)
 
 let pp fmt = function
   | UnboundVariable i ->
@@ -51,6 +53,10 @@ let pp fmt = function
       Format.fprintf fmt "Parse error: %s" msg
   | FileNotFound path ->
       Format.fprintf fmt "File not found: %s" path
+  | UnsupportedHole ->
+      Format.fprintf fmt "Holes (?) are not supported in elaboration. Use explicit terms or type annotations."
+  | UnsupportedConstruct what ->
+      Format.fprintf fmt "Unsupported construct: %s" what
 
 let to_string err =
   let buf = Buffer.create 128 in

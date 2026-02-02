@@ -1243,9 +1243,19 @@ Here $\mathsf{Con}(T) := \neg\mathsf{Prov}_T(\ulcorner \bot \urcorner)$.
 \]
 \end{definition}
 
-\begin{theorem}[Graded Second Incompleteness]
+\begin{theorem}[Graded Second Incompleteness]\label{thm:graded-second-incompleteness}
 CredTT can prove $\mathsf{Con}_c(\text{CredTT})$ for some $c < \one$, but not for $c = \one$.
 \end{theorem}
+
+\begin{remark}[Formalization Status]
+This theorem is a \textbf{conjecture} based on the structure of G\"odel's Second Incompleteness Theorem adapted to graded settings. The Agda formalization (\texttt{agda/CredTT/Reflection.agda}) \textbf{postulates} rather than proves the key components:
+\begin{itemize}
+    \item The G\"odel sentence existence (requires full arithmetic encoding)
+    \item The negation fixpoint $c = \negc c$ existence (proven for $[0,1]$, fails for Bool)
+    \item The self-referential credence assignment
+\end{itemize}
+A full proof would require formalizing G\"odel encoding of CredTT syntax and proving the derivability conditions. The proof sketch below outlines the argument structure.
+\end{remark}
 
 \begin{proof}[Proof sketch]
 The G\"odel-2 argument requires:

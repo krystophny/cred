@@ -54,10 +54,18 @@
 
    PROVEN:
    - inconsistency-bounded: c · d ≤ c and c · d ≤ d (Issue #52)
-   - no-bool-fixpoint: ∀ b → not b ≡ b → ⊥
+   - no-bool-fixpoint: ∀ b → not b ≡ b → ⊥ (in BoolNoNegationFixpoint in Credence.agda)
+   - bool-no-HasNegationFixpoint: Bool algebra does not have a negation fixpoint (Issue #55)
 
-   DERIVED (from postulates):
-   - G-credence: derived from postulated gödel-credence + G-self-reference
+   DERIVED (from postulates + HasUniqueNegationFixpoint evidence):
+   - G-credence: derived in GödelCredence module from HasUniqueNegationFixpoint + G-self-reference
+
+   ARCHITECTURE CHANGE (Issue #55):
+   - NegationFixpoint, HasNegationFixpoint, HasUniqueNegationFixpoint: defined in Credence.agda
+   - GödelCredence module: NOW PARAMETERIZED over HasUniqueNegationFixpoint evidence
+     This fixes the contradiction between postulated gödel-credence and no-bool-fixpoint:
+     - Bool: no negation fixpoint exists (proven), so GödelCredence cannot be instantiated
+     - [0,1]: unique fixpoint at 1/2 exists, so GödelCredence can be instantiated
 
    CONJECTURAL (postulated, believed true, not proven here):
 
@@ -68,10 +76,8 @@
      STATUS: Requires arithmetic encoding; existence is standard (Gödel 1931)
    - Prov-bounded, Prov-taut, Prov-contra, Prov-mp: provability properties
      STATUS: Standard properties of any reasonable provability predicate
-   - gödel-credence: existence of negation fixpoint c = ¬c
-     STATUS: Holds in [0,1] with ¬c = 1-c (c = 1/2); may fail in other algebras
-   - gödel-credence-unique: uniqueness of negation fixpoint
-     STATUS: Holds in [0,1]; may fail in non-Archimedean algebras
+
+   Module GödelCredence (parameterized over HasUniqueNegationFixpoint):
    - G-code, G-self-reference: Gödel sentence existence
      STATUS: Standard diagonal lemma construction (Gödel 1931)
    - graded-incompleteness: main theorem record
@@ -147,29 +153,31 @@ module ProvabilitySemantics {ℓ : Level} (DM : DeMorganAlgebra ℓ) where
     -- Modus ponens: Prov(A→B) · Prov(A) ≤ Prov(B)
     Prov-mp : ∀ n m k → IsImplication n m k → (Prov n · Prov m) ≤ Prov k
 
-  -- -------------------------------------------------------------------------
-  -- NEGATION FIXED POINT: THE GÖDEL CREDENCE
-  -- -------------------------------------------------------------------------
+-- ============================================================================
+-- GÖDEL CREDENCE MODULE (REQUIRES NEGATION FIXPOINT)
+-- ============================================================================
+-- IMPORTANT: Not all De Morgan algebras have a negation fixpoint.
+-- - Bool (classical {0,1}): NO fixpoint exists (see BoolNoNegationFixpoint in Credence.agda)
+-- - [0,1] with ¬c = 1-c: UNIQUE fixpoint at c = 1/2
+-- This module is parameterized over the EXISTENCE of such a fixpoint.
+-- ============================================================================
 
-  -- The negation fixed point equation: c = ¬c
-  -- In [0,1] with ¬c = 1-c, the unique solution is 1/2
+module GödelCredence {ℓ : Level} (DM : DeMorganAlgebra ℓ)
+                     (hasFixpoint : NegationFixpointStructure.HasUniqueNegationFixpoint DM) where
+  open DeMorganAlgebra DM
+  open DynamicsDefs DM
+  open NegationFixpointStructure DM
+  open ProvabilitySemantics DM
 
-  NegationFixpoint : C → Set ℓ
-  NegationFixpoint c = ¬ c ≡ c
-
-  -- CONJECTURAL: Negation fixpoint existence and uniqueness
-  -- In [0,1] with ¬c = 1-c, unique solution is c = 1/2 (proven algebraically)
-  -- In non-Archimedean algebras, existence holds but uniqueness may fail
-  postulate
-    gödel-credence : Σ C NegationFixpoint
-    gödel-credence-unique : ∀ c d → NegationFixpoint c → NegationFixpoint d → c ≡ d
-
-  -- The Gödel credence
+  -- Extract the fixpoint and its uniqueness proof
   ½ : C
-  ½ = proj₁ gödel-credence
+  ½ = proj₁ (proj₁ hasFixpoint)
 
   ½-fixpoint : ¬ ½ ≡ ½
-  ½-fixpoint = proj₂ gödel-credence
+  ½-fixpoint = proj₂ (proj₁ hasFixpoint)
+
+  gödel-credence-unique : ∀ c d → NegationFixpoint c → NegationFixpoint d → c ≡ d
+  gödel-credence-unique = proj₂ hasFixpoint
 
   -- -------------------------------------------------------------------------
   -- THE GÖDEL SENTENCE
@@ -372,13 +380,23 @@ module ClassicalCollapse where
   open import Data.Bool using (Bool; true; false; not)
 
   -- In Boolean algebra:
-  -- - No negation fixpoint exists (no c = not c)
+  -- - No negation fixpoint exists (no c = not c) - PROVEN in BoolNoNegationFixpoint
   -- - Gödel sentence is "undecidable" (no definite credence)
   -- - Inconsistency is catastrophic (true · true = true)
 
+  -- The proof is in Credence.agda module BoolNoNegationFixpoint.
+  -- We re-export under the original name for backwards compatibility.
   no-bool-fixpoint : ∀ (b : Bool) → not b ≡ b → ⊥
-  no-bool-fixpoint false ()
-  no-bool-fixpoint true ()
+  no-bool-fixpoint = BoolNoNegationFixpoint.no-bool-fixpoint
 
-  -- This is WHY classical logic has undecidability
-  -- CredTT with interior credences has graded incompleteness instead
+  -- This is WHY classical logic has undecidability:
+  -- The GödelCredence module REQUIRES HasUniqueNegationFixpoint evidence.
+  -- Bool does not have such a fixpoint (proven above), so:
+  -- - GödelCredence cannot be instantiated for Bool
+  -- - The Gödel sentence has no definite credence in classical logic
+  -- - This manifests as "undecidability" rather than "credence 1/2"
+  --
+  -- CredTT with [0,1] credences has graded incompleteness instead:
+  -- - [0,1] HAS a unique negation fixpoint at c = 1/2
+  -- - GödelCredence CAN be instantiated for [0,1]
+  -- - The Gödel sentence has definite credence 1/2

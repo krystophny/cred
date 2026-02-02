@@ -2,6 +2,9 @@
 
 open Raw
 
+(* Elaboration errors - raised when encountering unsupported constructs *)
+exception ElaborationError of Error.t
+
 module StringMap = Map.Make(String)
 
 type env = {
@@ -114,7 +117,10 @@ and elab_term env = function
   | TJ (m, d, p) ->
       Syntax.J (elab_ty env m, elab_term env d, elab_term env p)
   | TAnn (t, _ty) -> elab_term env t
-  | THole -> Syntax.Var 0  (* placeholder - holes are not properly supported *)
+  | THole ->
+      (* Issue #56: Holes are not supported in elaboration.
+         Previously this silently returned Var 0, which was incorrect. *)
+      raise (ElaborationError Error.UnsupportedHole)
   | TLet (name, _ty, t, body) ->
       let t' = elab_term env t in
       let env' = extend_var env name in
@@ -169,7 +175,13 @@ let wrap_lambdas_with_types env pats arg_infos body =
         let ty' = elab_ty env arg_ty in
         let env' = extend_var env "_" in
         Syntax.Lam (ty', go env' rest_pats rest_infos)
-    (* Pattern without type info - use placeholder type *)
+    (* Pattern without type info - use placeholder type.
+       Issue #59: This is a KNOWN LIMITATION. When a function is defined
+       without a type signature, we cannot infer argument types and must
+       use TBase 0 as a placeholder. A proper implementation would either:
+       1. Require all functions to have type signatures, or
+       2. Implement bidirectional type inference.
+       Current status: Placeholder, documented limitation. *)
     | pat :: rest_pats, [] ->
         let env' = match pat with
           | PVar name -> extend_var env name
@@ -240,16 +252,28 @@ let elab_program decls =
 let elab_decl _env decl =
   match decl with
   | DSig (name, ty, c) ->
+      (* Issue #59: DSig only declares a type, no term is available.
+         We use Refl as a placeholder term. This is semantically incorrect
+         but allows the signature to be recorded. A proper implementation
+         would separate type signatures from term definitions. *)
       let ty' = elab_ty empty_env ty in
       let credence = match c with
         | Some raw_c -> elab_credence raw_c
         | None -> Credence.one
       in
-      (name, ty', Syntax.Refl, credence)  (* placeholder term *)
+      (name, ty', Syntax.Refl, credence)
   | DDef (name, pats, body) ->
+      (* Issue #59: DDef without a preceding DSig lacks type information.
+         We use TBase 0 as a placeholder type. See wrap_lambdas_with_types
+         for documentation of this limitation. *)
       let term = wrap_lambdas_with_types empty_env pats [] body in
       (name, Syntax.TBase 0, term, Credence.one)
-  | _ -> ("", Syntax.TBase 0, Syntax.Refl, Credence.one)  (* placeholder term *)
+  | _ ->
+      (* Issue #59: Other declaration forms (modules, data, records, etc.)
+         are not fully supported in term elaboration. We return a placeholder.
+         This is a KNOWN LIMITATION - these constructs are parsed but not
+         elaborated to core syntax. *)
+      ("", Syntax.TBase 0, Syntax.Refl, Credence.one)
 
 (* Extract proof declarations from a program *)
 let extract_proof_decls decls =
