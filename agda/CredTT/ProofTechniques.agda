@@ -1,25 +1,24 @@
 -- Proof Techniques in CredTT
 --
--- STATUS: PEDAGOGICAL TEMPLATES, NOT FULL IMPLEMENTATIONS
+-- STATUS: PEDAGOGICAL TEMPLATES WITH DYNAMICS FRAMEWORK
 --
 -- This module provides MODULE STRUCTURE and DOCUMENTATION for all 28 proof
--- techniques. It is NOT a library of proven theorems, but rather:
+-- techniques. It connects to the dynamics framework where:
 --
--- 1. Type signatures showing what each technique SHOULD provide
--- 2. Documentation explaining how each technique works in CredTT
--- 3. Simple examples where proofs are straightforward
---
--- Full implementations would require:
--- - Proper dependent pattern matching on credence values
--- - Integration with the Judgment module for derivation tracking
--- - Proof terms for stability propagation lemmas
+-- KEY INSIGHT: Proofs are MONOTONE OPERATORS on credences
+-- - Each proof step s induces operator T_s(c) = c · s
+-- - Stability is about FIXED POINTS of these operators
+-- - PostFixedPoint: c ≤ c · s (step doesn't reduce credence)
+-- - Invariant: c = c · s (exact fixed point)
+-- - Idempotent: c · c = c (self-stable, may be interior!)
 --
 -- For the actual proven stability theorems, see:
--- - CredTT.StabilityTheorems (proven lemmas about stability)
+-- - CredTT.StabilityTheorems (proven dynamics lemmas)
+-- - CredTT.Neighbourhood (order-theoretic definitions)
 -- - CredTT.Collapse (proven {0,1} collapse theorem)
 --
 -- Each technique shows WHY CredTT is more expressive than MLTT:
--- Classical logic hides credence; CredTT exposes it.
+-- Classical logic hides credence dynamics; CredTT exposes them.
 
 module CredTT.ProofTechniques where
 
@@ -40,8 +39,9 @@ module ClassicalTechniques {ℓ} (DM : DeMorganAlgebra ℓ) where
   open DeMorganAlgebra DM
   open import CredTT.Neighbourhood
   open import CredTT.StabilityTheorems
-  open StabilityDefs DM
-  open ClassicalRecovery DM
+  open StabilityDefs DM        -- includes DynamicsDefs (PostFixedPoint, Invariant, etc.)
+  open ClassicalRecovery DM    -- proven dynamics versions
+  open OperatorDynamics DM     -- T_s(c) = c · s operator
 
   -- 1. DIRECT PROOF
   -- Track credence accumulation via multiplication
@@ -164,16 +164,22 @@ module ClassicalTechniques {ℓ} (DM : DeMorganAlgebra ℓ) where
     -- Witness @ c₁, property @ c₂ → existence @ c₁ · c₂
 
   -- 12. NATURAL INDUCTION
-  -- May degrade unless step is contractive
+  -- Valid iff c is a post-fixed point of step operator
   module NaturalInduction where
-    -- base @ c_b, step @ c_s → P(n) @ c_b · c_s^n
+    -- DYNAMICS FORMULATION:
+    -- Induction valid iff c ≤ c · step (PostFixedPoint c step)
+    --
+    -- Classical: step = 1, so c ≤ c · 1 = c always holds
+    -- Interior: if c idempotent (c · c = c), induction at c is valid!
+    --
+    -- See: InductionDynamics.InductionValid for the formal definition
 
     ind-example : ∀ (n : ℕ) → n + 0 ≡ n
     ind-example zero = refl
     ind-example (suc n) = cong suc (ind-example n)
 
-    -- If step @ 1: no degradation (contractive)
-    -- If step @ 0.99: degradation over n steps
+    -- If step @ 1: PostFixedPoint holds trivially (T_1 = identity)
+    -- If step < 1 and non-idempotent: may degrade over iterations
 
   -- 13. PROOF BY EXHAUSTION
   -- Stable if all cases stable
@@ -248,18 +254,22 @@ module CredTTNativeTechniques {ℓ} (DM : DeMorganAlgebra ℓ) where
   open DeMorganAlgebra DM
   open import CredTT.Neighbourhood
   open import CredTT.StabilityTheorems
-  open StabilityDefs DM
-  open NativeTechniques DM
+  open StabilityDefs DM        -- includes DynamicsDefs
+  open NativeTechniques DM     -- StabilityProof, InvariantProof records
 
   -- 21. STABILITY PROOFS
-  -- Prove "A is Stable₁" or "B is Unstable₀"
+  -- Prove c is a post-fixed point of some operator
   module StabilityProofs where
-    -- This is META-LEVEL reasoning about credence regions
-    -- Classical logic cannot express this!
-
-    -- "2+2=4 is ROBUSTLY true" = Stable₁
-    -- "sqrt(2) is rational is FRAGILE" = Unstable₀ (credence 0)
-    -- "Gödel sentence has credence 1/2" = Interior
+    -- DYNAMICS FORMULATION:
+    -- StabilityProof c s = PostFixedPoint c s × Positive c
+    -- (prove: the operator T_s doesn't reduce credence below c)
+    --
+    -- See: NativeTechniques.StabilityProof record
+    --
+    -- Examples:
+    -- "2+2=4 is ROBUSTLY true" = PostFixedPoint 1 1
+    -- "sqrt(2) is rational" = Invariant 0 s (degenerate fixed point)
+    -- "Gödel sentence" = Idempotent at 1/2 (Interior stable!)
 
   -- 22. CREDENCE BOUNDS AS INVARIANTS
   -- Maintain c ≥ bound through computation
