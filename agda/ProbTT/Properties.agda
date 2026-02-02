@@ -1,6 +1,10 @@
-{-# OPTIONS --allow-unsolved-metas #-}
--- Note: This module has incomplete proofs (substitution lemma, conversion)
--- marked with holes. These are standard metatheoretic lemmas.
+-- Properties of the ProbTT typing system
+--
+-- NOTE: This module uses postulates for standard metatheoretic lemmas:
+-- - Substitution admissibility: typing is preserved under substitution
+-- - Type conversion: definitionally equal types can be interchanged
+-- These are well-established results in type theory but require substantial
+-- infrastructure (parallel substitution calculus) to prove formally.
 
 module ProbTT.Properties where
 
@@ -117,21 +121,50 @@ module Props {ℓ : Level} (DM : DeMorganAlgebra ℓ) where
       preservation-right (eq-trans eq1 eq2) = preservation-right eq2
       preservation-right (Π-β db da) = subst-typed db da
         where
-          subst-typed : ∀ {n} {Γ : Ctx n} {A : Ty n} {B : Ty (suc n)}
-                          {b : Tm (suc n)} {a : Tm n} {w v : W} →
-                        (Γ , A) ⊢ b ∶ B 〔 w 〕 →
-                        Γ ⊢ a ∶ A 〔 v 〕 →
-                        Γ ⊢ (b [ a ]) ∶ (B [ a ]ₜ) 〔 w · v 〕
-          subst-typed db da = {!admissible!}  -- substitution lemma
+          -- POSTULATE: Substitution admissibility
+          -- This is the fundamental substitution lemma for dependent types.
+          -- Proof requires: substitution calculus, simultaneous substitution,
+          -- and compatibility with all type formers.
+          -- Standard in MLTT literature (cf. Hofmann's thesis).
+          postulate
+            subst-typed : ∀ {n} {Γ : Ctx n} {A : Ty n} {B : Ty (suc n)}
+                            {b : Tm (suc n)} {a : Tm n} {w v : W} →
+                          (Γ , A) ⊢ b ∶ B 〔 w 〕 →
+                          Γ ⊢ a ∶ A 〔 v 〕 →
+                          Γ ⊢ (b [ a ]) ∶ (B [ a ]ₜ) 〔 w · v 〕
       preservation-right (Σ-β₁ da db) = t-weaken da (·-≤-self _ _)
       preservation-right (Σ-β₂ {w = w} {v = v} da db) = t-weaken db (·-≤-right w v)
-      preservation-right (+-β-inl da dl dr) = {!admissible!}  -- substitution
-      preservation-right (+-β-inr db dl dr) = {!admissible!}  -- substitution
+      preservation-right (+-β-inl da dl dr) = subst-typed-sum-inl da dl
+        where
+          postulate
+            subst-typed-sum-inl : ∀ {n} {Γ : Ctx n} {A C : Ty n} {a : Tm n} {l : Tm (suc n)} {w v : W} →
+                                  Γ ⊢ a ∶ A 〔 w 〕 →
+                                  (Γ , A) ⊢ l ∶ wkTy C 〔 v 〕 →
+                                  Γ ⊢ (l [ a ]) ∶ C 〔 w · v 〕
+      preservation-right (+-β-inr db dl dr) = subst-typed-sum-inr db dr
+        where
+          postulate
+            subst-typed-sum-inr : ∀ {n} {Γ : Ctx n} {B C : Ty n} {b : Tm n} {r : Tm (suc n)} {w v : W} →
+                                  Γ ⊢ b ∶ B 〔 w 〕 →
+                                  (Γ , B) ⊢ r ∶ wkTy C 〔 v 〕 →
+                                  Γ ⊢ (r [ b ]) ∶ C 〔 w · v 〕
       preservation-right (Id-β {w = w} {v = v} da dd) = t-weaken dd (·-≤-right w v)
   preservation-left (eq-trans eq1 eq2) = preservation-left eq1
   preservation-left (Π-β db da) = t-app (t-lam db) da
   preservation-left (Σ-β₁ da db) = t-fst (t-pair da db)
-  preservation-left (Σ-β₂ da db) = {!conversion!}  -- needs B[fst(a,b)] ≡ B[a]
+  preservation-left (Σ-β₂ da db) = conversion-snd da db
+    where
+      -- POSTULATE: Type conversion for dependent pairs
+      -- We need: Γ ⊢ snd (pair a b) ∶ B[a] [ w·v ]
+      -- From t-snd (t-pair da db) we get: Γ ⊢ snd (pair a b) ∶ B[fst(pair a b)] [ w·v ]
+      -- These types are definitionally equal because fst(pair a b) reduces to a.
+      -- Type conversion requires proving B[fst(pair a b)] ≡ B[a], which follows
+      -- from the beta rule and congruence of substitution.
+      postulate
+        conversion-snd : ∀ {n} {Γ : Ctx n} {A : Ty n} {B : Ty (suc n)} {a b : Tm n} {w v : W} →
+                         Γ ⊢ a ∶ A 〔 w 〕 →
+                         Γ ⊢ b ∶ (B [ a ]ₜ) 〔 v 〕 →
+                         Γ ⊢ snd (pair a b) ∶ (B [ a ]ₜ) 〔 w · v 〕
   preservation-left (+-β-inl da dl dr) = t-case (t-inl da) dl dr
   preservation-left (+-β-inr db dl dr) = t-case (t-inr db) dl dr
   preservation-left (Id-β da dd) = t-J (t-refl da) dd
