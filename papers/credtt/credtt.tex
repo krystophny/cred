@@ -764,21 +764,37 @@ When $\C = {[0,1]}$ with copy $\Delta : A \to A \times A$ and delete $! : A \to 
 \section{Neighbourhood Semantics}
 %=============================================================================
 
-We replace the constant truth values $\top$ and $\bot$ with \emph{stability regions} near credence extrema. This is not metaphorical: stability is a meta-theoretic property expressing persistence of inhabitation under small degradations.
+We replace truth values with \emph{stability under dynamics}. This is not metaphorical: each proof step $s$ induces a monotone operator $T_s(c) = c \cdot s$, and stability is about \emph{fixed points} of these operators.
 
-\subsection{From Points to Regions}
+\subsection{Proofs as Monotone Dynamical Systems}
 
-Classical logic treats truth values as points: $\top$ or $\bot$, no intermediate values. CredTT replaces this with a continuous spectrum $[0,1]$. The key insight is that classical proof techniques don't disappear---they become \emph{stability theorems} about regions near the extrema.
+The key insight: proofs are not static objects but \emph{dynamical systems} on the credence algebra.
 
-\begin{definition}[Stable Inhabitation]
-$\Gamma \vdash A$ is \emph{stable} (written $\mathrm{Stable}_\one$) iff there exists $c_0 < \one$ such that for all $c \geq c_0$, there exists a derivation $\Gamma \vdash a : A \at{c}$.
+\begin{definition}[Proof Operator]
+Each proof step at credence $s$ induces the operator $T_s : \C \to \C$ where $T_s(c) = c \cdot s$.
 \end{definition}
 
-\begin{definition}[Unstable Inhabitation]
-$\Gamma \vdash A$ is \emph{unstable} (written $\mathrm{Unstable}_\zero$) iff for all $c > \zero$, there exists $c' < c$ such that no derivation $\Gamma \vdash a : A \at{c'}$ exists.
+Since multiplication is monotone, $T_s$ is a monotone operator. Stability is about fixed points:
+
+\begin{definition}[Post-Fixed Point]
+$c$ is a \emph{post-fixed point} under step $s$ (written $c \leq c \cdot s$) iff applying the proof step does not reduce credence.
 \end{definition}
 
-These are \emph{meta-properties}, like termination, not judgments inside CredTT. They capture whether inhabitation persists under degradation (stable) or collapses under strengthening (unstable).
+\begin{definition}[Invariant]
+$c$ is \emph{invariant} under step $s$ (written $c = c \cdot s$) iff it is an exact fixed point.
+\end{definition}
+
+\begin{definition}[Degenerating]
+$c$ \emph{degenerates} under step $s$ iff $\inf_n (c \cdot s^n) = \zero$.
+\end{definition}
+
+\begin{definition}[Idempotent]
+$c$ is \emph{idempotent} iff $c \cdot c = c$. Such elements are self-stable and may be \emph{interior} ($\zero < c < \one$).
+\end{definition}
+
+\textbf{Critical}: We do NOT assume Archimedeanicity. In non-Archimedean algebras, $s < \one$ does NOT imply $s^n \to \zero$. Interior idempotents can exist, allowing \emph{genuine stability in the interior}.
+
+These are \emph{meta-properties}, like termination, not judgments inside CredTT. NO THRESHOLDS. NO ARBITRARY CONSTANTS. Pure order-theoretic dynamics.
 
 \subsection{Classical Techniques as Stability Theorems}
 
@@ -823,13 +839,13 @@ Consider the classical syllogism ``All men are mortal; Socrates is a man; theref
 If $c_1 = 0.95$ and $c_2 = 0.90$, the conclusion has credence $0.855$---\emph{not} $0.95$ or $0.90$!
 
 \paragraph{Concrete Example: Induction (Technique \#13)}
-For mathematical induction with base case @ $c_b$ and step @ $c_s$:
+Induction is valid iff $c$ is a \emph{post-fixed point} of the step operator:
 \begin{itemize}
-    \item $P(0) \at{c_b}$
-    \item $P(n) \Rightarrow P(n+1) \at{c_s}$
-    \item $P(n) \at{c_b \cdot c_s^n}$
+    \item \textbf{Classical}: step at credence $\one$, so $c \leq c \cdot \one = c$ always holds
+    \item \textbf{Interior}: if $c$ is idempotent ($c \cdot c = c$), induction at $c$ is valid!
+    \item \textbf{Degenerating}: if $c < c \cdot s$ fails, the proof degrades over iterations
 \end{itemize}
-If $c_s = 0.99$, then $P(100) \at{c_b \cdot 0.99^{100}} = c_b \cdot 0.366$. Even ``almost certain'' steps degrade over iterations! Only $c_s = \one$ (contractive step) preserves credence.
+The formulation $P(n) \at{c_b \cdot c_s^n}$ assumes Archimedean credences. In non-Archimedean algebras with interior idempotents, induction can stabilize at interior credences.
 
 \paragraph{Concrete Example: Ex Falso (Technique \#6)}
 The graded spectrum of ex falso:
@@ -1117,6 +1133,31 @@ A, \neg A, \circ A \vdash B \quad \text{but} \quad A, \neg A \not\vdash B
 \]
 
 CredTT achieves similar effects through credence: contradiction at low credence doesn't explode to arbitrary conclusions because credence multiplication preserves the low credence.
+
+\subsection{Self-Hosting via Credence-Valued Provability}
+
+CredTT can describe itself internally. The key design choice:
+
+\begin{definition}[Internal Provability]
+$\mathsf{Prov}(\varphi) : \C$ maps formulas (via G\"odel coding) to credences, representing the ``degree of provability.''
+\end{definition}
+
+This is \emph{credence-valued}, not threshold-based. No arbitrary constants.
+
+\textbf{What this enables:}
+\begin{itemize}
+    \item Syntax encoding: CredTT represents its own terms, types, derivations
+    \item Meta-theorems: Internal reasoning about credence propagation
+    \item Self-reference: The G\"odel sentence $G \simeq \negc\mathsf{Prov}(G)$ has solution $\mathsf{Prov}(G) = \frac{1}{2}$
+\end{itemize}
+
+\textbf{Reflection principle (non-expansive):}
+\[
+\mathsf{Prov}(\varphi) \leq \mathsf{Sem}(\varphi)
+\]
+What we prove internally never exceeds semantic truth. For meta-level reasoning, a discount factor prevents L\"ob-style self-certification loops.
+
+\textbf{Graded inconsistency:} If $P \at{c}$ and $\negc P \at{d}$ with $c,d > \zero$, the inconsistency credence is $c \cdot d$. This propagates but doesn't explode. Ex falso becomes limit admissibility: as $c \to \zero$, constraints vanish.
 
 %=============================================================================
 \section{Graded Choice}
