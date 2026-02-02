@@ -437,6 +437,18 @@ module StructuralRules {ℓ : Level} (DM : DeMorganAlgebra ℓ) where
   exchange pf = pf
 
   -- Weakening: adding assumption at credence 1 doesn't degrade
+  -- Proof strategy:
+  --   Goal: (c · 𝟙) ≤ (c · 𝟙) · s
+  --   Given: c ≤ c · s  (i.e., PostFixedPoint c s)
+  --
+  --   Step 1: From c ≤ c · s and c · 𝟙 = c, we get c · 𝟙 ≤ c · s
+  --   Step 2: Rewrite RHS: c · s = c · (𝟙 · s) = (c · 𝟙) · s
+  --           This uses 𝟙 · s = s (identity) and associativity
+  --   Result: c · 𝟙 ≤ (c · 𝟙) · s  ✓
+  --
+  -- Mathematical meaning: If c is a post-fixed point of T_s (i.e., c persists
+  -- under step s), then c · 𝟙 = c is also a post-fixed point. Multiplying by
+  -- the identity 𝟙 doesn't change the stability property.
   weakening : ∀ {c s} →
     PostFixedPoint c s →
     PostFixedPoint (c · 𝟙) s
