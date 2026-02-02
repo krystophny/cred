@@ -27,3 +27,8 @@
  (name test_neighbourhood)
  (modules test_neighbourhood)
  (libraries credtt.lib))
+
+(test
+ (name test_dynamics)
+ (modules test_dynamics)
+ (libraries credtt.lib))

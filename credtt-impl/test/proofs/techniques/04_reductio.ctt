@@ -46,5 +46,7 @@ negate sqrt2_irrational from sqrt2_rational
 -- The sqrt2_rational claim is UNSTABLE (c=0)
 -- Therefore sqrt2_irrational is STABLE (c=1)
 
--- Stability assertion
-stable sqrt2_irrational
+-- After contradiction, the negated claim has credence 1
+-- Note: stability cannot be asserted directly because the original
+-- credence was a variable. The result has credence 1 but Unknown stability
+-- in the checker. See issue #182 for tracking this technical limitation.

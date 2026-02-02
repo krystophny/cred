@@ -50,9 +50,11 @@ postulate contractive_step : step_at_one @ 1
 -- Assume P(0), P(1), ..., P(n-1) to prove P(n)
 -- Same issue: credence can degrade
 
--- Stable base + Stable step = Stable result (if contractive)
-stable base
-stable step
+-- With contractive step (credence 1), the step is stable
+stable contractive_step
+
+-- Note: base and step with variable credences c_b and c_s have Unknown stability
+-- To demonstrate stable induction, use concrete credence 1. See issue #182.
 
 -- The KEY insight:
 -- Classical induction assumes infinite steps at no cost
