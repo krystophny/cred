@@ -1,6 +1,6 @@
 # Part 1: The Primitives
 
-The foundational structure of Cred, plus collapse to binary (for compatibility only).
+The foundational structure of Cred, plus collapse to known systems (for reference).
 
 ## The Primitives
 
@@ -31,21 +31,73 @@ When B = 0: (A | 0) is unconstrained. No ex falso.
 
 - `01-credence-algebra.md` — The algebraic structure
 - `02-conditioning.md` — Chain rule vs division (Rényi's insight)
-- `03-three-valued.md` — {0, ½, 1} intermediate (for reference)
-- `04-boolean-relevant.md` — {0, 1} collapse gives relevant logic
-- `05-classical.md` — Adding ex falso (NOT recommended)
+- `03-three-valued.md` — {0, ½, 1} collapse → RM3-like logic
+- `04-boolean-relevant.md` — {0, 1} collapse → Relevant logic
+- `05-classical.md` — Adding ex falso → Classical (not recommended)
 
-## Collapse (Compatibility Only)
+## The Collapse Tower (Limiting Cases)
 
-We CAN collapse to binary if needed for classical compatibility:
+**We work in Cred [0,1]. These collapses show connections to known systems.**
 
 ```
-Cred [0,1] → {0, ½, 1} → {0, 1} → Relevant logic
+┌─────────────────────────────────────────────┐
+│  Cred [0,1]           ← WHERE WE WORK       │
+│  Full graded credences                      │
+│  Conditioning primitive (chain rule)        │
+│  No ex falso, graded truth                  │
+└─────────────────────┬───────────────────────┘
+                      │ collapse (0,1) → ½
+                      ▼
+┌─────────────────────────────────────────────┐
+│  Three-Valued {0, ½, 1}                     │
+│  True / Unknown / False                     │
+│  RM3-like relevant logic                    │
+│  No ex falso, unknown propagates            │
+└─────────────────────┬───────────────────────┘
+                      │ collapse ½ → {0 or 1}
+                      ▼
+┌─────────────────────────────────────────────┐
+│  Boolean Relevant {0, 1}                    │
+│  Relevant logic (R, E, RM)                  │
+│  No ex falso                                │
+└─────────────────────┬───────────────────────┘
+                      │ add material implication
+                      ▼
+┌─────────────────────────────────────────────┐
+│  Classical FOL                              │
+│  Material implication: A → B = ¬A ∨ B       │
+│  Ex falso holds: ⊥ → A                      │
+└─────────────────────────────────────────────┘
 ```
 
-**But we prefer to stay in [0,1].** The collapse is documented for:
-- Showing we recover known structures
-- Interfacing with classical mathematics when necessary
-- Understanding the relationship to existing foundations
+## Key Relationships
 
-**Graded is primary. Binary is fallback.**
+| Cred collapses to... | Known system | Key property |
+|---------------------|--------------|--------------|
+| {0, ½, 1} | RM3, Kleene-like | Three-valued relevant |
+| {0, 1} | Relevant logic (R, E) | No ex falso |
+| {0, 1} + ex falso | Classical FOL | Standard foundation |
+
+## Why This Matters
+
+- **Cred generalizes relevant logic** (not classical, not fuzzy)
+- **Fuzzy logic generalizes classical** (has ex falso)
+- These are DIFFERENT generalizations
+
+```
+                    Fuzzy logic ←── generalizes ──→ Classical (ex falso)
+                         ↑
+                    DIFFERENT
+                         ↓
+                    Cred ←── generalizes ──→ Relevant logic (no ex falso)
+```
+
+## Prior Art for Limiting Cases
+
+| System | Source | Our connection |
+|--------|--------|----------------|
+| RM3 | 3-valued relevant logic | {0, ½, 1} collapse |
+| R, E | Anderson & Belnap (1960s) | {0, 1} collapse |
+| Paraconsistent | Brady, Weber | Related (no explosion) |
+
+**Graded is primary. These are limiting cases showing we land in known, well-studied territory.**
