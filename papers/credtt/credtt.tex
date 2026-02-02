@@ -1169,11 +1169,11 @@ G \leftrightarrow \neg \mathsf{Prov}_\one(\ulcorner G \urcorner)
 \]
 \end{definition}
 
-\begin{theorem}[Graded Incompleteness]
+\begin{theorem}[Graded Incompleteness]\label{thm:graded-incompleteness}
 If $G$ has credence $c$ in CredTT, then $c$ satisfies $c = \negc c$, hence $c = \frac{1}{2}$.
 \end{theorem}
 
-\begin{proof}
+\begin{proof}[Proof sketch]
 By the definition of $G$: if $G$ has credence $c$, then $G$'s content (that $G$ is not provable at credence $\one$) should also have credence $c$. But $G$'s claim is essentially the negation of provability. In the fixed-point analysis:
 \begin{itemize}
     \item If $c = \one$, then $G$ asserts $\neg\mathsf{Prov}_\one(G)$, but $G$ itself is provable at $\one$---contradiction.
@@ -1184,6 +1184,16 @@ The consistent resolution: $c = \negc c$. With $\negc c = 1 - c$:
 c = 1 - c \quad \Rightarrow \quad c = \frac{1}{2}
 \]
 \end{proof}
+
+\begin{remark}[Formalization Status]
+The Agda formalization (\texttt{agda/CredTT/Reflection.agda}) \textbf{postulates} rather than proves the key components of this theorem:
+\begin{itemize}
+    \item \textbf{Postulated}: The G\"odel sentence $G$ and its self-reference property $\mathsf{Prov}(G) = \negc(\mathsf{Prov}(G))$ (requires full arithmetic encoding)
+    \item \textbf{Postulated}: Existence and uniqueness of the negation fixpoint $c = \negc c$ (holds in $[0,1]$; may fail in non-Archimedean algebras)
+    \item \textbf{Derived}: Given the above postulates, $G$-credence = $\frac{1}{2}$ follows by fixpoint uniqueness
+\end{itemize}
+A complete formalization would require: (1) G\"odel encoding of CredTT syntax in Agda, (2) diagonal lemma construction, and (3) proof that $[0,1]$ with $\negc c = 1-c$ admits a unique negation fixpoint. This is standard metamathematics but substantial work. See the module header in \texttt{Reflection.agda} for detailed status of each postulate.
+\end{remark}
 
 \begin{remark}[Comparison with Classical Incompleteness]
 \begin{center}

@@ -85,6 +85,16 @@ record DeMorganAlgebra (ℓ : Level) : Set (suc ℓ) where
   _∨_ : C → C → C
   c ∨ d = ¬ (¬ c · ¬ d)
 
+  -- Derived: left-monotonicity of multiplication (Issue #54)
+  -- a ≤ b → a · c ≤ b · c
+  ·-mono-l : ∀ {a b} c → a ≤ b → a · c ≤ b · c
+  ·-mono-l c a≤b = ·-mono a≤b (≤-refl c)
+
+  -- Derived: right-monotonicity of multiplication
+  -- a ≤ b → c · a ≤ c · b
+  ·-mono-r : ∀ {a b} c → a ≤ b → c · a ≤ c · b
+  ·-mono-r c a≤b = ·-mono (≤-refl c) a≤b
+
   infixl 7 _·_
   infixl 6 _∨_
   infix  4 _≤_
