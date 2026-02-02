@@ -1,11 +1,16 @@
 {- The {0,1} Collapse Theorem
 
+   ORDER-THEORETIC DYNAMICS VIEW:
+   ==============================
+
    When credences are restricted to {0,1}:
-   1. Neighbourhoods become singletons
-   2. Stable₁(1) = true, Unstable₀(0) = true
-   3. CredTT judgments correspond exactly to MLTT judgments
+   1. All fixed points are trivial (only 0 and 1)
+   2. Robust(true) and Vanishing(false) are exhaustive
+   3. No interior dynamics exist (no points between 0 and 1)
+   4. CredTT judgments correspond exactly to MLTT judgments
 
    This module proves that MLTT is the Boolean specialization of CredTT.
+   It is the DEGENERATE CASE where proof dynamics collapse to classical logic.
 -}
 module CredTT.Collapse where
 
@@ -22,7 +27,7 @@ open import CredTT.Credence
 open import CredTT.Neighbourhood
 
 -- ============================================================================
--- BOOLEAN COLLAPSE THEOREMS
+-- BOOLEAN DYNAMICS COLLAPSE THEOREMS
 -- ============================================================================
 
 module BoolCollapse where
@@ -32,24 +37,50 @@ module BoolCollapse where
   open BoolStability
 
   -- -------------------------------------------------------------------------
-  -- Theorem 1: Neighbourhoods are singletons in Bool
+  -- Theorem 1: All fixed points in Bool are trivial
+  -- -------------------------------------------------------------------------
+
+  -- In {0,1}, the only fixed points are 0 and 1
+  -- For any step s: T_s(0) = 0 and T_s(1) = 1 or 0 depending on s
+
+  trivial-fixed-points : (c : Bool) → Idempotent c → (c ≡ true) ⊎ (c ≡ false)
+  trivial-fixed-points true  _ = inj₁ refl
+  trivial-fixed-points false _ = inj₂ refl
+
+  -- -------------------------------------------------------------------------
+  -- Theorem 2: Robust and Vanishing are exhaustive
+  -- -------------------------------------------------------------------------
+
+  -- Every Bool credence is either Robust (true) or Vanishing (false)
+  robust-or-vanishing : (c : Bool) → Robust c ⊎ Vanishing c
+  robust-or-vanishing true  = inj₁ ((≤-true , (λ ())) , subst (true ≤_) (sym (·-identityʳ true)) ≤-true)
+  robust-or-vanishing false = inj₂ refl
+
+  -- -------------------------------------------------------------------------
+  -- Theorem 3: No interior points
+  -- -------------------------------------------------------------------------
+
+  -- Bool has no Interior points (reusing from Neighbourhood)
+  no-interior : (c : Bool) → Interior c → ⊥
+  no-interior = bool-no-interior
+
+  -- -------------------------------------------------------------------------
+  -- Theorem 4: Neighbourhoods are singletons
   -- -------------------------------------------------------------------------
 
   -- In {0,1}, there are no intermediate points, so any neighbourhood
   -- containing c IS just {c}
 
-  -- A neighbourhood in Bool is trivial (either contains only true or only false)
   data BoolNeighbourhood : Bool → Set where
     singleton-true  : BoolNeighbourhood true
     singleton-false : BoolNeighbourhood false
 
-  -- Every Bool credence has a singleton neighbourhood
   neighbourhood-is-singleton : (c : Bool) → BoolNeighbourhood c
   neighbourhood-is-singleton true  = singleton-true
   neighbourhood-is-singleton false = singleton-false
 
   -- -------------------------------------------------------------------------
-  -- Theorem 2: Classification is exhaustive
+  -- Theorem 5: Classification is exhaustive
   -- -------------------------------------------------------------------------
 
   -- Every Bool is either stable (true) or unstable (false)
@@ -63,15 +94,7 @@ module BoolCollapse where
   bool-stability-complete = bool-classify
 
   -- -------------------------------------------------------------------------
-  -- Theorem 3: No interior points
-  -- -------------------------------------------------------------------------
-
-  -- Bool has no Interior points (reusing from Neighbourhood)
-  no-interior : (c : Bool) → Interior c → ⊥
-  no-interior = bool-no-interior
-
-  -- -------------------------------------------------------------------------
-  -- Theorem 4: Stability is trivial
+  -- Theorem 6: Stability is trivial
   -- -------------------------------------------------------------------------
 
   -- true is always stable
@@ -94,18 +117,18 @@ module CollapseIsomorphism where
   open BoolCollapse
 
   -- -------------------------------------------------------------------------
-  -- Direction 1: MLTT judgment → CredTT judgment at credence true
+  -- Direction 1: MLTT judgment -> CredTT judgment at credence true
   -- -------------------------------------------------------------------------
 
-  -- An MLTT judgment Γ ⊢ t : A
-  -- corresponds to a CredTT judgment Γ ⊢ t : A @ true
+  -- An MLTT judgment Gamma |- t : A
+  -- corresponds to a CredTT judgment Gamma |- t : A @ true
 
-  -- We represent this abstractly since we dont have the full term language here
+  -- We represent this abstractly since we don't have the full term language here
   record MLTTJudgment : Set₁ where
     field
-      context : Set     -- simplified: context as a type
-      term : Set        -- simplified: term as a type
-      ty : Set          -- the type
+      context : Set
+      term : Set
+      ty : Set
 
   record CredTTJudgment : Set₁ where
     field
@@ -124,10 +147,10 @@ module CollapseIsomorphism where
     }
 
   -- -------------------------------------------------------------------------
-  -- Direction 2: CredTT judgment at true → MLTT judgment
+  -- Direction 2: CredTT judgment at true -> MLTT judgment
   -- -------------------------------------------------------------------------
 
-  -- If Γ ⊢ t : A @ true in CredTT, we get Γ ⊢ t : A in MLTT
+  -- If Gamma |- t : A @ true in CredTT, we get Gamma |- t : A in MLTT
 
   credtt-true-to-mltt : (j : CredTTJudgment) →
     CredTTJudgment.credence j ≡ true →
@@ -139,22 +162,22 @@ module CollapseIsomorphism where
     }
 
   -- -------------------------------------------------------------------------
-  -- Direction 3: CredTT judgment at false → vacuously satisfied
+  -- Direction 3: CredTT judgment at false -> vacuously satisfied
   -- -------------------------------------------------------------------------
 
-  -- Γ ⊢ t : A @ false is vacuously true (no real content)
+  -- Gamma |- t : A @ false is vacuously true (no real content)
 
   -- A vacuous judgment has no computational content
   credtt-false-is-vacuous : (j : CredTTJudgment) →
     CredTTJudgment.credence j ≡ false →
-    ⊤  -- trivially satisfied
+    ⊤
   credtt-false-is-vacuous _ _ = tt
 
   -- -------------------------------------------------------------------------
   -- The Collapse Theorem
   -- -------------------------------------------------------------------------
 
-  -- MLTT ≃ CredTT[Bool] with credence = true
+  -- MLTT is isomorphic to CredTT[Bool] with credence = true
 
   -- Forward: every MLTT derivation gives a CredTT derivation at credence 1
   -- This is a meta-theorem about derivation trees
@@ -187,11 +210,11 @@ module MultiplicationCollapse where
   mul-is-and false true  = refl
   mul-is-and false false = refl
 
-  -- true · true = true (stable × stable = stable)
+  -- true * true = true (stable * stable = stable)
   stable-mul-stable : true · true ≡ true
   stable-mul-stable = refl
 
-  -- Anything with false = false (any × unstable = unstable)
+  -- Anything with false = false (any * unstable = unstable)
   unstable-absorbs : ∀ (c : Bool) → c · false ≡ false
   unstable-absorbs true  = refl
   unstable-absorbs false = refl
@@ -204,7 +227,7 @@ module MultiplicationCollapse where
 -- NEGATION COLLAPSE
 -- ============================================================================
 
--- In Bool, ¬ is standard Boolean NOT
+-- In Bool, negation is standard Boolean NOT
 
 module NegationCollapse where
   open BoolDM
@@ -218,13 +241,13 @@ module NegationCollapse where
   neg-flips-back = refl
 
   -- No fixed point exists in Bool
-  -- There is no c such that c = ¬c
+  -- There is no c such that c = not c
   no-fixpoint : (c : Bool) → c ≡ ¬ c → ⊥
   no-fixpoint true  ()
   no-fixpoint false ()
 
-  -- This is why Godel incompleteness is undecidable in classical logic!
-  -- c = ¬c has no solution in {true, false}
+  -- This is why Goedel incompleteness is undecidable in classical logic!
+  -- c = not c has no solution in {true, false}
   -- In [0,1], it has solution c = 1/2
 
 -- ============================================================================
@@ -268,8 +291,8 @@ module DynamicsCollapse where
   operator-trivial c false = inj₂ (refl , ·-annihilʳ c)
 
   -- Iteration in Bool stabilizes immediately
-  -- If s = true, c · sⁿ = c for all n
-  -- If s = false, c · sⁿ = false for all n > 0
+  -- If s = true, c * s^n = c for all n
+  -- If s = false, c * s^n = false for all n > 0
   iteration-immediate : ∀ (c : Bool) (n : ℕ) →
     iterate n c true ≡ c
   iteration-immediate c zero    = refl
@@ -290,6 +313,44 @@ module DynamicsCollapse where
     (𝟙-greatest 𝟘 , (λ ()))
 
 -- ============================================================================
+-- COMPLETE COLLAPSE THEOREM
+-- ============================================================================
+
+-- Combining all collapse results
+
+module CompleteCollapse where
+  open BoolCollapse
+  open CollapseIsomorphism
+  open DynamicsCollapse
+  open DeMorganAlgebra BoolDM
+  open StabilityDefs BoolDM
+
+  -- Main theorem: CredTT[Bool] = MLTT
+
+  -- 1. Fixed points: Only {0,1}, no interior
+  fixed-points-trivial : ∀ (c : Bool) → Idempotent c → (c ≡ true) ⊎ (c ≡ false)
+  fixed-points-trivial = trivial-fixed-points
+
+  -- 2. Classification: Robust(1) or Vanishing(0)
+  classification-exhaustive : ∀ (c : Bool) → Robust c ⊎ Vanishing c
+  classification-exhaustive = robust-or-vanishing
+
+  -- 3. Interior: No points between 0 and 1
+  no-interior-points : ∀ (c : Bool) → Interior c → ⊥
+  no-interior-points = no-interior
+
+  -- 4. Dynamics: Trivial (identity or annihilation)
+  dynamics-trivial : ∀ (c s : Bool) →
+    (s ≡ true × c · s ≡ c) ⊎ (s ≡ false × c · s ≡ false)
+  dynamics-trivial = operator-trivial
+
+  -- 5. Isomorphism: MLTT <-> CredTT[Bool]
+  judgment-correspondence : (j : CredTTJudgment) →
+    (CredTTJudgment.credence j ≡ true × MLTTJudgment) ⊎
+    (CredTTJudgment.credence j ≡ false × ⊤)
+  judgment-correspondence = collapse-theorem
+
+-- ============================================================================
 -- SUMMARY: WHY THE COLLAPSE MATTERS
 -- ============================================================================
 
@@ -305,17 +366,23 @@ The collapse theorem shows:
    - Stability becomes trivial (true = stable, false = unstable)
    - No intermediate credences
 
-3. Godel incompleteness appears as undecidability
-   - c = ¬c has no Boolean solution
+3. Goedel incompleteness appears as undecidability
+   - c = not c has no Boolean solution
    - In continuous credences, c = 1/2
 
 4. Classical proof techniques are special cases
-   - Modus ponens: true ∧ true = true
-   - Ex falso: false ∧ anything = false
+   - Modus ponens: true AND true = true
+   - Ex falso: false AND anything = false
    - LEM holds because all credences are 0 or 1
+
+5. No interior dynamics exist
+   - All fixed points are trivial
+   - Robust(true) and Vanishing(false) are exhaustive
+   - Classical logic has no "middle ground"
 
 CredTT GENERALIZES classical logic by:
 - Allowing intermediate credences
 - Making stability explicit
 - Quantifying proof reliability
+- Providing interior fixed points (like 1/2 for Goedel sentences)
 -}

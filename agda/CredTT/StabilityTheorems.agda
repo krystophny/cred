@@ -3,16 +3,21 @@
    PROOFS AS MONOTONE DYNAMICAL SYSTEMS
    =====================================
 
-   Each proof rule induces a monotone operator T_s : C → C
-   where T_s(c) = c · s.
+   Each proof rule induces a monotone operator T_s : C -> C
+   where T_s(c) = c * s.
 
    Stability is about FIXED POINTS of these operators, not truth values.
 
    Key insight: CredTT does not lose proof techniques; it reveals
    their underlying dynamics.
 
+   THREE BEHAVIORS (no Archimedean assumption):
+   1. Post-fixed point: c <= c * s (step doesn't reduce credence)
+   2. Invariant: c = c * s (exact fixed point)
+   3. Degenerating: inf_n (c * s^n) = 0 (credence collapses)
+
    The correct statement of "stability" is:
-     c is stable under step s  iff  infₙ (c · sⁿ) > 0
+     c is stable under step s  iff  inf_n (c * s^n) > 0
 
    This allows:
    - Stability at c = 1 (classical)
@@ -41,26 +46,125 @@ module OperatorDynamics {ℓ : Level} (DM : DeMorganAlgebra ℓ) where
   open DeMorganAlgebra DM
   open DynamicsDefs DM
 
-  -- Each proof step at credence s induces the operator T_s(c) = c · s
+  -- Each proof step at credence s induces the operator T_s(c) = c * s
   T : C → C → C
   T s c = c · s
 
-  -- T_s is monotone (by ·-mono)
-  postulate
-    T-monotone : ∀ {s c₁ c₂} → c₁ ≤ c₂ → T s c₁ ≤ T s c₂
+  -- T_s is monotone (by monotonicity of multiplication)
+  T-monotone : ∀ {s c₁ c₂} → c₁ ≤ c₂ → T s c₁ ≤ T s c₂
+  T-monotone {s} {c₁} {c₂} c₁≤c₂ = ·-mono c₁≤c₂ (≤-refl s)
 
-  -- T_1 is the identity
+  -- T_1 is the identity operator
   T-identity : ∀ (c : C) → T 𝟙 c ≡ c
   T-identity c = ·-identityʳ c
 
-  -- T_0 annihilates
+  -- T_0 annihilates (sends everything to 0)
   T-zero : ∀ (c : C) → T 𝟘 c ≡ 𝟘
   T-zero c = ·-annihilʳ c
 
-  -- Composition of operators: T_s ∘ T_t = T_{s·t}
-  -- This follows from associativity: (c · s) · t = c · (s · t)
+  -- Composition of operators: T_s composed with T_t equals T_{s*t}
+  -- This follows from associativity: (c * s) * t = c * (s * t)
   T-compose : ∀ (s t c : C) → T t (T s c) ≡ T (s · t) c
   T-compose s t c = ·-assoc c s t
+
+  -- Powers: s^n
+  _^_ : C → ℕ → C
+  s ^ zero = 𝟙
+  s ^ suc n = (s ^ n) · s
+
+  -- Note: iterate n c s from DynamicsDefs computes c * s^n
+  -- The relationship iterate n c s = c * (s ^ n) holds by induction,
+  -- but proving it requires careful handling of associativity.
+
+-- ============================================================================
+-- PRESERVATION LEMMAS: How operators preserve stability properties
+-- ============================================================================
+
+module PreservationLemmas {ℓ : Level} (DM : DeMorganAlgebra ℓ) where
+  open DeMorganAlgebra DM
+  open StabilityDefs DM
+  open OperatorDynamics DM
+
+  -- Lemma 1: Post-fixed points are preserved under composition
+  -- If c <= c*s and c <= c*t, then c <= c*(s*t)
+  postfixed-compose : ∀ {c s t} →
+    PostFixedPoint c s →
+    PostFixedPoint c t →
+    PostFixedPoint c (s · t)
+  postfixed-compose {c} {s} {t} pf-s pf-t =
+    -- c <= c*s and c <= c*t
+    -- Goal: c <= c*(s*t)
+    -- By pf-t: c <= c*t
+    -- c*t <= (c*s)*t by monotonicity and pf-s
+    -- (c*s)*t = c*(s*t) by associativity
+    ≤-trans pf-t (subst (c · t ≤_) (·-assoc c s t) (·-mono pf-s (≤-refl t)))
+
+  -- Lemma 2: Stable credences preserved under multiplication by stable step
+  stable-mul-preserves : ∀ {c₁ c₂} → Stable₁ c₁ → Stable₁ c₂ → Stable₁ (c₁ · c₂)
+  stable-mul-preserves = ·-preserves-stable
+
+  -- Lemma 3: Invariant elements are closed under the operator
+  invariant-closed : ∀ {c s} → Invariant c s → T s c ≡ c
+  invariant-closed inv = sym inv
+
+  -- Lemma 4: Idempotent elements are invariant under themselves
+  idempotent-self-invariant : ∀ {c} → Idempotent c → Invariant c c
+  idempotent-self-invariant idemp = idemp
+
+-- ============================================================================
+-- CONTRACTION LEMMAS: When operators contract credence
+-- ============================================================================
+
+module ContractionLemmas {ℓ : Level} (DM : DeMorganAlgebra ℓ) where
+  open DeMorganAlgebra DM
+  open StabilityDefs DM
+  open OperatorDynamics DM
+
+  -- Strict order (local definition to avoid name clash)
+  StrictLess : C → C → Set ℓ
+  StrictLess x y = (x ≤ y) × (x ≡ y → ⊥)
+
+  -- A step is contractive if it strictly reduces non-unit credence
+  Contractive : C → Set ℓ
+  Contractive s = ∀ {c} → Positive c → SubUnity c → StrictLess (c · s) c
+
+  -- A step is non-expanding if it doesn't increase credence
+  NonExpanding : C → Set ℓ
+  NonExpanding s = ∀ (c : C) → (c · s) ≤ c
+
+  -- All steps are non-expanding by the algebra axiom
+  all-steps-non-expanding : ∀ (s : C) → NonExpanding s
+  all-steps-non-expanding s c = ·-≤-self c s
+
+  -- A step is preserving if it equals 1
+  Preserving : C → Set ℓ
+  Preserving s = s ≡ 𝟙
+
+  -- Preserving steps are identity operators
+  preserving-is-identity : ∀ {s} → Preserving s → ∀ (c : C) → T s c ≡ c
+  preserving-is-identity refl c = ·-identityʳ c
+
+-- ============================================================================
+-- DEGENERATION ANALYSIS: When credence collapses to zero
+-- ============================================================================
+
+module DegenerationLemmas {ℓ : Level} (DM : DeMorganAlgebra ℓ) where
+  open DeMorganAlgebra DM
+  open StabilityDefs DM
+  open OperatorDynamics DM
+
+  -- Zero is degenerate under all steps (trivially)
+  zero-degenerate : ∀ (s : C) → iterate 0 𝟘 s ≡ 𝟘
+  zero-degenerate s = refl
+
+  -- Zero remains zero under any iteration
+  zero-stays-zero : ∀ (n : ℕ) (s : C) → iterate n 𝟘 s ≡ 𝟘
+  zero-stays-zero zero s = refl
+  zero-stays-zero (suc n) s = trans (cong (_· s) (zero-stays-zero n s)) (·-annihilˡ s)
+
+  -- Degenerate credence is absorbing
+  degenerate-absorbing : ∀ {c s} → c ≡ 𝟘 → ∀ (n : ℕ) → iterate n c s ≡ 𝟘
+  degenerate-absorbing {s = s} refl n = zero-stays-zero n s
 
 -- ============================================================================
 -- RECOVERED CLASSICAL PROOF TECHNIQUES (dynamics version)
@@ -68,22 +172,21 @@ module OperatorDynamics {ℓ : Level} (DM : DeMorganAlgebra ℓ) where
 
 module ClassicalRecovery {ℓ : Level} (DM : DeMorganAlgebra ℓ) where
   open DeMorganAlgebra DM
-  open StabilityDefs DM  -- already exports DynamicsDefs
+  open StabilityDefs DM
   open OperatorDynamics DM
+  open PreservationLemmas DM
 
   -- -------------------------------------------------------------------------
   -- 1. Direct Proof: composition of operators
   -- -------------------------------------------------------------------------
 
-  -- Direct proofs compose operators: T_s ∘ T_t = T_{s·t}
+  -- Direct proofs compose operators: T_s composed with T_t = T_{s*t}
   -- If both s and t are non-degrading (post-fixed points), composition is too
   direct-proof-operator : ∀ {c s₁ s₂} →
     PostFixedPoint c s₁ →
     PostFixedPoint c s₂ →
     c ≤ T (s₁ · s₂) c
   direct-proof-operator {c} {s₁} {s₂} pf₁ pf₂ =
-    -- c ≤ c · s₂ ≤ (c · s₁) · s₂ = c · (s₁ · s₂)
-    -- ·-mono pf₁ (≤-refl s₂) : c · s₂ ≤ (c · s₁) · s₂
     ≤-trans pf₂ (subst (c · s₂ ≤_) (·-assoc c s₁ s₂) (·-mono pf₁ (≤-refl s₂)))
 
   -- Legacy: using Stable₁ definitions
@@ -152,7 +255,7 @@ module ClassicalRecovery {ℓ : Level} (DM : DeMorganAlgebra ℓ) where
   -- 6. Vacuous Truth: degenerate conditioning
   -- -------------------------------------------------------------------------
 
-  -- Same as ex falso: 0 · anything = 0
+  -- Same as ex falso: 0 * anything = 0
   vacuous-condition : ∀ {s : C} → 𝟘 · s ≡ 𝟘
   vacuous-condition = ·-annihilˡ _
 
@@ -170,8 +273,8 @@ module ClassicalRecovery {ℓ : Level} (DM : DeMorganAlgebra ℓ) where
   -- 8. Modus Ponens: operator composition
   -- -------------------------------------------------------------------------
 
-  -- f : A→B @ s₁ and a : A @ s₂ gives f a : B @ s₁ · s₂
-  -- The dynamics: T_{s₁} ∘ T_{s₂} = T_{s₁·s₂}
+  -- f : A->B @ s₁ and a : A @ s₂ gives f a : B @ s₁ * s₂
+  -- The dynamics: T_{s₁} composed with T_{s₂} = T_{s₁*s₂}
   modus-ponens-dynamics : ∀ (s₁ s₂ c : C) → T s₂ (T s₁ c) ≡ T (s₁ · s₂) c
   modus-ponens-dynamics = T-compose
 
@@ -183,13 +286,13 @@ module ClassicalRecovery {ℓ : Level} (DM : DeMorganAlgebra ℓ) where
   -- 9. Syllogism: transitive composition
   -- -------------------------------------------------------------------------
 
-  -- g ∘ f has credence c_g · c_f
-  -- T-compose s₂ s₁ c gives: T s₁ (T s₂ c) ≡ T (s₂ · s₁) c
+  -- g composed with f has credence c_g * c_f
+  -- T-compose s₂ s₁ c gives: T s₁ (T s₂ c) ≡ T (s₂ * s₁) c
   syllogism-dynamics : ∀ (s₁ s₂ c : C) → T s₁ (T s₂ c) ≡ T (s₂ · s₁) c
   syllogism-dynamics s₁ s₂ c = T-compose s₂ s₁ c
 
   -- -------------------------------------------------------------------------
-  -- 10. Universal Generalization: Π-introduction
+  -- 10. Universal Generalization: Pi-introduction
   -- -------------------------------------------------------------------------
 
   -- λx.b : Πx.B @ inf_x c(x)
@@ -200,20 +303,17 @@ module ClassicalRecovery {ℓ : Level} (DM : DeMorganAlgebra ℓ) where
   pi-intro-dynamics pf = pf
 
   -- -------------------------------------------------------------------------
-  -- 11. Existential Introduction: Σ-types
+  -- 11. Existential Introduction: Sigma-types
   -- -------------------------------------------------------------------------
 
-  -- (a, b) : Σx.B @ c_a · c_b
+  -- (a, b) : Σx.B @ c_a * c_b
   sigma-intro-dynamics : ∀ {c_a c_b s} →
     PostFixedPoint c_a s →
     PostFixedPoint c_b s →
     c_a · c_b ≤ (c_a · c_b) · s
   sigma-intro-dynamics {c_a} {c_b} {s} pf_a pf_b =
-    let -- Step 1: c_a · c_b ≤ (c_a · s) · c_b
-        step1 : c_a · c_b ≤ (c_a · s) · c_b
+    let step1 : c_a · c_b ≤ (c_a · s) · c_b
         step1 = ·-mono pf_a (≤-refl c_b)
-        -- Step 2: (c_a · s) · c_b = (c_a · c_b) · s (by assoc and comm)
-        -- (c_a · s) · c_b = c_a · (s · c_b) = c_a · (c_b · s) = (c_a · c_b) · s
         rw : (c_a · s) · c_b ≡ (c_a · c_b) · s
         rw = trans (·-assoc c_a s c_b)
             (trans (cong (c_a ·_) (·-comm s c_b))
@@ -235,7 +335,7 @@ module ClassicalRecovery {ℓ : Level} (DM : DeMorganAlgebra ℓ) where
 
 module NativeTechniques {ℓ : Level} (DM : DeMorganAlgebra ℓ) where
   open DeMorganAlgebra DM
-  open StabilityDefs DM  -- already exports DynamicsDefs
+  open StabilityDefs DM
 
   -- -------------------------------------------------------------------------
   -- 1. Stability Proofs: prove c is post-fixed point of s
@@ -247,7 +347,7 @@ module NativeTechniques {ℓ : Level} (DM : DeMorganAlgebra ℓ) where
       positive   : Positive c
 
   -- -------------------------------------------------------------------------
-  -- 2. Invariant Proofs: prove c · s = c
+  -- 2. Invariant Proofs: prove c * s = c
   -- -------------------------------------------------------------------------
 
   record InvariantProof (c s : C) : Set ℓ where
@@ -331,7 +431,7 @@ module NativeTechniques {ℓ : Level} (DM : DeMorganAlgebra ℓ) where
 
 module StructuralRules {ℓ : Level} (DM : DeMorganAlgebra ℓ) where
   open DeMorganAlgebra DM
-  open StabilityDefs DM  -- already exports DynamicsDefs
+  open StabilityDefs DM
 
   -- Exchange: holds unconditionally (context reordering)
   exchange : ∀ {c s} → PostFixedPoint c s → PostFixedPoint c s
@@ -342,20 +442,15 @@ module StructuralRules {ℓ : Level} (DM : DeMorganAlgebra ℓ) where
     PostFixedPoint c s →
     PostFixedPoint (c · 𝟙) s
   weakening {c} {s} pf =
-    let -- Goal: c · 𝟙 ≤ (c · 𝟙) · s
-        -- From pf: c ≤ c · s
-        -- Step 1: c · 𝟙 ≤ c · s (rewrite c to c · 𝟙 using ·-identityʳ)
-        step1 : c · 𝟙 ≤ c · s
+    let step1 : c · 𝟙 ≤ c · s
         step1 = subst (λ x → x ≤ c · s) (sym (·-identityʳ c)) pf
-        -- Step 2: c · s = (c · 𝟙) · s
-        -- (c · 𝟙) · s = c · (𝟙 · s) = c · s
         rw : c · s ≡ (c · 𝟙) · s
         rw = trans (sym (cong (c ·_) (·-identityˡ s))) (sym (·-assoc c 𝟙 s))
     in subst (c · 𝟙 ≤_) rw step1
 
   -- Contraction: safe when c is idempotent
   safe-contraction : ∀ {c s} →
-    Idempotent c →  -- c · c = c
+    Idempotent c →
     PostFixedPoint c s →
     PostFixedPoint c s
   safe-contraction _ pf = pf
@@ -383,3 +478,11 @@ module InductionTheorems {ℓ : Level} (DM : DeMorganAlgebra ℓ) where
     Idempotent c →
     InductionValid c c
   interior-induction-valid = interior-induction
+
+  -- New: Induction with post-fixed point condition
+  -- Induction is valid when credence is a post-fixed point of the step operator
+  postfixed-induction : ∀ {c s} →
+    Positive c →
+    PostFixedPoint c s →
+    InductionValid c s
+  postfixed-induction pos pf = record { base = pos ; preserve = pf }
