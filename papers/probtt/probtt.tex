@@ -502,7 +502,7 @@ ProbTT synthesizes ideas from several traditions. We review each and explain how
 
 \subsection{Pavelka-Style Fuzzy Logic}
 
-Pavelka \citep{pavelka1979fuzzy} introduced \emph{graded provability}: instead of asking ``is $\varphi$ provable?'', one asks ``to what degree is $\varphi$ provable?''
+Pavelka \citep{pavelka1979fuzzy} introduced \emph{graded provability} for \textbf{propositional} fuzzy logic: instead of asking ``is $\varphi$ provable?'', one asks ``to what degree is $\varphi$ provable?''
 
 \begin{definition}[Pavelka Provability Degree]
 \[
@@ -510,33 +510,48 @@ Pavelka \citep{pavelka1979fuzzy} introduced \emph{graded provability}: instead o
 \]
 \end{definition}
 
-Hájek \citep{hajek1998metamathematics} systematized this in his \emph{Metamathematics of Fuzzy Logic}, proving completeness theorems equating provability degrees with truth degrees in appropriate models.
+Pavelka \textbf{proved} a completeness theorem for this propositional system, equating syntactic provability degrees with semantic truth degrees.
 
-\textbf{What Pavelka/Hájek provide}:
+H\'ajek \citep{hajek1998metamathematics} extended this to \textbf{predicate} fuzzy logic in his \emph{Metamathematics of Fuzzy Logic}. His completeness theorems apply to first-order fuzzy logic, not type theory.
+
+\textbf{Key distinction}: Pavelka/H\'ajek work in propositional and first-order logic respectively, and they \textbf{prove} their completeness results. ProbTT works in dependent type theory, which is a different formal system. The completeness question for ProbTT (Section 11, Open Problem 7) remains open.
+
+\textbf{What ProbTT adapts from Pavelka/H\'ajek}:
 \begin{itemize}
-    \item Graded provability as supremum
-    \item ``Arbitrarily close to true'' formalized
-    \item Completeness: $|\varphi|_T = \inf_{\mathcal{M} \models T} v_\mathcal{M}(\varphi)$
+    \item The concept of graded provability (weights on judgments)
+    \item The idea that degrees should form an algebra
 \end{itemize}
 
 \textbf{What ProbTT adds}:
 \begin{itemize}
     \item Dependent types ($\Pi$, $\Sigma$, $\mathsf{Id}$)
-    \item Weights on \emph{judgments}, not propositions
+    \item Weights on \emph{judgments}, not just propositions
     \item Conditioning as primitive (not residuated implication)
+\end{itemize}
+
+\textbf{What ProbTT postulates} (analogous to what Pavelka/H\'ajek prove):
+\begin{itemize}
+    \item That G\"odel sentences attain weight $\frac{1}{2}$ (we postulate the fixed point; they prove completeness)
 \end{itemize}
 
 \subsection{Self-Reference in Fuzzy Logic}
 
-Hájek, Paris, and Shepherdson \citep{hajek2000liar} analyzed the liar paradox in fuzzy logic:
+H\'ajek, Paris, and Shepherdson \citep{hajek2000liar} analyzed the liar paradox in fuzzy logic:
 
-\begin{theorem}[Hájek-Paris-Shepherdson]
-In Łukasiewicz logic with a truth predicate $T$, the liar sentence $\lambda$ satisfying $\lambda \leftrightarrow \neg T(\ulcorner \lambda \urcorner)$ has truth value $\frac{1}{2}$.
+\begin{theorem}[H\'ajek-Paris-Shepherdson]
+In {\L}ukasiewicz logic with a truth predicate $T$, the liar sentence $\lambda$ satisfying $\lambda \leftrightarrow \neg T(\ulcorner \lambda \urcorner)$ has truth value $\frac{1}{2}$.
 \end{theorem}
 
-\textbf{The key insight}: the equation $v = 1 - v$ has solution $v = \frac{1}{2}$. Self-referential paradoxes become fixed points rather than contradictions.
+\textbf{Key point}: H\'ajek-Paris-Shepherdson \textbf{prove} this result by carefully constructing the truth predicate and showing the fixed point exists. Their proof uses the diagonal lemma and properties of {\L}ukasiewicz logic.
 
-\textbf{ProbTT's version}: The G\"odel sentence $G \leftrightarrow \neg\mathsf{Prov}_\one(G)$ has weight $\frac{1}{2}$. This is the \emph{same} fixed-point phenomenon, but for provability rather than truth.
+\textbf{ProbTT's version}: We \textbf{postulate} that the G\"odel sentence $G \leftrightarrow \neg\mathsf{Prov}_\one(G)$ exists and has weight satisfying $w = \negw w$, hence $w = \frac{1}{2}$. This uses the same fixed-point \emph{phenomenon}, but:
+\begin{itemize}
+    \item H\'ajek-Paris-Shepherdson work with \emph{truth} in {\L}ukasiewicz logic
+    \item ProbTT works with \emph{provability weights} in type theory
+    \item They \textbf{construct} $\lambda$; we \textbf{postulate} $G$'s existence
+\end{itemize}
+
+A full treatment would require proving the diagonal lemma for ProbTT and constructing $G$ explicitly.
 
 \subsection{Logics of Formal Inconsistency (LFIs)}
 
@@ -549,19 +564,22 @@ A, \neg A, \circ A \vdash B \quad \text{but} \quad A, \neg A \not\vdash B
 where $\circ A$ means ``$A$ is consistent.''
 \end{definition}
 
-LFIs use an object-level consistency operator to gate explosion.
+LFIs have a well-developed proof theory with the consistency operator $\circ$ as \textbf{primitive syntax}. The operator gates explosion: you need $\circ A$ (assertion that $A$ is consistent) to derive arbitrary conclusions from $A \land \neg A$.
 
-\textbf{ProbTT's version}: Explosion is gated by \emph{weight}. From $a : A \at{w}$ and $\neg a : \neg A \at{v}$, we don't derive arbitrary $B \at{\one}$. Instead, the weights constrain: the contradiction forces $w \cdot v \leq \epsilon$ for some bound $\epsilon$.
+\textbf{ProbTT's approach}: ProbTT has no consistency operator and no explosion rule. From $a : A \at{w}$ and $b : \neg A \at{v}$, we simply cannot derive arbitrary $B \at{\one}$---there is no rule that would produce this. This is not ``gated explosion'' but \emph{absence of explosion}.
 
 \begin{center}
 \begin{tabular}{l|l|l}
 & \textbf{LFIs} & \textbf{ProbTT} \\
 \hline
-Explosion gate & Consistency operator $\circ$ & Weight $< \one$ \\
-Formal device & Unary connective & Graded judgment \\
+Explosion & Gated by $\circ$ operator & Absent (no explosion rule) \\
+Formal device & Primitive unary connective & Graded judgments \\
 Gradation & Binary (consistent/not) & Continuous $[0,1]$ \\
+Proof theory & Well-developed & Postulated analogs \\
 \end{tabular}
 \end{center}
+
+The comparison is suggestive but limited: LFIs and ProbTT address paraconsistency through different mechanisms.
 
 \subsection{T-Norm Fuzzy Logics}
 
@@ -599,15 +617,20 @@ Orchard et al. \citep{orchard2019quantitative} and Atkey \citep{atkey2018syntax}
 Algebraic structure & Semiring $(0,1,+,\cdot)$ & De Morgan $(\zero,\one,\cdot,\negw)$ \\
 Addition & Primitive (costs add) & Derived (De Morgan) \\
 Interpretation & Resource usage & Inhabitation certainty \\
-Philosophy & MLTT + grades & Grades $\to$ MLTT \\
 \end{tabular}
 \end{center}
 
-\textbf{The key distinction}: Granule asks ``how much resource does this use?''; ProbTT asks ``how certain is this type inhabited?''
+\textbf{Technical distinction}: Granule's semiring includes addition as primitive, enabling resource branching: ``use resource $r$ in one branch OR resource $s$ in another.'' ProbTT derives addition via De Morgan duality, which limits expressiveness for branching scenarios.
 
-In Granule, $f : A \to B @ 2$ means ``$f$ uses 2 units.'' Costs add at branches.
+\textbf{Philosophical distinction}: Both systems treat grades as primitive. The difference is interpretive:
+\begin{itemize}
+    \item Granule: ``how much resource does this computation use?''
+    \item ProbTT: ``how certain is this type inhabited?''
+\end{itemize}
 
-In ProbTT, $f : A \to B \at{0.9}$ means ``$f$ produces $B$ with 90\% certainty.'' Weights multiply in composition.
+In Granule, $f : A \to B @ 2$ means ``$f$ uses 2 units.'' In ProbTT, $f : A \to B \at{0.9}$ means ``$f$ produces $B$ with 90\% certainty.''
+
+\textbf{Note}: The claim that MLTT ``emerges'' from ProbTT while Granule ``decorates'' MLTT is a matter of presentation. Both can be viewed as parameterized systems that specialize to MLTT. Granule's semiring can also be instantiated at $\{0,1\}$.
 
 \subsection{De Morgan Algebras}
 
@@ -659,7 +682,9 @@ Markov categories & Conditioning semantics \\
 \end{tabular}
 \end{center}
 
-\textbf{What's new}: The combination---dependent type theory with conditioning (not implication), where MLTT emerges as the $\{\zero,\one\}$ limit.
+\textbf{What ProbTT combines}: Dependent type theory with conditioning (not implication), using De Morgan algebra for weights. MLTT is the $\{\zero,\one\}$ specialization.
+
+\textbf{Honest assessment of novelty}: The individual components (graded provability, fuzzy fixed points, graded types, De Morgan algebras) are well-established. ProbTT's contribution is combining them with conditioning as primitive and exploring the consequences for incompleteness and choice. Many results are postulated analogs of proven theorems in simpler settings.
 
 \subsection{What ProbTT Rejects}
 
@@ -918,18 +943,50 @@ ProbTT provides more information than both: constructive math says ``no choice f
 \section{Implementation Status}
 %=============================================================================
 
-The following have been implemented:
+\subsection{What Is Implemented}
 
 \begin{enumerate}
-    \item \textbf{Type checker} (\texttt{probtt-impl/}): OCaml implementation with Agda-compatible syntax
-    \item \textbf{Weight algebra}: Fixpoint solver ($w = \negw w \Rightarrow w = \frac{1}{2}$), rational arithmetic
-    \item \textbf{Proof checker}: Postulates, derivations, contradictions, weight forcing
-    \item \textbf{Meta-theory constructs}: \texttt{provable}, \texttt{fixpoint}, \texttt{encode} declarations
-    \item \textbf{Agda formalization} (\texttt{agda/ProbTT/}): Syntax, judgments, properties, MLTT embedding
-    \item \textbf{Graded incompleteness}: G\"odel fixed point at $\frac{1}{2}$, self-consistency, graded choice
+    \item \textbf{Weight algebra} (\texttt{probtt-impl/src/weight.ml}): Product De Morgan structure with:
+    \begin{itemize}
+        \item Simplification of weight expressions
+        \item Rational arithmetic for exact computation
+        \item Fixpoint solver for $w = \negw w \Rightarrow w = \frac{1}{2}$
+        \item Unification-based constraint accumulation
+    \end{itemize}
+    \item \textbf{Bidirectional type checker} (\texttt{probtt-impl/src/check.ml}): Prototype implementing:
+    \begin{itemize}
+        \item Weight multiplication in elimination rules
+        \item Type inference with weight tracking
+        \item Weight comparison via $\leq$
+    \end{itemize}
+    \item \textbf{Proof checker} (\texttt{probtt-impl/src/proof.ml}): Demonstration system for:
+    \begin{itemize}
+        \item Postulates, derivations, contradictions
+        \item Weight forcing from contradictions
+        \item Negation fixpoint solving
+    \end{itemize}
+    \item \textbf{Agda formalization} (\texttt{agda/ProbTT/}): Syntax, judgments, MLTT embedding theorem
 \end{enumerate}
 
-Example proofs pass: $\sqrt{2}$ irrationality, modus ponens/tollens, double negation, ex falso, G\"odel fixed point.
+\subsection{What Is NOT Implemented}
+
+\begin{enumerate}
+    \item \textbf{Weight inference}: The checker does not infer weights from term structure. Weights must be explicitly annotated or default to $\one$. The \texttt{infer\_ctx} in \texttt{weight.ml} accumulates constraints but \texttt{solve\_inference} handles only trivial cases.
+    \item \textbf{Constraint propagation}: The Pi-Elim rule should generate $w_{result} = w_f \cdot w_a$, but constraints are not propagated bidirectionally.
+    \item \textbf{Dependent weight instantiation}: Weights depending on bound variables (e.g., $w(x)$ in $(x : A) \to B \at{w(x)}$) are parsed but not fully instantiated during application.
+    \item \textbf{General proof checking}: The proof checker (\texttt{proof.ml}) demonstrates fixed examples (e.g., $\sqrt{2}$ irrationality). It does not parse arbitrary proof files.
+\end{enumerate}
+
+\subsection{Prototype vs Production}
+
+The implementation is a \textbf{prototype} demonstrating the core ideas:
+\begin{itemize}
+    \item Variables are always assigned weight $\one$ (line 24 of \texttt{check.ml})
+    \item Non-trivial fixpoints like $w = w \cdot w$ choose $1$ arbitrarily
+    \item The $\sqrt{2}$ proof runs a hardcoded list of declarations, not a parser
+\end{itemize}
+
+A production implementation would require bidirectional weight inference, general fixpoint solving, and a proper parser for proof files.
 
 %=============================================================================
 \section{Open Problems}
