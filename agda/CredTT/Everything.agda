@@ -43,6 +43,11 @@ import CredTT.Incompleteness
 import CredTT.Consistency
 import CredTT.GradedChoice
 import CredTT.Completeness
+import CredTT.Decidability
+import CredTT.Normalization
+
+-- Advanced features (depend on core modules)
+import CredTT.DependentCredences
 
 -- Self-hosting and reflection
 import CredTT.Reflection

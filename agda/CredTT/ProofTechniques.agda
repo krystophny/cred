@@ -484,7 +484,7 @@ module CredTTNativeTechniques {ℓ} (DM : DeMorganAlgebra ℓ) where
   open NativeTechniques DM
 
   -- 21. STABILITY PROOFS
-  -- STATUS: PROVEN (StabilityProofRecord wraps StabilityProof)
+  -- STATUS: DEFINED (record alias)
   --
   -- OPERATOR INDUCED: T_s(c) = c * s
   -- POST-FIXED CONDITION: c <= c * s AND c > 0 (positive post-fixed point)
@@ -501,7 +501,7 @@ module CredTTNativeTechniques {ℓ} (DM : DeMorganAlgebra ℓ) where
     StabilityProofRecord = StabilityProof
 
   -- 22. CREDENCE BOUNDS AS INVARIANTS
-  -- STATUS: PROVEN (LowerBoundRecord, UpperBoundRecord wrap record types)
+  -- STATUS: DEFINED (record aliases)
   --
   -- OPERATOR INDUCED: T_s with bound tracking
   -- POST-FIXED CONDITION: bound <= c AND c <= c * s (bound maintained through iteration)
@@ -532,7 +532,7 @@ module CredTTNativeTechniques {ℓ} (DM : DeMorganAlgebra ℓ) where
     mul-mono = mul-monotone
 
   -- 24. DEGENERACY ANALYSIS
-  -- STATUS: PROVEN (IsDegradingDef is type alias)
+  -- STATUS: DEFINED (type alias)
   --
   -- OPERATOR INDUCED: T_s with s < 1 (strictly contracting)
   -- POST-FIXED CONDITION: NOT satisfied; instead c > c * s (degrading)
@@ -562,7 +562,7 @@ module CredTTNativeTechniques {ℓ} (DM : DeMorganAlgebra ℓ) where
     identity-preserves = identity-non-degrading
 
   -- 26. PROOF FACTORING
-  -- STATUS: PROVEN (FactoringRecord wraps record type)
+  -- STATUS: DEFINED (record alias)
   --
   -- OPERATOR INDUCED: factorization into high-part and low-part operators
   -- POST-FIXED CONDITION: high-part post-fixed at 1, low-part may degrade
@@ -575,7 +575,7 @@ module CredTTNativeTechniques {ℓ} (DM : DeMorganAlgebra ℓ) where
     FactoringRecord = CredenceFactoring
 
   -- 27. DUAL PROOFS
-  -- STATUS: PROVEN (SqueezedRecord wraps record type)
+  -- STATUS: DEFINED (record alias)
   --
   -- OPERATOR INDUCED: combined lower and upper bound operators
   -- POST-FIXED CONDITION: lower <= c AND c <= upper (squeezed interval)
@@ -584,9 +584,10 @@ module CredTTNativeTechniques {ℓ} (DM : DeMorganAlgebra ℓ) where
   -- - Example: 0.4 <= c(A) <= 0.6 (the Goedel region, neither true nor false)
   -- - Goedel sentence: c = 1/2 exactly (squeezed by self-reference)
   --
-  -- This demonstrates INTERIOR STABILITY: the Goedel sentence has credence
-  -- 1/2 because it is an IDEMPOTENT (1/2 * 1/2 = 1/4 in standard arithmetic,
-  -- but in non-Archimedean algebras, interior idempotents can exist).
+  -- NOTE: In [0,1] with standard multiplication, 1/2 is NOT idempotent
+  -- (see half-not-idempotent in Neighbourhood.agda). Interior stability at
+  -- intermediate credences requires non-Archimedean algebras which are
+  -- FUTURE WORK (issue #190).
   module DualProofs where
     SqueezedRecord : C → Set ℓ
     SqueezedRecord = SqueezedCredence
