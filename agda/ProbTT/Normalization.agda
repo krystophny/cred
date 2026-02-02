@@ -1,3 +1,23 @@
+{- AXIOM STATUS SUMMARY for Normalization.agda
+
+TERMINATING pragma (line ~154): ACCEPTABLE
+  Termination holds by well-founded induction on type complexity.
+  Agda cannot verify because substitution B[a] does not syntactically decrease.
+  Reference: Harper PFPL Ch. 47, Abel "Normalization by Evaluation"
+
+weight-irrelevant-reduction: SHOULD BE PROVEN
+  Subject reduction. Depends on substitution lemma from Properties.agda.
+
+postulate-fun-*, postulate-pair-*: SHOULD BE PROVEN
+  Standard Tait-style reducibility candidate lemmas.
+  Reference: Girard "Proofs and Types" Ch. 6
+
+postulate-lam-fundamental, etc: SHOULD BE PROVEN
+  Fundamental theorem cases. Standard but tedious induction.
+
+KEY INSIGHT: Weights do not affect reduction. Normalization in ProbTT
+is identical to normalization in MLTT.
+-}
 module ProbTT.Normalization where
 
 open import Level using (Level; _⊔_) renaming (suc to lsuc)
