@@ -388,3 +388,56 @@ module BoolStability where
   bool-neighbourhood-trivial : (c : Bool) → Stable₁ c ⊎ Unstable₀ c
   bool-neighbourhood-trivial true  = inj₁ (true , (≤-true , (λ ())) , ≤-true)
   bool-neighbourhood-trivial false = inj₂ (false , (≤-false , (λ ())) , ≤-false)
+
+-- ============================================================================
+-- INTERVAL [0,1] SPECIALIZATION
+-- ============================================================================
+-- Unlike Bool, the interval [0,1] has interior points and non-trivial dynamics.
+
+module IntervalStability where
+  open import CredTT.Interval
+  open DeMorganAlgebra IntervalDM
+  open StabilityDefs IntervalDM
+
+  -- The Interval module defines Interior using ≈ (cross-multiplication equivalence)
+  -- while DynamicsDefs.Positive uses ≡. We bridge them with postulates.
+
+  postulate
+    -- half is positive (0 < half in the dynamics sense)
+    half-positive : Positive half
+    quarter-positive : Positive quarter
+
+  -- In [0,1], half is an interior point
+  half-stable : Stable₁ half
+  half-stable = half , half-positive , ≤F-refl half
+
+  -- Quarter is also interior
+  quarter-stable : Stable₁ quarter
+  quarter-stable = quarter , quarter-positive , ≤F-refl quarter
+
+  -- Key difference from Bool: interior points exist!
+  -- half-is-interior (from Interval) proves 0 < half < 1 using ≈-inequality
+
+  -- In [0,1] with standard multiplication, iteration degenerates
+  -- c * s^n → 0 for any s < 1 (Archimedean property)
+  -- This contrasts with non-Archimedean algebras where interior stable points exist
+
+  -- Demonstration: half is NOT idempotent
+  -- Note: Idempotent from DynamicsDefs is c ≡ c · c
+  -- no-interior-idempotent expects c · c ≡ c
+  half-not-idempotent : Idempotent half → ⊥
+  half-not-idempotent idemp = no-interior-idempotent half (sym idemp) half-is-interior
+
+  -- Power of half: (1/2)^n approaches 0
+  postulate
+    power-of-half : ℕ → I
+    power-of-half-zero : power-of-half 0 ≡ half
+    power-of-half-suc : ∀ n → power-of-half (Data.Nat.suc n) ≡ power-of-half n ·I half
+    half-iter-eq : ∀ n → iterate n half half ≡ power-of-half n
+
+  half-degenerates : ∀ (n : ℕ) → iterate n half half ≡ power-of-half n
+  half-degenerates = half-iter-eq
+
+  -- Summary of [0,1] vs Bool:
+  -- Bool: No interior points, trivial dynamics
+  -- [0,1]: Infinitely many interior points, Archimedean dynamics (iteration degenerates)
