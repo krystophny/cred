@@ -109,7 +109,8 @@ record DeMorganAlgebra (ℓ : Level) : Set (suc ℓ) where
 -- The IterationAlgebra record defines the INTERFACE (infω, continuity axioms)
 -- but verifying that [0,1] with standard arithmetic satisfies these axioms
 -- requires measure-theoretic arguments not formalized here.
--- BoolDM trivially satisfies this (finite sequences stabilize immediately).
+-- BoolDM WOULD trivially satisfy this (finite sequences stabilize immediately),
+-- but no BoolIterationAlgebra instance is implemented.
 
 open import Data.Nat as Nat using (ℕ; zero; suc)
 
