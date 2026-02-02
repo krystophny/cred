@@ -19,8 +19,9 @@
 postulate pigs_fly : pigs_can_fly @ 0
 
 -- EXECUTABLE: From credence 0, ANY consequent is admissible
--- This is vacuous truth in action - the conditional is "true" but meaningless
-derive pigs_can_fly_means_anything : B @ 1 from pigs_fly by vacuous
+-- This uses ex_falso: at c=0, any conditional is trivially satisfied
+-- (vacuous truth = ex falso with graded interpretation)
+derive pigs_can_fly_means_anything : B @ 1 from pigs_fly by ex_falso
 
 -- When antecedent is at credence 0:
 -- P(B|A) is UNCONSTRAINED (see ex_falso)
