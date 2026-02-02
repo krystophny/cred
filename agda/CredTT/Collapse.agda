@@ -364,7 +364,12 @@ module CompleteCollapse where
 -- ============================================================================
 
 {-
-The collapse theorem shows:
+SKETCH STATUS (Issue #121): The collapse theorem below is a CONJECTURE with
+partial evidence. We prove key lemmas (no interior, trivial dynamics) but
+the full isomorphism CredTT[Bool] ≃ MLTT requires formal syntax for both
+systems and a bijection on derivations - see issue #57 for tracking.
+
+The collapse theorem CONJECTURES:
 
 1. MLTT is CredTT restricted to {0,1}
    - Not an extension of CredTT

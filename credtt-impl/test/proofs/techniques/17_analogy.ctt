@@ -1,7 +1,12 @@
 -- Proof by Analogy
 --
+-- STATUS: SPECULATIVE (Issue #122)
+-- This file EXPLAINS how CredTT COULD express analogical reasoning but
+-- no actual implementation exists. The morphism concept described here
+-- requires formal definition and checker support not yet developed.
+--
 -- Classical: Not a formal proof technique (informal heuristic)
--- CredTT: Low-credence morphism with visible weakness
+-- CredTT: Low-credence morphism with visible weakness (CONCEPTUAL)
 --
 -- Example: "This proof should work like the other one"
 -- Classical: Not a proof, just intuition
