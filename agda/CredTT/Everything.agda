@@ -37,3 +37,6 @@ import CredTT.Incompleteness
 import CredTT.Consistency
 import CredTT.GradedChoice
 import CredTT.Completeness
+
+-- Self-hosting and reflection
+import CredTT.Reflection
