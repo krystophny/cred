@@ -20,6 +20,9 @@ type weight =
   | WVar of name
   | WRat of int * int  (* numerator, denominator for rational weights like 1/2 *)
   | WInfer            (* inference variable, weight to be inferred *)
+  | WDep of name * weight  (* dependent weight: w(x) where x is bound variable *)
+  | WSup of name * weight  (* supremum: sup x. w(x) *)
+  | WInf of name * weight  (* infimum: inf x. w(x) *)
 
 type term =
   | TVar of name

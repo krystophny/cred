@@ -11,6 +11,7 @@ open Probtt_lib.Raw
 %token FORALL SET PROP REFL FST SND INL INR
 %token POSTULATE DERIVE FROM BY CONTRADICT CONCLUDE
 %token PROVABLE FIXPOINT ENCODE
+%token SUP WINF
 %token LAMBDA ARROW DARROW TIMES PLUS EQ COLON SEMI COMMA DOT BAR SLASH
 %token LWEIGHT RWEIGHT
 %token LPAREN RPAREN LBRACE RBRACE LBRACKET RBRACKET UNDERSCORE
@@ -268,3 +269,9 @@ weight_atom:
   | x = IDENT { WVar x }
   | NEG w = weight_atom { WNeg w }
   | UNDERSCORE { WInfer }  (* _ for inferred weight *)
+  (* Dependent weights: w(x) syntax *)
+  | x = IDENT LPAREN y = IDENT RPAREN { WDep (y, WVar x) }
+  (* Supremum: sup x. w *)
+  | SUP x = IDENT DOT w = weight { WSup (x, w) }
+  (* Infimum: inf x. w *)
+  | WINF x = IDENT DOT w = weight { WInf (x, w) }

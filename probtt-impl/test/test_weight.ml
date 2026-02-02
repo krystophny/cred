@@ -93,4 +93,56 @@ let () =
     | None -> false
   );
 
+  (* Dependent weight tests *)
+  test "dep_var creates DepVar" (
+    match dep_var "x" 0 with
+    | DepVar ("x", 0) -> true
+    | _ -> false
+  );
+
+  test "sup creates Sup" (
+    match sup "x" one with
+    | Sup ("x", One) -> true
+    | _ -> false
+  );
+
+  test "inf creates Inf" (
+    match inf "x" one with
+    | Inf ("x", One) -> true
+    | _ -> false
+  );
+
+  test "sup with constant simplifies" (
+    match simplify (sup "x" one) with
+    | One -> true
+    | _ -> false
+  );
+
+  test "inf with constant simplifies" (
+    match simplify (inf "x" zero) with
+    | Zero -> true
+    | _ -> false
+  );
+
+  test "depends_on_var detects dependency" (
+    depends_on_var "x" (dep_var "x" 0)
+  );
+
+  test "depends_on_var returns false for different var" (
+    not (depends_on_var "y" (dep_var "x" 0))
+  );
+
+  test "dependent_pi_weight creates sup for dependent" (
+    let body = dep_var "x" 0 in
+    match dependent_pi_weight "x" body with
+    | Sup ("x", DepVar ("x", 0)) -> true
+    | _ -> false
+  );
+
+  test "dependent_pi_weight preserves constant" (
+    match dependent_pi_weight "x" one with
+    | One -> true
+    | _ -> false
+  );
+
   Printf.printf "\nAll weight tests passed!\n"

@@ -41,6 +41,9 @@ let rec elab_weight = function
   | WVar x -> Weight.var x
   | WRat (n, d) -> Weight.of_rational { Weight.num = n; Weight.den = d }
   | WInfer -> Weight.fresh_infer ()
+  | WDep (x, _) -> Weight.dep_var x 0  (* de Bruijn index 0 for innermost bound var *)
+  | WSup (x, w) -> Weight.sup x (elab_weight w)
+  | WInf (x, w) -> Weight.inf x (elab_weight w)
 
 
 let rec elab_ty env = function

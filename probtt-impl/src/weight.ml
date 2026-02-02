@@ -9,12 +9,18 @@ type t =
   | Neg of t
   | Var of string
   | Infer of int  (* inference variable, assigned during unification *)
+  | DepVar of string * int  (* dependent weight: w(x) where x is variable at de Bruijn index *)
+  | Sup of string * t       (* supremum over bound variable: sup x. w(x) *)
+  | Inf of string * t       (* infimum over bound variable: inf x. w(x) *)
 
 let zero = Zero
 let one = One
 let mul w v = Mul (w, v)
 let neg w = Neg w
 let var s = Var s
+let dep_var x i = DepVar (x, i)
+let sup x w = Sup (x, w)
+let inf x w = Inf (x, w)
 
 (* Inference variable generation *)
 let infer_counter = ref 0
@@ -50,6 +56,19 @@ let rec simplify = function
        | Neg w'' -> w''
        | _ -> Neg w')
   | Infer n -> Infer n
+  | DepVar (x, i) -> DepVar (x, i)
+  | Sup (x, w) ->
+      let w' = simplify w in
+      (match w' with
+       | Zero -> Zero            (* sup(x. 0) = 0 *)
+       | One -> One              (* sup(x. 1) = 1 *)
+       | _ -> Sup (x, w'))
+  | Inf (x, w) ->
+      let w' = simplify w in
+      (match w' with
+       | Zero -> Zero            (* inf(x. 0) = 0 *)
+       | One -> One              (* inf(x. 1) = 1 *)
+       | _ -> Inf (x, w'))
   | w -> w
 
 let rec equal w1 w2 =
@@ -58,6 +77,9 @@ let rec equal w1 w2 =
   | One, One -> true
   | Var s1, Var s2 -> s1 = s2
   | Infer n1, Infer n2 -> n1 = n2
+  | DepVar (x1, i1), DepVar (x2, i2) -> x1 = x2 && i1 = i2
+  | Sup (x1, w1'), Sup (x2, w2') -> x1 = x2 && equal w1' w2'
+  | Inf (x1, w1'), Inf (x2, w2') -> x1 = x2 && equal w1' w2'
   | Mul (a1, b1), Mul (a2, b2) -> equal a1 a2 && equal b1 b2
   | Neg w1', Neg w2' -> equal w1' w2'
   | _, _ -> false
@@ -73,6 +95,9 @@ let rec pp fmt = function
   | One -> Format.fprintf fmt "1"
   | Var s -> Format.fprintf fmt "%s" s
   | Infer n -> Format.fprintf fmt "?%d" n
+  | DepVar (x, i) -> Format.fprintf fmt "%s(%d)" x i
+  | Sup (x, w) -> Format.fprintf fmt "sup(%s. %a)" x pp w
+  | Inf (x, w) -> Format.fprintf fmt "inf(%s. %a)" x pp w
   | Mul (w, v) -> Format.fprintf fmt "(%a * %a)" pp w pp v
   | Neg w -> Format.fprintf fmt "(1 - %a)" pp w
 
@@ -127,6 +152,13 @@ let rec to_rational = function
        | _, _ -> None)
   | Var _ -> None
   | Infer _ -> None
+  | DepVar _ -> None
+  | Sup (_, w) ->
+      (* sup(x. w) = w if w is constant, None otherwise *)
+      to_rational w
+  | Inf (_, w) ->
+      (* inf(x. w) = w if w is constant, None otherwise *)
+      to_rational w
 
 (* Solve w = ¬w for fixed point
    ¬w = 1 - w, so w = 1 - w implies 2w = 1, w = 1/2 *)
@@ -198,6 +230,8 @@ let rec apply_subst (s : subst) (w : t) : t =
        | None -> Infer n)
   | Mul (a, b) -> simplify (Mul (apply_subst s a, apply_subst s b))
   | Neg w' -> simplify (Neg (apply_subst s w'))
+  | Sup (x, w') -> Sup (x, apply_subst s w')
+  | Inf (x, w') -> Inf (x, apply_subst s w')
   | _ -> w
 
 (* Occurs check: does inference variable n occur in weight w? *)
@@ -206,6 +240,8 @@ let rec occurs (n : int) (w : t) : bool =
   | Infer m -> n = m
   | Mul (a, b) -> occurs n a || occurs n b
   | Neg w' -> occurs n w'
+  | Sup (_, w') -> occurs n w'
+  | Inf (_, w') -> occurs n w'
   | _ -> false
 
 (* Unification result *)
@@ -227,6 +263,8 @@ let apply_var_subst (vs : var_subst) (w : t) : t =
          | None -> Var v)
     | Mul (a, b) -> simplify (Mul (go a, go b))
     | Neg w' -> simplify (Neg (go w'))
+    | Sup (x, w') -> Sup (x, go w')
+    | Inf (x, w') -> Inf (x, go w')
     | w' -> w'
   in go w
 
@@ -367,6 +405,8 @@ let rec collect_infers acc = function
   | Infer n -> if List.mem n acc then acc else n :: acc
   | Mul (a, b) -> collect_infers (collect_infers acc a) b
   | Neg w -> collect_infers acc w
+  | Sup (_, w) -> collect_infers acc w
+  | Inf (_, w) -> collect_infers acc w
   | _ -> acc
 
 (* Pretty print substitution *)
@@ -374,3 +414,48 @@ let pp_subst fmt s =
   List.iter (fun (n, w) ->
     Format.fprintf fmt "?%d = %a; " n pp w
   ) s
+
+(* ========================================================================
+   DEPENDENT WEIGHTS
+   ========================================================================
+   Weights that depend on a bound variable:
+     (x : A) -> B @ w(x)   means the weight varies with x
+
+   Key rules:
+   - Lambda: w(x) under binder becomes sup(x. w(x)) for the function
+   - Apply: f a @ w(a) gets instantiated weight
+   - Uniform case: sup(x. w) = inf(x. w) = w when w doesn't depend on x
+   ======================================================================== *)
+
+(* Check if weight depends on bound variable at index i *)
+let rec depends_on_var (name : string) (w : t) : bool =
+  match w with
+  | DepVar (x, _) -> x = name
+  | Mul (a, b) -> depends_on_var name a || depends_on_var name b
+  | Neg w' -> depends_on_var name w'
+  | Sup (x, w') -> x <> name && depends_on_var name w'
+  | Inf (x, w') -> x <> name && depends_on_var name w'
+  | _ -> false
+
+(* Substitute a value for dependent variable *)
+let rec subst_dep_var (name : string) (value : t) (w : t) : t =
+  match w with
+  | DepVar (x, _) when x = name -> value
+  | Mul (a, b) -> simplify (Mul (subst_dep_var name value a, subst_dep_var name value b))
+  | Neg w' -> simplify (Neg (subst_dep_var name value w'))
+  | Sup (x, w') when x <> name -> Sup (x, subst_dep_var name value w')
+  | Inf (x, w') when x <> name -> Inf (x, subst_dep_var name value w')
+  | _ -> w
+
+(* Construct dependent Pi weight: given body weight, form sup *)
+let dependent_pi_weight (var_name : string) (body_weight : t) : t =
+  if depends_on_var var_name body_weight then
+    Sup (var_name, body_weight)
+  else
+    body_weight  (* constant case: sup(x. w) = w *)
+
+(* Instantiate dependent weight at application *)
+let instantiate_dep_weight (pi_weight : t) (arg_value_name : string) : t =
+  match pi_weight with
+  | Sup (x, w) -> subst_dep_var x (Var arg_value_name) w
+  | _ -> pi_weight  (* not a dependent weight *)
