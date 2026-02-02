@@ -212,45 +212,49 @@ let of_rational r =
 
 (* Stability predicates - meta-level classification of credences *)
 
-(* Check if credence is stable near 1: exists c0 < 1 such that for all c >= c0,
-   inhabitation persists. For concrete credences, this means c is "close to 1". *)
-let is_stable_near_one (c : t) : bool =
-  match to_rational (simplify c) with
-  | Some r ->
-      let r' = rat_normalize r in
-      (* Stable if >= 0.9 (threshold) *)
-      r'.num * 10 >= r'.den * 9
-  | None ->
-      (* Symbolic: check structure *)
-      match simplify c with
-      | One -> true
-      | Zero -> false
-      | Neg c' ->
-          (* ¬c stable near 1 iff c is unstable near 0 *)
-          (match to_rational (simplify c') with
-           | Some r -> let r' = rat_normalize r in r'.num * 10 <= r'.den
-           | None -> false)
-      | _ -> false
+(* Check if credence is stable (robust): c = 1 exactly.
 
-(* Check if credence is unstable near 0: for all c > 0, exists c' < c
-   such that inhabitation fails. For concrete credences, c is "close to 0". *)
+   IMPORTANT: NO THRESHOLDS. Stability is an algebraic property:
+   - c = 1 is the unique maximal element, post-fixed under all operations
+   - Symbolic stability requires algebraic analysis via Neighbourhood module
+
+   For graded stability (post-fixed points), use Neighbourhood.classify *)
+let is_stable_near_one (c : t) : bool =
+  match simplify c with
+  | One -> true
+  | Zero -> false
+  | Neg c' ->
+      (* ¬c = 1 iff c = 0 *)
+      (match simplify c' with
+       | Zero -> true
+       | _ -> false)
+  | _ ->
+      (* For symbolic/interior: cannot determine without dynamics analysis *)
+      match to_rational (simplify c) with
+      | Some r -> rat_equal r rat_one
+      | None -> false
+
+(* Check if credence is unstable (vanishing): c = 0 exactly.
+
+   IMPORTANT: NO THRESHOLDS. Instability is an algebraic property:
+   - c = 0 is the unique minimal element, absorbed by all operations
+   - Symbolic instability requires algebraic analysis via Neighbourhood module
+
+   For graded instability (degenerating sequences), use Neighbourhood.classify *)
 let rec is_unstable_near_zero (c : t) : bool =
-  match to_rational (simplify c) with
-  | Some r ->
-      let r' = rat_normalize r in
-      (* Unstable if <= 0.1 (threshold) *)
-      r'.num * 10 <= r'.den
-  | None ->
-      match simplify c with
-      | Zero -> true
-      | One -> false
-      | Neg c' ->
-          (* ¬c unstable near 0 iff c is stable near 1 *)
-          is_stable_near_one c'
-      | Mul (a, b) ->
-          (* Product unstable if either factor is unstable *)
-          is_unstable_near_zero a || is_unstable_near_zero b
-      | _ -> false
+  match simplify c with
+  | Zero -> true
+  | One -> false
+  | Neg c' ->
+      (* ¬c = 0 iff c = 1 *)
+      is_stable_near_one c'
+  | Mul (a, b) ->
+      (* Product = 0 if either factor = 0 *)
+      is_unstable_near_zero a || is_unstable_near_zero b
+  | _ ->
+      match to_rational (simplify c) with
+      | Some r -> rat_equal r rat_zero
+      | None -> false
 
 (* ========================================================================
    CREDENCE INFERENCE ENGINE
