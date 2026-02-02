@@ -1,0 +1,81 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  ocaml:
+    name: OCaml (probtt-impl)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup OCaml
+        uses: ocaml/setup-ocaml@v3
+        with:
+          ocaml-compiler: "4.14"
+          dune-cache: true
+
+      - name: Install dependencies
+        run: opam install . --deps-only --with-test -y
+        working-directory: probtt-impl
+
+      - name: Build
+        run: opam exec -- dune build
+        working-directory: probtt-impl
+
+      - name: Test
+        run: opam exec -- dune runtest
+        working-directory: probtt-impl
+
+  agda:
+    name: Agda type-check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Agda
+        uses: wenkokke/setup-agda@v2
+        with:
+          agda-version: "2.6.4.3"
+          agda-stdlib-version: "2.3"
+
+      - name: Cache Agda build
+        uses: actions/cache@v4
+        with:
+          path: agda/_build
+          key: agda-${{ runner.os }}-${{ hashFiles('agda/**/*.agda') }}
+          restore-keys: |
+            agda-${{ runner.os }}-
+
+      - name: Type-check Everything
+        run: agda Everything.agda
+        working-directory: agda
+
+  latex:
+    name: LaTeX (papers)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Build ProbTT paper
+        uses: xu-cheng/latex-action@v3
+        with:
+          working_directory: papers/probtt
+          root_file: probtt.tex
+          latexmk_use_lualatex: false
+          args: -pdf -interaction=nonstopmode -halt-on-error
+
+      - name: Upload PDF
+        uses: actions/upload-artifact@v4
+        with:
+          name: probtt-paper
+          path: papers/probtt/probtt.pdf
+          retention-days: 30

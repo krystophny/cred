@@ -1,4 +1,3 @@
-{-# OPTIONS --allow-unsolved-metas #-}
 -- Graded Choice: Axiom of Choice at weight < 1
 -- Finite choice at weight 1, countable/uncountable at weight < 1
 --
