@@ -640,13 +640,16 @@ let finalize_credence ctx c =
 let infer_derivation_credence ~from_credence ~(step : string) =
   match step with
   (* Preserving steps: logical equivalences, definitional steps *)
+  (* NOTE: Contrapositive is a LOGICAL EQUIVALENCE (A->B iff ~B->~A), so it
+     preserves credence. The negations happen to the propositions, not credences. *)
   | "algebra" | "substitution" | "both_even" | "self_reference"
   | "definition" | "assumption" | "trivial" | "identity" | "reflexivity"
-  | "symmetry" | "congruence" | "rewrite" | "unfold" | "fold" ->
+  | "symmetry" | "congruence" | "rewrite" | "unfold" | "fold"
+  | "contrapositive" ->
       from_credence
 
-  (* Negation: c becomes 1-c *)
-  | "negate" | "negation" | "contrapositive" | "complement" ->
+  (* Negation: c becomes 1-c (applies complement to the credence itself) *)
+  | "negate" | "negation" | "complement" ->
       simplify (neg from_credence)
 
   (* Projection from pair: preserves credence (already joint) *)
