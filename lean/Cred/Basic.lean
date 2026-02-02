@@ -3,9 +3,17 @@
 
   This formalizes the credence algebra and its core properties.
   Credences are values in [0,1] with:
-  - Conjunction (multiplication)
-  - Negation (complement)
+  - Conjunction (multiplication): assumes independence, i.e., cred(A) * cred(B)
+  - Negation (complement): ~c = 1 - c
+  - Disjunction (De Morgan): c₁ + c₂ - c₁*c₂ (independence formula)
   - Conditioning (primitive, via chain rule)
+
+  IMPORTANT: The binary operations ⊗ and ⊔ compute the credence of conjunctions
+  and disjunctions under an INDEPENDENCE assumption. For dependent propositions,
+  the joint credence cred(A ∧ B) ≠ cred(A) * cred(B) in general.
+
+  The Conditioning structure handles the general case where joint credences
+  are provided as parameters, not computed from marginals.
 -/
 
 import Mathlib.Data.Real.Basic
@@ -126,27 +134,90 @@ theorem neg_le_neg_iff (c₁ c₂ : Credence) : c₁ ≤ c₂ ↔ ~c₂ ≤ ~c�
   simp only [le_def, neg_val]
   constructor <;> intro h <;> linarith
 
+instance : Preorder Credence where
+  le_refl c := le_refl c.val
+  le_trans _ _ _ h1 h2 := le_trans (α := ℝ) h1 h2
+  lt_iff_le_not_le c₁ c₂ := by
+    simp only [le_def, lt_def]
+    exact lt_iff_le_not_le
+
+instance : PartialOrder Credence where
+  le_antisymm c₁ c₂ h1 h2 := by
+    ext
+    exact le_antisymm (α := ℝ) h1 h2
+
+/-- Conjunction idempotent only at 0 and 1 -/
+theorem conj_idempotent_iff (c : Credence) : c ⊗ c = c ↔ c = 0 ∨ c = 1 := by
+  constructor
+  · intro h
+    have hv : c.val * c.val = c.val := congrArg (·.val) h
+    simp only [conj_val] at hv
+    have hsub : c.val * (c.val - 1) = 0 := by ring_nf; linarith
+    rcases mul_eq_zero.mp hsub with hz | h1
+    · left; ext; exact hz
+    · right; ext; simp only [one_val]; linarith
+  · intro h
+    rcases h with rfl | rfl
+    · simp
+    · simp
+
 /-! ## Conditioning (Primitive) -/
 
 /--
 Conditioning is a primitive operation satisfying the chain rule.
-We represent it as a structure containing a credence value and
-the chain rule constraint.
+
+Parameters:
+- `joint`: the credence cred(A ∧ B) of the conjunction (given, not computed)
+- `evidence`: the credence cred(B) of the evidence
+
+The chain rule states: cred(A | B) * cred(B) = cred(A ∧ B)
+
+Note: `joint` is NOT assumed to equal `evidence * something`; it is an
+independent parameter representing the actual joint credence, which may
+differ from the product of marginals for dependent propositions.
 -/
-structure Conditioning (A B : Credence) where
+structure Conditioning (joint evidence : Credence) where
   /-- The conditional credence cred(A | B) -/
   condCred : Credence
   /-- Chain rule: cred(A | B) * cred(B) = cred(A ∧ B) -/
-  chainRule : condCred ⊗ B = A ⊗ B
+  chainRule : condCred ⊗ evidence = joint
 
-/-- When B = 0, conditioning is unconstrained (no ex falso!) -/
-theorem conditioning_zero_unconstrained (A : Credence) (c : Credence) :
-    c ⊗ (0 : Credence) = A ⊗ 0 := by simp
+/-- When evidence = 0, any conditioning produces 0 -/
+theorem conditioning_zero_trivial (c : Credence) :
+    c ⊗ (0 : Credence) = 0 := by simp
 
-/-- When B = 1, cred(A | B) = cred(A) -/
-theorem conditioning_one (A : Credence) :
-    ∃ cond : Conditioning A 1, cond.condCred = A := by
-  use ⟨A, by simp⟩
+/-- When evidence = 0, conditioning requires joint = 0, but condCred is unconstrained -/
+theorem conditioning_zero_any (c : Credence) :
+    ∃ cond : Conditioning 0 0, cond.condCred = c := by
+  use ⟨c, by simp⟩
+
+/-- When evidence = 1, cred(A | B) = cred(A ∧ B) -/
+theorem conditioning_one (joint : Credence) :
+    ∃ cond : Conditioning joint 1, cond.condCred = joint := by
+  use ⟨joint, by simp⟩
+
+/-- Existence of conditioning when evidence > 0 and joint ≤ evidence -/
+theorem conditioning_exists (joint evidence : Credence) (h_pos : 0 < evidence.val)
+    (h_le : joint.val ≤ evidence.val) :
+    ∃ _ : Conditioning joint evidence, True := by
+  refine ⟨⟨⟨joint.val / evidence.val, ?_, ?_⟩, ?_⟩, trivial⟩
+  · exact div_nonneg joint.nonneg (le_of_lt h_pos)
+  · rw [div_le_one h_pos]; exact h_le
+  · ext; simp only [conj_val]; field_simp
+
+/-- Uniqueness of conditioning when evidence > 0 -/
+theorem conditioning_unique (joint evidence : Credence) (h_pos : 0 < evidence.val)
+    (c₁ c₂ : Conditioning joint evidence) : c₁.condCred = c₂.condCred := by
+  ext
+  have h1 := congrArg (·.val) c₁.chainRule
+  have h2 := congrArg (·.val) c₂.chainRule
+  simp only [conj_val] at h1 h2
+  have heq : c₁.condCred.val * evidence.val = c₂.condCred.val * evidence.val := by
+    rw [h1, h2]
+  have hne : evidence.val ≠ 0 := ne_of_gt h_pos
+  calc c₁.condCred.val = c₁.condCred.val * evidence.val / evidence.val := by field_simp
+    _ = c₂.condCred.val * evidence.val / evidence.val := by rw [heq]
+    _ = c₂.condCred.val := by field_simp
 
 /-! ## Fixed Points -/
 
@@ -157,6 +228,14 @@ def half : Credence where
   le_one := by norm_num
 
 @[simp] theorem half_val : half.val = 0.5 := rfl
+
+/-- Conjunction is NOT idempotent: c ⊗ c ≠ c in general (fails at 0.5) -/
+theorem conj_not_idempotent : ∃ c : Credence, c ⊗ c ≠ c := by
+  use half
+  intro h
+  have : half.val * half.val = half.val := congrArg (·.val) h
+  simp only [half_val] at this
+  norm_num at this
 
 /-- The liar sentence has credence 0.5 -/
 theorem liar_fixed_point : ~half = half := by
