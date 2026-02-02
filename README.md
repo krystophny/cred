@@ -1,69 +1,39 @@
-# CredTT: Type Theory with Primitive Credences
+# Cred: A Foundation Below Logic
 
-A type theory where **credences are primitive**, not derived from numbers.
+**Cred** is a foundation for mathematics where credences (degrees of belief) are primitive and logic emerges as a limiting case.
 
-## Core Idea
+## The Key Insight
 
-Judgments carry credences: `Gamma |- a : A @ c`
-
-The credence algebra is a **De Morgan algebra**:
-```
-0 : C           -- impossibility
-1 : C           -- certainty
-* : C -> C -> C -- multiplication (conjunction)
-~ : C -> C      -- complement (negation)
-<= : C -> C -> Prop
-```
-
-Disjunction is derived: `c1 | c2 = ~(~c1 * ~c2)`
-
-## Key Rule
-
-Credences multiply in elimination:
-```
-Gamma |- f : A -> B @ c1    Gamma |- a : A @ c2
------------------------------------------------
-           Gamma |- f a : B @ c1*c2
-```
-
-## Instances
-
-| C | Interpretation |
-|---|----------------|
-| {0,1} | MLTT (classical logic) |
-| [0,1] | Probability/confidence |
-| [0,inf] | Costs |
-
-## Key Features
-
-- **MLTT as limit**: When C = {0,1}, CredTT collapses to Martin-Lof Type Theory
-- **Conditioning**: Via chain rule `P(A,B) = P(A|B) * P(B)`, no division needed
-- **Graded ex falso**: Continuous spectrum from constrained (c=1) to unconstrained (c=0)
-
-## Files
+Classical logic is what credence looks like when you can't see the middle.
 
 ```
-papers/credtt/credtt.tex   -- The specification
-CLAUDE.md                  -- Project documentation
-TYPECHECKER.md             -- Implementation sketch
+Cred [0,1]              graded, conditioning primitive
+    ↓ collapse
+{0, ½, 1}               three-valued relevant (RM3-like)
+    ↓ collapse
+{0, 1}                  Boolean relevant logic
+    ↓ add ex falso
+Classical FOL           standard foundation
 ```
 
-## Build
+## What Makes This Different
 
-```bash
-cd papers/credtt && pdflatex credtt.tex
-```
+| Traditional | Cred |
+|-------------|------|
+| Logic is primitive | Credence is primitive, logic emerges |
+| Material implication (ex falso) | Conditioning via chain rule (no ex falso) |
+| Boolean truth | Graded truth, Boolean is limit |
+| Fuzzy logic generalizes classical | Cred generalizes relevant logic |
 
-## Status
+## Structure
 
-Paper specification complete. Next: Agda formalization.
+- **part1/**: The collapse hierarchy - how classical structures emerge
+- **part2/**: Credence foundation - replacing relevant logic without crisp sets
+- **part3/**: New mathematics - proof techniques and undecidability
 
-## Future Extension: ProbTT
+## Prior Art
 
-ProbTT extends CredTT with addition (+) for marginalization:
-- Marginalization: P(A) = sum_b P(A,b)
-- This is probability-specific, not needed for base logic
-
-## License
-
-MIT
+- **Rényi (1955)**: Conditional probability as primitive
+- **Anderson & Belnap (1960s)**: Relevant logic (no ex falso)
+- **Fritz et al. (2020)**: Markov categories (conditioning without division)
+- **Krantz et al. (1971)**: Qualitative probability (numbers emerge from ordering)

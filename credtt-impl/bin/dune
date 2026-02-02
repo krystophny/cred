@@ -1,5 +1,0 @@
-(executable
- (name credtt)
- (public_name credtt-cli)
- (modules credtt)
- (libraries credtt_lib credtt_parser))

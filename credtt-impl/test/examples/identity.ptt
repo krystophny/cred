@@ -1,3 +1,0 @@
--- Identity function
-id : A -> A
-id x = x
