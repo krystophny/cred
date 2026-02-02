@@ -59,10 +59,10 @@ If G is false: G is provable, but then G would be true. Contradiction in classic
 
 In Cred:
 ```
-cred(G) ≈ 0.5
+cred(G) = 0.5
 ```
 
-G is "undecidable" — credence stuck at 0.5.
+G is "undecidable" — credence exactly 0.5 (fixed point).
 
 ## The Fixed Point Theorem
 
@@ -122,7 +122,7 @@ The negation fixed point at 0.5 is neutrally stable.
 | Liar: "I am false" | c = 1-c | 0.5 |
 | Truth-teller: "I am true" | c = c | any c |
 | Asserter: "I am provable" | c = cred(proof exists) | depends on system |
-| Denier: "I am unprovable" | c = 1 - cred(proof exists) | ≈ 0.5 (Gödel) |
+| Denier: "I am unprovable" | c = 1 - cred(proof exists) | = 0.5 (Gödel) |
 
 ## Chains of Self-Reference
 

@@ -24,14 +24,16 @@ After more steps:     cred(P) = c₂ > c₁
 Limit:                cred(P) → c_∞
 ```
 
-## Degrees of Proof
+## Credence Ranges
 
 | cred(P) | Status |
 |---------|--------|
 | 1 | Proven (certain) |
-| (0.5, 1) | Partially proven (likely true) |
+| → 1 | Asymptotic proof (converging) |
+| (0.5, 1) | Partial evidence (degree of belief) |
 | 0.5 | Undecided / undecidable |
-| (0, 0.5) | Partially refuted (likely false) |
+| (0, 0.5) | Partial counter-evidence |
+| → 0 | Asymptotic refutation |
 | 0 | Refuted (impossible) |
 
 ## Asymptotic Proof
@@ -66,10 +68,10 @@ Classical: Unknown (neither proven nor refuted)
 Cred:
 - Most experts believe P ≠ NP
 - Evidence: separation of complexity classes, oracle results
-- cred(P ≠ NP) ≈ 0.9 (high but not certain)
-- cred(P = NP) ≈ 0.1
+- Current credence: high (degree of belief based on evidence)
+- But NOT proven: no convergence to 1 yet
 
-The credence reflects the state of knowledge.
+A proof would require cred → 1 (convergence), not just "high credence".
 
 ## Proof by Accumulation
 
@@ -79,18 +81,18 @@ In Cred, proofs can work by accumulating evidence:
 Initial: cred(P) = 0.5 (no information)
 
 Evidence 1: Consistent with P
-  cred(P) → 0.6
+  cred(P) increases to 0.6
 
 Evidence 2: Another consistency check
-  cred(P) → 0.7
+  cred(P) increases to 0.7
 
 ...
 
-Evidence n: Still consistent
-  cred(P) → 1 - ε
+If evidence keeps accumulating and cred → 1: PROOF
+If evidence stalls and cred plateaus: partial evidence (not proof)
 ```
 
-This is like scientific confirmation, not mathematical proof.
+The key: proof requires CONVERGENCE to 1, not just high credence.
 
 ## Proof by Derivation
 
@@ -117,19 +119,17 @@ In Cred:
 
 The undecidability IS the credence being stuck at 0.5.
 
-## Proof Strength
+## What Counts as a Proof?
 
-We can compare proof strength:
+A **proof** is a process where credence CONVERGES to 1:
 
 ```
-Strong proof: cred(P) = 1 (certain)
-Weak proof: cred(P) = 0.9 (highly likely)
-Partial proof: cred(P) = 0.7 (more likely than not)
-No proof: cred(P) = 0.5 (no information)
-Partial refutation: cred(P) = 0.3 (unlikely)
-Strong refutation: cred(P) = 0.1 (very unlikely)
-Refutation: cred(P) = 0 (impossible)
+Proof:       cred(P) → 1 (converges to certainty)
+Refutation:  cred(P) → 0 (converges to impossibility)
+Undecidable: cred(P) = 0.5 (fixed point)
 ```
+
+**Important**: There is no "weak proof at 0.9" or "partial proof at 0.7". Having cred(P) = 0.7 means you have partial evidence — which is meaningful! — but it's not a proof unless it's part of a sequence converging to 1.
 
 ## Constructive Proofs
 

@@ -8,25 +8,24 @@ Cred adds new techniques that exploit graded credence.
 
 ## Technique 1: Credence Bounding
 
-**Idea**: Instead of proving P true/false, bound its credence.
+**Idea**: Establish bounds on credence during reasoning.
 
 ```
-Theorem: cred(P) ∈ [0.7, 0.9]
+Analysis: cred(P) ∈ [0.7, 0.9]
 
-Proof:
 - Lower bound: Evidence E₁ implies cred(P) ≥ 0.7
 - Upper bound: Counter-evidence E₂ implies cred(P) ≤ 0.9
 ```
 
-This is useful when exact credence is unknown but bounds are provable.
+This is useful for partial analysis. Note: bounding is NOT the same as proof. A proof requires convergence to 1.
 
 ### Example: Prime Gap Conjecture
 ```
 "There are infinitely many prime gaps ≤ 246"
 
-cred(Conjecture) ∈ [0.99, 1]
-Lower bound: Zhang's theorem (gaps ≤ 70,000,000)
-Upper bound: Not proven exactly 1
+Current evidence gives high credence
+Zhang's theorem, Polymath improvements increase cred toward 1
+Goal: show cred → 1 (convergence), not just "cred is high"
 ```
 
 ## Technique 2: Asymptotic Proof
@@ -185,14 +184,16 @@ All classical techniques work when credences are 0 or 1:
 Real proofs combine techniques:
 
 ```
-Theorem: cred(Goldbach) ≥ 0.99
+Theorem: cred(Goldbach) → 1
 
 Proof:
 1. Verification up to 10^18 (asymptotic evidence)
-2. Heuristic arguments (credence bounding)
+2. Heuristic arguments (convergence analysis)
 3. Absence of counterexample (monotonicity)
-Combined: cred ≥ 0.99
+Combined: cred converges to 1
 ```
+
+Note: The credence converges to 1, not to some arbitrary threshold.
 
 ## Open Questions
 

@@ -25,16 +25,16 @@ The credence approaches 1 but may never exactly reach it.
 Goldbach's Conjecture: Every even n > 2 is sum of two primes.
 
 ```
-Verify n = 4: ✓ (4 = 2+2)     cred → 0.6
-Verify n = 6: ✓ (6 = 3+3)     cred → 0.7
-Verify n = 8: ✓ (8 = 3+5)     cred → 0.75
+Verify n = 4: ✓ (4 = 2+2)     cred increasing
+Verify n = 6: ✓ (6 = 3+3)     cred increasing
+Verify n = 8: ✓ (8 = 3+5)     cred increasing
 ...
-Verify n = 10^18: ✓           cred → 0.9999...
+Verify n = 10^18: ✓           cred very high
+...
+lim_{n→∞} cred_n = 1
 ```
 
-Each verification increases credence. In the limit (all n verified), cred → 1.
-
-But we never finish verifying all n. So we have asymptotic evidence, not proof.
+Each verification increases credence. The key: we care about CONVERGENCE to 1, not crossing some arbitrary threshold.
 
 ### Example 2: Probabilistic Primality
 
@@ -45,7 +45,7 @@ Round 2: Pass → cred(prime) ≥ 0.9375
 Round k: Pass → cred(prime) ≥ 1 - (1/4)^k
 ```
 
-As k → ∞, cred → 1. But finite rounds give cred < 1.
+As k → ∞, cred → 1. The key: this is CONVERGENCE to 1, not hitting an arbitrary threshold like 0.99.
 
 ### Example 3: Consistency Proofs
 
@@ -68,17 +68,19 @@ We have asymptotic evidence for Con(ZFC), not proof.
 - Weaker than "proven" (cred = 1)
 - Useful and meaningful
 
-## The Hierarchy of Proof Strength
+## The Hierarchy
 
 ```
 cred = 1        Classical proof
-cred → 1        Asymptotic proof (NEW)
-cred ∈ (0.5,1)  Partial evidence
+cred → 1        Asymptotic proof (converging to certainty)
+cred ∈ (0.5,1)  Partial evidence (degree of belief)
 cred = 0.5      Undecided/undecidable
 cred ∈ (0,0.5)  Partial counter-evidence
 cred → 0        Asymptotic refutation
 cred = 0        Classical refutation
 ```
+
+Note: Asymptotic proofs are defined by CONVERGENCE to 1, not by crossing an arbitrary threshold.
 
 ## Converging to 1
 
