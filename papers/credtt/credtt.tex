@@ -1,0 +1,1037 @@
+\documentclass[11pt,a4paper]{article}
+
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{mathtools}
+\usepackage[margin=1in]{geometry}
+\usepackage{stmaryrd}
+\usepackage[round]{natbib}
+
+% Custom inference rule macro
+\newcommand{\infer}[3][]{%
+  \genfrac{}{}{0.4pt}{0}{#3}{#2}\;\textsc{\footnotesize #1}%
+}
+
+\newtheorem{definition}{Definition}[section]
+\newtheorem{remark}{Remark}[section]
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{example}[theorem]{Example}
+
+\newcommand{\C}{\mathsf{C}}
+\newcommand{\Type}{\mathsf{Type}}
+\newcommand{\ctx}{\;\mathsf{ctx}}
+\newcommand{\type}{\;\mathsf{type}}
+\newcommand{\at}[1]{\,@\,#1}
+\newcommand{\one}{\mathbf{1}}
+\newcommand{\zero}{\mathbf{0}}
+\newcommand{\negc}{\neg}
+
+\title{CredTT: A Type Theory for Graded Provability\\[0.5em]
+\large Conditioning without Implication}
+
+\author{Probabilistic Foundations Project}
+\date{\today}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+We define a type theory where judgments carry \emph{credences} from a De Morgan algebra. The algebra has multiplication, complement, zero, one, and order---with disjunction derived via De Morgan duality. When $\C = \{\zero, \one\}$, we recover Martin-L\"of Type Theory. When $\C = {[0,1]}$, we get probabilistic typing with conditioning via the chain rule (not division). The key insight: types and logic \emph{emerge} from credence structure. We add conditioning as a primitive, distinguishing this from purely algebraic approaches.
+\end{abstract}
+
+\section*{Terminological Note}
+
+We use \emph{credence} (degree of belief) rather than \emph{probability} because:
+\begin{enumerate}
+    \item \textbf{Subjective interpretation}: Credences are epistemic---they represent degrees of belief or confidence in propositions, not frequencies of events.
+    \item \textbf{Avoiding measure-theoretic baggage}: ``Probability'' suggests Kolmogorov axioms, sigma-algebras, and measure theory. Our credences satisfy only the De Morgan algebra axioms.
+    \item \textbf{Type-theoretic context}: In type theory, we ask ``how confident are we that this type is inhabited?'' rather than ``what is the frequency of this event?''
+    \item \textbf{Philosophical tradition}: The term ``credence'' is standard in formal epistemology for rational degrees of belief.
+\end{enumerate}
+
+Throughout this paper, $c$ denotes a credence value, $\C$ is the credence algebra, and ``credence'' replaces ``weight'' or ``probability'' in all technical contexts.
+
+\tableofcontents
+
+%=============================================================================
+\section{The Credence Algebra}
+%=============================================================================
+
+\subsection{Product De Morgan Structure}
+
+We axiomatize a minimal structure: multiplication and complement. Disjunction is derived.
+
+\begin{definition}[Credence Algebra]
+$\C$ is a type with:
+\begin{itemize}
+    \item Constants: $\one : \C$ (certainty), $\zero : \C$ (impossibility)
+    \item Multiplication: $(\cdot) : \C \to \C \to \C$ (conjunction)
+    \item Complement: $\negc : \C \to \C$ (negation)
+    \item Order: $(\leq) : \C \to \C \to \Type$
+\end{itemize}
+\end{definition}
+
+\begin{definition}[Multiplication Axioms]
+\begin{align}
+c \cdot \one &= c \tag{unit-right} \\
+\one \cdot c &= c \tag{unit-left} \\
+c \cdot \zero &= \zero \tag{annihilate-right} \\
+\zero \cdot c &= \zero \tag{annihilate-left} \\
+(u \cdot v) \cdot c &= u \cdot (v \cdot c) \tag{assoc} \\
+u \cdot v &= v \cdot u \tag{comm}
+\end{align}
+\end{definition}
+
+\begin{definition}[Complement Axioms]
+\begin{align}
+\negc \zero &= \one \tag{neg-zero} \\
+\negc \one &= \zero \tag{neg-one} \\
+\negc \negc c &= c \tag{involution}
+\end{align}
+\end{definition}
+
+\begin{definition}[Order Axioms]
+\begin{align}
+c &\leq c \tag{refl} \\
+u \leq v \land v \leq c &\Rightarrow u \leq c \tag{trans} \\
+u \leq v \land v \leq u &\Rightarrow u = v \tag{antisym} \\
+\zero &\leq c \tag{zero-least} \\
+c &\leq \one \tag{one-greatest}
+\end{align}
+\end{definition}
+
+\subsection{Derived Operations}
+
+\begin{definition}[De Morgan Disjunction]
+\[
+c \vee v := \negc(\negc c \cdot \negc v)
+\]
+\end{definition}
+
+When $\C = {[0,1]}$ with $\negc c = 1 - c$, we get:
+\[
+c \vee v = 1 - (1-c)(1-v) = c + v - cv
+\]
+This is the \textbf{probabilistic sum} (inclusion-exclusion for independent events).
+
+\begin{theorem}[De Morgan Laws]
+\begin{align}
+\negc(c \cdot v) &= \negc c \vee \negc v \\
+\negc(c \vee v) &= \negc c \cdot \negc v
+\end{align}
+\end{theorem}
+
+\begin{proof}
+Direct calculation from definitions.
+\end{proof}
+
+\subsection{What We Have vs What We Don't}
+
+\begin{center}
+\begin{tabular}{l|l}
+\textbf{Primitive} & \textbf{Derived} \\
+\hline
+$\cdot$ (multiplication/AND) & $\vee$ (De Morgan OR) \\
+$\negc$ (complement/NOT) & $\to$ (implication, if needed) \\
+$\zero, \one$ (constants) & \\
+$\leq$ (order) &
+\end{tabular}
+\end{center}
+
+\textbf{NOT primitive}: addition $+$, subtraction $-$, division $/$.
+
+\subsection{Instances}
+
+\begin{example}[Boolean: $\C = \{\zero, \one\}$]
+$\one \cdot \one = \one$, else $\zero$. $\negc \zero = \one$, $\negc \one = \zero$.
+
+This is classical Boolean logic.
+\end{example}
+
+\begin{example}[Credence: $\C = {[0,1]}$]
+$c \cdot v = c \times v$ (ordinary multiplication). $\negc c = 1 - c$.
+
+This is product fuzzy logic / probabilistic reasoning.
+\end{example}
+
+\begin{example}[Three-valued: $\C = \{\zero, ?, \one\}$]
+$? \cdot ? = ?$, $\negc ? = ?$.
+
+Kleene's strong three-valued logic.
+\end{example}
+
+%=============================================================================
+\section{Judgments}
+%=============================================================================
+
+\begin{definition}[Judgment Forms]
+\begin{enumerate}
+    \item $\Gamma \ctx$ \hfill (valid context)
+    \item $\Gamma \vdash A \type$ \hfill (valid type)
+    \item $\Gamma \vdash a : A \at{c}$ \hfill (credence-annotated typing)
+    \item $\Gamma \vdash a \equiv b : A \at{c}$ \hfill (credence-annotated equality)
+\end{enumerate}
+\end{definition}
+
+\begin{remark}[Interpretation]
+$\Gamma \vdash a : A \at{c}$ means: term $a$ inhabits type $A$ with credence $c$.
+\begin{itemize}
+    \item $c = \one$: $a$ definitely inhabits $A$
+    \item $c = \zero$: $a$ does not inhabit $A$ (vacuously true)
+    \item $\zero < c < \one$: $a$ partially/probably inhabits $A$
+\end{itemize}
+\end{remark}
+
+%=============================================================================
+\section{Structural Rules}
+%=============================================================================
+
+\begin{gather}
+\infer[\textsc{Ctx-Empty}]
+  {\cdot \ctx}
+  {}
+\qquad
+\infer[\textsc{Ctx-Ext}]
+  {\Gamma, x : A \ctx}
+  {\Gamma \ctx \quad \Gamma \vdash A \type}
+\\[1em]
+\infer[\textsc{Var}]
+  {\Gamma, x : A, \Delta \vdash x : A \at{\one}}
+  {}
+\\[1em]
+\infer[\textsc{Weaken}]
+  {\Gamma \vdash a : A \at{v}}
+  {\Gamma \vdash a : A \at{c} \quad v \leq c}
+\\[1em]
+\infer[\textsc{Subst}]
+  {\Gamma \vdash b[a/x] : B[a/x] \at{c \cdot v}}
+  {\Gamma \vdash a : A \at{c} \quad \Gamma, x : A \vdash b : B \at{v}}
+\end{gather}
+
+%=============================================================================
+\section{Type Formers}
+%=============================================================================
+
+\subsection{Functions (Dependent)}
+
+\begin{gather}
+\infer[\textsc{$\Pi$-Form}]
+  {\Gamma \vdash (x : A) \to B \type}
+  {\Gamma \vdash A \type \quad \Gamma, x : A \vdash B \type}
+\\[1em]
+\infer[\textsc{$\Pi$-Intro}]
+  {\Gamma \vdash \lambda x. b : (x : A) \to B \at{c}}
+  {\Gamma, x : A \vdash b : B \at{c}}
+\\[1em]
+\infer[\textsc{$\Pi$-Elim}]
+  {\Gamma \vdash f\,a : B[a/x] \at{c \cdot v}}
+  {\Gamma \vdash f : (x : A) \to B \at{c} \quad \Gamma \vdash a : A \at{v}}
+\end{gather}
+
+\textbf{Key rule}: credences multiply in elimination.
+
+\subsection{Pairs (Dependent)}
+
+\begin{gather}
+\infer[\textsc{$\Sigma$-Form}]
+  {\Gamma \vdash \Sigma(x : A). B \type}
+  {\Gamma \vdash A \type \quad \Gamma, x : A \vdash B \type}
+\\[1em]
+\infer[\textsc{$\Sigma$-Intro}]
+  {\Gamma \vdash (a, b) : \Sigma(x : A). B \at{c \cdot v}}
+  {\Gamma \vdash a : A \at{c} \quad \Gamma \vdash b : B[a/x] \at{v}}
+\\[1em]
+\infer[\textsc{$\Sigma$-Elim$_1$}]
+  {\Gamma \vdash \pi_1\,t : A \at{c}}
+  {\Gamma \vdash t : \Sigma(x : A). B \at{c}}
+\qquad
+\infer[\textsc{$\Sigma$-Elim$_2$}]
+  {\Gamma \vdash \pi_2\,t : B[\pi_1 t / x] \at{c}}
+  {\Gamma \vdash t : \Sigma(x : A). B \at{c}}
+\end{gather}
+
+Pair credence = product of component credences (joint probability).
+
+\subsection{Sums (Coproducts)}
+
+\begin{gather}
+\infer[\textsc{$+$-Form}]
+  {\Gamma \vdash A + B \type}
+  {\Gamma \vdash A \type \quad \Gamma \vdash B \type}
+\\[1em]
+\infer[\textsc{$+$-Intro$_L$}]
+  {\Gamma \vdash \mathsf{inl}\,a : A + B \at{c}}
+  {\Gamma \vdash a : A \at{c}}
+\qquad
+\infer[\textsc{$+$-Intro$_R$}]
+  {\Gamma \vdash \mathsf{inr}\,b : A + B \at{c}}
+  {\Gamma \vdash b : B \at{c}}
+\\[1em]
+\infer[\textsc{$+$-Elim}]
+  {\Gamma \vdash \mathsf{case}\,e\,\mathsf{of}\,\mathsf{inl}\,x \Rightarrow l \mid \mathsf{inr}\,y \Rightarrow r : C \at{c \cdot v}}
+  {\Gamma \vdash e : A + B \at{c} \quad \Gamma, x : A \vdash l : C \at{v} \quad \Gamma, y : B \vdash r : C \at{v}}
+\end{gather}
+
+\textbf{Key rule}: credences multiply in sum elimination. The scrutinee credence $c$ combines with the branch credence $v$ to give joint credence $c \cdot v$.
+
+\subsection{Empty and Unit (Omitted)}
+
+\textbf{Design decision}: Pure CredTT omits the Empty type ($\mathbf{0}$) and Unit type ($\mathbf{1}$).
+
+\begin{itemize}
+    \item \textbf{Impossibility}: Credence $\zero$ on any type captures ``does not inhabit.'' No special Empty type needed.
+    \item \textbf{Certainty}: Credence $\one$ on any type captures ``definitely inhabits.'' No special Unit type needed.
+\end{itemize}
+
+This avoids the philosophical question ``what TYPE is impossibility/certainty?'' In MLTT, $\mathbf{0}$ and $\mathbf{1}$ are primitive types. In CredTT, impossibility and certainty are \emph{credences}, not types.
+
+\begin{remark}[No Ex Falso Explosion]
+Without $\mathbf{0}$-Elim (abort), there is no explosion rule. If $a : A \at{\zero}$, then $f\,a : B \at{c \cdot \zero} = \at{\zero}$---the zero credence propagates via multiplication, not via a special elimination rule.
+\end{remark}
+
+\begin{remark}[MLTT Compatibility]
+When extending CredTT for MLTT compatibility, one may add:
+\begin{gather*}
+\infer[\textsc{$\mathbf{0}$-Form}]
+  {\Gamma \vdash \mathbf{0} \type}
+  {\Gamma \ctx}
+\qquad
+\infer[\textsc{$\mathbf{0}$-Elim}]
+  {\Gamma \vdash \mathsf{abort}\,e : A \at{c}}
+  {\Gamma \vdash e : \mathbf{0} \at{c}}
+\\[1em]
+\infer[\textsc{$\mathbf{1}$-Form}]
+  {\Gamma \vdash \mathbf{1} \type}
+  {\Gamma \ctx}
+\qquad
+\infer[\textsc{$\mathbf{1}$-Intro}]
+  {\Gamma \vdash \star : \mathbf{1} \at{\one}}
+  {\Gamma \ctx}
+\end{gather*}
+The Agda formalization omits these for philosophical purity.
+\end{remark}
+
+\subsection{Identity}
+
+\begin{gather}
+\infer[\textsc{Id-Form}]
+  {\Gamma \vdash \mathsf{Id}_A(a, b) \type}
+  {\Gamma \vdash a : A \at{\one} \quad \Gamma \vdash b : A \at{\one}}
+\\[1em]
+\infer[\textsc{Id-Intro}]
+  {\Gamma \vdash \mathsf{refl} : \mathsf{Id}_A(a, a) \at{c}}
+  {\Gamma \vdash a : A \at{c}}
+\\[1em]
+\infer[\textsc{Id-Elim}]
+  {\Gamma \vdash J(M, d, p) : M[b, p] \at{c \cdot v}}
+  {\Gamma \vdash p : \mathsf{Id}_A(a, b) \at{c} \quad \Gamma \vdash d : M[a, \mathsf{refl}] \at{v}}
+\end{gather}
+
+The J eliminator transports along an identity proof. Credences multiply: the proof credence $c$ combines with the base case credence $v$.
+
+%=============================================================================
+\section{Computation Rules}
+%=============================================================================
+
+The computation (beta) rules reduce eliminator-intro pairs. In each case, credence multiplication is preserved.
+
+\subsection{$\Pi$-Computation}
+\[
+(\lambda x. b)\,a \equiv b[a/x] : B[a/x] \at{c \cdot v}
+\]
+when $\Gamma, x : A \vdash b : B \at{c}$ and $\Gamma \vdash a : A \at{v}$.
+
+\subsection{$\Sigma$-Computation}
+\begin{align}
+\pi_1(a, b) &\equiv a : A \at{c \cdot v} \\
+\pi_2(a, b) &\equiv b : B[a/x] \at{c \cdot v}
+\end{align}
+when $\Gamma \vdash a : A \at{c}$ and $\Gamma \vdash b : B[a/x] \at{v}$.
+
+\subsection{$+$-Computation}
+\begin{align}
+\mathsf{case}\,(\mathsf{inl}\,a)\,l\,r &\equiv l[a/x] : C \at{c \cdot v} \\
+\mathsf{case}\,(\mathsf{inr}\,b)\,l\,r &\equiv r[b/y] : C \at{c \cdot v}
+\end{align}
+
+\subsection{Id-Computation}
+\[
+J(M, d, \mathsf{refl}) \equiv d : M[a, \mathsf{refl}] \at{c \cdot v}
+\]
+when $\Gamma \vdash a : A \at{c}$ and $\Gamma \vdash d : M[a, \mathsf{refl}] \at{v}$.
+
+%=============================================================================
+\section{Negation}
+%=============================================================================
+
+There are two approaches to negation:
+
+\subsection{Type-Theoretic Negation}
+
+\[
+\neg A := A \to \mathbf{0}
+\]
+
+A proof of $\neg A$ is a function from $A$ to the empty type.
+
+\subsection{Credence Negation}
+
+For a term $a : A \at{c}$, we can consider $\negc c$ as the ``complementary credence.''
+
+In $\C = {[0,1]}$: if $P(A) = c$, then $P(\neg A) = 1 - c = \negc c$.
+
+\begin{remark}[Relationship]
+Type-theoretic negation ($A \to \mathbf{0}$) corresponds to credence negation in the following sense: if $a : A \at{c}$ with $c > \zero$, then there is no $f : A \to \mathbf{0} \at{\one}$.
+\end{remark}
+
+%=============================================================================
+\section{Conditioning (Not Implication)}
+%=============================================================================
+
+\subsection{Why Not Material Implication}
+
+Material implication $A \to B := \negc A \vee B$ has paradoxes:
+\begin{itemize}
+    \item $\mathsf{False} \to \mathsf{Anything} = \mathsf{True}$ (ex falso)
+    \item $\mathsf{Anything} \to \mathsf{True} = \mathsf{True}$
+\end{itemize}
+
+We use \textbf{conditioning} instead of implication.
+
+\subsection{Chain Rule}
+
+The fundamental equation is:
+\[
+P(A, B) = P(A \mid B) \cdot P(B) = P(B \mid A) \cdot P(A)
+\]
+
+This is \textbf{multiplicative}---no division needed!
+
+\begin{gather}
+\infer[\textsc{Chain}]
+  {\Gamma \vdash (a, b) : A \times B \at{u \cdot v}}
+  {\Gamma \vdash a : A \at{u} \quad \Gamma \vdash b \mid a : B \at{v}}
+\end{gather}
+
+The conditional $b \mid a$ is \textbf{primitive}. We don't compute it by division; we assert it exists when the chain rule holds.
+
+\subsection{Conditioning vs Implication}
+
+\begin{center}
+\begin{tabular}{l|l|l}
+& \textbf{Implication} $A \to B$ & \textbf{Conditioning} $A \mid B$ \\
+\hline
+Formula & $\negc A \vee B$ & $P(A,B) / P(B)$ \\
+Computable from & $A$ and $B$ alone & Joint $P(A,B)$ \\
+False antecedent & ``True'' (lies) & Indeterminate (honest) \\
+In logic & Yes & No \\
+In probability & No & Yes \\
+\end{tabular}
+\end{center}
+
+\subsection{Graded Ex Falso}
+
+What about $P(A \mid B)$ when $P(B) = 0$?
+
+In classical logic: $\bot \to A$ is always true (ex falso quodlibet).
+
+In CredTT: when $b : B \at{\zero}$:
+\[
+(a, b) : A \times B \at{\zero \cdot c} = \at{\zero}
+\]
+The conditional $a \mid b$ can have \emph{any} credence---the joint is already zero.
+
+\textbf{Key insight}: Ex falso is the $c = 0$ limit of a continuous phenomenon:
+\begin{itemize}
+    \item $c = \one$: Evidence fully constrains conclusions
+    \item $c = \epsilon$: Evidence weakly constrains conclusions
+    \item $c = \zero$: Evidence imposes no constraint (ex falso)
+\end{itemize}
+
+Classical logic has only the endpoints; CredTT has the entire spectrum.
+
+%=============================================================================
+\section{MLTT as the $\{\zero, \one\}$ Case}
+%=============================================================================
+
+\begin{theorem}[MLTT Embedding]
+When $\C = \{\zero, \one\}$, CredTT reduces to MLTT:
+\begin{itemize}
+    \item $\Gamma \vdash a : A \at{\one}$ becomes $\Gamma \vdash a : A$
+    \item $\Gamma \vdash a : A \at{\zero}$ is vacuously satisfied
+    \item Credence operations: $\one \cdot \one = \one$, else $\zero$
+    \item Complement: $\negc\zero = \one$, $\negc\one = \zero$
+    \item De Morgan OR: $c \vee v = \negc(\negc c \cdot \negc v)$ gives Boolean OR
+\end{itemize}
+\end{theorem}
+
+\begin{proof}
+By inspection. All credence operations compute to Boolean.
+\end{proof}
+
+\subsection{Side-by-Side Comparison}
+
+\begin{center}
+\begin{tabular}{l|l|l}
+\textbf{Rule} & \textbf{MLTT} & \textbf{CredTT} \\
+\hline
+Variable & $x : A \vdash x : A$ & $x : A \vdash x : A \at{\one}$ \\
+Application & $f\,a : B[a/x]$ & $f\,a : B[a/x] \at{c \cdot v}$ \\
+Pair & $(a, b) : \Sigma A\,B$ & $(a, b) : \Sigma A\,B \at{c \cdot v}$ \\
+Projection & $\pi_1 t : A$ & $\pi_1 t : A \at{c}$ \\
+Case & $\mathsf{case}\,e\,l\,r : C$ & $\mathsf{case}\,e\,l\,r : C \at{c \cdot v}$ \\
+\end{tabular}
+\end{center}
+
+\textbf{Key observation}: In MLTT, all judgments are implicitly at credence $\one$. Since $\one \cdot \one = \one$, credence multiplication is invisible. CredTT makes this structure explicit and generalizes it to arbitrary credences.
+
+%=============================================================================
+\section{Contrast with Cost-Based Graded Types}
+%=============================================================================
+
+Graded type systems like Granule \citep{orchard2019quantitative} and quantitative type theory \citep{atkey2018syntax} use grades to track \emph{resource usage}. CredTT uses credences to track \emph{inhabitation certainty}. These are philosophically distinct:
+
+\begin{center}
+\begin{tabular}{l|l|l}
+& \textbf{Cost-Based (Granule)} & \textbf{CredTT} \\
+\hline
+Algebraic structure & Semiring $(0, 1, +, \cdot)$ & De Morgan $(\zero, \one, \cdot, \negc)$ \\
+Addition & Primitive (branch costs add) & Derived via De Morgan \\
+Philosophy & Decorate MLTT with grades & Logic \emph{emerges} from grades \\
+Implication & Material implication exists & Implication \emph{rejected} \\
+Interpretation & Costs accumulate & Credences condition/constrain \\
+MLTT relationship & MLTT is axiomatic & MLTT is \emph{derivative} \\
+\end{tabular}
+\end{center}
+
+\textbf{Key distinction}: Cost-based systems ask ``how much resource does this computation use?'' CredTT asks ``how certain are we that this type is inhabited?''
+
+In cost-based grading:
+\begin{itemize}
+    \item $f : A \to B @ 2$ means ``$f$ uses 2 units of resource''
+    \item Costs add at branches: if one branch costs 3 and another costs 5, total cost is at most 5
+    \item The semiring axiom $0 + x = x$ reflects ``zero cost contributes nothing''
+\end{itemize}
+
+In CredTT:
+\begin{itemize}
+    \item $f : A \to B \at{0.9}$ means ``$f$ produces $B$ with 90\% certainty''
+    \item Credences multiply in composition: chaining 90\% and 80\% gives 72\%
+    \item The De Morgan axiom $\zero \cdot c = \zero$ reflects ``impossible antecedent gives impossible conclusion''
+\end{itemize}
+
+\textbf{One-liner}: Costs measure \emph{computation performed}; credences measure \emph{truth surviving composition}.
+
+%=============================================================================
+\section{Related Work: A Unified View}
+%=============================================================================
+
+CredTT synthesizes ideas from several traditions. We review each and explain how CredTT unifies them.
+
+\subsection{Pavelka-Style Fuzzy Logic}
+
+Pavelka \citep{pavelka1979fuzzy} introduced \emph{graded provability} for \textbf{propositional} fuzzy logic: instead of asking ``is $\varphi$ provable?'', one asks ``to what degree is $\varphi$ provable?''
+
+\begin{definition}[Pavelka Provability Degree]
+\[
+|\varphi|_T := \sup\{r \in [0,1] \mid T \vdash (\varphi, r)\}
+\]
+\end{definition}
+
+Pavelka \textbf{proved} a completeness theorem for this propositional system, equating syntactic provability degrees with semantic truth degrees.
+
+H\'ajek \citep{hajek1998metamathematics} extended this to \textbf{predicate} fuzzy logic in his \emph{Metamathematics of Fuzzy Logic}. His completeness theorems apply to first-order fuzzy logic, not type theory.
+
+\textbf{Key distinction}: Pavelka/H\'ajek work in propositional and first-order logic respectively, and they \textbf{prove} their completeness results. CredTT works in dependent type theory, which is a different formal system. The completeness question for CredTT (Section 11, Open Problem 7) remains open.
+
+\textbf{What CredTT adapts from Pavelka/H\'ajek}:
+\begin{itemize}
+    \item The concept of graded provability (credences on judgments)
+    \item The idea that degrees should form an algebra
+\end{itemize}
+
+\textbf{What CredTT adds}:
+\begin{itemize}
+    \item Dependent types ($\Pi$, $\Sigma$, $\mathsf{Id}$)
+    \item Credences on \emph{judgments}, not just propositions
+    \item Conditioning as primitive (not residuated implication)
+\end{itemize}
+
+\textbf{What CredTT postulates} (analogous to what Pavelka/H\'ajek prove):
+\begin{itemize}
+    \item That G\"odel sentences attain credence $\frac{1}{2}$ (we postulate the fixed point; they prove completeness)
+\end{itemize}
+
+\subsection{Self-Reference in Fuzzy Logic}
+
+H\'ajek, Paris, and Shepherdson \citep{hajek2000liar} analyzed the liar paradox in fuzzy logic:
+
+\begin{theorem}[H\'ajek-Paris-Shepherdson]
+In {\L}ukasiewicz logic with a truth predicate $T$, the liar sentence $\lambda$ satisfying $\lambda \leftrightarrow \neg T(\ulcorner \lambda \urcorner)$ has truth value $\frac{1}{2}$.
+\end{theorem}
+
+\textbf{Key point}: H\'ajek-Paris-Shepherdson \textbf{prove} this result by carefully constructing the truth predicate and showing the fixed point exists. Their proof uses the diagonal lemma and properties of {\L}ukasiewicz logic.
+
+\textbf{CredTT's version}: We \textbf{postulate} that the G\"odel sentence $G \leftrightarrow \neg\mathsf{Prov}_\one(G)$ exists and has credence satisfying $c = \negc c$, hence $c = \frac{1}{2}$. This uses the same fixed-point \emph{phenomenon}, but:
+\begin{itemize}
+    \item H\'ajek-Paris-Shepherdson work with \emph{truth} in {\L}ukasiewicz logic
+    \item CredTT works with \emph{provability credences} in type theory
+    \item They \textbf{construct} $\lambda$; we \textbf{postulate} $G$'s existence
+\end{itemize}
+
+A full treatment would require proving the diagonal lemma for CredTT and constructing $G$ explicitly.
+
+\subsection{Logics of Formal Inconsistency (LFIs)}
+
+Da Costa \citep{dacosta1974paraconsistent} and Carnielli-Coniglio \citep{carnielli2016paraconsistent} developed logics where contradiction doesn't explode:
+
+\begin{definition}[Gentle Explosion]
+\[
+A, \neg A, \circ A \vdash B \quad \text{but} \quad A, \neg A \not\vdash B
+\]
+where $\circ A$ means ``$A$ is consistent.''
+\end{definition}
+
+LFIs have a well-developed proof theory with the consistency operator $\circ$ as \textbf{primitive syntax}. The operator gates explosion: you need $\circ A$ (assertion that $A$ is consistent) to derive arbitrary conclusions from $A \land \neg A$.
+
+\textbf{CredTT's approach}: CredTT has no consistency operator and no explosion rule. From $a : A \at{c}$ and $b : \neg A \at{v}$, we simply cannot derive arbitrary $B \at{\one}$---there is no rule that would produce this. This is not ``gated explosion'' but \emph{absence of explosion}.
+
+\begin{center}
+\begin{tabular}{l|l|l}
+& \textbf{LFIs} & \textbf{CredTT} \\
+\hline
+Explosion & Gated by $\circ$ operator & Absent (no explosion rule) \\
+Formal device & Primitive unary connective & Graded judgments \\
+Gradation & Binary (consistent/not) & Continuous $[0,1]$ \\
+Proof theory & Well-developed & Postulated analogs \\
+\end{tabular}
+\end{center}
+
+The comparison is suggestive but limited: LFIs and CredTT address paraconsistency through different mechanisms.
+
+\subsection{T-Norm Fuzzy Logics}
+
+Most fuzzy logics use \emph{t-norms} for conjunction \citep{klement2000triangular}:
+
+\begin{definition}[T-norm]
+A t-norm $* : [0,1]^2 \to [0,1]$ satisfies:
+\begin{enumerate}
+    \item $x * 1 = x$ (identity)
+    \item $x * y = y * x$ (commutativity)
+    \item $(x * y) * z = x * (y * z)$ (associativity)
+    \item $x \leq y \Rightarrow x * z \leq y * z$ (monotonicity)
+\end{enumerate}
+\end{definition}
+
+Common t-norms: product ($x \cdot y$), minimum ($\min(x,y)$), Lukasiewicz ($\max(0, x+y-1)$).
+
+\textbf{CredTT uses product}: $c \cdot v$ is ordinary multiplication. This matches probabilistic conjunction (independent events) and gives the chain rule.
+
+\textbf{Key difference}: Standard fuzzy logics include a \emph{residuum} (implication) defined by:
+\[
+x \to y := \sup\{z \mid x * z \leq y\}
+\]
+
+CredTT \emph{rejects} this implication in favor of conditioning. The residuum has material implication paradoxes; conditioning doesn't.
+
+\subsection{Graded Type Theory (Granule)}
+
+Orchard et al. \citep{orchard2019quantitative} and Atkey \citep{atkey2018syntax} developed graded type systems for resource tracking:
+
+\begin{center}
+\begin{tabular}{l|l|l}
+& \textbf{Granule/QTT} & \textbf{CredTT} \\
+\hline
+Algebraic structure & Semiring $(0,1,+,\cdot)$ & De Morgan $(\zero,\one,\cdot,\negc)$ \\
+Addition & Primitive (costs add) & Derived (De Morgan) \\
+Interpretation & Resource usage & Inhabitation certainty \\
+\end{tabular}
+\end{center}
+
+\textbf{Technical distinction}: Granule's semiring includes addition as primitive, enabling resource branching: ``use resource $r$ in one branch OR resource $s$ in another.'' CredTT derives addition via De Morgan duality, which limits expressiveness for branching scenarios.
+
+\textbf{Philosophical distinction}: Both systems treat grades as primitive. The difference is interpretive:
+\begin{itemize}
+    \item Granule: ``how much resource does this computation use?''
+    \item CredTT: ``how certain is this type inhabited?''
+\end{itemize}
+
+In Granule, $f : A \to B @ 2$ means ``$f$ uses 2 units.'' In CredTT, $f : A \to B \at{0.9}$ means ``$f$ produces $B$ with 90\% certainty.''
+
+\textbf{Note}: The claim that MLTT ``emerges'' from CredTT while Granule ``decorates'' MLTT is a matter of presentation. Both can be viewed as parameterized systems that specialize to MLTT. Granule's semiring can also be instantiated at $\{0,1\}$.
+
+\subsection{De Morgan Algebras}
+
+Our credence algebra is a \emph{De Morgan algebra} \citep{kalman1958lattices}:
+
+\begin{definition}[De Morgan Algebra]
+$(L, \land, \lor, \neg, 0, 1)$ with:
+\begin{itemize}
+    \item $(L, \land, \lor, 0, 1)$ is a bounded distributive lattice
+    \item $\neg\neg x = x$ (involution)
+    \item $\neg(x \land y) = \neg x \lor \neg y$ (De Morgan)
+\end{itemize}
+\end{definition}
+
+CredTT uses a \emph{product De Morgan algebra}: conjunction is multiplication, disjunction derived via De Morgan. When $L = [0,1]$ with $\neg c = 1-c$:
+\begin{align}
+c \land v &= c \cdot v \\
+c \lor v &= \negc(\negc c \cdot \negc v) = c + v - cv
+\end{align}
+
+\subsection{Markov Categories}
+
+Fritz \citep{fritz2020synthetic} developed Markov categories for probabilistic reasoning:
+
+\begin{definition}[Markov Category]
+A symmetric monoidal category with:
+\begin{itemize}
+    \item Copy: $\Delta_A : A \to A \otimes A$
+    \item Delete: $!_A : A \to I$
+    \item Naturality conditions for stochastic maps
+\end{itemize}
+\end{definition}
+
+CredTT's categorical semantics is a \emph{credence-weighted Markov category}: morphisms carry credences, composition multiplies credences.
+
+\subsection{Synthesis: What CredTT Unifies}
+
+\begin{center}
+\begin{tabular}{l|l}
+\textbf{From} & \textbf{CredTT takes} \\
+\hline
+Pavelka/Hajek & Graded provability \\
+Hajek-Paris-Shepherdson & Self-reference $\to$ fixed point at $\frac{1}{2}$ \\
+LFIs & Non-explosive contradiction \\
+T-norm logics & Product conjunction \\
+Granule/QTT & Dependent types + grades \\
+De Morgan algebras & Minimal algebraic structure \\
+Markov categories & Conditioning semantics \\
+\end{tabular}
+\end{center}
+
+\textbf{What CredTT combines}: Dependent type theory with conditioning (not implication), using De Morgan algebra for credences. MLTT is the $\{\zero,\one\}$ specialization.
+
+\textbf{Honest assessment of novelty}: The individual components (graded provability, fuzzy fixed points, graded types, De Morgan algebras) are well-established. CredTT's contribution is combining them with conditioning as primitive and exploring the consequences for incompleteness and choice. Many results are postulated analogs of proven theorems in simpler settings.
+
+\subsection{What CredTT Rejects}
+
+\begin{enumerate}
+    \item \textbf{Implication}: No $A \to B := \negc A \lor B$. Use conditioning instead.
+    \item \textbf{Addition}: No primitive $+$. Disjunction derived via De Morgan.
+    \item \textbf{Division}: No $P(A|B) = P(A,B)/P(B)$. Use chain rule multiplicatively.
+    \item \textbf{MLTT as foundation}: MLTT is the $\{\zero,\one\}$ \emph{limit}, not the starting point.
+\end{enumerate}
+
+%=============================================================================
+\section{Categorical Semantics}
+%=============================================================================
+
+\begin{definition}[Credence-Weighted Category]
+A \emph{$\C$-weighted category} has:
+\begin{itemize}
+    \item Objects (types)
+    \item For each $c : \C$, morphisms $\mathrm{Hom}_c(A, B)$
+    \item Identity: $\mathrm{id}_A \in \mathrm{Hom}_\one(A, A)$
+    \item Composition: $f \in \mathrm{Hom}_c(A, B)$, $g \in \mathrm{Hom}_v(B, C)$ gives $g \circ f \in \mathrm{Hom}_{c \cdot v}(A, C)$
+\end{itemize}
+\end{definition}
+
+When $\C = {[0,1]}$ with copy $\Delta : A \to A \times A$ and delete $! : A \to \mathbf{1}$, this becomes a \textbf{Markov category} \citep{fritz2020synthetic}.
+
+%=============================================================================
+\section{Summary}
+%=============================================================================
+
+\textbf{Credence algebra}: $(\zero, \one, \cdot, \negc, \leq)$ --- Product De Morgan
+
+\textbf{Derived}: $c \vee v = \negc(\negc c \cdot \negc v)$ --- De Morgan OR
+
+\textbf{Judgments}: $\Gamma \vdash a : A \at{c}$
+
+\textbf{Key rule}: Credences multiply in elimination
+
+\textbf{Conditioning}: Chain rule $P(A,B) = P(A|B) \cdot P(B)$, no division
+
+\textbf{MLTT}: The $\C = \{\zero, \one\}$ case
+
+\textbf{Probability}: The $\C = {[0,1]}$ case
+
+\textbf{Novelty}: De Morgan algebra + type theory + conditioning
+
+%=============================================================================
+\section{Graded Incompleteness}
+%=============================================================================
+
+G\"odel's incompleteness theorems have a natural formulation in CredTT. Rather than forcing undecidability, self-referential sentences attain determinate intermediate credences.
+
+\subsection{Graded Provability Predicate}
+
+\begin{definition}[Graded Provability]
+For a theory $T$ and proposition $\varphi$, define:
+\[
+\mathsf{Prov}_c(\ulcorner \varphi \urcorner) :\equiv \text{there exists a derivation of } \varphi \text{ at credence } c
+\]
+The \emph{provability degree} is:
+\[
+|\varphi|_T := \sup\{c \mid T \vdash \varphi \at{c}\}
+\]
+\end{definition}
+
+This follows Pavelka \citep{pavelka1979fuzzy} and Hajek \citep{hajek1998metamathematics}, who developed graded provability for fuzzy logics.
+
+\subsection{The Diagonal Lemma}
+
+The diagonal lemma is purely syntactic and holds for any sufficiently expressive language:
+
+\begin{lemma}[Diagonal Lemma]
+For any predicate $P(x)$, there exists a sentence $G$ such that:
+\[
+T \vdash G \leftrightarrow P(\ulcorner G \urcorner)
+\]
+\end{lemma}
+
+In CredTT, this becomes: for any credence-valued predicate $P$, there exists $G$ such that the credence of $G$ equals $P(\ulcorner G \urcorner)$.
+
+\subsection{The G\"odel Sentence in CredTT}
+
+\begin{definition}[G\"odel Sentence]
+Let $G$ be the sentence asserting ``$G$ is not provable at credence $\one$'':
+\[
+G \leftrightarrow \neg \mathsf{Prov}_\one(\ulcorner G \urcorner)
+\]
+\end{definition}
+
+\begin{theorem}[Graded Incompleteness]
+If $G$ has credence $c$ in CredTT, then $c$ satisfies $c = \negc c$, hence $c = \frac{1}{2}$.
+\end{theorem}
+
+\begin{proof}
+By the definition of $G$: if $G$ has credence $c$, then $G$'s content (that $G$ is not provable at credence $\one$) should also have credence $c$. But $G$'s claim is essentially the negation of provability. In the fixed-point analysis:
+\begin{itemize}
+    \item If $c = \one$, then $G$ asserts $\neg\mathsf{Prov}_\one(G)$, but $G$ itself is provable at $\one$---contradiction.
+    \item If $c = \zero$, then $\neg G$ has credence $\one$, meaning $G$ is provable at $\one$---but we assumed $c = \zero$.
+\end{itemize}
+The consistent resolution: $c = \negc c$. With $\negc c = 1 - c$:
+\[
+c = 1 - c \quad \Rightarrow \quad c = \frac{1}{2}
+\]
+\end{proof}
+
+\begin{remark}[Comparison with Classical Incompleteness]
+\begin{center}
+\begin{tabular}{l|l|l}
+& \textbf{Classical} & \textbf{CredTT} \\
+\hline
+$G$'s status & Undecidable & Credence $\frac{1}{2}$ \\
+$c = \negc c$ in $\{\zero, \one\}$ & No solution & N/A \\
+$c = \negc c$ in $[0,1]$ & N/A & $c = \frac{1}{2}$ \\
+Information & Binary gap & Quantified uncertainty \\
+\end{tabular}
+\end{center}
+\end{remark}
+
+The key insight: classical logic's restriction to $\{\zero, \one\}$ forces $c = \negc c$ to have no solution, manifesting as undecidability. CredTT's continuous credences allow the fixed point to exist at $\frac{1}{2}$.
+
+\subsection{Literature Context}
+
+The fixed point $c = \negc c \Rightarrow c = \frac{1}{2}$ is well-studied in fuzzy logic:
+
+\begin{itemize}
+    \item Hajek, Paris, Shepherdson, ``The Liar Paradox and Fuzzy Logic'' (JSL 2000) \citep{hajek2000liar}
+    \item Restall on Lukasiewicz logic and self-reference
+\end{itemize}
+
+CredTT's contribution is embedding this in dependent type theory with graded judgments.
+
+%=============================================================================
+\section{Graded Self-Consistency}
+%=============================================================================
+
+G\"odel's Second Incompleteness Theorem states that a consistent theory extending PA cannot prove its own consistency. CredTT offers a graded alternative.
+
+\subsection{The Classical Obstacle}
+
+\begin{theorem}[G\"odel's Second, Classical]
+If $T \supseteq PA$ and $T$ is consistent, then $T \not\vdash \mathsf{Con}(T)$.
+\end{theorem}
+
+Here $\mathsf{Con}(T) := \neg\mathsf{Prov}_T(\ulcorner \bot \urcorner)$.
+
+\subsection{Graded Consistency}
+
+\begin{definition}[Graded Consistency]
+\[
+\mathsf{Con}_c(T) :\equiv \text{``$\bot$ is not provable at credence $\one$''} \at{c}
+\]
+\end{definition}
+
+\begin{theorem}[Graded Second Incompleteness]
+CredTT can prove $\mathsf{Con}_c(\text{CredTT})$ for some $c < \one$, but not for $c = \one$.
+\end{theorem}
+
+\begin{proof}[Proof sketch]
+The G\"odel-2 argument requires:
+\begin{enumerate}
+    \item If $T \vdash \mathsf{Con}(T) \at{\one}$, then by formalized soundness, $T$ proves ``if $T$ proves $\bot$, then $\bot$''
+    \item Combined with the G\"odel sentence, this yields $T \vdash G \at{\one}$
+    \item But $G$ asserts its own unprovability at $\one$---contradiction
+\end{enumerate}
+
+At credence $c < \one$, step 1 fails: we only have $\mathsf{Con}(T) \at{c}$, which doesn't yield the sharp consequence needed. The self-referential loop stabilizes at a credence below $\one$.
+\end{proof}
+
+\subsection{Philosophical Interpretation}
+
+\begin{center}
+\begin{tabular}{l|l}
+\textbf{Classical} & \textbf{CredTT} \\
+\hline
+Cannot prove own consistency & Can prove at $c < \one$ \\
+``Unknowable'' & ``Confident but not certain'' \\
+Binary epistemic gap & Quantified confidence level \\
+\end{tabular}
+\end{center}
+
+This is philosophically honest: we \emph{believe} our system is consistent, but absolute certainty is impossible (G\"odel). CredTT quantifies this epistemic state rather than leaving it as a binary gap.
+
+\subsection{Connection to LFIs}
+
+Logics of Formal Inconsistency \citep{carnielli2016paraconsistent} use an object-level consistency operator $\circ A$ (``$A$ is consistent''). The ``gentle explosion'' principle:
+\[
+A, \neg A, \circ A \vdash B \quad \text{but} \quad A, \neg A \not\vdash B
+\]
+
+CredTT achieves similar effects through credence: contradiction at low credence doesn't explode to arbitrary conclusions because credence multiplication preserves the low credence.
+
+%=============================================================================
+\section{Graded Choice}
+%=============================================================================
+
+The Axiom of Choice has a natural graded formulation in CredTT.
+
+\subsection{Classical AC and Its Problems}
+
+\begin{definition}[Axiom of Choice]
+For any family of non-empty sets $\{A_i\}_{i \in I}$, there exists a choice function $f : I \to \bigcup_i A_i$ with $f(i) \in A_i$ for all $i$.
+\end{definition}
+
+AC leads to non-constructive results like the Banach-Tarski paradox: a ball can be decomposed and reassembled into two balls of the same size.
+
+\subsection{Graded Choice}
+
+\begin{definition}[Graded AC]
+\[
+\mathsf{AC}_c : \left(\prod_{i:I} \|A_i\|_{c_i}\right) \to \left\|\prod_{i:I} A_i\right\|_c
+\]
+where $c$ depends on $I$ and the $c_i$.
+\end{definition}
+
+\begin{theorem}[Choice Credence Scaling]
+\begin{enumerate}
+    \item \textbf{Finite choice}: $c = \one$ (fully constructible)
+    \item \textbf{Countable choice}: $c = \prod_{n=1}^\infty c_n$ (may be $< \one$)
+    \item \textbf{Uncountable choice}: $c \ll \one$
+\end{enumerate}
+\end{theorem}
+
+\begin{proof}[Proof sketch]
+For finite $I$, we can construct the choice function explicitly---each step preserves credence $\one$, and finitely many steps preserve the product.
+
+For countable $I$, the infinite product $\prod_{n=1}^\infty c_n$ converges but may be strictly less than $\one$ (e.g., if $c_n = 1 - \epsilon/2^n$, then $c < 1$).
+
+For uncountable $I$, the product over uncountably many factors $< \one$ collapses toward $\zero$.
+\end{proof}
+
+\subsection{Banach-Tarski at Credence $< \one$}
+
+\begin{theorem}[Graded Banach-Tarski]
+The Banach-Tarski decomposition exists at some credence $c_{BT} < \one$.
+\end{theorem}
+
+\begin{remark}[Physical Interpretation]
+Credence $< \one$ means ``exists mathematically but not physically realizable.'' Banach-Tarski requires infinitely many non-constructive choices; each contributes a factor $< \one$; the product is strictly $< \one$. This correctly predicts that you cannot actually perform the decomposition.
+\end{remark}
+
+\subsection{Comparison}
+
+\begin{center}
+\begin{tabular}{l|l|l|l}
+& \textbf{Constructive} & \textbf{Classical} & \textbf{CredTT} \\
+\hline
+AC status & Fails & Holds (credence $\one$) & Holds at credence $c$ \\
+BT paradox & Doesn't exist & Exists & Exists at $c < \one$ \\
+Information & Binary rejection & Binary acceptance & Graded \\
+\end{tabular}
+\end{center}
+
+CredTT provides more information than both: constructive math says ``no choice function''; classical math says ``choice function exists''; CredTT says ``choice function exists at credence $c$, quantifying constructibility.''
+
+%=============================================================================
+\section{Implementation Status}
+%=============================================================================
+
+\subsection{What Is Implemented}
+
+\begin{enumerate}
+    \item \textbf{Credence algebra} (\texttt{credtt-impl/src/credence.ml}): Product De Morgan structure with:
+    \begin{itemize}
+        \item Simplification of credence expressions
+        \item Rational arithmetic for exact computation
+        \item Fixpoint solver for $c = \negc c \Rightarrow c = \frac{1}{2}$
+        \item Unification-based constraint accumulation
+    \end{itemize}
+    \item \textbf{Bidirectional type checker} (\texttt{credtt-impl/src/check.ml}): Prototype implementing:
+    \begin{itemize}
+        \item Credence multiplication in elimination rules
+        \item Type inference with credence tracking
+        \item Credence comparison via $\leq$
+    \end{itemize}
+    \item \textbf{Proof checker} (\texttt{credtt-impl/src/proof.ml}): Demonstration system for:
+    \begin{itemize}
+        \item Postulates, derivations, contradictions
+        \item Credence forcing from contradictions
+        \item Negation fixpoint solving
+    \end{itemize}
+    \item \textbf{Agda formalization} (\texttt{agda/CredTT/}): Syntax, judgments, MLTT embedding theorem
+\end{enumerate}
+
+\subsection{What Is NOT Implemented}
+
+\begin{enumerate}
+    \item \textbf{Credence inference}: The checker does not infer credences from term structure. Credences must be explicitly annotated or default to $\one$. The \texttt{infer\_ctx} in \texttt{credence.ml} accumulates constraints but \texttt{solve\_inference} handles only trivial cases.
+    \item \textbf{Constraint propagation}: The Pi-Elim rule should generate $c_{result} = c_f \cdot c_a$, but constraints are not propagated bidirectionally.
+    \item \textbf{Dependent credence instantiation}: Credences depending on bound variables (e.g., $c(x)$ in $(x : A) \to B \at{c(x)}$) are parsed but not fully instantiated during application.
+    \item \textbf{General proof checking}: The proof checker (\texttt{proof.ml}) demonstrates fixed examples (e.g., $\sqrt{2}$ irrationality). It does not parse arbitrary proof files.
+\end{enumerate}
+
+\subsection{Prototype vs Production}
+
+The implementation is a \textbf{prototype} demonstrating the core ideas:
+\begin{itemize}
+    \item Variables are always assigned credence $\one$ (line 24 of \texttt{check.ml})
+    \item Non-trivial fixpoints like $c = c \cdot c$ choose $1$ arbitrarily
+    \item The $\sqrt{2}$ proof runs a hardcoded list of declarations, not a parser
+\end{itemize}
+
+A production implementation would require bidirectional credence inference, general fixpoint solving, and a proper parser for proof files.
+
+%=============================================================================
+\section{Open Problems}
+%=============================================================================
+
+\begin{enumerate}
+    \item \textbf{Credence inference}: Can credences be inferred from term structure?
+    \item \textbf{Decidability}: Type checking decidable if $\C$ decidable---proof needed
+    \item \textbf{Normalization}: Should follow from MLTT---formal proof needed
+    \item \textbf{Dependent credences}: $c(x)$ varying over $x$ in $(x : A) \to B \at{c(x)}$
+    \item \textbf{Continuous types}: Extension to measurable spaces
+    \item \textbf{Full Agda proofs}: Some metatheorems have holes (\texttt{--allow-unsolved-metas})
+    \item \textbf{Completeness}: Pavelka-style completeness for CredTT?
+\end{enumerate}
+
+\bibliographystyle{plainnat}
+\bibliography{credtt}
+
+\end{document}

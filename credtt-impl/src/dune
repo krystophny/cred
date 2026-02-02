@@ -1,0 +1,16 @@
+(library
+ (name credtt_lib)
+ (public_name credtt.lib)
+ (modules credence syntax subst context eval error check raw elaborate proof)
+ (libraries str))
+
+(executable
+ (name main)
+ (public_name credtt)
+ (modules main parser lexer)
+ (libraries credtt_lib))
+
+(menhir
+ (modules parser))
+
+(ocamllex lexer)

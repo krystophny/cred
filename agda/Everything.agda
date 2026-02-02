@@ -1,53 +1,53 @@
 module Everything where
 
--- ProbTT: Type Theory with Primitive Weights
--- Weights from a De Morgan Algebra
+-- CredTT: Type Theory with Primitive Credences
+-- Credences from a De Morgan Algebra
 
--- Weight algebra (De Morgan, not semiring)
-open import ProbTT.Weight
+-- Credence algebra (De Morgan, not semiring)
+open import CredTT.Credence
 
 -- Syntax: well-scoped terms and types
-open import ProbTT.Syntax
+open import CredTT.Syntax
 
 -- Substitution: parallel substitution with lift/weaken
-open import ProbTT.Substitution
+open import CredTT.Substitution
 
 -- Contexts: well-scoped typing contexts
-open import ProbTT.Context
+open import CredTT.Context
 
--- Judgments: weighted typing rules
-open import ProbTT.Judgment
+-- Judgments: credence-weighted typing rules
+open import CredTT.Judgment
 
 -- Properties: metatheorems
-open import ProbTT.Properties
+open import CredTT.Properties
 
 -- Decidability: type checking is decidable
--- open import ProbTT.Decidability
+-- open import CredTT.Decidability
 
 -- Normalization: weak normalization via logical relations
--- open import ProbTT.Normalization
+-- open import CredTT.Normalization
 
 -- MLTT: the {0,1} limiting case
-open import ProbTT.MLTT
+open import CredTT.MLTT
 
 -- Examples: identity, composition, ex falso
-open import ProbTT.Examples
+open import CredTT.Examples
 
 -- Provability: graded provability predicates for meta-theory
-open import ProbTT.Provability
+open import CredTT.Provability
 
--- Incompleteness: Gödel's theorems with graded weights
--- Key result: G has weight 1/2 (fixed point of negation)
-open import ProbTT.Incompleteness
+-- Incompleteness: Godel's theorems with graded credences
+-- Key result: G has credence 1/2 (fixed point of negation)
+open import CredTT.Incompleteness
 
--- Consistency: self-consistency at weight < 1
--- ProbTT can prove its own consistency at graded weight
-open import ProbTT.Consistency
+-- Consistency: self-consistency at credence < 1
+-- CredTT can prove its own consistency at graded credence
+open import CredTT.Consistency
 
--- GradedChoice: Axiom of Choice at graded weights
+-- GradedChoice: Axiom of Choice at graded credences
 -- Finite choice at 1, countable/uncountable at < 1
-open import ProbTT.GradedChoice
+open import CredTT.GradedChoice
 
--- DependentWeights: weights that vary over the domain
--- (x : A) → B @ w(x) where w depends on x
-open import ProbTT.DependentWeights
+-- DependentCredences: credences that vary over the domain
+-- (x : A) -> B @ c(x) where c depends on x
+open import CredTT.DependentCredences

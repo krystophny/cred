@@ -1,0 +1,48 @@
+-- Goedel Fixed Point in CredTT
+--
+-- NOTE: This file DEMONSTRATES the proof checker syntax.
+-- The actual metatheory is formalized in agda/CredTT/Incompleteness.agda
+--
+-- LITERATURE: Hajek-Paris-Shepherdson, "The Liar Paradox and Fuzzy Logic" (2000)
+-- The c = 1-c -> c = 1/2 result is standard in fuzzy logic self-reference.
+--
+-- Classical: G is undecidable (neither provable nor refutable)
+-- CredTT: G has credence 1/2 (the fixed point of negation)
+--
+-- G = "G has credence 0" = "G is unprovable at credence 1"
+-- If G @ c, then by G's content, c should equal 0
+-- But if c = 0, then not G @ 1, so G @ 1 (contradiction)
+-- Resolution: c = neg c, which has unique solution c = 1/2
+
+-- Encode the Goedel sentence
+encode G = Unprov_G
+
+-- The Goedel sentence asserts its own unprovability
+-- G <-> not Prov_1(G)
+-- If Prov(G) @ c, then G's meaning implies c should satisfy c = neg c
+
+-- Assume G at some credence c
+postulate g : G 〔 c 〕
+
+-- Self-reference: G claims "Prov(G) @ 0"
+-- So if G @ c, then Prov(G) @ 0 should hold
+derive g_claims : Prov_G_zero 〔 c 〕 from g by self_reference
+
+-- But we assumed Prov(G) @ c, not 0
+-- The only consistent resolution: c = neg c
+
+-- Solve the fixpoint equation: c = neg c -> c = 1/2
+fixpoint godel_c = ¬godel_c
+
+-- The Goedel sentence has determinate credence 1/2
+-- This is not undecidability - it's maximal uncertainty
+-- At c = 1/2, "G is somewhat true" and "G is somewhat false" both hold
+-- This is the unique stable equilibrium
+
+-- Provability of G at credence 1/2
+provable godel_provability : G 〔 1/2 〕
+
+-- Key insight: Classical logic only has {0,1}
+-- The equation c = neg c has no solution in {0,1}
+-- Hence classical undecidability
+-- But in [0,1], c = 1-c has the solution c = 1/2

@@ -9,7 +9,7 @@ on:
 
 jobs:
   ocaml:
-    name: OCaml (probtt-impl)
+    name: OCaml (credtt-impl)
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -23,15 +23,15 @@ jobs:
 
       - name: Install dependencies
         run: opam install . --deps-only --with-test -y
-        working-directory: probtt-impl
+        working-directory: credtt-impl
 
       - name: Build
         run: opam exec -- dune build
-        working-directory: probtt-impl
+        working-directory: credtt-impl
 
       - name: Test
         run: opam exec -- dune runtest
-        working-directory: probtt-impl
+        working-directory: credtt-impl
 
   agda:
     name: Agda type-check
@@ -65,17 +65,17 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Build ProbTT paper
+      - name: Build CredTT paper
         uses: xu-cheng/latex-action@v3
         with:
-          working_directory: papers/probtt
-          root_file: probtt.tex
+          working_directory: papers/credtt
+          root_file: credtt.tex
           latexmk_use_lualatex: false
           args: -pdf -interaction=nonstopmode -halt-on-error
 
       - name: Upload PDF
         uses: actions/upload-artifact@v4
         with:
-          name: probtt-paper
-          path: papers/probtt/probtt.pdf
+          name: credtt-paper
+          path: papers/credtt/credtt.pdf
           retention-days: 30

@@ -1,0 +1,3 @@
+-- Pair construction: credences multiply
+mkPair : A -> A -> A × A
+mkPair a b = (a, b)

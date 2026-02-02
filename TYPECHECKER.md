@@ -1,47 +1,47 @@
-# ProbTT Type Checker Sketch
+# CredTT Type Checker Sketch
 
 ## Overview
 
-A minimal type checker for ProbTT in ~1500 lines of OCaml or Haskell.
+A minimal type checker for CredTT in ~1500 lines of OCaml or Haskell.
 
 ## Architecture
 
 ```
 Source Code
-    ↓ (parsing)
+    | (parsing)
 Raw AST
-    ↓ (elaboration)
-Core AST with Weights
-    ↓ (type checking)
+    | (elaboration)
+Core AST with Credences
+    | (type checking)
 Typed AST / Error
 ```
 
 ## Core Data Types
 
-### Weights
+### Credences
 
 ```ocaml
-(* Weight algebra: Product De Morgan *)
-type weight =
-  | WZero                    (* 0 *)
-  | WOne                     (* 1 *)
-  | WMul of weight * weight  (* w · v *)
-  | WNeg of weight           (* ¬w *)
-  | WVar of string           (* weight variable *)
+(* Credence algebra: Product De Morgan *)
+type credence =
+  | CZero                       (* 0 *)
+  | COne                        (* 1 *)
+  | CMul of credence * credence (* c1 * c2 *)
+  | CNeg of credence            (* ~c *)
+  | CVar of string              (* credence variable *)
 
-(* Derived: w ∨ v = ¬(¬w · ¬v) *)
-let w_or w v = WNeg (WMul (WNeg w, WNeg v))
+(* Derived: c1 | c2 = ~(~c1 * ~c2) *)
+let c_or c1 c2 = CNeg (CMul (CNeg c1, CNeg c2))
 
-(* Simplify weights *)
+(* Simplify credences *)
 let rec simplify = function
-  | WMul (WOne, w) | WMul (w, WOne) -> simplify w
-  | WMul (WZero, _) | WMul (_, WZero) -> WZero
-  | WNeg (WNeg w) -> simplify w
-  | WNeg WZero -> WOne
-  | WNeg WOne -> WZero
-  | WMul (w, v) -> WMul (simplify w, simplify v)
-  | WNeg w -> WNeg (simplify w)
-  | w -> w
+  | CMul (COne, c) | CMul (c, COne) -> simplify c
+  | CMul (CZero, _) | CMul (_, CZero) -> CZero
+  | CNeg (CNeg c) -> simplify c
+  | CNeg CZero -> COne
+  | CNeg COne -> CZero
+  | CMul (c1, c2) -> CMul (simplify c1, simplify c2)
+  | CNeg c -> CNeg (simplify c)
+  | c -> c
 ```
 
 ### Terms and Types
@@ -52,13 +52,13 @@ type term =
   | Var of string
 
   (* Functions *)
-  | Lam of string * typ * term        (* λx:A. b *)
+  | Lam of string * typ * term        (* lam x:A. b *)
   | App of term * term                (* f a *)
 
   (* Pairs *)
   | Pair of term * term               (* (a, b) *)
-  | Fst of term                       (* π₁ t *)
-  | Snd of term                       (* π₂ t *)
+  | Fst of term                       (* pi1 t *)
+  | Snd of term                       (* pi2 t *)
 
   (* Sums *)
   | Inl of term * typ                 (* inl a : A + B *)
@@ -66,7 +66,7 @@ type term =
   | Case of term * string * term * string * term
 
   (* Unit and Empty *)
-  | Star                              (* ★ *)
+  | Star                              (* star *)
   | Abort of term * typ               (* abort e : A *)
 
   (* Identity *)
@@ -75,19 +75,19 @@ type term =
   (* Universe *)
   | Type of int                       (* Type_i *)
 
-  (* Weight terms *)
-  | WTerm of weight                   (* weight as term *)
+  (* Credence terms *)
+  | CTerm of credence                 (* credence as term *)
 
 and typ =
   | TVar of string
-  | Pi of string * typ * typ          (* (x : A) → B *)
-  | Sigma of string * typ * typ       (* Σ(x : A). B *)
+  | Pi of string * typ * typ          (* (x : A) -> B *)
+  | Sigma of string * typ * typ       (* Sigma(x : A). B *)
   | Sum of typ * typ                  (* A + B *)
-  | Empty                             (* 𝟎 *)
-  | Unit                              (* 𝟏 *)
+  | Empty                             (* 0 *)
+  | Unit                              (* 1 *)
   | Id of typ * term * term           (* Id_A(a, b) *)
   | Universe of int                   (* Type_i *)
-  | WType                             (* W (weight type) *)
+  | CType                             (* C (credence type) *)
 ```
 
 ### Contexts and Judgments
@@ -99,12 +99,12 @@ type ctx_entry = string * typ
 (* Context *)
 type ctx = ctx_entry list
 
-(* Weighted typing judgment: Γ ⊢ a : A @ w *)
+(* Credenced typing judgment: Gamma |- a : A @ c *)
 type judgment = {
   ctx : ctx;
   term : term;
   typ : typ;
-  weight : weight;
+  credence : credence;
 }
 ```
 
@@ -113,44 +113,44 @@ type judgment = {
 ### Bidirectional Type Checking
 
 ```ocaml
-(* Infer type and weight of a term *)
-let rec infer (ctx : ctx) (t : term) : (typ * weight) result =
+(* Infer type and credence of a term *)
+let rec infer (ctx : ctx) (t : term) : (typ * credence) result =
   match t with
   | Var x ->
-      (* Variables have weight 1 *)
+      (* Variables have credence 1 *)
       let* ty = lookup x ctx in
-      Ok (ty, WOne)
+      Ok (ty, COne)
 
   | App (f, a) ->
-      (* Weights multiply *)
-      let* (Pi (x, a_ty, b_ty), w_f) = infer ctx f in
-      let* w_a = check ctx a a_ty in
+      (* Credences multiply *)
+      let* (Pi (x, a_ty, b_ty), c_f) = infer ctx f in
+      let* c_a = check ctx a a_ty in
       let result_ty = subst x a b_ty in
-      Ok (result_ty, WMul (w_f, w_a))
+      Ok (result_ty, CMul (c_f, c_a))
 
   | Fst t ->
-      let* (Sigma (x, a_ty, _), w) = infer ctx t in
-      Ok (a_ty, w)
+      let* (Sigma (x, a_ty, _), c) = infer ctx t in
+      Ok (a_ty, c)
 
   | Snd t ->
-      let* (Sigma (x, a_ty, b_ty), w) = infer ctx t in
+      let* (Sigma (x, a_ty, b_ty), c) = infer ctx t in
       let a = Fst t in
-      Ok (subst x a b_ty, w)
+      Ok (subst x a b_ty, c)
 
   | Star ->
-      Ok (Unit, WOne)
+      Ok (Unit, COne)
 
   | Type i ->
-      Ok (Universe (i + 1), WOne)
+      Ok (Universe (i + 1), COne)
 
-  | WTerm _ ->
-      Ok (WType, WOne)
+  | CTerm _ ->
+      Ok (CType, COne)
 
   | _ ->
       Error "Cannot infer type; use annotation"
 
-(* Check term against expected type, return weight *)
-and check (ctx : ctx) (t : term) (expected : typ) : weight result =
+(* Check term against expected type, return credence *)
+and check (ctx : ctx) (t : term) (expected : typ) : credence result =
   match t, expected with
   | Lam (x, a_ty, body), Pi (y, a_ty', b_ty) ->
       (* Check domain matches *)
@@ -161,11 +161,11 @@ and check (ctx : ctx) (t : term) (expected : typ) : weight result =
       check ctx' body b_ty'
 
   | Pair (a, b), Sigma (x, a_ty, b_ty) ->
-      (* Weights multiply *)
-      let* w_a = check ctx a a_ty in
+      (* Credences multiply *)
+      let* c_a = check ctx a a_ty in
       let b_ty' = subst x a b_ty in
-      let* w_b = check ctx b b_ty' in
-      Ok (WMul (w_a, w_b))
+      let* c_b = check ctx b b_ty' in
+      Ok (CMul (c_a, c_b))
 
   | Inl (a, _), Sum (a_ty, _) ->
       check ctx a a_ty
@@ -175,35 +175,35 @@ and check (ctx : ctx) (t : term) (expected : typ) : weight result =
 
   | Refl a, Id (ty, a', b') ->
       (* Check a = a' = b' *)
-      let* w = check ctx a ty in
+      let* c = check ctx a ty in
       let* () = check_equal_term a a' in
       let* () = check_equal_term a b' in
-      Ok w
+      Ok c
 
   | Abort (e, _), _ ->
-      let* w = check ctx e Empty in
-      Ok w  (* Any weight works *)
+      let* c = check ctx e Empty in
+      Ok c  (* Any credence works *)
 
   | _, _ ->
       (* Fall back to inference *)
-      let* (inferred, w) = infer ctx t in
+      let* (inferred, c) = infer ctx t in
       let* () = check_equal inferred expected in
-      Ok w
+      Ok c
 ```
 
-### Weight Comparison
+### Credence Comparison
 
 ```ocaml
-(* Check w₁ ≤ w₂ (for weakening) *)
-let rec weight_leq (w1 : weight) (w2 : weight) : bool =
-  match simplify w1, simplify w2 with
-  | WZero, _ -> true
-  | _, WOne -> true
-  | w1, w2 -> weight_equal w1 w2
+(* Check c1 <= c2 (for weakening) *)
+let rec credence_leq (c1 : credence) (c2 : credence) : bool =
+  match simplify c1, simplify c2 with
+  | CZero, _ -> true
+  | _, COne -> true
+  | c1, c2 -> credence_equal c1 c2
 
-(* Check weight equality *)
-and weight_equal (w1 : weight) (w2 : weight) : bool =
-  simplify w1 = simplify w2
+(* Check credence equality *)
+and credence_equal (c1 : credence) (c2 : credence) : bool =
+  simplify c1 = simplify c2
 ```
 
 ## Evaluation (Optional)
@@ -239,9 +239,9 @@ let rec eval (env : (string * term) list) (t : term) : term =
 ## File Structure
 
 ```
-probtt/
+credtt/
   src/
-    weight.ml       -- Weight algebra (~100 lines)
+    credence.ml     -- Credence algebra (~100 lines)
     syntax.ml       -- AST definitions (~100 lines)
     context.ml      -- Context operations (~50 lines)
     eval.ml         -- Evaluation/normalization (~150 lines)
@@ -250,32 +250,32 @@ probtt/
     lexer.mll       -- Lexer (~100 lines)
     main.ml         -- CLI (~50 lines)
   test/
-    examples/       -- Example ProbTT programs
+    examples/       -- Example CredTT programs
   dune             -- Build configuration
 ```
 
 ## Example Program
 
 ```
--- ProbTT source file
+-- CredTT source file
 
--- Weight-annotated function
+-- Credence-annotated function
 def uncertain_id : (A : Type) -> A -> A @ 0.9
-  = λA. λx. x
+  = lam A. lam x. x
 
--- Pair with joint weight
-def pair_example : (A : Type) -> (a : A @ 0.8) -> (b : A @ 0.7) -> A × A @ 0.56
-  = λA. λa. λb. (a, b)
+-- Pair with joint credence
+def pair_example : (A : Type) -> (a : A @ 0.8) -> (b : A @ 0.7) -> A x A @ 0.56
+  = lam A. lam a. lam b. (a, b)
 
--- Classical case: weight 1
+-- Classical case: credence 1
 def id : (A : Type) -> A -> A @ 1
-  = λA. λx. x
+  = lam A. lam x. x
 ```
 
 ## Implementation Steps
 
-1. **Weight algebra** (1 day)
-   - Define weight type
+1. **Credence algebra** (1 day)
+   - Define credence type
    - Simplification
    - Comparison
 
@@ -285,7 +285,7 @@ def id : (A : Type) -> A -> A @ 1
 
 3. **Type checker** (3 days)
    - Bidirectional algorithm
-   - Weight multiplication
+   - Credence multiplication
    - Context handling
 
 4. **Parser** (2 days)
@@ -309,7 +309,7 @@ Haskell alternative:
 
 ## Extensions
 
-1. **Weight inference**: Infer weights from term structure
+1. **Credence inference**: Infer credences from term structure
 2. **Universe polymorphism**: Proper universe handling
 3. **Holes**: `?` for incomplete terms
 4. **REPL**: Interactive mode

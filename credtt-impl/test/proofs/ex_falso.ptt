@@ -1,0 +1,16 @@
+-- Ex falso quodlibet (classical limit)
+-- From a contradiction, anything follows
+-- In CredTT: credence 0 propagates through derivations
+
+postulate p : P 〔 c 〕
+postulate not_p : NotP 〔 c 〕
+
+-- Immediate contradiction
+contradict p not_p
+
+-- Now c = 0, anything derived from c has credence 0
+-- But negation of the assumption has credence 1
+derive q : Q 〔 c 〕 from p by ex_falso
+
+-- The conclusion is that c = 0
+conclude result from p

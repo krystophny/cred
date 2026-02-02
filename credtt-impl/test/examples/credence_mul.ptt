@@ -1,0 +1,25 @@
+-- Demonstrates credence multiplication in CredTT
+-- When we apply functions or construct pairs, credences multiply
+
+-- Application: f a : B 〔 c·v 〕 when f : A -> B 〔 c 〕, a : A 〔 v 〕
+compose : (A -> B) -> (B -> C) -> A -> C
+compose f g x = g (f x)
+
+-- Pairs: (a, b) : A × B 〔 c·v 〕 when a : A 〔 c 〕, b : B 〔 v 〕
+swap : A × B -> B × A
+swap p = (snd p, fst p)
+
+-- Sum case: credence of scrutinee multiplies branch credence
+either : (A -> C) -> (B -> C) -> A + B -> C
+either f g x = case x of inl a -> f a | inr b -> g b
+
+-- Projections preserve credence
+proj1 : A × B -> A
+proj1 p = fst p
+
+proj2 : A × B -> B
+proj2 p = snd p
+
+-- Nested pairs
+nest : A -> B -> C -> (A × B) × C
+nest a b c = ((a, b), c)
