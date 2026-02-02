@@ -49,12 +49,8 @@ mutual
   renTy ρ (A +' B)   = renTy ρ A +' renTy ρ B
   renTy ρ (Id A a b) = Id (renTy ρ A) (renTm ρ a) (renTm ρ b)
 
--- Weakening: add unused variable at position 0
-wkTm : ∀ {n} → Tm n → Tm (suc n)
-wkTm = renTm suc
-
-wkTy : ∀ {n} → Ty n → Ty (suc n)
-wkTy = renTy suc
+-- Weakening: wkTm and wkTy are defined in Syntax.agda and re-exported here.
+-- They are equivalent to renTm suc and renTy suc respectively.
 
 -- Lift a substitution under a binder
 liftSub : ∀ {m n} → Sub m n → Sub (suc m) (suc n)
