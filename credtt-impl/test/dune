@@ -32,3 +32,8 @@
  (name test_dynamics)
  (modules test_dynamics)
  (libraries credtt.lib))
+
+(test
+ (name test_elaborate)
+ (modules test_elaborate)
+ (libraries credtt.lib))
