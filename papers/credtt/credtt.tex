@@ -1339,27 +1339,46 @@ AC leads to non-constructive results like the Banach-Tarski paradox: a ball can 
 where $c$ depends on $I$ and the $c_i$.
 \end{definition}
 
-\begin{theorem}[Choice Credence Scaling]
+\textbf{Axiom Schema} (Choice Credence Scaling):
 \begin{enumerate}
     \item \textbf{Finite choice}: $c = \one$ (fully constructible)
     \item \textbf{Countable choice}: $c = \prod_{n=1}^\infty c_n$ (may be $< \one$)
     \item \textbf{Uncountable choice}: $c \ll \one$
 \end{enumerate}
-\end{theorem}
 
-\begin{proof}[Proof sketch]
+\begin{remark}[Formalization Status]
+These are \textbf{axiom schemas}, not theorems. The Agda formalization (\texttt{agda/CredTT/GradedChoice.agda}) explicitly marks these as \texttt{postulate}s:
+\begin{itemize}
+    \item \texttt{ExistsAt} is a primitive notion bridging credences to existence
+    \item \texttt{finite-choice} is postulated as constructively valid
+    \item \texttt{countable-choice-credence} and \texttt{countable-choice-limit} are postulated
+    \item The limit credence depends on algebra-specific convergence properties
+\end{itemize}
+The intuitions below explain \emph{why} these axioms are reasonable, not proofs.
+\end{remark}
+
+\textbf{Intuition}:
 For finite $I$, we can construct the choice function explicitly---each step preserves credence $\one$, and finitely many steps preserve the product.
 
 For countable $I$, the infinite product $\prod_{n=1}^\infty c_n$ converges but may be strictly less than $\one$ (e.g., if $c_n = 1 - \epsilon/2^n$, then $c < 1$).
 
 For uncountable $I$, the product over uncountably many factors $< \one$ collapses toward $\zero$.
-\end{proof}
 
 \subsection{Banach-Tarski at Credence $< \one$}
 
-\begin{theorem}[Graded Banach-Tarski]
+\textbf{Conjecture} (Graded Banach-Tarski):
 The Banach-Tarski decomposition exists at some credence $c_{BT} < \one$.
-\end{theorem}
+
+\begin{remark}[Formalization Status]
+This is a \textbf{conjecture}, not a theorem. The Agda formalization (\texttt{agda/CredTT/GradedChoice.agda}) explicitly marks the components as \texttt{postulate}s:
+\begin{itemize}
+    \item \texttt{banach-tarski-credence : C} is postulated
+    \item \texttt{BanachTarskiDecomp : Set} is an abstract type
+    \item \texttt{bt-decomposition-exists} asserts existence at the postulated credence
+    \item \texttt{bt-not-realizable} asserts the credence is strictly less than $\one$
+\end{itemize}
+A proof would require formalizing Banach-Tarski in CredTT (measure theory), showing the construction uses uncountable choice, and computing the resulting credence.
+\end{remark}
 
 \begin{remark}[Physical Interpretation]
 Credence $< \one$ means ``exists mathematically but not physically realizable.'' Banach-Tarski requires infinitely many non-constructive choices; each contributes a factor $< \one$; the product is strictly $< \one$. This correctly predicts that you cannot actually perform the decomposition.

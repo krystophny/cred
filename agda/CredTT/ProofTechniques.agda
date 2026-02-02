@@ -5,6 +5,46 @@
 
    This module provides all 28 proof techniques with the dynamics framework.
 
+   ============================================================================
+   FORMALIZATION STATUS (Issue #63)
+   ============================================================================
+
+   PROVEN (with actual Agda proofs):
+   - 1. DirectProof: direct-proof-dynamics via postfixed-compose
+   - 3. Contraposition: contraposition (type-level), contrapos-antitone (credence)
+   - 4. Reductio: reductio via unstable-neg-to-stable
+   - 5. ExFalso: ex-falso-zero-fixed, ex-falso-zero-invariant
+   - 6. VacuousTruth: vacuous via annihilator axiom
+   - 7. DeductionTheorem: deduction-dynamics (identity on post-fixed)
+   - 8. ModusPonens: mp-dynamics via T-compose, mp-stability
+   - 9. Syllogism: syl-dynamics via T-compose
+   - 10. UniversalGen: pi-dynamics (wraps pi-intro-dynamics)
+   - 11. Existential: sigma-dynamics via sigma-intro-dynamics
+   - 13. Exhaustion: exhaust-example (concrete proof)
+   - 14. Construction: construct-example (concrete proof)
+   - 16. Equational: rewrite-dynamics (wraps rewriting-dynamics)
+   - 21. StabilityProofs: StabilityProofRecord (record type)
+   - 22. CredenceBounds: LowerBoundRecord, UpperBoundRecord (record types)
+   - 23. ContinuityLemmas: mul-mono via algebra monotonicity
+   - 24. DegeneracyAnalysis: IsDegradingDef (type alias)
+   - 25. Contractivity: identity-preserves (proven)
+   - 26. ProofFactoring: FactoringRecord (record type)
+   - 27. DualProofs: SqueezedRecord (record type)
+
+   EXAMPLES ONLY (concrete Agda terms, but not general theorems):
+   - 2. ProofByCases: cases-example (concrete Bool case)
+   - 12. NaturalInduction: ind-example (concrete Nat proof)
+   - 18. StructuralRules: exchange-example (concrete function)
+
+   NOT YET FORMALIZED (comments/templates):
+   - 15. Refutation: Requires contradiction predicate (no tracking issue)
+   - 17. Analogy: Requires concrete interval algebra
+   - 19. StrongInduction: Requires k-deep recursion schema (issue #155)
+   - 20. Contrapositive: Region-based, needs more infrastructure
+   - 28. LimitTheorems: Requires convergence formalization
+
+   ============================================================================
+
    KEY INSIGHT: Proofs are MONOTONE OPERATORS on credences
    - Each proof step s induces operator T_s(c) = c * s
    - Stability is about FIXED POINTS of these operators
@@ -86,9 +126,33 @@ module ClassicalTechniques {ℓ} (DM : DeMorganAlgebra ℓ) where
   -- 3. CONTRAPOSITION
   -- DYNAMICS: Negation reverses order (antitone)
   module Contraposition where
-    -- Classical: (A -> B) <-> (not B -> not A)
-    -- CredTT: if c <= d, then not d <= not c
+    open import Data.Empty using (⊥)
 
+    -- Type-level negation
+    ¬T : Set → Set
+    ¬T A = A → ⊥
+
+    -- =========================================================================
+    -- ACTUAL CONTRAPOSITION (Issue #65):
+    -- Classical: (A → B) → (¬B → ¬A)
+    -- This is a genuine proof, not a placeholder.
+    -- =========================================================================
+    contraposition : ∀ {A B : Set} → (A → B) → (¬T B → ¬T A)
+    contraposition f ¬b a = ¬b (f a)
+
+    -- The converse is also provable (intuitionistically valid)
+    -- Note: ¬T (¬T A) means (A → ⊥) → ⊥
+    contraposition-converse : ∀ {A B : Set} → (¬T B → ¬T A) → ¬T (¬T A) → ¬T (¬T B)
+    contraposition-converse f ¬¬a ¬b = ¬¬a (f ¬b)
+
+    -- =========================================================================
+    -- CREDENCE-LEVEL CONTRAPOSITION:
+    -- CredTT: if c ≤ d, then ¬d ≤ ¬c (order reversal)
+    --
+    -- This is about how credences transform under negation, not about
+    -- type-level implication. Both are valid notions of "contraposition"
+    -- but at different levels.
+    -- =========================================================================
     contrapos-antitone : ∀ {c d : C} → c ≤ d → (¬ d) ≤ (¬ c)
     contrapos-antitone = neg-antitone
 
@@ -97,6 +161,18 @@ module ClassicalTechniques {ℓ} (DM : DeMorganAlgebra ℓ) where
       PostFixedPoint c s →
       (¬ (c · s)) ≤ (¬ c)
     contrapos-dynamics = contraposition-dynamics
+
+    -- =========================================================================
+    -- NOTE ON CREDENCE-ANNOTATED CONTRAPOSITION:
+    -- True credence-annotated contraposition would require:
+    --   (A → B) @ c → (¬B → ¬A) @ c'
+    -- where c' depends on how credences transform through the derivation.
+    --
+    -- This requires the full credence-annotated judgment infrastructure
+    -- (CredTT.Judgment), which is currently a postulated framework.
+    -- The credence-level contrapos-antitone captures the key insight:
+    -- negation reverses the credence ordering.
+    -- =========================================================================
 
   -- 4. REDUCTIO AD ABSURDUM
   -- DYNAMICS: Unstable negation implies stable positive
@@ -233,7 +309,7 @@ module ClassicalTechniques {ℓ} (DM : DeMorganAlgebra ℓ) where
 
   -- 15. REFUTATION
   -- DYNAMICS: Drive credence to 0 (degeneration)
-  -- STATUS: Not yet formalized (see issue #157)
+  -- STATUS: Not yet formalized (no tracking issue)
   module Refutation where
     -- Classical: derive bottom (contradiction leads to falsum)
     -- CredTT: iterate until credence degenerates to 0
