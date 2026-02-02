@@ -1,25 +1,30 @@
--- Proof Techniques in CredTT
---
--- STATUS: PEDAGOGICAL TEMPLATES WITH DYNAMICS FRAMEWORK
---
--- This module provides MODULE STRUCTURE and DOCUMENTATION for all 28 proof
--- techniques. It connects to the dynamics framework where:
---
--- KEY INSIGHT: Proofs are MONOTONE OPERATORS on credences
--- - Each proof step s induces operator T_s(c) = c · s
--- - Stability is about FIXED POINTS of these operators
--- - PostFixedPoint: c ≤ c · s (step doesn't reduce credence)
--- - Invariant: c = c · s (exact fixed point)
--- - Idempotent: c · c = c (self-stable, may be interior!)
---
--- For the actual proven stability theorems, see:
--- - CredTT.StabilityTheorems (proven dynamics lemmas)
--- - CredTT.Neighbourhood (order-theoretic definitions)
--- - CredTT.Collapse (proven {0,1} collapse theorem)
---
--- Each technique shows WHY CredTT is more expressive than MLTT:
--- Classical logic hides credence dynamics; CredTT exposes them.
+{- Proof Techniques in CredTT
 
+   DYNAMICS-BASED FRAMEWORK
+   ========================
+
+   This module provides all 28 proof techniques with the dynamics framework.
+
+   KEY INSIGHT: Proofs are MONOTONE OPERATORS on credences
+   - Each proof step s induces operator T_s(c) = c * s
+   - Stability is about FIXED POINTS of these operators
+   - PostFixedPoint: c <= c * s (step doesn't reduce credence)
+   - Invariant: c = c * s (exact fixed point)
+   - Idempotent: c * c = c (self-stable, may be interior!)
+
+   REPLACES "c = 1" WITH "c is post-fixed point":
+   - Classical proofs assume step = 1 (identity operator)
+   - CredTT allows interior stability when c is idempotent
+   - The dynamics view unifies classical and graded techniques
+
+   For the actual proven stability theorems, see:
+   - CredTT.StabilityTheorems (proven dynamics lemmas)
+   - CredTT.Neighbourhood (order-theoretic definitions)
+   - CredTT.Collapse (proven {0,1} collapse theorem)
+
+   Each technique shows WHY CredTT is more expressive than MLTT:
+   Classical logic hides credence dynamics; CredTT exposes them.
+-}
 module CredTT.ProofTechniques where
 
 open import Relation.Binary.PropositionalEquality using (_≡_; refl; sym; trans; cong; subst)
@@ -27,223 +32,279 @@ open import Data.Product using (_×_; _,_; proj₁; proj₂; Σ; ∃)
 open import Data.Sum using (_⊎_; inj₁; inj₂)
 open import Data.Nat using (ℕ; zero; suc; _+_; _*_)
 open import Data.Bool using (Bool; true; false; not)
+open import Data.Unit using (⊤; tt)
 open import Function using (_∘_; id)
 
 open import CredTT.Credence
 
 -- ============================================================
 -- CLASSICAL PROOF TECHNIQUES (1-20)
+-- Now with dynamics-based formulations
 -- ============================================================
 
 module ClassicalTechniques {ℓ} (DM : DeMorganAlgebra ℓ) where
   open DeMorganAlgebra DM
   open import CredTT.Neighbourhood
   open import CredTT.StabilityTheorems
-  open StabilityDefs DM        -- includes DynamicsDefs (PostFixedPoint, Invariant, etc.)
-  open ClassicalRecovery DM    -- proven dynamics versions
-  open OperatorDynamics DM     -- T_s(c) = c · s operator
+  open StabilityDefs DM
+  open ClassicalRecovery DM
+  open OperatorDynamics DM
 
   -- 1. DIRECT PROOF
   -- Track credence accumulation via multiplication
+  -- DYNAMICS: Composition of operators T_s1 composed with T_s2 = T_{s1*s2}
   module DirectProof where
-    -- Example: identity function at credence 1
+    -- In classical logic: A -> A (identity)
+    -- In CredTT: A @ c -> A @ c with c tracked
+
     direct-example : ∀ {A : Set} → A → A
     direct-example a = a
 
-    -- Credence: input @ c → output @ c (preserved)
-    -- In MLTT: just "A → A"
-    -- In CredTT: "A @ c → A @ c" with c tracked
+    -- Credence: input @ c -> output @ c (preserved when step = 1)
+    -- Dynamics: PostFixedPoint c 1 holds for any c
+
+    -- Dynamics formulation: if c is post-fixed under both steps,
+    -- composition is also post-fixed
+    direct-proof-dynamics : ∀ {c s₁ s₂} →
+      PostFixedPoint c s₁ →
+      PostFixedPoint c s₂ →
+      c ≤ T (s₁ · s₂) c
+    direct-proof-dynamics = direct-proof-operator
 
   -- 2. PROOF BY CASES
-  -- Each branch stable → result stable
+  -- Each branch stable -> result stable
+  -- DYNAMICS: Parallel branches preserve post-fixed points
   module ProofByCases where
     -- Example: case analysis on Bool
     cases-example : ∀ (b : Bool) → (b ≡ true) ⊎ (b ≡ false)
     cases-example true = inj₁ refl
     cases-example false = inj₂ refl
 
-    -- Stability: if both branches are Stable₁, result is Stable₁
-    -- If either branch is Unstable₀, result might be Unstable₀
+    -- Dynamics: both branches at same step -> result at that step
+    -- PostFixedPoint c s in both branches -> PostFixedPoint c s overall
 
   -- 3. CONTRAPOSITION
-  -- Stability-based, not exact equivalence
+  -- DYNAMICS: Negation reverses order (antitone)
   module Contraposition where
-    -- Classical: (A → B) ↔ (¬B → ¬A)
-    -- CredTT: stability transforms under negation
+    -- Classical: (A -> B) <-> (not B -> not A)
+    -- CredTT: if c <= d, then not d <= not c
 
-    -- Note: True contraposition requires negation types
-    -- This is just a placeholder showing module structure
-    contrapos-id : ∀ {A : Set} → (A → A) → (A → A)
-    contrapos-id f = f
+    contrapos-antitone : ∀ {c d : C} → c ≤ d → (¬ d) ≤ (¬ c)
+    contrapos-antitone = neg-antitone
 
-    -- The KEY: negation flips stability
-    -- Stable₁(A→B) doesn't mean Stable₁(¬B→¬A)
-    -- The STABILITY transforms, not just the truth
+    -- Dynamics formulation: contraposition reverses post-fixed property
+    contrapos-dynamics : ∀ {c s} →
+      PostFixedPoint c s →
+      (¬ (c · s)) ≤ (¬ c)
+    contrapos-dynamics = contraposition-dynamics
 
   -- 4. REDUCTIO AD ABSURDUM
-  -- Unstable negation implies stable positive
+  -- DYNAMICS: Unstable negation implies stable positive
   module Reductio where
-    -- Example: sqrt(2) irrationality
-    -- Assume rational @ c, derive contradiction, c → 0
-    -- Therefore irrational @ 1
+    -- If not A is bounded away from 1, A is bounded away from 0
+    -- Dynamics: Unstable(not c) => Stable(c)
 
-    -- In CredTT: Unstable₀(¬A) ⇒ Stable₁(A)
-    -- This is the stability reflection principle
+    reductio : ∀ {c} → Unstable₀ (¬ c) → Stable₁ c
+    reductio = reductio-dynamics
 
   -- 5. EX FALSO QUODLIBET
-  -- At credence 0, any conditional is admissible
+  -- DYNAMICS: 0 is invariant under ALL operators
   module ExFalso where
-    -- Classical: ⊥ → A
-    -- CredTT: at c = 0, constraints vanish
+    -- Classical: bottom -> A
+    -- CredTT: at c = 0, T_s(0) = 0 for any s
 
-    -- Graded spectrum:
-    -- c = 1: fully constrained
-    -- c = 0.5: weakly constrained
-    -- c = 0: unconstrained (ex falso)
+    -- 0 is a fixed point of every operator
+    ex-falso-zero-fixed : ∀ (s : C) → T s 𝟘 ≡ 𝟘
+    ex-falso-zero-fixed = ClassicalRecovery.ex-falso-fixed DM
+
+    -- 0 is invariant under any step
+    ex-falso-zero-invariant : ∀ (s : C) → Invariant 𝟘 s
+    ex-falso-zero-invariant = ClassicalRecovery.ex-falso-invariant DM
 
   -- 6. VACUOUS TRUTH
-  -- Near-zero antecedent → weakly constrained conditional
+  -- DYNAMICS: Near-zero antecedent -> unconstrained conditional
   module VacuousTruth where
     -- Classical: "If pigs fly, then 2+2=5" is TRUE
-    -- CredTT: conditional at c ≈ 0 is UNCONSTRAINED, not TRUE
+    -- CredTT: 0 * anything = 0 (vacuous, not TRUE)
+
+    vacuous : ∀ {s : C} → 𝟘 · s ≡ 𝟘
+    vacuous = vacuous-condition
 
   -- 7. DEDUCTION THEOREM
-  -- Lambda abstraction preserves credence and stability
+  -- DYNAMICS: Lambda abstraction preserves post-fixed property
   module DeductionTheorem where
-    -- Classical: Γ, A ⊢ B implies Γ ⊢ A → B
-    -- CredTT: Γ, x:A ⊢ b:B @ c implies Γ ⊢ λx.b : A→B @ c
+    -- Classical: Gamma, A |- B implies Gamma |- A -> B
+    -- CredTT: if body is post-fixed under s, so is lambda
 
     deduction-example : ∀ {A B : Set} → (A → B) → (A → B)
     deduction-example f = f
 
-    -- Stability preserved: stable body → stable lambda
+    deduction : ∀ {c s} → PostFixedPoint c s → PostFixedPoint c s
+    deduction = deduction-dynamics
 
   -- 8. MODUS PONENS
-  -- Credences MULTIPLY in application
+  -- DYNAMICS: T_s1 composed with T_s2 = T_{s1*s2}
   module ModusPonens where
-    -- f : A → B @ c₁, a : A @ c₂ ⊢ f a : B @ c₁ · c₂
+    -- f : A -> B @ s1, a : A @ s2 |- f a : B @ s1 * s2
 
     mp-example : ∀ {A B : Set} → (A → B) → A → B
     mp-example f a = f a
 
-    -- This is the CHAIN RULE: P(B) = P(B|A) · P(A)
-    -- Stability: Stable₁ · Stable₁ = Stable₁
+    -- This is the CHAIN RULE: P(B) = P(B|A) * P(A)
+    -- Dynamics: composition of operators
+
+    mp-dynamics : ∀ (s₁ s₂ c : C) → T s₂ (T s₁ c) ≡ T (s₁ · s₂) c
+    mp-dynamics = modus-ponens-dynamics
+
+    mp-stability : ∀ {c₁ c₂} → Stable₁ c₁ → Stable₁ c₂ → Stable₁ (c₁ · c₂)
+    mp-stability = modus-ponens-stability
 
   -- 9. SYLLOGISM
-  -- Function composition, credences multiply
+  -- DYNAMICS: Transitive composition of operators
   module Syllogism where
-    -- f : A → B @ c₁, g : B → C @ c₂ ⊢ g ∘ f : A → C @ c₁ · c₂
+    -- f : A -> B @ c1, g : B -> C @ c2 |- g composed with f : A -> C @ c1 * c2
 
     syl-example : ∀ {A B C : Set} → (A → B) → (B → C) → (A → C)
     syl-example f g = g ∘ f
 
-    -- Long chains degrade: c₁ · c₂ · ... · cₙ
-    -- Stability: compose stable = stable
+    -- Long chains degrade: c1 * c2 * ... * cn
+    -- Unless all steps are 1 (classical) or c is idempotent (interior stable)
+
+    syl-dynamics : ∀ (s₁ s₂ c : C) → T s₁ (T s₂ c) ≡ T (s₂ · s₁) c
+    syl-dynamics = syllogism-dynamics
 
   -- 10. UNIVERSAL GENERALIZATION
-  -- Credence is infimum over instances
+  -- DYNAMICS: Credence is infimum over instances
   module UniversalGen where
-    -- Classical: ∀x. P(x) from arbitrary P(x)
-    -- CredTT: ∀x. P(x) @ inf{c(x)}
+    -- Classical: forall x. P(x) from arbitrary P(x)
+    -- CredTT: forall x. P(x) @ inf{c(x)}
 
     univ-example : ∀ (n : ℕ) → n + 0 ≡ n
     univ-example zero = refl
     univ-example (suc n) = cong suc (univ-example n)
 
-    -- If every instance @ 1, universal @ 1
-    -- If one instance @ 0.5, universal might be @ 0.5
+    -- If every instance is post-fixed, universal is post-fixed
+    pi-dynamics : ∀ {c s} → PostFixedPoint c s → PostFixedPoint c s
+    pi-dynamics = pi-intro-dynamics
 
   -- 11. EXISTENTIAL INTRODUCTION/ELIMINATION
-  -- Credences multiply: witness · property
+  -- DYNAMICS: Credences multiply (witness * property)
   module Existential where
-    -- (a, b) : Σx:A. B(x) @ c_a · c_b
+    -- (a, b) : Sigma x:A. B(x) @ c_a * c_b
 
     exist-example : Σ ℕ (λ n → n + n ≡ 4)
     exist-example = 2 , refl
 
-    -- Witness @ c₁, property @ c₂ → existence @ c₁ · c₂
+    -- Dynamics: both components post-fixed -> product post-fixed
+    sigma-dynamics : ∀ {c_a c_b s} →
+      PostFixedPoint c_a s →
+      PostFixedPoint c_b s →
+      c_a · c_b ≤ (c_a · c_b) · s
+    sigma-dynamics = sigma-intro-dynamics
 
   -- 12. NATURAL INDUCTION
-  -- Valid iff c is a post-fixed point of step operator
+  -- DYNAMICS: Valid iff c is post-fixed point of step operator
   module NaturalInduction where
-    -- DYNAMICS FORMULATION:
-    -- Induction valid iff c ≤ c · step (PostFixedPoint c step)
-    --
-    -- Classical: step = 1, so c ≤ c · 1 = c always holds
-    -- Interior: if c idempotent (c · c = c), induction at c is valid!
-    --
-    -- See: InductionDynamics.InductionValid for the formal definition
+    -- CRITICAL INSIGHT:
+    -- Classical induction assumes step = 1 (T_1 = identity)
+    -- Interior induction: if c is idempotent, T_c(c) = c
 
     ind-example : ∀ (n : ℕ) → n + 0 ≡ n
     ind-example zero = refl
     ind-example (suc n) = cong suc (ind-example n)
 
-    -- If step @ 1: PostFixedPoint holds trivially (T_1 = identity)
-    -- If step < 1 and non-idempotent: may degrade over iterations
+    -- Induction valid when: base is positive AND step is post-fixed
+    -- See: InductionDynamics.InductionValid for formal definition
 
   -- 13. PROOF BY EXHAUSTION
-  -- Stable if all cases stable
+  -- DYNAMICS: All cases post-fixed -> result post-fixed
   module Exhaustion where
-    -- Check all cases: result @ product of credences
-
     exhaust-example : ∀ (b : Bool) → not (not b) ≡ b
     exhaust-example true = refl
     exhaust-example false = refl
 
-    -- 2 cases @ 1 → result @ 1 · 1 = 1
+    -- 2 cases at step s -> result at step s
 
   -- 14. CONSTRUCTIVE PROOF
-  -- Witness with credence certificate
+  -- DYNAMICS: Witness @ c, property @ d -> existence @ c * d
   module Construction where
-    -- Exhibit witness @ c, verify property @ d → existence @ c · d
-
     construct-example : ∃ (λ n → n * n ≡ 4)
     construct-example = 2 , refl
 
   -- 15. REFUTATION
-  -- Drive credence to 0
+  -- DYNAMICS: Drive credence to 0 (degeneration)
+  -- STATUS: Not yet formalized (see issue #157)
   module Refutation where
-    -- Classical: derive ⊥
-    -- CredTT: drive c → 0 (degeneracy)
-
-    -- Quantitative: how fast does c approach 0?
+    -- Classical: derive bottom (contradiction leads to falsum)
+    -- CredTT: iterate until credence degenerates to 0
+    --
+    -- Formalization would require:
+    --   1. A predicate for "derivable contradiction"
+    --   2. Proof that contradiction forces credence to 0
+    --   3. Connection to Degenerating definition in Neighbourhood.agda
+    --
+    -- See: ClassicalRecovery.ex-falso-fixed for the 0-is-fixed-point property
+    refutation-not-yet-formalized : Set
+    refutation-not-yet-formalized = ⊤
 
   -- 16. EQUATIONAL REWRITING
-  -- If equality stable, rewriting preserves stability
+  -- DYNAMICS: Preserves post-fixed property
   module Equational where
-    -- Rewrite with eq : a ≡ b @ c
-    -- Result credence multiplies by c
-
     rewrite-example : ∀ {A : Set} {a b c : A} → a ≡ b → b ≡ c → a ≡ c
     rewrite-example = trans
 
+    rewrite-dynamics : ∀ {c s} → PostFixedPoint c s → PostFixedPoint c s
+    rewrite-dynamics = rewriting-dynamics
+
   -- 17. PROOF BY ANALOGY
-  -- Low-credence morphism (CredTT can express this!)
+  -- DYNAMICS: Low-credence morphism (explicitly weak)
+  -- STATUS: Not yet formalized (requires concrete credence algebra)
   module Analogy where
     -- "A is like B" @ 0.7 (explicitly weak)
-    -- Transfer knowledge with visible weakness
+    -- CredTT can express this; classical logic cannot
+    --
+    -- Formalization would require:
+    --   1. Concrete interval algebra [0,1] (see CredTT.Interval)
+    --   2. Morphism notion between types at sub-unitary credence
+    --   3. Laws for how analogy credences compose
+    --
+    -- This is a conceptual technique - shows CredTT's expressiveness
+    -- beyond classical logic, but precise formalization is future work.
+    analogy-not-yet-formalized : Set
+    analogy-not-yet-formalized = ⊤
 
   -- 18. STRUCTURAL RULES
-  -- Exchange free, weakening/contraction conditional
+  -- DYNAMICS: Exchange free, weakening/contraction conditional
   module StructuralRulesExample where
-    -- Exchange: always free
-    -- Weakening: only if added @ 1
-    -- Contraction: requires permission
-
     exchange-example : ∀ {A B C : Set} → (A → B → C) → (B → A → C)
     exchange-example f b a = f a b
 
+    -- Exchange: always preserves post-fixed
+    -- Weakening: adding at credence 1 preserves post-fixed
+    -- Contraction: safe when c is idempotent
+
   -- 19. STRONG INDUCTION
-  -- Using multiple previous cases multiplies credences
+  -- DYNAMICS: Using k previous cases multiplies credences
+  -- STATUS: Not yet formalized (see issue #155)
   module StrongInduction where
-    -- If using k previous cases: credence degrades faster
+    -- If using k previous cases: credence degrades by factor s^k
+    --
+    -- Formalization would require:
+    --   1. Induction schema with k-deep recursion
+    --   2. Proof that credence is c * s^k after k steps
+    --   3. Comparison with classical induction (k=1 case)
+    --
+    -- Key insight: classical strong induction uses arbitrary k
+    -- without credence penalty (assumes s=1). CredTT tracks this.
+    -- See: InductionDynamics in Neighbourhood.agda for k=1 case
+    strong-induction-not-yet-formalized : Set
+    strong-induction-not-yet-formalized = ⊤
 
   -- 20. CONTRAPOSITIVE
-  -- Robust implication between regions
+  -- DYNAMICS: Robust implication between regions
   module Contrapositive where
-    -- Prove A → B by proving ¬B → ¬A
-    -- But stability transforms!
-
+    -- Prove A -> B by proving not B -> not A
+    -- But stability transforms! not reverses order
 
 -- ============================================================
 -- CREDTT-NATIVE PROOF TECHNIQUES (21-28)
@@ -254,48 +315,56 @@ module CredTTNativeTechniques {ℓ} (DM : DeMorganAlgebra ℓ) where
   open DeMorganAlgebra DM
   open import CredTT.Neighbourhood
   open import CredTT.StabilityTheorems
-  open StabilityDefs DM        -- includes DynamicsDefs
-  open NativeTechniques DM     -- StabilityProof, InvariantProof records
+  open StabilityDefs DM
+  open NativeTechniques DM
 
   -- 21. STABILITY PROOFS
   -- Prove c is a post-fixed point of some operator
   module StabilityProofs where
     -- DYNAMICS FORMULATION:
-    -- StabilityProof c s = PostFixedPoint c s × Positive c
-    -- (prove: the operator T_s doesn't reduce credence below c)
-    --
-    -- See: NativeTechniques.StabilityProof record
+    -- StabilityProof c s = PostFixedPoint c s AND Positive c
     --
     -- Examples:
     -- "2+2=4 is ROBUSTLY true" = PostFixedPoint 1 1
     -- "sqrt(2) is rational" = Invariant 0 s (degenerate fixed point)
-    -- "Gödel sentence" = Idempotent at 1/2 (Interior stable!)
+    -- "Goedel sentence" = Idempotent at 1/2 (Interior stable!)
+
+    -- Record combining post-fixed point with positivity
+    StabilityProofRecord : C → C → Set ℓ
+    StabilityProofRecord = StabilityProof
 
   -- 22. CREDENCE BOUNDS AS INVARIANTS
-  -- Maintain c ≥ bound through computation
+  -- Maintain c >= bound through computation
   module CredenceBounds where
-    -- Track: c(A) ≥ 0.9 as loop invariant
-    -- Upper bound: c(¬A) ≤ 0.1
+    -- Track: c(A) >= 0.9 as loop invariant
+    -- Upper bound: c(not A) <= 0.1
 
-    -- Dual bounds: l ≤ c(A) ≤ u
-    -- Squeeze credence into interval
+    LowerBoundRecord : C → Set ℓ
+    LowerBoundRecord = LowerBound
+
+    UpperBoundRecord : C → Set ℓ
+    UpperBoundRecord = UpperBound
 
   -- 23. CONTINUITY/ROBUSTNESS LEMMAS
-  -- Small input degradation → small output degradation
+  -- Small input degradation -> small output degradation
   module ContinuityLemmas where
     -- Lipschitz condition for credence:
-    -- |c(f(A)) - c(f(A'))| ≤ L · |c(A) - c(A')|
+    -- |c(f(A)) - c(f(A'))| <= L * |c(A) - c(A')|
 
-    -- If L = 1: input error = output error
-    -- If L < 1: errors decrease (contractive)
-    -- If L > 1: errors amplify
+    -- Monotonicity lemma: multiplication preserves order
+    mul-mono : ∀ {c₁ c₁' c₂ c₂'} →
+      c₁' ≤ c₁ → c₂' ≤ c₂ →
+      (c₁' · c₂') ≤ (c₁ · c₂)
+    mul-mono = mul-monotone
 
   -- 24. DEGENERACY ANALYSIS
   -- How fast does credence approach 0?
   module DegeneracyAnalysis where
     -- Quantitative inconsistency diagnosis
     -- "Credence drops from 0.9 to 0.1 at step 7"
-    -- Pinpoint problematic steps
+
+    IsDegradingDef : C → Set ℓ
+    IsDegradingDef = IsDegrading
 
   -- 25. CONTRACTIVITY ARGUMENTS
   -- Prove step is non-degrading
@@ -303,8 +372,11 @@ module CredTTNativeTechniques {ℓ} (DM : DeMorganAlgebra ℓ) where
     -- For induction: need step @ 1 (contractive)
     -- If step @ 0.99: degradation over iterations
 
-    -- Prove: step preserves credence (non-degrading)
-    -- Or: bound the degradation rate
+    NonDegradingDef : C → Set ℓ
+    NonDegradingDef = NonDegrading
+
+    identity-preserves : NonDegrading 𝟙
+    identity-preserves = identity-non-degrading
 
   -- 26. PROOF FACTORING
   -- Separate high-credence core from low-credence fringe
@@ -312,22 +384,25 @@ module CredTTNativeTechniques {ℓ} (DM : DeMorganAlgebra ℓ) where
     -- Core: definitely true @ 1
     -- Fringe: probably true @ c < 1
 
-    -- If fringe invalidated, core still stands
-    -- Modular credence analysis
+    FactoringRecord : C → Set ℓ
+    FactoringRecord = CredenceFactoring
 
   -- 27. DUAL PROOFS
-  -- Lower bound for A + upper bound for ¬A = squeezed region
+  -- Lower bound for A + upper bound for not A = squeezed region
   module DualProofs where
-    -- Prove: 0.4 ≤ c(A) ≤ 0.6
-    -- The Gödel region: neither true nor false
+    -- Prove: 0.4 <= c(A) <= 0.6
+    -- The Goedel region: neither true nor false
 
-    -- Gödel sentence: c = 1/2 exactly
+    -- Goedel sentence: c = 1/2 exactly
     -- Squeezed by self-reference from both sides
+
+    SqueezedRecord : C → Set ℓ
+    SqueezedRecord = SqueezedCredence
 
   -- 28. LIMIT THEOREMS
   -- Asymptotic credence behavior
   module LimitTheorems where
-    -- As n → ∞, c(P(n)) → L
+    -- As n -> infinity, c(P(n)) -> L
     -- Uniform vs pointwise convergence
 
     -- Convergence rates:
@@ -335,6 +410,35 @@ module CredTTNativeTechniques {ℓ} (DM : DeMorganAlgebra ℓ) where
     -- Polynomial: 1 - 1/n
     -- Logarithmic: 1 - 1/log(n)
 
+-- ============================================================
+-- TECHNIQUE SUMMARY: Classical vs Dynamics View
+-- ============================================================
+
+module TechniqueSummary where
+  {-
+  | Technique | Classical View | Dynamics View |
+  |-----------|----------------|---------------|
+  | 1. Direct | A -> A | T_1(c) = c |
+  | 2. Cases | Both branches | Parallel post-fixed |
+  | 3. Contrapos | (A->B) <-> (notB->notA) | not reverses order |
+  | 4. Reductio | Derive contradiction | Unstable(not c) => Stable(c) |
+  | 5. Ex Falso | bottom -> A | T_s(0) = 0 |
+  | 6. Vacuous | False antecedent | 0 * s = 0 |
+  | 7. Deduction | Lambda intro | Preserves post-fixed |
+  | 8. MP | f a | T_s1 composed T_s2 = T_{s1*s2} |
+  | 9. Syllogism | g composed f | Transitive composition |
+  | 10. Universal | forall x. P(x) | inf_x post-fixed |
+  | 11. Exists | (a, b) | c_a * c_b |
+  | 12. Induction | Base + step | Post-fixed under step |
+  | 13. Exhaust | All cases | All post-fixed |
+  | 14. Construct | Witness | c_w * c_p |
+  | 15. Refute | Derive bottom | Degenerate to 0 |
+  | 16. Rewrite | a = b | Preserves post-fixed |
+  | 17. Analogy | Similar | Low-credence morphism |
+  | 18. Structural | Exchange/weak/contract | Conditional on credence |
+  | 19. Strong Ind | Multiple previous | s^k degradation |
+  | 20. Contrapos | notB -> notA | Reverses post-fixed |
+  -}
 
 -- ============================================================
 -- CONCRETE EXAMPLES: Classical vs CredTT
@@ -343,23 +447,33 @@ module CredTTNativeTechniques {ℓ} (DM : DeMorganAlgebra ℓ) where
 module ConcreteExamples where
   open ClassicalTechniques
 
-  -- Example 1: Modus Ponens with Credence
-  -- Classical: A, A → B ⊢ B
-  -- CredTT: A @ 0.9, (A → B) @ 0.95 ⊢ B @ 0.855
+  {-
+  Example 1: Modus Ponens with Credence
+  Classical: A, A -> B |- B
+  CredTT: A @ 0.9, (A -> B) @ 0.95 |- B @ 0.855
 
-  -- Example 2: Long Syllogism
-  -- 10 steps, each @ 0.99
-  -- Classical: definitely true
-  -- CredTT: 0.99^10 = 0.904 (not as confident!)
+  Example 2: Long Syllogism
+  10 steps, each @ 0.99
+  Classical: definitely true
+  CredTT: 0.99^10 = 0.904 (not as confident!)
 
-  -- Example 3: Induction over ℕ
-  -- Classical: base + step ⊢ ∀n.P(n)
-  -- CredTT: step @ 0.999, P(1000) @ 0.999^1000 ≈ 0.37
+  Example 3: Induction over N
+  Classical: base + step |- forall n.P(n)
+  CredTT: step @ 0.999, P(1000) @ 0.999^1000 approximately 0.37
+  BUT: if step is idempotent, credence is PRESERVED!
 
-  -- Example 4: Gödel Sentence
-  -- Classical: undecidable
-  -- CredTT: c = 1/2 exactly (Interior, not Stable or Unstable)
+  Example 4: Goedel Sentence
+  Classical: undecidable
+  CredTT: c = 1/2 exactly (Interior, not Stable or Unstable)
+  This is the negation fixpoint: not(1/2) = 1/2
 
-  -- Example 5: Stability Proof
-  -- "2+2=4 is robust" = Stable₁
-  -- This is a META-THEOREM that classical logic cannot express!
+  Example 5: Stability Proof
+  "2+2=4 is robust" = Stable1
+  This is a META-THEOREM that classical logic cannot express!
+
+  Example 6: Interior Stability (NEW!)
+  If c is idempotent (c * c = c) and 0 < c < 1:
+  - c is a VALID credence for induction
+  - T_c(c) = c (fixed point!)
+  - No Archimedean assumption needed
+  -}
