@@ -1,5 +1,10 @@
 -- Contraposition
 --
+-- STATUS: CONCEPTUAL (Issue #148)
+-- This file EXPLAINS how contraposition works in CredTT but the `by negate`
+-- tactic does NOT exist. Negation stability flipping is a DESIGN CONCEPT
+-- documented here; no implementation verifies it.
+--
 -- Classical: (A -> B) <-> (~B -> ~A)
 -- CredTT: Stability-contraposition (not exact equivalence!)
 --         Stable(A -> B) implies bound on ~B -> ~A

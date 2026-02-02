@@ -139,6 +139,10 @@ and elab_term env = function
       let t' = elab_term env t in
       let env' = extend_var env name in
       Syntax.App (Syntax.Lam (Syntax.TBase 0, elab_term env' body), t')
+  (* LIMITATION (Issue #150): TWhere clause bodies are ignored.
+     Local definitions from where-clauses are not elaborated or brought into
+     scope. The body is elaborated without access to where-clause bindings.
+     To fix: process _decls, extend env with local definitions, then elab body. *)
   | TWhere (body, _decls) ->
       elab_term env body
 
