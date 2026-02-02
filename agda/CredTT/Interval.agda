@@ -317,6 +317,41 @@ half-is-negation-fixpoint : ¬I half ≡ half
 half-is-negation-fixpoint = ≈-to-≡ half-fixpoint
 
 -- ============================================================================
+-- THEOREM: 1/2 is the UNIQUE negation fixpoint in [0,1]
+-- ============================================================================
+--
+-- MATHEMATICAL PROOF (arithmetic):
+--   In [0,1] with neg(c) = 1 - c, the equation c = neg(c) becomes:
+--     c = 1 - c
+--     2c = 1
+--     c = 1/2
+--   This is the UNIQUE solution.
+--
+-- FORMALIZATION STATUS:
+--   The arithmetic proof is routine but requires formalizing:
+--   1. Fraction arithmetic (addition, division by 2)
+--   2. The equation 2 * c = 1 has unique solution c = 1/2
+--
+--   We postulate uniqueness since our fraction representation
+--   does not include addition (only multiplication and complement).
+--   The proof is mathematically obvious but requires infrastructure.
+--
+-- ALGEBRA-SPECIFIC BEHAVIOR (Issue #61):
+--   - Boolean {0,1}: NO negation fixpoint exists (see Classical module)
+--     neg(0) = 1 /= 0, neg(1) = 0 /= 1
+--   - [0,1] interval: UNIQUE fixpoint at 1/2 (this theorem)
+--   - General De Morgan: MAY have multiple fixpoints
+--     Example: C = {0, a, b, 1} with neg(a) = a, neg(b) = b
+--     Both a and b are fixpoints, uniqueness fails
+--
+-- The Godel sentence analysis (Incompleteness.agda) assumes a rich enough
+-- algebra with a unique negation fixpoint. This is satisfied by [0,1]
+-- but NOT by Bool or arbitrary De Morgan algebras.
+-- ============================================================================
+postulate
+  half-unique-fixpoint : ∀ (c : I) → ¬I c ≡ c → c ≡ half
+
+-- ============================================================================
 -- THEOREM: 1/2 * 1/2 = 1/4
 -- ============================================================================
 

@@ -86,9 +86,27 @@ module Incompleteness {ℓ : Level} (DM : DeMorganAlgebra ℓ) where
   -- =========================================================================
   -- AXIOM: Uniqueness of Negation Fixed Point
   -- =========================================================================
-  -- In [0,1], uniqueness is arithmetic: 1 - c = c implies c = 1/2.
-  -- In general De Morgan algebras, there may be multiple fixed points.
-  -- We ASSUME uniqueness for our algebra.
+  --
+  -- MATHEMATICAL STATUS (Issue #61):
+  --
+  -- For [0,1] algebra with neg(c) = 1 - c:
+  --   PROVEN: c = neg(c) implies c = 1 - c, so 2c = 1, so c = 1/2.
+  --   This is arithmetic and the proof is in CredTT.Interval.half-unique-fixpoint
+  --   (postulated there pending fraction addition infrastructure).
+  --
+  -- For Boolean {0,1} algebra:
+  --   NO SOLUTION EXISTS. neg(0) = 1 /= 0, neg(1) = 0 /= 1.
+  --   See the Classical module below for the proof.
+  --
+  -- For general De Morgan algebras:
+  --   MAY HAVE MULTIPLE FIXED POINTS.
+  --   Example: C = {0, a, b, 1} with neg(a) = a, neg(b) = b.
+  --   Both a and b satisfy c = neg(c), so uniqueness fails.
+  --
+  -- REQUIREMENT: This postulate requires the credence algebra to have
+  -- at most one negation fixpoint. The [0,1] interval satisfies this.
+  -- General De Morgan algebras may not.
+  --
   -- =========================================================================
   postulate
     negation-fixpoint-unique : ∀ c → ¬ c ≡ c → c ≡ ½
