@@ -175,6 +175,13 @@ The chain rule states: cred(A | B) * cred(B) = cred(A ∧ B)
 Note: `joint` is NOT assumed to equal `evidence * something`; it is an
 independent parameter representing the actual joint credence, which may
 differ from the product of marginals for dependent propositions.
+
+Edge case when evidence = 0:
+The chain rule becomes condCred * 0 = joint, forcing joint = 0.
+But condCred itself is unconstrained (any value satisfies c * 0 = 0).
+This means conditioning on impossible evidence gives no information.
+See `conditioning_zero_any` for the proof that any credence works.
+This is intentional: there is no ex falso in graded logic.
 -/
 structure Conditioning (joint evidence : Credence) where
   /-- The conditional credence cred(A | B) -/
@@ -270,6 +277,12 @@ theorem disj_comm (c₁ c₂ : Credence) : c₁ ⊔ c₂ = c₂ ⊔ c₁ := by
   simp only [disj_val]
   ring
 
+/-- Disjunction is associative -/
+theorem disj_assoc (c₁ c₂ c₃ : Credence) : (c₁ ⊔ c₂) ⊔ c₃ = c₁ ⊔ (c₂ ⊔ c₃) := by
+  ext
+  simp only [disj_val]
+  ring
+
 /-- 0 is identity for disjunction -/
 @[simp] theorem disj_zero (c : Credence) : c ⊔ 0 = c := by
   ext
@@ -292,15 +305,54 @@ theorem de_morgan_disj (c₁ c₂ : Credence) : ~(c₁ ⊔ c₂) = ~c₁ ⊗ ~c�
   simp only [disj]
   exact neg_neg _
 
-/-! ## Contradiction -/
+/-! ## Non-Distributivity
 
-/-- A contradiction is A ⊗ ~A -/
+Unlike Boolean algebra, conjunction does NOT distribute over disjunction
+in general (and vice versa). This is a key feature of graded logic.
+-/
+
+/-- Conjunction does NOT distribute over disjunction in general -/
+theorem conj_disj_not_distrib :
+    ∃ c₁ c₂ c₃ : Credence, c₁ ⊗ (c₂ ⊔ c₃) ≠ (c₁ ⊗ c₂) ⊔ (c₁ ⊗ c₃) := by
+  use half, half, half
+  intro h
+  have hlhs : (half ⊗ (half ⊔ half)).val = 0.5 * (0.5 + 0.5 - 0.5 * 0.5) := by
+    simp only [conj_val, disj_val, half_val]
+  have hrhs : ((half ⊗ half) ⊔ (half ⊗ half)).val =
+      0.5 * 0.5 + 0.5 * 0.5 - (0.5 * 0.5) * (0.5 * 0.5) := by
+    simp only [conj_val, disj_val, half_val]
+  have heq : (half ⊗ (half ⊔ half)).val = ((half ⊗ half) ⊔ (half ⊗ half)).val :=
+    congrArg (·.val) h
+  simp only [hlhs, hrhs] at heq
+  norm_num at heq
+
+/-! ## Contradiction and Tautology (Under Independence)
+
+These operations compute c ⊗ ~c and c ⊔ ~c using the independence formulas.
+
+IMPORTANT: In classical probability, P(A ∧ ~A) = 0 and P(A ∨ ~A) = 1 always,
+because A and ~A are mutually exclusive. However, in this graded algebra:
+
+1. We use the INDEPENDENCE formula: c ⊗ ~c = c * (1-c)
+2. This gives nonzero "contradiction" (max 0.25 at c=0.5)
+3. And non-unity "tautology" (min 0.75 at c=0.5)
+
+This is INTENTIONAL and meaningful for the graded logic:
+- It measures the "uncertainty" or "spread" in a credence
+- c = 0.5 maximizes uncertainty (highest contradiction, lowest tautology)
+- c = 0 or 1 minimizes uncertainty (zero contradiction, full tautology)
+
+For dependent propositions (like A and ~A which are maximally anti-correlated),
+use the Conditioning structure with proper joint credences instead.
+-/
+
+/-- Pseudo-contradiction under independence: c ⊗ ~c = c * (1-c) -/
 def contradiction (c : Credence) : Credence := c ⊗ ~c
 
 theorem contradiction_val (c : Credence) : (contradiction c).val = c.val * (1 - c.val) := by
   simp only [contradiction, conj_val, neg_val]
 
-/-- Maximum contradiction at c = 0.5 gives 0.25, not 0 -/
+/-- Maximum contradiction at c = 0.5 gives 0.25 (measures uncertainty) -/
 theorem contradiction_half : (contradiction half).val = 0.25 := by
   simp only [contradiction_val, half_val]
   norm_num
@@ -313,16 +365,31 @@ theorem contradiction_le_quarter (c : Credence) :
   have h2 := c.le_one
   nlinarith [sq_nonneg (c.val - 0.5)]
 
-/-! ## Tautology -/
+/-- Contradiction is 0 only at extremes (certainty) -/
+theorem contradiction_eq_zero_iff (c : Credence) :
+    contradiction c = 0 ↔ c = 0 ∨ c = 1 := by
+  constructor
+  · intro h
+    have hv : c.val * (1 - c.val) = 0 := by
+      have := congrArg (·.val) h
+      simp only [contradiction_val, zero_val] at this
+      exact this
+    rcases mul_eq_zero.mp hv with hz | h1
+    · left; ext; exact hz
+    · right; ext; simp only [one_val]; linarith
+  · intro h
+    rcases h with rfl | rfl
+    · ext; simp [contradiction_val]
+    · ext; simp [contradiction_val]
 
-/-- A tautology is A ⊔ ~A -/
+/-- Pseudo-tautology under independence: c ⊔ ~c = 1 - c*(1-c) -/
 def tautology (c : Credence) : Credence := c ⊔ ~c
 
 theorem tautology_val (c : Credence) : (tautology c).val = 1 - c.val * (1 - c.val) := by
   simp only [tautology, disj_val, neg_val]
   ring
 
-/-- Under independence assumption, tautology equals 1 only at extremes -/
+/-- Tautology equals 1 at extremes (certainty) -/
 theorem tautology_zero : tautology (0 : Credence) = 1 := by
   ext
   simp only [tautology_val, zero_val, one_val]
@@ -332,7 +399,7 @@ theorem tautology_one : tautology (1 : Credence) = 1 := by
   ext
   simp only [tautology_val, one_val, sub_self, mul_zero, sub_zero]
 
-/-- Minimum tautology at half gives 0.75 -/
+/-- Minimum tautology at half gives 0.75 (maximum uncertainty) -/
 theorem tautology_half : (tautology half).val = 0.75 := by
   simp only [tautology_val, half_val]
   norm_num
@@ -344,6 +411,24 @@ theorem tautology_ge_three_quarters (c : Credence) :
   have h1 := c.nonneg
   have h2 := c.le_one
   nlinarith [sq_nonneg (c.val - 0.5)]
+
+/-- Tautology equals 1 only at extremes -/
+theorem tautology_eq_one_iff (c : Credence) :
+    tautology c = 1 ↔ c = 0 ∨ c = 1 := by
+  constructor
+  · intro h
+    have hv : 1 - c.val * (1 - c.val) = 1 := by
+      have := congrArg (·.val) h
+      simp only [tautology_val, one_val] at this
+      exact this
+    have hzero : c.val * (1 - c.val) = 0 := by linarith
+    rcases mul_eq_zero.mp hzero with hz | h1
+    · left; ext; exact hz
+    · right; ext; simp only [one_val]; linarith
+  · intro h
+    rcases h with rfl | rfl
+    · exact tautology_zero
+    · exact tautology_one
 
 end Credence
 
