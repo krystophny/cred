@@ -213,9 +213,9 @@ module ClassicalRecovery {ℓ : Level} (DM : DeMorganAlgebra ℓ) where
   -- 3. Contraposition: negation reverses order
   -- -------------------------------------------------------------------------
 
-  -- If c ≤ d, then ¬d ≤ ¬c (antitone)
+  -- If c ≤ d, then ¬d ≤ ¬c (antitone) - now from DeMorganAlgebra
   neg-antitone : ∀ {c₁ c₂} → c₁ ≤ c₂ → ¬ c₂ ≤ ¬ c₁
-  neg-antitone = StabilityDefs.¬-antitone DM
+  neg-antitone = ¬-antitone
 
   -- Contraposition reverses dynamics:
   -- If c is post-fixed under s, then ¬c is "post-unfixed" under s
@@ -378,11 +378,11 @@ module NativeTechniques {ℓ : Level} (DM : DeMorganAlgebra ℓ) where
   -- 4. Continuity/Monotonicity Lemmas
   -- -------------------------------------------------------------------------
 
-  -- Multiplication is monotone
+  -- Multiplication is monotone - now from DeMorganAlgebra
   mul-monotone : ∀ {c₁ c₁' c₂ c₂'} →
     c₁' ≤ c₁ → c₂' ≤ c₂ →
     (c₁' · c₂') ≤ (c₁ · c₂)
-  mul-monotone = StabilityDefs.·-mono DM
+  mul-monotone = ·-mono
 
   -- -------------------------------------------------------------------------
   -- 5. Degeneracy Analysis

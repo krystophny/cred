@@ -64,6 +64,21 @@ record DeMorganAlgebra (ℓ : Level) : Set (suc ℓ) where
     𝟙-greatest : ∀ c → c ≤ 𝟙
     ·-≤-self   : ∀ c d → c · d ≤ c  -- multiplication decreases (c·d ≤ c)
 
+    -- Additional axioms for dynamics framework (4 axioms)
+    -- Non-triviality: 0 and 1 are distinct
+    𝟘≢𝟙 : 𝟘 ≡ 𝟙 → ⊥
+
+    -- Negation is antitone: if c1 <= c2, then ~c2 <= ~c1
+    ¬-antitone : ∀ {c₁ c₂} → c₁ ≤ c₂ → ¬ c₂ ≤ ¬ c₁
+
+    -- Monotonicity of multiplication in both arguments
+    ·-mono : ∀ {a b c d} → a ≤ c → b ≤ d → (a · b) ≤ (c · d)
+
+    -- Positivity preservation: positive * positive = positive
+    -- This ensures we are in a well-behaved algebra without zero divisors
+    ·-positive : ∀ {c₁ c₂} → (𝟘 ≤ c₁) → (𝟘 ≡ c₁ → ⊥) → (𝟘 ≤ c₂) → (𝟘 ≡ c₂ → ⊥) →
+                 (𝟘 ≤ (c₁ · c₂)) × (𝟘 ≡ (c₁ · c₂) → ⊥)
+
   -- Derived: De Morgan disjunction
   -- c ∨ d = ¬(¬c · ¬d)
   -- In [0,1]: c ∨ d = 1 - (1-c)(1-d) = c + d - cd
@@ -231,6 +246,35 @@ module BoolDM where
   ∧-≤-self false d = ≤-false
   ∧-≤-self true  d = true-greatest d
 
+  -- Non-triviality: false /= true
+  false≢true : false ≡ true → ⊥
+  false≢true ()
+
+  -- Negation is antitone
+  notB-antitone : ∀ {c₁ c₂} → c₁ ≤B c₂ → notB c₂ ≤B notB c₁
+  notB-antitone {false} {false} _ = ≤B-refl true
+  notB-antitone {false} {true}  _ = ≤-false
+  notB-antitone {true}  {true}  _ = ≤B-refl false
+
+  -- Multiplication is monotone
+  -- Case analysis: a ≤B c means either a=false or c=true
+  --                b ≤B d means either b=false or d=true
+  -- Note: (a ∧B false) = false for any a, so use ≤-false
+  ∧-mono : ∀ {a b c d} → a ≤B c → b ≤B d → (a ∧B b) ≤B (c ∧B d)
+  ∧-mono {a}     {false} {c} {d} _       ≤-false with a
+  ... | false = ≤-false  -- false ∧ false = false ≤ anything
+  ... | true  = ≤-false  -- true ∧ false = false ≤ anything
+  ∧-mono {false} {b}     {c} {d} ≤-false _       = ≤-false  -- false ∧ b = false ≤ anything
+  ∧-mono {a}     {b}     {true} {true} ≤-true ≤-true = ≤-true  -- a ∧ b ≤ true ∧ true = true
+
+  -- Positivity preservation: positive * positive = positive
+  -- For Bool: c1 and c2 both positive means both are true, so c1 AND c2 is also true (positive)
+  ∧-positive : ∀ {c₁ c₂} → (false ≤B c₁) → (false ≡ c₁ → ⊥) → (false ≤B c₂) → (false ≡ c₂ → ⊥) →
+               (false ≤B (c₁ ∧B c₂)) × (false ≡ (c₁ ∧B c₂) → ⊥)
+  ∧-positive {true}  {true}  _ _    _ _    = ≤-false , (λ ())
+  ∧-positive {true}  {false} _ _    _ neq2 = ⊥-elim (neq2 refl)
+  ∧-positive {false} {c₂}    _ neq1 _ _    = ⊥-elim (neq1 refl)
+
   -- The complete Boolean De Morgan algebra
   BoolDM : DeMorganAlgebra _
   BoolDM = record
@@ -255,6 +299,10 @@ module BoolDM where
     ; 𝟘-least     = false-least
     ; 𝟙-greatest  = true-greatest
     ; ·-≤-self    = ∧-≤-self
+    ; 𝟘≢𝟙        = false≢true
+    ; ¬-antitone  = notB-antitone
+    ; ·-mono      = ∧-mono
+    ; ·-positive  = ∧-positive
     }
 
 open BoolDM public using (BoolDM)
