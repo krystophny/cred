@@ -1,5 +1,10 @@
 -- Existential Introduction and Elimination (Sigma Types)
 --
+-- STATUS: CONCEPTUAL (Issue #114)
+-- This file EXPLAINS how sigma types work in CredTT but does not demonstrate
+-- actual sigma formation/elimination, which requires full dependent type support
+-- in the checker. See credtt-impl/src/syntax.ml for the TSigma type constructor.
+--
 -- Classical: From P(a), derive exists x. P(x)
 --            From exists x. P(x) and (forall x. P(x) -> Q), derive Q
 -- CredTT: Credences multiply in both introduction and elimination

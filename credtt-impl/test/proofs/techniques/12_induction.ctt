@@ -1,5 +1,10 @@
 -- Natural Induction (and Strong Induction)
 --
+-- STATUS: CONCEPTUAL (Issue #117)
+-- This file EXPLAINS how induction works in CredTT but does not demonstrate
+-- actual recursive proofs, which require a Nat data type with induction principle.
+-- The key insight: credence can degrade through induction steps.
+--
 -- Classical: P(0) and (forall n. P(n) -> P(n+1)) implies forall n. P(n)
 -- CredTT: Result may DEGRADE unless step is contractive
 --         base @ c_b, step @ c_s -> result depends on contractivity

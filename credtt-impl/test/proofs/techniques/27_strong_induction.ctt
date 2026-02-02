@@ -1,5 +1,9 @@
 -- Strong Induction (Complete Induction)
 --
+-- STATUS: CONCEPTUAL (Issue #117)
+-- This file EXPLAINS strong induction in CredTT but does not demonstrate
+-- actual k-deep recursion, which requires well-founded induction infrastructure.
+--
 -- Classical: Assume P(0)...P(n-1) to prove P(n)
 -- CredTT: Same degradation issues as regular induction
 --         Plus: accessing all previous cases multiplies credences
