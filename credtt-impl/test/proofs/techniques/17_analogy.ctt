@@ -15,10 +15,10 @@
 -- The morphism exists but is uncertain
 
 -- Analogy: similar structure
-postulate structure_similar : A_like_B [ 7/10 ]
+postulate structure_similar : A_like_B @ 7/10
 
 -- Transfer: if P(A) and A ~ B, then probably P(B)
-postulate P_of_A : P_holds_for_A [ 1 ]
+postulate P_of_A : P_holds_for_A @ 1
 
 -- Analogical transfer: 1 * 0.7 = 0.7
 -- "P probably holds for B" @ 0.7

@@ -12,10 +12,10 @@
 -- In CredTT, witness has a credence
 
 -- Witness at credence c
-postulate prime_witness : prime_p [ c ]
+postulate prime_witness : prime_p @ c
 
 -- Property at credence d
-postulate in_range : p_between_n_and_2n [ d ]
+postulate in_range : p_between_n_and_2n @ d
 
 -- Existence: (witness, property) @ c * d
 -- The existence claim is only as strong as
@@ -27,8 +27,8 @@ postulate in_range : p_between_n_and_2n [ d ]
 --         "Existence @ 0.99 * 0.99 = 0.98"
 
 -- If we're uncertain about the witness:
-postulate uncertain_witness : maybe_prime [ 1/2 ]
-postulate property_ok : in_range_2 [ 1 ]
+postulate uncertain_witness : maybe_prime @ 1/2
+postulate property_ok : in_range_2 @ 1
 
 -- Existence: 0.5 * 1 = 0.5
 -- "Probably exists" not "definitely exists"

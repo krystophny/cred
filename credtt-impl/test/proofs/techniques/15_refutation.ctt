@@ -15,18 +15,18 @@
 -- CredTT: credence can be 0, 0.1, 0.5, 0.9, 1
 
 -- Hypothesis to refute at credence c
-postulate hypothesis : sqrt2_rational [ c ]
+postulate hypothesis : sqrt2_rational @ c
 
 -- Derive consequences at same credence
-derive consequence : p_and_q_coprime [ c ] from hypothesis by definition
+derive consequence : p_and_q_coprime @ c from hypothesis by definition
 
 -- Derive contradiction
-derive p_even : p_is_even [ c ] from hypothesis by algebra
-derive q_even : q_is_even [ c ] from p_even by algebra
+derive p_even : p_is_even @ c from hypothesis by algebra
+derive q_even : q_is_even @ c from p_even by algebra
 
 -- Contradictory claims
-postulate gcd_1 : gcd_is_1 [ c ]
-derive gcd_2 : gcd_geq_2 [ c ] from q_even by both_even
+postulate gcd_1 : gcd_is_1 @ c
+derive gcd_2 : gcd_geq_2 @ c from q_even by both_even
 
 -- Contradiction forces c = 0
 contradict gcd_1 gcd_2

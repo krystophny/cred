@@ -12,17 +12,17 @@
 -- CREDENCES MULTIPLY IN ELIMINATION
 
 -- Function at credence 1 (certain)
-postulate f : A_to_B [ 1 ]
+postulate f : A_to_B @ 1
 
 -- Argument at credence c (uncertain)
-postulate a : A [ c ]
+postulate a : A @ c
 
 -- Application: result credence = 1 * c = c
-derive b : B [ c ] from a by apply
+derive b : B @ c from a by apply
 
 -- Now both uncertain:
-postulate f2 : A_to_B [ c1 ]
-postulate a2 : A [ c2 ]
+postulate f2 : A_to_B @ c1
+postulate a2 : A @ c2
 
 -- Application: result credence = c1 * c2
 -- DEGRADATION: c1 * c2 <= min(c1, c2)
@@ -51,9 +51,9 @@ postulate a2 : A [ c2 ]
 -- If either is unstable (near 0),
 -- result is unstable (product near 0)
 
-postulate stable_f : stable_func [ 1 ]
-postulate stable_a : stable_arg [ 1 ]
-derive stable_result : result [ 1 ] from stable_a by apply
+postulate stable_f : stable_func @ 1
+postulate stable_a : stable_arg @ 1
+derive stable_result : result @ 1 from stable_a by apply
 
 stable stable_f
 stable stable_a

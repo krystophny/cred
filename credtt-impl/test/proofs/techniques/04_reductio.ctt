@@ -16,19 +16,19 @@
 -- "fragile negation implies robust positive"
 
 -- Assume sqrt2 rational at credence c
-postulate sqrt2_rational : sqrt2_is_rational [ c ]
+postulate sqrt2_rational : sqrt2_is_rational @ c
 
 -- Assume gcd = 1 (lowest terms) at credence c
-postulate gcd_one : gcd_p_q_is_1 [ c ]
+postulate gcd_one : gcd_p_q_is_1 @ c
 
 -- Derive p is even
-derive p_even : p_is_even [ c ] from sqrt2_rational by algebra
+derive p_even : p_is_even @ c from sqrt2_rational by algebra
 
 -- Derive q is even (from p even)
-derive q_even : q_is_even [ c ] from p_even by substitution
+derive q_even : q_is_even @ c from p_even by substitution
 
 -- Derive gcd >= 2 (both even)
-derive gcd_two : gcd_geq_2 [ c ] from q_even by both_even
+derive gcd_two : gcd_geq_2 @ c from q_even by both_even
 
 -- CONTRADICTION: gcd=1 AND gcd>=2
 contradict gcd_one gcd_two

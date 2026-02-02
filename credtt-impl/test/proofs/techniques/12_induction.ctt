@@ -12,10 +12,10 @@
 -- CredTT induction: MIGHT degrade over steps
 
 -- Base case at credence c_b
-postulate base : sum_0_eq_0 [ c_b ]
+postulate base : sum_0_eq_0 @ c_b
 
 -- Inductive step at credence c_s
-postulate step : step_preserves [ c_s ]
+postulate step : step_preserves @ c_s
 
 -- In classical logic: P(0) and (P(n)->P(n+1)) gives forall n. P(n)
 -- In CredTT: what is the credence of P(n) for large n?
@@ -38,7 +38,7 @@ postulate step : step_preserves [ c_s ]
 -- If the step is CONTRACTIVE (non-degrading), credence preserved
 
 -- Step at credence 1 (contractive)
-postulate contractive_step : step_at_one [ 1 ]
+postulate contractive_step : step_at_one @ 1
 
 -- Now: P(n) @ c_b * 1^n = c_b
 -- Credence is preserved! Induction is safe.
