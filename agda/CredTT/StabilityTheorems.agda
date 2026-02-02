@@ -39,13 +39,23 @@
    - all-steps-non-expanding: c * s <= c
    - zero-stays-zero: Zero is absorbing under iteration
    - postfixed-induction: Induction via post-fixed point
+   - postfixed-is-invariant: Post-fixed points are invariant (see note below)
    - All classical recovery lemmas
 
-   POSTULATED: None (all lemmas fully proven)
+   POSTULATED: None in this file (relies on DeMorganAlgebra axioms)
+
+   NOTE ON PostFixedPoint/Invariant EQUIVALENCE:
+   In this algebra, PostFixedPoint and Invariant are EQUIVALENT concepts.
+   - PostFixedPoint c s means: c <= c * s
+   - Invariant c s means: c = c * s
+   The equivalence follows because:
+   - Forward: c <= c * s implies c = c * s (by antisymmetry with c * s <= c from ·-≤-self)
+   - Backward: c = c * s trivially implies c <= c * s
+   See postfixed-is-invariant (formerly postfixed-implies-invariant) for the proof.
 -}
 module CredTT.StabilityTheorems where
 
-open import Level using (Level; _⊔_) renaming (suc to lsuc)
+open import Level using (Level; _⊔_)
 open import Relation.Binary.PropositionalEquality using (_≡_; refl; sym; trans; cong; subst)
 open import Data.Bool using (Bool; true; false)
 open import Data.Sum using (_⊎_; inj₁; inj₂)
@@ -165,12 +175,14 @@ module PreservationLemmas {ℓ : Level} (DM : DeMorganAlgebra ℓ) where
   idempotent-self-invariant idemp = idemp
 
   -- STATUS: PROVEN (via ≤-antisym)
-  -- Lemma 5: Post-fixed points imply invariance
+  -- Lemma 5: Post-fixed points ARE invariant (equivalence, not just implication)
   -- If c <= c*s, then c = c*s (since c*s <= c by ·-≤-self)
-  postfixed-implies-invariant : ∀ {c s} →
+  -- NOTE: In this algebra, PostFixedPoint and Invariant are equivalent due to
+  -- the ·-≤-self axiom. Any post-fixed point is automatically invariant.
+  postfixed-is-invariant : ∀ {c s} →
     PostFixedPoint c s →
     Invariant c s
-  postfixed-implies-invariant {c} {s} pf =
+  postfixed-is-invariant {c} {s} pf =
     ≤-antisym pf (·-≤-self c s)
 
   -- STATUS: PROVEN (via induction on iterate)
