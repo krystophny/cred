@@ -33,11 +33,12 @@ open import CredTT.Neighbourhood
 -- LIMITATION (Issue #163): BoolCollapse proves structural lemmas but MISSES the
 -- key theorem: CredTT[Bool] ≃ MLTT at the derivation level. What we prove:
 --   - trivial-fixed-points, robust-or-vanishing, no-interior (properties of Bool)
--- What we DON'T prove (see CollapseIsomorphism-Sketch for why):
+-- What we DON'T prove:
 --   - Type preservation under collapse
 --   - Derivation correspondence (Γ ⊢ t : A @ true ↔ Γ ⊢ t : A in MLTT)
 --   - Semantics preservation
--- Full proof requires MLTT and CredTT syntax (500+ lines) - see issue #57.
+-- Full proof requires MLTT and CredTT syntax (500+ lines).
+-- Note: Issue #57 tracks CollapseIsomorphism-Sketch's use of fake types.
 
 module BoolCollapse where
   open BoolDM

@@ -2,8 +2,8 @@
 --
 -- STATUS: CONCEPTUAL (Issue #164)
 -- This file EXPLAINS how equational rewriting SHOULD work with credence
--- multiplication. The J eliminator signature (line 56) is EXPLANATORY, not
--- parseable syntax. A full implementation would require:
+-- multiplication. The J eliminator signature (see "J eliminator" comment below)
+-- is EXPLANATORY, not parseable syntax. A full implementation would require:
 --   1. Parser support for the motive type `(m : A -> Type)`
 --   2. Identity type formation with credence annotations
 --   3. J elimination rule implementation
