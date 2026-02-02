@@ -367,6 +367,52 @@ module DependentCredence {ℓ} (DM : DeMorganAlgebra ℓ) where
   -- For the abstract algebra, we use sup as the primary operation
   -- (integration requires additional structure like measure/summation)
 
+-- ============================================================================
+-- NEGATION FIXPOINT STRUCTURE
+-- ============================================================================
+-- Some De Morgan algebras have a negation fixpoint c = ¬c (e.g., [0,1] has c = 1/2)
+-- while others do not (e.g., Bool has no such element).
+-- This module defines the predicate and documents which algebras have it.
+
+module NegationFixpointStructure {ℓ : Level} (DM : DeMorganAlgebra ℓ) where
+  open DeMorganAlgebra DM
+
+  -- A negation fixpoint is an element c such that ¬c = c
+  NegationFixpoint : C → Set ℓ
+  NegationFixpoint c = ¬ c ≡ c
+
+  -- Predicate: an algebra has a negation fixpoint
+  -- This is a PROPERTY of the algebra, not assumed in the base DeMorganAlgebra
+  HasNegationFixpoint : Set ℓ
+  HasNegationFixpoint = Σ C NegationFixpoint
+    where open import Data.Product using (Σ)
+
+  -- Predicate: an algebra has a UNIQUE negation fixpoint
+  HasUniqueNegationFixpoint : Set ℓ
+  HasUniqueNegationFixpoint = HasNegationFixpoint × (∀ c d → NegationFixpoint c → NegationFixpoint d → c ≡ d)
+    where open import Data.Product using (Σ; _×_)
+
+-- ============================================================================
+-- BOOL DOES NOT HAVE A NEGATION FIXPOINT
+-- ============================================================================
+-- This is important: the Bool algebra (classical logic) has no c = not c.
+-- This is WHY classical Gödel sentences are "undecidable" rather than having
+-- a determinate intermediate credence.
+
+module BoolNoNegationFixpoint where
+  open BoolDM
+  open NegationFixpointStructure BoolDM
+
+  -- Direct proof: neither true nor false satisfies not c = c
+  no-bool-fixpoint : ∀ (b : Bool) → NegationFixpoint b → ⊥
+  no-bool-fixpoint false ()
+  no-bool-fixpoint true ()
+
+  -- Consequence: Bool does not have a negation fixpoint
+  bool-no-HasNegationFixpoint : HasNegationFixpoint → ⊥
+  bool-no-HasNegationFixpoint (c , fp) = no-bool-fixpoint c fp
+    where open import Data.Product using (_,_)
+
 -- De Morgan laws (derived)
 module DeMorganLaws {ℓ : Level} (DM : DeMorganAlgebra ℓ) where
   open DeMorganAlgebra DM
