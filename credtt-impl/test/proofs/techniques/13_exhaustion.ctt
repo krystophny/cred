@@ -1,5 +1,10 @@
 -- Proof by Exhaustion (Finite Case Analysis)
 --
+-- STATUS: CONCEPTUAL (Issue #156)
+-- This file EXPLAINS how finite exhaustion affects credence (product or min
+-- aggregation). The checker does NOT verify these aggregation rules; this is
+-- documentation of the DESIGN. No actual finite case combinator is implemented.
+--
 -- Classical: Check all cases, conclude universal
 -- CredTT: Stable if each case stable AND aggregation stable
 --
