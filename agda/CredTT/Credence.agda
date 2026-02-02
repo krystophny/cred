@@ -105,12 +105,14 @@ record DeMorganAlgebra (ℓ : Level) : Set (suc ℓ) where
 -- This is the minimal extra structure needed for proof dynamics.
 -- It allows talking about long proofs, recursion, and induction.
 --
--- LIMITATION (Issue #131): No concrete instance for [0,1] is provided.
+-- LIMITATION (Issues #131, #146): No concrete IterationAlgebra instance is provided.
 -- The IterationAlgebra record defines the INTERFACE (infω, continuity axioms)
 -- but verifying that [0,1] with standard arithmetic satisfies these axioms
 -- requires measure-theoretic arguments not formalized here.
--- BoolDM WOULD trivially satisfy this (finite sequences stabilize immediately),
--- but no BoolIterationAlgebra instance is implemented.
+-- BoolDM WOULD trivially satisfy this (finite sequences stabilize immediately):
+-- infω x = false if any x n = false, else true. But no BoolIterationAlgebra
+-- instance is implemented. Theorems parametric over IterationAlgebra cannot
+-- be instantiated for Bool without this instance.
 
 open import Data.Nat as Nat using (ℕ; zero; suc)
 

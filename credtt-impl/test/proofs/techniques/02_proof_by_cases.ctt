@@ -1,5 +1,10 @@
 -- Proof by Cases (Case Analysis)
 --
+-- STATUS: CONCEPTUAL (Issue #145)
+-- This file EXPLAINS how case analysis works in CredTT but the checker
+-- does NOT implement sum types or case elimination. The postulates set up
+-- a scenario; actual case analysis would require Sum type with Inl/Inr.
+--
 -- Classical: If A|B and (A->C) and (B->C), then C
 -- CredTT: Each branch stable -> result stable; unstable branch -> unstable result
 --
