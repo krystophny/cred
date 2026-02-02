@@ -222,19 +222,28 @@ module StabilityThms {ℓ : Level} (DM : DeMorganAlgebra ℓ) where
 
   -- Application preserves post-fixed point property
   -- If c and d are both post-fixed under s, then c · d is post-fixed under s
-  -- PROOF SKETCH: c ≤ c·s and d ≤ d·s
-  --   By ·-mono: c·d ≤ (c·s)·d = c·(s·d) = c·(d·s) ≤ c·d·s·s
-  --   This does NOT directly give c·d ≤ (c·d)·s without s ≤ 1
-  -- ASSUMPTION: This holds when s ≤ 1 (sub-unitary step)
-  -- See GitHub issue #45: app-preserves-postfixed is postulated
-  postulate
-    app-preserves-postfixed : ∀ {c s d} →
-      PostFixedPoint c s →
-      PostFixedPoint d s →
-      PostFixedPoint (c · d) s
-    -- JUSTIFICATION: In De Morgan algebras with sub-unitary steps (s ≤ 1),
-    -- this follows from: c·d ≤ c·d·1 ≤ c·d·s (when s ≤ 1 implies s acts as
-    -- identity or contraction). Full proof requires ·-mono and order lemmas.
+  -- PROOF: c ≤ c·s implies c·d ≤ (c·s)·d = (c·d)·s by ·-mono and algebra laws
+  -- (We only need one of the hypotheses; the proof uses c ≤ c·s.)
+  app-preserves-postfixed : ∀ {c s d} →
+    PostFixedPoint c s →
+    PostFixedPoint d s →
+    PostFixedPoint (c · d) s
+  app-preserves-postfixed {c} {s} {d} c≤cs _ =
+    -- Goal: c · d ≤ (c · d) · s
+    -- Step 1: From c ≤ c·s and ≤-refl d, by ·-mono: c·d ≤ (c·s)·d
+    -- Step 2: (c·s)·d = c·(s·d) = c·(d·s) = (c·d)·s by assoc and comm
+    let step1 : c · d ≤ (c · s) · d
+        step1 = ·-mono c≤cs (≤-refl d)
+        -- Rewrite (c·s)·d to (c·d)·s
+        rw1 : (c · s) · d ≡ c · (s · d)
+        rw1 = ·-assoc c s d
+        rw2 : c · (s · d) ≡ c · (d · s)
+        rw2 = cong (c ·_) (·-comm s d)
+        rw3 : c · (d · s) ≡ (c · d) · s
+        rw3 = sym (·-assoc c d s)
+        rw : (c · s) · d ≡ (c · d) · s
+        rw = trans rw1 (trans rw2 rw3)
+    in subst (c · d ≤_) rw step1
 
   -- Negation flips fixed points
   -- If c is a post-fixed point, ¬c is "post-unfixed"

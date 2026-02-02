@@ -115,7 +115,7 @@ c \vee v = 1 - (1-c)(1-v) = c + v - cv
 \]
 This is the \textbf{probabilistic sum} (inclusion-exclusion for independent events).
 
-\begin{theorem}[De Morgan Laws]
+\begin{theorem}[De Morgan Laws]\label{thm:demorgan}
 \begin{align}
 \negc(c \cdot v) &= \negc c \vee \negc v \\
 \negc(c \vee v) &= \negc c \cdot \negc v
@@ -123,7 +123,12 @@ This is the \textbf{probabilistic sum} (inclusion-exclusion for independent even
 \end{theorem}
 
 \begin{proof}
-Direct calculation from definitions.
+Direct calculation from definitions:
+\begin{enumerate}
+    \item $\negc(c \cdot v) = \negc c \vee \negc v$: By definition, $\negc c \vee \negc v = \negc(\negc\negc c \cdot \negc\negc v)$. Using involution $\negc\negc x = x$, this equals $\negc(c \cdot v)$.
+    \item $\negc(c \vee v) = \negc c \cdot \negc v$: By definition, $c \vee v = \negc(\negc c \cdot \negc v)$. Taking complement: $\negc(c \vee v) = \negc\negc(\negc c \cdot \negc v) = \negc c \cdot \negc v$ by involution.
+\end{enumerate}
+Formally verified in Agda: \texttt{agda/CredTT/Credence.agda}, module \texttt{DeMorganLaws}, theorems \texttt{demorgan-\textperiodcentered} and \texttt{demorgan-\(\vee\)}.
 \end{proof}
 
 \subsection{What We Have vs What We Don't}
@@ -455,7 +460,7 @@ Classical logic has only the endpoints; CredTT has the entire spectrum.
 \section{MLTT as the $\{\zero, \one\}$ Case}
 %=============================================================================
 
-\begin{theorem}[MLTT Embedding]
+\begin{theorem}[MLTT Embedding]\label{thm:mltt-embedding}
 When $\C = \{\zero, \one\}$, CredTT reduces to MLTT:
 \begin{itemize}
     \item $\Gamma \vdash a : A \at{\one}$ becomes $\Gamma \vdash a : A$
@@ -467,7 +472,21 @@ When $\C = \{\zero, \one\}$, CredTT reduces to MLTT:
 \end{theorem}
 
 \begin{proof}
-By inspection. All credence operations compute to Boolean.
+We construct a bidirectional correspondence between MLTT and CredTT judgments:
+
+\textbf{Forward direction} (\texttt{embed}): Every MLTT judgment $\Gamma \vdash_\textsf{MLTT} t : A$ yields a CredTT judgment $\Gamma \vdash t : A \at{\one}$. The proof is by induction on the MLTT derivation:
+\begin{itemize}
+    \item Variable: $\Gamma \vdash_\textsf{MLTT} x_i : A_i$ embeds to $\Gamma \vdash x_i : A_i \at{\one}$ by \textsc{t-var}.
+    \item Lambda: If $\Gamma, A \vdash_\textsf{MLTT} b : B$ embeds to $\Gamma, A \vdash b : B \at{\one}$, then $\Gamma \vdash_\textsf{MLTT} \lambda b : A \to B$ embeds to $\Gamma \vdash \lambda b : A \to B \at{\one}$ by \textsc{t-lam}.
+    \item Application: Given embeddings of $f : A \to B \at{\one}$ and $a : A \at{\one}$, the application has credence $\one \cdot \one = \one$ by \textsc{t-app}.
+    \item Other type formers (pairs, injections, case, refl, J) follow the same pattern.
+\end{itemize}
+
+\textbf{Backward direction} (\texttt{collapse}): Every CredTT judgment $\Gamma \vdash t : A \at{\one}$ yields an MLTT judgment $\Gamma \vdash_\textsf{MLTT} t : A$. Since $\one \cdot \one = \one$, sub-judgments at credence $\one$ remain at credence $\one$, and the derivation translates directly.
+
+\textbf{Round-trip}: The composition $\texttt{collapse} \circ \texttt{embed}$ is the identity on MLTT derivations.
+
+Formally verified in Agda: \texttt{agda/CredTT/MLTT.agda}, functions \texttt{embed}, \texttt{collapse}, and \texttt{embed-collapse}.
 \end{proof}
 
 \subsection{Side-by-Side Comparison}
@@ -1394,6 +1413,14 @@ A production implementation would require bidirectional credence inference, gene
 %=============================================================================
 
 \begin{enumerate}
+    \item \textbf{Soundness} (critical): We have not proven the standard metatheoretic properties:
+    \begin{itemize}
+        \item \emph{Substitution lemma}: If $\Gamma \vdash a : A \at{c}$ and $\Gamma, x : A \vdash t : B \at{d}$, then $\Gamma \vdash t[a/x] : B[a/x] \at{?}$. The credence interaction under substitution requires careful analysis---does $d$ depend on $c$?
+        \item \emph{Subject reduction} (type preservation): If $\Gamma \vdash t : A \at{c}$ and $t \to t'$, then $\Gamma \vdash t' : A \at{c'}$ for some $c' \geq c$. We conjecture credence is preserved or improved by reduction, but this is not proven.
+        \item \emph{Progress}: A well-typed term at credence $c > \zero$ is either a value or can reduce. Vacuous terms (credence $\zero$) need not make progress.
+    \end{itemize}
+    The Agda formalization (\texttt{agda/CredTT/Substitution.agda}) includes substitution operations but postulates identity substitution lemmas. Full soundness remains open---see GitHub issues \#185 (substitution lemma), \#186 (subject reduction), and \#187 (progress).
+
     \item \textbf{Credence inference}: Can credences be inferred from term structure?
     \item \textbf{Decidability}: Type checking decidable if $\C$ decidable---proof needed
     \item \textbf{Normalization}: Should follow from MLTT---formal proof needed
