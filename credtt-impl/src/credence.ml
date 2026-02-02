@@ -190,22 +190,76 @@ let rec to_rational = function
    ¬c = 1 - c, so c = 1 - c implies 2c = 1, c = 1/2 *)
 let solve_negation_fixpoint () = rat_half
 
+(* Fixpoint solver result type *)
+type fixpoint_result =
+  | FPSolved of rational           (* unique solution found *)
+  | FPMultiple of rational list    (* multiple solutions (e.g., c = c*c has 0 and 1) *)
+  | FPIdentity                     (* c = c, always true, not a constraint *)
+  | FPUnsolvable of string         (* cannot solve, with reason *)
+
 (* General fixed point detection: given f(c), find c where c = f(c)
-   For c = ¬c: solution is 1/2
-   For c = c·c: solutions are 0 and 1 *)
-let solve_fixpoint f_of_c c =
+   Extended solver handling:
+   - c = ¬c -> c = 1/2
+   - c = c·c -> c in {0, 1}
+   - c = c·k for constant k -> c = 0 (if k <> 1) or identity (if k = 1)
+   - c = ¬¬c -> identity (by involution)
+   - Other patterns -> unsolvable with error *)
+let solve_fixpoint_ext f_of_c c =
   let simplified = simplify (f_of_c (Var c)) in
   match simplified with
+  (* c = ¬c -> c = 1/2 *)
   | Neg (Var v) when v = c ->
-      (* c = ¬c -> c = 1/2 *)
-      Some rat_half
+      FPSolved rat_half
+
+  (* c = c·c -> c = 0 or c = 1 (idempotent case)
+     We prefer the non-trivial solution (1) first *)
   | Mul (Var v1, Var v2) when v1 = c && v2 = c ->
-      (* c = c·c -> c = 0 or c = 1 *)
-      Some rat_one
+      FPMultiple [rat_one; rat_zero]
+
+  (* c = c·k for constant k *)
+  | Mul (Var v, k) when v = c ->
+      (match to_rational k with
+       | Some rk when rat_equal rk rat_one ->
+           (* c = c·1 is identity *)
+           FPIdentity
+       | Some _ ->
+           (* c = c·k with k <> 1 implies c = 0
+              Proof: c = c·k implies c·(1-k) = 0, and if k <> 1 then c = 0 *)
+           FPSolved rat_zero
+       | None ->
+           FPUnsolvable (Printf.sprintf "c = c * %s: cannot solve with symbolic constant" (to_string k)))
+
+  (* c = k·c for constant k (symmetric case) *)
+  | Mul (k, Var v) when v = c ->
+      (match to_rational k with
+       | Some rk when rat_equal rk rat_one ->
+           FPIdentity
+       | Some _ ->
+           FPSolved rat_zero
+       | None ->
+           FPUnsolvable (Printf.sprintf "c = %s * c: cannot solve with symbolic constant" (to_string k)))
+
+  (* c = ¬¬c is identity by involution *)
+  | Neg (Neg (Var v)) when v = c ->
+      FPIdentity
+
+  (* c = c is identity (trivial) *)
+  | Var v when v = c ->
+      FPIdentity
+
   | _ ->
-      (* Check if it's the identity: c = c *)
-      if equal simplified (Var c) then None
-      else None
+      (* Check if it simplifies to identity *)
+      if equal simplified (Var c) then FPIdentity
+      else FPUnsolvable (Printf.sprintf "Cannot solve c = %s" (to_string simplified))
+
+(* Legacy wrapper returning Option for backward compatibility *)
+let solve_fixpoint f_of_c c =
+  match solve_fixpoint_ext f_of_c c with
+  | FPSolved r -> Some r
+  | FPMultiple (r :: _) -> Some r  (* return first solution for compatibility *)
+  | FPMultiple [] -> None          (* shouldn't happen *)
+  | FPIdentity -> None             (* identity is not a constraint *)
+  | FPUnsolvable _ -> None         (* error case returns None for legacy code *)
 
 (* Constraint system for credence solving *)
 type constraint_t =
