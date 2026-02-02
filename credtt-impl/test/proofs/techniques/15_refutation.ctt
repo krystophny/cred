@@ -1,5 +1,13 @@
 -- Refutation and Resolution
 --
+-- STATUS: DIDACTIC (Issue #162)
+-- This file is a COMPANION to 04_reductio.ctt, not a duplicate.
+-- Same sqrt(2) example, DIFFERENT pedagogical focus:
+--   - 04_reductio.ctt: Stability perspective (Unstable0(~A) => Stable1(A))
+--   - 15_refutation.ctt: Resolution perspective (driving credence to 0)
+-- The syntax (postulate, derive, contradict) is CONCEPTUAL - the checker
+-- treats these as credence annotations, not executable proof tactics.
+--
 -- Classical: Drive toward contradiction to refute
 -- CredTT: Drive credence toward 0 (degeneracy detection)
 --

@@ -30,6 +30,15 @@ open import CredTT.Neighbourhood
 -- BOOLEAN DYNAMICS COLLAPSE THEOREMS
 -- ============================================================================
 
+-- LIMITATION (Issue #163): BoolCollapse proves structural lemmas but MISSES the
+-- key theorem: CredTT[Bool] ≃ MLTT at the derivation level. What we prove:
+--   - trivial-fixed-points, robust-or-vanishing, no-interior (properties of Bool)
+-- What we DON'T prove (see CollapseIsomorphism-Sketch for why):
+--   - Type preservation under collapse
+--   - Derivation correspondence (Γ ⊢ t : A @ true ↔ Γ ⊢ t : A in MLTT)
+--   - Semantics preservation
+-- Full proof requires MLTT and CredTT syntax (500+ lines) - see issue #57.
+
 module BoolCollapse where
   open BoolDM
   open DeMorganAlgebra BoolDM
@@ -315,7 +324,11 @@ module DynamicsCollapse where
            (subst (true ≤_) (sym (·-identityʳ true)) (≤-refl true))) ,
     (λ _ → sym (·-annihilˡ true))
 
-  -- Classical induction is always valid in Bool (trivially)
+  -- Classical induction is always valid in Bool at credence true
+  -- NOTE (Issue #167): Pattern match appears incomplete but is CORRECT.
+  -- The type `c ≡ true` forces c = true via unification with refl.
+  -- The c = false case is impossible: there's no proof of `false ≡ true`.
+  -- Name clarifies: this is about induction AT credence true, not "for all c".
   bool-induction-valid : ∀ (c : Bool) → c ≡ true → InductionDynamics.InductionValid BoolDM c true
   bool-induction-valid true refl = InductionDynamics.classical-induction BoolDM
     (𝟙-greatest 𝟘 , (λ ()))
