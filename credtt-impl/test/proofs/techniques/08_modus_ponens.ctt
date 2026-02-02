@@ -1,5 +1,12 @@
 -- Modus Ponens (Function Application)
 --
+-- STATUS: CONCEPTUAL (Issue #169)
+-- This file EXPLAINS the fundamental CredTT rule: credences multiply in
+-- elimination. The checker DOES implement this (see check.ml App case),
+-- but the .ctt syntax here is DIDACTIC - it demonstrates the concept
+-- without verifiable execution. The 'by apply' tactic is an annotation.
+-- To verify this rule works: write OCaml tests against the type checker.
+--
 -- Classical: A, A -> B |- B
 -- CredTT: f : A -> B @ c1, a : A @ c2 |- f a : B @ c1 * c2
 --         Credences MULTIPLY in application!

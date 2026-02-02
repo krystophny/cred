@@ -1,5 +1,12 @@
 -- Syllogism (Function Composition)
 --
+-- STATUS: CONCEPTUAL (Issue #170)
+-- This file EXPLAINS how function composition works with credences. The
+-- 'by compose' tactic is DIDACTIC - no actual composition operator is
+-- implemented in the proof checker. The key insight (credences multiply)
+-- is correct, but verification requires implementing composition in the
+-- checker or demonstrating via nested application (g (f x) @ c1*c2*c_x).
+--
 -- Classical: A -> B, B -> C |- A -> C
 -- CredTT: f : A -> B @ c1, g : B -> C @ c2 |- g . f : A -> C @ c1 * c2
 --

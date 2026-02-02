@@ -13,6 +13,14 @@
 -- but the checker treats them as annotations that preserve credence.
 -- The actual proof logic is in the credence tracking, not the tactic names.
 -- See GitHub issue #93 for discussion of tactic semantics.
+--
+-- NOTE ON 'contradict' (Issue #171): The `contradict p q` command signals that
+-- p and q are contradictory claims. In the type system, this:
+-- 1. Does NOT check that p,q are logically contradictory (parser accepts any names)
+-- 2. Records the contradiction in the proof context
+-- 3. Conceptually forces the shared credence variable to 0
+-- The c=0 propagation is DESIGN INTENT, not implemented constraint solving.
+-- See credence.ml constraint solver for actual implementation limits.
 
 -- Classical reductio: ~A -> False, therefore A
 -- CredTT reductio: Unstable0(~A) implies Stable1(A)

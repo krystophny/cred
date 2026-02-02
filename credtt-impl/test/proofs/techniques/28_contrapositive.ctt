@@ -1,5 +1,15 @@
 -- Contrapositive (Distinct from Contraposition)
 --
+-- STATUS: CONCEPTUAL COMPANION (Issue #172)
+-- This file is a COMPANION to 03_contraposition.ctt, not a duplicate.
+-- The distinction:
+--   - 03_contraposition.ctt: About the EQUIVALENCE (A→B) ↔ (~B→~A)
+--   - 28_contrapositive.ctt: About the PROOF TECHNIQUE of proving ~B→~A
+-- In CredTT, these differ because negation flips stability. Neither file
+-- implements the transformation - both explain the conceptual difference.
+-- The "stability flip" mentioned in both is documented in Collapse.agda's
+-- NegationCollapse module which proves neg-flips and neg-flips-back.
+--
 -- Classical: To prove A -> B, prove ~B -> ~A instead
 -- CredTT: ROBUST implication between stability regions
 --         Different from contraposition which is about equivalence

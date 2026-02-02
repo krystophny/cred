@@ -522,6 +522,12 @@ module StructuralRules {ℓ : Level} (DM : DeMorganAlgebra ℓ) where
 -- INDUCTION (dynamics version)
 -- ============================================================================
 
+-- NOTE (Issue #168): This module re-exports InductionDynamics and provides:
+-- - Convenience aliases (classical-induction-valid, interior-induction-valid)
+-- - New theorem: postfixed-induction (induction via post-fixed point condition)
+-- The aliases allow users to import just InductionTheorems without knowing about
+-- InductionDynamics internals. postfixed-induction generalizes the pattern.
+
 module InductionTheorems {ℓ : Level} (DM : DeMorganAlgebra ℓ) where
   open DeMorganAlgebra DM
   open DynamicsDefs DM
