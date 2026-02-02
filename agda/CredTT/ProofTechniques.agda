@@ -125,11 +125,17 @@ module ClassicalTechniques {ℓ} (DM : DeMorganAlgebra ℓ) where
 
     -- Dynamics formulation: both branches at same step -> result at that step
     -- If PostFixedPoint c s in both branches, result is PostFixedPoint c s
+    --
+    -- Mathematical justification: When both branches have identical credence c
+    -- and step s, they yield the same post-fixed condition (c <= c * s). The
+    -- proofs are equivalent witnesses of the same inequality, so either suffices.
+    -- This is a projection, not a computation - the type ensures both branches
+    -- agree on credence, and the proof witness is interchangeable.
     cases-dynamics : ∀ {c s} →
       PostFixedPoint c s →  -- left branch post-fixed
       PostFixedPoint c s →  -- right branch post-fixed
       PostFixedPoint c s    -- result post-fixed
-    cases-dynamics pf₁ _ = pf₁  -- Both are same; take either
+    cases-dynamics pf₁ _ = pf₁
 
   -- 3. CONTRAPOSITION
   -- DYNAMICS: Negation reverses order (antitone)
@@ -316,6 +322,12 @@ module ClassicalTechniques {ℓ} (DM : DeMorganAlgebra ℓ) where
     exhaust-example false = refl
 
     -- Dynamics formulation: all cases at step s -> result at step s
+    --
+    -- Mathematical justification: Exhaustion over a finite type requires each
+    -- case to satisfy the post-fixed condition. When all cases have the same
+    -- credence c and step s, the post-fixed proofs are witnesses of the same
+    -- inequality (c <= c * s). Since the credence is uniform across cases,
+    -- any case's proof suffices - this is projection, not computation.
     exhaust-dynamics : ∀ {c s} →
       PostFixedPoint c s →  -- case 1 post-fixed
       PostFixedPoint c s →  -- case 2 post-fixed

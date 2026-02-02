@@ -126,10 +126,9 @@ wkTm-var : ∀ {n} (i : Fin n) → wkTm (var i) ≡ var (suc i)
 wkTm-var i = refl
 
 -- Key lemma: liftSub idSub i = var i for all i
--- This is the critical helper for the main proofs
 liftSub-idSub : ∀ {n} (i : Fin (suc n)) → liftSub idSub i ≡ var i
 liftSub-idSub zero = refl
-liftSub-idSub (suc i) = refl  -- wkTm (var i) = var (suc i) by definition
+liftSub-idSub (suc i) = refl
 
 -- Two-level lift: liftSub (liftSub idSub) i = var i
 liftSub-liftSub-idSub : ∀ {n} (i : Fin (suc (suc n))) → liftSub (liftSub idSub) i ≡ var i
@@ -307,10 +306,11 @@ mutual
   subst-id-ty-lift5 (Id A a b) = cong₃ Id (subst-id-ty-lift5 A) (subst-id-tm-lift5 a) (subst-id-tm-lift5 b)
 
   -- Higher levels postulated to ensure termination (sufficient for practical use)
+  -- Technical debt tracked in issue #215
   postulate
-    subst-id-tm-lift6 : ∀ {n} (t : Tm (suc (suc (suc (suc (suc (suc n))))))) →
+    subst-id-tm-lift6 : ∀ {n} (t : Tm (suc (suc (suc (suc (suc (suc n))))))) →  -- issue #215
       substTm (liftSub (liftSub (liftSub (liftSub (liftSub (liftSub idSub)))))) t ≡ t
-    subst-id-ty-lift6 : ∀ {n} (A : Ty (suc (suc (suc (suc (suc (suc n))))))) →
+    subst-id-ty-lift6 : ∀ {n} (A : Ty (suc (suc (suc (suc (suc (suc n))))))) →  -- issue #215
       substTy (liftSub (liftSub (liftSub (liftSub (liftSub (liftSub idSub)))))) A ≡ A
-    subst-id-ty-lift7 : ∀ {n} (A : Ty (suc (suc (suc (suc (suc (suc (suc n)))))))) →
+    subst-id-ty-lift7 : ∀ {n} (A : Ty (suc (suc (suc (suc (suc (suc (suc n)))))))) →  -- issue #215
       substTy (liftSub (liftSub (liftSub (liftSub (liftSub (liftSub (liftSub idSub))))))) A ≡ A

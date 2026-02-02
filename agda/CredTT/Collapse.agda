@@ -327,14 +327,11 @@ module DynamicsCollapse where
   iteration-false-degenerates c (Data.Nat.suc n) =
     trans (cong (_· false) (iteration-false-degenerates c n)) (·-annihilˡ false)
 
-  -- Bool has exactly two idempotent elements
-  bool-idempotents : ∀ (c : Bool) → c · c ≡ c
-  bool-idempotents true  = refl
-  bool-idempotents false = refl
-
   -- Both Bool elements are idempotent (this is why dynamics are trivial)
+  -- Idempotent c means c = c * c, so we prove c * c = c and apply sym
   all-bool-idempotent : ∀ (c : Bool) → Idempotent c
-  all-bool-idempotent c = sym (bool-idempotents c)
+  all-bool-idempotent true  = refl
+  all-bool-idempotent false = refl
 
 -- ============================================================================
 -- COMPLETE COLLAPSE THEOREM
