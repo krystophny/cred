@@ -21,10 +21,10 @@ let rec whnf = function
        | Inl a -> whnf (subst_single_tm l a)
        | Inr b -> whnf (subst_single_tm r b)
        | e' -> Case (e', l, r))
-  | J (_, d, p) ->
+  | J (m, d, p) ->
       (match whnf p with
        | Refl -> whnf d
-       | p' -> J (TBase 0, d, p'))
+       | p' -> J (m, d, p'))
   | t -> t
 
 let rec equal_tm t1 t2 =

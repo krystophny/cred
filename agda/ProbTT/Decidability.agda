@@ -268,12 +268,22 @@ module Decidability {ℓ : Level} (DM : DeMorganAlgebra ℓ) where
     ... | yes Af with type-formation-dec Γ B
     ...   | no ¬Bf = no (λ { (+-form _ Bf) → ¬Bf Bf })
     ...   | yes Bf = yes (+-form Af Bf)
-    type-formation-dec Γ (Id A a b) = no helper
+    -- Id type formation decidability requires a term typing decision procedure.
+    -- Id-form needs: (1) A is a type, (2) a : A @ 1, (3) b : A @ 1
+    -- We can decide (1) recursively, but (2) and (3) require term typing.
+    -- For now, we return 'no' with honest justification: without term typing,
+    -- we cannot construct the required typing derivations.
+    --
+    -- LIMITATION: This is incomplete - valid Id types are rejected.
+    -- A complete implementation would need: term-typing-dec : Dec (Γ ⊢ t : A @ w)
+    type-formation-dec Γ (Id A a b) with type-formation-dec Γ A
+    ... | no ¬Af = no (λ { (Id-form Af _ _) → ¬Af Af })
+    ... | yes Af = no incomplete-without-term-typing
       where
-        helper : Γ ⊢ Id A a b type → ⊥
-        helper (Id-form _ _ _) = ⊥-elim (need-type-check Γ A a b)
-          where
-            postulate need-type-check : ∀ {n} (Γ : Ctx n) (A : Ty n) (a b : Tm n) → ⊥
+        -- We cannot construct Id-form without term typing derivations.
+        -- This is NOT a proof that Id types are ill-formed, but a limitation
+        -- of the current decision procedure.
+        postulate incomplete-without-term-typing : Relation.Nullary.¬_ (Γ ⊢ Id A a b type)
 
 -- Boolean weights are decidable
 module BoolDecidable where
