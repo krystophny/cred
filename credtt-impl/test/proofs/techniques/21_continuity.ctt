@@ -1,0 +1,53 @@
+-- Continuity/Robustness Lemmas (CredTT-Native #3)
+--
+-- NEW: Small input degradation -> small output degradation
+-- Prove that reasoning is ROBUST to perturbation
+--
+-- Example: If premises change by epsilon, conclusion changes by delta
+
+-- Classical: binary (true -> true, false -> false)
+-- CredTT: continuous (c1 -> c1 * f, small change -> small change)
+
+-- CONTINUITY: function f is continuous if
+-- c(A) near c0 implies c(f(A)) near f(c0)
+
+-- If f preserves high credence:
+-- c(A) >= 0.9 implies c(f(A)) >= 0.9 * k for some k near 1
+
+-- This is the LIPSCHITZ condition for credence:
+-- |c(f(A)) - c(f(A'))| <= L * |c(A) - c(A')|
+-- Small input change -> bounded output change
+
+postulate input : A [ c ]
+postulate func : A_to_B [ 1 ]
+
+-- Output credence = c * 1 = c
+-- Change in input by epsilon -> change in output by epsilon
+-- This is 1-Lipschitz (L = 1)
+
+-- If func @ d < 1:
+-- Output = c * d
+-- Change in input by epsilon -> change in output by epsilon * d
+-- This is d-Lipschitz
+
+-- WHY CONTINUITY MATTERS:
+-- Real-world inputs are NOISY
+-- Proofs should be ROBUST to noise
+-- Continuity guarantees robustness
+
+-- Example: Sensor readings
+-- Temperature sensor: T @ 0.95 (95% accurate)
+-- If proof uses T once: result @ 0.95
+-- If proof uses T twice: result @ 0.95^2 = 0.9
+-- Degradation is PREDICTABLE
+
+-- ROBUSTNESS CERTIFICATE:
+-- "This proof degrades gracefully under perturbation"
+-- Quantifies the Lipschitz constant
+
+-- If L = 0.5: 1% input error -> 0.5% output error
+-- If L = 2: 1% input error -> 2% output error
+
+-- Classical proofs have implicit L = infinity
+-- One bit flip can change conclusion from true to false
+-- CredTT makes this explicit and controllable

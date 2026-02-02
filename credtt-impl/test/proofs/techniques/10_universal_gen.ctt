@@ -1,0 +1,48 @@
+-- Universal Generalization (Pi-Introduction)
+--
+-- Classical: If Gamma |- P(x) for arbitrary x, then Gamma |- forall x. P(x)
+-- CredTT: lambda x. b : Pi x. B @ inf_x c(x)
+--         Credence is INFIMUM over all instances
+--
+-- Example: Prove forall n. n + 0 = n
+-- For each n, prove n + 0 = n at credence c(n)
+-- Universal has credence inf{c(n) : n in Nat}
+
+-- Classical universal: "for all x, P(x)" is true or false
+-- CredTT universal: credence is infimum over instances
+
+-- If every instance has credence >= 0.9, universal has >= 0.9
+-- If ONE instance has credence 0.1, universal might have 0.1
+
+-- Body of universal at uniform credence 1
+postulate body : n_plus_0_eq_n [ 1 ]
+
+-- Universal generalization: credence = inf{1} = 1
+derive forall_result : forall_n_plus_0_eq_n [ 1 ] from body by pi_intro
+
+stable body
+stable forall_result
+
+-- Non-uniform credences:
+-- Suppose P(0) @ 1, P(1) @ 1, P(2) @ 0.5, ...
+-- Then forall n. P(n) @ inf{1, 1, 0.5, ...} = 0.5
+
+-- This captures real uncertainty about universals:
+-- "All swans are white" might be high credence
+-- But one counterexample (black swan) drops credence
+
+-- In CredTT, the universal is only as strong as
+-- the weakest instance (infimum)
+
+-- Dependent credences: c(x)
+-- forall x. B(x) @ inf_x. c(x)
+-- The credence DEPENDS on x
+
+-- Example: confidence in P(n) might decrease with n
+-- P(0) @ 1, P(1) @ 0.99, P(2) @ 0.98, ...
+-- forall n. P(n) @ lim_{n->inf} c(n) = lim 0.99^n = 0
+-- The universal has credence 0 even though each finite
+-- instance has positive credence!
+
+-- This is why CredTT can express things classical logic can't:
+-- "We're confident in each instance but not the universal"

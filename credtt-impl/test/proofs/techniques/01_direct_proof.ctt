@@ -1,0 +1,40 @@
+-- Direct Proof
+--
+-- Classical: Build conclusion step by step from premises
+-- CredTT: Track credence accumulation via multiplication
+--
+-- Example: Prove that n + 0 = n (identity of addition)
+-- Classic: Immediate from definition
+-- CredTT: Each step multiplies credences; result credence is product
+
+-- In classical logic, direct proof gives definite result
+-- In CredTT, credence accumulates: c1 * c2 * c3 * ...
+
+-- Premise: We know addition identity at credence 1
+postulate add_zero_axiom : n_plus_0_eq_n [ 1 ]
+
+-- Direct derivation: axiom application at full credence
+derive identity : n_plus_0_eq_n [ 1 ] from add_zero_axiom by direct
+
+-- Stability check: credence 1 is Stable1
+stable identity
+
+-- Now consider a weaker premise at credence c
+postulate weak_premise : A [ c ]
+
+-- Deriving from weak premise preserves credence
+derive weak_result : B [ c ] from weak_premise by apply
+
+-- The KEY insight: in CredTT, we track the degradation
+-- Classical logic: A -> B -> C is simply transitive
+-- CredTT: A@c1 -> B@c2 -> C@(c1*c2)
+
+postulate f : A_to_B [ 1 ]
+postulate a : A [ c ]
+
+-- Modus ponens with credence tracking
+-- f @ 1 applied to a @ c gives B @ 1 * c = c
+derive b : B [ c ] from a by apply
+
+-- This is WHY CredTT is better than MLTT:
+-- We SEE the credence accumulation, not just "it type checks"

@@ -13,6 +13,8 @@ type t =
   | CredenceNotLeq of Credence.t * Credence.t
   | IdEndpointsNotEqual of term * term
   | BranchCredenceMismatch of Credence.t * Credence.t
+  | StabilityMismatch of { expected : string; actual : string }
+  | StabilityRequired of string * string  (* name, required_stability *)
   | ParseError of string
   | FileNotFound of string
 
@@ -40,6 +42,11 @@ let pp fmt = function
   | BranchCredenceMismatch (c1, c2) ->
       Format.fprintf fmt "Case branches must have equal credences: left=%a, right=%a"
         Credence.pp c1 Credence.pp c2
+  | StabilityMismatch { expected; actual } ->
+      Format.fprintf fmt "Stability mismatch:@.  Expected: %s@.  Actual:   %s"
+        expected actual
+  | StabilityRequired (name, required) ->
+      Format.fprintf fmt "Stability assertion failed for '%s': required %s" name required
   | ParseError msg ->
       Format.fprintf fmt "Parse error: %s" msg
   | FileNotFound path ->

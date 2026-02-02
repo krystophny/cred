@@ -210,6 +210,48 @@ let of_rational r =
   else if r'.num = r'.den then One
   else Var (rat_to_string r')
 
+(* Stability predicates - meta-level classification of credences *)
+
+(* Check if credence is stable near 1: exists c0 < 1 such that for all c >= c0,
+   inhabitation persists. For concrete credences, this means c is "close to 1". *)
+let is_stable_near_one (c : t) : bool =
+  match to_rational (simplify c) with
+  | Some r ->
+      let r' = rat_normalize r in
+      (* Stable if >= 0.9 (threshold) *)
+      r'.num * 10 >= r'.den * 9
+  | None ->
+      (* Symbolic: check structure *)
+      match simplify c with
+      | One -> true
+      | Zero -> false
+      | Neg c' ->
+          (* ¬c stable near 1 iff c is unstable near 0 *)
+          (match to_rational (simplify c') with
+           | Some r -> let r' = rat_normalize r in r'.num * 10 <= r'.den
+           | None -> false)
+      | _ -> false
+
+(* Check if credence is unstable near 0: for all c > 0, exists c' < c
+   such that inhabitation fails. For concrete credences, c is "close to 0". *)
+let rec is_unstable_near_zero (c : t) : bool =
+  match to_rational (simplify c) with
+  | Some r ->
+      let r' = rat_normalize r in
+      (* Unstable if <= 0.1 (threshold) *)
+      r'.num * 10 <= r'.den
+  | None ->
+      match simplify c with
+      | Zero -> true
+      | One -> false
+      | Neg c' ->
+          (* ¬c unstable near 0 iff c is stable near 1 *)
+          is_stable_near_one c'
+      | Mul (a, b) ->
+          (* Product unstable if either factor is unstable *)
+          is_unstable_near_zero a || is_unstable_near_zero b
+      | _ -> false
+
 (* ========================================================================
    CREDENCE INFERENCE ENGINE
    ========================================================================

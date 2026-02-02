@@ -1,0 +1,55 @@
+-- Contractivity Arguments (CredTT-Native #5)
+--
+-- NEW: Prove step is non-degrading or degrades at controlled rate
+-- Essential for induction and recursion
+--
+-- Example: Prove that induction step preserves credence
+
+-- Classical: induction step is TRUE or FALSE
+-- CredTT: induction step has credence c, affects result
+
+-- CONTRACTIVE: step that doesn't degrade credence
+-- f is contractive if c(f(A)) >= c(A) for all A
+
+-- If step @ 1 (contractive): c_n = c_0 * 1^n = c_0
+-- Credence preserved through all iterations!
+
+postulate contractive_step : step [ 1 ]
+
+-- Using contractive step: no degradation
+-- P(0) @ c -> P(n) @ c for all n
+
+stable contractive_step
+
+-- NON-CONTRACTIVE: step that degrades credence
+-- f is d-contractive if c(f(A)) >= d * c(A)
+
+postulate weak_step : step [ 9/10 ]
+
+-- Using weak step: c_n = c_0 * 0.9^n
+-- After 10 steps: c_0 * 0.35
+-- After 100 steps: c_0 * 0.000027 (basically 0)
+
+-- CONTROLLED DEGRADATION:
+-- Sometimes we accept degradation but bound it
+
+-- If step @ 0.99 and we do 10 iterations:
+-- Final credence >= initial * 0.99^10 = initial * 0.904
+-- Degradation is bounded: at most 10% loss
+
+-- WHY CONTRACTIVITY MATTERS:
+-- For recursive proofs over infinite structures
+-- Need to ensure credence doesn't vanish
+
+-- Example: Proof about all natural numbers
+-- If induction step @ 0.9999:
+-- P(10^6) @ 0.9999^{10^6} ≈ 0
+-- Even very good steps degrade to nothing!
+
+-- Solution: prove step @ 1 (exactly 1)
+-- Then P(n) @ c_0 for ALL n
+
+-- This is WHY formal verification matters:
+-- It achieves step @ 1
+-- Informal proofs might have step @ 0.99
+-- Over infinite steps, only @ 1 survives

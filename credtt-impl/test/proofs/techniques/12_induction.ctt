@@ -1,0 +1,59 @@
+-- Natural Induction (and Strong Induction)
+--
+-- Classical: P(0) and (forall n. P(n) -> P(n+1)) implies forall n. P(n)
+-- CredTT: Result may DEGRADE unless step is contractive
+--         base @ c_b, step @ c_s -> result depends on contractivity
+--
+-- Example: Prove sum(1..n) = n(n+1)/2
+-- Base: sum(1..0) = 0 = 0*1/2 = 0
+-- Step: If sum(1..n) = n(n+1)/2, then sum(1..n+1) = (n+1)(n+2)/2
+
+-- Classical induction: definite result
+-- CredTT induction: MIGHT degrade over steps
+
+-- Base case at credence c_b
+postulate base : sum_0_eq_0 [ c_b ]
+
+-- Inductive step at credence c_s
+postulate step : step_preserves [ c_s ]
+
+-- In classical logic: P(0) and (P(n)->P(n+1)) gives forall n. P(n)
+-- In CredTT: what is the credence of P(n) for large n?
+
+-- If step has credence < 1, each application DEGRADES:
+-- P(0) @ c_b
+-- P(1) @ c_b * c_s
+-- P(2) @ c_b * c_s^2
+-- ...
+-- P(n) @ c_b * c_s^n
+
+-- If c_s < 1, this goes to ZERO as n -> infinity!
+-- The "infinite" case of induction has credence 0
+
+-- This is WHY CredTT is more honest than classical logic:
+-- Induction over infinite sets is NOT automatic
+-- Each step accumulates uncertainty
+
+-- CONTRACTIVE INDUCTION:
+-- If the step is CONTRACTIVE (non-degrading), credence preserved
+
+-- Step at credence 1 (contractive)
+postulate contractive_step : step_at_one [ 1 ]
+
+-- Now: P(n) @ c_b * 1^n = c_b
+-- Credence is preserved! Induction is safe.
+
+-- The lesson: induction is only as good as its step
+-- Classical logic hides this; CredTT exposes it
+
+-- STRONG INDUCTION:
+-- Assume P(0), P(1), ..., P(n-1) to prove P(n)
+-- Same issue: credence can degrade
+
+-- Stable base + Stable step = Stable result (if contractive)
+stable base
+stable step
+
+-- The KEY insight:
+-- Classical induction assumes infinite steps at no cost
+-- CredTT induction tracks the cost of each step

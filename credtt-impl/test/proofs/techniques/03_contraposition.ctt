@@ -1,0 +1,45 @@
+-- Contraposition
+--
+-- Classical: (A -> B) <-> (~B -> ~A)
+-- CredTT: Stability-contraposition (not exact equivalence!)
+--         Stable(A -> B) implies bound on ~B -> ~A
+--
+-- Example: If rain -> wet ground, then dry ground -> no rain
+-- Classical: Exact equivalence
+-- CredTT: Credence and stability transform under negation
+
+-- Classical contraposition is EXACT: A->B iff ~B->~A
+-- CredTT contraposition is APPROXIMATE: stability bounds
+
+-- Original implication at credence c
+postulate rain_implies_wet : rain_to_wet [ c ]
+
+-- Contraposition in CredTT:
+-- If A -> B @ c, what is ~B -> ~A?
+--
+-- NOT exact equivalence! Negation FLIPS stability:
+-- Stable1 -> Unstable0
+-- Unstable0 -> Stable1
+--
+-- So contraposition relates STABILITY, not just truth
+
+-- Stable implication
+postulate stable_impl : A_implies_B [ 1 ]
+stable stable_impl
+
+-- Negation flips stability
+derive neg_B_implies_neg_A : not_B_to_not_A [ 1 ] from stable_impl by negate
+
+-- The negated implication has flipped stability!
+-- If original was Stable1, negation is Unstable0
+-- This is HONEST: negation changes the character of the claim
+
+-- Classical contraposition hides this stability flip
+-- CredTT exposes it: you can't freely negate without consequence
+
+-- Example of why this matters:
+-- "If P then Q" @ 0.9 (pretty confident)
+-- "If not Q then not P" @ 0.9 (same credence)
+-- BUT: the STABILITY changed!
+-- Near-1 confidence in P->Q doesn't mean near-1 confidence in ~Q->~P
+-- It means the NEGATED claim has different sensitivity to perturbation

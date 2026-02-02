@@ -1,0 +1,56 @@
+-- Proof by Exhaustion (Finite Case Analysis)
+--
+-- Classical: Check all cases, conclude universal
+-- CredTT: Stable if each case stable AND aggregation stable
+--
+-- Example: Prove 4-color theorem by checking all configurations
+-- Classical: Check all 1936 cases, done
+-- CredTT: Each case @ c_i, result @ product or minimum
+
+-- Finite exhaustion with n cases:
+-- Case 1 @ c1, Case 2 @ c2, ..., Case n @ cn
+-- Universal @ aggregation(c1, c2, ..., cn)
+
+-- With stable cases (all at credence 1):
+postulate case1 : P_for_red [ 1 ]
+postulate case2 : P_for_green [ 1 ]
+postulate case3 : P_for_blue [ 1 ]
+postulate case4 : P_for_yellow [ 1 ]
+
+-- Aggregation: AND of all cases
+-- 1 * 1 * 1 * 1 = 1
+-- Result is stable
+
+stable case1
+stable case2
+stable case3
+stable case4
+
+-- With one weak case:
+postulate weak_case : P_for_purple [ 1/2 ]
+
+-- Now: 1 * 1 * 1 * 0.5 = 0.5
+-- Result degrades to weakest link (actually worse: product)
+
+-- This is why computer-checked proofs matter:
+-- 1936 cases, each at 0.9999 credence
+-- Product: 0.9999^1936 = 0.824 (NOT near 1!)
+
+-- Classical logic: all cases check -> universal true
+-- CredTT: all cases check @ c -> universal @ f(c, n)
+
+-- The function f depends on aggregation method:
+-- Product: c^n (degrades exponentially)
+-- Minimum: min(c_i) (degrades to worst case)
+-- Average: mean(c_i) (doesn't capture dependencies)
+
+-- Computer-verified proofs:
+-- If each step verified with certainty (c=1), product = 1
+-- If each step has epsilon error, product degrades
+
+-- This explains why formal verification is valuable:
+-- It achieves c=1 for each step
+-- Informal proofs might have c=0.99 per step
+-- Over many steps, this accumulates significant uncertainty
+
+-- Stability: Stable1 only if ALL cases Stable1

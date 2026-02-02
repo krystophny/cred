@@ -1,7 +1,7 @@
 (library
  (name credtt_lib)
  (public_name credtt.lib)
- (modules credence syntax subst context eval error check raw elaborate proof)
+ (modules credence neighbourhood syntax subst context eval error check raw elaborate proof)
  (libraries str))
 
 (executable
