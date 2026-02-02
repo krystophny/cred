@@ -4,7 +4,9 @@
 
 (* LIMITATION (Issue #140): Rational credences use OCaml `int` type.
    This can overflow on 64-bit platforms for complex credence expressions.
-   Cross-multiplication in rat_mul (num*num, den*den) is the main risk.
+   Overflow risks:
+   - rat_mul: num*num and den*den can overflow for large rationals
+   - equal/leq: cross-multiplication (n1*d2, n2*d1) for comparison
    To fix: use Zarith arbitrary-precision integers, or add overflow checks. *)
 
 type t =
