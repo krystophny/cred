@@ -15,8 +15,23 @@ They serve as:
 
 ## File Naming Convention
 
-- `01-18_*.ctt`: Classical proof techniques (20 total)
-- `19-26_*.ctt`: CredTT-native techniques (8 total)
+- `01-19_*.ctt`: Classical proof techniques (19 files)
+- `20-28_*.ctt`: CredTT-native techniques (9 files)
+
+Total: 28 proof technique examples.
+
+## Note on Files 20-28 (CredTT-Native Techniques)
+
+Files 20-28 demonstrate CredTT-native techniques that have NO classical analogue.
+These files are more CONCEPTUAL than the classical technique files:
+- They explain HOW credence bounds, stability proofs, and limit theorems work
+- They use `postulate` to set up scenarios rather than building proof chains
+- The commentary explains why these techniques matter for verification
+
+This is intentional: classical files (01-19) show how classical proofs map to
+CredTT with credence tracking. Native files (20-28) explain new capabilities
+that classical logic simply cannot express (interior stability, credence bounds,
+degeneracy analysis, etc.).
 
 ## Syntax
 

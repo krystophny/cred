@@ -372,7 +372,14 @@ type iteration_behavior =
   | Unknown_limit      (* cannot determine *)
 
 (* Analyze iteration behavior for concrete rational credences.
-   Uses the Archimedean property of [0,1]: for 0 < r < 1, r^n -> 0. *)
+   Uses the Archimedean property of [0,1]: for 0 < r < 1, r^n -> 0.
+
+   DESIGN NOTE: Returns Unknown_limit for symbolic credences (Var, Infer, DepVar).
+   This is CORRECT behavior - we cannot determine iteration limits algebraically
+   without knowing concrete values. Callers should handle Unknown_limit by:
+   - Using conservative assumptions (treat as potentially degenerating)
+   - Requesting user annotation for credence bounds
+   - Propagating uncertainty to downstream analysis *)
 let iteration_behavior (c : Credence.t) (s : Credence.t) : iteration_behavior =
   match Credence.simplify c, Credence.simplify s with
   | Credence.Zero, _ -> Preserves      (* 0 * s^n = 0 *)
