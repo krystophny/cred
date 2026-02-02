@@ -98,16 +98,16 @@ let needs_inference = function
 
 (* Convert stability_kind to Neighbourhood.stability *)
 let stability_of_kind = function
-  | KStable1 -> Neighbourhood.Stable1
-  | KUnstable0 -> Neighbourhood.Unstable0
-  | KInterior -> Neighbourhood.Interior
+  | KStable1 -> Neighbourhood.Robust
+  | KUnstable0 -> Neighbourhood.Vanishing
+  | KInterior -> Neighbourhood.Idempotent
   | KUnknown -> Neighbourhood.Unknown
 
 (* Convert Neighbourhood.stability to stability_kind *)
 let kind_of_stability = function
-  | Neighbourhood.Stable1 -> KStable1
-  | Neighbourhood.Unstable0 -> KUnstable0
-  | Neighbourhood.Interior -> KInterior
+  | Neighbourhood.Robust -> KStable1
+  | Neighbourhood.Vanishing -> KUnstable0
+  | Neighbourhood.Idempotent -> KInterior
   | Neighbourhood.Unknown -> KUnknown
 
 (* Add a postulate *)
@@ -340,7 +340,7 @@ let assert_interior state name =
   match Hashtbl.find_opt state.judgments name with
   | None -> Error (Printf.sprintf "Unknown judgment: %s" name)
   | Some j ->
-      if j.stability = Neighbourhood.Interior then begin
+      if j.stability = Neighbourhood.Idempotent then begin
         Printf.printf "  INTERIOR: %s has stability %s (credence %s)\n"
           name (Neighbourhood.stability_to_string j.stability) (Credence.to_string j.credence);
         Ok state
@@ -374,9 +374,9 @@ let proof_by_cases state result case1 case2 =
         Hashtbl.find_opt state.judgments case2 with
   | Some j1, Some j2 ->
       let result_stability = match j1.stability, j2.stability with
-        | Neighbourhood.Stable1, Neighbourhood.Stable1 -> Neighbourhood.Stable1
-        | Neighbourhood.Unstable0, _ | _, Neighbourhood.Unstable0 -> Neighbourhood.Unstable0
-        | _, _ -> Neighbourhood.Interior
+        | Neighbourhood.Robust, Neighbourhood.Robust -> Neighbourhood.Robust
+        | Neighbourhood.Vanishing, _ | _, Neighbourhood.Vanishing -> Neighbourhood.Vanishing
+        | _, _ -> Neighbourhood.Idempotent
       in
       let result_credence = Credence.simplify (Credence.mul j1.credence j2.credence) in
       let j = { name = result; prop = j1.prop ^ " | " ^ j2.prop;
@@ -419,7 +419,7 @@ let reductio state result unstable_negation =
           unstable_negation (Neighbourhood.stability_to_string j.stability))
       else begin
         (* Unstable negation means stable positive *)
-        let stable_stability = Neighbourhood.Stable1 in
+        let stable_stability = Neighbourhood.Robust in
         let stable_credence = Credence.neg j.credence in
         let result_j = { name = result; prop = "~~" ^ j.prop;
                          credence = stable_credence; stability = stable_stability;
@@ -447,7 +447,7 @@ let ex_falso state name zero_term =
           zero_term (Credence.to_string j.credence))
       else begin
         let result_j = { name; prop = "anything";
-                         credence = Credence.one; stability = Neighbourhood.Stable1;
+                         credence = Credence.one; stability = Neighbourhood.Robust;
                          status = StabilityDerived (KStable1, "ex_falso") } in
         Hashtbl.replace state.judgments name result_j;
         Printf.printf "\n  EX FALSO: from %s at credence 0, derive %s at credence 1\n"
@@ -554,9 +554,9 @@ let induction state result base step stability_note =
         Hashtbl.find_opt state.judgments step with
   | Some b, Some s ->
       let result_stability = match b.stability, s.stability with
-        | Neighbourhood.Stable1, Neighbourhood.Stable1 -> Neighbourhood.Stable1
-        | Neighbourhood.Unstable0, _ | _, Neighbourhood.Unstable0 -> Neighbourhood.Unstable0
-        | _, _ -> Neighbourhood.Interior
+        | Neighbourhood.Robust, Neighbourhood.Robust -> Neighbourhood.Robust
+        | Neighbourhood.Vanishing, _ | _, Neighbourhood.Vanishing -> Neighbourhood.Vanishing
+        | _, _ -> Neighbourhood.Idempotent
       in
       let result_credence = Credence.mul b.credence s.credence in
       let result_j = { name = result; prop = "induction(" ^ b.prop ^ ", " ^ s.prop ^ ")";
@@ -593,7 +593,7 @@ let refutation state name toward_zero =
   | None -> Error (Printf.sprintf "Unknown judgment: %s" toward_zero)
   | Some j ->
       let result_j = { name; prop = "refute(" ^ j.prop ^ ")";
-                       credence = Credence.zero; stability = Neighbourhood.Unstable0;
+                       credence = Credence.zero; stability = Neighbourhood.Vanishing;
                        status = StabilityDerived (KUnstable0, "refutation") } in
       Hashtbl.replace state.judgments name result_j;
       Printf.printf "\n  REFUTATION: %s\n" name;
@@ -606,8 +606,8 @@ let equational_rewrite state result original equality =
         Hashtbl.find_opt state.judgments equality with
   | Some o, Some e ->
       let result_stability = match o.stability, e.stability with
-        | Neighbourhood.Stable1, Neighbourhood.Stable1 -> Neighbourhood.Stable1
-        | _, _ -> Neighbourhood.Interior
+        | Neighbourhood.Robust, Neighbourhood.Robust -> Neighbourhood.Robust
+        | _, _ -> Neighbourhood.Idempotent
       in
       let result_credence = Credence.mul o.credence e.credence in
       let result_j = { name = result; prop = "rewrite(" ^ o.prop ^ ", " ^ e.prop ^ ")";
