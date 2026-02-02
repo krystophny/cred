@@ -332,27 +332,25 @@ module GradedInconsistency {ℓ : Level} (DM : DeMorganAlgebra ℓ) where
 -- ============================================================================
 
 {-
-WHAT CREDTT CAN DO (self-hosting):
+WHAT CREDTT CLAIMS IT CAN DO (Issue #127):
+STATUS: These are DESIGN GOALS, not implemented features.
+The actual Agda code postulates most of these capabilities.
 
 1. ENCODE ITS OWN SYNTAX
-   - Terms, types, contexts as data types
-   - Derivations as proof objects
-   - Standard Gödel coding
+   ACTUAL STATUS: Postulated. No concrete term/type/context encoding.
+   WHAT EXISTS: Abstract Prov : ℕ → C predicate.
 
 2. DEFINE INTERNAL PROVABILITY
-   - Prov : Formula → Credence
-   - Sup of credences at which derivations exist
-   - This is order-theoretic, not metric
+   ACTUAL STATUS: Postulated (Prov is abstract, not constructed).
+   WHAT EXISTS: Axioms relating Prov to consistency.
 
 3. REASON ABOUT PROVABILITY
-   - Prove meta-theorems about rules
-   - Analyze credence propagation
-   - Diagnose inconsistencies
+   ACTUAL STATUS: Minimal. A few postulate-based lemmas.
+   WHAT EXISTS: Derivability conditions D1, D2, D3 (postulated).
 
 4. HANDLE SELF-REFERENCE
-   - Gödel sentence has interior credence (1/2)
-   - Not paradox, not undecidability
-   - Graded incompleteness
+   ACTUAL STATUS: Postulated via G-code, G-self-reference.
+   WHAT EXISTS: IF G exists with stated properties, THEN c=1/2.
 
 WHAT CREDTT CANNOT DO (Gödel-blocked):
 
