@@ -21,6 +21,12 @@ open import ProbTT.Judgment
 -- Properties: metatheorems
 open import ProbTT.Properties
 
+-- Decidability: type checking is decidable
+-- open import ProbTT.Decidability
+
+-- Normalization: weak normalization via logical relations
+-- open import ProbTT.Normalization
+
 -- MLTT: the {0,1} limiting case
 open import ProbTT.MLTT
 
@@ -41,3 +47,7 @@ open import ProbTT.Consistency
 -- GradedChoice: Axiom of Choice at graded weights
 -- Finite choice at 1, countable/uncountable at < 1
 open import ProbTT.GradedChoice
+
+-- DependentWeights: weights that vary over the domain
+-- (x : A) → B @ w(x) where w depends on x
+open import ProbTT.DependentWeights
