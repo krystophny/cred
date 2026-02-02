@@ -213,8 +213,9 @@ module ClassicalRecovery {ℓ : Level} (DM : DeMorganAlgebra ℓ) where
   -- -------------------------------------------------------------------------
 
   -- If c ≤ d, then ¬d ≤ ¬c (antitone)
-  -- NOTE: This is ¬-antitone from DeMorganAlgebra - it is an AXIOM of the algebra,
-  -- proven for concrete instances (BoolDM, IntervalDM). Not a postulate.
+  -- NOTE: This is ¬-antitone from DeMorganAlgebra - it is an AXIOM field that
+  -- each instance must provide. BoolDM proves it; IntervalDM postulates it
+  -- (pending arithmetic proof, see Interval.agda:172).
   neg-antitone : ∀ {c₁ c₂} → c₁ ≤ c₂ → ¬ c₂ ≤ ¬ c₁
   neg-antitone = ¬-antitone
 
