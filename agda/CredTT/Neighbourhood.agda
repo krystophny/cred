@@ -173,6 +173,19 @@ module DynamicsDefs {ℓ : Level} (DM : DeMorganAlgebra ℓ) where
   -- Example: idempotent e with 0 < e < 1 satisfies e · e = e, so eⁿ = e
 
   -- Record for an interior stable element
+  -- STATUS: VACUOUSLY SATISFIABLE in standard probability algebras
+  --
+  -- In [0,1] with standard multiplication, there are NO interior idempotents:
+  --   - Idempotent: c · c = c implies c ∈ {0, 1}
+  --   - Interior: 0 < c < 1
+  --   - These are mutually exclusive in [0,1]!
+  --
+  -- This record exists to:
+  --   1. Define the concept for non-standard algebras (e.g., idempotent semirings)
+  --   2. State a negative result: no instances exist in probability algebras
+  --   3. Support potential future extensions with different credence algebras
+  --
+  -- See bool-no-interior below for the proof that Bool has no interior points.
   record InteriorStable : Set ℓ where
     field
       elem     : C
