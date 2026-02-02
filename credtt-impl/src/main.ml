@@ -2,7 +2,15 @@
 
 open Credtt_lib
 
-let usage = "Usage: credtt <command> [file]\n\nCommands:\n  check <file>  Check a CredTT/Agda file\n  infer <file>  Infer types in a CredTT/Agda file\n  proof sqrt2   Run the sqrt2 irrationality proof\n"
+let usage = "Usage: credtt <command> [file]\n\n\
+Commands:\n\
+  check <file>  Check a CredTT/Agda file (supports .ctt proof files)\n\
+  infer <file>  Infer types in a CredTT/Agda file\n\
+  proof sqrt2   Run the sqrt2 irrationality proof (builtin demo)\n\n\
+The 'check' command supports proof techniques including:\n\
+  postulate, derive, contradict, conclude, negate, fixpoint, stable, unstable\n\
+  Automatic fixpoint solving (e.g., fixpoint x = neg x solves to 1/2)\n\n\
+See credtt-impl/test/proofs/techniques/*.ctt for examples.\n"
 
 let read_file path =
   try
