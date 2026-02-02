@@ -1,3 +1,18 @@
+{- AXIOM STATUS SUMMARY for Weight.agda (DependentWeight module)
+
+sup, sup-upper, sup-least: COMPLETENESS EXTENSION
+  The De Morgan algebra does not include completeness.
+  These axioms extend the algebra to a complete lattice.
+  For Bool: sup = OR (trivially finite).
+  For [0,1]: sup exists by completeness of reals.
+
+inf, inf-lower, inf-greatest: COMPLETENESS EXTENSION
+  Same as sup. For Bool: inf = AND.
+
+sup-const, inf-const: SHOULD BE PROVEN
+  Given inhabited index type, sup/inf of constant function equals constant.
+  Requires index type to be non-empty.
+-}
 module ProbTT.Weight where
 
 open import Level using (Level; suc; _⊔_)

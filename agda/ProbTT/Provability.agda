@@ -1,3 +1,27 @@
+{- AXIOM STATUS SUMMARY for Provability.agda
+
+All postulates in this module are META-LEVEL AXIOMS that cannot be
+proven within ProbTT itself. They describe the meta-theory.
+
+encode, encode-derivation: META-LEVEL AXIOM
+  Godel encoding requires arithmetic (natural numbers, beta function)
+  which ProbTT does not include. Standard in provability logic.
+
+diagonal: META-LEVEL AXIOM
+  Godel fixed-point theorem. Proven FROM encoding in systems with
+  arithmetic. Without arithmetic, we axiomatize it.
+
+D1, D2, D3: META-LEVEL AXIOM
+  Hilbert-Bernays-Lob derivability conditions.
+  D2 includes ProbTT-specific weight multiplication.
+  Proven from encoding in arithmetic. We axiomatize them.
+
+self-ref-weight: META-LEVEL AXIOM
+  Existence of fixed-point weights for self-referential terms.
+  Requires weight algebra to have fixed points (not guaranteed).
+
+Reference: Boolos "Logic of Provability", Hajek-Paris-Shepherdson 2000
+-}
 -- Provability predicates for ProbTT meta-theory
 -- Formalizes graded provability Prov_w(phi)
 --
