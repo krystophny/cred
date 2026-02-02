@@ -77,6 +77,38 @@ let () =
     | None -> false
   );
 
+  (* Extended fixpoint solver tests *)
+  test "solve_fixpoint_ext c = c*k (k<1) gives 0" (
+    match solve_fixpoint_ext (fun c -> Mul (c, Rat (1, 2))) "c" with
+    | FPSolved r -> rat_equal r rat_zero
+    | _ -> false
+  );
+  test "solve_fixpoint_ext c = c*1 is identity" (
+    match solve_fixpoint_ext (fun c -> Mul (c, One)) "c" with
+    | FPIdentity -> true
+    | _ -> false
+  );
+  test "solve_fixpoint_ext c = neg neg c is identity (involution)" (
+    match solve_fixpoint_ext (fun c -> Neg (Neg c)) "c" with
+    | FPIdentity -> true
+    | _ -> false
+  );
+  test "solve_fixpoint_ext c = c*c gives multiple solutions" (
+    match solve_fixpoint_ext (fun c -> Mul (c, c)) "c" with
+    | FPMultiple [r1; r2] -> rat_equal r1 rat_one && rat_equal r2 rat_zero
+    | _ -> false
+  );
+  test "solve_fixpoint_ext c = c is identity" (
+    match solve_fixpoint_ext (fun c -> c) "c" with
+    | FPIdentity -> true
+    | _ -> false
+  );
+  test "solve_fixpoint_ext c = c * var is unsolvable" (
+    match solve_fixpoint_ext (fun c -> Mul (c, Var "k")) "c" with
+    | FPUnsolvable _ -> true
+    | _ -> false
+  );
+
   (* Constraint solver tests *)
   test "solve_constraints [c = 0]" (
     let constraints = [CEqual (Var "c", Zero)] in
