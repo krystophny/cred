@@ -32,6 +32,7 @@ open import Data.Product using (_×_; _,_; proj₁; proj₂; Σ; ∃)
 open import Data.Sum using (_⊎_; inj₁; inj₂)
 open import Data.Nat using (ℕ; zero; suc; _+_; _*_)
 open import Data.Bool using (Bool; true; false; not)
+open import Data.Unit using (⊤; tt)
 open import Function using (_∘_; id)
 
 open import CredTT.Credence
@@ -232,9 +233,19 @@ module ClassicalTechniques {ℓ} (DM : DeMorganAlgebra ℓ) where
 
   -- 15. REFUTATION
   -- DYNAMICS: Drive credence to 0 (degeneration)
+  -- STATUS: Not yet formalized (see issue #157)
   module Refutation where
-    -- Classical: derive bottom
+    -- Classical: derive bottom (contradiction leads to falsum)
     -- CredTT: iterate until credence degenerates to 0
+    --
+    -- Formalization would require:
+    --   1. A predicate for "derivable contradiction"
+    --   2. Proof that contradiction forces credence to 0
+    --   3. Connection to Degenerating definition in Neighbourhood.agda
+    --
+    -- See: ClassicalRecovery.ex-falso-fixed for the 0-is-fixed-point property
+    refutation-not-yet-formalized : Set
+    refutation-not-yet-formalized = ⊤
 
   -- 16. EQUATIONAL REWRITING
   -- DYNAMICS: Preserves post-fixed property
@@ -247,9 +258,20 @@ module ClassicalTechniques {ℓ} (DM : DeMorganAlgebra ℓ) where
 
   -- 17. PROOF BY ANALOGY
   -- DYNAMICS: Low-credence morphism (explicitly weak)
+  -- STATUS: Not yet formalized (requires concrete credence algebra)
   module Analogy where
     -- "A is like B" @ 0.7 (explicitly weak)
     -- CredTT can express this; classical logic cannot
+    --
+    -- Formalization would require:
+    --   1. Concrete interval algebra [0,1] (see CredTT.Interval)
+    --   2. Morphism notion between types at sub-unitary credence
+    --   3. Laws for how analogy credences compose
+    --
+    -- This is a conceptual technique - shows CredTT's expressiveness
+    -- beyond classical logic, but precise formalization is future work.
+    analogy-not-yet-formalized : Set
+    analogy-not-yet-formalized = ⊤
 
   -- 18. STRUCTURAL RULES
   -- DYNAMICS: Exchange free, weakening/contraction conditional
@@ -263,8 +285,20 @@ module ClassicalTechniques {ℓ} (DM : DeMorganAlgebra ℓ) where
 
   -- 19. STRONG INDUCTION
   -- DYNAMICS: Using k previous cases multiplies credences
+  -- STATUS: Not yet formalized (see issue #155)
   module StrongInduction where
     -- If using k previous cases: credence degrades by factor s^k
+    --
+    -- Formalization would require:
+    --   1. Induction schema with k-deep recursion
+    --   2. Proof that credence is c * s^k after k steps
+    --   3. Comparison with classical induction (k=1 case)
+    --
+    -- Key insight: classical strong induction uses arbitrary k
+    -- without credence penalty (assumes s=1). CredTT tracks this.
+    -- See: InductionDynamics in Neighbourhood.agda for k=1 case
+    strong-induction-not-yet-formalized : Set
+    strong-induction-not-yet-formalized = ⊤
 
   -- 20. CONTRAPOSITIVE
   -- DYNAMICS: Robust implication between regions

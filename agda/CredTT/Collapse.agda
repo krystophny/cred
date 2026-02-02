@@ -106,12 +106,15 @@ module BoolCollapse where
   false-always-unstable = false , (≤-false , (λ ())) , ≤-false
 
 -- ============================================================================
--- THE COLLAPSE ISOMORPHISM
+-- THE COLLAPSE ISOMORPHISM (SKETCH)
 -- ============================================================================
 
 -- CredTT with Bool credences is isomorphic to MLTT
+-- STATUS: This is a STRUCTURAL SKETCH demonstrating the correspondence.
+-- Full integration with the actual term language (CredTT.Syntax) is future work.
+-- See GitHub issue #57: CollapseIsomorphism uses simplified/fake types
 
-module CollapseIsomorphism where
+module CollapseIsomorphism-Sketch where
   open BoolDM
   open DeMorganAlgebra BoolDM
   open BoolCollapse
@@ -123,26 +126,29 @@ module CollapseIsomorphism where
   -- An MLTT judgment Gamma |- t : A
   -- corresponds to a CredTT judgment Gamma |- t : A @ true
 
-  -- We represent this abstractly since we don't have the full term language here
-  record MLTTJudgment : Set₁ where
+  -- SKETCH: We represent judgments abstractly since full term language
+  -- integration requires CredTT.Syntax. These records capture the
+  -- STRUCTURE of the correspondence without committing to a specific
+  -- term representation. (See issue #57 for full integration work.)
+  record MLTTJudgment-Sketch : Set₁ where
     field
       context : Set
       term : Set
       ty : Set
 
-  record CredTTJudgment : Set₁ where
+  record CredTTJudgment-Sketch : Set₁ where
     field
       context : Set
       term : Set
       ty : Set
       credence : Bool
 
-  -- Embed MLTT into CredTT
-  mltt-to-credtt : MLTTJudgment → CredTTJudgment
-  mltt-to-credtt j = record
-    { context = MLTTJudgment.context j
-    ; term = MLTTJudgment.term j
-    ; ty = MLTTJudgment.ty j
+  -- Embed MLTT into CredTT (sketch)
+  mltt-to-credtt-sketch : MLTTJudgment-Sketch → CredTTJudgment-Sketch
+  mltt-to-credtt-sketch j = record
+    { context = MLTTJudgment-Sketch.context j
+    ; term = MLTTJudgment-Sketch.term j
+    ; ty = MLTTJudgment-Sketch.ty j
     ; credence = true
     }
 
@@ -152,13 +158,13 @@ module CollapseIsomorphism where
 
   -- If Gamma |- t : A @ true in CredTT, we get Gamma |- t : A in MLTT
 
-  credtt-true-to-mltt : (j : CredTTJudgment) →
-    CredTTJudgment.credence j ≡ true →
-    MLTTJudgment
-  credtt-true-to-mltt j _ = record
-    { context = CredTTJudgment.context j
-    ; term = CredTTJudgment.term j
-    ; ty = CredTTJudgment.ty j
+  credtt-true-to-mltt-sketch : (j : CredTTJudgment-Sketch) →
+    CredTTJudgment-Sketch.credence j ≡ true →
+    MLTTJudgment-Sketch
+  credtt-true-to-mltt-sketch j _ = record
+    { context = CredTTJudgment-Sketch.context j
+    ; term = CredTTJudgment-Sketch.term j
+    ; ty = CredTTJudgment-Sketch.ty j
     }
 
   -- -------------------------------------------------------------------------
@@ -168,16 +174,18 @@ module CollapseIsomorphism where
   -- Gamma |- t : A @ false is vacuously true (no real content)
 
   -- A vacuous judgment has no computational content
-  credtt-false-is-vacuous : (j : CredTTJudgment) →
-    CredTTJudgment.credence j ≡ false →
+  credtt-false-is-vacuous-sketch : (j : CredTTJudgment-Sketch) →
+    CredTTJudgment-Sketch.credence j ≡ false →
     ⊤
-  credtt-false-is-vacuous _ _ = tt
+  credtt-false-is-vacuous-sketch _ _ = tt
 
   -- -------------------------------------------------------------------------
-  -- The Collapse Theorem
+  -- The Collapse Theorem (Sketch)
   -- -------------------------------------------------------------------------
 
   -- MLTT is isomorphic to CredTT[Bool] with credence = true
+  -- This is a STRUCTURAL demonstration, not a full proof.
+  -- Full proof requires integration with CredTT.Syntax (see issue #57).
 
   -- Forward: every MLTT derivation gives a CredTT derivation at credence 1
   -- This is a meta-theorem about derivation trees
@@ -185,12 +193,12 @@ module CollapseIsomorphism where
   -- Backward: every CredTT derivation at credence 1 gives an MLTT derivation
   -- Credence 0 derivations are computationally empty
 
-  -- Combined: the isomorphism
-  collapse-theorem : (j : CredTTJudgment) →
-    (CredTTJudgment.credence j ≡ true × MLTTJudgment) ⊎
-    (CredTTJudgment.credence j ≡ false × ⊤)
-  collapse-theorem j with bool-dichotomy (CredTTJudgment.credence j)
-  ... | inj₁ eq-true  = inj₁ (eq-true , credtt-true-to-mltt j eq-true)
+  -- Combined: the isomorphism (sketch)
+  collapse-theorem-sketch : (j : CredTTJudgment-Sketch) →
+    (CredTTJudgment-Sketch.credence j ≡ true × MLTTJudgment-Sketch) ⊎
+    (CredTTJudgment-Sketch.credence j ≡ false × ⊤)
+  collapse-theorem-sketch j with bool-dichotomy (CredTTJudgment-Sketch.credence j)
+  ... | inj₁ eq-true  = inj₁ (eq-true , credtt-true-to-mltt-sketch j eq-true)
   ... | inj₂ eq-false = inj₂ (eq-false , tt)
 
 -- ============================================================================
@@ -320,12 +328,12 @@ module DynamicsCollapse where
 
 module CompleteCollapse where
   open BoolCollapse
-  open CollapseIsomorphism
+  open CollapseIsomorphism-Sketch
   open DynamicsCollapse
   open DeMorganAlgebra BoolDM
   open StabilityDefs BoolDM
 
-  -- Main theorem: CredTT[Bool] = MLTT
+  -- Main theorem: CredTT[Bool] = MLTT (sketch-level)
 
   -- 1. Fixed points: Only {0,1}, no interior
   fixed-points-trivial : ∀ (c : Bool) → Idempotent c → (c ≡ true) ⊎ (c ≡ false)
@@ -344,11 +352,12 @@ module CompleteCollapse where
     (s ≡ true × c · s ≡ c) ⊎ (s ≡ false × c · s ≡ false)
   dynamics-trivial = operator-trivial
 
-  -- 5. Isomorphism: MLTT <-> CredTT[Bool]
-  judgment-correspondence : (j : CredTTJudgment) →
-    (CredTTJudgment.credence j ≡ true × MLTTJudgment) ⊎
-    (CredTTJudgment.credence j ≡ false × ⊤)
-  judgment-correspondence = collapse-theorem
+  -- 5. Isomorphism: MLTT <-> CredTT[Bool] (sketch)
+  -- Full proof requires integration with actual term language (issue #57)
+  judgment-correspondence-sketch : (j : CredTTJudgment-Sketch) →
+    (CredTTJudgment-Sketch.credence j ≡ true × MLTTJudgment-Sketch) ⊎
+    (CredTTJudgment-Sketch.credence j ≡ false × ⊤)
+  judgment-correspondence-sketch = collapse-theorem-sketch
 
 -- ============================================================================
 -- SUMMARY: WHY THE COLLAPSE MATTERS

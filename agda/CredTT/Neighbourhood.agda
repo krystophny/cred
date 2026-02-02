@@ -125,20 +125,33 @@ module DynamicsDefs {ℓ : Level} (DM : DeMorganAlgebra ℓ) where
       x ≢ y = x ≡ y → ⊥
 
   -- ============================================================================
-  -- POSTULATED AXIOMS
+  -- ADDITIONAL AXIOMS (not derivable from De Morgan algebra)
   -- ============================================================================
+  -- These properties are REQUIRED for the dynamics framework but are NOT
+  -- provable from the minimal De Morgan algebra axioms in Credence.agda.
+  -- See GitHub issues for tracking:
+  --   #42: These 4 postulates must be theorems or added as axioms
+  --   #147: DeMorganAlgebra missing ·-mono axiom needed elsewhere
 
   postulate
-    -- Non-triviality
+    -- Non-triviality: 0 and 1 are distinct
+    -- NOT provable: De Morgan axioms are satisfied by trivial 1-element algebra
+    -- Required for meaningful stability analysis (see issue #42)
     𝟘≢𝟙 : 𝟘 ≡ 𝟙 → ⊥
 
-    -- Anti-monotonicity of negation
+    -- Anti-monotonicity of negation: if c1 <= c2, then ~c2 <= ~c1
+    -- NOT provable from current axioms: would need order-negation interaction
+    -- In [0,1]: ~c = 1-c is obviously antitone (see issue #42)
     ¬-antitone : ∀ {c₁ c₂} → c₁ ≤ c₂ → ¬ c₂ ≤ ¬ c₁
 
-    -- Monotonicity of multiplication
+    -- Monotonicity of multiplication in both arguments
+    -- NOT provable: only have ·-≤-self (c · d ≤ c) in current axioms
+    -- Should be added to DeMorganAlgebra (see issue #147)
     ·-mono : ∀ {a b c d} → a ≤ c → b ≤ d → (a · b) ≤ (c · d)
 
-    -- Positivity preservation (for well-behaved algebras)
+    -- Positivity preservation: positive * positive = positive
+    -- NOT provable: requires strict order properties not in axioms
+    -- In well-behaved algebras (e.g., [0,1]) this holds trivially (see issue #42)
     ·-positive : ∀ {c₁ c₂} → Positive c₁ → Positive c₂ → Positive (c₁ · c₂)
 
   -- ============================================================================
@@ -228,13 +241,20 @@ module StabilityThms {ℓ : Level} (DM : DeMorganAlgebra ℓ) where
   -- well-behaved De Morgan algebras with multiplication.
 
   -- Application preserves post-fixed point property
-  -- If c is post-fixed under s, then c · d is post-fixed under s
-  -- (requires associativity and commutativity of ·)
+  -- If c and d are both post-fixed under s, then c · d is post-fixed under s
+  -- PROOF SKETCH: c ≤ c·s and d ≤ d·s
+  --   By ·-mono: c·d ≤ (c·s)·d = c·(s·d) = c·(d·s) ≤ c·d·s·s
+  --   This does NOT directly give c·d ≤ (c·d)·s without s ≤ 1
+  -- ASSUMPTION: This holds when s ≤ 1 (sub-unitary step)
+  -- See GitHub issue #45: app-preserves-postfixed is postulated
   postulate
     app-preserves-postfixed : ∀ {c s d} →
       PostFixedPoint c s →
       PostFixedPoint d s →
       PostFixedPoint (c · d) s
+    -- JUSTIFICATION: In De Morgan algebras with sub-unitary steps (s ≤ 1),
+    -- this follows from: c·d ≤ c·d·1 ≤ c·d·s (when s ≤ 1 implies s acts as
+    -- identity or contraction). Full proof requires ·-mono and order lemmas.
 
   -- Negation flips fixed points
   -- If c is a post-fixed point, ¬c is "post-unfixed"

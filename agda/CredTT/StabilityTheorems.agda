@@ -120,13 +120,12 @@ module ContractionLemmas {ℓ : Level} (DM : DeMorganAlgebra ℓ) where
   open StabilityDefs DM
   open OperatorDynamics DM
 
-  -- Strict order (local definition to avoid name clash)
-  StrictLess : C → C → Set ℓ
-  StrictLess x y = (x ≤ y) × (x ≡ y → ⊥)
+  -- Use _<_ from DynamicsDefs (re-exported via StabilityDefs)
+  -- instead of defining a duplicate StrictLess
 
   -- A step is contractive if it strictly reduces non-unit credence
   Contractive : C → Set ℓ
-  Contractive s = ∀ {c} → Positive c → SubUnity c → StrictLess (c · s) c
+  Contractive s = ∀ {c} → Positive c → SubUnity c → (c · s) < c
 
   -- A step is non-expanding if it doesn't increase credence
   NonExpanding : C → Set ℓ
