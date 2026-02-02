@@ -18,6 +18,10 @@
 -- Impossible antecedent at credence 0
 postulate pigs_fly : pigs_can_fly @ 0
 
+-- EXECUTABLE: From credence 0, ANY consequent is admissible
+-- This is vacuous truth in action - the conditional is "true" but meaningless
+derive pigs_can_fly_means_anything : B @ 1 from pigs_fly by vacuous
+
 -- When antecedent is at credence 0:
 -- P(B|A) is UNCONSTRAINED (see ex_falso)
 -- So "pigs fly -> 2+2=5" is admissible but MEANINGLESS
