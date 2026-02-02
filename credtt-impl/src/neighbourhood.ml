@@ -165,6 +165,7 @@ let rec classify (c : Credence.t) : stability =
   match Credence.simplify c with
   | Credence.One -> Robust      (* 1 is robust: preserved under any s <= 1 *)
   | Credence.Zero -> Vanishing  (* 0 is the vanishing point *)
+  | Credence.Rat (_, _) -> Idempotent  (* interior rationals are idempotent *)
   | Credence.Neg inner ->
       (* Negation: ~c = 1 - c, swaps 0 <-> 1 at extremes, maps interior to interior *)
       (match classify inner with

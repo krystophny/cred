@@ -5,6 +5,7 @@
 type t =
   | Zero
   | One
+  | Rat of int * int  (* numerator, denominator - proper rational representation *)
   | Mul of t * t
   | Neg of t
   | Var of string
@@ -15,6 +16,7 @@ type t =
 
 let zero = Zero
 let one = One
+let rat n d = Rat (n, d)
 let mul w v = Mul (w, v)
 let neg w = Neg w
 let var s = Var s
@@ -33,6 +35,23 @@ let reset_infer () = infer_counter := 0
 
 let c_or c v = Neg (Mul (Neg c, Neg v))
 
+(* GCD for simplifying rationals *)
+let rec gcd_int a b = if b = 0 then abs a else gcd_int b (a mod b)
+
+(* Simplify Rat to canonical form, converting 0/d to Zero and n/n to One *)
+let simplify_rat n d =
+  if d = 0 then invalid_arg "simplify_rat: denominator is zero"
+  else if n = 0 then Zero
+  else
+    let g = gcd_int n d in
+    let n' = n / g in
+    let d' = d / g in
+    (* Normalize sign to denominator *)
+    let (n'', d'') = if d' < 0 then (-n', -d') else (n', d') in
+    if n'' = 0 then Zero
+    else if n'' = d'' then One
+    else Rat (n'', d'')
+
 let rec simplify = function
   | Mul (One, w) -> simplify w
   | Mul (w, One) -> simplify w
@@ -41,19 +60,22 @@ let rec simplify = function
   | Neg (Neg w) -> simplify w
   | Neg Zero -> One
   | Neg One -> Zero
+  | Rat (n, d) -> simplify_rat n d
   | Mul (w, v) ->
       let w' = simplify w in
       let v' = simplify v in
-      if w' = Zero || v' = Zero then Zero
-      else if w' = One then v'
-      else if v' = One then w'
-      else Mul (w', v')
+      (match w', v' with
+       | Zero, _ | _, Zero -> Zero
+       | One, x | x, One -> x
+       | Rat (n1, d1), Rat (n2, d2) -> simplify_rat (n1 * n2) (d1 * d2)
+       | _, _ -> Mul (w', v'))
   | Neg w ->
       let w' = simplify w in
       (match w' with
        | Zero -> One
        | One -> Zero
        | Neg w'' -> w''
+       | Rat (n, d) -> simplify_rat (d - n) d  (* 1 - n/d = (d-n)/d *)
        | _ -> Neg w')
   | Infer n -> Infer n
   | DepVar (x, i) -> DepVar (x, i)
@@ -75,6 +97,7 @@ let rec equal w1 w2 =
   match simplify w1, simplify w2 with
   | Zero, Zero -> true
   | One, One -> true
+  | Rat (n1, d1), Rat (n2, d2) -> n1 * d2 = n2 * d1  (* cross-multiply to compare *)
   | Var s1, Var s2 -> s1 = s2
   | Infer n1, Infer n2 -> n1 = n2
   | DepVar (x1, i1), DepVar (x2, i2) -> x1 = x2 && i1 = i2
@@ -88,11 +111,13 @@ let leq w1 w2 =
   match simplify w1, simplify w2 with
   | Zero, _ -> true
   | _, One -> true
+  | Rat (n1, d1), Rat (n2, d2) -> n1 * d2 <= n2 * d1  (* compare by cross-multiply *)
   | w1', w2' -> equal w1' w2'
 
 let rec pp fmt = function
   | Zero -> Format.fprintf fmt "0"
   | One -> Format.fprintf fmt "1"
+  | Rat (n, d) -> Format.fprintf fmt "%d/%d" n d
   | Var s -> Format.fprintf fmt "%s" s
   | Infer n -> Format.fprintf fmt "?%d" n
   | DepVar (x, i) -> Format.fprintf fmt "%s(%d)" x i
@@ -116,7 +141,7 @@ let gcd a b =
   go (abs a) (abs b)
 
 let rat_normalize r =
-  if r.den = 0 then { num = 0; den = 1 }
+  if r.den = 0 then invalid_arg "rat_normalize: denominator is zero"
   else
     let g = gcd r.num r.den in
     let sign = if r.den < 0 then -1 else 1 in
@@ -142,6 +167,7 @@ let rat_to_string r =
 let rec to_rational = function
   | Zero -> Some rat_zero
   | One -> Some rat_one
+  | Rat (n, d) -> Some (rat_normalize { num = n; den = d })
   | Neg w ->
       (match to_rational w with
        | Some r -> Some (rat_neg r)
@@ -208,7 +234,7 @@ let of_rational r =
   let r' = rat_normalize r in
   if r'.num = 0 then Zero
   else if r'.num = r'.den then One
-  else Var (rat_to_string r')
+  else Rat (r'.num, r'.den)
 
 (* Stability predicates - meta-level classification of credences *)
 
@@ -332,6 +358,7 @@ let rec unify (s : subst) (w1 : t) (w2 : t) : unify_result =
   match simplify w1', simplify w2' with
   | Zero, Zero -> Unified s
   | One, One -> Unified s
+  | Rat (n1, d1), Rat (n2, d2) when n1 * d2 = n2 * d1 -> Unified s
   | Var v1, Var v2 when v1 = v2 -> Unified s
   | Infer n1, Infer n2 when n1 = n2 -> Unified s
 
