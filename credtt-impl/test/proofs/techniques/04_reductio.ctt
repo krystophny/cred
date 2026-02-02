@@ -7,6 +7,12 @@
 -- Assume sqrt(2) = p/q in lowest terms
 -- Derive contradiction (p,q both even but gcd=1)
 -- Conclude sqrt(2) is irrational
+--
+-- NOTE ON TACTICS: The 'by algebra', 'by substitution', 'by both_even' tactics
+-- in this file are DIDACTIC - they demonstrate the intended proof structure
+-- but the checker treats them as annotations that preserve credence.
+-- The actual proof logic is in the credence tracking, not the tactic names.
+-- See GitHub issue #93 for discussion of tactic semantics.
 
 -- Classical reductio: ~A -> False, therefore A
 -- CredTT reductio: Unstable0(~A) implies Stable1(A)
