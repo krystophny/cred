@@ -1,4 +1,16 @@
 (* Weak head normalization for type equality *)
+(*
+ * LIMITATION (Issue #144): Only weak head normal form (whnf) is implemented.
+ *
+ * Missing functionality:
+ * - No full `normalize` function (no eta expansion/reduction)
+ * - No fuel/depth limit (non-terminating terms will loop forever)
+ * - No caching/memoization for repeated normalization
+ *
+ * This is sufficient for type-checking because we only need whnf for
+ * head comparison. Full normalization would be needed for definitional
+ * equality modulo eta, or for printing normal forms.
+ *)
 
 open Syntax
 open Subst

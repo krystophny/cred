@@ -2,10 +2,15 @@
    Minimal structure: 0, 1, *, negation, order
    No addition - disjunction derived via De Morgan duality *)
 
+(* LIMITATION (Issue #140): Rational credences use OCaml `int` type.
+   This can overflow on 64-bit platforms for complex credence expressions.
+   Cross-multiplication in rat_mul (num*num, den*den) is the main risk.
+   To fix: use Zarith arbitrary-precision integers, or add overflow checks. *)
+
 type t =
   | Zero
   | One
-  | Rat of int * int  (* numerator, denominator - proper rational representation *)
+  | Rat of int * int  (* numerator/denominator - CAUTION: may overflow *)
   | Mul of t * t
   | Neg of t
   | Var of string
