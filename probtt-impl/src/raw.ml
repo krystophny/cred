@@ -19,6 +19,7 @@ type weight =
   | WNeg of weight
   | WVar of name
   | WRat of int * int  (* numerator, denominator for rational weights like 1/2 *)
+  | WInfer            (* inference variable, weight to be inferred *)
 
 type term =
   | TVar of name

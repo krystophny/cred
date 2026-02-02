@@ -40,6 +40,7 @@ let rec elab_weight = function
   | WNeg w -> Weight.neg (elab_weight w)
   | WVar x -> Weight.var x
   | WRat (n, d) -> Weight.of_rational { Weight.num = n; Weight.den = d }
+  | WInfer -> Weight.fresh_infer ()
 
 
 let rec elab_ty env = function
