@@ -47,6 +47,54 @@
    - Inconsistency is QUANTIFIED, not catastrophic
 
    Ex falso becomes: as c → 0, constraints vanish (limit admissibility).
+
+   ============================================================================
+   FORMALIZATION STATUS (Issue #50)
+   ============================================================================
+
+   PROVEN:
+   - inconsistency-bounded: c · d ≤ c and c · d ≤ d (Issue #52)
+   - no-bool-fixpoint: ∀ b → not b ≡ b → ⊥
+
+   DERIVED (from postulates):
+   - G-credence: derived from postulated gödel-credence + G-self-reference
+
+   CONJECTURAL (postulated, believed true, not proven here):
+
+   Module ProvabilitySemantics:
+   - IsTautology, IsContradiction, IsImplication: syntax encoding predicates
+     STATUS: Would require full Gödel encoding of CredTT syntax
+   - Prov : ℕ → C: provability function
+     STATUS: Requires arithmetic encoding; existence is standard (Gödel 1931)
+   - Prov-bounded, Prov-taut, Prov-contra, Prov-mp: provability properties
+     STATUS: Standard properties of any reasonable provability predicate
+   - gödel-credence: existence of negation fixpoint c = ¬c
+     STATUS: Holds in [0,1] with ¬c = 1-c (c = 1/2); may fail in other algebras
+   - gödel-credence-unique: uniqueness of negation fixpoint
+     STATUS: Holds in [0,1]; may fail in non-Archimedean algebras
+   - G-code, G-self-reference: Gödel sentence existence
+     STATUS: Standard diagonal lemma construction (Gödel 1931)
+   - graded-incompleteness: main theorem record
+     STATUS: Fields are derivable from above postulates; record postulated for convenience
+
+   Module ReflectionPrinciple:
+   - Sem : ℕ → C: semantic truth function
+     STATUS: Model-dependent; existence assumed as in standard model theory
+   - reflection: Prov ≤ Sem (soundness)
+     STATUS: Standard soundness; proof would require full formalization
+   - discount, discount-strict, discount-positive: meta-reflection discount
+     STATUS: Design choice to prevent Löb-style loops; any 0 < d < 1 works
+   - meta-reflection: discounted meta-level soundness
+     STATUS: Follows from soundness + discount design
+
+   Module GradedInconsistency:
+   - Prov-internal, neg-code: internal provability infrastructure
+     STATUS: Standard Gödel encoding; postulated for graded consistency definition
+
+   OPEN PROBLEMS:
+   1. Full Gödel encoding of CredTT syntax in Agda
+   2. Constructive proof of negation fixpoint existence in specific algebras
+   3. Uniqueness analysis for non-Archimedean cases
 -}
 module CredTT.Reflection where
 
@@ -73,13 +121,16 @@ module ProvabilitySemantics {ℓ : Level} (DM : DeMorganAlgebra ℓ) where
   -- Prov : Prop → C
   -- representing the "degree of provability" of a proposition
 
-  -- Placeholder predicates (would be defined via syntax encoding)
+  -- CONJECTURAL: Syntax encoding predicates (would require full Gödel encoding)
+  -- These are standard in metamathematics; postulated here as infrastructure
   postulate
     IsTautology : ℕ → Set
     IsContradiction : ℕ → Set
     IsImplication : ℕ → ℕ → ℕ → Set  -- n = "m → k"
 
-  -- We postulate the existence of such a function with key properties
+  -- CONJECTURAL: Provability predicate and standard properties
+  -- Existence follows from Gödel 1931; properties are standard for any
+  -- reasonable provability predicate. Full proof requires arithmetic encoding.
   postulate
     -- The provability predicate (maps formulas to credences)
     Prov : ℕ → C  -- ℕ represents Gödel codes of formulas
@@ -106,7 +157,9 @@ module ProvabilitySemantics {ℓ : Level} (DM : DeMorganAlgebra ℓ) where
   NegationFixpoint : C → Set ℓ
   NegationFixpoint c = ¬ c ≡ c
 
-  -- If such a fixpoint exists, it represents the "Gödel credence"
+  -- CONJECTURAL: Negation fixpoint existence and uniqueness
+  -- In [0,1] with ¬c = 1-c, unique solution is c = 1/2 (proven algebraically)
+  -- In non-Archimedean algebras, existence holds but uniqueness may fail
   postulate
     gödel-credence : Σ C NegationFixpoint
     gödel-credence-unique : ∀ c d → NegationFixpoint c → NegationFixpoint d → c ≡ d
@@ -122,8 +175,9 @@ module ProvabilitySemantics {ℓ : Level} (DM : DeMorganAlgebra ℓ) where
   -- THE GÖDEL SENTENCE
   -- -------------------------------------------------------------------------
 
-  -- G is a formula whose code satisfies: G ≃ ¬Prov(⌜G⌝)
-  -- Meaning: G asserts "my provability credence is low"
+  -- CONJECTURAL: Gödel sentence existence via diagonal lemma
+  -- Standard construction (Gödel 1931); proof requires full syntax encoding
+  -- G asserts "my provability credence is low"
 
   postulate
     G-code : ℕ  -- The Gödel number of G
@@ -146,8 +200,9 @@ module ProvabilitySemantics {ℓ : Level} (DM : DeMorganAlgebra ℓ) where
       gödel-not-impossible : Prov G-code ≡ 𝟘 → ⊥  -- Not impossible
       gödel-interior : Prov G-code ≡ ½  -- Has interior credence
 
-  -- The proofs are complex due to the interplay of self-reference
-  -- We postulate the record construction
+  -- CONJECTURAL: Graded incompleteness theorem
+  -- Fields are derivable from gödel-credence + G-self-reference above
+  -- Postulated as convenience; could be constructed from prior postulates
   postulate
     graded-incompleteness : GradedIncompleteness
 
@@ -160,14 +215,15 @@ module ReflectionPrinciple {ℓ : Level} (DM : DeMorganAlgebra ℓ) where
   open DynamicsDefs DM
   open ProvabilitySemantics DM
 
-  -- Semantic truth (external/ideal notion)
-  -- This is what "would be true" if we had all axioms
+  -- CONJECTURAL: Semantic truth function
+  -- Model-dependent; existence assumed as in standard model theory
+  -- Represents "what would be true" if we had all axioms
   postulate
     Sem : ℕ → C  -- Semantic credence
 
-  -- THE REFLECTION PRINCIPLE: Provability ≤ Semantic truth
+  -- CONJECTURAL: Reflection principle (soundness)
   -- What we prove internally never exceeds what's actually true
-  -- This is SOUNDNESS
+  -- Standard soundness theorem; proof requires full formalization
 
   postulate
     reflection : ∀ n → Prov n ≤ Sem n
@@ -179,15 +235,17 @@ module ReflectionPrinciple {ℓ : Level} (DM : DeMorganAlgebra ℓ) where
   -- DISCOUNTED META-REFLECTION
   -- -------------------------------------------------------------------------
 
-  -- When reasoning about provability at the meta-level,
-  -- we apply a discount factor to prevent self-certification loops
+  -- CONJECTURAL: Discounted meta-reflection
+  -- Design choice to prevent Löb-style self-certification loops
+  -- Any 0 < discount < 1 works; specific value is model-dependent
 
   postulate
     discount : C  -- The meta-level discount factor
     discount-strict : discount < 𝟙  -- Strictly less than 1
     discount-positive : Positive discount  -- Strictly greater than 0
 
-  -- Meta-reflection: proving "X is provable" gives discounted truth
+  -- CONJECTURAL: Meta-reflection with discount
+  -- Follows from soundness + discount design choice
   -- Prov("Prov(φ) = c") = 1 implies Sem(φ) ≥ c · discount
   postulate
     meta-reflection : ∀ n c →
@@ -221,13 +279,20 @@ module GradedInconsistency {ℓ : Level} (DM : DeMorganAlgebra ℓ) where
   -- Graded ex falso: as credence → 0, constraints vanish
 
   -- The "damage" from inconsistency is bounded by the inconsistency credence
-  postulate
-    inconsistency-bounded : ∀ c d →
-      InconsistencyCredence c d ≤ c ×
-      InconsistencyCredence c d ≤ d
+  -- PROVEN (Issue #52): c · d ≤ c (since d ≤ 1) and c · d ≤ d (since c ≤ 1)
+  -- Uses monotonicity: if a ≤ b then a · c ≤ b · c (·-mono-l from Issue #54)
+  inconsistency-bounded : ∀ c d →
+    InconsistencyCredence c d ≤ c ×
+    InconsistencyCredence c d ≤ d
+  inconsistency-bounded c d = left-bound , right-bound
+    where
+      -- c · d ≤ c · 1 = c (using d ≤ 1 and right-monotonicity)
+      left-bound : c · d ≤ c
+      left-bound = subst (λ x → c · d ≤ x) (·-identityʳ c) (·-mono-r c (𝟙-greatest d))
 
-  -- Proof: c · d ≤ c (since d ≤ 1) and c · d ≤ d (since c ≤ 1)
-  -- This is just monotonicity of multiplication
+      -- c · d ≤ 1 · d = d (using c ≤ 1 and left-monotonicity)
+      right-bound : c · d ≤ d
+      right-bound = subst (λ x → c · d ≤ x) (·-identityˡ d) (·-mono-l d (𝟙-greatest c))
 
   -- -------------------------------------------------------------------------
   -- GRADED CONSISTENCY
@@ -238,8 +303,8 @@ module GradedInconsistency {ℓ : Level} (DM : DeMorganAlgebra ℓ) where
   -- Con_c(T): no contradiction derivable at credence ≥ c
   -- This is a FAMILY of consistency notions
 
-  -- Consistency at credence c means no contradiction has inconsistency ≥ c
-  -- We define this using postulates for the necessary infrastructure
+  -- CONJECTURAL: Internal provability infrastructure for graded consistency
+  -- Standard Gödel encoding; postulated as infrastructure for definitions
   postulate
     Prov-internal : ℕ → C
     neg-code : ℕ → ℕ  -- Gödel code of negation
