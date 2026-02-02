@@ -776,8 +776,8 @@ Each proof step at credence $s$ induces the operator $T_s : \C \to \C$ where $T_
 
 Since multiplication preserves order in each argument, $T_s$ is a monotone operator on the ordered credence algebra. Stability is characterized by fixed-point properties:
 
-\begin{definition}[Post-Fixed Point]
-$c$ is a \emph{post-fixed point} under step $s$ (written $c \leq c \cdot s$) iff applying the proof step does not reduce credence. This is the fundamental validity condition for iterative proofs.
+\begin{definition}[Pre-Fixed Point]
+$c$ is a \emph{pre-fixed point} under step $s$ (written $c \leq c \cdot s$) iff applying the proof step does not reduce credence. In standard lattice theory, $x \leq f(x)$ defines pre-fixed points. This is the fundamental validity condition for iterative proofs.
 \end{definition}
 
 \begin{definition}[Invariant]
@@ -802,7 +802,11 @@ $c$ is \emph{idempotent} iff $c \cdot c = c$. Such elements are self-stable and 
     \item Credence sequences may plateau at interior values
 \end{itemize}
 
-This is what makes CredTT richer than probability theory on $[0,1]$. The Archimedean case (standard real interval) is a \emph{special case} where iteration always degenerates for $s < \one$.
+\begin{example}[Credence algebra with interior idempotent]
+Consider the three-element algebra $\C = \{\zero, e, \one\}$ with order $\zero < e < \one$, multiplication $e \cdot e = e$, $e \cdot \one = e$, $\zero \cdot x = \zero$, $\one \cdot x = x$, and complement $\negc e = e$ (the unique fixed point of negation). This is a valid credence algebra where $e$ is an interior idempotent: $\zero < e < \one$ and $e \cdot e = e$.
+\end{example}
+
+This is what makes CredTT richer than probability theory on $[0,1]$. The Archimedean case (standard real interval) is a \emph{special case} where iteration always degenerates for $s < \one$, since the only idempotents are $0$ and $1$.
 
 \subsection{Interior Credences as First-Class Citizens}
 
@@ -830,23 +834,23 @@ Every classical proof technique has a CredTT analog expressed in terms of stabil
 \small
 \begin{tabular}{|c|l|l|l|l|}
 \hline
-\textbf{\#} & \textbf{Technique} & \textbf{Operator} & \textbf{Stability} & \textbf{Credence} \\
+\textbf{\#} & \textbf{Technique} & \textbf{Operator $T_s$} & \textbf{Validity Condition} & \textbf{Result Credence} \\
 \hline
 1 & Direct proof & $T_s \circ T_t = T_{s \cdot t}$ & Compose & $c$ accumulates \\
-2 & Cases & Parallel $T_s$ & Both post-fixed & Branches stable \\
+2 & Cases & Parallel $T_s$ & Both pre-fixed & Branches stable \\
 3 & Contraposition & $\negc$ antitone & Order reverses & $\negc c_2 \leq \negc c_1$ \\
 4 & Reductio & Instability & Unstable$(\negc)$ & $\Rightarrow$ Stable \\
-5 & Contrapositive & $\negc \circ T_s$ & Reverses post-fixed & Bounds flip \\
+5 & Contrapositive & $\negc \circ T_s$ & Reverses pre-fixed & Bounds flip \\
 6 & Ex falso & $T_s(\zero) = \zero$ & $\zero$ absorbs & Unconstrained \\
 7 & Vacuous & $\zero \cdot s = \zero$ & Degenerate & Vacuous \\
 8 & Deduction & $\lambda$ preserves & Same dynamics & $c$ preserved \\
 9 & Modus ponens & $T_{s_1 \cdot s_2}$ & Multiply & $c_1 \cdot c_2$ \\
 10 & Syllogism & $T_{s_1} \circ T_{s_2}$ & Compose & $c_1 \cdot c_2$ \\
-11 & $\forall$-intro & $\inf_x T_{s(x)}$ & All post-fixed & $\inf_x c(x)$ \\
-12 & $\exists$-intro & $T_{s_a \cdot s_b}$ & Both post-fixed & $c_a \cdot c_b$ \\
-13 & Induction & $T_s^n$ & Post-fixed & Degrade/stable \\
+11 & $\forall$-intro & $\inf_x T_{s(x)}$ & All pre-fixed & $\inf_x c(x)$ \\
+12 & $\exists$-intro & $T_{s_a \cdot s_b}$ & Both pre-fixed & $c_a \cdot c_b$ \\
+13 & Induction & $T_s^n$ & Pre-fixed & Degrade/stable \\
 14 & Strong ind. & $T_s^k$ & $k$-fold & $c \cdot s^k$ \\
-15 & Exhaustion & $\bigwedge T_{s_i}$ & All post-fixed & Min stable \\
+15 & Exhaustion & $\bigwedge T_{s_i}$ & All pre-fixed & Min stable \\
 16 & Construction & $T_{s_w \cdot s_p}$ & Witness+prop & $c_w \cdot c_p$ \\
 17 & Refutation & Iterate to $\zero$ & Degenerates & $\inf_n = \zero$ \\
 18 & Rewriting & $T_{\mathsf{Id}}$ & Id stable & Preserved \\
@@ -865,7 +869,7 @@ Consider the classical syllogism ``All men are mortal; Socrates is a man; theref
 If $c_1 = 0.95$ and $c_2 = 0.90$, the conclusion has credence $0.855$---\emph{not} $0.95$ or $0.90$!
 
 \paragraph{Concrete Example: Induction (Technique \#13)}
-Induction is valid iff $c$ is a \emph{post-fixed point} of the step operator:
+Induction is valid iff $c$ is a \emph{pre-fixed point} of the step operator:
 \begin{itemize}
     \item \textbf{Classical}: step at credence $\one$, so $c \leq c \cdot \one = c$ always holds
     \item \textbf{Interior}: if $c$ is idempotent ($c \cdot c = c$), induction at $c$ is valid!
@@ -901,9 +905,14 @@ When credences are restricted to $\{\zero,\one\}$:
 \begin{proof}[Proof sketch (order-theoretic)]
 In the Boolean algebra $\{\zero,\one\}$:
 \begin{enumerate}
-    \item \textbf{Fixed points}: The equation $c = c \cdot c$ has solutions $c = \zero$ (since $\zero \cdot \zero = \zero$) and $c = \one$ (since $\one \cdot \one = \one$). These are the only elements, so these are the only fixed points.
+    \item \textbf{Fixed points of $T_s$}: For any operator $T_s(c) = c \cdot s$:
+    \begin{itemize}
+        \item $T_s(\zero) = \zero \cdot s = \zero$, so $\zero$ is always a fixed point
+        \item $T_s(\one) = \one \cdot s = s$, so $\one$ is a fixed point iff $s = \one$
+    \end{itemize}
+    Since $\{\zero,\one\}$ has only two elements: $\zero$ is a fixed point of every $T_s$, and $\one$ is a fixed point of $T_\one$. These are the only candidates and hence the only fixed points.
 
-    \item \textbf{Operator dichotomy}: For step $s$:
+    \item \textbf{Operator dichotomy}: For step $s \in \{\zero, \one\}$:
     \begin{itemize}
         \item If $s = \one$: $T_\one(c) = c \cdot \one = c$ (identity)
         \item If $s = \zero$: $T_\zero(c) = c \cdot \zero = \zero$ (annihilation)
@@ -912,7 +921,7 @@ In the Boolean algebra $\{\zero,\one\}$:
 
     \item \textbf{No interior}: Suppose $\zero < c < \one$. But in $\{\zero,\one\}$, there are no such elements. The order $\zero \leq \one$ has no intermediate points.
 
-    \item \textbf{Classification}: By (3), every credence is either $\zero$ or $\one$. By (1), $\one$ is a robust fixed point and $\zero$ is a vanishing fixed point. This classification is exhaustive.
+    \item \textbf{Classification}: By (3), every credence is either $\zero$ or $\one$. By (1), $\one$ is a robust fixed point (under $T_\one$) and $\zero$ is a vanishing fixed point (under all $T_s$). This classification is exhaustive.
 
     \item \textbf{MLTT}: Judgments $\Gamma \vdash a : A \at{\one}$ correspond to MLTT judgments $\Gamma \vdash a : A$. Judgments at credence $\zero$ are vacuously satisfied (no computational content).
 \end{enumerate}
@@ -961,9 +970,9 @@ CredTT enables 8 proof techniques with \emph{no classical analog}. These exploit
 \hline
 \textbf{\#} & \textbf{Technique} & \textbf{Operator/Dynamics} & \textbf{Stability Condition} \\
 \hline
-21 & Stability proofs & Classify $c$ & Post-fixed + positive \\
+21 & Stability proofs & Classify $c$ & Pre-fixed + positive \\
 22 & Credence bounds & Invariant maintenance & $c \geq l$ preserved by $T_s$ \\
-23 & Robustness & Lipschitz on $T_s$ & $|T_s(c) - T_s(c')| \leq L|c - c'|$ \\
+23 & Robustness & Order-preserving $T_s$ & $c \leq c' \Rightarrow T_s(c) \leq T_s(c')$ \\
 24 & Degeneracy & Iteration analysis & Rate of $c \cdot s^n \to \zero$ \\
 25 & Contractivity & $T_s$ non-expanding & $T_s(c) \leq c$ \\
 26 & Factoring & Decompose $c = h \cdot l$ & High-cred core isolated \\
@@ -1023,7 +1032,7 @@ Classical logic has free structural rules---this \emph{hides} important credence
 CredTT's proof operators form a \emph{monotone dynamical system} on the credence algebra. The relevant literature includes:
 
 \begin{itemize}
-    \item \textbf{Tarski's Fixed Point Theorem} \citep{tarski1955lattice}: Monotone functions on complete lattices have fixed points. CredTT's proof operators $T_s$ are monotone, and the credence algebra (when complete) admits fixed points by Tarski's theorem.
+    \item \textbf{Tarski's Fixed Point Theorem} \citep{tarski1955lattice}: Monotone functions on complete lattices have fixed points. When the credence algebra forms a complete lattice (e.g., $[0,1]$ with standard order), CredTT's proof operators $T_s$ are monotone and admit fixed points by Tarski's theorem. Note: the general credence algebra axioms do not assume completeness; this application requires the additional assumption.
 
     \item \textbf{Abstract Interpretation} \citep{cousot1979constructive}: Cousot and Cousot's framework uses Galois connections and fixed-point iteration on abstract domains. CredTT's stability analysis is analogous: iteration of $T_s$ converges to fixed points characterizing proof validity.
 
@@ -1037,9 +1046,9 @@ The fixed-point perspective on logic has deep roots:
 \begin{itemize}
     \item \textbf{Kripke Fixed Points} \citep{kripke1975outline}: Kripke's theory of truth uses fixed points to handle self-reference. CredTT's G\"odel sentence at $c = \tfrac{1}{2}$ is a fixed point of the negation operator.
 
-    \item \textbf{Modal $\mu$-Calculus}: Least and greatest fixed points characterize temporal properties. CredTT's post-fixed points ($c \leq c \cdot s$) are analogous to pre-fixed points in modal logic.
+    \item \textbf{Modal $\mu$-Calculus}: Least and greatest fixed points characterize temporal properties. CredTT's pre-fixed points ($c \leq c \cdot s$) are analogous to pre-fixed points in modal logic.
 
-    \item \textbf{Inductive Definitions} \citep{aczel1977inductive}: Aczel's theory of inductive definitions uses fixed points on set-theoretic structures. CredTT's induction principle requires the credence to be a post-fixed point.
+    \item \textbf{Inductive Definitions} \citep{aczel1977inductive}: Aczel's theory of inductive definitions uses fixed points on set-theoretic structures. CredTT's induction principle requires the credence to be a pre-fixed point.
 \end{itemize}
 
 \subsection{Non-Archimedean Structures}
