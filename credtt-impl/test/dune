@@ -1,0 +1,24 @@
+(test
+ (name test_credence)
+ (modules test_credence)
+ (libraries credtt.lib))
+
+(test
+ (name test_check)
+ (modules test_check)
+ (libraries credtt.lib))
+
+(test
+ (name test_proof)
+ (modules test_proof)
+ (libraries credtt.lib))
+
+(test
+ (name test_integration)
+ (modules test_integration)
+ (libraries credtt.lib str unix))
+
+(test
+ (name test_infer)
+ (modules test_infer)
+ (libraries credtt.lib))

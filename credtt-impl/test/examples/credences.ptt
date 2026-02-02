@@ -1,0 +1,17 @@
+-- CredTT credence annotation examples
+
+-- Identity at credence 1
+id : A → A 〔 1 〕;
+id x = x;
+
+-- Pair construction (credences multiply)
+pair : A → B → A × B 〔 1 〕;
+pair a b = (a , b);
+
+-- Const function
+const : A → B → A 〔 1 〕;
+const x y = x;
+
+-- Composition
+compose : (A → B) → (B → C) → A → C 〔 1 〕;
+compose f g x = g (f x)

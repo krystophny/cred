@@ -1,0 +1,69 @@
+-- Graded Choice: Axiom of Choice at Credence < 1
+--
+-- NOTE: This file DEMONSTRATES the proof checker syntax.
+-- The actual metatheory is formalized in agda/CredTT/GradedChoice.agda
+--
+-- LITERATURE: This is more novel than Goedel/consistency work.
+-- Related: constructive choice principles (Martin-Loef), realizability.
+-- The "credence of AC" idea is CredTT-specific.
+--
+-- Classical AC: For any family of non-empty sets, there exists a choice function
+-- Problem: Non-constructive, leads to paradoxes (Banach-Tarski)
+--
+-- CredTT alternative: Partial choice at high credence
+-- - Finite choice: credence 1 (always works)
+-- - Countable choice: credence approaches 1 but may not reach it
+-- - Uncountable choice: credence strictly < 1
+--
+-- Key insight: Paradoxes require credence 1 to be fully realized
+
+-- Finite choice is always possible at credence 1
+-- For any finite family {A_1, ..., A_n} of non-empty sets,
+-- we can construct a choice function explicitly
+postulate finite_choice : Finite_Choice 〔 1 〕
+
+-- Finite induction: if we can choose from n sets, we can choose from n+1
+derive choice_step : Choice_n_plus_1 〔 1 〕 from finite_choice by induction
+
+-- For countable families, each finite prefix has a choice function
+-- The limit is the full choice function, but the limit may not be achieved
+-- Credence = lim_{n->inf} (product of individual credences)
+-- If each choice has credence 1-eps_n, total credence = prod(1-eps_n)
+-- This can be < 1 even if each factor is close to 1
+
+-- Countable choice at credence approaching 1
+provable countable_choice_approx : Countable_Choice 〔 c 〕
+
+-- The credence c satisfies: for any eps > 0, c > 1 - eps for finite prefixes
+-- But c may be < 1 in the limit
+
+-- Uncountable choice (full AC) would require credence 1
+-- But this may not be achievable
+
+-- Banach-Tarski decomposition:
+-- The paradoxical decomposition exists at some credence c < 1
+-- This means: the mathematical object is "partially constructed"
+-- At credence < 1, it cannot be physically realized
+
+postulate bt_decomposition : Banach_Tarski 〔 c 〕
+
+-- The key constraint: c < 1
+-- This is NOT a postulate - it follows from the construction
+-- Banach-Tarski requires infinitely many non-constructive choices
+-- Each choice contributes a factor slightly < 1
+-- The product is strictly < 1
+
+-- Comparison with constructive mathematics:
+-- Constructive: AC fails entirely (no choice function)
+-- Classical: AC holds fully (credence 1)
+-- CredTT: AC holds at credence < 1 (partial choice)
+--
+-- CredTT is more informative:
+-- - We know something exists (credence > 0)
+-- - We know it's not fully constructible (credence < 1)
+-- - The credence quantifies how "close to constructible" it is
+
+-- Physical interpretation:
+-- Credence < 1 means "theoretically possible but not physically realizable"
+-- Banach-Tarski at c < 1 correctly predicts: you can't actually do it
+-- This resolves the apparent paradox

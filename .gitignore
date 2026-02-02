@@ -15,7 +15,7 @@ agda/_build/
 **/*.agdai
 
 # OCaml/Dune build artifacts
-probtt-impl/_build/
+credtt-impl/_build/
 **/*.install
 
 # OS files

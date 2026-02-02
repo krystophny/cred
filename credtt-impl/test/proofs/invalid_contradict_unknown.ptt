@@ -1,0 +1,5 @@
+-- INVALID: Contradict with unknown judgment
+-- Should fail: one of the contradicting propositions doesn't exist
+
+postulate p : P 〔 c 〕
+contradict p nonexistent

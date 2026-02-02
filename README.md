@@ -1,49 +1,49 @@
-# ProbTT: Type Theory with Primitive Weights
+# CredTT: Type Theory with Primitive Credences
 
-A type theory where **weights are primitive**, not derived from numbers.
+A type theory where **credences are primitive**, not derived from numbers.
 
 ## Core Idea
 
-Judgments carry weights: `Γ ⊢ a : A @ w`
+Judgments carry credences: `Gamma |- a : A @ c`
 
-The weight algebra is a **De Morgan algebra**:
+The credence algebra is a **De Morgan algebra**:
 ```
-0 : W           -- impossibility
-1 : W           -- certainty
-· : W → W → W   -- multiplication (conjunction)
-¬ : W → W       -- complement (negation)
-≤ : W → W → Prop
+0 : C           -- impossibility
+1 : C           -- certainty
+* : C -> C -> C -- multiplication (conjunction)
+~ : C -> C      -- complement (negation)
+<= : C -> C -> Prop
 ```
 
-Disjunction is derived: `w ∨ v = ¬(¬w · ¬v)`
+Disjunction is derived: `c1 | c2 = ~(~c1 * ~c2)`
 
 ## Key Rule
 
-Weights multiply in elimination:
+Credences multiply in elimination:
 ```
-Γ ⊢ f : A → B @ w    Γ ⊢ a : A @ v
-──────────────────────────────────
-       Γ ⊢ f a : B @ w·v
+Gamma |- f : A -> B @ c1    Gamma |- a : A @ c2
+-----------------------------------------------
+           Gamma |- f a : B @ c1*c2
 ```
 
 ## Instances
 
-| W | Interpretation |
+| C | Interpretation |
 |---|----------------|
 | {0,1} | MLTT (classical logic) |
-| [0,1] | Probability |
-| [0,∞] | Costs |
+| [0,1] | Probability/confidence |
+| [0,inf] | Costs |
 
 ## Key Features
 
-- **MLTT as limit**: When W = {0,1}, ProbTT collapses to Martin-Löf Type Theory
-- **Conditioning**: Via chain rule `P(A,B) = P(A|B) · P(B)`, no division needed
-- **Graded ex falso**: Continuous spectrum from constrained (w=1) to unconstrained (w=0)
+- **MLTT as limit**: When C = {0,1}, CredTT collapses to Martin-Lof Type Theory
+- **Conditioning**: Via chain rule `P(A,B) = P(A|B) * P(B)`, no division needed
+- **Graded ex falso**: Continuous spectrum from constrained (c=1) to unconstrained (c=0)
 
 ## Files
 
 ```
-papers/probtt/probtt.tex   -- The specification
+papers/credtt/credtt.tex   -- The specification
 CLAUDE.md                  -- Project documentation
 TYPECHECKER.md             -- Implementation sketch
 ```
@@ -51,12 +51,18 @@ TYPECHECKER.md             -- Implementation sketch
 ## Build
 
 ```bash
-cd papers/probtt && pdflatex probtt.tex
+cd papers/credtt && pdflatex credtt.tex
 ```
 
 ## Status
 
 Paper specification complete. Next: Agda formalization.
+
+## Future Extension: ProbTT
+
+ProbTT extends CredTT with addition (+) for marginalization:
+- Marginalization: P(A) = sum_b P(A,b)
+- This is probability-specific, not needed for base logic
 
 ## License
 

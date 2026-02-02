@@ -1,0 +1,10 @@
+-- CredTT Proof: Fixpoint inference test
+--
+-- Tests that c = neg c is solved to c = 1/2
+
+-- Declare a fixpoint where c = neg c
+fixpoint self_ref = ¬self_ref
+
+-- The fixpoint should be solved to 1/2
+-- Provability at the fixpoint credence
+provable half_truth : P 〔 1/2 〕
