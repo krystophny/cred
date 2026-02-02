@@ -346,6 +346,31 @@ module StabilityDefs {ℓ : Level} (DM : DeMorganAlgebra ℓ) where
           in 0≢b 0≡b
     in ¬ b , (¬b≤1 , ¬b≢1) , ¬-antitone b≤c
 
+  -- Reverse direction: unstable negation implies stable
+  -- If ¬c is bounded away from 1, then c is bounded away from 0
+  unstable-neg-to-stable : ∀ {c} → Unstable₀ (¬ c) → Stable₁ c
+  unstable-neg-to-stable {c} (b , (b≤1 , b≢1) , ¬c≤b) =
+    let -- From b < 1, we get ¬b > 0
+        0≤¬b : 𝟘 ≤ (¬ b)
+        0≤¬b = subst (_≤ ¬ b) ¬-𝟙 (¬-antitone (𝟙-greatest b))
+        -- ¬b ≠ 0 because b ≠ 1 (need 𝟘 ≡ ¬b → ⊥ for Positive)
+        0≢¬b : 𝟘 ≡ (¬ b) → ⊥
+        0≢¬b eq =
+          let ¬¬b≡b : ¬ (¬ b) ≡ b
+              ¬¬b≡b = ¬-invol b
+              ¬0≡1 : ¬ 𝟘 ≡ 𝟙
+              ¬0≡1 = ¬-𝟘
+              -- from 0 ≡ ¬b, derive ¬0 ≡ ¬(¬b) = b
+              ¬¬b≡¬0 : ¬ (¬ b) ≡ ¬ 𝟘
+              ¬¬b≡¬0 = cong ¬_ (sym eq)
+              b≡1 : b ≡ 𝟙
+              b≡1 = trans (sym ¬¬b≡b) (trans ¬¬b≡¬0 ¬0≡1)
+          in b≢1 b≡1
+        -- From ¬c ≤ b, by antitone: ¬b ≤ ¬(¬c) = c
+        ¬b≤c : (¬ b) ≤ c
+        ¬b≤c = subst ((¬ b) ≤_) (¬-invol c) (¬-antitone ¬c≤b)
+    in ¬ b , (0≤¬b , 0≢¬b) , ¬b≤c
+
 -- Boolean specialization (legacy)
 module BoolStability where
   open BoolDM

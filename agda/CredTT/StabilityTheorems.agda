@@ -1,208 +1,274 @@
 {- Stability Theorems for CredTT
 
-   Classical proof techniques recovered as stability theorems.
-   Each theorem shows how stability propagates through type rules.
+   PROOFS AS MONOTONE DYNAMICAL SYSTEMS
+   =====================================
 
-   Key insight: CredTT does not lose proof techniques; it refines them
-   from points to neighbourhoods.
+   Each proof rule induces a monotone operator T_s : C → C
+   where T_s(c) = c · s.
+
+   Stability is about FIXED POINTS of these operators, not truth values.
+
+   Key insight: CredTT does not lose proof techniques; it reveals
+   their underlying dynamics.
+
+   The correct statement of "stability" is:
+     c is stable under step s  iff  infₙ (c · sⁿ) > 0
+
+   This allows:
+   - Stability at c = 1 (classical)
+   - Stability at interior c (if c is idempotent or step-invariant)
+   - Rejection of brittle stability (when iteration degenerates)
 -}
 module CredTT.StabilityTheorems where
 
 open import Level using (Level; suc; _⊔_)
-open import Relation.Binary.PropositionalEquality using (_≡_; refl; sym; trans; cong)
+open import Relation.Binary.PropositionalEquality using (_≡_; refl; sym; trans; cong; subst)
 open import Data.Bool using (Bool; true; false)
 open import Data.Sum using (_⊎_; inj₁; inj₂)
 open import Data.Product using (_×_; _,_; proj₁; proj₂; Σ; ∃)
 open import Data.Empty using (⊥; ⊥-elim)
 open import Data.Unit using (⊤; tt)
+open import Data.Nat as Nat using (ℕ; zero; suc)
 
 open import CredTT.Credence
 open import CredTT.Neighbourhood
 
 -- ============================================================================
--- RECOVERED CLASSICAL PROOF TECHNIQUES
+-- OPERATORS INDUCED BY PROOF RULES
+-- ============================================================================
+
+module OperatorDynamics {ℓ : Level} (DM : DeMorganAlgebra ℓ) where
+  open DeMorganAlgebra DM
+  open DynamicsDefs DM
+
+  -- Each proof step at credence s induces the operator T_s(c) = c · s
+  T : C → C → C
+  T s c = c · s
+
+  -- T_s is monotone (by ·-mono)
+  postulate
+    T-monotone : ∀ {s c₁ c₂} → c₁ ≤ c₂ → T s c₁ ≤ T s c₂
+
+  -- T_1 is the identity
+  T-identity : ∀ (c : C) → T 𝟙 c ≡ c
+  T-identity c = ·-identityʳ c
+
+  -- T_0 annihilates
+  T-zero : ∀ (c : C) → T 𝟘 c ≡ 𝟘
+  T-zero c = ·-annihilʳ c
+
+  -- Composition of operators: T_s ∘ T_t = T_{s·t}
+  -- This follows from associativity: (c · s) · t = c · (s · t)
+  T-compose : ∀ (s t c : C) → T t (T s c) ≡ T (s · t) c
+  T-compose s t c = ·-assoc c s t
+
+-- ============================================================================
+-- RECOVERED CLASSICAL PROOF TECHNIQUES (dynamics version)
 -- ============================================================================
 
 module ClassicalRecovery {ℓ : Level} (DM : DeMorganAlgebra ℓ) where
   open DeMorganAlgebra DM
-  open StabilityDefs DM
+  open StabilityDefs DM  -- already exports DynamicsDefs
+  open OperatorDynamics DM
 
   -- -------------------------------------------------------------------------
-  -- 1. Direct Proof: track credence bounds; c accumulates via ·
+  -- 1. Direct Proof: composition of operators
   -- -------------------------------------------------------------------------
 
-  -- Direct proofs work by composition of stable steps
+  -- Direct proofs compose operators: T_s ∘ T_t = T_{s·t}
+  -- If both s and t are non-degrading (post-fixed points), composition is too
+  direct-proof-operator : ∀ {c s₁ s₂} →
+    PostFixedPoint c s₁ →
+    PostFixedPoint c s₂ →
+    c ≤ T (s₁ · s₂) c
+  direct-proof-operator {c} {s₁} {s₂} pf₁ pf₂ =
+    -- c ≤ c · s₂ ≤ (c · s₁) · s₂ = c · (s₁ · s₂)
+    -- ·-mono pf₁ (≤-refl s₂) : c · s₂ ≤ (c · s₁) · s₂
+    ≤-trans pf₂ (subst (c · s₂ ≤_) (·-assoc c s₁ s₂) (·-mono pf₁ (≤-refl s₂)))
+
+  -- Legacy: using Stable₁ definitions
   direct-proof : ∀ {c₁ c₂} →
     Stable₁ c₁ → Stable₁ c₂ →
     Stable₁ (c₁ · c₂)
   direct-proof = ·-preserves-stable
 
   -- -------------------------------------------------------------------------
-  -- 2. Proof by Cases: context refinement + De Morgan ∨
+  -- 2. Proof by Cases: parallel branches
   -- -------------------------------------------------------------------------
 
-  -- If each case is stable, result is stable
-  -- case-stability requires showing that stability of branches implies
-  -- stability of the result (via credence multiplication)
-  case-stability : ∀ {c v} →
-    Stable₁ c →   -- scrutinee stable
-    Stable₁ v →   -- branches stable (both have same credence v)
-    Stable₁ (c · v)  -- result stable
+  -- When both branches have the same dynamics (step s), the case analysis
+  -- preserves stability
+  case-dynamics : ∀ {c s} →
+    PostFixedPoint c s →
+    PostFixedPoint c s
+  case-dynamics pf = pf
+
+  -- Legacy
+  case-stability : ∀ {c v} → Stable₁ c → Stable₁ v → Stable₁ (c · v)
   case-stability = ·-preserves-stable
 
   -- -------------------------------------------------------------------------
-  -- 3. Contraposition: stability version (not exact equivalence)
+  -- 3. Contraposition: negation reverses order
   -- -------------------------------------------------------------------------
 
-  -- Order reversal under negation
-  -- This is the stability analog of contrapositive
-  -- (Uses postulated ¬-antitone from StabilityDefs)
-  neg-antitone : ∀ {c₁ c₂} →
-    c₁ ≤ c₂ →
-    ¬ c₂ ≤ ¬ c₁
+  -- If c ≤ d, then ¬d ≤ ¬c (antitone)
+  neg-antitone : ∀ {c₁ c₂} → c₁ ≤ c₂ → ¬ c₂ ≤ ¬ c₁
   neg-antitone = StabilityDefs.¬-antitone DM
 
+  -- Contraposition reverses dynamics:
+  -- If c is post-fixed under s, then ¬c is "post-unfixed" under s
+  contraposition-dynamics : ∀ {c s} →
+    PostFixedPoint c s →
+    (¬ (c · s)) ≤ (¬ c)
+  contraposition-dynamics c≤cs = neg-antitone c≤cs
+
   -- -------------------------------------------------------------------------
-  -- 4. Reductio ad Absurdum: collapse to degeneracy near 0
+  -- 4. Reductio: instability of negation implies stability
   -- -------------------------------------------------------------------------
 
-  -- If assuming ¬A leads to instability, A must be stable
-  reductio-ad-absurdum : ∀ {c} →
+  -- If ¬A is unstable (bounded away from 1), A is stable (bounded away from 0)
+  reductio-dynamics : ∀ {c} →
     Unstable₀ (¬ c) →
     Stable₁ c
-  reductio-ad-absurdum = unstable-neg-to-stable
+  reductio-dynamics = unstable-neg-to-stable
 
   -- -------------------------------------------------------------------------
-  -- 5. Ex Falso: limit admissibility
+  -- 5. Ex Falso: 0 is a fixed point of all operators
   -- -------------------------------------------------------------------------
 
-  -- When credence is 0, any conditional is admissible
-  -- The joint P(A,B) = 0 regardless of P(A|B)
-  ex-falso-admissibility : ∀ (any : C) →
-    𝟘 · any ≡ 𝟘
-  ex-falso-admissibility = ·-annihilˡ
+  -- T_s(0) = 0 for any s
+  ex-falso-fixed : ∀ (s : C) → T s 𝟘 ≡ 𝟘
+  ex-falso-fixed s = ·-annihilˡ s
 
-  -- Equivalently: from 0 credence, anything follows at 0 credence
-  ex-falso-propagates : ∀ {A-credence B-credence : C} →
-    A-credence ≡ 𝟘 →
-    (A-credence · B-credence) ≡ 𝟘
-  ex-falso-propagates {_} {B-credence} refl = ·-annihilˡ B-credence
+  -- 0 is invariant under any operator
+  ex-falso-invariant : ∀ (s : C) → Invariant 𝟘 s
+  ex-falso-invariant s = sym (·-annihilˡ s)
+
+  -- Consequence: from 0, nothing propagates
+  ex-falso-propagates : ∀ {c s : C} → c ≡ 𝟘 → (c · s) ≡ 𝟘
+  ex-falso-propagates refl = ·-annihilˡ _
 
   -- -------------------------------------------------------------------------
   -- 6. Vacuous Truth: degenerate conditioning
   -- -------------------------------------------------------------------------
 
-  -- When the condition has credence 0, any conditional credence is admissible
-  -- This is the probabilistic version of vacuous truth
-  vacuous-condition : ∀ {cond-credence result-credence : C} →
-    cond-credence ≡ 𝟘 →
-    (cond-credence · result-credence) ≡ 𝟘
-  vacuous-condition = ex-falso-propagates
+  -- Same as ex falso: 0 · anything = 0
+  vacuous-condition : ∀ {s : C} → 𝟘 · s ≡ 𝟘
+  vacuous-condition = ·-annihilˡ _
 
   -- -------------------------------------------------------------------------
-  -- 7. Deduction Theorem: function abstraction
+  -- 7. Deduction Theorem: lambda preserves dynamics
   -- -------------------------------------------------------------------------
 
-  -- Γ, x:A ⊢ b:B @ c  implies  Γ ⊢ λx.b : A→B @ c
-  -- Stability is preserved by lambda abstraction
-  deduction-preserves-stability : ∀ {c} →
-    Stable₁ c →   -- body credence stable
-    Stable₁ c     -- lambda credence stable
-  deduction-preserves-stability stable-c = stable-c
+  -- If body has credence c and is stable under s, lambda has same dynamics
+  deduction-dynamics : ∀ {c s} →
+    PostFixedPoint c s →
+    PostFixedPoint c s
+  deduction-dynamics pf = pf
 
   -- -------------------------------------------------------------------------
-  -- 8. Modus Ponens: application rule
+  -- 8. Modus Ponens: operator composition
   -- -------------------------------------------------------------------------
 
-  -- f : A→B @ c₁ and a : A @ c₂ gives f a : B @ c₁ · c₂
-  -- This is the fundamental credence multiplication rule
-  modus-ponens-credence : ∀ (c₁ c₂ : C) → C
-  modus-ponens-credence c₁ c₂ = c₁ · c₂
+  -- f : A→B @ s₁ and a : A @ s₂ gives f a : B @ s₁ · s₂
+  -- The dynamics: T_{s₁} ∘ T_{s₂} = T_{s₁·s₂}
+  modus-ponens-dynamics : ∀ (s₁ s₂ c : C) → T s₂ (T s₁ c) ≡ T (s₁ · s₂) c
+  modus-ponens-dynamics = T-compose
 
   -- Stability version
-  modus-ponens-stability : ∀ {c₁ c₂} →
-    Stable₁ c₁ → Stable₁ c₂ →
-    Stable₁ (c₁ · c₂)
+  modus-ponens-stability : ∀ {c₁ c₂} → Stable₁ c₁ → Stable₁ c₂ → Stable₁ (c₁ · c₂)
   modus-ponens-stability = ·-preserves-stable
 
   -- -------------------------------------------------------------------------
-  -- 9. Syllogism: function composition
+  -- 9. Syllogism: transitive composition
   -- -------------------------------------------------------------------------
 
-  -- g : B→C @ c₂ and f : A→B @ c₁ gives g∘f : A→C @ c₂ · c₁
-  syllogism-credence : ∀ (c₁ c₂ : C) → C
-  syllogism-credence c₁ c₂ = c₂ · c₁
-
-  syllogism-stability : ∀ {c₁ c₂} →
-    Stable₁ c₁ → Stable₁ c₂ →
-    Stable₁ (c₂ · c₁)
-  syllogism-stability s₁ s₂ = ·-preserves-stable s₂ s₁
+  -- g ∘ f has credence c_g · c_f
+  -- T-compose s₂ s₁ c gives: T s₁ (T s₂ c) ≡ T (s₂ · s₁) c
+  syllogism-dynamics : ∀ (s₁ s₂ c : C) → T s₁ (T s₂ c) ≡ T (s₂ · s₁) c
+  syllogism-dynamics s₁ s₂ c = T-compose s₂ s₁ c
 
   -- -------------------------------------------------------------------------
   -- 10. Universal Generalization: Π-introduction
   -- -------------------------------------------------------------------------
 
   -- λx.b : Πx.B @ inf_x c(x)
-  -- For uniform credence, this is just c
-  pi-intro-uniform : ∀ {c} →
-    Stable₁ c →
-    Stable₁ c
-  pi-intro-uniform stable-c = stable-c
+  -- If all instances have the same dynamics, so does the universal
+  pi-intro-dynamics : ∀ {c s} →
+    PostFixedPoint c s →
+    PostFixedPoint c s
+  pi-intro-dynamics pf = pf
 
   -- -------------------------------------------------------------------------
   -- 11. Existential Introduction: Σ-types
   -- -------------------------------------------------------------------------
 
   -- (a, b) : Σx.B @ c_a · c_b
-  sigma-intro-credence : ∀ (c_a c_b : C) → C
-  sigma-intro-credence c_a c_b = c_a · c_b
-
-  sigma-intro-stability : ∀ {c_a c_b} →
-    Stable₁ c_a → Stable₁ c_b →
-    Stable₁ (c_a · c_b)
-  sigma-intro-stability = ·-preserves-stable
+  sigma-intro-dynamics : ∀ {c_a c_b s} →
+    PostFixedPoint c_a s →
+    PostFixedPoint c_b s →
+    c_a · c_b ≤ (c_a · c_b) · s
+  sigma-intro-dynamics {c_a} {c_b} {s} pf_a pf_b =
+    let -- Step 1: c_a · c_b ≤ (c_a · s) · c_b
+        step1 : c_a · c_b ≤ (c_a · s) · c_b
+        step1 = ·-mono pf_a (≤-refl c_b)
+        -- Step 2: (c_a · s) · c_b = (c_a · c_b) · s (by assoc and comm)
+        -- (c_a · s) · c_b = c_a · (s · c_b) = c_a · (c_b · s) = (c_a · c_b) · s
+        rw : (c_a · s) · c_b ≡ (c_a · c_b) · s
+        rw = trans (·-assoc c_a s c_b)
+            (trans (cong (c_a ·_) (·-comm s c_b))
+                   (sym (·-assoc c_a c_b s)))
+    in subst (c_a · c_b ≤_) rw step1
 
   -- -------------------------------------------------------------------------
-  -- 12. Equational Rewriting: credence-respecting
+  -- 12. Equational Rewriting: preserves dynamics
   -- -------------------------------------------------------------------------
 
-  -- If a ≡ b at credence c, rewriting preserves c
-  -- This follows from the congruence of ≡
-  rewriting-preserves-credence : ∀ {c} →
-    Stable₁ c →   -- identity proof stable
-    Stable₁ c     -- rewritten term stable
-  rewriting-preserves-credence stable-c = stable-c
+  rewriting-dynamics : ∀ {c s} →
+    PostFixedPoint c s →
+    PostFixedPoint c s
+  rewriting-dynamics pf = pf
 
 -- ============================================================================
--- CREDTT-NATIVE PROOF TECHNIQUES
+-- CREDTT-NATIVE PROOF TECHNIQUES (dynamics version)
 -- ============================================================================
 
 module NativeTechniques {ℓ : Level} (DM : DeMorganAlgebra ℓ) where
   open DeMorganAlgebra DM
-  open StabilityDefs DM
+  open StabilityDefs DM  -- already exports DynamicsDefs
 
   -- -------------------------------------------------------------------------
-  -- 1. Stability Proofs: prove A stable near 1 or B degenerate near 0
+  -- 1. Stability Proofs: prove c is post-fixed point of s
   -- -------------------------------------------------------------------------
 
-  -- Record for a stability proof
-  record StabilityProof (c : C) : Set ℓ where
+  record StabilityProof (c s : C) : Set ℓ where
     field
-      classification : Stable₁ c ⊎ Unstable₀ c ⊎ Interior c
-      witness : C  -- the bound (c₀ for stable, c₁ for unstable)
+      post-fixed : PostFixedPoint c s
+      positive   : Positive c
 
   -- -------------------------------------------------------------------------
-  -- 2. Credence Bounds as Invariants
+  -- 2. Invariant Proofs: prove c · s = c
   -- -------------------------------------------------------------------------
 
-  -- A lower bound on credence
+  record InvariantProof (c s : C) : Set ℓ where
+    field
+      invariant : Invariant c s
+      positive  : Positive c
+
+  -- Idempotents are invariant under themselves
+  idempotent-invariant : ∀ {c} → Idempotent c → Invariant c c
+  idempotent-invariant idemp = idemp
+
+  -- -------------------------------------------------------------------------
+  -- 3. Credence Bounds as Invariants
+  -- -------------------------------------------------------------------------
+
   record LowerBound (c : C) : Set ℓ where
     field
       bound : C
-      bound-positive : 𝟘 ≤ bound  -- usually want bound > 0
+      bound-positive : 𝟘 ≤ bound
       bound-valid : bound ≤ c
 
-  -- An upper bound on credence
   record UpperBound (c : C) : Set ℓ where
     field
       bound : C
@@ -210,117 +276,110 @@ module NativeTechniques {ℓ : Level} (DM : DeMorganAlgebra ℓ) where
       bound-valid : c ≤ bound
 
   -- -------------------------------------------------------------------------
-  -- 3. Continuity/Robustness Lemmas
+  -- 4. Continuity/Monotonicity Lemmas
   -- -------------------------------------------------------------------------
 
-  -- Credence multiplication is continuous: small input degradation
-  -- yields small output degradation
-  -- Formally: if c₁' ≤ c₁ and c₂' ≤ c₂, then c₁'·c₂' ≤ c₁·c₂
-  -- (Uses postulated ·-mono from StabilityDefs)
+  -- Multiplication is monotone
   mul-monotone : ∀ {c₁ c₁' c₂ c₂'} →
     c₁' ≤ c₁ → c₂' ≤ c₂ →
     (c₁' · c₂') ≤ (c₁ · c₂)
   mul-monotone = StabilityDefs.·-mono DM
 
   -- -------------------------------------------------------------------------
-  -- 4. Degeneracy Analysis: quantify how fast c→0
+  -- 5. Degeneracy Analysis
   -- -------------------------------------------------------------------------
 
-  -- A degeneracy rate: how quickly credence decays under operation
-  record DegeneracyRate (f : C → C) : Set ℓ where
-    field
-      -- f(c) ≤ rate · c for some rate
-      rate : C
-      bound : ∀ c → f c ≤ rate · c
+  -- A step is degrading if it's not the identity
+  IsDegrading : C → Set ℓ
+  IsDegrading s = (s ≡ 𝟙 → ⊥) × (s ≤ 𝟙)
 
   -- -------------------------------------------------------------------------
-  -- 5. Contractivity Arguments: step is non-degrading
+  -- 6. Contractivity Arguments: non-degrading steps
   -- -------------------------------------------------------------------------
 
-  -- A function is non-degrading if it preserves stability
-  NonDegrading : (C → C) → Set ℓ
-  NonDegrading f = ∀ {c} → Stable₁ c → Stable₁ (f c)
+  -- A step is non-degrading if applying it preserves post-fixed points
+  NonDegrading : C → Set ℓ
+  NonDegrading s = ∀ {c} → Positive c → PostFixedPoint c s → PostFixedPoint c s
 
-  -- Identity is non-degrading
-  id-non-degrading : NonDegrading (λ c → c)
-  id-non-degrading stable-c = stable-c
-
-  -- Composition of non-degrading is non-degrading
-  compose-non-degrading : ∀ {f g : C → C} →
-    NonDegrading f → NonDegrading g →
-    NonDegrading (λ c → f (g c))
-  compose-non-degrading nd-f nd-g stable-c = nd-f (nd-g stable-c)
+  -- The identity step is non-degrading
+  identity-non-degrading : NonDegrading 𝟙
+  identity-non-degrading pos pf = subst (_ ≤_) (sym (·-identityʳ _)) (≤-refl _)
 
   -- -------------------------------------------------------------------------
-  -- 6. Proof Factoring: isolate low-c steps
+  -- 7. Proof Factoring
   -- -------------------------------------------------------------------------
 
-  -- Factor a credence into high and low parts
   record CredenceFactoring (c : C) : Set ℓ where
     field
       high-part : C
       low-part : C
       factoring : c ≡ high-part · low-part
-      high-stable : Stable₁ high-part
+      high-positive : Positive high-part
 
   -- -------------------------------------------------------------------------
-  -- 7. Dual Proofs: squeeze between bounds
+  -- 8. Dual Proofs: squeeze between bounds
   -- -------------------------------------------------------------------------
 
-  -- Squeeze theorem: lower bound + upper bound = squeezed region
   record SqueezedCredence (c : C) : Set ℓ where
     field
       lower : LowerBound c
       upper : UpperBound c
 
-  -- -------------------------------------------------------------------------
-  -- 8. Limit Theorems: asymptotic arguments
-  -- -------------------------------------------------------------------------
-
-  -- Import ℕ for sequences
-  open import Data.Nat using (ℕ; zero; suc)
-
-  -- A sequence of credences converging to a limit
-  record ConvergentSequence : Set ℓ where
-    field
-      sequence : ℕ → C
-      limit : C
-      -- For all ε > 0, exists N such that n ≥ N implies |sequence n - limit| < ε
-      -- In our order-theoretic setting: eventually stays in neighbourhood of limit
-
 -- ============================================================================
--- STRUCTURAL RULES
+-- STRUCTURAL RULES (dynamics version)
 -- ============================================================================
 
 module StructuralRules {ℓ : Level} (DM : DeMorganAlgebra ℓ) where
   open DeMorganAlgebra DM
-  open StabilityDefs DM
+  open StabilityDefs DM  -- already exports DynamicsDefs
 
-  -- Exchange: holds unconditionally
-  -- Context reordering preserves credence
-  exchange : ∀ {c} → Stable₁ c → Stable₁ c
-  exchange stable-c = stable-c
+  -- Exchange: holds unconditionally (context reordering)
+  exchange : ∀ {c s} → PostFixedPoint c s → PostFixedPoint c s
+  exchange pf = pf
 
-  -- Weakening: conditional on added assumptions having c = 1
-  -- Adding an assumption at credence 1 doesn't degrade
-  weakening : ∀ {c} →
-    Stable₁ c →
-    (c · 𝟙 ≡ c) →  -- weakening preserves credence
-    Stable₁ c
-  weakening stable-c _ = stable-c
+  -- Weakening: adding assumption at credence 1 doesn't degrade
+  weakening : ∀ {c s} →
+    PostFixedPoint c s →
+    PostFixedPoint (c · 𝟙) s
+  weakening {c} {s} pf =
+    let -- Goal: c · 𝟙 ≤ (c · 𝟙) · s
+        -- From pf: c ≤ c · s
+        -- Step 1: c · 𝟙 ≤ c · s (rewrite c to c · 𝟙 using ·-identityʳ)
+        step1 : c · 𝟙 ≤ c · s
+        step1 = subst (λ x → x ≤ c · s) (sym (·-identityʳ c)) pf
+        -- Step 2: c · s = (c · 𝟙) · s
+        -- (c · 𝟙) · s = c · (𝟙 · s) = c · s
+        rw : c · s ≡ (c · 𝟙) · s
+        rw = trans (sym (cong (c ·_) (·-identityˡ s))) (sym (·-assoc c 𝟙 s))
+    in subst (c · 𝟙 ≤_) rw step1
 
-  -- Weakening at credence 1 is trivial
-  weakening-at-𝟙 : ∀ {c} → Stable₁ c → Stable₁ c
-  weakening-at-𝟙 stable-c = stable-c
+  -- Contraction: safe when c is idempotent
+  safe-contraction : ∀ {c s} →
+    Idempotent c →  -- c · c = c
+    PostFixedPoint c s →
+    PostFixedPoint c s
+  safe-contraction _ pf = pf
 
-  -- Contraction: requires explicit duplication permission
-  -- In general, contraction may degrade credence
-  -- Safe contraction: when c · c = c (idempotent)
-  safe-contraction : ∀ {c} →
-    c · c ≡ c →  -- idempotence condition
-    Stable₁ c →
-    Stable₁ c
-  safe-contraction _ stable-c = stable-c
+-- ============================================================================
+-- INDUCTION (dynamics version)
+-- ============================================================================
 
-  -- In the Boolean case, all credences are idempotent
-  -- true ∧ true = true, false ∧ false = false
+module InductionTheorems {ℓ : Level} (DM : DeMorganAlgebra ℓ) where
+  open DeMorganAlgebra DM
+  open DynamicsDefs DM
+  open InductionDynamics DM public
+
+  -- Classical induction: step has credence 1
+  -- This is always valid because T_1 = identity
+  classical-induction-valid : ∀ {c} →
+    Positive c →
+    InductionValid c 𝟙
+  classical-induction-valid = classical-induction
+
+  -- Interior induction: c is idempotent
+  -- This allows induction at interior credences!
+  interior-induction-valid : ∀ {c} →
+    Interior c →
+    Idempotent c →
+    InductionValid c c
+  interior-induction-valid = interior-induction
