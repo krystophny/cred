@@ -212,7 +212,10 @@ module ClassicalRecovery {ℓ : Level} (DM : DeMorganAlgebra ℓ) where
   -- 3. Contraposition: negation reverses order
   -- -------------------------------------------------------------------------
 
-  -- If c ≤ d, then ¬d ≤ ¬c (antitone) - now from DeMorganAlgebra
+  -- If c ≤ d, then ¬d ≤ ¬c (antitone)
+  -- NOTE: This is ¬-antitone from DeMorganAlgebra - it is an AXIOM field that
+  -- each instance must provide. BoolDM proves it; IntervalDM postulates it
+  -- (pending arithmetic proof, see Interval.agda:172).
   neg-antitone : ∀ {c₁ c₂} → c₁ ≤ c₂ → ¬ c₂ ≤ ¬ c₁
   neg-antitone = ¬-antitone
 

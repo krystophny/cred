@@ -180,10 +180,14 @@ let rec to_rational = function
   | Infer _ -> None
   | DepVar _ -> None
   | Sup (_, w) ->
-      (* sup(x. w) = w if w is constant, None otherwise *)
+      (* sup(x. w) = w only if w is constant (doesn't depend on bound var)
+         LIMITATION (Issue #116): We don't check variable dependency here.
+         For now, we optimistically assume constant body. A full implementation
+         would check depends_on_var and return None for dependent bodies. *)
       to_rational w
   | Inf (_, w) ->
-      (* inf(x. w) = w if w is constant, None otherwise *)
+      (* inf(x. w) = w only if w is constant (doesn't depend on bound var)
+         LIMITATION (Issue #116): See Sup comment above. *)
       to_rational w
 
 (* Solve c = ¬c for fixed point
