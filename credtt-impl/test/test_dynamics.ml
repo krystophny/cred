@@ -352,7 +352,111 @@ let () =
     | Error _ -> false
   );
 
-  (* 13-18: More classical techniques... *)
+  (* 06. Vacuous Truth - handled by ExFalso mechanism *)
+  test "technique 06: vacuous truth (zero credence antecedent)" (
+    let decls = [
+      Postulate ("impossible", "pigs_fly", Zero);
+      ExFalso ("anything", "impossible")
+    ] in
+    match check_proof decls with
+    | Ok state ->
+        (match Hashtbl.find_opt state.judgments "anything" with
+         | Some j -> j.stability = Robust
+         | None -> false)
+    | Error _ -> false
+  );
+
+  (* 13. Exhaustion - all cases stable means result stable *)
+  test "technique 13: exhaustion (all cases stable)" (
+    let decls = [
+      Postulate ("case1", "P_red", One);
+      Postulate ("case2", "P_green", One);
+      Postulate ("case3", "P_blue", One);
+      Postulate ("case4", "P_yellow", One);
+      ProofByCases ("result", "case1", "case2")
+    ] in
+    match check_proof decls with
+    | Ok state ->
+        (match Hashtbl.find_opt state.judgments "result" with
+         | Some j -> j.stability = Robust
+         | None -> false)
+    | Error _ -> false
+  );
+
+  (* 14. Construction - witness + property *)
+  test "technique 14: construction (witness with property)" (
+    let decls = [
+      Postulate ("witness", "prime_127", One);
+      Postulate ("property", "in_range", One);
+      Construction ("exists", "witness")
+    ] in
+    match check_proof decls with
+    | Ok state ->
+        (match Hashtbl.find_opt state.judgments "exists" with
+         | Some j -> j.stability = Robust
+         | None -> false)
+    | Error _ -> false
+  );
+
+  (* 15. Refutation - drive to zero *)
+  test "technique 15: refutation (contradiction forces zero)" (
+    let decls = [
+      Postulate ("hypothesis", "sqrt2_rational", var "c");
+      Postulate ("gcd_1", "gcd_is_1", var "c");
+      Refutation ("result", "hypothesis")
+    ] in
+    match check_proof decls with
+    | Ok state ->
+        (match Hashtbl.find_opt state.judgments "result" with
+         | Some j -> j.stability = Vanishing
+         | None -> false)
+    | Error _ -> false
+  );
+
+  (* 16. Equational Rewrite - preserves stability *)
+  test "technique 16: equational rewrite preserves stability" (
+    let decls = [
+      Postulate ("original", "x_equals_y", One);
+      Postulate ("equality", "y_equals_z", One);
+      EquationalRewrite ("result", "original", "equality")
+    ] in
+    match check_proof decls with
+    | Ok state ->
+        (match Hashtbl.find_opt state.judgments "result" with
+         | Some j -> j.stability = Robust
+         | None -> false)
+    | Error _ -> false
+  );
+
+  (* 17. Analogy - low credence morphism *)
+  test "technique 17: analogy (low credence transfer)" (
+    let decls = [
+      Postulate ("similar", "A_like_B", Rat (7, 10));
+      Postulate ("P_of_A", "P_holds_for_A", One);
+      ModusPonens ("P_of_B", "similar", "P_of_A")
+    ] in
+    match check_proof decls with
+    | Ok state ->
+        (match Hashtbl.find_opt state.judgments "P_of_B" with
+         | Some j -> j.stability = Idempotent
+         | None -> false)
+    | Error _ -> false
+  );
+
+  (* 18. Structural Rules - weakening with stable addition *)
+  test "technique 18: structural weakening (neutral assumption)" (
+    let decls = [
+      Postulate ("neutral", "A", One);
+      Postulate ("context", "B", One);
+      Deduction ("lambda", "context")
+    ] in
+    match check_proof decls with
+    | Ok state ->
+        (match Hashtbl.find_opt state.judgments "lambda" with
+         | Some j -> j.stability = Robust
+         | None -> false)
+    | Error _ -> false
+  );
 
   Printf.printf "\n=== Proof Technique Tests: CredTT-Native (21-28) ===\n\n";
 
@@ -470,8 +574,9 @@ let () =
     | Error _ -> false
   );
 
-  (* Fixpoint: c = c*c -> c = 0 or 1 *)
-  test "fixpoint: c = c*c solves to 1 (idempotent)" (
+  (* Fixpoint: c = c*c has TWO solutions: c=0 and c=1 (both idempotent).
+     The solver chooses c=1 as it represents the "informative" fixpoint. *)
+  test "fixpoint: c = c*c solves to 1 (choosing non-trivial solution)" (
     let decls = [
       Fixpoint ("c", Mul (Var "c", Var "c"))
     ] in

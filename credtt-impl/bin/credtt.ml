@@ -59,12 +59,12 @@ let make_layout_lexer lexbuf =
     match !pending_token with
     | Some tok ->
         pending_token := None;
-        last_was_semi := (tok = Parser.SEMI);
+        last_was_semi := (tok = Credtt_parser.Parser.SEMI);
         tok
     | None ->
-        let tok = Lexer.token lexbuf in
-        if tok = Parser.EOF then tok
-        else if tok = Parser.SEMI then begin
+        let tok = Credtt_parser.Lexer.token lexbuf in
+        if tok = Credtt_parser.Parser.EOF then tok
+        else if tok = Credtt_parser.Parser.SEMI then begin
           last_was_semi := true;
           tok
         end else begin
@@ -75,7 +75,7 @@ let make_layout_lexer lexbuf =
             last_line := line;
             pending_token := Some tok;
             last_was_semi := false;
-            Parser.SEMI
+            Credtt_parser.Parser.SEMI
           end else begin
             last_line := line;
             last_was_semi := false;
@@ -87,10 +87,10 @@ let parse_string s =
   let lexbuf = Lexing.from_string s in
   let layout_token = make_layout_lexer lexbuf in
   try
-    Ok (Parser.program (fun _ -> layout_token ()) lexbuf)
+    Ok (Credtt_parser.Parser.program (fun _ -> layout_token ()) lexbuf)
   with
-  | Lexer.LexError msg -> Error (Printf.sprintf "Lexer error: %s" msg)
-  | Parser.Error ->
+  | Credtt_parser.Lexer.LexError msg -> Error (Printf.sprintf "Lexer error: %s" msg)
+  | Credtt_parser.Parser.Error ->
       let pos = lexbuf.Lexing.lex_curr_p in
       Error (Printf.sprintf "Parse error at line %d, column %d"
         pos.Lexing.pos_lnum

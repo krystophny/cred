@@ -1,10 +1,5 @@
 (executable
  (name credtt)
  (public_name credtt-cli)
- (modules credtt parser lexer)
- (libraries credtt_lib))
-
-(menhir
- (modules parser))
-
-(ocamllex lexer)
+ (modules credtt)
+ (libraries credtt_lib credtt_parser))

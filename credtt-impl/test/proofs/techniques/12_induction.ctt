@@ -54,7 +54,7 @@ postulate contractive_step : step_at_one @ 1
 stable contractive_step
 
 -- Note: base and step with variable credences c_b and c_s have Unknown stability
--- To demonstrate stable induction, use concrete credence 1
+-- To demonstrate stable induction, use concrete credence 1. See issue #182.
 
 -- The KEY insight:
 -- Classical induction assumes infinite steps at no cost

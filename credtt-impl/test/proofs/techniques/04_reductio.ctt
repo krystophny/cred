@@ -49,4 +49,4 @@ negate sqrt2_irrational from sqrt2_rational
 -- After contradiction, the negated claim has credence 1
 -- Note: stability cannot be asserted directly because the original
 -- credence was a variable. The result has credence 1 but Unknown stability
--- in the checker. This is a technical limitation that could be improved.
+-- in the checker. See issue #182 for tracking this technical limitation.
