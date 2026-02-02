@@ -1,8 +1,22 @@
 -- Proof Techniques in CredTT
 --
--- This module demonstrates all 28 proof techniques with concrete examples:
--- - 20 classical techniques recovered with stability tracking
--- - 8 CredTT-native techniques with no classical analogue
+-- STATUS: PEDAGOGICAL TEMPLATES, NOT FULL IMPLEMENTATIONS
+--
+-- This module provides MODULE STRUCTURE and DOCUMENTATION for all 28 proof
+-- techniques. It is NOT a library of proven theorems, but rather:
+--
+-- 1. Type signatures showing what each technique SHOULD provide
+-- 2. Documentation explaining how each technique works in CredTT
+-- 3. Simple examples where proofs are straightforward
+--
+-- Full implementations would require:
+-- - Proper dependent pattern matching on credence values
+-- - Integration with the Judgment module for derivation tracking
+-- - Proof terms for stability propagation lemmas
+--
+-- For the actual proven stability theorems, see:
+-- - CredTT.StabilityTheorems (proven lemmas about stability)
+-- - CredTT.Collapse (proven {0,1} collapse theorem)
 --
 -- Each technique shows WHY CredTT is more expressive than MLTT:
 -- Classical logic hides credence; CredTT exposes it.

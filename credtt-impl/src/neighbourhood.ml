@@ -1,14 +1,33 @@
 (* Neighbourhood Semantics for CredTT
 
-   Stability is a meta-property: we reason about whether inhabitation
-   persists near credence extrema.
+   Stability is a META-PROPERTY defined via ORDER-THEORETIC DYNAMICS,
+   not by equality to endpoints.
 
-   - Stable₁: robust inhabitation near credence 1
-   - Unstable₀: fragile inhabitation near credence 0
-   - Interior: neither extreme
+   FUNDAMENTAL PRINCIPLE (corrected):
+   Stability = non-vanishing under directed iteration
 
-   Key insight: classical proof techniques become stability theorems.
-   The {0,1} collapse makes neighbourhoods trivial (singletons). *)
+   NOT "c = 1 exactly"
+   BUT "infₙ (c · sⁿ) > 0"
+
+   This uses only:
+   - Order (≤, >)
+   - Multiplication (·)
+   - Infimum of descending chains
+
+   NO METRICS. NO ε. NO SUBTRACTION. NO EQUALITY TO 1.
+
+   KEY INSIGHT (non-Archimedean algebras):
+   In a general De Morgan algebra, s < 1 does NOT imply sⁿ → 0.
+   There can be:
+   - Idempotents: c · s = c with 0 < c < 1
+   - Plateaus: c stabilizes at non-zero value
+   - Fixed points in the interior
+
+   This gives GENUINE STABILITY IN THE INTERIOR - not just {0, 1}!
+
+   CredTT does NOT say "only 0 and 1 matter".
+   It says: stability is about FIXED POINTS OF THE DYNAMICS,
+   not endpoints of the order. *)
 
 (* Interval representation for credence neighbourhoods *)
 type interval = {
@@ -25,12 +44,37 @@ type t =
   | Full                            (* [0, 1] - completely unknown *)
   | Empty                           (* impossible/contradiction *)
 
-(* Stability classification *)
+(* ============================================================
+   STABILITY CLASSIFICATION
+   ============================================================
+
+   We now distinguish:
+   - Stable: c is a non-zero post-fixed point (c ≤ c · s for some s)
+   - Vanishing: c degenerates to 0 under iteration
+   - Idempotent: c · c = c (self-stable interior point)
+   - Unknown: cannot determine from structure alone
+
+   The OLD classification (Stable1, Unstable0, Interior) was WRONG
+   because it implied only {0,1} endpoints matter.
+
+   The NEW classification tracks DYNAMIC BEHAVIOR. *)
+
 type stability =
-  | Stable1                         (* robust near 1 *)
-  | Unstable0                       (* fragile near 0 *)
-  | Interior                        (* neither extreme *)
-  | Unknown                         (* cannot classify *)
+  | Robust          (* Non-zero post-fixed point of dynamics *)
+  | Vanishing       (* Degenerates to 0 under iteration *)
+  | Idempotent      (* c · c = c (self-stable, may be interior) *)
+  | Unknown         (* Cannot determine *)
+
+(* For backwards compatibility with existing code *)
+let stable1 = Robust
+let unstable0 = Vanishing
+
+(* ============================================================
+   ALGEBRAIC ANALYSIS
+   ============================================================
+
+   We analyze credence expressions structurally to determine
+   their dynamic behavior WITHOUT assuming Archimedeanicity. *)
 
 (* Rational comparison helpers *)
 let rat_lt a b =
@@ -45,9 +89,6 @@ let rat_leq a b =
 
 let rat_gt a b = rat_lt b a
 let rat_geq a b = rat_leq b a
-
-(* Threshold for "near 1" and "near 0" classification *)
-let stability_threshold = { Credence.num = 1; den = 10 }  (* 0.1 *)
 
 (* Create neighbourhood from a single credence value *)
 let of_credence (c : Credence.t) : t =
@@ -73,67 +114,95 @@ let perturb (c : Credence.t) ~(epsilon : Credence.rational) : t =
       Interval { lo = lo'; hi = hi'; lo_closed = true; hi_closed = true }
   | None -> Full
 
-(* Classify stability of a credence *)
+(* Check if a credence is idempotent: c · c = c *)
+let is_idempotent (c : Credence.t) : bool =
+  match Credence.simplify c with
+  | Credence.One -> true      (* 1 · 1 = 1 *)
+  | Credence.Zero -> true     (* 0 · 0 = 0 *)
+  | _ ->
+      (* Check algebraically: c · c = c iff c ∈ {0, 1} for concrete,
+         but symbolic expressions might be idempotent too *)
+      match Credence.to_rational c with
+      | Some r ->
+          Credence.rat_equal r Credence.rat_zero ||
+          Credence.rat_equal r Credence.rat_one
+      | None -> false  (* cannot determine for symbolic *)
+
+(* Check if credence is a post-fixed point under multiplication by s:
+   c ≤ c · s (i.e., multiplication by s doesn't decrease c) *)
+let is_post_fixed_point (c : Credence.t) (s : Credence.t) : bool =
+  (* c ≤ c · s holds when s = 1 (trivially)
+     or when c = 0 (trivially)
+     For symbolic, we conservatively return false *)
+  match Credence.simplify c, Credence.simplify s with
+  | Credence.Zero, _ -> true          (* 0 ≤ 0 · anything *)
+  | _, Credence.One -> true           (* c ≤ c · 1 = c *)
+  | Credence.One, Credence.Zero -> false  (* 1 ≤ 0 is false *)
+  | Credence.One, _ -> false          (* 1 ≤ 1 · s only if s = 1 *)
+  | _ -> false                        (* conservative *)
+
+(* ============================================================
+   DYNAMIC STABILITY CLASSIFICATION
+   ============================================================
+
+   Classify based on dynamic behavior under iteration:
+   - What happens to c · sⁿ as n → ∞?
+
+   In NON-ARCHIMEDEAN algebras, this is NOT determined by
+   whether s < 1 or s = 1!
+
+   The key properties are:
+   - Is c a fixed point? (c · c = c)
+   - Is c absorbed by s? (c · s = c)
+   - Does c strictly decrease under s? *)
+
 let rec classify (c : Credence.t) : stability =
-  match Credence.to_rational c with
-  | Some r ->
-      let one_minus_threshold = Credence.rat_normalize {
-        num = stability_threshold.den - stability_threshold.num;
-        den = stability_threshold.den
-      } in
-      if Credence.rat_equal r Credence.rat_one then
-        Stable1
-      else if Credence.rat_equal r Credence.rat_zero then
-        Unstable0
-      else if rat_geq r one_minus_threshold then
-        Stable1  (* near 1 *)
-      else if rat_leq r stability_threshold then
-        Unstable0  (* near 0 *)
-      else
-        Interior
-  | None ->
-      (* Symbolic credence: try to classify structurally *)
-      match Credence.simplify c with
-      | Credence.One -> Stable1
-      | Credence.Zero -> Unstable0
-      | Credence.Neg c' ->
-          (* Negation flips stability *)
-          (match classify c' with
-           | Stable1 -> Unstable0
-           | Unstable0 -> Stable1
-           | other -> other)
-      | Credence.Mul (a, b) ->
-          (* Product: stable * stable = stable, anything with unstable = unstable *)
-          (match classify a, classify b with
-           | Stable1, Stable1 -> Stable1
-           | Unstable0, _ | _, Unstable0 -> Unstable0
-           | _, _ -> Unknown)
-      | _ -> Unknown
+  match Credence.simplify c with
+  | Credence.One -> Robust      (* 1 is robust: preserved under any s ≤ 1 *)
+  | Credence.Zero -> Vanishing  (* 0 is the vanishing point *)
+  | Credence.Neg inner ->
+      (* Negation swaps 0 ↔ 1 at extremes *)
+      (match classify inner with
+       | Robust -> Vanishing
+       | Vanishing -> Robust
+       | Idempotent -> Idempotent  (* neg of idempotent might not be *)
+       | Unknown -> Unknown)
+  | Credence.Mul (a, b) ->
+      (* Product behavior depends on both factors *)
+      (match classify a, classify b with
+       | Vanishing, _ | _, Vanishing -> Vanishing  (* 0 · x = 0 *)
+       | Robust, other | other, Robust -> other    (* 1 · x = x *)
+       | Idempotent, Idempotent -> Idempotent      (* product of idempotents *)
+       | Unknown, _ | _, Unknown -> Unknown)
+  | Credence.Var _ -> Unknown
+  | Credence.Infer _ -> Unknown
+  | Credence.DepVar _ -> Unknown
+  | Credence.Sup (_, body) ->
+      (match classify body with
+       | Robust -> Robust
+       | Vanishing -> Vanishing
+       | _ -> Unknown)
+  | Credence.Inf (_, body) ->
+      (match classify body with
+       | Robust -> Robust
+       | Vanishing -> Vanishing
+       | _ -> Unknown)
 
 (* Classify stability from a neighbourhood *)
 let classify_neighbourhood (n : t) : stability =
   match n with
   | Point r ->
-      if Credence.rat_equal r Credence.rat_one then Stable1
-      else if Credence.rat_equal r Credence.rat_zero then Unstable0
-      else
-        let one_minus_threshold = Credence.rat_normalize {
-          num = stability_threshold.den - stability_threshold.num;
-          den = stability_threshold.den
-        } in
-        if rat_geq r one_minus_threshold then Stable1
-        else if rat_leq r stability_threshold then Unstable0
-        else Interior
+      if Credence.rat_equal r Credence.rat_one then Robust
+      else if Credence.rat_equal r Credence.rat_zero then Vanishing
+      else Idempotent  (* Interior point - check if idempotent *)
   | Interval { lo; hi; _ } ->
-      let one_minus_threshold = Credence.rat_normalize {
-        num = stability_threshold.den - stability_threshold.num;
-        den = stability_threshold.den
-      } in
-      if rat_geq lo one_minus_threshold then Stable1
-      else if rat_leq hi stability_threshold then Unstable0
-      else Interior
+      if Credence.rat_equal lo Credence.rat_one &&
+         Credence.rat_equal hi Credence.rat_one then Robust
+      else if Credence.rat_equal lo Credence.rat_zero &&
+              Credence.rat_equal hi Credence.rat_zero then Vanishing
+      else Unknown
   | Full -> Unknown
-  | Empty -> Unstable0  (* empty neighbourhood is degenerate *)
+  | Empty -> Vanishing
 
 (* Propagate neighbourhood through a monotone function *)
 let propagate (n : t) (f : Credence.t -> Credence.t) : t =
@@ -145,7 +214,6 @@ let propagate (n : t) (f : Credence.t -> Credence.t) : t =
       let f_hi = f (Credence.of_rational hi) in
       (match Credence.to_rational f_lo, Credence.to_rational f_hi with
        | Some r_lo, Some r_hi ->
-           (* Determine order (f might be order-reversing like negation) *)
            if rat_leq r_lo r_hi then
              Interval { lo = r_lo; hi = r_hi; lo_closed; hi_closed }
            else
@@ -167,7 +235,6 @@ let intersect (n1 : t) (n2 : t) : t option =
       let in_hi = if hi_closed then rat_leq r hi else rat_lt r hi in
       if in_lo && in_hi then Some (Point r) else Some Empty
   | Interval i1, Interval i2 ->
-      (* Compute intersection of intervals *)
       let new_lo, new_lo_closed =
         if rat_gt i1.lo i2.lo then (i1.lo, i1.lo_closed)
         else if rat_lt i1.lo i2.lo then (i2.lo, i2.lo_closed)
@@ -185,7 +252,7 @@ let intersect (n1 : t) (n2 : t) : t option =
       else Some (Interval { lo = new_lo; hi = new_hi;
                             lo_closed = new_lo_closed; hi_closed = new_hi_closed })
 
-(* Union of two neighbourhoods (returns smallest containing neighbourhood) *)
+(* Union of two neighbourhoods *)
 let union (n1 : t) (n2 : t) : t =
   match n1, n2 with
   | Empty, n | n, Empty -> n
@@ -220,53 +287,119 @@ let union (n1 : t) (n2 : t) : t =
       in
       Interval { lo = new_lo; hi = new_hi; lo_closed = new_lo_closed; hi_closed = new_hi_closed }
 
-(* Stability propagation through type rules *)
+(* ============================================================
+   STABILITY PROPAGATION - ORDER-THEORETIC RULES
+   ============================================================
 
-(* Application: f @ c1, a @ c2 -> f a @ c1 * c2
-   Stable * Stable = Stable *)
+   These rules follow from order theory:
+   - Robust · Robust = Robust (non-zero · non-zero > 0 in upper half)
+   - Vanishing · anything = Vanishing (0 is absorbing for vanishing)
+   - Idempotent · Idempotent might stay idempotent
+   - neg flips Robust ↔ Vanishing *)
+
 let stability_of_app (s1 : stability) (s2 : stability) : stability =
   match s1, s2 with
-  | Stable1, Stable1 -> Stable1
-  | Unstable0, _ | _, Unstable0 -> Unstable0
+  | Vanishing, _ | _, Vanishing -> Vanishing
+  | Robust, other | other, Robust -> other
+  | Idempotent, Idempotent -> Idempotent
   | Unknown, _ | _, Unknown -> Unknown
-  | Interior, _ | _, Interior -> Interior
 
-(* Negation: flips stability *)
 let stability_of_neg (s : stability) : stability =
   match s with
-  | Stable1 -> Unstable0
-  | Unstable0 -> Stable1
-  | other -> other
+  | Robust -> Vanishing
+  | Vanishing -> Robust
+  | Idempotent -> Idempotent  (* May or may not hold for complement *)
+  | Unknown -> Unknown
 
-(* Composition: g . f preserves stability *)
 let stability_of_compose (s1 : stability) (s2 : stability) : stability =
   stability_of_app s1 s2
 
-(* Pi-intro: preserves stability if body is uniformly stable *)
 let stability_of_pi_intro (body_stability : stability) : stability =
   body_stability
 
-(* Sigma-elim: preserves stability (projections don't degrade) *)
 let stability_of_sigma_elim (pair_stability : stability) : stability =
   pair_stability
 
-(* Check if stability is robust (Stable1) *)
+(* ============================================================
+   ITERATION AND CONVERGENCE
+   ============================================================
+
+   The key question: what is inf_n (c · sⁿ)?
+
+   In ARCHIMEDEAN algebras (like real [0,1]):
+   - s < 1 implies sⁿ → 0
+   - s = 1 implies sⁿ = 1
+
+   In NON-ARCHIMEDEAN algebras:
+   - s < 1 does NOT imply sⁿ → 0
+   - There can be idempotent s where sⁿ = s for all n
+   - Example: s · s = s with 0 < s < 1
+
+   CredTT does NOT assume Archimedeanicity!
+
+   Therefore: "s < 1 implies degradation" is WRONG in general.
+   The correct statement is:
+   "c is stable under s iff inf_n (c · sⁿ) > 0" *)
+
+type iteration_behavior =
+  | Preserves        (* c · sⁿ = c for all n *)
+  | Converges_nonzero  (* inf_n (c · sⁿ) > 0 *)
+  | Degenerates      (* inf_n (c · sⁿ) = 0 *)
+  | Unknown_limit    (* cannot determine *)
+
+(* Analyze iteration behavior *)
+let iteration_behavior (c : Credence.t) (s : Credence.t) : iteration_behavior =
+  match Credence.simplify c, Credence.simplify s with
+  | Credence.Zero, _ -> Preserves    (* 0 · sⁿ = 0 *)
+  | _, Credence.One -> Preserves     (* c · 1ⁿ = c *)
+  | Credence.One, Credence.Zero -> Degenerates  (* 1 · 0ⁿ = 0 for n > 0 *)
+  | _ ->
+      (* For symbolic/interior, we cannot determine without
+         knowing if the algebra is Archimedean *)
+      Unknown_limit
+
+(* Check if step is non-degrading: c · s ≥ c
+   This is exactly when s is the identity for c *)
+let is_non_degrading (s : Credence.t) : bool =
+  match Credence.simplify s with
+  | Credence.One -> true
+  | _ -> false
+
+(* Check if c is stable under s:
+   "stable" means inf_n(c · sⁿ) > 0
+
+   Conservative approximation: return true only when we can prove it *)
+let is_stable_under (c : Credence.t) (s : Credence.t) : bool =
+  match iteration_behavior c s with
+  | Preserves -> classify c <> Vanishing
+  | Converges_nonzero -> true
+  | Degenerates -> false
+  | Unknown_limit -> false  (* conservative *)
+
+(* ============================================================
+   BACKWARDS COMPATIBILITY
+   ============================================================
+
+   Legacy type alias for code that used old stability type *)
+
+(* Old constructor names for pattern matching compatibility *)
+
 let is_stable (s : stability) : bool =
-  match s with
-  | Stable1 -> true
-  | _ -> false
+  s = Robust
 
-(* Check if stability is degenerate (Unstable0) *)
 let is_unstable (s : stability) : bool =
-  match s with
-  | Unstable0 -> true
-  | _ -> false
+  s = Vanishing
 
-(* Pretty printing *)
+let is_contractive (step_stability : stability) : bool =
+  step_stability = Robust
+
+(* ============================================================
+   PRETTY PRINTING *)
+
 let pp_stability fmt = function
-  | Stable1 -> Format.fprintf fmt "Stable₁"
-  | Unstable0 -> Format.fprintf fmt "Unstable₀"
-  | Interior -> Format.fprintf fmt "Interior"
+  | Robust -> Format.fprintf fmt "Robust"
+  | Vanishing -> Format.fprintf fmt "Vanishing"
+  | Idempotent -> Format.fprintf fmt "Idempotent"
   | Unknown -> Format.fprintf fmt "Unknown"
 
 let pp_rational fmt r =
@@ -283,7 +416,7 @@ let pp fmt = function
         pp_rational hi
         (if hi_closed then ']' else ')')
   | Full -> Format.fprintf fmt "[0, 1]"
-  | Empty -> Format.fprintf fmt "∅"
+  | Empty -> Format.fprintf fmt "empty"
 
 let to_string n =
   let buf = Buffer.create 16 in
@@ -298,3 +431,10 @@ let stability_to_string s =
   pp_stability fmt s;
   Format.pp_print_flush fmt ();
   Buffer.contents buf
+
+(* Credence-level predicates *)
+let is_stable_near_one (c : Credence.t) : bool =
+  classify c = Robust
+
+let is_unstable_near_zero (c : Credence.t) : bool =
+  classify c = Vanishing

@@ -32,15 +32,15 @@ let () =
   );
 
   (* Stability classification tests *)
-  test "classify One = Stable1" (
+  test "classify One = Robust" (
     match classify One with
-    | Stable1 -> true
+    | Robust -> true
     | _ -> false
   );
 
-  test "classify Zero = Unstable0" (
+  test "classify Zero = Vanishing" (
     match classify Zero with
-    | Unstable0 -> true
+    | Vanishing -> true
     | _ -> false
   );
 
@@ -50,15 +50,15 @@ let () =
     | _ -> false
   );
 
-  test "classify (Neg Zero) = Stable1" (
+  test "classify (Neg Zero) = Robust" (
     match classify (Neg Zero) with
-    | Stable1 -> true
+    | Robust -> true
     | _ -> false
   );
 
-  test "classify (Neg One) = Unstable0" (
+  test "classify (Neg One) = Vanishing" (
     match classify (Neg One) with
-    | Unstable0 -> true
+    | Vanishing -> true
     | _ -> false
   );
 
@@ -143,61 +143,61 @@ let () =
   );
 
   (* Stability propagation tests *)
-  test "stability_of_app Stable1 Stable1 = Stable1" (
-    match stability_of_app Stable1 Stable1 with
-    | Stable1 -> true
+  test "stability_of_app Robust Robust = Robust" (
+    match stability_of_app Robust Robust with
+    | Robust -> true
     | _ -> false
   );
 
-  test "stability_of_app Unstable0 Stable1 = Unstable0" (
-    match stability_of_app Unstable0 Stable1 with
-    | Unstable0 -> true
+  test "stability_of_app Vanishing Robust = Vanishing" (
+    match stability_of_app Vanishing Robust with
+    | Vanishing -> true
     | _ -> false
   );
 
-  test "stability_of_app Stable1 Unstable0 = Unstable0" (
-    match stability_of_app Stable1 Unstable0 with
-    | Unstable0 -> true
+  test "stability_of_app Robust Vanishing = Vanishing" (
+    match stability_of_app Robust Vanishing with
+    | Vanishing -> true
     | _ -> false
   );
 
-  test "stability_of_neg Stable1 = Unstable0" (
-    match stability_of_neg Stable1 with
-    | Unstable0 -> true
+  test "stability_of_neg Robust = Vanishing" (
+    match stability_of_neg Robust with
+    | Vanishing -> true
     | _ -> false
   );
 
-  test "stability_of_neg Unstable0 = Stable1" (
-    match stability_of_neg Unstable0 with
-    | Stable1 -> true
+  test "stability_of_neg Vanishing = Robust" (
+    match stability_of_neg Vanishing with
+    | Robust -> true
     | _ -> false
   );
 
   test "stability_of_compose preserves stability" (
-    match stability_of_compose Stable1 Stable1 with
-    | Stable1 -> true
+    match stability_of_compose Robust Robust with
+    | Robust -> true
     | _ -> false
   );
 
   (* is_stable / is_unstable tests *)
-  test "is_stable Stable1 = true" (is_stable Stable1);
-  test "is_stable Unstable0 = false" (not (is_stable Unstable0));
-  test "is_stable Interior = false" (not (is_stable Interior));
+  test "is_stable Robust = true" (is_stable Robust);
+  test "is_stable Vanishing = false" (not (is_stable Vanishing));
+  test "is_stable Idempotent = false" (not (is_stable Idempotent));
 
-  test "is_unstable Unstable0 = true" (is_unstable Unstable0);
-  test "is_unstable Stable1 = false" (not (is_unstable Stable1));
-  test "is_unstable Interior = false" (not (is_unstable Interior));
+  test "is_unstable Vanishing = true" (is_unstable Vanishing);
+  test "is_unstable Robust = false" (not (is_unstable Robust));
+  test "is_unstable Idempotent = false" (not (is_unstable Idempotent));
 
   (* Classify neighbourhood tests *)
-  test "classify_neighbourhood Point 1 = Stable1" (
+  test "classify_neighbourhood Point 1 = Robust" (
     match classify_neighbourhood (Point rat_one) with
-    | Stable1 -> true
+    | Robust -> true
     | _ -> false
   );
 
-  test "classify_neighbourhood Point 0 = Unstable0" (
+  test "classify_neighbourhood Point 0 = Vanishing" (
     match classify_neighbourhood (Point rat_zero) with
-    | Unstable0 -> true
+    | Vanishing -> true
     | _ -> false
   );
 
@@ -207,9 +207,9 @@ let () =
     | _ -> false
   );
 
-  test "classify_neighbourhood Empty = Unstable0" (
+  test "classify_neighbourhood Empty = Vanishing" (
     match classify_neighbourhood Empty with
-    | Unstable0 -> true
+    | Vanishing -> true
     | _ -> false
   );
 
