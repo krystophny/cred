@@ -21,7 +21,7 @@
 -- This is the spectrum classical logic hides!
 
 -- A proposition at zero credence
-postulate absurdity : False [ 0 ]
+postulate absurdity : False @ 0
 
 -- From zero credence, anything follows at credence 1
 -- This is because P(A|False) is undefined/vacuous

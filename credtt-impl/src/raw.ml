@@ -72,7 +72,10 @@ and decl =
   (* Meta-theory declarations for Goedel/consistency *)
   | DProvable of name * name * credence          (* Prov_c(phi): name, prop, credence *)
   | DFixpoint of name * credence                 (* fixpoint name = credence_expr *)
-  | DEncode of name * name                     (* encode name = prop (Goedel encoding) *)
+  | DEncode of name * name                       (* encode name = prop (Goedel encoding) *)
+  (* Stability assertions *)
+  | DStable of name                              (* stable name: assert Stable1 credence *)
+  | DUnstable of name                            (* unstable name: assert Unstable0 credence *)
 
 and assoc = ALeft | ARight | ANone
 

@@ -12,10 +12,10 @@
 -- Universal @ aggregation(c1, c2, ..., cn)
 
 -- With stable cases (all at credence 1):
-postulate case1 : P_for_red [ 1 ]
-postulate case2 : P_for_green [ 1 ]
-postulate case3 : P_for_blue [ 1 ]
-postulate case4 : P_for_yellow [ 1 ]
+postulate case1 : P_for_red @ 1
+postulate case2 : P_for_green @ 1
+postulate case3 : P_for_blue @ 1
+postulate case4 : P_for_yellow @ 1
 
 -- Aggregation: AND of all cases
 -- 1 * 1 * 1 * 1 = 1
@@ -27,7 +27,7 @@ stable case3
 stable case4
 
 -- With one weak case:
-postulate weak_case : P_for_purple [ 1/2 ]
+postulate weak_case : P_for_purple @ 1/2
 
 -- Now: 1 * 1 * 1 * 0.5 = 0.5
 -- Result degrades to weakest link (actually worse: product)

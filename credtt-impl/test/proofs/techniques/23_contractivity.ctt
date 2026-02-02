@@ -14,7 +14,7 @@
 -- If step @ 1 (contractive): c_n = c_0 * 1^n = c_0
 -- Credence preserved through all iterations!
 
-postulate contractive_step : step [ 1 ]
+postulate contractive_step : step @ 1
 
 -- Using contractive step: no degradation
 -- P(0) @ c -> P(n) @ c for all n
@@ -24,7 +24,7 @@ stable contractive_step
 -- NON-CONTRACTIVE: step that degrades credence
 -- f is d-contractive if c(f(A)) >= d * c(A)
 
-postulate weak_step : step [ 9/10 ]
+postulate weak_step : step @ 9/10
 
 -- Using weak step: c_n = c_0 * 0.9^n
 -- After 10 steps: c_0 * 0.35

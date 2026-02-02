@@ -12,7 +12,7 @@
 -- CredTT contraposition is APPROXIMATE: stability bounds
 
 -- Original implication at credence c
-postulate rain_implies_wet : rain_to_wet [ c ]
+postulate rain_implies_wet : rain_to_wet @ c
 
 -- Contraposition in CredTT:
 -- If A -> B @ c, what is ~B -> ~A?
@@ -24,11 +24,11 @@ postulate rain_implies_wet : rain_to_wet [ c ]
 -- So contraposition relates STABILITY, not just truth
 
 -- Stable implication
-postulate stable_impl : A_implies_B [ 1 ]
+postulate stable_impl : A_implies_B @ 1
 stable stable_impl
 
 -- Negation flips stability
-derive neg_B_implies_neg_A : not_B_to_not_A [ 1 ] from stable_impl by negate
+derive neg_B_implies_neg_A : not_B_to_not_A @ 1 from stable_impl by negate
 
 -- The negated implication has flipped stability!
 -- If original was Stable1, negation is Unstable0

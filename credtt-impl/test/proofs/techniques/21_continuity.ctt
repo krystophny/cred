@@ -18,8 +18,8 @@
 -- |c(f(A)) - c(f(A'))| <= L * |c(A) - c(A')|
 -- Small input change -> bounded output change
 
-postulate input : A [ c ]
-postulate func : A_to_B [ 1 ]
+postulate input : A @ c
+postulate func : A_to_B @ 1
 
 -- Output credence = c * 1 = c
 -- Change in input by epsilon -> change in output by epsilon

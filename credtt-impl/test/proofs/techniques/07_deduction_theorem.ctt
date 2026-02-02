@@ -10,23 +10,23 @@
 -- CredTT deduction: lambda abstraction preserves credence AND stability
 
 -- Premise in context at credence 1
-postulate x_nat : x_is_nat [ 1 ]
+postulate x_nat : x_is_nat @ 1
 
 -- Body derivation at credence 1
-postulate body : x_plus_0_eq_x [ 1 ] from x_nat by definition
+derive body : x_plus_0_eq_x @ 1 from x_nat by definition
 
 -- Lambda abstraction preserves credence
-derive lambda_result : forall_x_plus_0_eq_x [ 1 ] from body by pi_intro
+derive lambda_result : forall_x_plus_0_eq_x @ 1 from body by pi_intro
 
 -- Stability check: stable body -> stable lambda
 stable body
 stable lambda_result
 
 -- Now with weaker credence:
-postulate weak_body : weak_prop [ c ]
+postulate weak_body : weak_prop @ c
 
 -- Lambda still preserves credence (and stability)
-derive weak_lambda : forall_weak [ c ] from weak_body by pi_intro
+derive weak_lambda : forall_weak @ c from weak_body by pi_intro
 
 -- KEY insight: Deduction theorem in CredTT is CREDENCE-PRESERVING
 -- If the body has credence c, the lambda has credence c

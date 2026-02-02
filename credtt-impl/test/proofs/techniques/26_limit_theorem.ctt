@@ -16,7 +16,7 @@
 -- c(return by step n) increases with n
 -- lim_{n->inf} c(return) = 1 (certain in limit)
 
-postulate step_n : return_by_n [ c_n ]
+postulate step_n : return_by_n @ c_n
 
 -- As n -> infinity:
 -- c_n -> 1
