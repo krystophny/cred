@@ -15,8 +15,10 @@ They serve as:
 
 ## File Naming Convention
 
-- `01-18_*.ctt`: Classical proof techniques (20 total)
-- `19-28_*.ctt`: CredTT-native techniques (9 total)
+- `01-19_*.ctt`: Classical proof techniques (19 files)
+- `20-28_*.ctt`: CredTT-native techniques (9 files)
+
+Total: 28 proof technique examples.
 
 ## Note on Files 20-28 (CredTT-Native Techniques)
 
