@@ -768,64 +768,94 @@ We replace truth values with \emph{stability under dynamics}. This is not metaph
 
 \subsection{Proofs as Monotone Dynamical Systems}
 
-The key insight: proofs are not static objects but \emph{dynamical systems} on the credence algebra.
+The key insight: proofs are not static objects but \emph{dynamical systems} on the credence algebra. This perspective connects CredTT to the theory of monotone operators on ordered algebraic structures \citep{tarski1955lattice, cousot1979constructive}.
 
 \begin{definition}[Proof Operator]
 Each proof step at credence $s$ induces the operator $T_s : \C \to \C$ where $T_s(c) = c \cdot s$.
 \end{definition}
 
-Since multiplication is monotone, $T_s$ is a monotone operator. Stability is about fixed points:
+Since multiplication preserves order in each argument, $T_s$ is a monotone operator on the ordered credence algebra. Stability is characterized by fixed-point properties:
 
-\begin{definition}[Post-Fixed Point]
-$c$ is a \emph{post-fixed point} under step $s$ (written $c \leq c \cdot s$) iff applying the proof step does not reduce credence.
+\begin{definition}[Pre-Fixed Point]
+$c$ is a \emph{pre-fixed point} under step $s$ (written $c \leq c \cdot s$) iff applying the proof step does not reduce credence. In standard lattice theory, $x \leq f(x)$ defines pre-fixed points. This is the fundamental validity condition for iterative proofs.
 \end{definition}
 
 \begin{definition}[Invariant]
-$c$ is \emph{invariant} under step $s$ (written $c = c \cdot s$) iff it is an exact fixed point.
+$c$ is \emph{invariant} under step $s$ (written $c = c \cdot s$) iff it is an exact fixed point. Invariant credences are \emph{stable} under the dynamics.
 \end{definition}
 
 \begin{definition}[Degenerating]
-$c$ \emph{degenerates} under step $s$ iff $\inf_n (c \cdot s^n) = \zero$.
+$c$ \emph{degenerates} under step $s$ iff $\inf_n (c \cdot s^n) = \zero$. Degenerating credences eventually collapse to impossibility.
 \end{definition}
 
 \begin{definition}[Idempotent]
 $c$ is \emph{idempotent} iff $c \cdot c = c$. Such elements are self-stable and may be \emph{interior} ($\zero < c < \one$).
 \end{definition}
 
-\textbf{Critical}: We do NOT assume Archimedeanicity. In non-Archimedean algebras, $s < \one$ does NOT imply $s^n \to \zero$. Interior idempotents can exist, allowing \emph{genuine stability in the interior}.
+\subsection{Non-Archimedean Dynamics}
+
+\textbf{Critical}: We do NOT assume Archimedeanicity. In non-Archimedean algebras:
+\begin{itemize}
+    \item $s < \one$ does NOT imply $s^n \to \zero$
+    \item Interior idempotents can exist (e.g., $e$ with $\zero < e < \one$ and $e \cdot e = e$)
+    \item Multiple fixed points are possible
+    \item Credence sequences may plateau at interior values
+\end{itemize}
+
+\begin{example}[Credence algebra with interior idempotent]
+Consider the three-element algebra $\C = \{\zero, e, \one\}$ with order $\zero < e < \one$, multiplication $e \cdot e = e$, $e \cdot \one = e$, $\zero \cdot x = \zero$, $\one \cdot x = x$, and complement $\negc e = e$ (the unique fixed point of negation). This is a valid credence algebra where $e$ is an interior idempotent: $\zero < e < \one$ and $e \cdot e = e$.
+\end{example}
+
+This is what makes CredTT richer than probability theory on $[0,1]$. The Archimedean case (standard real interval) is a \emph{special case} where iteration always degenerates for $s < \one$, since the only idempotents are $0$ and $1$.
+
+\subsection{Interior Credences as First-Class Citizens}
+
+In classical logic, only $\zero$ and $\one$ exist. In probability theory on $[0,1]$, interior values are ``approximations'' that converge to extremes. In CredTT:
+
+\begin{center}
+\begin{tabular}{l|l}
+\textbf{Credence Type} & \textbf{Status} \\
+\hline
+$c = \one$ (certainty) & Maximal fixed point, robust \\
+$c = \zero$ (impossibility) & Minimal fixed point, vanishing \\
+$\zero < c < \one$ (interior) & \textbf{First-class}, may be stable if idempotent \\
+\end{tabular}
+\end{center}
+
+Interior credences are not ``partial truth'' or ``approximations''---they are legitimate epistemic states. The G\"odel sentence at credence $\tfrac{1}{2}$ is not ``partially true''; it has a determinate credence that is neither $\zero$ nor $\one$.
 
 These are \emph{meta-properties}, like termination, not judgments inside CredTT. NO THRESHOLDS. NO ARBITRARY CONSTANTS. Pure order-theoretic dynamics.
 
 \subsection{Classical Techniques as Stability Theorems}
 
-Every classical proof technique has a CredTT analog expressed in terms of stability. The table below shows all 20 classical techniques with their CredTT translations:
+Every classical proof technique has a CredTT analog expressed in terms of stability. The table below shows all 20 classical techniques with their operator dynamics, stability conditions, and credence behavior:
 
 \begin{center}
 \small
-\begin{tabular}{|c|l|l|l|}
+\begin{tabular}{|c|l|l|l|l|}
 \hline
-\textbf{\#} & \textbf{Classical Technique} & \textbf{CredTT Analog} & \textbf{Credence Behavior} \\
+\textbf{\#} & \textbf{Technique} & \textbf{Operator $T_s$} & \textbf{Validity Condition} & \textbf{Result Credence} \\
 \hline
-1 & Direct proof & Track credence bounds & $c$ accumulates via $\cdot$ \\
-2 & Proof by cases & Context refinement & Each branch stable $\Rightarrow$ stable \\
-3 & Contraposition & Stability-contraposition & Not exact; $\negc c_2 \leq \negc c_1$ \\
-4 & Reductio ad absurdum & Instability reflection & Unstable$(\negc A) \Rightarrow$ Stable$(A)$ \\
-5 & Contrapositive & Robust implication & Stability bounds transform \\
-6 & Ex falso & Limit admissibility & As $c \to \zero$, constraints vanish \\
-7 & Vacuous truth & Degenerate conditioning & $c \approx \zero \Rightarrow$ unconstrained \\
-8 & Deduction theorem & Function abstraction & $\Gamma, x:A \vdash b:B \at{c}$ preserves $c$ \\
-9 & Modus ponens & Application rule & $c_1 \cdot c_2$ (multiply!) \\
-10 & Syllogism & Function composition & $c_2 \cdot c_1$ (accumulates) \\
-11 & Universal generalization & $\Pi$-introduction & $\lambda x.b : \Pi x.B \at{\inf_x c(x)}$ \\
-12 & Existential intro/elim & $\Sigma$-types & Credence multiplies in elim \\
-13 & Natural induction & Same + stability of step & May degrade unless contractive \\
-14 & Strong induction & Bound over premise set & Multiple uses multiply \\
-15 & Exhaustion & Finite case + aggregation & Stable if each case stable \\
-16 & Construction & Existence + certificate & Credence = witness $\cdot$ property \\
-17 & Refutation/resolution & Degeneracy detection & Drive bound to $\zero$ \\
-18 & Equational rewriting & J-elimination & Preserves stability if Id stable \\
-19 & Proof by analogy & Low-credence morphism & Visible weakness at $c < \one$ \\
-20 & Structural rules & Conditional theorems & See \S\ref{sec:structural-credtt} \\
+1 & Direct proof & $T_s \circ T_t = T_{s \cdot t}$ & Compose & $c$ accumulates \\
+2 & Cases & Parallel $T_s$ & Both pre-fixed & Branches stable \\
+3 & Contraposition & $\negc$ antitone & Order reverses & $\negc c_2 \leq \negc c_1$ \\
+4 & Reductio & Instability & Unstable$(\negc)$ & $\Rightarrow$ Stable \\
+5 & Contrapositive & $\negc \circ T_s$ & Reverses pre-fixed & Bounds flip \\
+6 & Ex falso & $T_s(\zero) = \zero$ & $\zero$ absorbs & Unconstrained \\
+7 & Vacuous & $\zero \cdot s = \zero$ & Degenerate & Vacuous \\
+8 & Deduction & $\lambda$ preserves & Same dynamics & $c$ preserved \\
+9 & Modus ponens & $T_{s_1 \cdot s_2}$ & Multiply & $c_1 \cdot c_2$ \\
+10 & Syllogism & $T_{s_1} \circ T_{s_2}$ & Compose & $c_1 \cdot c_2$ \\
+11 & $\forall$-intro & $\inf_x T_{s(x)}$ & All pre-fixed & $\inf_x c(x)$ \\
+12 & $\exists$-intro & $T_{s_a \cdot s_b}$ & Both pre-fixed & $c_a \cdot c_b$ \\
+13 & Induction & $T_s^n$ & Pre-fixed & Degrade/stable \\
+14 & Strong ind. & $T_s^k$ & $k$-fold & $c \cdot s^k$ \\
+15 & Exhaustion & $\bigwedge T_{s_i}$ & All pre-fixed & Min stable \\
+16 & Construction & $T_{s_w \cdot s_p}$ & Witness+prop & $c_w \cdot c_p$ \\
+17 & Refutation & Iterate to $\zero$ & Degenerates & $\inf_n = \zero$ \\
+18 & Rewriting & $T_{\mathsf{Id}}$ & Id stable & Preserved \\
+19 & Analogy & $T_s$, $s < \one$ & Explicit weak & Visible \\
+20 & Structural & Conditional & See below & Costs explicit \\
 \hline
 \end{tabular}
 \end{center}
@@ -839,7 +869,7 @@ Consider the classical syllogism ``All men are mortal; Socrates is a man; theref
 If $c_1 = 0.95$ and $c_2 = 0.90$, the conclusion has credence $0.855$---\emph{not} $0.95$ or $0.90$!
 
 \paragraph{Concrete Example: Induction (Technique \#13)}
-Induction is valid iff $c$ is a \emph{post-fixed point} of the step operator:
+Induction is valid iff $c$ is a \emph{pre-fixed point} of the step operator:
 \begin{itemize}
     \item \textbf{Classical}: step at credence $\one$, so $c \leq c \cdot \one = c$ always holds
     \item \textbf{Interior}: if $c$ is idempotent ($c \cdot c = c$), induction at $c$ is valid!
@@ -859,21 +889,52 @@ The chain rule $P(A,B) = P(A|B) \cdot P(B)$ is trivially satisfied when $P(B) = 
 
 \subsection{The $\{\zero,\one\}$ Collapse Theorem}
 
+When credences are restricted to the Boolean algebra $\{\zero,\one\}$, the dynamics trivialize completely. This is the \emph{degenerate case} where classical logic emerges.
+
 \begin{theorem}[Collapse]
 When credences are restricted to $\{\zero,\one\}$:
 \begin{enumerate}
-    \item Neighbourhoods become singletons
-    \item $\mathrm{Stable}_\one(\one) = \mathrm{true}$, $\mathrm{Unstable}_\zero(\zero) = \mathrm{true}$
-    \item CredTT judgments correspond exactly to MLTT judgments
-    \item No interior points exist (every credence is extreme)
+    \item \textbf{Only two fixed points}: $\zero$ (vanishing) and $\one$ (robust)
+    \item \textbf{Dynamics trivialize}: $T_\one = \mathrm{id}$, $T_\zero = \mathrm{const}_\zero$
+    \item \textbf{No interior}: Every credence is extremal
+    \item \textbf{Classification exhaustive}: Robust$(\one)$ or Vanishing$(\zero)$
+    \item \textbf{MLTT recovery}: CredTT judgments correspond exactly to MLTT judgments
 \end{enumerate}
 \end{theorem}
 
-\begin{proof}[Proof sketch]
-In Boolean algebra, there are no intermediate points between $\zero$ and $\one$, so $\epsilon$-neighbourhoods collapse to their centers. The stability classification becomes exhaustive and trivial: $\one$ is stable, $\zero$ is unstable.
+\begin{proof}[Proof sketch (order-theoretic)]
+In the Boolean algebra $\{\zero,\one\}$:
+\begin{enumerate}
+    \item \textbf{Fixed points of $T_s$}: For any operator $T_s(c) = c \cdot s$:
+    \begin{itemize}
+        \item $T_s(\zero) = \zero \cdot s = \zero$, so $\zero$ is always a fixed point
+        \item $T_s(\one) = \one \cdot s = s$, so $\one$ is a fixed point iff $s = \one$
+    \end{itemize}
+    Since $\{\zero,\one\}$ has only two elements: $\zero$ is a fixed point of every $T_s$, and $\one$ is a fixed point of $T_\one$. These are the only candidates and hence the only fixed points.
+
+    \item \textbf{Operator dichotomy}: For step $s \in \{\zero, \one\}$:
+    \begin{itemize}
+        \item If $s = \one$: $T_\one(c) = c \cdot \one = c$ (identity)
+        \item If $s = \zero$: $T_\zero(c) = c \cdot \zero = \zero$ (annihilation)
+    \end{itemize}
+    No other behavior is possible.
+
+    \item \textbf{No interior}: Suppose $\zero < c < \one$. But in $\{\zero,\one\}$, there are no such elements. The order $\zero \leq \one$ has no intermediate points.
+
+    \item \textbf{Classification}: By (3), every credence is either $\zero$ or $\one$. By (1), $\one$ is a robust fixed point (under $T_\one$) and $\zero$ is a vanishing fixed point (under all $T_s$). This classification is exhaustive.
+
+    \item \textbf{MLTT}: Judgments $\Gamma \vdash a : A \at{\one}$ correspond to MLTT judgments $\Gamma \vdash a : A$. Judgments at credence $\zero$ are vacuously satisfied (no computational content).
+\end{enumerate}
 \end{proof}
 
-This explains why classical logic appears to have exact truth values: it's the degenerate limit where neighbourhoods collapse to points. CredTT reveals the underlying continuous structure that classical logic hides.
+This explains why classical logic appears to have exact truth values: it is the degenerate limit where:
+\begin{itemize}
+    \item Neighbourhoods collapse to singletons
+    \item The G\"odel fixed point $c = \negc c$ has no solution (undecidability)
+    \item Proof dynamics become trivial (identity or annihilation)
+\end{itemize}
+
+CredTT reveals the underlying continuous structure that classical logic hides.
 
 %=============================================================================
 \section{Proof Principles in CredTT}
@@ -901,22 +962,22 @@ Classical proof patterns are recovered as:
 
 \subsection{New CredTT-Native Techniques}
 
-CredTT enables 8 proof techniques with \emph{no classical analog}. These are the core differentiators:
+CredTT enables 8 proof techniques with \emph{no classical analog}. These exploit the dynamics framework:
 
 \begin{center}
 \small
-\begin{tabular}{|c|l|l|}
+\begin{tabular}{|c|l|l|l|}
 \hline
-\textbf{\#} & \textbf{Technique} & \textbf{Description} \\
+\textbf{\#} & \textbf{Technique} & \textbf{Operator/Dynamics} & \textbf{Stability Condition} \\
 \hline
-21 & Stability proofs & Prove ``$A$ is Stable$_\one$'' or ``$B$ is Unstable$_\zero$'' \\
-22 & Credence bounds as invariants & Maintain $c(A) \geq l$ through computation \\
-23 & Continuity/robustness lemmas & Small input degradation $\Rightarrow$ small output degradation \\
-24 & Degeneracy analysis & Quantify how fast $c \to \zero$ (diagnosis) \\
-25 & Contractivity arguments & Prove step is non-degrading ($c_{out} \geq c_{in}$) \\
-26 & Proof factoring & Isolate stable core from unstable fringe \\
-27 & Dual proofs & Squeeze: $l \leq c(A) \leq u$ from both sides \\
-28 & Limit theorems & Asymptotic credence behavior as $n \to \infty$ \\
+21 & Stability proofs & Classify $c$ & Pre-fixed + positive \\
+22 & Credence bounds & Invariant maintenance & $c \geq l$ preserved by $T_s$ \\
+23 & Robustness & Order-preserving $T_s$ & $c \leq c' \Rightarrow T_s(c) \leq T_s(c')$ \\
+24 & Degeneracy & Iteration analysis & Rate of $c \cdot s^n \to \zero$ \\
+25 & Contractivity & $T_s$ non-expanding & $T_s(c) \leq c$ \\
+26 & Factoring & Decompose $c = h \cdot l$ & High-cred core isolated \\
+27 & Dual proofs & Upper + lower bounds & Squeeze to exact value \\
+28 & Limit theorems & $\lim_{n \to \infty} c \cdot s^n$ & Convergence rate \\
 \hline
 \end{tabular}
 \end{center}
@@ -966,6 +1027,44 @@ Classical logic has free structural rules---this \emph{hides} important credence
 \section{Related Work: Neighbourhood and Continuous Semantics}
 %=============================================================================
 
+\subsection{Monotone Dynamical Systems}
+
+CredTT's proof operators form a \emph{monotone dynamical system} on the credence algebra. The relevant literature includes:
+
+\begin{itemize}
+    \item \textbf{Tarski's Fixed Point Theorem} \citep{tarski1955lattice}: Monotone functions on complete lattices have fixed points. When the credence algebra forms a complete lattice (e.g., $[0,1]$ with standard order), CredTT's proof operators $T_s$ are monotone and admit fixed points by Tarski's theorem. Note: the general credence algebra axioms do not assume completeness; this application requires the additional assumption.
+
+    \item \textbf{Abstract Interpretation} \citep{cousot1979constructive}: Cousot and Cousot's framework uses Galois connections and fixed-point iteration on abstract domains. CredTT's stability analysis is analogous: iteration of $T_s$ converges to fixed points characterizing proof validity.
+
+    \item \textbf{Iterative Methods}: The iteration $c, c \cdot s, c \cdot s^2, \ldots$ is a discrete dynamical system. Convergence analysis (when it degenerates to $\zero$ vs.\ stabilizes at an interior fixed point) connects to classical dynamical systems theory.
+\end{itemize}
+
+\subsection{Fixed Point Theory}
+
+The fixed-point perspective on logic has deep roots:
+
+\begin{itemize}
+    \item \textbf{Kripke Fixed Points} \citep{kripke1975outline}: Kripke's theory of truth uses fixed points to handle self-reference. CredTT's G\"odel sentence at $c = \tfrac{1}{2}$ is a fixed point of the negation operator.
+
+    \item \textbf{Modal $\mu$-Calculus}: Least and greatest fixed points characterize temporal properties. CredTT's pre-fixed points ($c \leq c \cdot s$) are analogous to pre-fixed points in modal logic.
+
+    \item \textbf{Inductive Definitions} \citep{aczel1977inductive}: Aczel's theory of inductive definitions uses fixed points on set-theoretic structures. CredTT's induction principle requires the credence to be a pre-fixed point.
+\end{itemize}
+
+\subsection{Non-Archimedean Structures}
+
+CredTT deliberately avoids the Archimedean assumption:
+
+\begin{itemize}
+    \item \textbf{Non-standard Analysis} \citep{robinson1966nonstandard}: Robinson's hyperreals contain infinitesimals and infinite numbers. Non-Archimedean credence algebras can have similar structure.
+
+    \item \textbf{Valued Fields}: $p$-adic numbers and other non-Archimedean fields have discrete valuations. CredTT's credence algebras may similarly have ``gaps'' allowing interior fixed points.
+
+    \item \textbf{Ultrametric Spaces}: In ultrametric spaces, $d(x,z) \leq \max(d(x,y), d(y,z))$. Non-Archimedean credence algebras may satisfy analogous ``strong'' properties.
+\end{itemize}
+
+The key insight: in non-Archimedean settings, $s < \one$ does NOT imply $s^n \to \zero$. This allows interior idempotents ($e = e \cdot e$ with $\zero < e < \one$), enabling genuinely stable interior credences.
+
 \subsection{Primitive Conditional Probability}
 
 The tradition of taking conditional probability as primitive (rather than derived via the ratio formula) traces to \textbf{Popper functions} and \textbf{R\'enyi conditional probability}. Stalnaker \citep{stalnaker1970probability} and Pruss \citep{pruss2013popper} develop this approach philosophically. CredTT adopts this stance but internalizes it into dependent type theory.
@@ -978,16 +1077,35 @@ The tradition of taking conditional probability as primitive (rather than derive
 
 Many-valued generalizations of neighbourhood semantics exist \citep{hansoul2020neighbourhood}, compatible with our stability regions, but not in a dependent type setting.
 
+\subsection{Positioning vs.\ QTT and Granule}
+
+Quantitative Type Theory (QTT) \citep{atkey2018syntax} and Granule \citep{orchard2019quantitative} are the closest related work in graded type theory:
+
+\begin{center}
+\begin{tabular}{l|l|l|l}
+\textbf{Aspect} & \textbf{QTT/Granule} & \textbf{CredTT} & \textbf{Key Difference} \\
+\hline
+Algebra & Semiring $(0,1,+,\times)$ & De Morgan $(\zero,\one,\cdot,\negc)$ & No primitive $+$ \\
+Interpretation & Resource usage & Credence/certainty & Epistemic vs.\ operational \\
+Dynamics & Not emphasized & Central (operators) & Fixed points matter \\
+MLTT relation & Parameterized & Derived as limit & Direction of generalization \\
+Implication & Standard & Conditioning & No material implication \\
+\end{tabular}
+\end{center}
+
+Both QTT/Granule and CredTT treat grades as primitive. The philosophical difference is interpretive: QTT asks ``how much resource?'' while CredTT asks ``how certain?'' The technical difference is algebraic: CredTT's De Morgan structure lacks addition but gains negation.
+
 \subsection{What CredTT Unifies}
 
 CredTT sits at the intersection of:
 \begin{itemize}
+    \item Monotone dynamical systems (operators, fixed points)
     \item Popper-style primitive conditioning
     \item Continuous/approximate logic robustness
     \item Graded type theory judgment structure
 \end{itemize}
 
-But differs by: (i) conditioning-first semantics, (ii) $\bot$/$\top$ as neighbourhood phenomena, (iii) MLTT as the $\{\zero,\one\}$ collapse.
+But differs by: (i) dynamics-first semantics, (ii) non-Archimedean generality, (iii) conditioning replaces implication, (iv) MLTT as the $\{\zero,\one\}$ collapse.
 
 %=============================================================================
 \section{Graded Incompleteness}
