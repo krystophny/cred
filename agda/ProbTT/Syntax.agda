@@ -52,53 +52,33 @@ infixr 5 _⇒_
 infixr 6 _×'_
 infixr 6 _+'_
 
+-- Weakening for types (adds unused variable)
+-- Defined here to break cyclic module dependency with Substitution.
+mutual
+  wkTy : ∀ {n} → Ty n → Ty (suc n)
+  wkTy (base i)   = base i
+  wkTy (A ⇒ B)    = wkTy A ⇒ wkTy B
+  wkTy (A ×' B)   = wkTy A ×' wkTy B
+  wkTy (A +' B)   = wkTy A +' wkTy B
+  wkTy (Id A a b) = Id (wkTy A) (wkTm a) (wkTm b)
+
+  wkTm : ∀ {n} → Tm n → Tm (suc n)
+  wkTm (var i)       = var (suc i)
+  wkTm (lam A t)     = lam (wkTy A) (wkTm t)
+  wkTm (app f a)     = app (wkTm f) (wkTm a)
+  wkTm (pair a b)    = pair (wkTm a) (wkTm b)
+  wkTm (fst t)       = fst (wkTm t)
+  wkTm (snd t)       = snd (wkTm t)
+  wkTm (inl a)       = inl (wkTm a)
+  wkTm (inr b)       = inr (wkTm b)
+  wkTm (case e l r)  = case (wkTm e) (wkTm l) (wkTm r)
+  wkTm refl'         = refl'
+  wkTm (J M d p)     = J (wkTy M) (wkTm d) (wkTm p)
+
 -- Simple (non-dependent) function type
 _→'_ : ∀ {n} → Ty n → Ty n → Ty n
 A →' B = A ⇒ wkTy B
-  where
-    -- Weakening for types (adds unused variable)
-    mutual
-      wkTy : ∀ {n} → Ty n → Ty (suc n)
-      wkTy (base i)   = base i
-      wkTy (A ⇒ B)    = wkTy A ⇒ wkTy B
-      wkTy (A ×' B)   = wkTy A ×' wkTy B
-      wkTy (A +' B)   = wkTy A +' wkTy B
-      wkTy (Id A a b) = Id (wkTy A) (wkTm a) (wkTm b)
-
-      wkTm : ∀ {n} → Tm n → Tm (suc n)
-      wkTm (var i)       = var (suc i)
-      wkTm (lam A t)     = lam (wkTy A) (wkTm t)
-      wkTm (app f a)     = app (wkTm f) (wkTm a)
-      wkTm (pair a b)    = pair (wkTm a) (wkTm b)
-      wkTm (fst t)       = fst (wkTm t)
-      wkTm (snd t)       = snd (wkTm t)
-      wkTm (inl a)       = inl (wkTm a)
-      wkTm (inr b)       = inr (wkTm b)
-      wkTm (case e l r)  = case (wkTm e) (wkTm l) (wkTm r)
-      wkTm refl'         = refl'
-      wkTm (J M d p)     = J (wkTy M) (wkTm d) (wkTm p)
 
 -- Simple (non-dependent) product type
 _×''_ : ∀ {n} → Ty n → Ty n → Ty n
 A ×'' B = A ×' wkTy B
-  where
-    mutual
-      wkTy : ∀ {n} → Ty n → Ty (suc n)
-      wkTy (base i)   = base i
-      wkTy (A ⇒ B)    = wkTy A ⇒ wkTy B
-      wkTy (A ×' B)   = wkTy A ×' wkTy B
-      wkTy (A +' B)   = wkTy A +' wkTy B
-      wkTy (Id A a b) = Id (wkTy A) (wkTm a) (wkTm b)
-
-      wkTm : ∀ {n} → Tm n → Tm (suc n)
-      wkTm (var i)       = var (suc i)
-      wkTm (lam A t)     = lam (wkTy A) (wkTm t)
-      wkTm (app f a)     = app (wkTm f) (wkTm a)
-      wkTm (pair a b)    = pair (wkTm a) (wkTm b)
-      wkTm (fst t)       = fst (wkTm t)
-      wkTm (snd t)       = snd (wkTm t)
-      wkTm (inl a)       = inl (wkTm a)
-      wkTm (inr b)       = inr (wkTm b)
-      wkTm (case e l r)  = case (wkTm e) (wkTm l) (wkTm r)
-      wkTm refl'         = refl'
-      wkTm (J M d p)     = J (wkTy M) (wkTm d) (wkTm p)
