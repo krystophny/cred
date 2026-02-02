@@ -7,9 +7,10 @@ encode, encode-derivation: META-LEVEL AXIOM
   Godel encoding requires arithmetic (natural numbers, beta function)
   which CredTT does not include. Standard in provability logic.
 
-diagonal: META-LEVEL AXIOM
+diagonal: META-LEVEL AXIOM (Issue #124)
   Godel fixed-point theorem. Proven FROM encoding in systems with
-  arithmetic. Without arithmetic, we axiomatize it.
+  arithmetic. Without arithmetic, we axiomatize it. The diagonal
+  lemma is the foundation for Godel sentence construction.
 
 D1, D2, D3: META-LEVEL AXIOM
   Hilbert-Bernays-Lob derivability conditions.

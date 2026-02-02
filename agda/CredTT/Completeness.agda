@@ -1,6 +1,6 @@
 -- Pavelka-style Completeness for CredTT
 --
--- STATUS: CONJECTURAL
+-- STATUS: CONJECTURAL (Issue #125)
 -- This module presents the STRUCTURE of Pavelka completeness.
 -- The core theorems are POSTULATED, not proven.
 --

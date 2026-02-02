@@ -1,12 +1,18 @@
 -- Structural Rules (Exchange, Weakening, Contraction)
 --
+-- STATUS: CONCEPTUAL (Issue #126)
+-- This file EXPLAINS how structural rules COULD work in CredTT but
+-- no verification is performed. The type checker does not implement
+-- exchange, weakening, or contraction tracking. For structural rules
+-- to have the described behavior, checker modifications would be needed.
+--
 -- Classical: Free structural rules (exchange, weakening, contraction)
--- CredTT: CONDITIONAL structural rules
+-- CredTT: CONDITIONAL structural rules (CONCEPTUAL)
 --         Exchange: unconditional
 --         Weakening: only if added assumption @ 1 or neutral
 --         Contraction: only with explicit duplication permission
 --
--- These are NOT free in CredTT!
+-- These are NOT free in CredTT (CONCEPTUAL - not yet implemented)!
 
 -- EXCHANGE: Reorder assumptions
 -- Gamma, A, B, Delta |- C  implies  Gamma, B, A, Delta |- C
