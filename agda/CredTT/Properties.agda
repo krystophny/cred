@@ -1,16 +1,18 @@
 {- AXIOM STATUS SUMMARY for Properties.agda
 
-subst-typed, subst-typed-sum-*: SHOULD BE PROVEN
+subst-typed, subst-typed-sum-*: SHOULD BE PROVEN (Issues #115, #118)
   Fundamental substitution lemma for dependent types.
   Requires parallel substitution calculus, simultaneous substitution,
   and compatibility with all type formers.
   Reference: Hofmann thesis, Harper PFPL, PLFA "Properties"
+  See GitHub issues #115, #118 for tracking.
 
 conversion-snd: SHOULD BE PROVEN
   Type conversion using definitional equality B[fst(pair a b)] = B[a].
   Requires congruence of substitution under beta.
 
-These are NOT fundamental axioms but formalization gaps to be filled.
+These are NOT fundamental axioms but FORMALIZATION GAPS to be filled.
+The postulates are standard metatheoretic results (proven in literature).
 -}
 -- Properties of the CredTT typing system
 --

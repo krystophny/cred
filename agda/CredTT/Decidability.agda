@@ -1,3 +1,34 @@
+-- ============================================================================
+-- DECIDABILITY OF TYPE CHECKING
+-- ============================================================================
+--
+-- STATUS: PARTIAL SKETCH
+--
+-- This module contains a PARTIAL development toward decidable type checking
+-- for CredTT. The following gaps remain:
+--
+-- 1. INCOMPLETE TYPE FORMATION: type-formation-dec always rejects Id types
+--    because term typing is not implemented (see lines ~279-286)
+--
+-- 2. NO TERM TYPING DECISION: The file has type-formation-dec but NO
+--    term-typing-dec. Full type checking requires both.
+--
+-- 3. TERMINATION SIGNATURE ONLY: type-check-terminates is defined as a TYPE,
+--    not proven. The termination proof requires well-founded induction on
+--    term/type structure, which depends on the normalization proof.
+--
+-- DEPENDENCIES (not fully proven elsewhere):
+--   - Normalization (Normalization.agda uses TERMINATING pragma)
+--   - Substitution lemma
+--   - Credence algebra decision procedures
+--
+-- PAPER CLAIM vs REALITY:
+--   Paper Section 11 lists decidability as an "open problem"
+--   This is accurate - the problem is open and this module is a sketch.
+--
+-- See GitHub issue #92 for tracking full decidability proof work.
+-- ============================================================================
+
 module CredTT.Decidability where
 
 open import Level using (Level; suc; _⊔_)

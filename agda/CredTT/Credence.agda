@@ -85,6 +85,16 @@ record DeMorganAlgebra (ℓ : Level) : Set (suc ℓ) where
   _∨_ : C → C → C
   c ∨ d = ¬ (¬ c · ¬ d)
 
+  -- Derived: left-monotonicity of multiplication (Issue #54)
+  -- a ≤ b → a · c ≤ b · c
+  ·-mono-l : ∀ {a b} c → a ≤ b → a · c ≤ b · c
+  ·-mono-l c a≤b = ·-mono a≤b (≤-refl c)
+
+  -- Derived: right-monotonicity of multiplication
+  -- a ≤ b → c · a ≤ c · b
+  ·-mono-r : ∀ {a b} c → a ≤ b → c · a ≤ c · b
+  ·-mono-r c a≤b = ·-mono (≤-refl c) a≤b
+
   infixl 7 _·_
   infixl 6 _∨_
   infix  4 _≤_
@@ -94,6 +104,15 @@ record DeMorganAlgebra (ℓ : Level) : Set (suc ℓ) where
 -- ============================================================================
 -- This is the minimal extra structure needed for proof dynamics.
 -- It allows talking about long proofs, recursion, and induction.
+--
+-- LIMITATION (Issues #131, #146): No concrete IterationAlgebra instance is provided.
+-- The IterationAlgebra record defines the INTERFACE (infω, continuity axioms)
+-- but verifying that [0,1] with standard arithmetic satisfies these axioms
+-- requires measure-theoretic arguments not formalized here.
+-- BoolDM WOULD trivially satisfy this (finite sequences stabilize immediately):
+-- infω x = false if any x n = false, else true. But no BoolIterationAlgebra
+-- instance is implemented. Theorems parametric over IterationAlgebra cannot
+-- be instantiated for Bool without this instance.
 
 open import Data.Nat as Nat using (ℕ; zero; suc)
 
@@ -155,6 +174,15 @@ record IterationAlgebra (ℓ : Level) : Set (Level.suc ℓ) where
 -- ============================================================================
 -- This axiom would collapse interior stability. DO NOT assume it in CredTT!
 -- ProbTT (probability semantics over [0,1]) would include this.
+--
+-- OPEN PROBLEM (Issue #108): Non-Archimedean model construction
+-- The paper claims that non-Archimedean De Morgan algebras can have interior
+-- idempotents (0 < e < 1 with e * e = e), but no concrete model is constructed.
+-- Possible approaches:
+--   1. Hyperreal interval [0,1]* with infinitesimals
+--   2. Certain bounded complete distributive lattices
+--   3. Tropical semiring under max-plus
+-- Constructing such a model and proving its properties is future work.
 
 module ArchimedeanAxiom {ℓ : Level} (IA : IterationAlgebra ℓ) where
   open IterationAlgebra IA
@@ -320,10 +348,16 @@ module DependentCredence {ℓ} (DM : DeMorganAlgebra ℓ) where
   const-cf : ∀ {A : Set ℓ} → C → CFun A
   const-cf c _ = c
 
+  -- LIMITATION (Issue #142): Sup/inf over arbitrary types are POSTULATED.
+  -- These are STRONG assumptions:
+  -- 1. For finite types: sup/inf always exist (provable)
+  -- 2. For infinite types: requires completeness of the credence lattice
+  -- 3. For impredicative types: may need choice axiom
+  -- In a constructive setting, these would need to be restricted to
+  -- decidable/searchable types, or work within a specific model like [0,1].
+
   -- Supremum of a credence function: upper bound over all values
   -- sup(c) = smallest d such that c(x) ≤ d for all x
-  -- For finite types, this is just the maximum
-  -- For general types, we need a postulate or work within a specific model
   postulate
     sup : ∀ {A : Set ℓ} → CFun A → C
     sup-upper : ∀ {A : Set ℓ} (cf : CFun A) (a : A) → cf a ≤ sup cf
@@ -356,6 +390,52 @@ module DependentCredence {ℓ} (DM : DeMorganAlgebra ℓ) where
   -- In the [0,1] model: integral of c(x) dP(x) where P is the distribution over A
   -- For the abstract algebra, we use sup as the primary operation
   -- (integration requires additional structure like measure/summation)
+
+-- ============================================================================
+-- NEGATION FIXPOINT STRUCTURE
+-- ============================================================================
+-- Some De Morgan algebras have a negation fixpoint c = ¬c (e.g., [0,1] has c = 1/2)
+-- while others do not (e.g., Bool has no such element).
+-- This module defines the predicate and documents which algebras have it.
+
+module NegationFixpointStructure {ℓ : Level} (DM : DeMorganAlgebra ℓ) where
+  open DeMorganAlgebra DM
+
+  -- A negation fixpoint is an element c such that ¬c = c
+  NegationFixpoint : C → Set ℓ
+  NegationFixpoint c = ¬ c ≡ c
+
+  -- Predicate: an algebra has a negation fixpoint
+  -- This is a PROPERTY of the algebra, not assumed in the base DeMorganAlgebra
+  HasNegationFixpoint : Set ℓ
+  HasNegationFixpoint = Σ C NegationFixpoint
+    where open import Data.Product using (Σ)
+
+  -- Predicate: an algebra has a UNIQUE negation fixpoint
+  HasUniqueNegationFixpoint : Set ℓ
+  HasUniqueNegationFixpoint = HasNegationFixpoint × (∀ c d → NegationFixpoint c → NegationFixpoint d → c ≡ d)
+    where open import Data.Product using (Σ; _×_)
+
+-- ============================================================================
+-- BOOL DOES NOT HAVE A NEGATION FIXPOINT
+-- ============================================================================
+-- This is important: the Bool algebra (classical logic) has no c = not c.
+-- This is WHY classical Gödel sentences are "undecidable" rather than having
+-- a determinate intermediate credence.
+
+module BoolNoNegationFixpoint where
+  open BoolDM
+  open NegationFixpointStructure BoolDM
+
+  -- Direct proof: neither true nor false satisfies not c = c
+  no-bool-fixpoint : ∀ (b : Bool) → NegationFixpoint b → ⊥
+  no-bool-fixpoint false ()
+  no-bool-fixpoint true ()
+
+  -- Consequence: Bool does not have a negation fixpoint
+  bool-no-HasNegationFixpoint : HasNegationFixpoint → ⊥
+  bool-no-HasNegationFixpoint (c , fp) = no-bool-fixpoint c fp
+    where open import Data.Product using (_,_)
 
 -- De Morgan laws (derived)
 module DeMorganLaws {ℓ : Level} (DM : DeMorganAlgebra ℓ) where

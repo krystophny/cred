@@ -1,5 +1,10 @@
 -- CredTT: A Type Theory with Primitive Credences
 -- Complete module listing for typechecking all definitions
+--
+-- VERIFICATION (Issues #39, #134):
+-- Run: cd agda && agda CredTT/Everything.agda
+-- This verifies ALL modules type-check. Requires Agda 2.6+ and
+-- agda-stdlib 1.7+. A CI workflow for Agda checking is future work.
 
 module CredTT.Everything where
 

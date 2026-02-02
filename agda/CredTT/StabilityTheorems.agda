@@ -32,8 +32,7 @@ open import Data.Bool using (Bool; true; false)
 open import Data.Sum using (_⊎_; inj₁; inj₂)
 open import Data.Product using (_×_; _,_; proj₁; proj₂; Σ; ∃)
 open import Data.Empty using (⊥; ⊥-elim)
-open import Data.Unit using (⊤; tt)
-open import Data.Nat as Nat using (ℕ; zero; suc)
+open import Data.Nat using (ℕ; zero; suc)
 
 open import CredTT.Credence
 open import CredTT.Neighbourhood
@@ -168,6 +167,13 @@ module DegenerationLemmas {ℓ : Level} (DM : DeMorganAlgebra ℓ) where
 -- ============================================================================
 -- RECOVERED CLASSICAL PROOF TECHNIQUES (dynamics version)
 -- ============================================================================
+--
+-- NOTE (Issue #132): Several functions below are identity functions (e.g.,
+-- case-dynamics, deduction-dynamics, pi-intro-dynamics, rewriting-dynamics).
+-- This is INTENTIONAL and CORRECT. These techniques preserve the post-fixed
+-- property unchanged - the identity function IS the proof that "if c is
+-- post-fixed under s, then c is still post-fixed under s after the operation."
+-- The trivial proof documents that these operations do NOT change dynamics.
 
 module ClassicalRecovery {ℓ : Level} (DM : DeMorganAlgebra ℓ) where
   open DeMorganAlgebra DM
@@ -213,7 +219,10 @@ module ClassicalRecovery {ℓ : Level} (DM : DeMorganAlgebra ℓ) where
   -- 3. Contraposition: negation reverses order
   -- -------------------------------------------------------------------------
 
-  -- If c ≤ d, then ¬d ≤ ¬c (antitone) - now from DeMorganAlgebra
+  -- If c ≤ d, then ¬d ≤ ¬c (antitone)
+  -- NOTE: This is ¬-antitone from DeMorganAlgebra - it is an AXIOM field that
+  -- each instance must provide. BoolDM proves it; IntervalDM postulates it
+  -- (pending arithmetic proof, see Interval.agda:172).
   neg-antitone : ∀ {c₁ c₂} → c₁ ≤ c₂ → ¬ c₂ ≤ ¬ c₁
   neg-antitone = ¬-antitone
 
@@ -375,6 +384,49 @@ module NativeTechniques {ℓ : Level} (DM : DeMorganAlgebra ℓ) where
       bound-valid : c ≤ bound
 
   -- -------------------------------------------------------------------------
+  -- Example Instances
+  -- -------------------------------------------------------------------------
+
+  -- Example: 1 is a lower bound for itself
+  𝟙-lower-bound : LowerBound 𝟙
+  𝟙-lower-bound = record
+    { bound = 𝟙
+    ; bound-positive = 𝟙-greatest 𝟘
+    ; bound-valid = ≤-refl 𝟙
+    }
+
+  -- Example: 1 is an upper bound for itself
+  𝟙-upper-bound : UpperBound 𝟙
+  𝟙-upper-bound = record
+    { bound = 𝟙
+    ; bound-subunity = ≤-refl 𝟙
+    ; bound-valid = ≤-refl 𝟙
+    }
+
+  -- Example: 0 is a lower bound for everything
+  𝟘-lower-bound : ∀ {c} → LowerBound c
+  𝟘-lower-bound {c} = record
+    { bound = 𝟘
+    ; bound-positive = ≤-refl 𝟘
+    ; bound-valid = 𝟘-least c
+    }
+
+  -- Example: 1 is an upper bound for everything
+  𝟙-universal-upper : ∀ {c} → UpperBound c
+  𝟙-universal-upper {c} = record
+    { bound = 𝟙
+    ; bound-subunity = ≤-refl 𝟙
+    ; bound-valid = 𝟙-greatest c
+    }
+
+  -- NOTE on StabilityProof and InvariantProof:
+  -- These require Positive c (i.e., 0 < c), which excludes 0.
+  -- For non-trivial instances, we'd need specific credence values
+  -- in a concrete algebra like [0,1]. In the abstract DeMorganAlgebra,
+  -- we can only provide instances for 𝟙.
+  -- See GitHub issue #95 for discussion.
+
+  -- -------------------------------------------------------------------------
   -- 4. Continuity/Monotonicity Lemmas
   -- -------------------------------------------------------------------------
 
@@ -437,6 +489,18 @@ module StructuralRules {ℓ : Level} (DM : DeMorganAlgebra ℓ) where
   exchange pf = pf
 
   -- Weakening: adding assumption at credence 1 doesn't degrade
+  -- Proof strategy:
+  --   Goal: (c · 𝟙) ≤ (c · 𝟙) · s
+  --   Given: c ≤ c · s  (i.e., PostFixedPoint c s)
+  --
+  --   Step 1: From c ≤ c · s and c · 𝟙 = c, we get c · 𝟙 ≤ c · s
+  --   Step 2: Rewrite RHS: c · s = c · (𝟙 · s) = (c · 𝟙) · s
+  --           This uses 𝟙 · s = s (identity) and associativity
+  --   Result: c · 𝟙 ≤ (c · 𝟙) · s  ✓
+  --
+  -- Mathematical meaning: If c is a post-fixed point of T_s (i.e., c persists
+  -- under step s), then c · 𝟙 = c is also a post-fixed point. Multiplying by
+  -- the identity 𝟙 doesn't change the stability property.
   weakening : ∀ {c s} →
     PostFixedPoint c s →
     PostFixedPoint (c · 𝟙) s

@@ -32,7 +32,6 @@ open import Data.Bool using (Bool; true; false)
 open import Data.Sum using (_⊎_; inj₁; inj₂)
 open import Data.Product using (_×_; _,_; proj₁; proj₂; Σ; ∃)
 open import Data.Empty using (⊥; ⊥-elim)
-open import Data.Unit using (⊤; tt)
 open import Data.Nat using (ℕ; zero; suc)
 
 open import CredTT.Credence
@@ -78,10 +77,11 @@ module DynamicsDefs {ℓ : Level} (DM : DeMorganAlgebra ℓ) where
   -- (3) Degenerating under step s:
   --     infₙ (c · sⁿ) = 0
   --     "Credence collapses to 0 under iteration"
-  --     We express this as: for any positive lower bound, iteration drops below it
+  --     For any positive lower bound, iteration eventually drops to or below it
+  --     (Issue #77: Fixed from `→ ⊥` which gave the opposite meaning)
   Degenerating : C → C → Set ℓ
   Degenerating c s = ∀ (bound : C) → Positive bound →
-                     Σ ℕ (λ n → (iterate n c s) ≤ bound → ⊥)
+                     Σ ℕ (λ n → (iterate n c s) ≤ bound)
     where
       iterate : ℕ → C → C → C
       iterate zero    c s = c
@@ -172,6 +172,19 @@ module DynamicsDefs {ℓ : Level} (DM : DeMorganAlgebra ℓ) where
   -- Example: idempotent e with 0 < e < 1 satisfies e · e = e, so eⁿ = e
 
   -- Record for an interior stable element
+  -- STATUS: VACUOUSLY SATISFIABLE in standard probability algebras
+  --
+  -- In [0,1] with standard multiplication, there are NO interior idempotents:
+  --   - Idempotent: c · c = c implies c ∈ {0, 1}
+  --   - Interior: 0 < c < 1
+  --   - These are mutually exclusive in [0,1]!
+  --
+  -- This record exists to:
+  --   1. Define the concept for non-standard algebras (e.g., idempotent semirings)
+  --   2. State a negative result: no instances exist in probability algebras
+  --   3. Support potential future extensions with different credence algebras
+  --
+  -- See bool-no-interior below for the proof that Bool has no interior points.
   record InteriorStable : Set ℓ where
     field
       elem     : C
@@ -222,19 +235,32 @@ module StabilityThms {ℓ : Level} (DM : DeMorganAlgebra ℓ) where
 
   -- Application preserves post-fixed point property
   -- If c and d are both post-fixed under s, then c · d is post-fixed under s
-  -- PROOF SKETCH: c ≤ c·s and d ≤ d·s
-  --   By ·-mono: c·d ≤ (c·s)·d = c·(s·d) = c·(d·s) ≤ c·d·s·s
-  --   This does NOT directly give c·d ≤ (c·d)·s without s ≤ 1
-  -- ASSUMPTION: This holds when s ≤ 1 (sub-unitary step)
-  -- See GitHub issue #45: app-preserves-postfixed is postulated
-  postulate
-    app-preserves-postfixed : ∀ {c s d} →
-      PostFixedPoint c s →
-      PostFixedPoint d s →
-      PostFixedPoint (c · d) s
-    -- JUSTIFICATION: In De Morgan algebras with sub-unitary steps (s ≤ 1),
-    -- this follows from: c·d ≤ c·d·1 ≤ c·d·s (when s ≤ 1 implies s acts as
-    -- identity or contraction). Full proof requires ·-mono and order lemmas.
+  -- PROOF: c ≤ c·s implies c·d ≤ (c·s)·d = (c·d)·s by ·-mono and algebra laws
+  --
+  -- NOTE: The second hypothesis (PostFixedPoint d s) is unused in this proof.
+  -- The signature preserves full generality for consistency with the theorem
+  -- statement and potential alternative proofs that might use both hypotheses
+  -- (e.g., proofs via d ≤ d·s with different rewriting strategies).
+  app-preserves-postfixed : ∀ {c s d} →
+    PostFixedPoint c s →
+    PostFixedPoint d s →
+    PostFixedPoint (c · d) s
+  app-preserves-postfixed {c} {s} {d} c≤cs _ =
+    -- Goal: c · d ≤ (c · d) · s
+    -- Step 1: From c ≤ c·s and ≤-refl d, by ·-mono: c·d ≤ (c·s)·d
+    -- Step 2: (c·s)·d = c·(s·d) = c·(d·s) = (c·d)·s by assoc and comm
+    let step1 : c · d ≤ (c · s) · d
+        step1 = ·-mono c≤cs (≤-refl d)
+        -- Rewrite (c·s)·d to (c·d)·s
+        rw1 : (c · s) · d ≡ c · (s · d)
+        rw1 = ·-assoc c s d
+        rw2 : c · (s · d) ≡ c · (d · s)
+        rw2 = cong (c ·_) (·-comm s d)
+        rw3 : c · (d · s) ≡ (c · d) · s
+        rw3 = sym (·-assoc c d s)
+        rw : (c · s) · d ≡ (c · d) · s
+        rw = trans rw1 (trans rw2 rw3)
+    in subst (c · d ≤_) rw step1
 
   -- Negation flips fixed points
   -- If c is a post-fixed point, ¬c is "post-unfixed"
@@ -325,6 +351,12 @@ module StabilityDefs {ℓ : Level} (DM : DeMorganAlgebra ℓ) where
   ·-preserves-stable {c₁} {c₂} (b₁ , pos₁ , bound₁) (b₂ , pos₂ , bound₂) =
     b₁ · b₂ , positive-preserved pos₁ pos₂ , ·-mono bound₁ bound₂
 
+  -- NOTE (Issue #137): ¬-flips-stable uses ¬-antitone, which is an AXIOM FIELD
+  -- of DeMorganAlgebra (see Credence.agda:72), NOT a postulate. Each algebra
+  -- instance must provide this field:
+  -- - BoolDM: proven (notB-antitone)
+  -- - IntervalDM: proven (¬F-antitone-proof)
+  -- This proof is valid for any algebra that satisfies DeMorganAlgebra.
   ¬-flips-stable : ∀ {c} → Stable₁ c → Unstable₀ (¬ c)
   ¬-flips-stable {c} (b , (0≤b , 0≢b) , b≤c) =
     let ¬b≤¬0 : (¬ b) ≤ (¬ 𝟘)
@@ -371,7 +403,10 @@ module StabilityDefs {ℓ : Level} (DM : DeMorganAlgebra ℓ) where
         ¬b≤c = subst ((¬ b) ≤_) (¬-invol c) (¬-antitone ¬c≤b)
     in ¬ b , (0≤¬b , 0≢¬b) , ¬b≤c
 
--- Boolean specialization (legacy)
+-- Boolean specialization (stability view)
+-- TECHNICAL DEBT: This module duplicates `bool-no-interior` from BoolDynamics.
+-- See GitHub issue #102 for planned consolidation.
+-- Temporary justification: kept separate during refactoring to preserve imports.
 module BoolStability where
   open BoolDM
   open DeMorganAlgebra BoolDM
@@ -401,9 +436,11 @@ module IntervalStability where
 
   -- The Interval module defines Interior using ≈ (cross-multiplication equivalence)
   -- while DynamicsDefs.Positive uses ≡. We bridge them with postulates.
+  -- See GitHub issue #189 for tracking proof of these postulates.
 
   postulate
     -- half is positive (0 < half in the dynamics sense)
+    -- Proof requires bridging ≈-inequality to ≡-inequality; see issue #189
     half-positive : Positive half
     quarter-positive : Positive quarter
 
@@ -429,6 +466,8 @@ module IntervalStability where
   half-not-idempotent idemp = no-interior-idempotent half (sym idemp) half-is-interior
 
   -- Power of half: (1/2)^n approaches 0
+  -- See GitHub issue #190 for tracking proof of these postulates.
+  -- Solution: define power-of-half recursively and prove by induction.
   postulate
     power-of-half : ℕ → I
     power-of-half-zero : power-of-half 0 ≡ half
