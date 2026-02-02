@@ -1,5 +1,11 @@
 -- Credence Bounds as Invariants (CredTT-Native #2)
 --
+-- STATUS: CONCEPTUAL (Issue #103 - CredTT-native techniques 20-28)
+-- Files 20-28 describe CredTT-NATIVE proof techniques not found in classical
+-- logic. These are DESIGN DOCUMENTS explaining the concepts. The postulates
+-- are parsed but the meta-reasoning (bounds maintenance, loop invariants)
+-- requires implementation not yet present. See issue #166 for master tracking.
+--
 -- NEW: Prove lower bounds on c(A), upper bounds on c(neg A)
 -- Maintain credence bounds as loop invariants
 --

@@ -1,5 +1,10 @@
 -- Ex Falso Quodlibet (From False, Anything Follows)
 --
+-- STATUS: EXECUTABLE (Issue #107 - incorrectly claimed no content)
+-- This file HAS executable content: the `derive anything` statement (line 27)
+-- uses ex_falso to derive Anything @ 1 from absurdity @ 0. The checker
+-- parses and validates this. The surrounding comments explain the semantics.
+--
 -- Classical: False -> A (for any A)
 -- CredTT: When c = 0, any conditional is admissible (limit)
 --

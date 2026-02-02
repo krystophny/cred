@@ -1,5 +1,10 @@
 -- Vacuous Truth
 --
+-- STATUS: EXECUTABLE (Issue #109 - incorrectly claimed no content)
+-- This file HAS executable content: the `derive pigs_can_fly_means_anything`
+-- statement (line 24) uses ex_falso to show vacuous truth via graded approach.
+-- The checker parses and validates this derivation.
+--
 -- Classical: A -> B is true when A is false (paradox of material implication)
 -- CredTT: When antecedent has c ~ 0, conditional is weakly constrained
 --
