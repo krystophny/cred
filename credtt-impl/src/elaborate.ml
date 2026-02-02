@@ -49,16 +49,26 @@ let rec elab_credence = function
   | CInf (x, c) -> Credence.inf x (elab_credence c)
 
 
+let is_type_param name =
+  (* Single uppercase letter = polymorphic type parameter *)
+  String.length name = 1 && name.[0] >= 'A' && name.[0] <= 'Z'
+
 let rec elab_ty env = function
   | TyVar "_" -> Syntax.TBase 0
+  | TyVar "Nat" -> Syntax.TBase 0  (* Nat as base type 0 *)
+  | TyVar "Bool" -> Syntax.TBase 1  (* Bool as base type 1 *)
+  | TyVar "Type" -> Syntax.TBase 2  (* Type universe as base type 2 *)
+  | TyVar name when is_type_param name ->
+      (* Single letter = polymorphic type param, elab to base type *)
+      Syntax.TBase (Char.code name.[0] - Char.code 'A')
   | TyVar name ->
+      (* Issue #79: Report unbound type names instead of silently returning TBase 0 *)
       (match lookup_var env name with
-       | Some _ -> Syntax.TBase 0
-       | None -> Syntax.TBase 0)
-  | TyApp (f, a) ->
-      let _ = elab_ty env f in
-      let _ = elab_ty env a in
-      Syntax.TBase 0
+       | Some _ -> Syntax.TBase 0  (* Type variable bound in context *)
+       | None -> raise (ElaborationError (Error.UnboundTypeName name)))
+  | TyApp (_, _) ->
+      (* Issue #79: Type applications are not yet supported *)
+      raise (ElaborationError (Error.UnsupportedConstruct "type application"))
   | TyArrow (a, b) ->
       let a' = elab_ty env a in
       let env' = extend_var env "_" in
@@ -84,7 +94,7 @@ and elab_term env = function
   | TVar name ->
       (match lookup_var env name with
        | Some i -> Syntax.Var i
-       | None -> Syntax.Var 0)
+       | None -> raise (ElaborationError (Error.UnboundName name)))
   | TApp (TVar "fst", a) ->
       Syntax.Fst (elab_term env a)
   | TApp (TVar "snd", a) ->
