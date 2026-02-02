@@ -1,11 +1,11 @@
 {- AXIOM STATUS SUMMARY for Properties.agda
 
-subst-typed, subst-typed-sum-*: SHOULD BE PROVEN (Issue #115)
+subst-typed, subst-typed-sum-*: SHOULD BE PROVEN (Issues #115, #118)
   Fundamental substitution lemma for dependent types.
   Requires parallel substitution calculus, simultaneous substitution,
   and compatibility with all type formers.
   Reference: Hofmann thesis, Harper PFPL, PLFA "Properties"
-  See GitHub issue #115 for tracking.
+  See GitHub issues #115, #118 for tracking.
 
 conversion-snd: SHOULD BE PROVEN
   Type conversion using definitional equality B[fst(pair a b)] = B[a].
