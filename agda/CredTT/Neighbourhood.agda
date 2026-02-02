@@ -351,6 +351,12 @@ module StabilityDefs {ℓ : Level} (DM : DeMorganAlgebra ℓ) where
   ·-preserves-stable {c₁} {c₂} (b₁ , pos₁ , bound₁) (b₂ , pos₂ , bound₂) =
     b₁ · b₂ , positive-preserved pos₁ pos₂ , ·-mono bound₁ bound₂
 
+  -- NOTE (Issue #137): ¬-flips-stable uses ¬-antitone, which is an AXIOM FIELD
+  -- of DeMorganAlgebra (see Credence.agda:72), NOT a postulate. Each algebra
+  -- instance must provide this field:
+  -- - BoolDM: proven (notB-antitone)
+  -- - IntervalDM: proven (¬F-antitone-proof)
+  -- This proof is valid for any algebra that satisfies DeMorganAlgebra.
   ¬-flips-stable : ∀ {c} → Stable₁ c → Unstable₀ (¬ c)
   ¬-flips-stable {c} (b , (0≤b , 0≢b) , b≤c) =
     let ¬b≤¬0 : (¬ b) ≤ (¬ 𝟘)

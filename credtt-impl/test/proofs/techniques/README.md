@@ -78,7 +78,17 @@ For actual executable tests, see:
 - `test/test_proof.ml` - Proof checker tests (uses OCaml API, not .ctt files)
 - `test/test_neighbourhood.ml` - Neighbourhood/stability tests
 
-## Future Work
+## Parser Status (Issue #139)
 
-A parser for `.ctt` files is a potential future addition. See the
-"Implementation Status" section in the paper for current limitations.
+A parser EXISTS at `credtt-impl/src/parser.mly` and `lexer.mll`, but:
+
+1. The parser uses different syntax than these example files
+   - Parser expects unicode brackets `〔 〕` not ASCII `[ ]`
+   - Parser lacks some keywords used here (`stable`, `unstable`, `fixpoint`)
+
+2. These `.ctt` files use a DOCUMENTATION SYNTAX designed for readability
+
+To execute actual proofs, use the OCaml API directly (see test/test_proof.ml)
+or update the parser to support the full syntax documented above.
+
+See the "Implementation Status" section in the paper for details.

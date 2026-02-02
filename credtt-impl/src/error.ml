@@ -1,4 +1,17 @@
 (* Error types and formatting *)
+(*
+ * LIMITATION (Issue #136): This module lacks structured error codes.
+ *
+ * Missing features:
+ * - No numeric error codes (E0001, E0002, etc.) for tooling integration
+ * - No severity levels (Error | Warning | Hint)
+ * - No fix suggestions ("did you mean...")
+ * - No related locations ("see also...")
+ * - No JSON output format for build systems
+ *
+ * Impact: IDE integration and automated filtering are harder without codes.
+ * Future work: Add error code enum and --error-format=json output option.
+ *)
 
 open Syntax
 
