@@ -223,7 +223,11 @@ module StabilityThms {ℓ : Level} (DM : DeMorganAlgebra ℓ) where
   -- Application preserves post-fixed point property
   -- If c and d are both post-fixed under s, then c · d is post-fixed under s
   -- PROOF: c ≤ c·s implies c·d ≤ (c·s)·d = (c·d)·s by ·-mono and algebra laws
-  -- (We only need one of the hypotheses; the proof uses c ≤ c·s.)
+  --
+  -- NOTE: The second hypothesis (PostFixedPoint d s) is unused in this proof.
+  -- The signature preserves full generality for consistency with the theorem
+  -- statement and potential alternative proofs that might use both hypotheses
+  -- (e.g., proofs via d ≤ d·s with different rewriting strategies).
   app-preserves-postfixed : ∀ {c s d} →
     PostFixedPoint c s →
     PostFixedPoint d s →
@@ -410,9 +414,11 @@ module IntervalStability where
 
   -- The Interval module defines Interior using ≈ (cross-multiplication equivalence)
   -- while DynamicsDefs.Positive uses ≡. We bridge them with postulates.
+  -- See GitHub issue #189 for tracking proof of these postulates.
 
   postulate
     -- half is positive (0 < half in the dynamics sense)
+    -- Proof requires bridging ≈-inequality to ≡-inequality; see issue #189
     half-positive : Positive half
     quarter-positive : Positive quarter
 
@@ -438,6 +444,8 @@ module IntervalStability where
   half-not-idempotent idemp = no-interior-idempotent half (sym idemp) half-is-interior
 
   -- Power of half: (1/2)^n approaches 0
+  -- See GitHub issue #190 for tracking proof of these postulates.
+  -- Solution: define power-of-half recursively and prove by induction.
   postulate
     power-of-half : ℕ → I
     power-of-half-zero : power-of-half 0 ≡ half
