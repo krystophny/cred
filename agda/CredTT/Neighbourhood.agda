@@ -398,7 +398,14 @@ module StabilityDefs {ℓ : Level} (DM : DeMorganAlgebra ℓ) where
         ¬b≤c = subst ((¬ b) ≤_) (¬-invol c) (¬-antitone ¬c≤b)
     in ¬ b , (0≤¬b , 0≢¬b) , ¬b≤c
 
--- Boolean specialization (legacy)
+-- Boolean specialization (stability view)
+-- NOTE: This module provides stability-oriented versions of boolean lemmas.
+-- It overlaps with BoolDynamics above, which provides dynamics-oriented versions.
+-- Both are kept because they serve different conceptual purposes:
+--   - BoolDynamics: focuses on iteration, fixed points
+--   - BoolStability: focuses on Stable₁/Unstable₀ classification
+-- The core lemma (bool-no-interior) is proven in both using same technique.
+-- See GitHub issue #102 for discussion of consolidation options.
 module BoolStability where
   open BoolDM
   open DeMorganAlgebra BoolDM

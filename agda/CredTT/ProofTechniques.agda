@@ -523,6 +523,18 @@ module TechniqueSummary where
 module ConcreteExamples where
   open ClassicalTechniques
 
+  -- NOTE: ConcreteExamples uses COMMENTS rather than executable Agda code.
+  -- This is because:
+  -- 1. Examples like "A @ 0.9, (A -> B) @ 0.95 |- B @ 0.855" require CONCRETE
+  --    numeric credences from an interval algebra [0,1]
+  -- 2. This module works over ABSTRACT DeMorganAlgebra without concrete values
+  -- 3. The Interval.agda module provides concrete [0,1] but it's not imported
+  --    here to keep the module abstract and general
+  --
+  -- These examples are PEDAGOGICAL - they explain how credence multiplication
+  -- affects proof confidence. For executable tests with concrete credences,
+  -- see: credtt-impl/test/test_neighbourhood.ml
+
   {-
   Example 1: Modus Ponens with Credence
   Classical: A, A -> B |- B
