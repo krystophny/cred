@@ -374,6 +374,11 @@ BUT THIS IS A FEATURE:
 -- COLLAPSE TO CLASSICAL LOGIC
 -- ============================================================================
 
+-- NOTE (Issue #160): ClassicalCollapse and ProvabilitySemantics are NOT contradictory.
+-- ProvabilitySemantics is PARAMETRIC over any DeMorganAlgebra. ClassicalCollapse
+-- shows that Bool has no negation fixpoint, so GödelCredence (which requires
+-- HasUniqueNegationFixpoint) cannot be instantiated for Bool. This is CORRECT:
+-- Bool = classical logic = undecidability, [0,1] = graded logic = c=1/2 at fixpoint.
 module ClassicalCollapse where
   open import Data.Bool using (Bool; true; false; not)
 
