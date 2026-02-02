@@ -127,4 +127,70 @@ let () =
     | Error _ -> false
   );
 
+  (* Fixpoint: c = c*c resolves to 1 (idempotent, non-trivial solution) *)
+  test "fixpoint c = c*c resolves to 1" (
+    let c_squared = Credence.Mul (Credence.Var "idempot_c", Credence.Var "idempot_c") in
+    let decls = [
+      Proof.Fixpoint ("idempot_c", c_squared)
+    ] in
+    match Proof.check_proof decls with
+    | Ok state ->
+        (match Hashtbl.find_opt state.fixpoints "idempot_c" with
+         | Some r -> Credence.rat_equal r Credence.rat_one
+         | None -> false)
+    | Error _ -> false
+  );
+
+  (* Fixpoint: c = c*k with k < 1 resolves to 0 *)
+  test "fixpoint c = c*k (k<1) resolves to 0" (
+    let c_times_half = Credence.Mul (Credence.Var "contract_c", Credence.Rat (1, 2)) in
+    let decls = [
+      Proof.Fixpoint ("contract_c", c_times_half)
+    ] in
+    match Proof.check_proof decls with
+    | Ok state ->
+        (match Hashtbl.find_opt state.fixpoints "contract_c" with
+         | Some r -> Credence.rat_equal r Credence.rat_zero
+         | None -> false)
+    | Error _ -> false
+  );
+
+  (* Fixpoint: c = c*1 is identity (no binding) *)
+  test "fixpoint c = c*1 is identity" (
+    let c_times_one = Credence.Mul (Credence.Var "ident_c", Credence.One) in
+    let decls = [
+      Proof.Fixpoint ("ident_c", c_times_one)
+    ] in
+    match Proof.check_proof decls with
+    | Ok state ->
+        (* Identity means no fixpoint value is stored *)
+        not (Hashtbl.mem state.fixpoints "ident_c")
+    | Error _ -> false
+  );
+
+  (* Fixpoint: c = neg(neg c) is identity by involution *)
+  test "fixpoint c = neg(neg c) is identity" (
+    let double_neg = Credence.Neg (Credence.Neg (Credence.Var "invol_c")) in
+    let decls = [
+      Proof.Fixpoint ("invol_c", double_neg)
+    ] in
+    match Proof.check_proof decls with
+    | Ok state ->
+        (* Identity means no fixpoint value is stored *)
+        not (Hashtbl.mem state.fixpoints "invol_c")
+    | Error _ -> false
+  );
+
+  (* Fixpoint: c = c is trivial identity *)
+  test "fixpoint c = c is trivial identity" (
+    let trivial = Credence.Var "trivial_c" in
+    let decls = [
+      Proof.Fixpoint ("trivial_c", trivial)
+    ] in
+    match Proof.check_proof decls with
+    | Ok state ->
+        not (Hashtbl.mem state.fixpoints "trivial_c")
+    | Error _ -> false
+  );
+
   Printf.printf "\nAll proof checker tests passed!\n"
