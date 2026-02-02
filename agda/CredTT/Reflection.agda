@@ -192,6 +192,13 @@ module GödelCredence {ℓ : Level} (DM : DeMorganAlgebra ℓ)
     G-self-reference : Prov G-code ≡ ¬ (Prov G-code)
 
   -- From self-reference, G's provability is the negation fixpoint
+  -- NOTE (Issue #98): This derivation is NOT circular - it derives G-credence from:
+  --   1. G-self-reference (postulated): Prov G ≡ ¬(Prov G)
+  --   2. gödel-credence-unique (from HasUniqueNegationFixpoint axiom)
+  --   3. ½-fixpoint: ¬ ½ ≡ ½
+  -- The sym flips G-self-reference to get ¬(Prov G) ≡ Prov G.
+  -- This is standard metamathematics: ASSUMING G exists with self-reference property,
+  -- its credence MUST be ½ in any algebra with unique negation fixpoint.
   G-credence : Prov G-code ≡ ½
   G-credence = gödel-credence-unique (Prov G-code) ½
     (sym G-self-reference)  -- ¬(Prov G) = Prov G, so Prov G = ¬(Prov G)

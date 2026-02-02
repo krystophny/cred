@@ -168,6 +168,10 @@ let infer (ctx : Context.t) (t : term) : result =
   Ok (res.ty, res.credence)
 
 (* Check term against type, return credence *)
+(* LIMITATION (Issue #100): This check_against is nearly identical to the one in
+   infer_full (line 96). DRY violation exists because infer_full needs checking
+   mode for introduction forms, and check also needs it. A refactor would extract
+   a shared helper, but current structure prioritizes readability over DRY. *)
 let check ctx t expected : check_result =
   (* Helper for introduction forms that need checking mode *)
   let rec check_against ctx t expected : check_result =
