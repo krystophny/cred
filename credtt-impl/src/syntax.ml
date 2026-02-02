@@ -3,7 +3,16 @@
    No Empty type: impossibility is credence 0, not a special type.
    No Unit type: certainty is credence 1, not a special type.
 
-   Types: Base, Pi, Sigma, +, Id *)
+   Types: Base, Pi, Sigma, +, Id
+
+   LIMITATION (Issue #110): No source location tracking
+   The AST types do not include source location information. This means:
+   - Error messages show "v0" instead of user-provided variable names
+   - Cannot point to specific source locations in errors
+   - IDE integration is limited without location info
+
+   Future work: Add location tracking by wrapping AST nodes with
+   { value: 'a; loc: loc } where loc = { file; line; col }. *)
 
 type ty =
   | TBase of int

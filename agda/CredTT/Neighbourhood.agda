@@ -32,7 +32,6 @@ open import Data.Bool using (Bool; true; false)
 open import Data.Sum using (_⊎_; inj₁; inj₂)
 open import Data.Product using (_×_; _,_; proj₁; proj₂; Σ; ∃)
 open import Data.Empty using (⊥; ⊥-elim)
-open import Data.Unit using (⊤; tt)
 open import Data.Nat using (ℕ; zero; suc)
 
 open import CredTT.Credence
