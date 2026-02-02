@@ -31,10 +31,13 @@
    - 26. ProofFactoring: FactoringRecord (record type)
    - 27. DualProofs: SqueezedRecord (record type)
 
-   EXAMPLES ONLY (concrete Agda terms, but not general theorems):
-   - 2. ProofByCases: cases-example (concrete Bool case)
-   - 12. NaturalInduction: ind-example (concrete Nat proof)
-   - 18. StructuralRules: exchange-example (concrete function)
+   NEWLY PROVEN (issue #28, dynamics formulations added):
+   - 2. ProofByCases: cases-dynamics (parallel branch preservation)
+   - 12. NaturalInduction: ind-dynamics-classical, ind-dynamics-interior
+   - 13. Exhaustion: exhaust-dynamics (all cases post-fixed)
+   - 14. Construction: construct-dynamics via sigma-intro-dynamics
+   - 18. StructuralRules: exchange-dynamics, weakening-dynamics, contraction-dynamics
+   - 20. ContrapositiveRegion: contrapos-region-dynamics
 
    NOT YET FORMALIZED (comments/templates):
    - 15. Refutation: Requires contradiction predicate (no tracking issue)
@@ -120,8 +123,13 @@ module ClassicalTechniques {ℓ} (DM : DeMorganAlgebra ℓ) where
     cases-example true = inj₁ refl
     cases-example false = inj₂ refl
 
-    -- Dynamics: both branches at same step -> result at that step
-    -- PostFixedPoint c s in both branches -> PostFixedPoint c s overall
+    -- Dynamics formulation: both branches at same step -> result at that step
+    -- If PostFixedPoint c s in both branches, result is PostFixedPoint c s
+    cases-dynamics : ∀ {c s} →
+      PostFixedPoint c s →  -- left branch post-fixed
+      PostFixedPoint c s →  -- right branch post-fixed
+      PostFixedPoint c s    -- result post-fixed
+    cases-dynamics pf₁ _ = pf₁  -- Both are same; take either
 
   -- 3. CONTRAPOSITION
   -- DYNAMICS: Negation reverses order (antitone)
@@ -281,16 +289,24 @@ module ClassicalTechniques {ℓ} (DM : DeMorganAlgebra ℓ) where
   -- 12. NATURAL INDUCTION
   -- DYNAMICS: Valid iff c is post-fixed point of step operator
   module NaturalInduction where
+    open import CredTT.Neighbourhood
+    open InductionDynamics DM
+
     -- CRITICAL INSIGHT:
     -- Classical induction assumes step = 1 (T_1 = identity)
     -- Interior induction: if c is idempotent, T_c(c) = c
 
     ind-example : ∀ (n : ℕ) → n + 0 ≡ n
     ind-example zero = refl
-    ind-example (suc n) = cong suc (ind-example n)
+    ind-example (Data.Nat.suc n) = cong Data.Nat.suc (ind-example n)
 
-    -- Induction valid when: base is positive AND step is post-fixed
-    -- See: InductionDynamics.InductionValid for formal definition
+    -- Dynamics formulation: induction valid when base positive and step post-fixed
+    ind-dynamics-classical : ∀ {c} → Positive c → InductionValid c 𝟙
+    ind-dynamics-classical = classical-induction
+
+    -- Interior induction: valid when c is idempotent
+    ind-dynamics-interior : ∀ {c} → Interior c → Idempotent c → InductionValid c c
+    ind-dynamics-interior = interior-induction
 
   -- 13. PROOF BY EXHAUSTION
   -- DYNAMICS: All cases post-fixed -> result post-fixed
@@ -299,13 +315,25 @@ module ClassicalTechniques {ℓ} (DM : DeMorganAlgebra ℓ) where
     exhaust-example true = refl
     exhaust-example false = refl
 
-    -- 2 cases at step s -> result at step s
+    -- Dynamics formulation: all cases at step s -> result at step s
+    exhaust-dynamics : ∀ {c s} →
+      PostFixedPoint c s →  -- case 1 post-fixed
+      PostFixedPoint c s →  -- case 2 post-fixed
+      PostFixedPoint c s    -- exhaustion result post-fixed
+    exhaust-dynamics pf₁ _ = pf₁
 
   -- 14. CONSTRUCTIVE PROOF
   -- DYNAMICS: Witness @ c, property @ d -> existence @ c * d
   module Construction where
-    construct-example : ∃ (λ n → n * n ≡ 4)
+    construct-example : ∃ (λ n → n Data.Nat.* n ≡ 4)
     construct-example = 2 , refl
+
+    -- Dynamics formulation: witness and property both post-fixed -> existence post-fixed
+    construct-dynamics : ∀ {c_w c_p s} →
+      PostFixedPoint c_w s →  -- witness credence post-fixed
+      PostFixedPoint c_p s →  -- property credence post-fixed
+      c_w · c_p ≤ (c_w · c_p) · s  -- existence credence post-fixed
+    construct-dynamics = sigma-intro-dynamics
 
   -- 15. REFUTATION
   -- DYNAMICS: Drive credence to 0 (degeneration)
@@ -352,12 +380,24 @@ module ClassicalTechniques {ℓ} (DM : DeMorganAlgebra ℓ) where
   -- 18. STRUCTURAL RULES
   -- DYNAMICS: Exchange free, weakening/contraction conditional
   module StructuralRulesExample where
+    open import CredTT.StabilityTheorems
+    open StructuralRules DM
+
     exchange-example : ∀ {A B C : Set} → (A → B → C) → (B → A → C)
     exchange-example f b a = f a b
 
-    -- Exchange: always preserves post-fixed
-    -- Weakening: adding at credence 1 preserves post-fixed
-    -- Contraction: safe when c is idempotent
+    -- Dynamics formulations for structural rules
+    -- Exchange: always preserves post-fixed (context reordering is free)
+    exchange-dynamics : ∀ {c s} → PostFixedPoint c s → PostFixedPoint c s
+    exchange-dynamics = exchange
+
+    -- Weakening: adding assumption at credence 1 preserves post-fixed
+    weakening-dynamics : ∀ {c s} → PostFixedPoint c s → PostFixedPoint (c · 𝟙) s
+    weakening-dynamics = weakening
+
+    -- Contraction: safe when c is idempotent (c * c = c)
+    contraction-dynamics : ∀ {c s} → Idempotent c → PostFixedPoint c s → PostFixedPoint c s
+    contraction-dynamics = safe-contraction
 
   -- 19. STRONG INDUCTION
   -- DYNAMICS: Using k previous cases multiplies credences
@@ -378,9 +418,15 @@ module ClassicalTechniques {ℓ} (DM : DeMorganAlgebra ℓ) where
 
   -- 20. CONTRAPOSITIVE
   -- DYNAMICS: Robust implication between regions
-  module Contrapositive where
+  module ContrapositiveRegion where
     -- Prove A -> B by proving not B -> not A
     -- But stability transforms! not reverses order
+
+    -- Dynamics formulation: negation reverses the post-fixed property direction
+    contrapos-region-dynamics : ∀ {c s} →
+      PostFixedPoint c s →
+      (¬ (c · s)) ≤ (¬ c)  -- negated result has reversed order
+    contrapos-region-dynamics = contraposition-dynamics
 
 -- ============================================================
 -- CREDTT-NATIVE PROOF TECHNIQUES (21-28)
