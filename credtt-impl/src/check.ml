@@ -46,8 +46,9 @@ let infer_full (ctx : Context.t) (t : term) : full_result =
   let rec go ctx = function
     | Var i ->
         (match lookup ctx i with
-         | Some ty ->
-             (* Variables have credence 1, which is Stable1 (t-var rule) *)
+         | Some (ty, _var_credence) ->
+             (* Variables have credence 1, which is Stable1 (t-var rule)
+                Note: _var_credence from context is ignored per Agda spec *)
              Ok { ty; credence = Credence.one; stability = Neighbourhood.Robust }
          | None -> Error (Error.UnboundVariable i))
 
