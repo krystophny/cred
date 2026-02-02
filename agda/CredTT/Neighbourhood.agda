@@ -78,10 +78,11 @@ module DynamicsDefs {ℓ : Level} (DM : DeMorganAlgebra ℓ) where
   -- (3) Degenerating under step s:
   --     infₙ (c · sⁿ) = 0
   --     "Credence collapses to 0 under iteration"
-  --     We express this as: for any positive lower bound, iteration drops below it
+  --     For any positive lower bound, iteration eventually drops to or below it
+  --     (Issue #77: Fixed from `→ ⊥` which gave the opposite meaning)
   Degenerating : C → C → Set ℓ
   Degenerating c s = ∀ (bound : C) → Positive bound →
-                     Σ ℕ (λ n → (iterate n c s) ≤ bound → ⊥)
+                     Σ ℕ (λ n → (iterate n c s) ≤ bound)
     where
       iterate : ℕ → C → C → C
       iterate zero    c s = c
