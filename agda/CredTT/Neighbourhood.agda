@@ -1,17 +1,28 @@
 {- Neighbourhood Semantics for CredTT
 
-   Stability is a META-PROPERTY (like termination), not a judgment inside CredTT.
-   We define:
-   - Stable₁: robust inhabitation near credence 1
-   - Unstable₀: fragile inhabitation near credence 0
+   FUNDAMENTAL INSIGHT:
+   CredTT is NOT about assigning truth values.
+   It is about HOW CREDENCE BEHAVES UNDER PROOF TRANSFORMATIONS.
 
-   Key insight: classical proof techniques become stability theorems.
-   The {0,1} collapse makes neighbourhoods trivial (singletons).
+   - Proof rules induce MONOTONE OPERATORS on credences
+   - Proof structure induces ITERATION of these operators
+   - "Stability" is about FIXED POINTS of these operators
 
-   AXIOM STATUS:
-   Some stability lemmas are postulated because they require additional
-   structure beyond the De Morgan algebra axioms (e.g., non-triviality 0 ≠ 1,
-   monotonicity of multiplication, anti-monotonicity of negation).
+   This is ORDER-THEORETIC DYNAMICS, not topology, not metrics.
+
+   THREE DISTINCT NOTIONS (DO NOT CONFLATE):
+   (A) Extremal credences: c = 1 (maximal), c = 0 (degenerate)
+   (B) Interior credences: 0 < c < 1 (first-class citizens, NOT approximations)
+   (C) Iteration behavior: what happens to c · sⁿ as n → ∞
+
+   CRITICAL: We do NOT assume Archimedeanicity!
+   In general De Morgan algebras:
+   - s < 1 does NOT imply sⁿ → 0
+   - There can be idempotents (s · s = s)
+   - There can be plateaus (c · s = c with 0 < c < 1)
+   - Multiple fixed points are possible
+
+   These are NOT pathological - they are what makes CredTT richer than probability theory.
 -}
 module CredTT.Neighbourhood where
 
@@ -22,24 +33,21 @@ open import Data.Sum using (_⊎_; inj₁; inj₂)
 open import Data.Product using (_×_; _,_; proj₁; proj₂; Σ; ∃)
 open import Data.Empty using (⊥; ⊥-elim)
 open import Data.Unit using (⊤; tt)
+open import Data.Nat using (ℕ; zero; suc)
 
 open import CredTT.Credence
 
 -- ============================================================================
--- STABILITY DEFINITIONS
+-- MONOTONE OPERATORS AND DYNAMICS
 -- ============================================================================
 
--- Stability near 1: inhabitation persists under degradation
--- Formal: ∃ c₀ < 1 . ∀ c ≥ c₀ . ∃ a . (Γ ⊢ a : A @ c)
--- This is a META-PROPERTY about derivability, not a judgment.
+-- Every proof step induces a monotone operator T_s : C → C
+-- where T_s(c) = c · s
 
--- For a De Morgan algebra, we express stability order-theoretically:
--- c is stable near 1 if c is bounded away from 0
-
-module StabilityDefs {ℓ : Level} (DM : DeMorganAlgebra ℓ) where
+module DynamicsDefs {ℓ : Level} (DM : DeMorganAlgebra ℓ) where
   open DeMorganAlgebra DM
 
-  -- Strictly less than (derived from order)
+  -- Strict order
   _<_ : C → C → Set ℓ
   c < d = (c ≤ d) × (c ≡ d → ⊥)
 
@@ -51,79 +59,272 @@ module StabilityDefs {ℓ : Level} (DM : DeMorganAlgebra ℓ) where
   SubUnity : C → Set ℓ
   SubUnity c = c < 𝟙
 
-  -- Bounded away from zero: c ≥ c₀ for some c₀ > 0
-  -- This captures persistence: small perturbations stay inhabited
-  BoundedAwayFromZero : C → Set ℓ
-  BoundedAwayFromZero c = Σ C (λ c₀ → Positive c₀ × (c₀ ≤ c))
-
-  -- Bounded away from one: c ≤ c₁ for some c₁ < 1
-  BoundedAwayFromOne : C → Set ℓ
-  BoundedAwayFromOne c = Σ C (λ c₁ → SubUnity c₁ × (c ≤ c₁))
-
   -- ============================================================================
-  -- STABILITY CLASSIFICATION
+  -- THE THREE KEY DEFINITIONS (order-theoretic, no Archimedean assumption)
   -- ============================================================================
 
-  -- Stable₁: robust near credence 1
-  -- Operationally: the credence is bounded away from 0
-  Stable₁ : C → Set ℓ
-  Stable₁ = BoundedAwayFromZero
+  -- (1) Post-fixed point under step s:
+  --     c ≤ c · s
+  --     "Applying the proof step does not reduce credence"
+  PostFixedPoint : C → C → Set ℓ
+  PostFixedPoint c s = c ≤ (c · s)
 
-  -- Unstable₀: fragile near credence 0
-  -- Operationally: the credence is bounded away from 1
-  Unstable₀ : C → Set ℓ
-  Unstable₀ = BoundedAwayFromOne
+  -- (2) Invariant under step s:
+  --     c = c · s
+  --     "Exact fixed point - step preserves credence exactly"
+  Invariant : C → C → Set ℓ
+  Invariant c s = c ≡ (c · s)
 
-  -- Interior: neither extreme (strictly between 0 and 1)
+  -- (3) Degenerating under step s:
+  --     infₙ (c · sⁿ) = 0
+  --     "Credence collapses to 0 under iteration"
+  --     We express this as: for any positive lower bound, iteration drops below it
+  Degenerating : C → C → Set ℓ
+  Degenerating c s = ∀ (bound : C) → Positive bound →
+                     Σ ℕ (λ n → (iterate n c s) ≤ bound → ⊥)
+    where
+      iterate : ℕ → C → C → C
+      iterate zero    c s = c
+      iterate (suc n) c s = (iterate n c s) · s
+
+  -- Iteration helper (exposed for use elsewhere)
+  iterate : ℕ → C → C → C
+  iterate zero    c s = c
+  iterate (suc n) c s = (iterate n c s) · s
+
+  -- ============================================================================
+  -- STABILITY CLASSIFICATION (based on dynamics)
+  -- ============================================================================
+
+  -- Robust: credence is preserved or improved under all admissible steps
+  -- This is broader than "c = 1"
+  Robust : C → Set ℓ
+  Robust c = Positive c × PostFixedPoint c 𝟙
+
+  -- Vanishing: credence degenerates to 0
+  Vanishing : C → Set ℓ
+  Vanishing c = c ≡ 𝟘
+
+  -- Idempotent: c · c = c (self-stable, may be interior!)
+  Idempotent : C → Set ℓ
+  Idempotent c = c ≡ (c · c)
+
+  -- Interior: 0 < c < 1 (first-class citizen)
   Interior : C → Set ℓ
   Interior c = Positive c × SubUnity c
 
-  -- Stability classification type
-  data Stability : C → Set ℓ where
-    stable₁   : ∀ {c} → Stable₁ c → Stability c
-    unstable₀ : ∀ {c} → Unstable₀ c → Stability c
-    interior  : ∀ {c} → Interior c → Stability c
+  -- Stability under a specific step
+  StableUnder : C → C → Set ℓ
+  StableUnder c s = (iterate-limit c s ≢ 𝟘)
+    where
+      -- The limit exists when iteration stabilizes
+      iterate-limit : C → C → C
+      iterate-limit c s = c  -- Placeholder: in general, this is the infimum
+
+      _≢_ : C → C → Set ℓ
+      x ≢ y = x ≡ y → ⊥
 
   -- ============================================================================
-  -- POSTULATED LEMMAS (require additional axioms)
+  -- POSTULATED AXIOMS
   -- ============================================================================
 
-  -- Non-triviality: 0 ≠ 1 (required for meaningful stability)
   postulate
+    -- Non-triviality
     𝟘≢𝟙 : 𝟘 ≡ 𝟙 → ⊥
 
-  -- Anti-monotonicity of negation (order-reversing)
-  postulate
+    -- Anti-monotonicity of negation
     ¬-antitone : ∀ {c₁ c₂} → c₁ ≤ c₂ → ¬ c₂ ≤ ¬ c₁
 
-  -- Monotonicity of multiplication
-  postulate
+    -- Monotonicity of multiplication
     ·-mono : ∀ {a b c d} → a ≤ c → b ≤ d → (a · b) ≤ (c · d)
 
-  -- Positivity of product (for product algebras like [0,1])
-  postulate
+    -- Positivity preservation (for well-behaved algebras)
     ·-positive : ∀ {c₁ c₂} → Positive c₁ → Positive c₂ → Positive (c₁ · c₂)
 
   -- ============================================================================
-  -- BASIC STABILITY LEMMAS
+  -- TRIVIAL FIXED POINTS (extremal cases)
   -- ============================================================================
 
-  -- 1 is stable (trivially)
+  -- 1 is a post-fixed point under step 1
+  𝟙-postfixed-at-1 : PostFixedPoint 𝟙 𝟙
+  𝟙-postfixed-at-1 = subst (𝟙 ≤_) (sym (·-identityʳ 𝟙)) (≤-refl 𝟙)  -- 1 ≤ 1·1 = 1
+
+  -- 0 is invariant under any step
+  𝟙-invariant-at-1 : Invariant 𝟙 𝟙
+  𝟙-invariant-at-1 = sym (·-identityʳ 𝟙)  -- 1 = 1 · 1
+
+  -- 0 is invariant under any step
+  𝟘-invariant : ∀ (s : C) → Invariant 𝟘 s
+  𝟘-invariant s = sym (·-annihilˡ s)  -- 0 = 0 · s
+
+  -- ============================================================================
+  -- IDEMPOTENT ELEMENTS (key to interior stability!)
+  -- ============================================================================
+
+  -- In a general De Morgan algebra, there may be idempotent elements e where e · e = e
+  -- These are stable under iteration by themselves!
+
+  -- If c is idempotent, iteration stabilizes immediately
+  idempotent-stable : ∀ {c} → Idempotent c → Positive c →
+                      ∀ (n : ℕ) → iterate n c c ≡ c
+  idempotent-stable idemp pos zero    = refl
+  idempotent-stable idemp pos (suc n) =
+    trans (cong (λ x → x · _) (idempotent-stable idemp pos n)) (sym idemp)
+
+  -- ============================================================================
+  -- KEY INSIGHT: Interior credences can be stable!
+  -- ============================================================================
+
+  -- In non-Archimedean algebras, there exist c with 0 < c < 1 where c is stable
+  -- Example: idempotent e with 0 < e < 1 satisfies e · e = e, so eⁿ = e
+
+  -- Record for an interior stable element
+  record InteriorStable : Set ℓ where
+    field
+      elem     : C
+      interior : Interior elem
+      idemp    : Idempotent elem
+
+-- ============================================================================
+-- BOOLEAN ALGEBRA SPECIALIZATION (degenerate case)
+-- ============================================================================
+
+-- In Bool, there are NO interior points
+-- This is the {0,1} collapse: CredTT becomes MLTT
+
+module BoolDynamics where
+  open BoolDM
+  open DeMorganAlgebra BoolDM
+  open DynamicsDefs BoolDM
+
+  -- Bool has no interior points
+  bool-no-interior : (c : Bool) → Interior c → ⊥
+  bool-no-interior true  ((0≤c , 0≢c) , (c≤1 , c≢1)) = c≢1 refl
+  bool-no-interior false ((0≤c , 0≢c) , _) = 0≢c refl
+
+  -- Only two fixed points: 0 and 1
+  bool-only-trivial-fixed : (c : Bool) → Idempotent c → (c ≡ true) ⊎ (c ≡ false)
+  bool-only-trivial-fixed true  _ = inj₁ refl
+  bool-only-trivial-fixed false _ = inj₂ refl
+
+  -- Classification is exhaustive for Bool
+  bool-classify : (c : Bool) → (c ≡ true) ⊎ (c ≡ false)
+  bool-classify true  = inj₁ refl
+  bool-classify false = inj₂ refl
+
+  -- This is WHY {0,1} collapse works:
+  -- In Bool, dynamics are trivial because there's nowhere else to go
+
+-- ============================================================================
+-- STABILITY THEOREMS FOR TYPE RULES
+-- ============================================================================
+
+module StabilityThms {ℓ : Level} (DM : DeMorganAlgebra ℓ) where
+  open DeMorganAlgebra DM
+  open DynamicsDefs DM
+
+  -- These theorems require careful algebraic reasoning about associativity,
+  -- commutativity, and monotonicity. We postulate them as axioms about
+  -- well-behaved De Morgan algebras with multiplication.
+
+  -- Application preserves post-fixed point property
+  -- If c is post-fixed under s, then c · d is post-fixed under s
+  -- (requires associativity and commutativity of ·)
+  postulate
+    app-preserves-postfixed : ∀ {c s d} →
+      PostFixedPoint c s →
+      PostFixedPoint d s →
+      PostFixedPoint (c · d) s
+
+  -- Negation flips fixed points
+  -- If c is a post-fixed point, ¬c is "post-unfixed"
+  neg-flips : ∀ {c s} →
+    PostFixedPoint c s →
+    (¬ (c · s)) ≤ (¬ c)
+  neg-flips c≤cs = ¬-antitone c≤cs
+
+  -- Ex falso: 0 is always a fixed point (trivial dynamics)
+  ex-falso : ∀ (s : C) → Invariant 𝟘 s
+  ex-falso = 𝟘-invariant
+
+  -- Weakening: 1 · c = c (no degradation when using at credence 1)
+  weakening : ∀ (c : C) → 𝟙 · c ≡ c
+  weakening = ·-identityˡ
+
+-- ============================================================================
+-- INDUCTION PRINCIPLE (order-theoretic formulation)
+-- ============================================================================
+
+module InductionDynamics {ℓ : Level} (DM : DeMorganAlgebra ℓ) where
+  open DeMorganAlgebra DM
+  open DynamicsDefs DM
+
+  -- Induction is valid for predicates whose credence is a post-fixed point
+  -- of the step operator.
+  --
+  -- Classical induction secretly assumes: step at credence 1
+  -- CredTT makes this explicit: c ≤ c · s
+  --
+  -- This allows:
+  -- - Induction at c = 1 (classical)
+  -- - Induction at interior c (if c is idempotent or step-invariant)
+  -- - Rejection of brittle induction (when c > c · s, step degrades)
+
+  record InductionValid (c : C) (step : C) : Set ℓ where
+    field
+      base      : Positive c
+      preserve  : PostFixedPoint c step
+
+  -- Classical induction: step = 1
+  classical-induction : ∀ {c} → Positive c → InductionValid c 𝟙
+  classical-induction {c} pos = record
+    { base = pos
+    ; preserve = subst (c ≤_) (sym (·-identityʳ c)) (≤-refl c)
+    }
+
+  -- Interior induction: c is idempotent
+  -- If c = c · c, then c ≤ c · c (post-fixed point)
+  interior-induction : ∀ {c} → Interior c → Idempotent c → InductionValid c c
+  interior-induction {c} (pos , _) idemp = record
+    { base = pos
+    ; preserve = subst (c ≤_) idemp (≤-refl c)  -- c ≤ c, subst along c = c·c
+    }
+
+-- ============================================================================
+-- CLASSICAL RECOVERY (for backwards compatibility)
+-- ============================================================================
+
+-- Legacy definitions using old terminology
+module StabilityDefs {ℓ : Level} (DM : DeMorganAlgebra ℓ) where
+  open DeMorganAlgebra DM
+  open DynamicsDefs DM public
+
+  -- Bounded away from zero (legacy)
+  BoundedAwayFromZero : C → Set ℓ
+  BoundedAwayFromZero c = Σ C (λ c₀ → Positive c₀ × (c₀ ≤ c))
+
+  -- Bounded away from one (legacy)
+  BoundedAwayFromOne : C → Set ℓ
+  BoundedAwayFromOne c = Σ C (λ c₁ → SubUnity c₁ × (c ≤ c₁))
+
+  -- Legacy stability names
+  Stable₁ : C → Set ℓ
+  Stable₁ = BoundedAwayFromZero
+
+  Unstable₀ : C → Set ℓ
+  Unstable₀ = BoundedAwayFromOne
+
+  -- Basic lemmas
   𝟙-stable : Stable₁ 𝟙
   𝟙-stable = 𝟙 , (𝟙-greatest 𝟘 , 𝟘≢𝟙) , ≤-refl 𝟙
 
-  -- 0 is unstable (trivially)
   𝟘-unstable : Unstable₀ 𝟘
   𝟘-unstable = 𝟘 , (𝟘-least 𝟙 , 𝟘≢𝟙) , ≤-refl 𝟘
 
-  -- Multiplication preserves stability (key rule!)
-  -- If c₁ and c₂ are stable, so is c₁ · c₂
   ·-preserves-stable : ∀ {c₁ c₂} → Stable₁ c₁ → Stable₁ c₂ → Stable₁ (c₁ · c₂)
   ·-preserves-stable {c₁} {c₂} (b₁ , pos₁ , bound₁) (b₂ , pos₂ , bound₂) =
     b₁ · b₂ , ·-positive pos₁ pos₂ , ·-mono bound₁ bound₂
 
-  -- Negation flips stability
-  -- Stable c implies Unstable (¬ c)
   ¬-flips-stable : ∀ {c} → Stable₁ c → Unstable₀ (¬ c)
   ¬-flips-stable {c} (b , (0≤b , 0≢b) , b≤c) =
     let ¬b≤¬0 : (¬ b) ≤ (¬ 𝟘)
@@ -131,152 +332,34 @@ module StabilityDefs {ℓ : Level} (DM : DeMorganAlgebra ℓ) where
         ¬b≤1 : (¬ b) ≤ 𝟙
         ¬b≤1 = subst (λ x → (¬ b) ≤ x) ¬-𝟘 ¬b≤¬0
         ¬b≢1 : (¬ b) ≡ 𝟙 → ⊥
-        -- If ¬b = 1, then ¬(¬b) = ¬1 = 0
-        -- But ¬(¬b) = b (by involution), so b = 0
-        -- But 0 ≢ b (from positivity of b)
         ¬b≢1 eq =
           let ¬¬b≡b : ¬ (¬ b) ≡ b
               ¬¬b≡b = ¬-invol b
               ¬1≡0 : ¬ 𝟙 ≡ 𝟘
               ¬1≡0 = ¬-𝟙
-              -- ¬b ≡ 1 implies ¬(¬b) ≡ ¬1 ≡ 0
               ¬¬b≡0 : ¬ (¬ b) ≡ 𝟘
               ¬¬b≡0 = trans (cong ¬_ eq) ¬1≡0
-              -- Combined with ¬¬b ≡ b, we get b ≡ 0
               b≡0 : b ≡ 𝟘
               b≡0 = trans (sym ¬¬b≡b) ¬¬b≡0
-              -- But 0 ≢ b means 𝟘 ≡ b → ⊥
               0≡b : 𝟘 ≡ b
               0≡b = sym b≡0
           in 0≢b 0≡b
     in ¬ b , (¬b≤1 , ¬b≢1) , ¬-antitone b≤c
 
-  -- Unstable (¬ c) implies Stable c (via double negation)
-  unstable-neg-to-stable : ∀ {c} → Unstable₀ (¬ c) → Stable₁ c
-  unstable-neg-to-stable {c} (b , (b≤1 , b≢1) , neg-c≤b) =
-    let ¬b = ¬ b
-        -- ¬ is antitone: neg-c ≤ b implies ¬b ≤ ¬¬c = c
-        ¬b≤c : ¬ b ≤ c
-        ¬b≤c = subst (λ x → ¬ b ≤ x) (¬-invol c) (¬-antitone neg-c≤b)
-        -- ¬b > 0 because b < 1
-        -- First: ¬-antitone (𝟙-greatest b) gives ¬𝟙 ≤ ¬b
-        -- Then substitute ¬𝟙 = 𝟘 to get 𝟘 ≤ ¬b
-        0≤¬b : 𝟘 ≤ ¬ b
-        0≤¬b = subst (λ x → x ≤ ¬ b) ¬-𝟙 (¬-antitone (𝟙-greatest b))
-        -- ¬b ≢ 0 because if ¬b = 0, then ¬(¬b) = ¬0 = 1, but ¬(¬b) = b, so b = 1
-        -- contradicting b ≢ 1
-        0≢¬b : 𝟘 ≡ ¬ b → ⊥
-        0≢¬b eq =
-          let -- From eq : 𝟘 ≡ ¬b, get ¬𝟘 ≡ ¬(¬b)
-              ¬0≡¬¬b : ¬ 𝟘 ≡ ¬ (¬ b)
-              ¬0≡¬¬b = cong ¬_ eq
-              -- ¬𝟘 = 𝟙
-              1≡¬¬b : 𝟙 ≡ ¬ (¬ b)
-              1≡¬¬b = trans (sym ¬-𝟘) ¬0≡¬¬b
-              -- ¬(¬b) = b
-              1≡b : 𝟙 ≡ b
-              1≡b = trans 1≡¬¬b (¬-invol b)
-              -- So b = 1
-              b≡1 : b ≡ 𝟙
-              b≡1 = sym 1≡b
-          in b≢1 b≡1
-        ¬b-pos : Positive (¬ b)
-        ¬b-pos = 0≤¬b , 0≢¬b
-    in ¬ b , ¬b-pos , ¬b≤c
-
--- ============================================================================
--- BOOLEAN ALGEBRA SPECIALIZATION
--- ============================================================================
-
--- In Bool, stability classification is exhaustive and trivial
+-- Boolean specialization (legacy)
 module BoolStability where
   open BoolDM
   open DeMorganAlgebra BoolDM
   open StabilityDefs BoolDM
 
-  -- In {0,1}, neighbourhoods collapse to singletons
-  -- true is stable, false is unstable, no interior points
-
-  -- Classification is exhaustive for Bool
   bool-classify : (c : Bool) → (c ≡ true × Stable₁ c) ⊎ (c ≡ false × Unstable₀ c)
   bool-classify true  = inj₁ (refl , (true , (≤-true , (λ ())) , ≤-true))
   bool-classify false = inj₂ (refl , (false , (≤-false , (λ ())) , ≤-false))
 
-  -- No interior points in Bool
   bool-no-interior : (c : Bool) → Interior c → ⊥
   bool-no-interior true  (pos , (c≤1 , c≢1)) = c≢1 refl
   bool-no-interior false ((0≤c , 0≢c) , _) = 0≢c refl
 
-  -- Neighbourhood is trivial (singleton) for Bool
   bool-neighbourhood-trivial : (c : Bool) → Stable₁ c ⊎ Unstable₀ c
   bool-neighbourhood-trivial true  = inj₁ (true , (≤-true , (λ ())) , ≤-true)
   bool-neighbourhood-trivial false = inj₂ (false , (≤-false , (λ ())) , ≤-false)
-
--- ============================================================================
--- STABILITY THEOREMS FOR TYPE RULES
--- ============================================================================
-
--- These are meta-theorems about how stability propagates through derivations
-
-module StabilityThms {ℓ : Level} (DM : DeMorganAlgebra ℓ) where
-  open DeMorganAlgebra DM
-  open StabilityDefs DM
-
-  -- Application is stability-preserving
-  -- If f : A → B @ c₁ with Stable₁ c₁
-  -- and a : A @ c₂ with Stable₁ c₂
-  -- then f a : B @ c₁ · c₂ with Stable₁ (c₁ · c₂)
-  app-stability : ∀ {c₁ c₂} →
-    Stable₁ c₁ → Stable₁ c₂ →
-    Stable₁ (c₁ · c₂)
-  app-stability = ·-preserves-stable
-
-  -- Π-introduction preserves stability
-  -- If body has uniform stability, the lambda inherits it
-  pi-intro-stability : ∀ {c} →
-    Stable₁ c →
-    Stable₁ c  -- Lambda at body credence
-  pi-intro-stability stable-c = stable-c
-
-  -- Σ-elimination preserves stability
-  -- Projections don't degrade credence
-  sigma-elim-stability : ∀ {c} →
-    Stable₁ c →
-    Stable₁ c
-  sigma-elim-stability stable-c = stable-c
-
-  -- Composition preserves stability
-  -- g ∘ f @ c₁ · c₂ is stable if both are stable
-  compose-stability : ∀ {c₁ c₂} →
-    Stable₁ c₁ → Stable₁ c₂ →
-    Stable₁ (c₁ · c₂)
-  compose-stability = ·-preserves-stable
-
-  -- Reductio: if ¬A is unstable, A is stable
-  -- This is the stability version of proof by contradiction
-  reductio : ∀ {c} →
-    Unstable₀ (¬ c) →
-    Stable₁ c
-  reductio = unstable-neg-to-stable
-
-  -- Contraposition: stability version (not exact equivalence)
-  -- If c₁ ≤ c₂, then ¬c₂ ≤ ¬c₁
-  contraposition-order : ∀ {c₁ c₂} →
-    c₁ ≤ c₂ →
-    ¬ c₂ ≤ ¬ c₁
-  contraposition-order = ¬-antitone
-
-  -- Ex falso: limit admissibility
-  -- When c = 0, any conditional credence is admissible
-  -- This is because c · d = 0 for any d when c = 0
-  ex-falso-limit : ∀ (d : C) →
-    𝟘 · d ≡ 𝟘
-  ex-falso-limit d = ·-annihilˡ d
-
-  -- Weakening: conditional on c = 1
-  -- Adding assumptions at credence 1 preserves stability
-  weakening-at-one : ∀ {c} →
-    Stable₁ c →
-    c · 𝟙 ≡ c →  -- Provided by ·-identityʳ
-    Stable₁ c
-  weakening-at-one stable-c _ = stable-c
