@@ -165,6 +165,15 @@ record IterationAlgebra (ℓ : Level) : Set (Level.suc ℓ) where
 -- ============================================================================
 -- This axiom would collapse interior stability. DO NOT assume it in CredTT!
 -- ProbTT (probability semantics over [0,1]) would include this.
+--
+-- OPEN PROBLEM (Issue #108): Non-Archimedean model construction
+-- The paper claims that non-Archimedean De Morgan algebras can have interior
+-- idempotents (0 < e < 1 with e * e = e), but no concrete model is constructed.
+-- Possible approaches:
+--   1. Hyperreal interval [0,1]* with infinitesimals
+--   2. Certain bounded complete distributive lattices
+--   3. Tropical semiring under max-plus
+-- Constructing such a model and proving its properties is future work.
 
 module ArchimedeanAxiom {ℓ : Level} (IA : IterationAlgebra ℓ) where
   open IterationAlgebra IA
