@@ -125,6 +125,62 @@ let () =
     | None -> false
   );
 
+  (* CLeq constraint tests *)
+  test "solve_constraints_ext [v <= 0] binds v=0" (
+    let result = solve_constraints_ext [CLeq (Var "v", Zero)] in
+    match List.assoc_opt "v" result.bindings with
+    | Some r -> rat_equal r rat_zero
+    | None -> false
+  );
+
+  test "solve_constraints_ext [1 <= v] binds v=1" (
+    let result = solve_constraints_ext [CLeq (One, Var "v")] in
+    match List.assoc_opt "v" result.bindings with
+    | Some r -> rat_equal r rat_one
+    | None -> false
+  );
+
+  test "solve_constraints_ext [v1 = v2] unifies variables" (
+    let result = solve_constraints_ext [
+      CEqual (Var "v1", Var "v2");
+      CEqual (Var "v1", Zero)
+    ] in
+    let v1_binding = List.assoc_opt "v1" result.bindings in
+    let v2_binding = List.assoc_opt "v2" result.bindings in
+    match v1_binding, v2_binding with
+    | Some r1, Some r2 -> rat_equal r1 rat_zero && rat_equal r2 rat_zero
+    | _, _ -> false
+  );
+
+  test "solve_constraints_ext [3/4 <= 1/2] is unsatisfied" (
+    let result = solve_constraints_ext [CLeq (Rat (3, 4), Rat (1, 2))] in
+    List.length result.unsolved_leq = 1
+  );
+
+  test "solve_constraints_ext [1/4 <= 1/2] is satisfied (empty unsolved)" (
+    let result = solve_constraints_ext [CLeq (Rat (1, 4), Rat (1, 2))] in
+    List.length result.unsolved_leq = 0
+  );
+
+  test "solve_constraints_ext [0 <= v] is trivially satisfied" (
+    let result = solve_constraints_ext [CLeq (Zero, Var "v")] in
+    List.length result.unsolved_leq = 0 && List.length result.bindings = 0
+  );
+
+  test "solve_constraints_ext [v <= 1] is trivially satisfied" (
+    let result = solve_constraints_ext [CLeq (Var "v", One)] in
+    List.length result.unsolved_leq = 0 && List.length result.bindings = 0
+  );
+
+  test "solve_constraints_ext detects conflicts" (
+    let result = solve_constraints_ext [
+      CEqual (Var "v1", Var "v2");
+      CEqual (Var "v1", Zero);
+      CEqual (Var "v2", One)
+    ] in
+    List.length result.conflicts > 0
+  );
+
   (* Dependent credence tests *)
   test "dep_var creates DepVar" (
     match dep_var "x" 0 with

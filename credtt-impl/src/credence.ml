@@ -267,21 +267,138 @@ type constraint_t =
   | CLeq of t * t
   | CFixpoint of string * (t -> t)
 
-(* Solve a list of constraints, returning variable assignments *)
-let solve_constraints constraints =
+(* Union-Find for variable unification (Issue #51) *)
+module UnionFind = struct
+  type uf = {
+    parent : (string, string) Hashtbl.t;
+    rank : (string, int) Hashtbl.t;
+  }
+
+  let create () = { parent = Hashtbl.create 16; rank = Hashtbl.create 16 }
+
+  let rec find uf x =
+    match Hashtbl.find_opt uf.parent x with
+    | None -> x
+    | Some p ->
+        let root = find uf p in
+        if root <> p then Hashtbl.replace uf.parent x root;
+        root
+
+  let union uf x y =
+    let rx = find uf x in
+    let ry = find uf y in
+    if rx <> ry then begin
+      let rank_x = Option.value ~default:0 (Hashtbl.find_opt uf.rank rx) in
+      let rank_y = Option.value ~default:0 (Hashtbl.find_opt uf.rank ry) in
+      if rank_x < rank_y then
+        Hashtbl.replace uf.parent rx ry
+      else if rank_x > rank_y then
+        Hashtbl.replace uf.parent ry rx
+      else begin
+        Hashtbl.replace uf.parent ry rx;
+        Hashtbl.replace uf.rank rx (rank_x + 1)
+      end
+    end
+end
+
+(* Constraint solver result *)
+type solve_result = {
+  bindings : (string * rational) list;
+  unsolved_leq : (t * t) list;  (* CLeq constraints that could not be resolved *)
+  conflicts : (string * rational * rational) list;  (* Variables with conflicting assignments *)
+}
+
+(* Solve a list of constraints, returning variable assignments (Issue #51)
+   Handles:
+   - CEqual (Var v, Zero/One): direct assignment
+   - CEqual (Var v, Rat): direct assignment
+   - CEqual (Var v1, Var v2): variable unification
+   - CLeq: constraint propagation for bounds
+   - CFixpoint: fixpoint solving *)
+let solve_constraints_ext constraints =
+  let uf = UnionFind.create () in
   let bindings = Hashtbl.create 8 in
+  let leq_constraints = ref [] in
+
+  (* First pass: handle equalities and unification *)
   List.iter (function
     | CEqual (Var v, Zero) | CEqual (Zero, Var v) ->
         Hashtbl.replace bindings v rat_zero
     | CEqual (Var v, One) | CEqual (One, Var v) ->
         Hashtbl.replace bindings v rat_one
+    | CEqual (Var v, Rat (n, d)) | CEqual (Rat (n, d), Var v) ->
+        Hashtbl.replace bindings v (rat_normalize { num = n; den = d })
+    | CEqual (Var v1, Var v2) when v1 <> v2 ->
+        (* Unify two variables *)
+        UnionFind.union uf v1 v2
     | CFixpoint (v, f) ->
         (match solve_fixpoint f v with
          | Some r -> Hashtbl.replace bindings v r
          | None -> ())
+    | CLeq (w1, w2) ->
+        leq_constraints := (w1, w2) :: !leq_constraints
     | _ -> ()
   ) constraints;
-  Hashtbl.fold (fun k v acc -> (k, v) :: acc) bindings []
+
+  (* Propagate bindings through union-find, tracking conflicts *)
+  let propagated = Hashtbl.create 8 in
+  let conflicts = ref [] in
+  Hashtbl.iter (fun v r ->
+    let root = UnionFind.find uf v in
+    match Hashtbl.find_opt propagated root with
+    | None -> Hashtbl.replace propagated root r
+    | Some existing when rat_equal existing r -> ()
+    | Some existing ->
+        (* Record conflict: variable has two different values *)
+        conflicts := (v, existing, r) :: !conflicts
+  ) bindings;
+
+  (* Assign same value to all unified variables *)
+  let final_bindings = Hashtbl.create 8 in
+  Hashtbl.iter (fun v _ ->
+    let root = UnionFind.find uf v in
+    match Hashtbl.find_opt propagated root with
+    | Some r -> Hashtbl.replace final_bindings v r
+    | None -> ()
+  ) bindings;
+
+  (* Also propagate to variables that were unified but not directly bound *)
+  Hashtbl.iter (fun v _ ->
+    let root = UnionFind.find uf v in
+    if not (Hashtbl.mem final_bindings v) then
+      match Hashtbl.find_opt propagated root with
+      | Some r -> Hashtbl.replace final_bindings v r
+      | None -> ()
+  ) uf.parent;
+
+  (* Process CLeq constraints: simple bound propagation *)
+  let unsolved_leq = List.filter (fun (w1, w2) ->
+    match simplify w1, simplify w2 with
+    | Zero, _ -> false  (* 0 <= anything: trivially true *)
+    | _, One -> false   (* anything <= 1: trivially true *)
+    | Var v, Zero ->
+        (* v <= 0 implies v = 0 *)
+        Hashtbl.replace final_bindings v rat_zero;
+        false
+    | One, Var v ->
+        (* 1 <= v implies v = 1 *)
+        Hashtbl.replace final_bindings v rat_one;
+        false
+    | Rat (n1, d1), Rat (n2, d2) ->
+        (* Keep unsatisfied constraints: n1/d1 > n2/d2 means constraint fails *)
+        not (n1 * d2 <= n2 * d1)
+    | _ -> true  (* Cannot resolve: keep as unsolved *)
+  ) !leq_constraints in
+
+  {
+    bindings = Hashtbl.fold (fun k v acc -> (k, v) :: acc) final_bindings [];
+    unsolved_leq;
+    conflicts = !conflicts;
+  }
+
+(* Legacy wrapper for backward compatibility *)
+let solve_constraints constraints =
+  (solve_constraints_ext constraints).bindings
 
 (* Create credence from rational *)
 let of_rational r =
