@@ -346,10 +346,16 @@ module DependentCredence {ℓ} (DM : DeMorganAlgebra ℓ) where
   const-cf : ∀ {A : Set ℓ} → C → CFun A
   const-cf c _ = c
 
+  -- LIMITATION (Issue #142): Sup/inf over arbitrary types are POSTULATED.
+  -- These are STRONG assumptions:
+  -- 1. For finite types: sup/inf always exist (provable)
+  -- 2. For infinite types: requires completeness of the credence lattice
+  -- 3. For impredicative types: may need choice axiom
+  -- In a constructive setting, these would need to be restricted to
+  -- decidable/searchable types, or work within a specific model like [0,1].
+
   -- Supremum of a credence function: upper bound over all values
   -- sup(c) = smallest d such that c(x) ≤ d for all x
-  -- For finite types, this is just the maximum
-  -- For general types, we need a postulate or work within a specific model
   postulate
     sup : ∀ {A : Set ℓ} → CFun A → C
     sup-upper : ∀ {A : Set ℓ} (cf : CFun A) (a : A) → cf a ≤ sup cf

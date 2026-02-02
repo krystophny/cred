@@ -1,5 +1,10 @@
 -- Direct Proof
 --
+-- STATUS: DIDACTIC (Issue #141)
+-- This file EXPLAINS how direct proof works in CredTT but the checker
+-- does NOT verify credence multiplication. Credences are tracked syntactically
+-- (c matches c) not algebraically (1 * c = c is not verified).
+--
 -- Classical: Build conclusion step by step from premises
 -- CredTT: Track credence accumulation via multiplication
 --
