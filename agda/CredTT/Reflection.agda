@@ -54,8 +54,10 @@
 
    PROVEN:
    - inconsistency-bounded: c · d ≤ c and c · d ≤ d (Issue #52)
-   - G-credence: derived from postulated gödel-credence + G-self-reference
    - no-bool-fixpoint: ∀ b → not b ≡ b → ⊥
+
+   DERIVED (from postulates):
+   - G-credence: derived from postulated gödel-credence + G-self-reference
 
    CONJECTURAL (postulated, believed true, not proven here):
 

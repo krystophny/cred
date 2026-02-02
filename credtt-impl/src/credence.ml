@@ -305,6 +305,7 @@ end
 type solve_result = {
   bindings : (string * rational) list;
   unsolved_leq : (t * t) list;  (* CLeq constraints that could not be resolved *)
+  conflicts : (string * rational * rational) list;  (* Variables with conflicting assignments *)
 }
 
 (* Solve a list of constraints, returning variable assignments (Issue #51)
@@ -339,14 +340,17 @@ let solve_constraints_ext constraints =
     | _ -> ()
   ) constraints;
 
-  (* Propagate bindings through union-find *)
+  (* Propagate bindings through union-find, tracking conflicts *)
   let propagated = Hashtbl.create 8 in
+  let conflicts = ref [] in
   Hashtbl.iter (fun v r ->
     let root = UnionFind.find uf v in
     match Hashtbl.find_opt propagated root with
     | None -> Hashtbl.replace propagated root r
     | Some existing when rat_equal existing r -> ()
-    | Some _ -> ()  (* Conflicting assignments; keep first *)
+    | Some existing ->
+        (* Record conflict: variable has two different values *)
+        conflicts := (v, existing, r) :: !conflicts
   ) bindings;
 
   (* Assign same value to all unified variables *)
@@ -381,14 +385,15 @@ let solve_constraints_ext constraints =
         Hashtbl.replace final_bindings v rat_one;
         false
     | Rat (n1, d1), Rat (n2, d2) ->
-        (* Check if constraint is satisfied *)
-        n1 * d2 <= n2 * d1
+        (* Keep unsatisfied constraints: n1/d1 > n2/d2 means constraint fails *)
+        not (n1 * d2 <= n2 * d1)
     | _ -> true  (* Cannot resolve: keep as unsolved *)
   ) !leq_constraints in
 
   {
     bindings = Hashtbl.fold (fun k v acc -> (k, v) :: acc) final_bindings [];
     unsolved_leq;
+    conflicts = !conflicts;
   }
 
 (* Legacy wrapper for backward compatibility *)
