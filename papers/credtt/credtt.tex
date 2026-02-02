@@ -37,7 +37,7 @@
 \maketitle
 
 \begin{abstract}
-We define a type theory where judgments carry \emph{credences} from a De Morgan algebra. The algebra has multiplication, complement, zero, one, and order---with disjunction derived via De Morgan duality. When $\C = \{\zero, \one\}$, we recover Martin-L\"of Type Theory. When $\C = {[0,1]}$, we get probabilistic typing with conditioning via the chain rule (not division). The key insight: types and logic \emph{emerge} from credence structure. We add conditioning as a primitive, distinguishing this from purely algebraic approaches.
+We define a type theory where judgments carry \emph{credences} from a De Morgan algebra. The algebra has multiplication, complement, zero, one, and order---with disjunction derived via De Morgan duality. When $\C = \{\zero, \one\}$, we recover Martin-L\"of Type Theory. When $\C = {[0,1]}$, we get probabilistic typing where \emph{credence multiplication} captures conditioning: the elimination rules multiply credences, implementing the chain rule $P(A,B) = P(A) \cdot P(B|A)$ without requiring explicit division. The key insight: types and logic \emph{emerge} from credence structure. Note: This paper presents the \emph{design} of CredTT; a full formal verification remains future work (see Section~\ref{sec:status}).
 \end{abstract}
 
 \section*{Terminological Note}
@@ -1408,6 +1408,7 @@ CredTT provides more information than both: constructive math says ``no choice f
 
 %=============================================================================
 \section{Implementation Status}
+\label{sec:status}
 %=============================================================================
 
 \subsection{What Is Implemented}
@@ -1454,6 +1455,34 @@ The implementation is a \textbf{prototype} demonstrating the core ideas:
 \end{itemize}
 
 A production implementation would require bidirectional credence inference, general fixpoint solving, and a proper parser for proof files.
+
+\subsection{Formalization Status (Issue \#138)}
+
+The Agda formalization (\texttt{agda/CredTT/}) provides \textbf{structure}, not complete proofs:
+
+\begin{itemize}
+    \item \textbf{50+ postulates}: Core metatheorems (substitution, soundness, completeness) are postulated, not proven
+    \item \textbf{Axiom fields}: Key properties like $\negc$-antitone are axioms that each algebra instance must satisfy
+    \item \textbf{Concrete models}: BoolDM is fully proven; IntervalDM relies on arithmetic postulates
+\end{itemize}
+
+\noindent\textbf{What IS proven:}
+\begin{itemize}
+    \item De Morgan algebra structure and derived operations
+    \item Dynamics-based stability classification
+    \item MLTT embedding in one direction (\texttt{embed-collapse})
+    \item Basic type formation rules with credence tracking
+\end{itemize}
+
+\noindent\textbf{What is CONJECTURED (postulated):}
+\begin{itemize}
+    \item Substitution lemma (Issue \#115)
+    \item Subject reduction/progress (Issues \#186, \#187)
+    \item Pavelka completeness (Issue \#99)
+    \item G\"odel sentence existence at credence $\frac{1}{2}$ (Issue \#124)
+\end{itemize}
+
+This paper should be read as a \textbf{design proposal} for CredTT, with the Agda files serving as executable specifications. Full verification is future work requiring 4000+ lines of additional proof.
 
 %=============================================================================
 \section{Open Problems}
