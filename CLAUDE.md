@@ -2,21 +2,21 @@
 
 ## Project Overview
 
-**Cred**: A foundation for mathematics where credences are primitive and logic emerges.
+**Cred**: A foundation for graded mathematics. We work in [0,1] credences as the primary setting, not as a generalization of binary logic.
 
-## Core Architecture
+## Core Vision
 
 ```
-Credence Algebra (*, ~, ≤, _|_)     ← PRIMITIVE
-         ↓
-Graded Propositions (P : C)
-         ↓
-Graded Predicates (S : Thing → C)
-         ↓ Boolean collapse
-Relevant Logic (no ex falso)
-         ↓ add material implication
-Classical FOL
+Cred [0,1]                    ← PRIMARY (where we live)
+├── Graded propositions
+├── Graded predicates (non-crisp sets)
+├── Graded proofs
+├── Self-hosting Cred in Cred
+│
+└── Boolean {0,1}             ← FALLBACK (compatibility only)
 ```
+
+**Binary logic is a degenerate case, not the foundation.**
 
 ## The Primitive Structure
 
@@ -27,76 +27,69 @@ C : credence values [0,1]
 * : conjunction (multiplication)
 ~ : negation (complement, ~c = 1 - c)
 ≤ : ordering
-_|_ : conditioning (PRIMITIVE, not derived from division)
+_|_ : conditioning (PRIMITIVE, chain rule)
 ```
 
 ## Conditioning (The Key Innovation)
 
-NOT defined via division:
+PRIMITIVE with chain rule axiom:
 ```
-P(A|B) := P(A∧B) / P(B)     ← requires division, undefined at 0
-```
-
-Instead, PRIMITIVE with chain rule axiom:
-```
-(A | B) * B = A ∧ B         ← only multiplication, unconstrained at 0
+(A | B) * B = A ∧ B
 ```
 
-When B = 0: (A | 0) is unconstrained (not "true" like material implication).
+When B = 0: (A | 0) is unconstrained — no ex falso.
 
-This avoids ex falso naturally.
+## Why Graded is Primary
 
-## Collapse Hierarchy
+| Binary Logic | Cred |
+|--------------|------|
+| Undecidable = stuck | Undecidable = cred 0.5 (a value!) |
+| Paradoxes break system | Paradoxes → fixed points |
+| Gödel: unprovable limbo | Gödel: cred 0.5 (meaningful) |
+| Self-reference problematic | Self-reference natural |
 
-```
-Cred [0,1]          graded relevant (primary)
-    ↓
-{0, ½, 1}           three-valued relevant (RM3-like)
-    ↓
-{0, 1}              Boolean relevant logic
-    ↓ +ex falso
-Classical FOL       (optional extension)
-```
+## Defying Gödel
 
-## What Emerges vs What's Assumed
+Gödel's incompleteness is a limitation of BINARY logic:
+- "True but unprovable" = stuck in limbo
 
-| Assumed (Primitive) | Emerges |
-|---------------------|---------|
-| Credence values C | Propositions (as credences) |
-| Operations *, ~, ≤ | Logical connectives |
-| Conditioning _\|_ | Inference rules |
-| Chain rule axiom | Relevant logic (Boolean collapse) |
+In Cred:
+- Gödel sentence G has cred(G) = 0.5
+- This IS its truth value — not stuck
+- Self-reference gives fixed points, not paradoxes
 
-## Key Properties
+## Self-Hosting Goal
 
-1. **No ex falso**: From impossible condition, nothing determined (not "everything true")
-2. **Graded truth**: Undecidability visible as intermediate credence
-3. **Relevant logic emerges**: Boolean collapse gives relevant logic, not classical
-4. **Probability-native**: Chain rule is probabilistic reasoning
+Implement Cred in Cred itself.
+
+Since Cred handles self-reference via fixed points:
+- The system can reason about itself
+- No Gödelian limitations on self-description
+- True foundational autonomy
 
 ## File Structure
 
 ```
 foundations/
-├── part1/          Collapse hierarchy
-├── part2/          Credence foundation (no crisp sets)
-├── part3/          New proof techniques, undecidability
+├── part1/    Primitives (+ collapse for compatibility)
+├── part2/    Graded mathematics (PRIMARY)
+├── part3/    New techniques, undecidability, self-hosting
 └── README.md
 ```
 
-## Comparison to Related Work
+## Key Properties
 
-| System | Relationship |
-|--------|--------------|
-| Fuzzy logic | Different: fuzzy collapses to classical (has ex falso) |
-| Relevant logic | Cred generalizes relevant logic |
-| Probability theory | Similar: conditioning undefined at 0 |
-| Paraconsistent logic | Related: no explosion from contradiction |
+1. **Graded truth primary**: [0,1] is where we work, not {0,1}
+2. **No ex falso**: Conditioning, not material implication
+3. **Undecidability has value**: cred = 0.5, not "stuck"
+4. **Self-reference works**: Fixed points, not paradoxes
+5. **Self-hosting possible**: System can describe itself
 
-## Key Insight
+## Collapse (For Compatibility Only)
 
-Classical logic is a **lossy compression** of credence structure:
-1. Collapse [0,1] to {0,1} (lose graded truth)
-2. Add ex falso (lose relevance)
+If needed for classical mathematics:
+```
+Cred [0,1] → {0,1} Boolean → Relevant logic
+```
 
-Cred is what you get before these losses.
+But we prefer to stay graded.

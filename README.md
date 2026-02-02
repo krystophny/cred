@@ -1,39 +1,59 @@
-# Cred: A Foundation Below Logic
+# Cred: A Foundation for Graded Mathematics
 
-**Cred** is a foundation for mathematics where credences (degrees of belief) are primitive and logic emerges as a limiting case.
+**Cred** is a foundation for mathematics where credences are primitive. We work directly with graded truth — not as a generalization of binary logic, but as the natural setting for mathematics.
 
-## The Key Insight
+## The Vision
 
-Classical logic is what credence looks like when you can't see the middle.
+**Graded mathematics is primary. Binary logic is a degenerate special case.**
 
 ```
-Cred [0,1]              graded, conditioning primitive
-    ↓ collapse
-{0, ½, 1}               three-valued relevant (RM3-like)
-    ↓ collapse
-{0, 1}                  Boolean relevant logic
-    ↓ add ex falso
-Classical FOL           standard foundation
+Cred [0,1]              ← WHERE WE WORK
+├── Graded propositions
+├── Graded predicates (non-crisp sets)
+├── Graded proofs
+└── Self-hosting Cred in Cred
+
+Binary {0,1}            ← FALLBACK (compatibility only)
+└── Classical logic/sets (recoverable if needed)
 ```
 
-## What Makes This Different
+## Why Graded?
 
-| Traditional | Cred |
-|-------------|------|
-| Logic is primitive | Credence is primitive, logic emerges |
-| Material implication (ex falso) | Conditioning via chain rule (no ex falso) |
-| Boolean truth | Graded truth, Boolean is limit |
-| Fuzzy logic generalizes classical | Cred generalizes relevant logic |
+| Binary Logic | Cred |
+|--------------|------|
+| Undecidable = stuck, no value | Undecidable = credence 0.5 |
+| Paradoxes break the system | Paradoxes → fixed points |
+| Gödel: true but unprovable | Gödel: credence 0.5 (meaningful) |
+| Ex falso: nonsense follows | No ex falso: relevance preserved |
+
+## Defying Gödel
+
+Gödel's incompleteness: "Some true statements are unprovable."
+
+In binary logic, this is a fundamental limitation — statements exist in limbo.
+
+In Cred:
+- "Unprovable" means credence doesn't reach 1
+- Gödel sentence G has credence **exactly 0.5**
+- This IS a value. G is not stuck — it has graded truth.
+- Self-reference produces fixed points, not paradoxes
+
+**Cred makes undecidability a feature, not a bug.**
+
+## Self-Hosting
+
+Goal: Implement Cred in Cred itself.
+
+Since Cred handles self-reference via fixed points (not paradoxes), self-hosting becomes natural. The system can reason about itself without the limitations that plague binary foundations.
 
 ## Structure
 
-- **part1/**: The collapse hierarchy - how classical structures emerge
-- **part2/**: Credence foundation - replacing relevant logic without crisp sets
-- **part3/**: New mathematics - proof techniques and undecidability
+- **part1/**: The primitives (and collapse to binary for compatibility)
+- **part2/**: Graded mathematics — where we live
+- **part3/**: New techniques, undecidability, and self-hosting
 
 ## Prior Art
 
 - **Rényi (1955)**: Conditional probability as primitive
-- **Anderson & Belnap (1960s)**: Relevant logic (no ex falso)
-- **Fritz et al. (2020)**: Markov categories (conditioning without division)
-- **Krantz et al. (1971)**: Qualitative probability (numbers emerge from ordering)
+- **Anderson & Belnap (1960s)**: Relevant logic
+- **Paraconsistent mathematics**: Brady, Weber

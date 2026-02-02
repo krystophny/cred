@@ -1,59 +1,64 @@
-# Part 3: New Proof Techniques and Undecidability
+# Part 3: New Techniques, Undecidability, and Self-Hosting
 
-Exploring what becomes possible when truth is graded.
+What becomes possible when truth is graded and self-reference works.
 
-## The Opportunity
+## The Opportunities
 
-Classical logic forces binary outcomes:
-- Provable or unprovable
-- True or false
-- Decidable or undecidable
+### 1. Undecidability Has Value
+Binary logic: Undecidable = stuck in limbo, no truth value.
 
-Cred allows a spectrum:
-- Credence from 0 to 1
-- Asymptotic proofs
-- Undecidability as cred = 0.5
+Cred: Undecidable = credence 0.5. **This is a value, not a failure.**
 
-What new techniques and insights emerge?
+### 2. Self-Reference Works
+Binary logic: Self-reference → paradoxes, incompleteness.
+
+Cred: Self-reference → fixed points. The liar sentence has cred = 0.5.
+
+### 3. Self-Hosting Cred
+Since Cred handles self-reference via fixed points (not paradoxes), we can:
+- Implement Cred in Cred
+- Reason about Cred within Cred
+- Achieve true foundational autonomy
 
 ## Files
 
-- `01-asymptotic-proofs.md` - Proofs that approach but never reach certainty
-- `02-fixed-points.md` - Self-reference and credence fixed points
-- `03-undecidability.md` - Working with undecidable statements
-- `04-new-techniques.md` - Proof techniques unique to Cred
-- `05-open-questions.md` - What we don't know yet
+- `01-asymptotic-proofs.md` — Proofs approaching certainty
+- `02-fixed-points.md` — Self-reference and paradox dissolution
+- `03-undecidability.md` — Working with cred = 0.5 statements
+- `04-new-techniques.md` — Proof techniques unique to Cred
+- `05-open-questions.md` — Research directions including self-hosting
 
 ## Key Ideas
 
-### Asymptotic Truth
-```
-lim_{n→∞} cred_n(P) = 1
-```
-Proven "in the limit" but not at any finite stage.
-
 ### Fixed Points
 ```
-cred(L) = ~cred(L) = 0.5
+cred(L) = ~cred(L) implies cred(L) = 0.5
 ```
-Self-referential statements find stable credence.
+Self-referential statements find stable credence, not paradox.
 
-### Graded Undecidability
+### Gödel Dissolved
 ```
-cred(G) = 0.5 (Gödel sentence)
+cred(G) = 0.5 where G = "G is not provable"
 ```
-Undecidability IS the credence, not a meta-property.
+G is not "true but unprovable." G has credence 0.5 — that's its truth value.
 
-### Robust Reasoning
+### Self-Hosting
 ```
-cred(A ∧ ~A) ≤ 0.25
+Cred described in Cred
+Meta-Cred = Cred (fixed point)
 ```
-Contradictions bounded, don't explode.
+The system can fully describe itself without Gödelian limitations.
 
-## Questions to Explore
+## The Big Picture
 
-1. Can asymptotic proofs count as "real" proofs?
-2. What statements have credence exactly 0.5?
-3. Can we compute credences? (decidability of credence)
-4. What's the complexity of credence reasoning?
-5. Are there new theorems provable only in Cred?
+Binary logic hits walls:
+- Gödel's incompleteness
+- Tarski's undefinability
+- Halting problem
+
+Cred goes through these walls:
+- Undecidable statements have value 0.5
+- Self-reference gives fixed points
+- Self-description becomes possible
+
+**We're not avoiding the theorems. We're showing they're limitations of binary logic, not mathematics itself.**

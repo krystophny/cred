@@ -1,39 +1,40 @@
-# Part 2: Credence Foundation Without Crisp Sets
+# Part 2: Graded Mathematics (Primary)
 
-Working directly in graded credences without collapsing to Boolean.
+**This is where we live.** Building mathematics directly in [0,1] credences.
 
-## The Goal
+## The Vision
 
-Build mathematics **staying in [0,1]** as long as possible:
-- Graded propositions
+We work in graded credences as the PRIMARY setting:
+- Graded propositions (not binary truth)
 - Graded predicates (not crisp sets)
-- Graded inference
-- Graded proofs
+- Graded inference (not binary derivation)
+- Graded proofs (credence approaching 1)
 
-Boolean/crisp structures are limiting cases we can recover, but not where we live.
+**Binary/crisp is NOT the foundation. It's a degenerate special case.**
 
 ## Files
 
-- `01-graded-propositions.md` - Propositions AS credences
-- `02-graded-predicates.md` - Fuzzy sets / credence predicates
-- `03-graded-inference.md` - Reasoning with credences
-- `04-graded-quantifiers.md` - Forall and exists in graded setting
-- `05-graded-proofs.md` - What "proof" means when truth is graded
-- `06-mathematics.md` - Building math on graded foundation
+- `01-graded-propositions.md` — Propositions AS credences
+- `02-graded-predicates.md` — Non-crisp sets
+- `03-graded-inference.md` — Reasoning with credences
+- `04-graded-quantifiers.md` — Forall and exists in graded setting
+- `05-graded-proofs.md` — What "proof" means when truth is graded
+- `06-mathematics.md` — Building math on graded foundation
 
-## The Key Shift
+## Why Graded is Better
 
-| Classical | Cred |
-|-----------|------|
-| Proposition is true or false | Proposition has credence in [0,1] |
-| Set membership is yes/no | Membership has degree in [0,1] |
-| Proof establishes truth | Proof approaches credence 1 |
-| Undecidable = neither provable nor refutable | Undecidable = credence stays at ½ |
+| Binary Logic | Cred |
+|--------------|------|
+| Undecidable = stuck, no value | Undecidable = cred 0.5 (meaningful!) |
+| Paradoxes break the system | Paradoxes → fixed points |
+| Gödel: "true but unprovable" limbo | Gödel: cred 0.5 (a value) |
+| Self-reference problematic | Self-reference natural |
+| Ex falso: nonsense follows | No ex falso |
 
-## Why Stay Graded?
+## The Key Insight
 
-1. **More information**: [0,1] has more distinctions than {0,1}
-2. **Undecidability visible**: Gödel sentences have credence ½
-3. **Paradoxes dissolve**: Liar sentence has credence ½ (fixed point)
-4. **Probability-native**: Chain rule works directly
-5. **Robust**: Partial contradictions don't explode
+In binary logic, undecidability is a PROBLEM — statements stuck in limbo.
+
+In Cred, undecidability is a VALUE — credence 0.5 is meaningful.
+
+**Cred doesn't avoid Gödel. It makes Gödel's "undecidable" statements have definite values.**

@@ -1,46 +1,51 @@
-# Part 1: The Collapse Hierarchy
+# Part 1: The Primitives
 
-How classical structures emerge from Cred as limiting cases.
+The foundational structure of Cred, plus collapse to binary (for compatibility only).
 
-## The Tower
+## The Primitives
 
 ```
-┌─────────────────────────────────────────────┐
-│  Cred [0,1]                                 │
-│  Full graded credences                      │
-│  Conditioning primitive (chain rule)        │
-│  No ex falso, graded truth                  │
-└─────────────────────┬───────────────────────┘
-                      │ collapse (0,1) → ½
-                      ▼
-┌─────────────────────────────────────────────┐
-│  Three-Valued {0, ½, 1}                     │
-│  True / Unknown / False                     │
-│  RM3-like relevant logic                    │
-│  No ex falso, unknown propagates            │
-└─────────────────────┬───────────────────────┘
-                      │ collapse ½ → {0 or 1}
-                      ▼
-┌─────────────────────────────────────────────┐
-│  Boolean Relevant {0, 1}                    │
-│  True / False                               │
-│  Relevant logic (R, E)                      │
-│  No ex falso                                │
-└─────────────────────┬───────────────────────┘
-                      │ add material implication
-                      ▼
-┌─────────────────────────────────────────────┐
-│  Classical FOL                              │
-│  Material implication: A → B = ¬A ∨ B       │
-│  Ex falso holds: ⊥ → A                      │
-│  Standard foundation                        │
-└─────────────────────────────────────────────┘
+C = [0, 1]              credence values
+0, 1                    impossibility, certainty
+*                       conjunction (multiplication)
+~                       negation (complement)
+≤                       ordering
+_|_                     conditioning (chain rule)
 ```
+
+## Why These Primitives?
+
+- **Multiplication (*)**: Credences compound — uncertainty multiplies
+- **Complement (~)**: ~c = 1 - c, natural negation
+- **Conditioning (_|_)**: Via chain rule, NOT division — avoids ex falso
+
+## The Chain Rule
+
+```
+(A | B) * B = A ∧ B
+```
+
+When B = 0: (A | 0) is unconstrained. No ex falso.
 
 ## Files
 
-- `01-credence-algebra.md` - The primitive structure
-- `02-conditioning.md` - Chain rule vs division
-- `03-three-valued.md` - The RM3-like intermediate
-- `04-boolean-relevant.md` - Relevant logic emerges
-- `05-classical.md` - Adding ex falso (optional)
+- `01-credence-algebra.md` — The algebraic structure
+- `02-conditioning.md` — Chain rule vs division (Rényi's insight)
+- `03-three-valued.md` — {0, ½, 1} intermediate (for reference)
+- `04-boolean-relevant.md` — {0, 1} collapse gives relevant logic
+- `05-classical.md` — Adding ex falso (NOT recommended)
+
+## Collapse (Compatibility Only)
+
+We CAN collapse to binary if needed for classical compatibility:
+
+```
+Cred [0,1] → {0, ½, 1} → {0, 1} → Relevant logic
+```
+
+**But we prefer to stay in [0,1].** The collapse is documented for:
+- Showing we recover known structures
+- Interfacing with classical mathematics when necessary
+- Understanding the relationship to existing foundations
+
+**Graded is primary. Binary is fallback.**
