@@ -17,3 +17,8 @@
  (name test_integration)
  (modules test_integration)
  (libraries probtt.lib str unix))
+
+(test
+ (name test_infer)
+ (modules test_infer)
+ (libraries probtt.lib))

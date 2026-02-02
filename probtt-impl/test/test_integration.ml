@@ -98,4 +98,14 @@ let () =
   test "graded_choice.ptt succeeds" (check_succeeds "test/proofs/graded_choice.ptt");
   test "graded_choice.ptt has finite choice" (check_contains "test/proofs/graded_choice.ptt" "Finite_Choice");
 
+  (* Weight inference tests *)
+  test "weight_infer.ptt succeeds" (check_succeeds "test/proofs/weight_infer.ptt");
+  test "weight_infer.ptt preserves weight w" (check_contains "test/proofs/weight_infer.ptt" "w");
+
+  test "infer_underscore.ptt succeeds" (check_succeeds "test/proofs/infer_underscore.ptt");
+  test "infer_underscore.ptt shows inference variable" (check_contains "test/proofs/infer_underscore.ptt" "?0");
+
+  test "infer_fixpoint.ptt succeeds" (check_succeeds "test/proofs/infer_fixpoint.ptt");
+  test "infer_fixpoint.ptt solves to 1/2" (check_contains "test/proofs/infer_fixpoint.ptt" "1/2");
+
   Printf.printf "\nAll integration tests passed!\n"

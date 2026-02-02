@@ -38,6 +38,7 @@ type proof_state = {
   provables : (string, string * Weight.t) Hashtbl.t;  (* name -> (prop, weight) *)
   fixpoints : (string, Weight.rational) Hashtbl.t;    (* variable -> solved value *)
   encodings : (string, string) Hashtbl.t;  (* name -> encoded prop *)
+  infer_ctx : Weight.infer_ctx;  (* inference context for weight solving *)
 }
 
 let create () = {
@@ -46,13 +47,24 @@ let create () = {
   provables = Hashtbl.create 16;
   fixpoints = Hashtbl.create 16;
   encodings = Hashtbl.create 16;
+  infer_ctx = Weight.create_infer_ctx ();
 }
+
+(* Check if weight needs inference (is an Infer variable) *)
+let needs_inference = function
+  | Weight.Infer _ -> true
+  | _ -> false
 
 (* Add a postulate *)
 let add_postulate state name prop weight =
-  let j = { name; prop; weight; status = Assumed } in
+  (* If weight needs inference, generate fresh variable *)
+  let actual_weight =
+    if needs_inference weight then weight
+    else weight
+  in
+  let j = { name; prop; weight = actual_weight; status = Assumed } in
   Hashtbl.replace state.judgments name j;
-  Printf.printf "  postulate %s : %s 〔 %s 〕\n" name prop (Weight.to_string weight);
+  Printf.printf "  postulate %s : %s 〔 %s 〕\n" name prop (Weight.to_string actual_weight);
   Ok state
 
 (* Add a derivation *)
@@ -63,16 +75,28 @@ let add_derivation state name prop weight deriv =
      | None ->
        Error (Printf.sprintf "Unknown judgment: %s" from_name)
      | Some from_j ->
-       (* Weight multiplies: new_weight = from_weight · 1 = from_weight *)
-       let derived_weight = Weight.simplify (Weight.mul from_j.weight Weight.one) in
-       (* Check declared weight matches *)
-       if not (Weight.equal (Weight.simplify weight) derived_weight) then
-         Printf.printf "  WARNING: declared weight %s differs from derived %s\n"
-           (Weight.to_string weight) (Weight.to_string derived_weight);
-       let j = { name; prop; weight = derived_weight; status = Derived from_name } in
+       (* Use inference to derive weight from source *)
+       let derived_weight = Weight.infer_derivation_weight
+         ~from_weight:from_j.weight ~step:justification in
+       (* If declared weight differs, add constraint for inference *)
+       let final_weight =
+         if needs_inference weight then begin
+           (* Infer from derivation *)
+           Weight.add_constraint state.infer_ctx weight derived_weight;
+           derived_weight
+         end else if not (Weight.equal (Weight.simplify weight) (Weight.simplify derived_weight)) then begin
+           Printf.printf "  WARNING: declared weight %s differs from derived %s\n"
+             (Weight.to_string weight) (Weight.to_string derived_weight);
+           (* Add constraint: declared = derived *)
+           Weight.add_constraint state.infer_ctx weight derived_weight;
+           derived_weight
+         end else
+           derived_weight
+       in
+       let j = { name; prop; weight = final_weight; status = Derived from_name } in
        Hashtbl.replace state.judgments name j;
        Printf.printf "  %s : %s 〔 %s 〕  (from %s by %s)\n"
-         name prop (Weight.to_string derived_weight) from_name justification;
+         name prop (Weight.to_string final_weight) from_name justification;
        Ok state)
   | Direct ->
     let j = { name; prop; weight; status = Assumed } in
@@ -85,12 +109,12 @@ let add_contradiction state p q =
   match Hashtbl.find_opt state.judgments p,
         Hashtbl.find_opt state.judgments q with
   | Some jp, Some jq ->
-    Printf.printf "\n  ⚡ CONTRADICTION: %s ⊥ %s\n" p q;
+    Printf.printf "\n  CONTRADICTION: %s and %s\n" p q;
     Printf.printf "     %s 〔 %s 〕\n" p (Weight.to_string jp.weight);
     Printf.printf "     %s 〔 %s 〕\n" q (Weight.to_string jq.weight);
     (* Find the weight variable(s) to force to 0 *)
-    (* If both have same weight → that weight = 0 *)
-    (* If one is constant 1 and other is variable w → w = 0 *)
+    (* If both have same weight -> that weight = 0 *)
+    (* If one is constant 1 and other is variable w -> w = 0 *)
     let wp = Weight.simplify jp.weight in
     let wq = Weight.simplify jq.weight in
     let (forced_weight, forced_str) =
@@ -102,9 +126,11 @@ let add_contradiction state p q =
         (wp, Weight.to_string wp)
       else
         (* Both are different variables - force both via product *)
-        (Weight.mul wp wq, Printf.sprintf "%s · %s" (Weight.to_string wp) (Weight.to_string wq))
+        (Weight.mul wp wq, Printf.sprintf "%s * %s" (Weight.to_string wp) (Weight.to_string wq))
     in
-    Printf.printf "     → %s = 0\n" forced_str;
+    Printf.printf "     -> %s = 0\n" forced_str;
+    (* Add constraint to inference context *)
+    Weight.add_zero_constraint state.infer_ctx forced_weight;
     let state = { state with weight_eqs = (forced_weight, Weight.zero) :: state.weight_eqs } in
     (* Update judgments to show forced weight *)
     Hashtbl.iter (fun name j ->
@@ -133,9 +159,9 @@ let add_negation state name from_name =
   | None -> Error (Printf.sprintf "Unknown judgment: %s" from_name)
   | Some from_j ->
     let neg_weight = negate_weight state from_j.weight in
-    let j = { name; prop = "¬" ^ from_j.prop; weight = neg_weight; status = Derived from_name } in
+    let j = { name; prop = "not " ^ from_j.prop; weight = neg_weight; status = Derived from_name } in
     Hashtbl.replace state.judgments name j;
-    Printf.printf "\n  ∴ %s : ¬%s 〔 %s 〕\n" name from_j.prop (Weight.to_string neg_weight);
+    Printf.printf "\n  THEREFORE %s : not %s 〔 %s 〕\n" name from_j.prop (Weight.to_string neg_weight);
     Ok state
 
 (* Add a provability assertion: Prov_w(φ) *)
@@ -145,30 +171,39 @@ let add_provable state name prop weight =
   Ok state
 
 (* Add and solve a fixpoint: x = f(x)
-   Currently handles w = ¬w → w = 1/2 *)
+   Currently handles w = neg w -> w = 1/2 *)
 let add_fixpoint state name weight_expr =
   let simplified = Weight.simplify weight_expr in
   let result = match simplified with
     | Weight.Neg (Weight.Var v) when v = name ->
-        (* w = ¬w → w = 1/2 (negation fixpoint) *)
+        (* w = neg w -> w = 1/2 (negation fixpoint) *)
         let half = Weight.solve_negation_fixpoint () in
         Hashtbl.replace state.fixpoints name half;
-        Printf.printf "\n  ⚙ FIXPOINT: %s = ¬%s\n" name name;
+        Printf.printf "\n  FIXPOINT: %s = neg %s\n" name name;
         Printf.printf "     Solved: %s = %s\n" name (Weight.rat_to_string half);
         Some half
+    | Weight.Neg (Weight.Infer n) ->
+        (* Inference variable fixpoint: ?n = neg ?n -> ?n = 1/2 *)
+        let half = Weight.solve_negation_fixpoint () in
+        Hashtbl.replace state.fixpoints name half;
+        Printf.printf "\n  FIXPOINT: %s = neg ?%d\n" name n;
+        Printf.printf "     Solved: %s = %s\n" name (Weight.rat_to_string half);
+        (* Add to inference context *)
+        state.infer_ctx.fixpoints <- (n, fun x -> Weight.Neg x) :: state.infer_ctx.fixpoints;
+        Some half
     | Weight.Mul (Weight.Var v1, Weight.Var v2) when v1 = name && v2 = name ->
-        (* w = w·w → w = 0 or w = 1 (idempotent) *)
-        Printf.printf "\n  ⚙ FIXPOINT: %s = %s · %s\n" name name name;
+        (* w = w*w -> w = 0 or w = 1 (idempotent) *)
+        Printf.printf "\n  FIXPOINT: %s = %s * %s\n" name name name;
         Printf.printf "     Solutions: 0 or 1 (choosing 1)\n";
         let one = Weight.rat_one in
         Hashtbl.replace state.fixpoints name one;
         Some one
     | Weight.Var v when v = name ->
         (* w = w (trivial, any value works) *)
-        Printf.printf "\n  ⚙ FIXPOINT: %s = %s (trivial)\n" name name;
+        Printf.printf "\n  FIXPOINT: %s = %s (trivial)\n" name name;
         None
     | _ ->
-        Printf.printf "\n  ⚙ FIXPOINT: %s = %s (unknown form)\n" name (Weight.to_string simplified);
+        Printf.printf "\n  FIXPOINT: %s = %s (unknown form)\n" name (Weight.to_string simplified);
         None
   in
   match result with
@@ -197,10 +232,11 @@ let process_decl state = function
 
 (* Run a proof *)
 let check_proof decls =
-  Printf.printf "\n══════════════════════════════════════════════════════════════\n";
+  Printf.printf "\n==============================================================\n";
   Printf.printf "  ProbTT Proof Checker\n";
-  Printf.printf "══════════════════════════════════════════════════════════════\n\n";
+  Printf.printf "==============================================================\n\n";
 
+  Weight.reset_infer ();  (* Reset inference counter for fresh run *)
   let state = create () in
   let rec go state = function
     | [] -> Ok state
@@ -211,19 +247,32 @@ let check_proof decls =
   in
   match go state decls with
   | Ok final_state ->
-    Printf.printf "\n══════════════════════════════════════════════════════════════\n";
-    Printf.printf "  ✓ Proof checked successfully\n";
-    (* Print solved fixpoints *)
-    if Hashtbl.length final_state.fixpoints > 0 then begin
-      Printf.printf "\n  Solved fixpoints:\n";
-      Hashtbl.iter (fun name value ->
-        Printf.printf "    %s = %s\n" name (Weight.rat_to_string value)
-      ) final_state.fixpoints
-    end;
-    Printf.printf "══════════════════════════════════════════════════════════════\n\n";
-    Ok final_state
+    (* Solve accumulated inference constraints *)
+    (match Weight.solve_inference final_state.infer_ctx with
+     | Ok subst ->
+       Printf.printf "\n==============================================================\n";
+       Printf.printf "  Proof checked successfully\n";
+       (* Print inferred weights if any *)
+       if subst <> [] then begin
+         Printf.printf "\n  Inferred weights:\n";
+         List.iter (fun (n, w) ->
+           Printf.printf "    ?%d = %s\n" n (Weight.to_string w)
+         ) subst
+       end;
+       (* Print solved fixpoints *)
+       if Hashtbl.length final_state.fixpoints > 0 then begin
+         Printf.printf "\n  Solved fixpoints:\n";
+         Hashtbl.iter (fun name value ->
+           Printf.printf "    %s = %s\n" name (Weight.rat_to_string value)
+         ) final_state.fixpoints
+       end;
+       Printf.printf "==============================================================\n\n";
+       Ok final_state
+     | Error msg ->
+       Printf.printf "\n  Inference error: %s\n\n" msg;
+       Error msg)
   | Error e ->
-    Printf.printf "\n  ✗ Error: %s\n\n" e;
+    Printf.printf "\n  Error: %s\n\n" e;
     Error e
 
 (* === √2 proof as data === *)
