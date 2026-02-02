@@ -670,6 +670,12 @@ let infer_derivation_credence ~from_credence ~(step : string) =
   | "negate" | "negation" | "complement" ->
       simplify (neg from_credence)
 
+  (* Ex falso: from credence 0, ANYTHING is admissible at credence 1.
+     This is the graded version of ex falso quodlibet: when P(B)=0,
+     the conditional P(A|B) is unconstrained, so we can assign credence 1. *)
+  | "ex_falso" | "exfalso" | "absurd" | "explosion" ->
+      One
+
   (* Projection from pair: preserves credence (already joint) *)
   | "fst" | "snd" | "project" | "projection" ->
       from_credence

@@ -15,23 +15,31 @@ They serve as:
 
 ## File Naming Convention
 
-- `01-19_*.ctt`: Classical proof techniques (19 files)
-- `20-28_*.ctt`: CredTT-native techniques (9 files)
+Total: 28 proof technique examples matching the paper tables.
 
-Total: 28 proof technique examples.
+**Classical techniques (20 total):**
+- `01-18_*.ctt`: Main classical techniques (18 files)
+- `27_strong_induction.ctt`: Strong induction (classical technique #14)
+- `28_contrapositive.ctt`: Contrapositive (classical technique #5)
 
-## Note on Files 20-28 (CredTT-Native Techniques)
+**CredTT-native techniques (8 total):**
+- `19-26_*.ctt`: CredTT-native techniques (8 files)
 
-Files 20-28 demonstrate CredTT-native techniques that have NO classical analogue.
+The numbering reflects development history; the paper (Table in Section 8)
+provides canonical numbering 1-20 for classical and 21-28 for native techniques.
+
+## Note on Files 19-26 (CredTT-Native Techniques)
+
+Files 19-26 demonstrate CredTT-native techniques that have NO classical analogue.
 These files are more CONCEPTUAL than the classical technique files:
 - They explain HOW credence bounds, stability proofs, and limit theorems work
 - They use `postulate` to set up scenarios rather than building proof chains
 - The commentary explains why these techniques matter for verification
 
-This is intentional: classical files (01-19) show how classical proofs map to
-CredTT with credence tracking. Native files (20-28) explain new capabilities
-that classical logic simply cannot express (interior stability, credence bounds,
-degeneracy analysis, etc.).
+This is intentional: classical files show how classical proofs map to CredTT
+with credence tracking. Native files explain new capabilities that classical
+logic simply cannot express (interior stability, credence bounds, degeneracy
+analysis, contractivity, proof factoring, dual proofs, limit theorems).
 
 ## Syntax
 
@@ -53,6 +61,7 @@ compose, apply, etc.) but does NOT verify the tactic semantically.
 
 Credence propagation rules:
 - `by negate`/`negation`/`complement`: credence becomes 1-c
+- `by ex_falso`/`exfalso`/`absurd`/`explosion`: credence becomes 1 (from 0)
 - All other tactics: credence preserved
 
 The tactic name documents the INTENDED reasoning step for human readers.

@@ -32,8 +32,9 @@ postulate rain_implies_wet : rain_to_wet @ c
 postulate stable_impl : A_implies_B @ 1
 stable stable_impl
 
--- Negation flips stability
-derive neg_B_implies_neg_A : not_B_to_not_A @ 1 from stable_impl by negate
+-- Negation flips stability: credence 1 becomes 1-1=0
+-- The negated claim has VANISHING credence (stability flipped)
+derive neg_B_implies_neg_A : not_B_to_not_A @ 0 from stable_impl by negate
 
 -- The negated implication has flipped stability!
 -- If original was Stable1, negation is Unstable0
