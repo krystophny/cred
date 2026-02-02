@@ -375,6 +375,49 @@ module NativeTechniques {ℓ : Level} (DM : DeMorganAlgebra ℓ) where
       bound-valid : c ≤ bound
 
   -- -------------------------------------------------------------------------
+  -- Example Instances
+  -- -------------------------------------------------------------------------
+
+  -- Example: 1 is a lower bound for itself
+  𝟙-lower-bound : LowerBound 𝟙
+  𝟙-lower-bound = record
+    { bound = 𝟙
+    ; bound-positive = 𝟙-greatest 𝟘
+    ; bound-valid = ≤-refl 𝟙
+    }
+
+  -- Example: 1 is an upper bound for itself
+  𝟙-upper-bound : UpperBound 𝟙
+  𝟙-upper-bound = record
+    { bound = 𝟙
+    ; bound-subunity = ≤-refl 𝟙
+    ; bound-valid = ≤-refl 𝟙
+    }
+
+  -- Example: 0 is a lower bound for everything
+  𝟘-lower-bound : ∀ {c} → LowerBound c
+  𝟘-lower-bound {c} = record
+    { bound = 𝟘
+    ; bound-positive = ≤-refl 𝟘
+    ; bound-valid = 𝟘-least c
+    }
+
+  -- Example: 1 is an upper bound for everything
+  𝟙-universal-upper : ∀ {c} → UpperBound c
+  𝟙-universal-upper {c} = record
+    { bound = 𝟙
+    ; bound-subunity = ≤-refl 𝟙
+    ; bound-valid = 𝟙-greatest c
+    }
+
+  -- NOTE on StabilityProof and InvariantProof:
+  -- These require Positive c (i.e., 0 < c), which excludes 0.
+  -- For non-trivial instances, we'd need specific credence values
+  -- in a concrete algebra like [0,1]. In the abstract DeMorganAlgebra,
+  -- we can only provide instances for 𝟙.
+  -- See GitHub issue #95 for discussion.
+
+  -- -------------------------------------------------------------------------
   -- 4. Continuity/Monotonicity Lemmas
   -- -------------------------------------------------------------------------
 

@@ -458,6 +458,8 @@ The conditional $a \mid b$ can have \emph{any} credence---the joint is already z
 
 Classical logic has only the endpoints; CredTT has the entire spectrum.
 
+\emph{Implementation note: The conditioning relation $b \mid a$ is captured implicitly through credence multiplication in Pi-Elim and Sigma-Intro rules, rather than as a distinct syntactic form. See check.ml for the credence propagation implementation.}
+
 %=============================================================================
 \section{MLTT as the $\{\zero, \one\}$ Case}
 %=============================================================================
