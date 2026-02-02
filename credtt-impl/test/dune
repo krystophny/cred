@@ -22,3 +22,8 @@
  (name test_infer)
  (modules test_infer)
  (libraries credtt.lib))
+
+(test
+ (name test_neighbourhood)
+ (modules test_neighbourhood)
+ (libraries credtt.lib))

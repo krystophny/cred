@@ -1,0 +1,56 @@
+-- Degeneracy Analysis (CredTT-Native #4)
+--
+-- NEW: Quantitative inconsistency diagnosis
+-- How FAST does credence approach 0?
+--
+-- Example: This contradiction forces credence to 0 at rate r
+
+-- Classical: contradiction = false, game over
+-- CredTT: contradiction = c -> 0, but HOW FAST?
+
+-- DEGENERACY RATE:
+-- How many steps until c < epsilon?
+-- How sensitive is c to perturbation?
+
+postulate hypothesis : H [ c ]
+postulate contradicts : not_H [ c ]
+
+-- Contradiction: c = 0
+contradict hypothesis contradicts
+
+-- But BEFORE the contradiction was forced:
+-- How did c evolve?
+-- Was it already heading toward 0?
+
+-- GRADUAL DEGENERACY:
+-- Step 1: c
+-- Step 2: c * d1
+-- Step 3: c * d1 * d2
+-- ...
+-- At some step n: c * d1 * ... * d_{n-1} < epsilon
+
+-- Rate = n (how many steps to degeneracy)
+
+-- Fast degeneracy: contradiction reached in few steps
+-- Slow degeneracy: many steps before c hits 0
+
+-- WHY THIS MATTERS:
+-- SAT solving: fast contradictions are easy to find
+-- Proof search: degeneracy rate guides exploration
+-- Debugging: find where credence drops fastest
+
+-- QUANTITATIVE DIAGNOSIS:
+-- "This proof fails because step 7 drops credence from 0.9 to 0.1"
+-- Pinpoints the problematic step
+
+-- Classical debugging: "somewhere there's an error"
+-- CredTT debugging: "step 7 is responsible for 80% of credence loss"
+
+-- Example: Complex proof with 100 steps
+-- Steps 1-50: c remains at 0.95
+-- Step 51: c drops to 0.5 (BIG DROP)
+-- Steps 52-100: c gradually reaches 0.1
+-- Diagnosis: Step 51 is the problem!
+
+-- This is like profiling for proofs
+-- Find the "hot spots" of credence degradation

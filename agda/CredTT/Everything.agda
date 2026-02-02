@@ -9,6 +9,11 @@ import CredTT.Substitution
 import CredTT.Credence
 import CredTT.Context
 
+-- Neighbourhood semantics (stability definitions)
+import CredTT.Neighbourhood
+import CredTT.StabilityTheorems
+import CredTT.Collapse
+
 -- Typing judgment (depends on core)
 import CredTT.Judgment
 
@@ -23,6 +28,9 @@ import CredTT.MLTT
 
 -- Examples using the type system
 import CredTT.Examples
+
+-- Proof techniques (all 28 with concrete examples)
+import CredTT.ProofTechniques
 
 -- Meta-theoretic results (depend on provability)
 import CredTT.Incompleteness

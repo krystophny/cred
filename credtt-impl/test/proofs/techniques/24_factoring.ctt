@@ -1,0 +1,62 @@
+-- Proof Factoring (CredTT-Native #6)
+--
+-- NEW: Isolate low-credence steps from high-credence core
+-- Keep the stable part separate from the weak part
+--
+-- Example: Factor proof into "definitely true" core + "probably true" fringe
+
+-- Classical: all steps equal, no factoring possible
+-- CredTT: separate high-c steps from low-c steps
+
+-- HIGH-CREDENCE CORE: steps at c = 1
+-- These are the DEFINITELY true parts
+-- Mathematical theorems, verified computations
+
+postulate axiom1 : A1 [ 1 ]
+postulate axiom2 : A2 [ 1 ]
+postulate theorem : T [ 1 ]
+
+-- Core is stable: 1 * 1 * 1 = 1
+stable axiom1
+stable axiom2
+stable theorem
+
+-- LOW-CREDENCE FRINGE: steps at c < 1
+-- These are the PROBABLY true parts
+-- Empirical assumptions, unverified claims
+
+postulate assumption : B1 [ 8/10 ]
+postulate conjecture : B2 [ 7/10 ]
+
+-- Fringe has lower credence: 0.8 * 0.7 = 0.56
+
+-- FACTORED PROOF:
+-- Core |- C @ 1 (stable, certain)
+-- Fringe + Core |- D @ 0.56 * 1 = 0.56 (less certain)
+
+-- Why factoring matters:
+-- 1. Identify what's definitely true vs probably true
+-- 2. If fringe fails, core is still valid
+-- 3. Prioritize verification of fringe
+
+-- Example: Physics proof
+-- Core: mathematical derivation @ 1
+-- Fringe: empirical assumptions @ 0.9
+-- Result @ 0.9 (limited by fringe)
+
+-- If fringe is invalidated:
+-- Core remains valid
+-- Just need new fringe assumptions
+
+-- MODULAR CREDENCE:
+-- Factor proof into modules
+-- Each module has own credence
+-- Combining: product of credences
+
+-- Module A @ 0.95
+-- Module B @ 0.90
+-- Module C @ 0.85
+-- Combined @ 0.95 * 0.90 * 0.85 = 0.73
+
+-- This is like dependency analysis for credence
+-- Know which modules contribute most uncertainty

@@ -1,0 +1,54 @@
+-- Strong Induction (Complete Induction)
+--
+-- Classical: Assume P(0)...P(n-1) to prove P(n)
+-- CredTT: Same degradation issues as regular induction
+--         Plus: accessing all previous cases multiplies credences
+--
+-- Example: Every integer > 1 has a prime factor
+-- Use: If n is prime, done. If composite, n = ab with a,b < n.
+--      By strong IH, a has prime factor, which is also prime factor of n.
+
+-- Classical strong induction: use ALL previous cases
+-- CredTT strong induction: credence depends on how many cases used
+
+-- Strong IH: forall k < n. P(k) @ c_k
+-- Want to prove: P(n) @ ?
+
+-- If we use P(k1), P(k2), ..., P(km) in the proof:
+-- Each use multiplies: c_{k1} * c_{k2} * ... * c_{km}
+
+postulate base : P_0 [ 1 ]
+postulate strong_step : strong_IH_to_P_n [ 1 ]
+
+-- If step uses just ONE previous case:
+-- Same as regular induction: c_n = c_0 * step^n
+
+-- If step uses TWO previous cases (like Fibonacci):
+-- P(n) uses P(n-1) and P(n-2)
+-- c_n = c_{n-1} * c_{n-2} * step
+
+-- If step @ 1 and we use 2 cases:
+-- c_n = c_{n-1} * c_{n-2}
+-- This is like Fibonacci but for credences!
+-- Even starting at c_0 = c_1 = 1, we have c_n = 1 for all n
+
+-- If step @ 0.99 and uses 2 cases:
+-- c_n = c_{n-1} * c_{n-2} * 0.99
+-- Degradation is FASTER than linear!
+
+-- BOUNDED STRONG INDUCTION:
+-- Use at most k previous cases
+-- Degradation bounded by k * step per level
+
+-- WHY STRONG INDUCTION DIFFERS:
+-- Regular: linear degradation
+-- Strong (unbounded): potentially exponential degradation
+-- Strong (bounded): controlled degradation
+
+-- The KEY insight:
+-- Classical strong induction is FREE (use any previous case)
+-- CredTT strong induction COSTS (each use multiplies)
+
+-- This is why well-founded induction matters:
+-- The well-founded order constrains which cases you can use
+-- CredTT tracks the cost of this access

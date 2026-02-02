@@ -1,0 +1,59 @@
+-- Credence Bounds as Invariants (CredTT-Native #2)
+--
+-- NEW: Prove lower bounds on c(A), upper bounds on c(neg A)
+-- Maintain credence bounds as loop invariants
+--
+-- Example: Throughout computation, maintain c >= 0.9
+
+-- Classical: invariants are boolean (holds or doesn't)
+-- CredTT: invariants have CREDENCE (how strongly they hold)
+
+-- LOWER BOUND: c(A) >= bound
+-- "We're at least this confident in A"
+
+postulate hypothesis : H [ c ]
+
+-- Prove: c >= 0.9 (high confidence)
+-- This is a meta-assertion about credence
+
+-- UPPER BOUND: c(neg A) <= bound
+-- "Negation has at most this credence"
+
+-- If c(A) >= 0.9, then c(neg A) <= 0.1
+-- Because c(neg A) = 1 - c(A)
+
+-- INVARIANT MAINTENANCE:
+-- In a loop, track how credence evolves
+
+-- Iteration 0: c_0 = 1
+-- Iteration 1: c_1 = c_0 * step_credence
+-- Iteration n: c_n = step_credence^n
+
+-- If step_credence = 0.99:
+-- c_100 = 0.99^100 = 0.366
+-- Credence degrades over iterations!
+
+-- To maintain c >= 0.9 invariant:
+-- Need step_credence >= 0.9^(1/n)
+-- For 100 iterations: step >= 0.9^0.01 = 0.9989
+
+-- This is WHY CredTT matters for verification:
+-- It tracks credence degradation through loops
+-- Classical verification ignores this
+
+-- DUAL BOUNDS:
+-- Prove both c(A) >= l and c(A) <= u
+-- "Credence is in interval [l, u]"
+
+-- If l = 0.4 and u = 0.6, we know:
+-- A is probably true (> 0.5 midpoint)
+-- But not definitely (< 1)
+-- And not definitely false (> 0)
+
+-- This is the INTERIOR region
+-- CredTT can reason about it; classical logic cannot
+
+-- Practical application:
+-- Machine learning confidence scores
+-- Statistical hypothesis testing
+-- Bayesian inference bounds

@@ -761,6 +761,219 @@ When $\C = {[0,1]}$ with copy $\Delta : A \to A \times A$ and delete $! : A \to 
 \textbf{Novelty}: De Morgan algebra + type theory + conditioning
 
 %=============================================================================
+\section{Neighbourhood Semantics}
+%=============================================================================
+
+We replace the constant truth values $\top$ and $\bot$ with \emph{stability regions} near credence extrema. This is not metaphorical: stability is a meta-theoretic property expressing persistence of inhabitation under small degradations.
+
+\subsection{From Points to Regions}
+
+Classical logic treats truth values as points: $\top$ or $\bot$, no intermediate values. CredTT replaces this with a continuous spectrum $[0,1]$. The key insight is that classical proof techniques don't disappear---they become \emph{stability theorems} about regions near the extrema.
+
+\begin{definition}[Stable Inhabitation]
+$\Gamma \vdash A$ is \emph{stable} (written $\mathrm{Stable}_\one$) iff there exists $c_0 < \one$ such that for all $c \geq c_0$, there exists a derivation $\Gamma \vdash a : A \at{c}$.
+\end{definition}
+
+\begin{definition}[Unstable Inhabitation]
+$\Gamma \vdash A$ is \emph{unstable} (written $\mathrm{Unstable}_\zero$) iff for all $c > \zero$, there exists $c' < c$ such that no derivation $\Gamma \vdash a : A \at{c'}$ exists.
+\end{definition}
+
+These are \emph{meta-properties}, like termination, not judgments inside CredTT. They capture whether inhabitation persists under degradation (stable) or collapses under strengthening (unstable).
+
+\subsection{Classical Techniques as Stability Theorems}
+
+Every classical proof technique has a CredTT analog expressed in terms of stability. The table below shows all 20 classical techniques with their CredTT translations:
+
+\begin{center}
+\small
+\begin{tabular}{|c|l|l|l|}
+\hline
+\textbf{\#} & \textbf{Classical Technique} & \textbf{CredTT Analog} & \textbf{Credence Behavior} \\
+\hline
+1 & Direct proof & Track credence bounds & $c$ accumulates via $\cdot$ \\
+2 & Proof by cases & Context refinement & Each branch stable $\Rightarrow$ stable \\
+3 & Contraposition & Stability-contraposition & Not exact; $\negc c_2 \leq \negc c_1$ \\
+4 & Reductio ad absurdum & Instability reflection & Unstable$(\negc A) \Rightarrow$ Stable$(A)$ \\
+5 & Contrapositive & Robust implication & Stability bounds transform \\
+6 & Ex falso & Limit admissibility & As $c \to \zero$, constraints vanish \\
+7 & Vacuous truth & Degenerate conditioning & $c \approx \zero \Rightarrow$ unconstrained \\
+8 & Deduction theorem & Function abstraction & $\Gamma, x:A \vdash b:B \at{c}$ preserves $c$ \\
+9 & Modus ponens & Application rule & $c_1 \cdot c_2$ (multiply!) \\
+10 & Syllogism & Function composition & $c_2 \cdot c_1$ (accumulates) \\
+11 & Universal generalization & $\Pi$-introduction & $\lambda x.b : \Pi x.B \at{\inf_x c(x)}$ \\
+12 & Existential intro/elim & $\Sigma$-types & Credence multiplies in elim \\
+13 & Natural induction & Same + stability of step & May degrade unless contractive \\
+14 & Strong induction & Bound over premise set & Multiple uses multiply \\
+15 & Exhaustion & Finite case + aggregation & Stable if each case stable \\
+16 & Construction & Existence + certificate & Credence = witness $\cdot$ property \\
+17 & Refutation/resolution & Degeneracy detection & Drive bound to $\zero$ \\
+18 & Equational rewriting & J-elimination & Preserves stability if Id stable \\
+19 & Proof by analogy & Low-credence morphism & Visible weakness at $c < \one$ \\
+20 & Structural rules & Conditional theorems & See \S\ref{sec:structural-credtt} \\
+\hline
+\end{tabular}
+\end{center}
+
+\paragraph{Concrete Example: Syllogism (Technique \#10)}
+Consider the classical syllogism ``All men are mortal; Socrates is a man; therefore Socrates is mortal.''
+\begin{itemize}
+    \item \textbf{Classical}: Major premise + minor premise $\Rightarrow$ definite conclusion.
+    \item \textbf{CredTT}: Major @ $c_1$ + Minor @ $c_2$ $\Rightarrow$ Conclusion @ $c_1 \cdot c_2$.
+\end{itemize}
+If $c_1 = 0.95$ and $c_2 = 0.90$, the conclusion has credence $0.855$---\emph{not} $0.95$ or $0.90$!
+
+\paragraph{Concrete Example: Induction (Technique \#13)}
+For mathematical induction with base case @ $c_b$ and step @ $c_s$:
+\begin{itemize}
+    \item $P(0) \at{c_b}$
+    \item $P(n) \Rightarrow P(n+1) \at{c_s}$
+    \item $P(n) \at{c_b \cdot c_s^n}$
+\end{itemize}
+If $c_s = 0.99$, then $P(100) \at{c_b \cdot 0.99^{100}} = c_b \cdot 0.366$. Even ``almost certain'' steps degrade over iterations! Only $c_s = \one$ (contractive step) preserves credence.
+
+\paragraph{Concrete Example: Ex Falso (Technique \#6)}
+The graded spectrum of ex falso:
+\begin{itemize}
+    \item $c = \one$: Fully constrained (normal logic)
+    \item $c = 0.5$: Weakly constrained
+    \item $c = 0.01$: Almost unconstrained
+    \item $c = \zero$: Completely unconstrained (classical ex falso)
+\end{itemize}
+The chain rule $P(A,B) = P(A|B) \cdot P(B)$ is trivially satisfied when $P(B) = \zero$, making $P(A|B)$ unconstrained.
+
+\subsection{The $\{\zero,\one\}$ Collapse Theorem}
+
+\begin{theorem}[Collapse]
+When credences are restricted to $\{\zero,\one\}$:
+\begin{enumerate}
+    \item Neighbourhoods become singletons
+    \item $\mathrm{Stable}_\one(\one) = \mathrm{true}$, $\mathrm{Unstable}_\zero(\zero) = \mathrm{true}$
+    \item CredTT judgments correspond exactly to MLTT judgments
+    \item No interior points exist (every credence is extreme)
+\end{enumerate}
+\end{theorem}
+
+\begin{proof}[Proof sketch]
+In Boolean algebra, there are no intermediate points between $\zero$ and $\one$, so $\epsilon$-neighbourhoods collapse to their centers. The stability classification becomes exhaustive and trivial: $\one$ is stable, $\zero$ is unstable.
+\end{proof}
+
+This explains why classical logic appears to have exact truth values: it's the degenerate limit where neighbourhoods collapse to points. CredTT reveals the underlying continuous structure that classical logic hides.
+
+%=============================================================================
+\section{Proof Principles in CredTT}
+%=============================================================================
+
+\subsection{Object-Level vs Meta-Level}
+
+CredTT distinguishes two kinds of reasoning:
+\begin{itemize}
+    \item \textbf{Object-level}: Produces judgments $\Gamma \vdash a : A \at{c}$
+    \item \textbf{Meta-level}: Reasons about stability regions
+\end{itemize}
+
+Object-level reasoning uses the type rules. Meta-level reasoning proves things like ``if both premises are stable, the conclusion is stable.''
+
+\subsection{Recovered Classical Patterns}
+
+Classical proof patterns are recovered as:
+\begin{itemize}
+    \item \textbf{Function transformers}: Deduction, modus ponens, transitivity preserve credence via multiplication
+    \item \textbf{Stability reflection}: Reductio works via complement: unstable $\negc A$ implies stable $A$
+    \item \textbf{Limit admissibility}: Ex falso is the $c = \zero$ limit where multiplication annihilates
+    \item \textbf{Controlled structural rules}: Weakening/contraction are conditional on credence
+\end{itemize}
+
+\subsection{New CredTT-Native Techniques}
+
+CredTT enables 8 proof techniques with \emph{no classical analog}. These are the core differentiators:
+
+\begin{center}
+\small
+\begin{tabular}{|c|l|l|}
+\hline
+\textbf{\#} & \textbf{Technique} & \textbf{Description} \\
+\hline
+21 & Stability proofs & Prove ``$A$ is Stable$_\one$'' or ``$B$ is Unstable$_\zero$'' \\
+22 & Credence bounds as invariants & Maintain $c(A) \geq l$ through computation \\
+23 & Continuity/robustness lemmas & Small input degradation $\Rightarrow$ small output degradation \\
+24 & Degeneracy analysis & Quantify how fast $c \to \zero$ (diagnosis) \\
+25 & Contractivity arguments & Prove step is non-degrading ($c_{out} \geq c_{in}$) \\
+26 & Proof factoring & Isolate stable core from unstable fringe \\
+27 & Dual proofs & Squeeze: $l \leq c(A) \leq u$ from both sides \\
+28 & Limit theorems & Asymptotic credence behavior as $n \to \infty$ \\
+\hline
+\end{tabular}
+\end{center}
+
+\paragraph{Concrete Example: Stability Proofs (Technique \#21)}
+Classical logic cannot express ``$2+2=4$ is \emph{robustly} true.'' CredTT can:
+\begin{itemize}
+    \item ``$2+2=4$'' has credence $\one$, which is Stable$_\one$.
+    \item ``$\sqrt{2}$ is rational'' has credence $\zero$ (after proof), which is Unstable$_\zero$.
+    \item The G\"odel sentence has credence $\tfrac{1}{2}$, which is Interior (neither stable nor unstable).
+\end{itemize}
+
+\paragraph{Concrete Example: Dual Proofs (Technique \#27)}
+The G\"odel sentence $G$ satisfies:
+\begin{itemize}
+    \item Lower bound: $c(G) \geq \tfrac{1}{2}$ (from self-reference)
+    \item Upper bound: $c(G) \leq \tfrac{1}{2}$ (from negation self-reference)
+    \item Squeezed: $c(G) = \tfrac{1}{2}$ exactly
+\end{itemize}
+This is the \emph{Interior region} that classical logic cannot express. The fixpoint $c = \negc c$ has solution $c = \tfrac{1}{2}$.
+
+\paragraph{Concrete Example: Degeneracy Analysis (Technique \#24)}
+In a complex proof with 100 steps:
+\begin{itemize}
+    \item Steps 1--50: $c$ remains at 0.95
+    \item Step 51: $c$ drops to 0.5 (\textbf{problematic step!})
+    \item Steps 52--100: $c$ gradually reaches 0.1
+\end{itemize}
+Degeneracy analysis pinpoints Step 51 as responsible for 80\% of credence loss---like profiling for proofs.
+
+\subsection{Structural Rules}
+\label{sec:structural-credtt}
+
+Structural rules have subtle behavior in CredTT---this is Technique \#20 from the classical list:
+
+\begin{itemize}
+    \item \textbf{Exchange}: Holds unconditionally. Reordering $\Gamma, A, B, \Delta$ to $\Gamma, B, A, \Delta$ preserves credence. Order doesn't matter.
+
+    \item \textbf{Weakening}: \emph{Conditional} on added assumptions having $c = \one$. If $\Gamma \vdash t : A \at{c}$, then $\Gamma, x:B \at{\one} \vdash t : A \at{c}$. But adding $x:B \at{d}$ with $d < \one$ may degrade conclusions.
+
+    \item \textbf{Contraction}: Requires explicit duplication permission. Using assumption $A \at{c}$ twice might cost $c^2$, not $c$. In resource-sensitive settings, this tracks consumption.
+\end{itemize}
+
+Classical logic has free structural rules---this \emph{hides} important credence costs. CredTT makes these costs \emph{explicit}.
+
+%=============================================================================
+\section{Related Work: Neighbourhood and Continuous Semantics}
+%=============================================================================
+
+\subsection{Primitive Conditional Probability}
+
+The tradition of taking conditional probability as primitive (rather than derived via the ratio formula) traces to \textbf{Popper functions} and \textbf{R\'enyi conditional probability}. Stalnaker \citep{stalnaker1970probability} and Pruss \citep{pruss2013popper} develop this approach philosophically. CredTT adopts this stance but internalizes it into dependent type theory.
+
+\subsection{Continuous Logic and Approximate Satisfaction}
+
+\textbf{Continuous logic} for metric structures uses truth values in $[0,1]$ with robustness/continuity as key notions \citep{benyaacov2008continuous}. This resonates with our ``truth as stability'' view, but continuous logic is model-theoretic rather than proof-theoretic.
+
+\subsection{Neighbourhood Semantics}
+
+Many-valued generalizations of neighbourhood semantics exist \citep{hansoul2020neighbourhood}, compatible with our stability regions, but not in a dependent type setting.
+
+\subsection{What CredTT Unifies}
+
+CredTT sits at the intersection of:
+\begin{itemize}
+    \item Popper-style primitive conditioning
+    \item Continuous/approximate logic robustness
+    \item Graded type theory judgment structure
+\end{itemize}
+
+But differs by: (i) conditioning-first semantics, (ii) $\bot$/$\top$ as neighbourhood phenomena, (iii) MLTT as the $\{\zero,\one\}$ collapse.
+
+%=============================================================================
 \section{Graded Incompleteness}
 %=============================================================================
 

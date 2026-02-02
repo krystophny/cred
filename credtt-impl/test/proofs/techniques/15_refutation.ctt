@@ -1,0 +1,54 @@
+-- Refutation and Resolution
+--
+-- Classical: Drive toward contradiction to refute
+-- CredTT: Drive credence toward 0 (degeneracy detection)
+--
+-- Example: Refute "sqrt(2) is rational"
+-- Classical: Derive contradiction, done
+-- CredTT: Show credence forced to 0
+
+-- Classical refutation: derive False
+-- CredTT refutation: drive credence to 0
+
+-- The difference is GRADUAL vs BINARY:
+-- Classical: either refuted (False) or not
+-- CredTT: credence can be 0, 0.1, 0.5, 0.9, 1
+
+-- Hypothesis to refute at credence c
+postulate hypothesis : sqrt2_rational [ c ]
+
+-- Derive consequences at same credence
+derive consequence : p_and_q_coprime [ c ] from hypothesis by definition
+
+-- Derive contradiction
+derive p_even : p_is_even [ c ] from hypothesis by algebra
+derive q_even : q_is_even [ c ] from p_even by algebra
+
+-- Contradictory claims
+postulate gcd_1 : gcd_is_1 [ c ]
+derive gcd_2 : gcd_geq_2 [ c ] from q_even by both_even
+
+-- Contradiction forces c = 0
+contradict gcd_1 gcd_2
+
+-- Now c = 0: hypothesis is REFUTED
+-- Not "false" but "credence 0" (degenerate)
+
+-- RESOLUTION:
+-- Classical resolution: derive empty clause
+-- CredTT resolution: drive credence to 0
+
+-- The process is the same, but CredTT tracks credence throughout
+-- You can see HOW FAST credence goes to 0
+
+-- Fast refutation: one contradiction, c -> 0 immediately
+-- Slow refutation: gradual accumulation of constraints
+
+-- This matters for:
+-- SAT solving: track which clauses force low credence
+-- Proof complexity: measure how "hard" a refutation is
+-- Debugging: find where credence drops
+
+-- Degeneracy detection:
+-- When c hits 0, we've found a degeneracy
+-- This is the CredTT version of "deriving false"

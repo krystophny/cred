@@ -1,0 +1,57 @@
+-- Equational Rewriting
+--
+-- Classical: If a = b, replace a with b anywhere
+-- CredTT: If Id @ c is stable, rewriting preserves stability
+--         Rewrite result @ c_original * c_equality
+--
+-- Example: Prove 2+2=4 using arithmetic identities
+-- Classical: Each rewrite step, done
+-- CredTT: Each rewrite multiplies credence
+
+-- Identity type in CredTT: Id(A, a, b) @ c
+-- c = 1: definitely equal
+-- c < 1: probably equal
+
+-- Original term at credence c1
+postulate original : term_equals_2_plus_2 [ c1 ]
+
+-- Equality at credence c2
+postulate equality : two_plus_two_equals_four [ c2 ]
+
+-- Rewrite: original @ c1, equality @ c2 -> result @ c1 * c2
+-- If c1 = 1 and c2 = 1, result = 1 (stable)
+-- If either < 1, result < 1
+
+-- Stable rewrites:
+postulate stable_term : x_equals_y [ 1 ]
+postulate stable_eq : y_equals_z [ 1 ]
+
+derive stable_result : x_equals_z [ 1 ] from stable_term by rewrite
+
+stable stable_term
+stable stable_eq
+stable stable_result
+
+-- Uncertain equality:
+-- "a probably equals b" @ 0.9
+-- Rewriting with this: credence degrades
+
+postulate uncertain_eq : a_probably_b [ 9/10 ]
+postulate certain_term : some_term [ 1 ]
+
+-- Rewrite: 1 * 0.9 = 0.9
+
+-- Chain of rewrites:
+-- a = b @ 0.99
+-- b = c @ 0.99
+-- c = d @ 0.99
+-- a = d @ 0.99^3 = 0.97
+
+-- Long rewrite chains degrade credence
+-- This is WHY formal equality proofs matter:
+-- Each step at 1 gives final at 1
+-- Each step at 0.99 accumulates error
+
+-- The J eliminator in CredTT:
+-- J : (m : A -> Type) -> m(a) @ c1 -> (p : Id a b @ c2) -> m(b) @ c1 * c2
+-- Rewriting COSTS credence when equality is uncertain

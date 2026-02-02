@@ -1,0 +1,50 @@
+-- Vacuous Truth
+--
+-- Classical: A -> B is true when A is false (paradox of material implication)
+-- CredTT: When antecedent has c ~ 0, conditional is weakly constrained
+--
+-- Example: "If pigs fly, then 2+2=5"
+-- Classical: TRUE (vacuously, since pigs don't fly)
+-- CredTT: Conditional at very low credence (near-zero antecedent)
+
+-- The classical paradox:
+-- "If the moon is made of cheese, I am the Pope"
+-- This is TRUE in classical logic! Because antecedent is false.
+
+-- CredTT dissolves this paradox:
+-- When antecedent credence -> 0, conditional becomes UNCONSTRAINED
+-- Not "true" but "admissible with no information content"
+
+-- Impossible antecedent at credence 0
+postulate pigs_fly : pigs_can_fly [ 0 ]
+
+-- When antecedent is at credence 0:
+-- P(B|A) is UNCONSTRAINED (see ex_falso)
+-- So "pigs fly -> 2+2=5" is admissible but MEANINGLESS
+
+-- The difference from classical:
+-- Classical: vacuous truth is TRUE
+-- CredTT: vacuous conditional is ADMISSIBLE but UNINFORMATIVE
+
+-- Nearly-impossible antecedent at credence 0.001
+postulate nearly_impossible : very_unlikely_A [ 1/1000 ]
+
+-- Conditional with near-zero antecedent:
+-- P(B|A) is ALMOST unconstrained
+-- Any P(B|A) is approximately compatible with the chain rule
+
+-- This is the GRADED version:
+-- c_A = 0: completely unconstrained (ex falso)
+-- c_A = 0.001: almost unconstrained
+-- c_A = 0.1: weakly constrained
+-- c_A = 0.5: moderately constrained
+-- c_A = 1: fully constrained
+
+-- Classical logic only sees endpoints: true or false
+-- CredTT sees the entire spectrum
+
+-- Why this matters for real reasoning:
+-- "If the test returns positive, you have the disease"
+-- If P(positive) = 0.001, this conditional is weakly constrained
+-- The conditional might be "true" but carries little information
+-- CredTT tracks this; classical logic doesn't
