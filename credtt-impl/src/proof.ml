@@ -100,14 +100,15 @@ let needs_inference = function
 let stability_of_kind = function
   | KStable1 -> Neighbourhood.Robust
   | KUnstable0 -> Neighbourhood.Vanishing
-  | KInterior -> Neighbourhood.Idempotent
+  | KInterior -> Neighbourhood.Interior
   | KUnknown -> Neighbourhood.Unknown
 
 (* Convert Neighbourhood.stability to stability_kind *)
 let kind_of_stability = function
   | Neighbourhood.Robust -> KStable1
   | Neighbourhood.Vanishing -> KUnstable0
-  | Neighbourhood.Idempotent -> KInterior
+  | Neighbourhood.Interior -> KInterior
+  | Neighbourhood.Idempotent -> KInterior  (* Idempotent maps to KInterior for compatibility *)
   | Neighbourhood.Unknown -> KUnknown
 
 (* Add a postulate *)

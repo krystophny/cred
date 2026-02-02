@@ -335,4 +335,148 @@ let () =
     | _ -> false
   );
 
+  (* ============================================================
+     INTERIOR POINT CLASSIFICATION TESTS (Issue #133)
+     ============================================================
+     Interior points 0 < c < 1 must be classified as Interior,
+     NOT as Idempotent. Only 0 and 1 are idempotent under
+     standard multiplication. *)
+
+  test "classify_neighbourhood Point 1/2 = Interior (NOT Idempotent)" (
+    match classify_neighbourhood (Point rat_half) with
+    | Interior -> true
+    | Idempotent -> false  (* This was the bug! *)
+    | _ -> false
+  );
+
+  test "classify_neighbourhood Point 1/4 = Interior" (
+    let quarter = { num = 1; den = 4 } in
+    match classify_neighbourhood (Point quarter) with
+    | Interior -> true
+    | _ -> false
+  );
+
+  test "classify_neighbourhood Point 3/4 = Interior" (
+    let three_quarters = { num = 3; den = 4 } in
+    match classify_neighbourhood (Point three_quarters) with
+    | Interior -> true
+    | _ -> false
+  );
+
+  test "1/2 is NOT idempotent (1/2 * 1/2 = 1/4 != 1/2)" (
+    let half_credence = of_rational rat_half in
+    not (is_idempotent half_credence)
+  );
+
+  (* ============================================================
+     ITERATION BEHAVIOR TESTS (Issue #104)
+     ============================================================
+     For concrete endpoint credences (0, 1), iteration_behavior
+     should return concrete results. For symbolic credences
+     (including Vars representing rationals), Unknown_limit is
+     the correct conservative behavior. *)
+
+  test "iteration_behavior 1 with 1 = Preserves" (
+    match iteration_behavior One One with
+    | Preserves -> true
+    | _ -> false
+  );
+
+  test "iteration_behavior 0 with any = Preserves (0 * s^n = 0)" (
+    match iteration_behavior Zero One with
+    | Preserves -> true
+    | _ -> false
+  );
+
+  test "iteration_behavior c with 0 = Degenerates for c = 1" (
+    match iteration_behavior One Zero with
+    | Degenerates -> true
+    | _ -> false
+  );
+
+  test "iteration_behavior (Neg One) with 1 = Preserves (~1=0, 0*1^n=0)" (
+    match iteration_behavior (Neg One) One with
+    | Preserves -> true
+    | _ -> false
+  );
+
+  test "iteration_behavior (Neg Zero) with 0 = Degenerates (~0=1, 1*0^n=0)" (
+    match iteration_behavior (Neg Zero) Zero with
+    | Degenerates -> true
+    | _ -> false
+  );
+
+  test "iteration_behavior (Var c) with Zero = Degenerates (any c * 0^n = 0)" (
+    match iteration_behavior (Var "c") Zero with
+    | Degenerates -> true
+    | _ -> false
+  );
+
+  test "iteration_behavior symbolic with symbolic = Unknown_limit (conservative)" (
+    let symbolic = Var "c" in
+    match iteration_behavior symbolic symbolic with
+    | Unknown_limit -> true
+    | _ -> false
+  );
+
+  (* ============================================================
+     INTERIOR STABILITY PROPAGATION TESTS
+     ============================================================ *)
+
+  test "stability_of_app Interior Interior = Interior" (
+    match stability_of_app Interior Interior with
+    | Interior -> true
+    | _ -> false
+  );
+
+  test "stability_of_app Robust Interior = Interior (1 * c = c)" (
+    match stability_of_app Robust Interior with
+    | Interior -> true
+    | _ -> false
+  );
+
+  test "stability_of_app Interior Vanishing = Vanishing (c * 0 = 0)" (
+    match stability_of_app Interior Vanishing with
+    | Vanishing -> true
+    | _ -> false
+  );
+
+  test "stability_of_neg Interior = Interior (~c for 0<c<1 gives 0<1-c<1)" (
+    match stability_of_neg Interior with
+    | Interior -> true
+    | _ -> false
+  );
+
+  test "is_interior Interior = true" (is_interior Interior);
+  test "is_interior Robust = false" (not (is_interior Robust));
+  test "is_interior Vanishing = false" (not (is_interior Vanishing));
+
+  (* ============================================================
+     INTERVAL CLASSIFICATION TESTS
+     ============================================================ *)
+
+  test "classify_neighbourhood Interval (0.1, 0.9) = Interior" (
+    let lo = { num = 1; den = 10 } in
+    let hi = { num = 9; den = 10 } in
+    match classify_neighbourhood (Interval { lo; hi; lo_closed = true; hi_closed = true }) with
+    | Interior -> true
+    | _ -> false
+  );
+
+  test "classify_neighbourhood Interval (0, 0.5) = Interior (contains interior)" (
+    let lo = rat_zero in
+    let hi = rat_half in
+    match classify_neighbourhood (Interval { lo; hi; lo_closed = true; hi_closed = true }) with
+    | Interior -> true
+    | _ -> false
+  );
+
+  test "classify_neighbourhood Interval (0.5, 1) = Interior" (
+    let lo = rat_half in
+    let hi = rat_one in
+    match classify_neighbourhood (Interval { lo; hi; lo_closed = true; hi_closed = true }) with
+    | Interior -> true
+    | _ -> false
+  );
+
   Printf.printf "\nAll neighbourhood tests passed!\n"
