@@ -58,6 +58,19 @@ Credence propagation rules:
 The tactic name documents the INTENDED reasoning step for human readers.
 A full tactic verification system is future work (see GitHub issue #97).
 
+## Note on Symbolic Credences (Issue #130)
+
+These .ctt files use SYMBOLIC credence variables like `c`, `c1`, `c2`, `c_a`, etc.
+The checker ACCEPTS these as variable names but does NOT verify symbolic
+credence relationships. For example:
+- `postulate p : A @ c` creates a postulate with symbolic credence "c"
+- `derive q : B @ c from p by apply` works because "c" matches "c"
+- The checker CANNOT verify that `c1 * c2` actually multiplies two credences
+
+LIMITATION: Symbolic credences are treated as UNINTERPRETED strings. The
+checker tracks credence equality syntactically, not algebraically. To verify
+actual credence arithmetic, use concrete rational values like `1/2`, `1`, `0`.
+
 ## Executable Tests
 
 For actual executable tests, see:
