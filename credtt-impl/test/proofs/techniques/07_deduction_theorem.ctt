@@ -1,5 +1,10 @@
 -- Deduction Theorem (Lambda Abstraction)
 --
+-- STATUS: CONCEPTUAL (Issue #151)
+-- This file EXPLAINS how the deduction theorem works in CredTT. The `derive`
+-- statements use `by definition` and `by pi_intro` tactics which are accepted
+-- by the parser but NOT semantically verified - they document intended reasoning.
+--
 -- Classical: If Gamma, A |- B, then Gamma |- A -> B
 -- CredTT: If Gamma, x:A |- b:B @ c, then Gamma |- \x.b : A -> B @ c
 --         Stability preserved: stable body -> stable lambda
