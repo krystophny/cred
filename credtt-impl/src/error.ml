@@ -4,6 +4,7 @@ open Syntax
 
 type t =
   | UnboundVariable of int
+  | UnboundName of string  (* Issue #81: unbound variable by name during elaboration *)
   | TypeMismatch of { expected : ty; actual : ty }
   | NotAFunction of ty
   | NotAPair of ty
@@ -19,10 +20,13 @@ type t =
   | FileNotFound of string
   | UnsupportedHole  (* Issue #56: holes are not properly supported *)
   | UnsupportedConstruct of string  (* Issue #59: placeholder for unsupported constructs *)
+  | UnboundTypeName of string  (* Issue #79: unbound type name during elaboration *)
 
 let pp fmt = function
   | UnboundVariable i ->
       Format.fprintf fmt "Unbound variable: v%d" i
+  | UnboundName name ->
+      Format.fprintf fmt "Unbound variable: %s" name
   | TypeMismatch { expected; actual } ->
       Format.fprintf fmt "Type mismatch:@.  Expected: %a@.  Actual:   %a"
         pp_ty expected pp_ty actual
@@ -57,6 +61,8 @@ let pp fmt = function
       Format.fprintf fmt "Holes (?) are not supported in elaboration. Use explicit terms or type annotations."
   | UnsupportedConstruct what ->
       Format.fprintf fmt "Unsupported construct: %s" what
+  | UnboundTypeName name ->
+      Format.fprintf fmt "Unbound type name: %s" name
 
 let to_string err =
   let buf = Buffer.create 128 in

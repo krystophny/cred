@@ -83,17 +83,47 @@ let () =
     | _ -> false
   );
 
-  (* Test type elaboration: arrow type *)
+  (* Test type elaboration: arrow type with known types *)
   test "TyArrow elaborates to TPi" (
-    match Elaborate.elab_ty Elaborate.empty_env (Raw.TyArrow (Raw.TyVar "A", Raw.TyVar "B")) with
+    match Elaborate.elab_ty Elaborate.empty_env (Raw.TyArrow (Raw.TyVar "Nat", Raw.TyVar "Bool")) with
     | Syntax.TPi (_, _) -> true
     | _ -> false
   );
 
-  (* Test type elaboration: sum type *)
+  (* Test type elaboration: sum type with known types *)
   test "TySum elaborates to TSum" (
-    match Elaborate.elab_ty Elaborate.empty_env (Raw.TySum (Raw.TyVar "A", Raw.TyVar "B")) with
+    match Elaborate.elab_ty Elaborate.empty_env (Raw.TySum (Raw.TyVar "Nat", Raw.TyVar "Nat")) with
     | Syntax.TSum (_, _) -> true
+    | _ -> false
+  );
+
+  (* Issue #79: Test unbound type name raises error *)
+  test "Unbound type name raises ElaborationError" (
+    try
+      let _ = Elaborate.elab_ty Elaborate.empty_env (Raw.TyVar "UnknownType") in
+      false
+    with
+    | Elaborate.ElaborationError (Error.UnboundTypeName "UnknownType") -> true
+    | _ -> false
+  );
+
+  (* Issue #79: Test type application raises error *)
+  test "TyApp raises ElaborationError" (
+    try
+      let _ = Elaborate.elab_ty Elaborate.empty_env (Raw.TyApp (Raw.TyVar "List", Raw.TyVar "Nat")) in
+      false
+    with
+    | Elaborate.ElaborationError (Error.UnsupportedConstruct _) -> true
+    | _ -> false
+  );
+
+  (* Issue #81: Test unbound variable raises error *)
+  test "Unbound variable raises ElaborationError" (
+    try
+      let _ = Elaborate.elab_term Elaborate.empty_env (Raw.TVar "unbound_var") in
+      false
+    with
+    | Elaborate.ElaborationError (Error.UnboundName "unbound_var") -> true
     | _ -> false
   );
 

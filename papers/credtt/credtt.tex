@@ -1428,7 +1428,7 @@ CredTT provides more information than both: constructive math says ``no choice f
         \item Credence forcing from contradictions
         \item Negation fixpoint solving
     \end{itemize}
-    \item \textbf{Agda formalization} (\texttt{agda/CredTT/}): Syntax, typing rules with credence multiplication, MLTT embedding theorem. Note: Agda has credence-annotated \emph{typing rules} (in \texttt{Judgment.agda}) but not a \emph{type-checking algorithm}---the OCaml implementation provides the algorithmic type checker while Agda provides the specification
+    \item \textbf{Agda formalization} (\texttt{agda/CredTT/}): Syntax, typing rules with credence multiplication, MLTT embedding theorem. Note: (a) Agda has credence-annotated \emph{typing rules} (in \texttt{Judgment.agda}) but not a \emph{type-checking algorithm}---the OCaml implementation provides the algorithmic type checker while Agda provides the specification; (b) The MLTT embedding (\texttt{MLTT.agda}) proves one direction of the round-trip (\texttt{embed-collapse}); the other direction (\texttt{collapse-embed}) is not yet proven---see Issue \#76
 \end{enumerate}
 
 \subsection{What Is NOT Implemented}
