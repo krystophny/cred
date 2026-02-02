@@ -1,0 +1,11 @@
+-- ProbTT Proof: Underscore weight inference
+--
+-- This proof uses _ to request weight inference.
+
+-- Assume P at inferred weight
+postulate p : P 〔 _ 〕
+
+-- Derive Q - weight inferred from p
+derive q : Q 〔 _ 〕 from p by rule1
+
+-- The weights should be unified

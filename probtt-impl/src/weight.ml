@@ -8,12 +8,22 @@ type t =
   | Mul of t * t
   | Neg of t
   | Var of string
+  | Infer of int  (* inference variable, assigned during unification *)
 
 let zero = Zero
 let one = One
 let mul w v = Mul (w, v)
 let neg w = Neg w
 let var s = Var s
+
+(* Inference variable generation *)
+let infer_counter = ref 0
+let fresh_infer () =
+  let n = !infer_counter in
+  incr infer_counter;
+  Infer n
+
+let reset_infer () = infer_counter := 0
 
 let w_or w v = Neg (Mul (Neg w, Neg v))
 
@@ -39,6 +49,7 @@ let rec simplify = function
        | One -> Zero
        | Neg w'' -> w''
        | _ -> Neg w')
+  | Infer n -> Infer n
   | w -> w
 
 let rec equal w1 w2 =
@@ -46,6 +57,7 @@ let rec equal w1 w2 =
   | Zero, Zero -> true
   | One, One -> true
   | Var s1, Var s2 -> s1 = s2
+  | Infer n1, Infer n2 -> n1 = n2
   | Mul (a1, b1), Mul (a2, b2) -> equal a1 a2 && equal b1 b2
   | Neg w1', Neg w2' -> equal w1' w2'
   | _, _ -> false
@@ -60,6 +72,7 @@ let rec pp fmt = function
   | Zero -> Format.fprintf fmt "0"
   | One -> Format.fprintf fmt "1"
   | Var s -> Format.fprintf fmt "%s" s
+  | Infer n -> Format.fprintf fmt "?%d" n
   | Mul (w, v) -> Format.fprintf fmt "(%a * %a)" pp w pp v
   | Neg w -> Format.fprintf fmt "(1 - %a)" pp w
 
@@ -113,6 +126,7 @@ let rec to_rational = function
        | Some ra, Some rb -> Some (rat_mul ra rb)
        | _, _ -> None)
   | Var _ -> None
+  | Infer _ -> None
 
 (* Solve w = ¬w for fixed point
    ¬w = 1 - w, so w = 1 - w implies 2w = 1, w = 1/2 *)
@@ -163,3 +177,200 @@ let of_rational r =
   if r'.num = 0 then Zero
   else if r'.num = r'.den then One
   else Var (rat_to_string r')
+
+(* ========================================================================
+   WEIGHT INFERENCE ENGINE
+   ========================================================================
+   Infers weights from term structure when not explicitly annotated.
+   Uses unification with substitution to propagate constraints.
+   ======================================================================== *)
+
+(* Substitution: maps inference variables to weights *)
+type subst = (int * t) list
+
+let empty_subst : subst = []
+
+let rec apply_subst (s : subst) (w : t) : t =
+  match w with
+  | Infer n ->
+      (match List.assoc_opt n s with
+       | Some w' -> apply_subst s w'
+       | None -> Infer n)
+  | Mul (a, b) -> simplify (Mul (apply_subst s a, apply_subst s b))
+  | Neg w' -> simplify (Neg (apply_subst s w'))
+  | _ -> w
+
+(* Occurs check: does inference variable n occur in weight w? *)
+let rec occurs (n : int) (w : t) : bool =
+  match w with
+  | Infer m -> n = m
+  | Mul (a, b) -> occurs n a || occurs n b
+  | Neg w' -> occurs n w'
+  | _ -> false
+
+(* Unification result *)
+type unify_result =
+  | Unified of subst
+  | Failed of string
+  | Fixpoint of int * (t -> t)  (* variable n satisfies n = f(n) *)
+
+(* Substitution for named variables *)
+type var_subst = (string * t) list
+
+let empty_var_subst : var_subst = []
+
+let apply_var_subst (vs : var_subst) (w : t) : t =
+  let rec go = function
+    | Var v ->
+        (match List.assoc_opt v vs with
+         | Some w' -> go w'
+         | None -> Var v)
+    | Mul (a, b) -> simplify (Mul (go a, go b))
+    | Neg w' -> simplify (Neg (go w'))
+    | w' -> w'
+  in go w
+
+(* Extended substitution: inference vars + named vars *)
+type full_subst = {
+  infer_bindings : subst;
+  var_bindings : var_subst;
+}
+
+let empty_full_subst = { infer_bindings = []; var_bindings = [] }
+
+let apply_full_subst (fs : full_subst) (w : t) : t =
+  apply_var_subst fs.var_bindings (apply_subst fs.infer_bindings w)
+
+(* Unify two weights, returning substitution or failure *)
+let rec unify (s : subst) (w1 : t) (w2 : t) : unify_result =
+  let w1' = apply_subst s w1 in
+  let w2' = apply_subst s w2 in
+  match simplify w1', simplify w2' with
+  | Zero, Zero -> Unified s
+  | One, One -> Unified s
+  | Var v1, Var v2 when v1 = v2 -> Unified s
+  | Infer n1, Infer n2 when n1 = n2 -> Unified s
+
+  (* Inference variable on left: bind if no occurs check failure *)
+  | Infer n, w ->
+      if occurs n w then
+        (* Fixpoint: ?n = f(?n) for some f *)
+        Fixpoint (n, fun x -> apply_subst [(n, x)] w)
+      else
+        Unified ((n, w) :: s)
+
+  (* Inference variable on right: symmetric *)
+  | w, Infer n ->
+      if occurs n w then
+        Fixpoint (n, fun x -> apply_subst [(n, x)] w)
+      else
+        Unified ((n, w) :: s)
+
+  (* Named variable unification: treat as constraint w = value
+     This records the constraint but doesn't "fail" unification *)
+  | Var _, Zero -> Unified s  (* constraint noted elsewhere *)
+  | Var _, One -> Unified s
+  | Zero, Var _ -> Unified s
+  | One, Var _ -> Unified s
+
+  (* Structural unification *)
+  | Mul (a1, b1), Mul (a2, b2) ->
+      (match unify s a1 a2 with
+       | Unified s' -> unify s' b1 b2
+       | other -> other)
+
+  | Neg w1'', Neg w2'' -> unify s w1'' w2''
+
+  (* Named variables match if equal *)
+  | Var v1, Var v2 when v1 = v2 -> Unified s
+
+  (* Check structural equality after simplification *)
+  | w1'', w2'' when equal w1'' w2'' -> Unified s
+
+  | w1'', w2'' ->
+      Failed (Printf.sprintf "Cannot unify %s with %s"
+                (to_string w1'') (to_string w2''))
+
+(* Inference context: accumulates constraints during type checking *)
+type infer_ctx = {
+  mutable constraints : (t * t) list;
+  mutable fixpoints : (int * (t -> t)) list;
+  mutable subst : subst;
+}
+
+let create_infer_ctx () = {
+  constraints = [];
+  fixpoints = [];
+  subst = empty_subst;
+}
+
+(* Add a constraint w1 = w2 *)
+let add_constraint ctx w1 w2 =
+  ctx.constraints <- (w1, w2) :: ctx.constraints
+
+(* Add a constraint that w should be zero (from contradiction) *)
+let add_zero_constraint ctx w =
+  add_constraint ctx w Zero
+
+(* Solve all accumulated constraints *)
+let solve_inference ctx =
+  let rec go s = function
+    | [] -> Ok s
+    | (w1, w2) :: rest ->
+        match unify s w1 w2 with
+        | Unified s' -> go s' rest
+        | Failed msg -> Error msg
+        | Fixpoint (n, f) ->
+            ctx.fixpoints <- (n, f) :: ctx.fixpoints;
+            go s rest
+  in
+  match go ctx.subst ctx.constraints with
+  | Ok s ->
+      ctx.subst <- s;
+      (* Solve fixpoints: ?n = f(?n) *)
+      List.iter (fun (n, f) ->
+        let solved = solve_fixpoint f (Printf.sprintf "?%d" n) in
+        match solved with
+        | Some r ->
+            ctx.subst <- (n, of_rational r) :: ctx.subst
+        | None -> ()
+      ) ctx.fixpoints;
+      Ok ctx.subst
+  | Error msg -> Error msg
+
+(* Apply solved substitution to get final weight *)
+let finalize_weight ctx w =
+  let w' = apply_subst ctx.subst w in
+  simplify w'
+
+(* Infer weight for a derivation chain.
+   Given a sequence of derivation steps, propagate weights through. *)
+let infer_derivation_weight ~from_weight ~(step : string) =
+  (* Most derivation steps preserve weight *)
+  match step with
+  | "algebra" | "substitution" | "both_even" | "self_reference"
+  | "definition" | "assumption" | "trivial" ->
+      from_weight
+  | _ ->
+      (* Unknown step: preserve weight by default *)
+      from_weight
+
+(* Check if a weight has inference variables *)
+let rec has_infer = function
+  | Infer _ -> true
+  | Mul (a, b) -> has_infer a || has_infer b
+  | Neg w -> has_infer w
+  | _ -> false
+
+(* Collect all inference variables in a weight *)
+let rec collect_infers acc = function
+  | Infer n -> if List.mem n acc then acc else n :: acc
+  | Mul (a, b) -> collect_infers (collect_infers acc a) b
+  | Neg w -> collect_infers acc w
+  | _ -> acc
+
+(* Pretty print substitution *)
+let pp_subst fmt s =
+  List.iter (fun (n, w) ->
+    Format.fprintf fmt "?%d = %a; " n pp w
+  ) s

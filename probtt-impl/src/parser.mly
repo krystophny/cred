@@ -267,3 +267,4 @@ weight_atom:
   | NUM { if $1 = 0 then WZero else if $1 = 1 then WOne else WVar (string_of_int $1) }
   | x = IDENT { WVar x }
   | NEG w = weight_atom { WNeg w }
+  | UNDERSCORE { WInfer }  (* _ for inferred weight *)

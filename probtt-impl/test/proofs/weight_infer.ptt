@@ -1,0 +1,15 @@
+-- ProbTT Proof: Weight inference test
+--
+-- This proof demonstrates automatic weight inference.
+-- When weight is specified as _, it will be inferred from context.
+
+-- Assume P at unknown weight (will be inferred)
+postulate p : P 〔 w 〕
+
+-- Derive Q from P - weight should be inferred as w
+derive q : Q 〔 w 〕 from p by implication
+
+-- Derive R from Q - weight chain preserved
+derive r : R 〔 w 〕 from q by transitivity
+
+-- All derivations should have the same inferred weight w
