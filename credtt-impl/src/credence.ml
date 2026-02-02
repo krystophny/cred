@@ -626,15 +626,46 @@ let finalize_credence ctx c =
   simplify c'
 
 (* Infer credence for a derivation chain.
-   Given a sequence of derivation steps, propagate credences through. *)
+   Given a sequence of derivation steps, propagate credences through.
+
+   Derivation steps transform credences according to their semantics:
+   - Preserving steps: algebra, substitution, etc. keep credence unchanged
+   - Negation steps: compute complement (1 - c)
+   - Weakening steps: may decrease credence (conservative: preserve)
+   - Application requires two credences (handled in proof.ml's modus_ponens)
+
+   For single-source derivations, most steps preserve credence since the
+   transformation depends only on the source. Steps that genuinely transform
+   a single credence (like negation) are handled explicitly. *)
 let infer_derivation_credence ~from_credence ~(step : string) =
-  (* Most derivation steps preserve credence *)
   match step with
+  (* Preserving steps: logical equivalences, definitional steps *)
+  (* NOTE: Contrapositive is a LOGICAL EQUIVALENCE (A->B iff ~B->~A), so it
+     preserves credence. The negations happen to the propositions, not credences. *)
   | "algebra" | "substitution" | "both_even" | "self_reference"
-  | "definition" | "assumption" | "trivial" ->
+  | "definition" | "assumption" | "trivial" | "identity" | "reflexivity"
+  | "symmetry" | "congruence" | "rewrite" | "unfold" | "fold"
+  | "contrapositive" ->
       from_credence
+
+  (* Negation: c becomes 1-c (applies complement to the credence itself) *)
+  | "negate" | "negation" | "complement" ->
+      simplify (neg from_credence)
+
+  (* Projection from pair: preserves credence (already joint) *)
+  | "fst" | "snd" | "project" | "projection" ->
+      from_credence
+
+  (* Induction step: typically preserves base credence *)
+  | "induction" | "inductive" ->
+      from_credence
+
+  (* Weakening: can only decrease credence, but without target we preserve *)
+  | "weaken" | "weakening" ->
+      from_credence
+
+  (* Unknown step: preserve credence by default (conservative) *)
   | _ ->
-      (* Unknown step: preserve credence by default *)
       from_credence
 
 (* Check if a credence has inference variables *)
