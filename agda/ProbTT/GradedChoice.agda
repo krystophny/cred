@@ -1,5 +1,28 @@
--- Graded Choice: Axiom of Choice at weight < 1
--- Finite choice at weight 1, countable/uncountable at weight < 1
+{- AXIOM STATUS SUMMARY for GradedChoice.agda
+
+This module contains FUNDAMENTAL AXIOMS, not theorems to be proven.
+These axiomatize graded choice, analogous to how AC is an axiom of ZFC.
+
+ExistsAt: PRIMITIVE NOTION
+  Bridges ProbTT weighted types to set-theoretic existence.
+  Cannot be defined within ProbTT itself.
+
+finite-choice: FUNDAMENTAL AXIOM
+  Constructively valid for finite families.
+
+countable-choice-*: AXIOM SCHEMA
+  Limit weight depends on specific weight algebra.
+  In [0,1]: limit of 1^n = 1. In other algebras: may be less than 1.
+
+banach-tarski-*: PHILOSOPHICAL AXIOM
+  Encodes position that non-constructive existence has weight less than 1.
+  This is a declaration, not a theorem about Banach-Tarski.
+
+product-bounded, product-limit-exists: SHOULD BE PROVEN
+  Require order-multiplication interaction not in minimal De Morgan algebra.
+-}
+-- Graded Choice: Axiom of Choice at weight less than 1
+-- Finite choice at weight 1, countable/uncountable at weight less than 1
 --
 -- LITERATURE CONTEXT:
 -- This module is more novel than the incompleteness/consistency work.
