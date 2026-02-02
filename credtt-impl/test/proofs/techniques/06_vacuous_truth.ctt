@@ -16,7 +16,7 @@
 -- Not "true" but "admissible with no information content"
 
 -- Impossible antecedent at credence 0
-postulate pigs_fly : pigs_can_fly [ 0 ]
+postulate pigs_fly : pigs_can_fly @ 0
 
 -- When antecedent is at credence 0:
 -- P(B|A) is UNCONSTRAINED (see ex_falso)
@@ -27,7 +27,7 @@ postulate pigs_fly : pigs_can_fly [ 0 ]
 -- CredTT: vacuous conditional is ADMISSIBLE but UNINFORMATIVE
 
 -- Nearly-impossible antecedent at credence 0.001
-postulate nearly_impossible : very_unlikely_A [ 1/1000 ]
+postulate nearly_impossible : very_unlikely_A @ 1/1000
 
 -- Conditional with near-zero antecedent:
 -- P(B|A) is ALMOST unconstrained

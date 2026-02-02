@@ -11,10 +11,10 @@
 -- INTRODUCTION: (a, b) : Sigma x:A. B(x) @ c_a * c_b
 
 -- Witness at credence c1
-postulate witness : prime_101 [ c1 ]
+postulate witness : prime_101 @ c1
 
 -- Property holds at credence c2
-postulate property : greater_than_100 [ c2 ]
+postulate property : greater_than_100 @ c2
 
 -- Existential intro: credences multiply
 -- (witness, property) @ c1 * c2
@@ -28,10 +28,10 @@ postulate property : greater_than_100 [ c2 ]
 -- Then result : C @ c1 * c2
 
 -- Sigma at credence c
-postulate sigma_term : exists_prime_gt_100 [ c ]
+postulate sigma_term : exists_prime_gt_100 @ c
 
 -- Elimination (using the witness) at credence d
-postulate usage : using_the_prime [ d ]
+postulate usage : using_the_prime @ d
 
 -- Result: c * d
 -- Each use of the existential MULTIPLIES credence

@@ -228,6 +228,8 @@ let process_decls env decls =
     | DProvable _ :: rest -> process env acc rest
     | DFixpoint _ :: rest -> process env acc rest
     | DEncode _ :: rest -> process env acc rest
+    | DStable _ :: rest -> process env acc rest
+    | DUnstable _ :: rest -> process env acc rest
   in
   process env [] decls
 
@@ -273,6 +275,10 @@ let extract_proof_decls decls =
     | DEncode (name, prop) :: rest ->
         let proof_decl = Proof.Encode (name, prop) in
         go (proof_decl :: acc) rest
+    | DStable name :: rest ->
+        go (Proof.AssertStable name :: acc) rest
+    | DUnstable name :: rest ->
+        go (Proof.AssertUnstable name :: acc) rest
     | _ :: rest -> go acc rest
   in
   go [] decls
@@ -281,6 +287,7 @@ let extract_proof_decls decls =
 let has_proof_decls decls =
   List.exists (function
     | DPostulate _ | DDerive _ | DContradict _ | DConclude _
-    | DProvable _ | DFixpoint _ | DEncode _ -> true
+    | DProvable _ | DFixpoint _ | DEncode _
+    | DStable _ | DUnstable _ -> true
     | _ -> false
   ) decls

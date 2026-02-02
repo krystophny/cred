@@ -12,8 +12,8 @@
 -- How many steps until c < epsilon?
 -- How sensitive is c to perturbation?
 
-postulate hypothesis : H [ c ]
-postulate contradicts : not_H [ c ]
+postulate hypothesis : H @ c
+postulate contradicts : not_H @ c
 
 -- Contradiction: c = 0
 contradict hypothesis contradicts

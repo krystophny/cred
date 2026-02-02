@@ -13,20 +13,20 @@
 -- c < 1: probably equal
 
 -- Original term at credence c1
-postulate original : term_equals_2_plus_2 [ c1 ]
+postulate original : term_equals_2_plus_2 @ c1
 
 -- Equality at credence c2
-postulate equality : two_plus_two_equals_four [ c2 ]
+postulate equality : two_plus_two_equals_four @ c2
 
 -- Rewrite: original @ c1, equality @ c2 -> result @ c1 * c2
 -- If c1 = 1 and c2 = 1, result = 1 (stable)
 -- If either < 1, result < 1
 
 -- Stable rewrites:
-postulate stable_term : x_equals_y [ 1 ]
-postulate stable_eq : y_equals_z [ 1 ]
+postulate stable_term : x_equals_y @ 1
+postulate stable_eq : y_equals_z @ 1
 
-derive stable_result : x_equals_z [ 1 ] from stable_term by rewrite
+derive stable_result : x_equals_z @ 1 from stable_term by rewrite
 
 stable stable_term
 stable stable_eq
@@ -36,8 +36,8 @@ stable stable_result
 -- "a probably equals b" @ 0.9
 -- Rewriting with this: credence degrades
 
-postulate uncertain_eq : a_probably_b [ 9/10 ]
-postulate certain_term : some_term [ 1 ]
+postulate uncertain_eq : a_probably_b @ 9/10
+postulate certain_term : some_term @ 1
 
 -- Rewrite: 1 * 0.9 = 0.9
 

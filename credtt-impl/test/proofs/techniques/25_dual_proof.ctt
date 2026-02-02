@@ -9,12 +9,12 @@
 -- CredTT: c(A) can be constrained to interval
 
 -- LOWER BOUND: prove c(A) >= l
-postulate lower : A_at_least [ 4/10 ]
+postulate lower : A_at_least @ 4/10
 
 -- UPPER BOUND: prove c(A) <= u
 -- Equivalently: c(neg A) >= 1 - u
 
-postulate upper : A_at_most [ 6/10 ]
+postulate upper : A_at_most @ 6/10
 
 -- SQUEEZED: l <= c(A) <= u
 -- c(A) is in interval [0.4, 0.6]

@@ -14,7 +14,7 @@
 -- Small perturbations don't destroy truth
 
 -- Stable theorem (e.g., 2+2=4)
-postulate arithmetic : two_plus_two_eq_four [ 1 ]
+postulate arithmetic : two_plus_two_eq_four @ 1
 
 -- This is Stable1: credence is exactly 1
 -- No perturbation can make it false
@@ -25,7 +25,7 @@ stable arithmetic
 -- B is fragile, easily refuted
 
 -- Unstable claim (after contradiction)
-postulate refuted : sqrt2_is_rational [ 0 ]
+postulate refuted : sqrt2_is_rational @ 0
 
 -- This is Unstable0: credence is exactly 0
 unstable refuted
@@ -34,7 +34,7 @@ unstable refuted
 -- This means: C has credence strictly between 0 and 1
 -- Neither definitely true nor definitely false
 
-postulate partial : some_conjecture [ 1/2 ]
+postulate partial : some_conjecture @ 1/2
 
 -- This is Interior: neither Stable1 nor Unstable0
 -- The Godel sentence at credence 1/2 is Interior
