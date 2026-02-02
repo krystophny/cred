@@ -552,9 +552,12 @@ let rec unify (s : subst) (w1 : t) (w2 : t) : unify_result =
       else
         Unified ((n, w) :: s)
 
-  (* Named variable unification: treat as constraint c = value
-     This records the constraint but doesn't "fail" unification *)
-  | Var _, Zero -> Unified s  (* constraint noted elsewhere *)
+  (* LIMITATION (Issue #120): Named variable unification is incomplete.
+     These cases succeed without recording any binding, meaning constraints
+     like "c = 0" are silently ignored. The solve_constraints function
+     handles Var = Zero/One cases properly, but this unify function does not.
+     To fix: extend substitution type to include named variable bindings. *)
+  | Var _, Zero -> Unified s
   | Var _, One -> Unified s
   | Zero, Var _ -> Unified s
   | One, Var _ -> Unified s
