@@ -1,10 +1,11 @@
 -- Universal Generalization (Pi-Introduction)
 --
 -- STATUS: CONCEPTUAL (Issue #153)
--- This file EXPLAINS how Pi-introduction works with infimum credences, but
--- no `inf` construct is verified by the checker. The claim that Pi type has
--- credence = infimum over instances is the DESIGN; implementation tracks
--- credences syntactically without computing actual infima.
+-- This file EXPLAINS how Pi-introduction SHOULD work with infimum credences.
+-- DISCREPANCY: The DESIGN says Pi type has credence = infimum over instances,
+-- but credence.ml:740-742 uses Sup (supremum) in dependent_pi_credence.
+-- This may be a semantic issue requiring clarification. Either way, the checker
+-- does not compute actual infima/suprema - it tracks symbolic Sup/Inf terms.
 --
 -- Classical: If Gamma |- P(x) for arbitrary x, then Gamma |- forall x. P(x)
 -- CredTT: lambda x. b : Pi x. B @ inf_x c(x)
