@@ -385,6 +385,9 @@ module ClassicalTechniques {ℓ} (DM : DeMorganAlgebra ℓ) where
 -- ============================================================
 -- CREDTT-NATIVE PROOF TECHNIQUES (21-28)
 -- No classical analogue - pure CredTT innovations
+-- STATUS (Issue #119): These modules wrap record definitions from
+-- StabilityTheorems.NativeTechniques. They provide type aliases and
+-- examples but not full proof infrastructure. See StabilityTheorems.agda.
 -- ============================================================
 
 module CredTTNativeTechniques {ℓ} (DM : DeMorganAlgebra ℓ) where
