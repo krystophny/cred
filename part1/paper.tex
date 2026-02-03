@@ -893,7 +893,10 @@ $c(1-c)$ is the variance of a single Bernoulli trial.
     \item Zero at extremes: $\text{spread}(c) = 0 \iff c \in \{0, 1\}$
 \end{enumerate}
 \end{theorem}
-\noindent\textit{Proof.} Verified in Lean: \texttt{spread\_le\_quarter}, \texttt{spread\_half}, \texttt{spread\_eq\_zero\_iff}. \hfill$\square$
+\noindent\textit{Proof.} (a) By completing the square: $c(1-c) = -(c - 0.5)^2 + 0.25 \leq 0.25$
+since $(c - 0.5)^2 \geq 0$. (b) Direct computation. (c) The product $c(1-c) = 0$
+iff $c = 0$ or $c = 1$. Verified in Lean: \texttt{spread\_le\_quarter},
+\texttt{spread\_half}, \texttt{spread\_eq\_zero\_iff}. \hfill$\square$
 
 \textbf{Interpretation:} Spread measures distance from certainty. At
 $c = 0$ or $c = 1$ (certainty), spread is zero. At $c = 0.5$ (maximum
