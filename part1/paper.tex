@@ -1858,8 +1858,15 @@ Comments reference Lean theorem and definition names (e.g., \texttt{neg\_neg},
 \texttt{conditioning\_zero\_any}), which are stable identifiers.
 The Lean code defines \texttt{half} as the credence $0.5$ and uses \texttt{ThreeVal}
 with constructors \texttt{zero}, \texttt{half}, \texttt{one}---numerical names
-that are interpretation-neutral. This paper uses $0.5$ and $\tfrac{1}{2}$
-directly. Note that RM3's middle value is sometimes interpreted as ``both''
+that are interpretation-neutral.
+
+\textbf{Notational convention:} This paper uses $0.5$ (decimal) when discussing
+credences on the continuous interval $[0,1]$, and $\tfrac{1}{2}$ (fraction) when
+discussing the discrete three-valued logic $\{0, \tfrac{1}{2}, 1\}$. Both denote
+the same numerical value; the notation signals whether the context is the full
+algebra or its three-valued collapse.
+
+Note that RM3's middle value is sometimes interpreted as ``both''
 (true and false) or ``neither'' (a gap); Cred's $0.5$ represents intermediate
 credence on a continuum, a different interpretation that happens to yield
 matching truth tables for $\{\negc, \conjc, \disjc\}$.
