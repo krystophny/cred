@@ -112,7 +112,7 @@ Neither is obviously superior---see Section~\ref{sec:conditioning} for discussio
 \footnotesize{${}^b$When restricted to Boolean values $\{0,1\}$: classical logic's
 implication-like inference uses material implication ($\neg A \lor B$), giving
 $0 \to B = 1$ for all $B$ (ex falso). Cred uses conditioning, where conditioning on
-$0$ is underdetermined---any value satisfies the chain rule $\condc{B}{0} \cdot 0 = 0$.}
+$0$ is underdetermined---any value satisfies the chain rule $\condc{B}{0} \conjc 0 = 0$.}
 \end{center}
 
 \textbf{Why ``credence'' instead of ``probability''?}
@@ -147,7 +147,7 @@ derive absolute probability as the special case $P(A) = P(A | \Omega)$.}
 \end{quote}
 
 Cred adopts this ``conditional first'' approach: the chain rule equation
-$\cred(A|B) \cdot \cred(B) = \cred(A \land B)$ governs conditioning, and
+$\cred(A|B) \conjc \cred(B) = \cred(A \land B)$ governs conditioning, and
 absolute credence is the special case where evidence is certain.
 
 \begin{remark}[What ``Primitive'' Means]
@@ -239,7 +239,7 @@ subsequent worked examples are interpretation-neutral algebraic calculations.
 A researcher assigns $\cred(H) = 0.7$ (70\% confidence). Here $H$ is the
 proposition ``hypothesis $H$ holds.'' Cred handles an edge case differently
 than probability: suppose evidence $E$ is regarded as impossible
-($\cred(E) = 0$). The chain rule equation $\cred(H \mid E) \cdot 0 = 0$ is
+($\cred(E) = 0$). The chain rule equation $\cred(H \mid E) \conjc 0 = 0$ is
 satisfied by \emph{any} value.
 The conditional is \emph{unconstrained} by the constraint, rather than undefined
 (probability) or forced to 1 (classical ex falso).
@@ -285,9 +285,9 @@ contrast Cred with the elementary definition.
 
 In Cred, conditioning is \emph{primitive}, governed by a constraint equation:
 \[
-\cred(A \mid B) \cdot \cred(B) = \cred(A \land B)
+\cred(A \mid B) \conjc \cred(B) = \cred(A \land B)
 \]
-When $\cred(B) = 0$, this equation becomes $\cred(A \mid 0) \cdot 0 = 0$,
+When $\cred(B) = 0$, this equation becomes $\cred(A \mid 0) \conjc 0 = 0$,
 which is satisfied for \emph{any} value of $\cred(A \mid 0)$. The
 conditional is \emph{unconstrained}, not undefined and not forced to
 equal 1.
@@ -325,15 +325,15 @@ The intuition has three parts:
 
     \item \textbf{Evidence constrains.} Each piece of evidence $B$ with
     $\cred(B) > 0$ narrows the space of consistent beliefs. The chain rule
-    $\cred(A \mid B) \cdot \cred(B) = \cred(A \land B)$ expresses how
+    $\cred(A \mid B) \conjc \cred(B) = \cred(A \land B)$ expresses how
     evidence constrains the joint credence.
 
     \item \textbf{Impossible evidence is algebraically inert.} When
-    $\cred(B) = 0$, the chain rule becomes $\cred(A \mid 0) \cdot 0 = 0$,
+    $\cred(B) = 0$, the chain rule becomes $\cred(A \mid 0) \conjc 0 = 0$,
     satisfied by \emph{any} value. Note: $\cred(B) = 0$ means $B$ is
     \emph{impossible}, not ``no evidence for $B$'' (which would be
     $\cred(B) = 0.5$). The rationale is pragmatic: downstream computations
-    using $\cred(A \mid B) \cdot 0 = 0$ are unaffected by the conditional's
+    using $\cred(A \mid B) \conjc 0 = 0$ are unaffected by the conditional's
     value, so the constraint need not determine it.
 \end{enumerate}
 
@@ -592,7 +592,7 @@ The central innovation of Cred is treating conditioning as \emph{primitive}:
 A \emph{conditioning structure} for a pair (joint, evidence) $\in [0,1]^2$
 is a conditional credence condCred $\in [0,1]$ satisfying the chain rule equation:
 \[
-\text{condCred} \cdot \text{evidence} = \text{joint}.
+\text{condCred} \conjc \text{evidence} = \text{joint}.
 \]
 
 When evidence $> 0$, the inequality joint $\leq$ evidence is necessary for
@@ -604,7 +604,7 @@ a hypothesis for the existence construction (\texttt{conditioning\_mk}).
 
 \textbf{Propositional notation:} We write $\cred(A \mid B)$ for the conditional
 credence where joint $= \cred(A \land B)$ and evidence $= \cred(B)$, so the
-chain rule becomes $\condc{A}{B} \cdot \cred(B) = \cred(A \land B)$. This
+chain rule becomes $\condc{A}{B} \conjc \cred(B) = \cred(A \land B)$. This
 notation is informal; the Lean formalization works purely with credence
 values---see Remark~\ref{rmk:algebraic-foundation}.
 \end{definition}
@@ -626,8 +626,10 @@ Lean works purely with numeric credence values and the algebraic constraint
 reflects Remark~\ref{rmk:algebraic-foundation}: the algebra operates on $[0,1]$
 values, not on a domain of propositions.
 
-\textbf{Important:} The chain rule uses ordinary multiplication, \emph{not} the
-independence product $\conjc$ in the sense of computing joint credence.
+\textbf{Important:} The chain rule multiplies credence \emph{values} using the
+same operation $\conjc$ from Definition~\ref{def:indep-conj}. The point is not
+that $\conjc$ computes joint credence from marginal credences: the \texttt{joint}
+parameter is supplied as input and represents $\cred(A \land B)$.
 The \texttt{joint} parameter is supplied directly---it is never computed as
 \texttt{condCred $\conjc$ something}. See Remark~\ref{rmk:product-vs-joint}.
 
@@ -656,7 +658,7 @@ The algebra distinguishes two concepts:
 
 \noindent\textbf{Warning:} Do not substitute $\cred(A) \conjc \cred(B)$ for
 $\cred(A \land B)$ in the chain rule. The chain rule
-$\cred(A \mid B) \cdot \cred(B) = \cred(A \land B)$ requires the actual joint
+$\cred(A \mid B) \conjc \cred(B) = \cred(A \land B)$ requires the actual joint
 credence as input. The independence product $\conjc$ computes this joint
 \emph{only} when $A$ and $B$ are independent; for dependent propositions,
 $\cred(A \land B)$ must be provided externally.
@@ -716,14 +718,14 @@ The chain rule determines conditioning behavior naturally:
 
 \textbf{Case 1: $\cred(B) = 1$ (certain evidence).}
 \[
-\cred(A \mid 1) \cdot 1 = \cred(A \land B) \implies \cred(A \mid 1) = \cred(A \land B)
+\cred(A \mid 1) \conjc 1 = \cred(A \land B) \implies \cred(A \mid 1) = \cred(A \land B)
 \]
 % Lean: conditioning_one
 Conditioning on certainty simply returns the joint credence.
 
 \textbf{Case 2: $\cred(B) = 0$ (impossible evidence).}
 \[
-\cred(A \mid 0) \cdot 0 = \cred(A \land B) = 0
+\cred(A \mid 0) \conjc 0 = \cred(A \land B) = 0
 \]
 % Lean: conditioning_zero_any
 This is satisfied for \emph{any} value of $\cred(A \mid 0)$. The
@@ -742,8 +744,8 @@ When evidence has credence $0$, the chain rule constraint underdetermines the co
 
 \begin{proof}
 Let $\text{evidence} = 0$. By Definition~\ref{def:conditioning}, the defining equation is
-$\text{condCred} \cdot \text{evidence} = \text{joint}$, hence $\text{condCred} \cdot 0 = \text{joint}$.
-Therefore joint $= 0$. Conversely, if joint $= 0$, then for any $c \in [0,1]$ we have $c \cdot 0 = 0$,
+$\text{condCred} \conjc \text{evidence} = \text{joint}$, hence $\text{condCred} \conjc 0 = \text{joint}$.
+Therefore joint $= 0$. Conversely, if joint $= 0$, then for any $c \in [0,1]$ we have $c \conjc 0 = 0$,
 so any conditional value satisfies the constraint. (Lean: \texttt{conditioning\_zero\_forces\_joint\_zero},
 \texttt{conditioning\_zero\_any})
 \end{proof}
@@ -778,7 +780,7 @@ There is an important distinction between the \emph{defining constraint} and the
 \emph{existence proof}:
 \begin{itemize}
     \item \textbf{The defining equation (chain rule)} is stated multiplicatively:
-    $\cred(A \mid B) \cdot \cred(B) = \cred(A \land B)$. Division does not
+    $\cred(A \mid B) \conjc \cred(B) = \cred(A \land B)$. Division does not
     appear in the defining equation itself.
     \item \textbf{The existence proof} constructs the witness by computing
     $\cred(A \land B) / \cred(B)$ when $\cred(B) > 0$.
@@ -807,7 +809,7 @@ non-uniqueness is precisely what avoids forcing ex falso.
 does not determine a unique value. This requires careful interpretation.
 \begin{itemize}
     \item \textbf{Algebraically:} The chain rule is a constraint equation.
-    When $\cred(B) = 0$, the equation $\cred(A \mid B) \cdot 0 = 0$ is satisfied
+    When $\cred(B) = 0$, the equation $\cred(A \mid B) \conjc 0 = 0$ is satisfied
     by all values in $[0,1]$---the constraint is \emph{silent} on this case.
     This is a mathematical fact about the equation, nothing more.
 
@@ -835,7 +837,7 @@ does not determine a unique value. This requires careful interpretation.
     plausibilities of its components. Cred relaxes precisely this functional
     requirement: conditioning is a \emph{relation} satisfying the chain rule,
     which becomes non-functional when evidence $= 0$ (multiple values satisfy
-    $c \cdot 0 = 0$). This trade-off is justified pragmatically:
+    $c \conjc 0 = 0$). This trade-off is justified pragmatically:
     (i) the underdetermined case is computationally inert, so no reasoning
     depends on it; (ii) forcing a unique value would require axioms beyond
     the chain rule, artificially constraining a case the algebra leaves open.
@@ -851,7 +853,7 @@ does not determine a unique value. This requires careful interpretation.
 \end{itemize}
 
 \noindent\textbf{Key point:} In all cases, downstream computations are unaffected:
-$\cred(A \mid B) \cdot 0 = 0$ regardless of the conditional's value, so
+$\cred(A \mid B) \conjc 0 = 0$ regardless of the conditional's value, so
 reasoning never depends on the unconstrained case. The expression is
 syntactically valid but \emph{semantically inert}---it propagates no information.
 This differs from probability theory (where $P(A|B)$ is \emph{undefined} when
@@ -865,7 +867,7 @@ $P(B)=0$) and from classical logic (where $\bot \to A$ is forced to be true).
 \toprule
 & \textbf{Division Approach} & \textbf{Chain Rule Approach} \\
 \midrule
-Definition & $P(A \mid B) = P(A \land B) / P(B)$ & $\cred(A \mid B) \cdot \cred(B) = \cred(A \land B)$ \\
+Definition & $P(A \mid B) = P(A \land B) / P(B)$ & $\cred(A \mid B) \conjc \cred(B) = \cred(A \land B)$ \\
 At $B = 0$ & Undefined (divide by zero) & Underdetermined (any value)${}^\dagger$ \\
 Ex falso status & Avoided (expression excluded) & Avoided (no unique value) \\
 Axiom form & Division in definition & Multiplication only${}^*$ \\
@@ -1087,10 +1089,10 @@ Remark~\ref{rmk:conditional-algebra}). The chain rule gives:
 \[
 \cred(A \mid B) = \frac{\cred(A \land B)}{\cred(B)} = \frac{0.4}{0.6} = \frac{2}{3} \approx 0.667
 \]
-Verification: $\frac{2}{3} \cdot 0.6 = 0.4 = \cred(A \land B)$. \checkmark
+Verification: $\frac{2}{3} \conjc 0.6 = 0.4 = \cred(A \land B)$. \checkmark
 
 If instead $\cred(B) = 0$, then $\cred(A \land B) = 0$ (joint cannot exceed
-marginal), and any value $c \in [0,1]$ satisfies $c \cdot 0 = 0$. The conditional
+marginal), and any value $c \in [0,1]$ satisfies $c \conjc 0 = 0$. The conditional
 $\cred(A \mid B)$ is \emph{unconstrained}.
 \end{example}
 
@@ -1272,7 +1274,7 @@ Cred conditioning uses \emph{evidence}/\emph{joint} (rows/columns in right table
 RM3 uses the Kleene strong implication $a \to b = \max(\negc a, b)$,
 giving $0 \to b = 1$ (ex falso).
 Cred conditioning satisfies $\condc{b}{a} \cdot a = \text{joint}$. When $a = 0$:
-$\condc{b}{0} \cdot 0 = 0$, satisfied by any value. Thus Cred conditioning
+$\condc{b}{0} \conjc 0 = 0$, satisfied by any value. Thus Cred conditioning
 is \emph{unconstrained} at $a = 0$, not forced to 1.
 \end{proof}
 
@@ -1359,7 +1361,7 @@ Note: This comparison shows how the two operations differ at Boolean values.
 Material implication $B \to A$ is a \emph{function} returning a definite value
 (1 when $B = 0$, regardless of $A$---this is ex falso). Cred conditioning
 $\condc{A}{B}$ when $\cred(B) = 0$ is \emph{underdetermined}---any value in
-$[0,1]$ satisfies the chain rule equation $\condc{A}{B} \cdot 0 = 0$. The key
+$[0,1]$ satisfies the chain rule equation $\condc{A}{B} \conjc 0 = 0$. The key
 difference: material implication \emph{forces} 1; conditioning leaves the
 value \emph{unconstrained}.
 \end{minipage}
@@ -1500,7 +1502,7 @@ See Remark~\ref{rmk:unconstrained} for epistemic interpretation.}
 
 \smallskip
 \footnotesize{${}^\S$Cred uses product conjunction because it models independent combination:
-$\cred(A \land B) = \cred(A) \cdot \cred(B)$ when $A$ and $B$ are epistemically independent.
+$\cred(A \land B) = \cred(A) \conjc \cred(B)$ when $A$ and $B$ are epistemically independent.
 Alternative t-norms (min, \L ukasiewicz) would yield different algebras; we leave
 exploration of such variants to future work.}
 \end{center}
@@ -2068,7 +2070,7 @@ key contributions are:
 
 \begin{enumerate}
     \item \textbf{Primitive conditioning:} The chain rule constraint
-    $\cred(A \mid B) \cdot \cred(B) = \cred(A \land B)$ is a design choice.
+    $\cred(A \mid B) \conjc \cred(B) = \cred(A \land B)$ is a design choice.
     From this choice, unconstrained conditioning at zero emerges as a
     mathematical consequence: when $\cred(B) = 0$, any value satisfies the
     equation, so the constraint imposes no constraint.
@@ -2127,7 +2129,7 @@ Future work includes:
     Definition~\ref{def:disj}.
 \item[Conditioning] Primitive operation governed by the chain rule constraint.
     Definition~\ref{def:conditioning}.
-\item[Chain rule] The defining equation $\cred(A \mid B) \cdot \cred(B) = \cred(A \land B)$.
+\item[Chain rule] The defining equation $\cred(A \mid B) \conjc \cred(B) = \cred(A \land B)$.
     Definition~\ref{def:conditioning}.
 \item[Unconstrained] When $\cred(B) = 0$, any value satisfies the chain rule;
     the constraint does not determine $\cred(A \mid B)$. Theorem~\ref{thm:noexfalso}.
