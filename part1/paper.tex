@@ -1447,7 +1447,7 @@ crucially:
 \toprule
 & \textbf{Standard Fuzzy Logics}${}^*$ & \textbf{Cred} \\
 \midrule
-Conjunction & Various t-norms${}^\dagger$ & Product (multiplication) \\
+Conjunction & Various t-norms${}^\dagger$ & Product${}^\S$ \\
 Implication & Residuum of t-norm${}^\dagger$ & Chain rule conditioning \\
 At antecedent $= 0$ & $0 \to b = 1$ (ex falso) & Unconstrained${}^\ddagger$ \\
 At Boolean values & Classical logic & Conditioning (no ex falso) \\
@@ -1467,6 +1467,12 @@ Product: $a \land b = ab$, $a \to b = 1$ if $a \leq b$ (including $a = 0$), else
 \footnotesize{${}^\ddagger$``Unconstrained'' means any value satisfies the chain rule axiom;
 this differs from ``undefined'' (probability) and from forcing $1$ (fuzzy implication).
 See Remark~\ref{rmk:unconstrained} for epistemic interpretation.}
+
+\smallskip
+\footnotesize{${}^\S$Cred uses product conjunction because it models independent combination:
+$\cred(A \land B) = \cred(A) \cdot \cred(B)$ when $A$ and $B$ are epistemically independent.
+Alternative t-norms (min, \L ukasiewicz) would yield different algebras; we leave
+exploration of such variants to future work.}
 \end{center}
 
 \begin{remark}
