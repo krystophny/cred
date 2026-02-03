@@ -867,4 +867,70 @@ theorem collapse_disj (c₁ c₂ : Credence) :
             collapse_interior (c₁ ⊔ c₂) hdisj_ne_zero hdisj_ne_one
           simp only [hcoll1, hcoll2, hcoll_disj, ThreeVal.disj_half_half]
 
+/-! ## Boolean Subalgebra and Kleene Quotient
+
+{0,1} is a subalgebra of Cred: operations on Boolean values stay Boolean.
+{0,1/2,1} is NOT a subalgebra: 1/2 ⊗ 1/2 = 1/4, which leaves the set.
+This is why the three-valued relationship requires a quotient (the collapse
+homomorphism) rather than a simple restriction.
+-/
+
+namespace Credence
+
+/-! ### Boolean Subalgebra: {0,1} is closed under all operations -/
+
+theorem boolean_neg_closed (c : Credence) (h : c = 0 ∨ c = 1) :
+    ~c = 0 ∨ ~c = 1 := by
+  rcases h with rfl | rfl
+  · right; simp
+  · left; simp
+
+theorem boolean_conj_closed (c₁ c₂ : Credence)
+    (h₁ : c₁ = 0 ∨ c₁ = 1) (h₂ : c₂ = 0 ∨ c₂ = 1) :
+    c₁ ⊗ c₂ = 0 ∨ c₁ ⊗ c₂ = 1 := by
+  rcases h₁ with rfl | rfl <;> rcases h₂ with rfl | rfl <;> simp
+
+theorem boolean_disj_closed (c₁ c₂ : Credence)
+    (h₁ : c₁ = 0 ∨ c₁ = 1) (h₂ : c₂ = 0 ∨ c₂ = 1) :
+    c₁ ⊔ c₂ = 0 ∨ c₁ ⊔ c₂ = 1 := by
+  rcases h₁ with rfl | rfl <;> rcases h₂ with rfl | rfl <;> simp
+
+/-! ### {0,1/2,1} is NOT a subalgebra: 1/2 ⊗ 1/2 = 1/4 -/
+
+theorem three_val_conj_not_closed :
+    ¬(∀ c₁ c₂ : Credence,
+      (c₁ = 0 ∨ c₁ = half ∨ c₁ = 1) →
+      (c₂ = 0 ∨ c₂ = half ∨ c₂ = 1) →
+      (c₁ ⊗ c₂ = 0 ∨ c₁ ⊗ c₂ = half ∨ c₁ ⊗ c₂ = 1)) := by
+  intro h
+  have := h half half (Or.inr (Or.inl rfl)) (Or.inr (Or.inl rfl))
+  rcases this with h0 | hh | h1
+  · have : (half ⊗ half).val = 0 := congrArg (·.val) h0
+    simp [conj_val, half_val] at this
+  · have : (half ⊗ half).val = half.val := congrArg (·.val) hh
+    simp [conj_val, half_val] at this
+  · have hv : (half ⊗ half).val = 1 := congrArg (·.val) h1
+    simp only [conj_val, half_val] at hv
+    norm_num at hv
+
+/-! ### No retraction: no negation-preserving map [0,1] → {0,1} -/
+
+theorem no_boolean_neg_retraction :
+    ¬(∃ φ : Credence → Credence,
+      (∀ c, φ c = 0 ∨ φ c = 1) ∧
+      (∀ c, φ (~c) = ~(φ c))) := by
+  intro ⟨φ, hbool, hneg⟩
+  have hfix := hneg half
+  rw [liar_fixed_point] at hfix
+  -- hfix : φ half = ~(φ half), so φ half is a negation fixed point
+  have hfp : φ half = half := neg_fixed_point_unique (φ half) hfix.symm
+  -- but φ half ∈ {0,1}, and half ∉ {0,1}
+  rcases hbool half with h0 | h1
+  · have : half.val = 0 := by rw [← hfp, h0]; simp
+    simp [half_val] at this
+  · have : half.val = 1 := by rw [← hfp, h1]; simp
+    simp [half_val] at this
+
+end Credence
+
 end Cred

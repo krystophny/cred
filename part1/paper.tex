@@ -552,12 +552,19 @@ gives $0 \to B = 1$, while conditioning at $0$ is unconstrained.
 To recover classical logic from Boolean Cred, one must \emph{add} the axiom
 $\cred(A \mid 0) = 1$.
 
-\subsection{Scope of the Collapse}
+\subsection{Subalgebra vs.\ Quotient}
 \label{sec:scope}
 
-The Kleene algebra is not an arbitrary choice of target: it is the unique
-natural three-valued quotient of Cred.
-No analogous homomorphism exists for the other standard many-valued algebras.
+Cred relates to classical logic and to the Kleene algebra in structurally
+different ways: embedding vs.\ quotient.
+
+\textbf{Boolean subalgebra.}
+The set $\{0, 1\} \subset [0,1]$ is closed under all Cred operations:
+if $c_1, c_2 \in \{0,1\}$, then $\negc c_1$, $c_1 \conjc c_2$, and
+$c_1 \disjc c_2$ are all in $\{0,1\}$ (the truth tables are exactly
+$\neg$, $\land$, $\lor$; see Section~\ref{sec:connections}).
+No quotient map is needed: if you start with only $0$s and $1$s, all
+operations keep you there.
 
 \begin{proposition}[No Collapse to Classical Logic]
 \label{prop:no-classical}
@@ -567,12 +574,26 @@ $\varphi(1-c) = 1 - \varphi(c)$ for all $c$.
 \begin{proof}
 At $c = \tfrac{1}{2}$: $\varphi(\tfrac{1}{2}) = 1 - \varphi(\tfrac{1}{2})$,
 so $\varphi(\tfrac{1}{2}) = \tfrac{1}{2} \notin \{0, 1\}$.
+Lean: \texttt{no\_boolean\_neg\_retraction}.
 \end{proof}
 
-The obstacle is that $\{0, 1\}$ has no fixed point of $c \mapsto 1 - c$, while
-$[0,1]$ has one at $\tfrac{1}{2}$.
-The Boolean restriction (Section~\ref{sec:connections}) works in the other direction:
-$\{0, 1\}$ embeds into $[0,1]$ as a subalgebra, but there is no retraction.
+The result is stronger than ``no retraction'': no negation-preserving map
+$[0,1] \to \{0,1\}$ exists at all, because the fixed point at $\tfrac{1}{2}$
+has no image in $\{0,1\}$.
+The Boolean algebra embeds into Cred as a subalgebra, but there is no
+surjection back.
+
+\textbf{Kleene quotient.}
+The set $\{0, \tfrac{1}{2}, 1\}$ is \emph{not} closed under Cred operations:
+$\tfrac{1}{2} \conjc \tfrac{1}{2} = \tfrac{1}{4} \notin \{0, \tfrac{1}{2}, 1\}$.
+Intermediate values interact to produce other intermediate values, so the
+three-valued algebra cannot live inside Cred as a subalgebra.
+The collapse homomorphism (Theorem~\ref{thm:collapse}) is the necessary
+quotient: it maps the entire open interval $(0,1)$ to $\tfrac{1}{2}$,
+absorbing the products that leave $\{0, \tfrac{1}{2}, 1\}$.
+
+\textbf{Uniqueness of the Kleene target.}
+No analogous quotient exists for the other standard three-valued algebras.
 
 \begin{proposition}[No Collapse to G\"odel Logic]
 \label{prop:no-godel}
@@ -600,22 +621,21 @@ negation ($\varphi(1-c) = 1-\varphi(c)$) and conjunction
 \end{proposition}
 \begin{proof}
 Negation at $c = \tfrac{1}{2}$ gives $\varphi(\tfrac{1}{2}) = \tfrac{1}{2}$.
-Let $c = 1/\!\sqrt{2}$, so $c^2 = \tfrac{1}{2}$.
-The conjunction condition gives:
-\[
-\varphi(\tfrac{1}{2}) = \varphi(c^2) = \max(2\varphi(c) - 1,\; 0) = \tfrac{1}{2}
-\]
-Hence $2\varphi(c) - 1 = \tfrac{1}{2}$, giving $\varphi(c) = \tfrac{3}{4}
-\notin \{0, \tfrac{1}{2}, 1\}$.
+Pick any $c \in (0,1)$ with $c^2 = \tfrac{1}{2}$ (e.g.\ $c = 1/\!\sqrt{2}$).
+Conjunction preservation gives
+$\varphi(\tfrac{1}{2}) = \mathrm{conj}_{\text{\L}}(\varphi(c), \varphi(c))$.
+But $\mathrm{conj}_{\text{\L}}(v,v) = \max(2v-1,0)$ takes values $0, 0, 1$
+for $v \in \{0, \tfrac{1}{2}, 1\}$ respectively---none equals $\tfrac{1}{2}$.
 \end{proof}
 
-The three impossibility results share a common structure: the negation fixed point
-at $\tfrac{1}{2}$ propagates constraints that only the Kleene algebra can absorb.
+The pattern: the negation fixed point at $\tfrac{1}{2}$ propagates constraints
+that only the Kleene algebra can absorb.
 Classical logic and G\"odel logic fail because they lack a negation fixed point.
 \L ukasiewicz logic has the same negation, but its conjunction
 $\mathrm{conj}_{\text{\L}}(\tfrac{1}{2}, \tfrac{1}{2}) = 0$ disagrees with the
-Kleene conjunction $\min(\tfrac{1}{2}, \tfrac{1}{2}) = \tfrac{1}{2}$, and the
-mismatch propagates to irrational values.
+Kleene value $\min(\tfrac{1}{2}, \tfrac{1}{2}) = \tfrac{1}{2}$: the
+self-conjunction of the fixed point must equal the fixed point, and only the
+Kleene algebra satisfies this.
 
 \begin{remark}[Belnap-Dunn Four-Valued Logic]
 \label{rem:fde}
@@ -848,6 +868,10 @@ The \texttt{joint} parameter is supplied as input, representing $\cred(A \land B
 \item \texttt{collapse\_neg}, \texttt{collapse\_conj}, \texttt{collapse\_disj}: homomorphism proofs
 \item \texttt{conj\_disj\_not\_distrib}: non-distributivity counterexample
 \item \texttt{conj\_idempotent\_iff}: idempotence only at $\{0,1\}$
+\item \texttt{boolean\_neg\_closed}, \texttt{boolean\_conj\_closed},
+\texttt{boolean\_disj\_closed}: $\{0,1\}$ is a subalgebra
+\item \texttt{three\_val\_conj\_not\_closed}: $\{0,\tfrac{1}{2},1\}$ is not a subalgebra
+\item \texttt{no\_boolean\_neg\_retraction}: no negation-preserving map $[0,1] \to \{0,1\}$
 \end{itemize}
 
 Verification: \texttt{cd lean \&\& lake build}.
