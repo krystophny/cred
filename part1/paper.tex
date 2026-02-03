@@ -391,11 +391,13 @@ c_1 \conjc c_2 = c_1 \cdot c_2
 (standard multiplication)
 \end{definition}
 
-\begin{remark}[Critical Independence Assumption]
+\begin{remark}[\textbf{Warning}: Independence Required]
 \label{rmk:independence}
-\textbf{Important:} The operator $\conjc$ computes $\cred(A \land B)$ \emph{only}
-when $A$ and $B$ are probabilistically independent. For dependent propositions,
-the actual joint credence $\cred(A \land B)$ must be obtained differently:
+\textbf{The operator $\conjc$ is NOT general conjunction.} It computes
+$\cred(A \land B)$ \emph{only} when $A$ and $B$ are probabilistically independent.
+For example, $\cred(A) \conjc \cred(\neg A) = 0.25$ when $\cred(A) = 0.5$, but the
+actual $\cred(A \land \neg A) = 0$ always (a contradiction is impossible).
+For dependent propositions, the joint credence must be obtained differently:
 \begin{itemize}
     \item Via the conditioning structure: $\cred(A \land B) = \cred(A \mid B) \cdot \cred(B)$
     \item Or provided directly as a parameter (see Section~\ref{sec:conditioning})
