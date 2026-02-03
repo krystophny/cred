@@ -1771,9 +1771,10 @@ def conj (c1 c2 : Credence) : Credence where
   -- nonneg, le_one proofs omitted
 
 -- Conditioning: Conditioning structure
+-- The operator ⊗ is defined as infix notation for conj
 structure Conditioning (joint evidence : Credence) where
   condCred : Credence
-  chainRule : condCred * evidence = joint
+  chainRule : condCred ⊗ evidence = joint
 \end{verbatim}
 
 \subsection{Verified Theorems}
