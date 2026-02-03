@@ -14,6 +14,22 @@ Cred [0,1]              ← WHERE WE WORK
 └── Self-hosting Cred in Cred
 ```
 
+## Philosophy: Inference as Constraint
+
+**Inference narrows possibilities from uncertainty, not builds certainties from nothing.**
+
+In the Bayesian philosophy (Jaynes, de Finetti, Cox):
+- **Prior**: Maximal uncertainty—flat distribution over possibilities
+- **Evidence constrains**: Narrows the space of consistent beliefs
+- **Posterior**: Prior + constraints
+- **No evidence = no constraint**: Credence 0 evidence provides nothing to constrain with
+
+This is why:
+- **Conditioning is primitive**: Inference IS constraining belief by evidence
+- **No ex falso**: Impossible evidence provides no constraint (not "everything follows")
+- **0.5 = maximal uncertainty**: Flat prior over {true, false}
+- **Chain rule**: (A|B)·B = A∧B expresses constraint propagation
+
 ## Why Graded?
 
 | Binary Logic | Cred |
@@ -74,9 +90,14 @@ Since Cred handles self-reference via fixed points (not paradoxes), self-hosting
 
 | Source | Contribution | Our use |
 |--------|--------------|---------|
+| **Jaynes (1957, 2003)** | Maximum entropy, probability as logic | Inference as constraint philosophy |
+| **Shore & Johnson (1980)** | Uniqueness of entropy for constraint inference | Theoretical foundation |
+| **de Finetti (1937)** | Coherence, exchangeability | Constraint consistency |
 | **Rényi (1955)** | Conditional probability as primitive | Chain rule axiom |
+| **Popper (1959)** | Primitive conditional probability | Alternative to division |
+| **van Fraassen (1983)** | Probabilistic semantics for relevant logic | Semantic correspondence |
 | **Anderson & Belnap (1960s)** | Relevant logic (no ex falso) | Boolean collapse target |
 | **RM3** | Three-valued relevant logic | {0, ½, 1} collapse target |
+| **Walley (1991)** | Imprecise probability, credal sets | Constraint regions |
 | **Brady, Weber** | Paraconsistent mathematics | Related approach |
 | **Markov categories (2020)** | Conditioning without division | Categorical connection |
-| **Krantz et al. (1971)** | Qualitative probability | Numbers from ordering |

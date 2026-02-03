@@ -8,6 +8,16 @@
   - Disjunction (De Morgan): c₁ + c₂ - c₁*c₂ (independence formula)
   - Conditioning (primitive, via chain rule)
 
+  PHILOSOPHY: Inference as Constraint
+  -----------------------------------
+  Inference narrows possibilities from uncertainty toward specificity.
+  - Prior: Start with maximal uncertainty (flat prior, credence 0.5)
+  - Evidence constrains: Each piece of evidence narrows consistent beliefs
+  - No evidence = no constraint: Credence 0 evidence cannot narrow anything
+
+  This is why conditioning is primitive (inference IS constraining) and why
+  there is no ex falso (impossible evidence provides no constraint).
+
   IMPORTANT: The binary operations ⊗ and ⊔ compute the credence of conjunctions
   and disjunctions under an INDEPENDENCE assumption. For dependent propositions,
   the joint credence cred(A ∧ B) ≠ cred(A) * cred(B) in general.
