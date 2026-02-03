@@ -582,21 +582,25 @@ the two-element Boolean algebra and is essential for modeling uncertainty correc
 
 % Lean: Conditioning, conditioning_zero_any, conditioning_one, conditioning_mk, conditioning_unique
 
-\subsection{The Chain Rule Axiom}
+\subsection{Primitive Conditioning via the Chain Rule}
 
 The central innovation of Cred is treating conditioning as \emph{primitive}:
 
 % Lean: Conditioning structure
-\begin{definition}[Conditioning Structure]
+\begin{definition}[Conditioning Structure (Chain Rule Constraint)]
 \label{def:conditioning}
 A \emph{conditioning structure} for a pair (joint, evidence) $\in [0,1]^2$
-with joint $\leq$ evidence is a conditional credence condCred $\in [0,1]$
-satisfying the chain rule (Axiom~\ref{axiom:chainrule}).
+is a conditional credence condCred $\in [0,1]$ satisfying the chain rule equation:
+\[
+\text{condCred} \cdot \text{evidence} = \text{joint}.
+\]
 
-The constraint joint $\leq$ evidence is necessary: logically, $A \land B$
-entails $B$, so $\cred(A \land B) \leq \cred(B)$---the joint cannot exceed
-the evidence. Without this constraint, conditioning would yield values
-outside $[0,1]$ when evidence $> 0$.
+When evidence $> 0$, the inequality joint $\leq$ evidence is necessary for
+existence of a witness in $[0,1]$: otherwise the unique solution
+condCred $=$ joint/evidence would exceed $1$. In the Lean development this
+inequality is a derived property of any inhabiting conditioning structure
+(Theorem \texttt{conditioning\_implies\_joint\_le\_evidence}), and is also used as
+a hypothesis for the existence construction (\texttt{conditioning\_mk}).
 
 \textbf{Propositional notation:} We write $\cred(A \mid B)$ for the conditional
 credence where joint $= \cred(A \land B)$ and evidence $= \cred(B)$, so the
@@ -605,22 +609,12 @@ notation is informal; the Lean formalization works purely with credence
 values---see Remark~\ref{rmk:algebraic-foundation}.
 \end{definition}
 
-\begin{axiom}[Chain Rule]
-\label{axiom:chainrule}
-For any conditioning structure (Definition~\ref{def:conditioning}):
-\[
-\text{condCred} \cdot \text{evidence} = \text{joint}
-\]
-The chain rule is the \emph{only} axiom of Cred. The operations in Section~2
-(negation, independence product, disjunction) are \emph{definitions}, not axioms.
-\end{axiom}
-
 \begin{remark}[Lean Formalization: Axiom vs.\ Derived Theorems]
 \label{rmk:lean-conditioning}
-The Lean code \emph{axiomatizes} conditioning via a structure that postulates
-the existence of a value satisfying the chain rule---it does not compute
-conditioning as a function. The structure \texttt{Conditioning(joint, evidence)}
-is parameterized by credence \emph{values}, not propositions:
+The Lean code represents conditioning as a structure that \emph{packages a witness}
+\texttt{condCred} together with a proof of the chain rule equation. The structure
+\texttt{Conditioning(joint, evidence)} is parameterized by credence \emph{values},
+not propositions:
 \begin{itemize}
     \item \texttt{joint}: the credence value $\cred(A \land B)$
     \item \texttt{evidence}: the credence value $\cred(B)$
@@ -637,16 +631,16 @@ independence product $\conjc$ in the sense of computing joint credence.
 The \texttt{joint} parameter is supplied directly---it is never computed as
 \texttt{condCred $\conjc$ something}. See Remark~\ref{rmk:product-vs-joint}.
 
-The existence theorem (\texttt{conditioning\_exists}) requires
-joint $\leq$ evidence when evidence $> 0$.
+The existence construction (\texttt{conditioning\_mk}) requires evidence $> 0$
+and joint $\leq$ evidence.
 
-\textbf{What is verified vs.\ what is postulated:} The chain rule
-(Axiom~\ref{axiom:chainrule}) is \emph{postulated}---the Lean structure
-declares that \texttt{condCred} satisfies the equation, not that there is
-an algorithm computing it. The Lean proofs then verify \emph{derived}
-properties: existence of witnesses when evidence $> 0$, uniqueness in that
-case, and that any value satisfies the axiom when evidence $= 0$. This is
-standard mathematical practice: axioms are stated, consequences are proven.
+\textbf{What is verified vs.\ what is constructed:} Lean does not define a total
+function $(\text{joint},\text{evidence}) \mapsto \text{condCred}$. Instead it proves
+existence of witnesses under hypotheses (evidence $> 0$, joint $\leq$ evidence),
+proves uniqueness when evidence $> 0$, and proves that when evidence $= 0$ the
+only possible joint is $0$ and then any condCred works. These correspond to
+\texttt{conditioning\_mk}, \texttt{conditioning\_unique},
+\texttt{conditioning\_zero\_forces\_joint\_zero}, and \texttt{conditioning\_zero\_any}.
 \end{remark}
 
 \begin{remark}[Independence Product vs.\ Joint Credence]
@@ -2120,7 +2114,7 @@ Future work includes:
 \item[Conditioning] Primitive operation governed by the chain rule axiom.
     Definition~\ref{def:conditioning}.
 \item[Chain rule] The axiom $\cred(A \mid B) \cdot \cred(B) = \cred(A \land B)$.
-    Axiom~\ref{axiom:chainrule}.
+    Definition~\ref{def:conditioning}.
 \item[Unconstrained] When $\cred(B) = 0$, any value satisfies the chain rule;
     the axiom does not determine $\cred(A \mid B)$. Theorem~\ref{thm:noexfalso}.
 \item[Ex falso quodlibet] ``From falsehood, anything follows''; the principle
