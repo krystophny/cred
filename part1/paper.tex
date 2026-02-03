@@ -69,8 +69,8 @@ mechanisms. Van Fraassen (1983) established the
 theoretical connection between probabilistic semantics and relevant logic;
 Cred is not itself a semantics for relevant logic. The core algebra is
 formalized in Lean 4 with machine-checked proofs. Our contribution is the
-systematic integration: using the chain rule to avoid forcing ex falso, the
-collapse tower
+systematic integration: using the chain rule to avoid forcing ex falso, a
+three-valued collapse homomorphism
 connecting to RM3, and machine-verified proofs---not the underlying ideas,
 which derive from prior work.
 \end{abstract}
@@ -1266,7 +1266,13 @@ ex falso axiom:
 This forces the unconstrained cases to equal 1, recovering material
 implication and classical logic.
 
-\subsection{The Collapse Tower}
+\subsection{Summary: From Cred to Classical Logic}
+
+The following diagram summarizes the relationships between Cred and simpler
+systems. Only the first arrow (Cred to Three-Valued) is a proven homomorphism
+for $\{\negc, \conjc, \disjc\}$ (Theorem~\ref{thm:rm3-fragment}). The other
+transitions are conceptual: restriction drops information, and replacing
+conditioning with material implication changes the structure.
 
 \begin{center}
 \begin{tikzpicture}[node distance=1.8cm, auto]
@@ -1279,9 +1285,9 @@ implication and classical logic.
     \node[draw,rectangle,minimum width=6cm,minimum height=1cm,below of=bool] (class)
         {\textbf{Classical} $\{0, 1\}$ + material impl. --- FOL};
 
-    \draw[-{Stealth}] (cred) -- node[right] {collapse $(0,1) \to \tfrac{1}{2}$} (three);
-    \draw[-{Stealth}] (three) -- node[right] {restrict to $\{0, 1\}$} (bool);
-    \draw[-{Stealth}] (bool) -- node[right] {replace conditioning with $\neg A \lor B$} (class);
+    \draw[-{Stealth}] (cred) -- node[right] {homomorphism (Thm.~\ref{thm:rm3-fragment})} (three);
+    \draw[-{Stealth}] (three) -- node[right] {restriction (not homomorphism)} (bool);
+    \draw[-{Stealth}] (bool) -- node[right] {redefine implication} (class);
 \end{tikzpicture}
 \end{center}
 
@@ -1518,14 +1524,14 @@ Specifically, he demonstrated that:
 with primitive conditioning; Cred formalizes this as an algebra with machine-checked
 proofs. The key insight---that chain-rule conditioning avoids forcing ex falso---is
 van Fraassen's. Cred's contribution is the systematic development with Lean
-verification and the collapse tower connecting to RM3.
+verification and the three-valued collapse homomorphism connecting to RM3.
 
 \textbf{What these authors did NOT do} (as far as we can determine):
 \begin{itemize}
     \item Systematically develop conditioning via chain rule as a foundation
     for avoiding forced ex falso in a complete graded algebra
-    \item Provide the structured collapse tower $[0,1] \to \{0,\frac{1}{2},1\}
-    \to \{0,1\}$ with the property of not forcing ex falso preserved at each level
+    \item Provide the three-valued collapse homomorphism $[0,1] \to \{0,\frac{1}{2},1\}$
+    with Lean-verified preservation of $\{\negc, \conjc, \disjc\}$ operations
     \item Treat self-reference via fixed points with machine-verified proofs
     \item Provide complete Lean 4 formalizations
 \end{itemize}
@@ -1701,12 +1707,12 @@ Given the extensive prior art, we claim the following contributions are novel:
     from impossibility unconstrained, thereby avoiding forcing ex falso without
     syntactic relevance conditions.
 
-    \item \textbf{The collapse tower:} The conceptual observation that
-    collapsing $[0,1] \to \{0, \frac{1}{2}, 1\} \to \{0,1\}$ connects
-    Cred to RM3-like and Boolean structures. At each level, conditioning
-    remains distinct from material implication (Theorem~\ref{thm:rm3-impl-differs}).
-    The three-valued collapse homomorphism is Lean-verified for
-    $\{\negc, \conjc, \disjc\}$; the avoidance of forced ex falso is conceptual.
+    \item \textbf{The three-valued collapse homomorphism:} The proven
+    homomorphism $[0,1] \to \{0, \frac{1}{2}, 1\}$ preserves
+    $\{\negc, \conjc, \disjc\}$ (Theorem~\ref{thm:rm3-fragment}, Lean-verified),
+    connecting Cred to RM3. Further restriction to $\{0,1\}$ is conceptual
+    (not a homomorphism); conditioning remains distinct from material
+    implication (Theorem~\ref{thm:rm3-impl-differs}).
 
     \item \textbf{Shared property with relevant logic:} Boolean Cred
     with conditioning shares the property of not forcing ex falso with relevant
@@ -1877,8 +1883,8 @@ Future work includes:
     (Brady~\cite{brady2006}, Weber~\cite{weber2010}) suggests this direction,
     though significant open questions remain about whether graded credences
     offer advantages over existing approaches.
-    \item Formalizing additional theorems in Lean, particularly around the
-    collapse tower and RM3 correspondence.
+    \item Formalizing additional theorems in Lean, particularly extending
+    the collapse homomorphism and RM3 correspondence.
 \end{itemize}
 
 \begin{remark}[On G\"odel and Self-Reference]
