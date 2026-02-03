@@ -54,11 +54,11 @@ differs from probability theory in a crucial way: conditioning is a
 \emph{primitive operation} governed by a chain rule axiom, not defined via
 division. When evidence has credence zero, the conditional is \emph{unconstrained}
 (any value satisfies the axiom), not undefined. This naturally blocks
-``ex falso quodlibet'': from impossibility, anything follows. We show that Cred
-shares this key ``no ex falso'' property with relevant logic through semantic
-means. Following van Fraassen's (1983) work on probabilistic semantics for
-relevant logic, we establish that Boolean Cred corresponds to a semantic model
-for relevance. The core algebra (negation, conjunction, disjunction,
+``ex falso quodlibet'': from impossibility, anything follows. Cred
+shares this ``no ex falso'' property with relevant logic, though through
+different mechanisms (chain rule vs.\ variable-sharing). Van Fraassen (1983)
+showed that probabilistic semantics can model relevant logic; Cred similarly
+rejects ex falso but is not itself a semantics for relevant logic. The core algebra (negation, conjunction, disjunction,
 conditioning, fixed points) is formalized in Lean 4 with machine-checked proofs.
 We compare Cred to probability theory, fuzzy logics, and many-valued logics,
 highlighting the crucial difference: treating conditioning as primitive
@@ -88,7 +88,7 @@ Ramsey, Savage, and Jaynes~\cite{definetti1937,jaynes2003}.
 Interpretation & Various (frequentist, etc.) & Epistemic (degree of belief) \\
 Conditioning at 0 & Undefined ($0/0$) & Unconstrained (any value) \\
 Chain rule & Derived: $P(A|B) = P(A \land B)/P(B)$ & \textbf{Primitive axiom} \\
-Boolean collapse & Classical logic & Relevant logic (no ex falso) \\
+Boolean collapse & Classical logic & No ex falso (shared with relevant logic) \\
 \bottomrule
 \end{tabular}
 \end{center}
@@ -943,28 +943,29 @@ are consistent with the chain rule axiom.
 Material implication gives $A \to B = 1$ when $A = 0$ (ex falso).
 The chain rule gives \emph{unconstrained} conditioning when $A = 0$.
 
-\begin{theorem}[Semantic Correspondence with Relevant Logic]
-\label{thm:semantic-correspondence}
-Boolean Cred (with conditioning instead of material implication) validates
-the \emph{same characteristic property} as relevant logic R: rejection of
-ex falso quodlibet. Specifically:
+\begin{remark}[Relationship to Relevant Logic]
+\label{rmk:relevant-logic-relationship}
+Boolean Cred (with conditioning instead of material implication) shares
+a key property with relevant logic R: rejection of ex falso quodlibet.
 \begin{enumerate}[label=(\roman*)]
     \item In relevant logic R: $(A \land \neg A) \to B$ is \emph{not} a theorem
     (variable-sharing requirement blocks it syntactically)
     \item In Boolean Cred: $\condc{B}{A \land \neg A}$ is \emph{unconstrained}
     when $A \land \neg A = 0$ (chain rule blocks it semantically)
 \end{enumerate}
-Van Fraassen~\cite{vanfraassen1983} established that probabilistic semantics
-can be given for relevant logic using conditional probability, providing the
-theoretical foundation for this correspondence.
-\end{theorem}
+This is a \emph{shared property}, not a deep structural correspondence.
+Many systems reject ex falso (paraconsistent logics, LP, RM3, etc.), and
+sharing this property does not imply that the systems are equivalent or
+that one provides semantics for the other.
 
-\begin{remark}
-This is a \emph{semantic correspondence}, not an algebraic isomorphism.
-The structures differ: De Morgan monoids (relevant logic) use residuated
-implication $a \to b = \max\{c : c \cdot a \leq b\}$, while Cred uses
-conditioning via the chain rule. The shared property is the rejection of
-ex falso, achieved through different mechanisms.
+Van Fraassen~\cite{vanfraassen1983} showed that probabilistic semantics
+can be given \emph{for} relevant logic---that is, probability theory can
+model relevant logic's consequence relation. This does not mean that Cred
+\emph{is} relevant logic or that Cred provides a semantics for R; rather,
+it establishes that probabilistic and relevance-based approaches can be
+related. The mechanisms differ fundamentally: De Morgan monoids (relevant
+logic) use residuated implication, while Cred uses conditioning via the
+chain rule.
 \end{remark}
 
 \subsection{Classical Logic: Adding Ex Falso}
@@ -1165,7 +1166,7 @@ key prior work connecting probability theory to relevant logic.
     \item Systematically develop conditioning via chain rule as a foundation
     for blocking ex falso in a complete graded algebra
     \item Provide the structured collapse tower $[0,1] \to \{0,\frac{1}{2},1\}
-    \to \{0,1\}$ with explicit semantic correspondence at each level
+    \to \{0,1\}$ with shared ``no ex falso'' property preserved at each level
     \item Treat self-reference via fixed points with machine-verified proofs
     \item Provide complete Lean 4 formalizations
 \end{itemize}
@@ -1296,10 +1297,10 @@ Given the extensive prior art, we claim the following contributions are novel:
     ``no ex falso'' property at each level, connecting to RM3-like and
     Boolean structures that share this key feature with relevant logic.
 
-    \item \textbf{Semantic relevance correspondence:} Following
-    van Fraassen~\cite{vanfraassen1983}, we establish that Boolean Cred
-    with conditioning corresponds semantically (not algebraically) to
-    relevant logic in its rejection of ex falso.
+    \item \textbf{Shared property with relevant logic:} Boolean Cred
+    with conditioning shares the ``no ex falso'' property with relevant
+    logic, achieved through the chain rule rather than syntactic
+    variable-sharing. This is a shared property, not a correspondence.
 
     \item \textbf{Self-reference fixed points:} Assigning $0.5$ to the liar
     is not new (cf.\ Kripke's 1975 fixed-point semantics). Our contribution is
@@ -1315,7 +1316,7 @@ Given the extensive prior art, we claim the following contributions are novel:
 We do not claim to have invented primitive conditional probability
 (Popper-R\'enyi) or probabilistic semantics for relevant logic (van Fraassen).
 Our contribution is the systematic \emph{integration}: using the chain rule
-to block ex falso, connecting to relevant logic semantics, and providing
+to block ex falso, noting the shared property with relevant logic, and providing
 machine-verified proofs.
 \end{remark}
 
@@ -1391,8 +1392,9 @@ key contributions are:
     \item \textbf{Primitive conditioning:} Using the chain rule axiom
     rather than division eliminates ex falso naturally.
 
-    \item \textbf{Semantic relevance:} Relevant logic emerges from the
-    algebra without syntactic restrictions.
+    \item \textbf{Shared property with relevant logic:} The ``no ex falso''
+    property emerges from the algebra, paralleling relevant logic's rejection
+    of ex falso (though through different mechanisms).
 
     \item \textbf{Fixed points:} Self-referential sentences receive
     determinate credences (e.g., the liar at 0.5).
