@@ -1,6 +1,8 @@
 # Cred Lean Formalization
 
-Machine-verified proofs for the Cred credence algebra.
+Machine-verified proofs for the Cred credence algebra. This Lean library is the authoritative source for Part 1: the paper (`part1/paper.tex`) should match the definitions and theorem statements here.
+
+Project goal (beyond Part 1): use this algebra as a foundation for graded mathematics and new proof techniques where propositions and proofs can take values in `[0,1]`.
 
 ## Building
 
@@ -10,7 +12,7 @@ lake build
 
 ## Structure
 
-- `Cred/Basic.lean` - Core credence algebra (562 lines)
+- `Cred/Basic.lean` - Core credence algebra
   - Credence type with [0,1] bounds
   - Negation, conjunction, disjunction operations
   - Conditioning via chain rule (primitive)

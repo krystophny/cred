@@ -7,6 +7,13 @@ on:
     branches: [main]
   workflow_dispatch:
 
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   lean:
     name: Lean (formalization)
@@ -32,9 +39,11 @@ jobs:
         run: lake build
         working-directory: lean
 
-  latex:
-    name: LaTeX (part1 paper)
+  paper:
+    name: Paper (Part 1)
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -47,9 +56,21 @@ jobs:
           latexmk_use_lualatex: false
           args: -pdf -interaction=nonstopmode -halt-on-error
 
-      - name: Upload PDF
+      - name: Upload PDF artifact
         uses: actions/upload-artifact@v4
         with:
-          name: cred-paper
+          name: cred-paper-pdf
           path: part1/paper.pdf
           retention-days: 30
+
+      - name: Publish "paper-latest" release asset
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        uses: ncipollo/release-action@v1
+        with:
+          tag: paper-latest
+          name: Latest paper (auto)
+          artifacts: part1/paper.pdf
+          artifactContentType: application/pdf
+          allowUpdates: true
+          replacesArtifacts: true
+          makeLatest: true

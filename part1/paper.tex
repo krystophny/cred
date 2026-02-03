@@ -55,7 +55,7 @@
 \maketitle
 
 \begin{abstract}
-We present \emph{Cred}, a credence algebra for reasoning under uncertainty.
+We present \emph{Cred}, a credence algebra for graded mathematics and reasoning under uncertainty.
 A \emph{credence} is a real number in $[0,1]$ representing degree of belief---the
 standard representation in formal epistemology (Definition~\ref{def:credence}). Cred adopts a well-known approach from
 R\'enyi (1955) and Popper (1959): conditioning is a \emph{primitive operation}
@@ -69,6 +69,7 @@ theoretical connection between probabilistic semantics and relevant logic;
 Cred is not itself a semantics for relevant logic. The core algebra is
 formalized in Lean 4 with machine-checked proofs of algebraic properties
 derived from the chain rule axiom (the axiom itself is postulated, not derived).
+Our broader goal is foundational: to rebuild familiar mathematical constructions in a setting where propositions and proofs can be graded in $[0,1]$, and where impossible evidence does not trivialize inference.
 Our contributions are:
 (1)~primitive conditioning via chain rule axiom avoiding ex falso;
 (2)~showing this property is shared with relevant logic (through different mechanisms);
@@ -128,6 +129,10 @@ $0$ is underdetermined---any value satisfies the chain rule $\condc{B}{0} \cdot 
     \item \textbf{Alignment with epistemology:} The term is standard in
     philosophy~\cite{ramsey1931,definetti1937}.
 \end{enumerate}
+
+\subsection{Goal: A Foundation for Graded Mathematics}
+
+Although credences originate in epistemology, Cred is used here \emph{algebraically} as a candidate foundation: we aim to develop mathematics in a setting where propositions can take values in $[0,1]$ and inference is governed by constraints rather than by explosion at impossibility. Part~1 (this paper) isolates the primitive operations and proves their core consequences (with Lean verification). Later work builds graded mathematics (predicates, quantifiers, and proofs) and explores proof techniques that become available when intermediate values and fixed points are treated as first-class.
 
 \subsection{The ``Conditional First'' Principle}
 

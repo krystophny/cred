@@ -1,6 +1,8 @@
 # Part 1: The Primitives
 
-The foundational structure of Cred, plus collapse to known systems (for reference).
+Part 1 establishes the primitive Cred algebra that the rest of the project builds on. The immediate goal is a clean, publication-quality account (`part1/paper.tex`) aligned with the machine-checked Lean source (`lean/Cred/Basic.lean`).
+
+This is intentionally the smallest layer: primitives + their core consequences, plus collapse connections to known systems (for orientation). Graded mathematics and new proof techniques are developed in later parts.
 
 ## The Primitives
 

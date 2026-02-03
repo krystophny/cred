@@ -8,6 +8,7 @@
 *.fdb_latexmk
 *.bbl
 *.blg
+*.pdf
 
 # Lean build artifacts
 lean/.lake/
