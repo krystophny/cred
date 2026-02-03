@@ -517,16 +517,10 @@ The central innovation of Cred is treating conditioning as \emph{primitive}:
 % Lean: Conditioning structure
 \begin{definition}[Conditioning Structure]
 \label{def:conditioning}
-\label{axiom:chainrule}
 A \emph{conditioning structure} for a pair (joint, evidence) $\in [0,1]^2$
 with joint $\leq$ evidence is a conditional credence condCred $\in [0,1]$
-satisfying the \emph{chain rule}:
-\[
-\text{condCred} \cdot \text{evidence} = \text{joint}
-\]
+satisfying the chain rule (Axiom~\ref{axiom:chainrule}).
 The constraint joint $\leq$ evidence ensures condCred $\in [0,1]$.
-The chain rule is the \emph{only} axiom of Cred. The operations in Section~2
-(negation, conjunction, disjunction) are \emph{definitions}, not axioms.
 
 \textbf{Propositional notation:} We write $\cred(A \mid B)$ for the conditional
 credence where joint $= \cred(A \land B)$ and evidence $= \cred(B)$, so the
@@ -534,6 +528,16 @@ chain rule becomes $\condc{A}{B} \cdot \cred(B) = \cred(A \land B)$. This
 notation is informal; the Lean formalization works purely with credence
 values---see Remark~\ref{rmk:algebraic-foundation}.
 \end{definition}
+
+\begin{axiom}[Chain Rule]
+\label{axiom:chainrule}
+For any conditioning structure (Definition~\ref{def:conditioning}):
+\[
+\text{condCred} \cdot \text{evidence} = \text{joint}
+\]
+The chain rule is the \emph{only} axiom of Cred. The operations in Section~2
+(negation, conjunction, disjunction) are \emph{definitions}, not axioms.
+\end{axiom}
 
 \begin{remark}[Validity Constraint]
 \label{rmk:validity-constraint}
@@ -677,6 +681,7 @@ require division---is what allows the unconstrained behavior at $\cred(B) = 0$.
 If $\cred(B) > 0$, the conditional credence is uniquely determined by
 the chain rule.
 \end{theorem}
+\noindent\textit{Proof.} Verified in Lean: \texttt{conditioning\_unique}. \hfill$\square$
 
 When $\cred(B) = 0$, conditioning is not unique---any value works. This
 non-uniqueness is precisely what avoids forcing ex falso.
