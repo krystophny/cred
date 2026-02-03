@@ -350,6 +350,21 @@ A \emph{credence} is a real number $c \in [0, 1]$. The set of all credences
 is denoted $\Cred = [0, 1] \subset \Real$.
 \end{definition}
 
+\begin{remark}[Algebraic Foundation]
+\label{rmk:algebraic-foundation}
+Cred is defined as a pure algebra on credence values $c \in [0,1]$. The Lean
+formalization (Section~9) works entirely with these numerical values and
+operations on them. Propositional notation such as $\cred(A)$, $\cred(A \land B)$,
+or $\cred(A \mid B)$ is used informally throughout this paper to aid intuition,
+but formally, we work only with credence values and algebraic operations
+(negation, conjunction, disjunction, conditioning). A full propositional
+semantics---mapping a domain of propositions to credences---is not required
+for the algebraic development. This parallels how Boolean algebra can be
+studied purely as operations on $\{0, 1\}$ without requiring a domain of
+propositions. Future work may explore propositional semantics; the present
+paper establishes the algebraic core.
+\end{remark}
+
 % Lean: Basic.lean:46-47 Zero and One instances
 \begin{definition}[Distinguished Elements]
 The credences $0$ (impossibility) and $1$ (certainty) are the boundary values.
