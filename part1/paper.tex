@@ -739,16 +739,21 @@ does not determine a unique value. This requires careful interpretation.
         \item \textbf{Undefined:} The agent may simply lack any belief about
         $\cred(A \mid B)$ when $\cred(B) = 0$, treating it as a meaningless query.
     \end{enumerate}
-    Cox's theorem~\cite{cox1961} derives probability from desiderata including
-    that plausibility assignments be unique functions. Cred relaxes this at one
-    point: when evidence $= 0$, multiple values satisfy the chain rule. This
-    trade-off is justified pragmatically: (i) the underdetermined case is
-    computationally inert ($c \cdot 0 = 0$ regardless of $c$), so no reasoning
-    depends on it; (ii) forcing a value would require additional axioms beyond
-    the chain rule. Cred retains Cox's other desiderata (real-valued, monotonic,
-    consistent). Epistemic agents using Cred may still have unique conditional
-    beliefs---those beliefs are simply not determined by the chain rule when
-    evidence is impossible.
+    Cox's theorem~\cite{cox1961,jaynes2003} derives probability from desiderata:
+    (1) plausibility is a real number, (2) qualitative correspondence with common
+    sense, and (3) consistency (equivalent states of knowledge yield equivalent
+    plausibilities). A key consequence is that the plausibility of a conjunction
+    given evidence must be a \emph{function}---uniquely determined by the
+    plausibilities of its components. Cred relaxes precisely this functional
+    requirement: conditioning is a \emph{relation} satisfying the chain rule,
+    which becomes non-functional when evidence $= 0$ (multiple values satisfy
+    $c \cdot 0 = 0$). This trade-off is justified pragmatically:
+    (i) the underdetermined case is computationally inert, so no reasoning
+    depends on it; (ii) forcing a unique value would require axioms beyond
+    the chain rule, artificially constraining a case the algebra leaves open.
+    Cred retains Cox's other desiderata (real-valued, monotonic, consistent).
+    Epistemic agents using Cred may still have unique conditional beliefs---those
+    beliefs are simply not determined by the chain rule when evidence is impossible.
 
     \item \textbf{Semantically:} For the degree-of-truth reading,
     ``unconstrained'' is natural: when the antecedent has truth degree 0,
