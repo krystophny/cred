@@ -704,6 +704,54 @@ independence, while chain-rule conditioning with the Kleene joint captures
 comonotonicity.
 \end{remark}
 
+\begin{proposition}[Fr\'echet-Hoeffding Bounds]
+\label{prop:frechet}
+If the chain rule holds in both directions---$\condc{A}{B} \cdot \cred(B)
+= \cred(A \land B)$ and $\condc{B}{A} \cdot \cred(A) = \cred(A \land B)$---then
+the joint is bounded above:
+\[
+\cred(A \land B) \;\leq\; \min(\cred(A),\; \cred(B)).
+\]
+If additionally all four cells $\cred(A \land B)$,
+$\cred(A) - \cred(A \land B)$,
+$\cred(B) - \cred(A \land B)$, and
+$1 - \cred(A) - \cred(B) + \cred(A \land B)$ are non-negative, then
+\[
+\max(\cred(A) + \cred(B) - 1,\; 0) \;\leq\; \cred(A \land B).
+\]
+Together: the joint lies in the Fr\'echet-Hoeffding
+interval~\cite{nelsen2006}.
+\end{proposition}
+\begin{proof}
+Upper bound: each conditioning structure forces
+$\text{joint} \leq \text{evidence}$ (since $\text{condCred} \leq 1$).
+Applying this from both directions gives
+$\cred(A \land B) \leq \cred(A)$ and $\cred(A \land B) \leq \cred(B)$.
+Lower bound: the complement cell
+$1 - \cred(A) - \cred(B) + \cred(A \land B) \geq 0$ rearranges to
+$\cred(A \land B) \geq \cred(A) + \cred(B) - 1$.
+Conversely, any joint in the Fr\'echet-Hoeffding interval admits
+conditioning structures in both directions (by division when marginals
+are positive).
+Lean: \texttt{frechet\_upper}, \texttt{frechet\_lower},
+\texttt{frechet\_conditioning\_exists}.
+\end{proof}
+
+\begin{remark}[Freedom of the Joint]
+\label{rem:freedom}
+Cred leaves the joint free: any value in the Fr\'echet-Hoeffding interval
+$[\max(a + b - 1, 0),\; \min(a, b)]$ is a valid joint credence, and
+chain-rule conditioning produces a Bayes-consistent arrow for each choice.
+The Fr\'echet upper bound $\min(a, b)$ yields the product residuated
+(Goguen) implication $\min(b/a, 1)$---the implication of H\'ajek's
+product logic $\Pi$~\cite{hajek1998}.
+The independence copula $a \cdot b$ (Cred's $\conjc$) yields the trivial
+arrow $b$.
+The Fr\'echet lower bound $\max(a + b - 1, 0)$ yields a third arrow.
+Fixing a specific copula (dependence structure) selects a specific arrow;
+Cred's parametric conditioning encompasses all of them.
+\end{remark}
+
 \subsection{Boolean Restriction}
 
 Restricting Cred to $\{0, 1\}$, the operations $\{\negc, \conjc, \disjc\}$ become:
@@ -1101,6 +1149,8 @@ The \texttt{joint} parameter is supplied as input, representing $\cred(A \land B
 \item \texttt{godel\_impl}, \texttt{rm3\_impl}: implication tables with comparison theorems
 \item \texttt{rm3\_not\_bayes\_consistent}: RM3 implication fails Bayes consistency
 \item \texttt{godel\_bayes\_consistent}: G\"odel/product residuated is Bayes-consistent on $\{0,\tfrac{1}{2},1\}$
+\item \texttt{frechet\_upper}, \texttt{frechet\_lower}: Fr\'echet-Hoeffding bounds
+\item \texttt{frechet\_conditioning\_exists}: bidirectional conditioning for any joint in bounds
 \end{itemize}
 
 Verification: \texttt{cd lean \&\& lake build}.

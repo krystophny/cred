@@ -260,6 +260,37 @@ theorem conditioning_unique (joint evidence : Credence) (h_pos : 0 < evidence.va
     _ = c₂.condCred.val * evidence.val / evidence.val := by rw [heq]
     _ = c₂.condCred.val := by field_simp
 
+/-! ## Fréchet-Hoeffding Bounds
+
+The chain rule applied from both directions constrains the joint credence
+to the Fréchet-Hoeffding interval [max(a + b - 1, 0), min(a, b)].
+The upper bound follows from the chain rule alone (each conditioning
+structure forces joint <= evidence). The lower bound additionally requires
+complement non-negativity (1 - a - b + joint >= 0).
+Any joint in [0, min(a, b)] admits conditioning structures in both
+directions when both marginals are positive.
+-/
+
+/-- Upper Fréchet bound: bidirectional chain rule forces joint ≤ min(a, b) -/
+theorem frechet_upper (a b joint : Credence)
+    (cond_ba : Conditioning joint a) (cond_ab : Conditioning joint b) :
+    joint.val ≤ a.val ∧ joint.val ≤ b.val :=
+  ⟨conditioning_implies_joint_le_evidence joint a cond_ba,
+   conditioning_implies_joint_le_evidence joint b cond_ab⟩
+
+/-- Lower Fréchet bound: complement non-negativity forces joint ≥ a + b - 1 -/
+theorem frechet_lower (a b joint : Credence)
+    (h_complement : 0 ≤ 1 - a.val - b.val + joint.val) :
+    a.val + b.val - 1 ≤ joint.val := by
+  linarith
+
+/-- Any joint in [0, min(a, b)] admits bidirectional conditioning -/
+noncomputable def frechet_conditioning_exists (a b joint : Credence)
+    (ha : 0 < a.val) (hb : 0 < b.val)
+    (hja : joint.val ≤ a.val) (hjb : joint.val ≤ b.val) :
+    Conditioning joint a × Conditioning joint b :=
+  (conditioning_mk joint a ha hja, conditioning_mk joint b hb hjb)
+
 /-! ## Fixed Points -/
 
 /-- The fixed point credence for self-referential negation: L = ~L implies L = 1/2 -/
