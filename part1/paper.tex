@@ -362,6 +362,23 @@ propositions. Future work may explore propositional semantics; the present
 paper establishes the algebraic core.
 \end{remark}
 
+\begin{remark}[Precise Algebraic Characterization]
+\label{rmk:algebraic-characterization}
+Cred has the following algebraic structure:
+\begin{itemize}
+    \item $([0,1], \conjc, 1)$ is a commutative monoid (identity $1$, annihilator $0$)
+    \item $([0,1], \disjc, 0)$ is a commutative monoid (identity $0$, annihilator $1$)
+    \item $\negc$ is an involution ($\negc\negc c = c$) swapping $0 \leftrightarrow 1$
+    \item De Morgan laws hold: $\negc(c_1 \conjc c_2) = \negc c_1 \disjc \negc c_2$
+\end{itemize}
+This makes $([0,1], \conjc, \disjc, \negc, 0, 1)$ a \emph{bounded De Morgan bisemigroup}:
+two dual monoid structures connected by an order-reversing involution.
+Unlike Boolean algebras, Cred is \emph{non-idempotent} ($c \conjc c \neq c$ for
+$c \notin \{0,1\}$) and \emph{non-distributive} ($\conjc$ does not distribute
+over $\disjc$). These failures are essential for modeling uncertainty
+(Theorems~\ref{thm:idempotence}--\ref{thm:nondistrib}).
+\end{remark}
+
 % Lean: Zero, One instances
 \begin{definition}[Distinguished Elements]
 The credences $0$ (impossibility) and $1$ (certainty) are the boundary values.
