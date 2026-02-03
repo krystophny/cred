@@ -1349,7 +1349,7 @@ $\max(1-a, b)$), not as a primitive. Cred avoids ex falso by using
 \midrule
 Values & $[0, 1]$ & $[0, 1]$ \\
 Conditioning at 0 & Undefined${}^*$ & Unconstrained${}^*$ \\
-Additivity & $P(A \cup B) = P(A) + P(B) - P(A \cap B)$ & Same for disjunction \\
+Additivity & $P(A \cup B) = P(A) + P(B) - P(A \cap B)$ & $c_1 \disjc c_2 = c_1 + c_2 - c_1 \cdot c_2$${}^\dagger$ \\
 Application & Random events & Epistemic uncertainty \\
 \bottomrule
 \end{tabular}
@@ -1360,6 +1360,12 @@ it is a syntactic error to write it. ``Unconstrained'' (Cred): the expression
 $\cred(A \mid B)$ when $\cred(B)=0$ is well-formed but underdetermined by the chain rule axiom.
 Both approaches avoid forcing $\cred(A \mid 0) = 1$; they differ in how.
 See Remark~\ref{rmk:unconstrained} for detailed comparison.}
+
+\smallskip
+\footnotesize{${}^\dagger$The formulas look similar but differ in assumptions:
+probability's inclusion-exclusion applies to any events (using $P(A \cap B)$),
+while Cred's disjunction formula assumes independence (where $\cred(A \land B) = c_1 \cdot c_2$).
+See Remark~\ref{rmk:additivity}.}
 \end{center}
 
 Probability theory treats conditioning at zero as undefined (division by zero);
