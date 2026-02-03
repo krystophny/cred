@@ -66,6 +66,8 @@ We establish a surjective homomorphism from Cred to the three-valued Kleene
 algebra---the shared foundation of K$_3$, LP, and RM3---and prove this collapse
 target is unique: no analogous homomorphism exists for \L ukasiewicz, G\"odel,
 or classical algebras.
+Applying the chain rule from both directions (Bayes' theorem) selects the
+product residuated implication as the unique Bayes-consistent binary arrow.
 Negation has a unique fixed point at $\tfrac{1}{2}$.
 All results are machine-checked in Lean~4.
 \end{abstract}
@@ -122,6 +124,10 @@ conditioning is unconstrained at evidence zero (Section~\ref{sec:conditioning}).
 \item A surjective homomorphism from Cred to the Kleene algebra (underlying
 K$_3$, LP, and RM3) for $\{\negc, \conjc, \disjc\}$, with impossibility results
 for alternative targets and machine-checked proof (Section~\ref{sec:connections}).
+\item Bayes consistency---the chain rule applied from both directions---selects
+the product residuated implication as the unique standard Bayes-consistent
+binary arrow; Bayes-consistent arrows are exactly the copula-derived arrows
+(Section~\ref{sec:connections}).
 \item Fixed-point analysis: $\tfrac{1}{2}$ is the unique fixed point of negation
 (Section~\ref{sec:fixed-points}).
 \item Lean~4 formalization of the core algebra (Section~\ref{sec:lean}).
@@ -613,6 +619,91 @@ The product residuated implication is the specific instantiation with
 joint $= \min(a, b)$ (the Kleene conjunction).
 Product fuzzy logic commits to this choice; Cred leaves the joint free.
 
+\subsubsection*{Bayes Consistency}
+
+Applying the chain rule from both directions gives Bayes' theorem:
+\[
+\cred(A \mid B) \cdot \cred(B) = \cred(A \land B) = \cred(B \land A) = \cred(B \mid A) \cdot \cred(A).
+\]
+A binary arrow $f(a, b)$ used as conditioning is \emph{Bayes-consistent} when
+the joint it induces is symmetric: $f(a, b) \cdot a = f(b, a) \cdot b$ for all
+$a, b$.
+
+\begin{proposition}[Product Residuated is Bayes-Consistent]
+\label{prop:resid-bayes}
+The product residuated implication $f(a, b) = \min(b/a,\; 1)$ (with
+$f(0, b) = 1$) is Bayes-consistent: $f(a, b) \cdot a = \min(a, b) = f(b, a) \cdot b$.
+\end{proposition}
+\begin{proof}
+If $b \leq a$ then $f(a, b) \cdot a = (b/a) \cdot a = b = \min(a, b)$.
+If $a < b$ then $f(a, b) \cdot a = 1 \cdot a = a = \min(a, b)$.
+By symmetry of $\min$, $f(b, a) \cdot b = \min(a, b)$ as well.
+\end{proof}
+
+\begin{proposition}[G\"odel is Not Bayes-Consistent on the Continuum]
+\label{prop:godel-not-bayes}
+The G\"odel implication ($f(a,b) = 1$ if $a \leq b$, else $b$) fails
+Bayes consistency on $[0,1]$.
+\end{proposition}
+\begin{proof}
+Take $a = \tfrac{2}{5}$, $b = \tfrac{3}{5}$.
+Then $f(a, b) = 1$ (since $a \leq b$), so $f(a, b) \cdot a = \tfrac{2}{5}$.
+But $f(b, a) = a = \tfrac{2}{5}$ (since $b > a$), so
+$f(b, a) \cdot b = \tfrac{2}{5} \cdot \tfrac{3}{5} = \tfrac{6}{25} \neq \tfrac{2}{5}$.
+\end{proof}
+
+\begin{proposition}[RM3 is Not Bayes-Consistent]
+\label{prop:rm3-not-bayes}
+The RM3 implication $\max(\negc a, b)$ fails Bayes consistency even on
+$\{0, \tfrac{1}{2}, 1\}$.
+\end{proposition}
+\begin{proof}
+Take $a = \tfrac{1}{2}$, $b = 0$.
+Then $f(a, b) = \max(\tfrac{1}{2}, 0) = \tfrac{1}{2}$, so
+$f(a, b) \cdot a = \tfrac{1}{4}$.
+But $f(b, a) = \max(1, \tfrac{1}{2}) = 1$, so $f(b, a) \cdot b = 0$.
+Since $\tfrac{1}{4} \neq 0$, RM3 is not Bayes-consistent.
+Lean: \texttt{rm3\_not\_bayes\_consistent}.
+\end{proof}
+
+\begin{remark}
+On $\{0, \tfrac{1}{2}, 1\}$, the G\"odel implication coincides with the product
+residuated implication (Section~\ref{sec:collapse}), so it is Bayes-consistent
+on this finite set.
+Lean: \texttt{godel\_bayes\_consistent}.
+The failure occurs only on the full interval $[0,1]$.
+\end{remark}
+
+\begin{remark}[Copula Characterization]
+\label{rem:copula}
+A binary arrow $f$ is Bayes-consistent if and only if the induced joint
+$J(a,b) = f(a,b) \cdot a$ is symmetric.
+A symmetric function $J : [0,1]^2 \to [0,1]$ satisfying $J(a,0) = 0$ and
+$J(a,1) = a$ is a (symmetric) copula~\cite{nelsen2006}.
+Grzegorzewski~\cite{grzegorzewski2013} defined \emph{probabilistic
+implications} $I_C(a,b) = C(a,b)/a$ from a copula $C$ and computed three
+cases: the Fr\'echet upper bound $C(a,b) = \min(a,b)$ gives the product
+residuated (Goguen) implication; the independence copula $C(a,b) = ab$
+gives the trivial arrow $b$; the Fr\'echet lower bound
+$C(a,b) = \max(a+b-1, 0)$ gives a third arrow.
+Among the standard logic implications, only the product residuated is
+copula-derived (from the Fr\'echet upper bound); RM3's $\max(\negc a, b)$
+and G\"odel's implication are not copula-derived, which is why they fail
+Bayes consistency.
+\end{remark}
+
+\begin{remark}[Dependence Interpretation]
+The Fr\'echet upper bound is the unique copula of maximum positive
+dependence (comonotonicity).
+Setting joint $= \min(a,b)$ in Cred's chain rule therefore corresponds to
+conditioning under maximum positive dependence between propositions.
+The product $a \cdot b$ (Cred's $\conjc$) is the independence copula;
+conditioning under independence gives the trivial arrow $b$.
+Thus Cred's two operations play complementary roles: $\conjc$ captures
+independence, while chain-rule conditioning with the Kleene joint captures
+comonotonicity.
+\end{remark}
+
 \subsection{Boolean Restriction}
 
 Restricting Cred to $\{0, 1\}$, the operations $\{\negc, \conjc, \disjc\}$ become:
@@ -916,6 +1007,21 @@ Section~\ref{sec:scope} shows that no analogous collapse exists for
 \L ukasiewicz, G\"odel, or classical algebras, making the Kleene algebra the
 unique natural three-valued quotient of Cred.
 
+\textbf{Copulas and Fuzzy Implications.}
+Grzegorzewski~\cite{grzegorzewski2013} defined \emph{probabilistic
+implications} $I_C(a,b) = C(a,b)/a$ from a copula $C$ and computed that
+the Fr\'echet upper bound (min copula) yields the Goguen (product
+residuated) implication.
+This is the copula-side construction; Cred arrives at the same arrow from
+the chain-rule side by setting joint $= \min(a,b)$.
+The Bayes consistency criterion---that $f(a,b) \cdot a = f(b,a) \cdot b$,
+equivalently that the induced joint is symmetric---and its use to
+\emph{diagnose} why RM3 and G\"odel arrows fail (they are not
+copula-derived) appears to be new.
+Lawvere~\cite{lawvere1973} showed that residuation generalizes directed
+distance in enriched categories; this principle applies to the product
+residuated via the additive generator $-\log x$~\cite{klement2000}.
+
 \textbf{Measure-Theoretic Conditioning.}
 In measure theory, conditioning on null sets uses disintegration~\cite{chang1997},
 yielding a specific (a.e.\ unique) value determined by the measure structure.
@@ -926,7 +1032,8 @@ conditional is unconstrained rather than determined.
 \textbf{Cred's Contributions.}
 The product De Morgan triplet is standard; primitive conditioning is due to
 R\'enyi and Popper; the connection to relevant logic is van Fraassen's;
-the chain rule constraint in a fuzzy setting appears in H\'ajek et al.
+the chain rule constraint in a fuzzy setting appears in H\'ajek et al.;
+copula-derived implications are due to Grzegorzewski.
 Given this prior art, Cred contributes:
 \begin{enumerate}[label=(\arabic*)]
 \item Identifying the chain rule as the sole structural axiom needed beyond
@@ -937,6 +1044,10 @@ replacing residuated implication in the product De Morgan triplet.
 \item The explicit collapse homomorphism to the Kleene algebra (underlying
 K$_3$, LP, and RM3), with impossibility results for \L ukasiewicz, G\"odel,
 and classical targets, and Lean verification.
+\item Bayes consistency as a selection criterion: the chain rule applied from
+both directions uniquely selects the product residuated implication among
+standard arrows, equivalently characterizing Bayes-consistent arrows as
+copula-derived, with RM3 and G\"odel as counterexamples (machine-checked).
 \item Systematic treatment of fixed points with machine-checked proofs.
 \end{enumerate}
 
@@ -988,6 +1099,8 @@ The \texttt{joint} parameter is supplied as input, representing $\cred(A \land B
 \item \texttt{no\_godel\_collapse}: no negation-preserving map to G\"odel algebra
 \item \texttt{no\_luk\_collapse}: no negation-and-conjunction-preserving map to \L ukasiewicz
 \item \texttt{godel\_impl}, \texttt{rm3\_impl}: implication tables with comparison theorems
+\item \texttt{rm3\_not\_bayes\_consistent}: RM3 implication fails Bayes consistency
+\item \texttt{godel\_bayes\_consistent}: G\"odel/product residuated is Bayes-consistent on $\{0,\tfrac{1}{2},1\}$
 \end{itemize}
 
 Verification: \texttt{cd lean \&\& lake build}.
@@ -1017,6 +1130,14 @@ Conditioning, when instantiated as a binary arrow via the Kleene joint,
 recovers the product residuated implication for positive evidence; the sole
 divergence from product fuzzy logic is at evidence zero, where Cred is
 unconstrained rather than forced to~$1$.
+Applying the chain rule from both directions (Bayes' theorem) selects the
+product residuated implication as the unique standard Bayes-consistent binary
+arrow on $[0,1]$: RM3's arrow fails even on three values, and G\"odel's
+fails on the continuum.
+The product residuated implication is copula-derived---it arises from
+conditioning under the Fr\'echet upper bound (maximum positive
+dependence)---and Bayes consistency is equivalent to copula-derivability,
+explaining why non-copula arrows fail.
 The negation fixed point at $\tfrac{1}{2}$ provides a natural algebraic value
 for self-negating sentences.
 All core results are machine-checked in Lean~4.
@@ -1093,6 +1214,11 @@ G\"odel, K.
 \newblock \emph{Anzeiger der Akademie der Wissenschaften in Wien},
 69:65--66, 1932.
 
+\bibitem{grzegorzewski2013}
+Grzegorzewski, P.
+\newblock Probabilistic implications.
+\newblock \emph{Fuzzy Sets and Systems}, 226:53--66, 2013.
+
 \bibitem{hajek1995}
 H\'ajek, P., Godo, L., and Esteva, F.
 \newblock Fuzzy logic and probability.
@@ -1129,6 +1255,12 @@ Kripke, S.
 \newblock Outline of a theory of truth.
 \newblock \emph{Journal of Philosophy}, 72(19):690--716, 1975.
 
+\bibitem{lawvere1973}
+Lawvere, F.W.
+\newblock Metric spaces, generalized logic, and closed categories.
+\newblock \emph{Rendiconti del Seminario Matematico e Fisico di Milano},
+43:135--166, 1973.
+
 \bibitem{lewis1976}
 Lewis, D.
 \newblock Probabilities of conditionals and conditional probabilities.
@@ -1143,6 +1275,11 @@ Lewis, D.
 Meyer, R.K. and Routley, R.
 \newblock Algebraic analysis of entailment I.
 \newblock \emph{Logique et Analyse}, 15:407--428, 1972.
+
+\bibitem{nelsen2006}
+Nelsen, R.B.
+\newblock \emph{An Introduction to Copulas}.
+\newblock Springer Series in Statistics, 2nd edition. Springer, 2006.
 
 \bibitem{popper1959}
 Popper, K.

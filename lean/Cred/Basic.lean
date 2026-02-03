@@ -649,6 +649,21 @@ theorem cred_no_ex_falso_godel (c : Credence) :
     ∃ cond : Credence.Conditioning 0 0, cond.condCred = c :=
   Credence.conditioning_zero_any c
 
+/-! ### Bayes Consistency
+
+A binary arrow f(a, b) used as conditioning is Bayes-consistent when the joint
+it induces is symmetric: f(a, b) * a = f(b, a) * b.  This is the constraint
+from applying the chain rule in both directions (Bayes theorem).
+-/
+
+theorem rm3_not_bayes_consistent :
+    ∃ a b : ThreeVal, conj (rm3_impl a b) a ≠ conj (rm3_impl b a) b := by
+  use half, zero; decide
+
+theorem godel_bayes_consistent (a b : ThreeVal) :
+    conj (godel_impl a b) a = conj (godel_impl b a) b := by
+  cases a <;> cases b <;> rfl
+
 end ThreeVal
 
 /-! ### Cred Conditioning at Special Values (Theorem 6.2)
