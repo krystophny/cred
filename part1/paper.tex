@@ -1093,6 +1093,7 @@ The algebras are different; only the three-valued quotient coincides.
 Three-valued Cred conditioning differs fundamentally from RM3 implication:
 \begin{center}
 \begin{tabular}{c|ccc}
+ & \multicolumn{3}{c}{\textit{consequent}} \\
 RM3 $\to$ & 0 & $\tfrac{1}{2}$ & 1 \\
 \hline
 0 & 1 & 1 & 1 \\
@@ -1101,14 +1102,15 @@ $\tfrac{1}{2}$ & $\tfrac{1}{2}$ & $\tfrac{1}{2}$ & 1 \\
 \end{tabular}
 \quad
 \begin{tabular}{c|ccc}
-Cred cond & 0 & $\tfrac{1}{2}$ & 1 \\
+ & \multicolumn{3}{c}{\textit{joint}} \\
+\textit{evidence} & 0 & $\tfrac{1}{2}$ & 1 \\
 \hline
-0 & $*$ & $*$ & $*$ \\
+0 & --- & --- & --- \\
 $\tfrac{1}{2}$ & 0 & $\dagger$ & 1 \\
 1 & 0 & $\tfrac{1}{2}$ & 1
 \end{tabular}
 \end{center}
-\footnotesize{$*$ = unconstrained: any value in $\{0, \tfrac{1}{2}, 1\}$ satisfies the chain rule when evidence $= 0$.}
+\footnotesize{--- = unconstrained: any value in $\{0, \tfrac{1}{2}, 1\}$ satisfies the chain rule when evidence $= 0$.}
 
 \smallskip
 \footnotesize{$\dagger$ = depends on joint: if $\cred(A \land B) = \tfrac{1}{4}$ (independence), then
@@ -1187,14 +1189,14 @@ Recall material implication: $A \to B := \neg A \lor B$
 \toprule
 $\cred(A)$ & $\cred(A \land B)$ & $A \to B$ & $\condc{B}{A}$ \\
 \midrule
-0 & 0 & 1 & $*$ \\
+0 & 0 & 1 & --- \\
 1 & 0 & 0 & 0 \\
 1 & 1 & 1 & 1 \\
 \bottomrule
 \end{tabular}
 
 \smallskip
-\footnotesize{$*$ = unconstrained (any value in $[0,1]$ satisfies the chain rule when evidence $= 0$)}
+\footnotesize{--- = unconstrained (any value in $[0,1]$ satisfies the chain rule when evidence $= 0$)}
 \end{center}
 \normalsize
 \begin{center}
