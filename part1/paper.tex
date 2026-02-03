@@ -1930,14 +1930,13 @@ credence on a continuum, a different interpretation that happens to yield
 matching truth tables for $\{\negc, \conjc, \disjc\}$.
 \end{remark}
 
-\begin{remark}[Decidability]
+\begin{remark}[Conditioning Satisfiability]
 \label{rmk:decidability}
-Conditioning satisfiability is decidable: given joint and evidence credences,
-a valid conditioning exists iff joint $\leq$ evidence (when evidence $> 0$) or
-joint $= 0$ (when evidence $= 0$). For credence expression equality, the
-question reduces to polynomial identity, which is decidable by quantifier
-elimination in real closed fields (Tarski, 1948). These observations are not
-formalized in Lean.
+Given joint and evidence credences, a valid conditioning exists iff
+joint $\leq$ evidence (when evidence $> 0$) or joint $= 0$ (when evidence $= 0$).
+This follows from Theorem~\ref{thm:condexists} (existence when evidence $> 0$)
+and Theorem~\ref{thm:noexfalso} (any value satisfies the chain rule when
+evidence $= 0$).
 \end{remark}
 
 \begin{remark}[Computational Complexity]
