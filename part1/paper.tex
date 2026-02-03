@@ -1123,15 +1123,32 @@ $\negc c = 0$, so both sides yield 0. If $0 < c < 1$, then $0 < \negc c < 1$,
 so both sides yield $\tfrac{1}{2}$.
 
 \textbf{Conjunction:} Nine cases by the values of $\mathrm{collapse}(c_1)$
-and $\mathrm{collapse}(c_2)$. The key case: when both collapse to $\tfrac{1}{2}$
-(i.e., $0 < c_1, c_2 < 1$), we have $0 < c_1 \cdot c_2 < 1$, so the product
-also collapses to $\tfrac{1}{2}$, matching RM3's $\tfrac{1}{2} \land \tfrac{1}{2} = \tfrac{1}{2}$.
-Boundary cases (0 or 1 inputs) follow from absorption and identity laws.
+and $\mathrm{collapse}(c_2)$:
+\begin{itemize}
+\item $(0, 0), (0, \tfrac{1}{2}), (0, 1), (\tfrac{1}{2}, 0), (1, 0)$: Zero absorbs---if either
+  $c_i = 0$, then $c_1 \cdot c_2 = 0$, matching RM3.
+\item $(1, 1)$: Identity---$1 \cdot 1 = 1$, matching RM3.
+\item $(1, \tfrac{1}{2}), (\tfrac{1}{2}, 1)$: If $c_1 = 1$ and $0 < c_2 < 1$, then
+  $c_1 \cdot c_2 = c_2$, so $0 < c_1 \cdot c_2 < 1$, collapsing to $\tfrac{1}{2}$. Symmetric
+  for $(\tfrac{1}{2}, 1)$.
+\item $(\tfrac{1}{2}, \tfrac{1}{2})$: The key case---when $0 < c_1, c_2 < 1$, we have
+  $0 < c_1 \cdot c_2 < 1$, so the product collapses to $\tfrac{1}{2}$, matching
+  RM3's $\tfrac{1}{2} \land \tfrac{1}{2} = \tfrac{1}{2}$.
+\end{itemize}
 
-\textbf{Disjunction:} Similarly nine cases. When both collapse to $\tfrac{1}{2}$,
-$c_1 \disjc c_2 = c_1 + c_2 - c_1 \cdot c_2$ satisfies $0 < c_1 \disjc c_2 < 1$
-(since $0 < c_i < 1$ implies the product is positive and the sum is less than 2),
-so it collapses to $\tfrac{1}{2}$, matching RM3.
+\textbf{Disjunction:} Similarly nine cases:
+\begin{itemize}
+\item $(1, 1), (1, \tfrac{1}{2}), (1, 0), (\tfrac{1}{2}, 1), (0, 1)$: One absorbs---if either
+  $c_i = 1$, then $c_1 \disjc c_2 = 1$, matching RM3.
+\item $(0, 0)$: Identity---$0 \disjc 0 = 0$, matching RM3.
+\item $(0, \tfrac{1}{2}), (\tfrac{1}{2}, 0)$: If $c_1 = 0$ and $0 < c_2 < 1$, then
+  $c_1 \disjc c_2 = c_2$, so $0 < c_1 \disjc c_2 < 1$, collapsing to $\tfrac{1}{2}$.
+  Symmetric for $(\tfrac{1}{2}, 0)$.
+\item $(\tfrac{1}{2}, \tfrac{1}{2})$: The key case---when $0 < c_1, c_2 < 1$,
+  $c_1 \disjc c_2 = c_1 + c_2 - c_1 \cdot c_2$ satisfies $0 < c_1 \disjc c_2 < 1$
+  (since $0 < c_i < 1$ implies the product is positive and the sum is less than 2),
+  so it collapses to $\tfrac{1}{2}$, matching RM3.
+\end{itemize}
 
 The Lean proofs handle all cases by nested case splits on whether each
 $c_i.val$ equals 0, 1, or lies strictly between.
