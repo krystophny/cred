@@ -1356,9 +1356,9 @@ conditioning with material implication changes the structure.
     \node[draw,rectangle,minimum width=6cm,minimum height=1cm,below of=bool] (class)
         {\textbf{Classical} $\{0, 1\}$ + material impl. --- FOL};
 
-    \draw[-{Stealth}] (cred) -- node[right] {homomorphism (Thm.~\ref{thm:rm3-fragment})} (three);
-    \draw[-{Stealth}] (three) -- node[right] {restriction (not homomorphism)} (bool);
-    \draw[-{Stealth}] (bool) -- node[right] {redefine implication} (class);
+    \draw[-{Stealth}] (cred) -- node[right] {collapse: homomorphism (Thm.~\ref{thm:rm3-fragment})} (three);
+    \draw[-{Stealth}] (three) -- node[right] {restrict domain: not a homomorphism} (bool);
+    \draw[-{Stealth}] (bool) -- node[right] {add axiom: $\cred(A \mid 0) = 1$} (class);
 \end{tikzpicture}
 \end{center}
 
