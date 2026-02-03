@@ -448,4 +448,114 @@ theorem tautology_eq_one_iff (c : Credence) :
 
 end Credence
 
+/-! ## Three-Valued Collapse
+
+The three-valued collapse maps [0,1] to {0, 0.5, 1}:
+- 0 maps to 0
+- (0,1) maps to 0.5
+- 1 maps to 1
+
+This collapsed algebra matches RM3 for {negation, conjunction, disjunction},
+but differs on implication: RM3 has 0 → b = 1 (ex falso), while Cred
+conditioning on 0 is unconstrained.
+-/
+
+/-- Three-valued credence type -/
+inductive ThreeVal where
+  | zero : ThreeVal
+  | half : ThreeVal
+  | one : ThreeVal
+deriving DecidableEq, Repr
+
+namespace ThreeVal
+
+/-- Negation on three values (matches Cred and RM3) -/
+def neg : ThreeVal → ThreeVal
+  | zero => one
+  | half => half
+  | one => zero
+
+/-- Conjunction on three values (matches RM3 min) -/
+def conj : ThreeVal → ThreeVal → ThreeVal
+  | zero, _ => zero
+  | _, zero => zero
+  | one, b => b
+  | a, one => a
+  | half, half => half
+
+/-- Disjunction on three values (matches RM3 max) -/
+def disj : ThreeVal → ThreeVal → ThreeVal
+  | one, _ => one
+  | _, one => one
+  | zero, b => b
+  | a, zero => a
+  | half, half => half
+
+/-- Negation is involutive -/
+theorem neg_neg (v : ThreeVal) : neg (neg v) = v := by
+  cases v <;> rfl
+
+/-- 0 is absorbing for conjunction -/
+theorem conj_zero (v : ThreeVal) : conj zero v = zero := by
+  cases v <;> rfl
+
+theorem zero_conj (v : ThreeVal) : conj v zero = zero := by
+  cases v <;> rfl
+
+/-- 1 is identity for conjunction -/
+theorem conj_one (v : ThreeVal) : conj one v = v := by
+  cases v <;> rfl
+
+theorem one_conj (v : ThreeVal) : conj v one = v := by
+  cases v <;> rfl
+
+/-- half ∧ half = half (key RM3 property) -/
+theorem conj_half_half : conj half half = half := by rfl
+
+/-- 1 is absorbing for disjunction -/
+theorem disj_one (v : ThreeVal) : disj one v = one := by
+  cases v <;> rfl
+
+theorem one_disj (v : ThreeVal) : disj v one = one := by
+  cases v <;> rfl
+
+/-- 0 is identity for disjunction -/
+theorem disj_zero (v : ThreeVal) : disj zero v = v := by
+  cases v <;> rfl
+
+theorem zero_disj (v : ThreeVal) : disj v zero = v := by
+  cases v <;> rfl
+
+/-- half ∨ half = half (key RM3 property) -/
+theorem disj_half_half : disj half half = half := by rfl
+
+/-- De Morgan law -/
+theorem de_morgan_conj (a b : ThreeVal) : neg (conj a b) = disj (neg a) (neg b) := by
+  cases a <;> cases b <;> rfl
+
+theorem de_morgan_disj (a b : ThreeVal) : neg (disj a b) = conj (neg a) (neg b) := by
+  cases a <;> cases b <;> rfl
+
+/-- RM3 implication (for comparison - NOT used in Cred) -/
+def rm3_impl : ThreeVal → ThreeVal → ThreeVal
+  | zero, _ => one  -- Ex falso!
+  | half, zero => half
+  | half, half => half
+  | half, one => one
+  | one, zero => zero
+  | one, half => half
+  | one, one => one
+
+/-- RM3 has ex falso: 0 → b = 1 for all b -/
+theorem rm3_ex_falso (b : ThreeVal) : rm3_impl zero b = one := by
+  cases b <;> rfl
+
+/-- Cred conditioning on 0 is NOT forced to 1 (blocks ex falso) -/
+theorem cred_no_ex_falso :
+    ∃ c : Credence, ∃ cond : Credence.Conditioning 0 0, cond.condCred = c := by
+  use 0
+  exact Credence.conditioning_zero_any 0
+
+end ThreeVal
+
 end Cred

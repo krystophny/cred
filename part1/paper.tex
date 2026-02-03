@@ -770,7 +770,7 @@ Both functions are quadratic in $c$:
 The full credence algebra $[0, 1]$ can be ``collapsed'' to simpler systems.
 These collapses connect Cred to well-known logics.
 
-\subsection{Three-Valued Collapse: RM3-like Logic}
+\subsection{Three-Valued Collapse: Relationship to RM3}
 
 Collapse the continuum to three values:
 \[
@@ -781,8 +781,13 @@ Collapse the continuum to three values:
 \end{cases}
 \]
 
-This yields a three-valued logic with values \{False, Unknown, True\}
-similar to RM3 (Relevant Mingle, 3-valued):
+This yields a three-valued logic with values $\{0, \tfrac{1}{2}, 1\}$.
+
+\begin{theorem}[Fragment Equivalence with RM3]
+\label{thm:rm3-fragment}
+Three-valued Cred shares the same truth tables as RM3 for the connectives
+$\{\negc, \conjc, \disjc\}$:
+\end{theorem}
 
 \begin{center}
 \begin{tabular}{c|ccc}
@@ -798,15 +803,65 @@ $\conjc$ & 0 & $\tfrac{1}{2}$ & 1 \\
 $\tfrac{1}{2}$ & 0 & $\tfrac{1}{2}$ & $\tfrac{1}{2}$ \\
 1 & 0 & $\tfrac{1}{2}$ & 1
 \end{tabular}
+\quad
+\begin{tabular}{c|ccc}
+$\disjc$ & 0 & $\tfrac{1}{2}$ & 1 \\
+\hline
+0 & 0 & $\tfrac{1}{2}$ & 1 \\
+$\tfrac{1}{2}$ & $\tfrac{1}{2}$ & $\tfrac{1}{2}$ & 1 \\
+1 & 1 & 1 & 1
+\end{tabular}
 \end{center}
 
-\begin{remark}
-The conjunction table matches RM3 (where $\frac{1}{2} \conjc \frac{1}{2} =
-\frac{1}{2}$) because the collapse is well-defined: for any $c_1, c_2 \in (0,1)$,
-their product $c_1 \cdot c_2 \in (0,1)$, which collapses to $\frac{1}{2}$.
+\begin{proof}
+Conjunction: $\tfrac{1}{2} \conjc \tfrac{1}{2} = 0.5 \times 0.5 = 0.25$,
+which collapses to $\tfrac{1}{2}$ since $0 < 0.25 < 1$. This matches RM3's
+minimum operation. Disjunction: $\tfrac{1}{2} \disjc \tfrac{1}{2} =
+0.5 + 0.5 - 0.25 = 0.75$, collapsing to $\tfrac{1}{2}$. This matches RM3's
+maximum operation. All other cases follow directly.
+\end{proof}
+
+\begin{theorem}[Implication Differs from RM3]
+\label{thm:rm3-impl-differs}
+Three-valued Cred conditioning differs fundamentally from RM3 implication:
+\begin{center}
+\begin{tabular}{c|ccc}
+RM3 $\to$ & 0 & $\tfrac{1}{2}$ & 1 \\
+\hline
+0 & 1 & 1 & 1 \\
+$\tfrac{1}{2}$ & $\tfrac{1}{2}$ & $\tfrac{1}{2}$ & 1 \\
+1 & 0 & $\tfrac{1}{2}$ & 1
+\end{tabular}
+\quad
+\begin{tabular}{c|ccc}
+Cred cond & 0 & $\tfrac{1}{2}$ & 1 \\
+\hline
+0 & $*$ & $*$ & $*$ \\
+$\tfrac{1}{2}$ & 0 & $\tfrac{1}{2}$ or 1 & 1 \\
+1 & 0 & $\tfrac{1}{2}$ & 1
+\end{tabular}
+\end{center}
+\footnotesize{$*$ = unconstrained (any value satisfies the chain rule)}
+\end{theorem}
+
+\begin{proof}
+RM3 uses $a \to b = \max(\negc a, b)$, giving $0 \to b = 1$ (ex falso).
+Cred conditioning satisfies $\condc{b}{a} \cdot a = b \conjc a$. When $a = 0$:
+$\condc{b}{0} \cdot 0 = 0$, satisfied by any value. Thus Cred conditioning
+is \emph{unconstrained} at $a = 0$, not forced to 1.
+\end{proof}
+
+\begin{remark}[Both Are Paraconsistent]
+Despite differing on implication, both systems are paraconsistent
+(contradictions do not explode). RM3 achieves this via designated-value
+semantics: only 1 is designated for inference, so premises with value 0
+cannot drive valid inferences. Cred achieves this via the chain rule:
+conditioning on impossibility is unconstrained, blocking ex falso directly.
 \end{remark}
 
-\textbf{Key property:} No ex falso. Conditioning on 0 is unconstrained.
+\textbf{Summary:} Three-valued Cred $\equiv$ RM3 for $\{\negc, \conjc, \disjc\}$,
+but Cred conditioning $\neq$ RM3 implication. Both reject ex falso, but
+through different mechanisms.
 
 \subsection{Boolean Collapse: Relevant Logic}
 
