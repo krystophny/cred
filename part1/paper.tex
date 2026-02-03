@@ -262,78 +262,43 @@ Belnap~\cite{anderson1975}, who rejected ex falso on philosophical grounds.
 They enforced relevance through syntactic conditions (premises must share
 variables with conclusions). Cred achieves the same result semantically.
 
-\subsection{Inference as Constraint: The Philosophical Foundation}
+\subsection{Design Motivation: Inference as Constraint}
 
-The deepest motivation for Cred comes from the Bayesian philosophy of
-inference: \textbf{inference constrains possibilities from uncertainty
-toward specificity, rather than building certainties from nothing.}
+The design of Cred is motivated by an intuition about inference:
+\textbf{evidence constrains possibilities from uncertainty toward specificity}.
+This is a \emph{design choice} that guides Cred's axioms, not a theorem
+derived from first principles.
 
-\begin{quote}
-\emph{``The principle of maximum entropy may be regarded as an extension of
-the principle of insufficient reason... we should be maximally noncommittal
-with regard to missing information.''} --- Jaynes~\cite{jaynes2003}
-\end{quote}
-
-This view, championed by Jaynes, de Finetti, and others, sees inference as:
+The intuition has three parts:
 
 \begin{enumerate}[label=(\roman*)]
-    \item \textbf{Prior as maximal uncertainty.} Begin with the least
-    informative distribution consistent with known constraints. For binary
-    propositions with no information, this is the flat prior: $\cred(A) = 0.5$.
-    The principle of indifference (Laplace, Keynes) formalizes this as:
-    equal credence to symmetric alternatives absent distinguishing evidence.
+    \item \textbf{Prior as uncertainty.} Without information about a binary
+    proposition, a natural starting point is $\cred(A) = 0.5$ (the principle
+    of indifference).
 
     \item \textbf{Evidence constrains.} Each piece of evidence $B$ with
     $\cred(B) > 0$ narrows the space of consistent beliefs. The chain rule
     $\cred(A \mid B) \cdot \cred(B) = \cred(A \land B)$ expresses how
     evidence constrains the joint credence.
 
-    \item \textbf{No evidence means no constraint.} When $\cred(B) = 0$,
-    the evidence provides no information to constrain belief. The chain rule
-    becomes $\cred(A \mid 0) \cdot 0 = 0$, satisfied by \emph{any} value of
-    $\cred(A \mid 0)$. This is not a defect but a feature: vacuous evidence
-    cannot constrain.
+    \item \textbf{Impossible evidence provides no constraint.} When
+    $\cred(B) = 0$, the chain rule becomes $\cred(A \mid 0) \cdot 0 = 0$,
+    satisfied by \emph{any} value. We interpret this as: vacuous evidence
+    cannot constrain belief.
 \end{enumerate}
 
-This philosophical stance has deep roots:
+This motivates Cred's treatment of conditioning at zero as unconstrained
+rather than undefined (probability) or forced to 1 (classical ex falso).
 
-\begin{itemize}
-    \item \textbf{Maximum Entropy (Jaynes, 1957):} The probability distribution
-    that best represents incomplete knowledge maximizes entropy subject to
-    known constraints. Shore and Johnson~\cite{shorejohnson1980} proved this
-    is the \emph{unique} consistent method for inference with constraint
-    information.
-
-    \item \textbf{Coherence (de Finetti, 1937):} Probability assignments must
-    be internally consistent---no Dutch book can be made against a coherent
-    agent. This coherence requirement, combined with exchangeability, shows
-    how subjective priors converge with frequencies under evidence.
-
-    \item \textbf{Primitive Conditioning (R\'enyi, Popper):} Conditional
-    probability is more fundamental than unconditional. The chain rule is
-    an axiom, not a derived ratio. This avoids division-by-zero issues and
-    makes conditioning on impossibility well-formed (though unconstrained).
-
-    \item \textbf{Imprecise Probability (Walley, 1991):} When constraints
-    do not uniquely determine a distribution, we work with \emph{credal sets}---
-    the convex set of all distributions consistent with known constraints.
-    Conditioning on zero-probability evidence leaves the credal set maximally
-    unconstrained.
-\end{itemize}
-
-\begin{remark}[Connection to Cred]
-The ``inference as constraint'' philosophy directly explains Cred's design:
-\begin{itemize}
-    \item \textbf{Why conditioning is primitive:} Because inference \emph{is}
-    constraining belief by evidence. The chain rule expresses constraint
-    propagation.
-    \item \textbf{Why no ex falso:} Because impossible evidence ($\cred(B) = 0$)
-    provides no constraint. Classical ex falso ($\bot \to A$) wrongly treats
-    impossibility as maximally constraining (forcing $\cred(A \mid \bot) = 1$).
-    \item \textbf{Why 0.5 is meaningful:} It represents maximal uncertainty---
-    a flat prior over $\{$true, false$\}$. The liar sentence at 0.5 is
-    ``maximally unconstrained by the truth predicate.''
-\end{itemize}
+\begin{remark}[Scope of the Motivation]
+This ``inference as constraint'' intuition is \emph{informal motivation}
+for Cred's design, not a derivation from Bayesian inference or information
+theory. The work of Jaynes on maximum entropy and de Finetti on coherence
+concerns probability distributions and betting behavior---related but
+distinct topics. Similarly, R\'enyi and Popper's primitive conditioning
+(Section~1.6) provides the mathematical framework we adopt, but our
+interpretation of ``unconstrained means no constraint'' is a design
+choice, not a consequence of their axioms.
 \end{remark}
 
 %=============================================================================
@@ -1538,10 +1503,6 @@ J. \L ukasiewicz.
 \newblock O logice tr\'ojwarto\'sciowej.
 \newblock \emph{Ruch Filozoficzny}, 5:170--171, 1920.
 
-\bibitem{meyer1972}
-R.K. Meyer and R. Routley.
-\newblock Algebraic analysis of entailment I.
-\newblock \emph{Logique et Analyse}, 15:407--428, 1972.
 
 \bibitem{vanfraassen1976}
 B.C. van Fraassen.
@@ -1577,16 +1538,6 @@ A. R\'enyi.
 \newblock On a new axiomatic theory of probability.
 \newblock \emph{Acta Mathematica Hungarica}, 6:285--335, 1955.
 
-\bibitem{shorejohnson1980}
-J.E. Shore and R.W. Johnson.
-\newblock Axiomatic derivation of the principle of maximum entropy and the
-principle of minimum cross-entropy.
-\newblock \emph{IEEE Transactions on Information Theory}, IT-26:26--37, 1980.
-
-\bibitem{walley1991}
-P. Walley.
-\newblock \emph{Statistical Reasoning with Imprecise Probabilities}.
-\newblock Chapman and Hall, 1991.
 
 \bibitem{weber2010}
 Z. Weber.
