@@ -24,7 +24,7 @@
 \newtheorem{definition}[theorem]{Definition}
 \newtheorem{example}[theorem]{Example}
 \newtheorem{remark}[theorem]{Remark}
-\newtheorem{axiom}{Axiom}
+\newtheorem{axiom}[theorem]{Axiom}
 
 % Custom commands
 \newcommand{\cred}{\mathsf{cred}}
@@ -513,14 +513,23 @@ Boolean algebra and is essential for modeling uncertainty correctly.
 The central innovation of Cred is treating conditioning as \emph{primitive}:
 
 % Lean: Conditioning structure
-\begin{definition}[Conditioning]
-A \emph{conditioning} of joint credence $\cred(A \land B)$ on evidence
-credence $\cred(B)$ consists of a conditional credence $\condc{A}{B}$
-satisfying the \emph{chain rule}:
+\begin{definition}[Conditioning Structure]
+\label{def:conditioning}
+A \emph{conditioning structure} assigns to each pair of propositions $A, B$
+a \emph{conditional credence} $\condc{A}{B} \in [0,1]$, representing the
+credence in $A$ given evidence $B$.
+\end{definition}
+
+\begin{axiom}[Chain Rule]
+\label{axiom:chainrule}
+A conditioning structure is \emph{valid} if and only if it satisfies the
+\emph{chain rule}: for any propositions $A$ and $B$,
 \[
 \condc{A}{B} \cdot \cred(B) = \cred(A \land B)
 \]
-\end{definition}
+This axiom constrains what counts as a valid conditioning---conditioning is
+not merely any function, but one satisfying this multiplicative relationship.
+\end{axiom}
 
 \begin{remark}[Two Notions of Conjunction]
 \label{rmk:two-conjunctions}
@@ -530,21 +539,13 @@ The algebra has \emph{two} conjunction-related concepts:
     (Def.~\ref{def:indep-conj}), computing $\cred(A \land B)$ when $A, B$ are
     probabilistically independent.
     \item $\cred(A \land B)$: The \emph{actual joint credence}, which is a
-    parameter in the conditioning structure. For dependent propositions, this
+    parameter in the chain rule. For dependent propositions, this
     may differ from $\cred(A) \conjc \cred(B)$.
 \end{itemize}
 In practice: if independence holds, use $\conjc$. Otherwise, the joint credence
 must be specified separately (e.g., given by context or derived from known
 relationships).
 \end{remark}
-
-\begin{axiom}[Chain Rule]
-\label{axiom:chainrule}
-For any propositions $A$ and $B$:
-\[
-\cred(A \mid B) \cdot \cred(B) = \cred(A \land B)
-\]
-\end{axiom}
 
 \subsection{Behavior at Boundary Cases}
 
