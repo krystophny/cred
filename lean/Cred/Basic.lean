@@ -187,9 +187,9 @@ independent parameter representing the actual joint credence, which may
 differ from the product of marginals for dependent propositions.
 
 Edge case when evidence = 0:
-The chain rule becomes condCred * 0 = joint, forcing joint = 0.
-But condCred itself is unconstrained (any value satisfies c * 0 = 0).
-This means conditioning on impossible evidence gives no information.
+The chain rule requires condCred * 0 = joint. Since anything times 0 equals 0,
+this forces joint = 0 but leaves condCred unconstrained (any value satisfies
+c * 0 = 0). Conditioning on impossible evidence provides no constraint on belief.
 See `conditioning_zero_any` for the proof that any credence works.
 This is intentional: there is no ex falso in graded logic.
 -/
@@ -566,11 +566,11 @@ theorem rm3_impl_one_zero : rm3_impl one zero = zero := rfl
 theorem rm3_impl_one_half : rm3_impl one half = half := rfl
 theorem rm3_impl_one_one : rm3_impl one one = one := rfl
 
-/-- Cred conditioning on 0 is NOT forced to 1 (blocks ex falso) -/
-theorem cred_no_ex_falso :
-    ∃ c : Credence, ∃ cond : Credence.Conditioning 0 0, cond.condCred = c := by
-  use 0
-  exact Credence.conditioning_zero_any 0
+/-- Cred conditioning on 0 is NOT forced to 1 (blocks ex falso).
+    Any credence value can serve as the conditional when evidence = 0. -/
+theorem cred_no_ex_falso (c : Credence) :
+    ∃ cond : Credence.Conditioning 0 0, cond.condCred = c :=
+  Credence.conditioning_zero_any c
 
 end ThreeVal
 

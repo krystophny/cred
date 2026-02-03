@@ -394,11 +394,21 @@ it does NOT claim $c_1 \conjc c_2 = \cred(A \land B)$ for arbitrary propositions
 \begin{definition}[Disjunction (De Morgan Dual)]
 The \emph{disjunction} of credences is defined via De Morgan:
 \[
-c_1 \disjc c_2 = \negc(\negc c_1 \conjc \negc c_2) = c_1 + c_2 - c_1 \cdot c_2
+c_1 \disjc c_2 = \negc(\negc c_1 \conjc \negc c_2)
 \]
 \end{definition}
 
+\begin{proof}[Derivation of explicit formula]
+Expanding the definition:
+\begin{align*}
+c_1 \disjc c_2 &= \negc(\negc c_1 \conjc \negc c_2) \\
+&= \negc((1-c_1) \cdot (1-c_2)) \\
+&= 1 - (1-c_1)(1-c_2) \\
+&= 1 - (1 - c_1 - c_2 + c_1 c_2) \\
+&= c_1 + c_2 - c_1 c_2
+\end{align*}
 This is the probabilistic inclusion-exclusion formula for independent events.
+\end{proof}
 
 \subsection{Algebraic Properties}
 
@@ -1072,7 +1082,7 @@ implication and classical logic.
         {\textbf{Classical} $\{0, 1\}$ + material impl. --- FOL};
 
     \draw[-{Stealth}] (cred) -- node[right] {collapse $(0,1) \to \tfrac{1}{2}$} (three);
-    \draw[-{Stealth}] (three) -- node[right] {collapse $\tfrac{1}{2} \to 0$ or $1$} (bool);
+    \draw[-{Stealth}] (three) -- node[right] {restrict to $\{0, 1\}$} (bool);
     \draw[-{Stealth}] (bool) -- node[right] {replace conditioning with $\neg A \lor B$} (class);
 \end{tikzpicture}
 \end{center}
@@ -1422,6 +1432,22 @@ without division.
 This is mathematically sophisticated but focused on measure theory, not logic
 foundations or blocking ex falso.
 
+\subsection{Measure-Theoretic Probability and Disintegration}
+
+In measure-theoretic probability, conditioning on events of measure zero requires
+the machinery of \emph{regular conditional probability} and
+\emph{disintegration}~\cite{chang1997}. When $P(B) = 0$, one cannot simply compute
+$P(A|B) = P(A \cap B)/P(B)$; instead, conditional probability is defined as an
+essentially unique measurable function satisfying certain integral equations.
+
+This approach handles conditioning on null sets rigorously but differs from Cred's
+treatment: measure-theoretic conditioning yields a \emph{specific} (a.e.\ unique)
+value determined by the underlying measure structure, whereas Cred's chain rule
+leaves conditioning on zero \emph{unconstrained} by the axiom. Both avoid the
+na\"ive ``undefined'' of elementary probability, but through different mechanisms.
+A detailed comparison of Cred with measure-theoretic conditioning is beyond
+the scope of this paper.
+
 \subsection{Summary: What is Novel in Cred}
 
 Given the extensive prior art, we claim the following contributions are novel:
@@ -1519,6 +1545,22 @@ All theorems in Sections 2--5 have been formally verified. Notable proofs:
     \item \textbf{neg\_fixed\_point\_unique}: $0.5$ is the unique negation fixed point
 \end{itemize}
 
+The formalization also includes additional helper lemmas and derived results not
+individually referenced in this paper:
+\begin{itemize}
+    \item \textbf{Spread and certainty:} \texttt{spread\_val}, \texttt{spread\_half},
+    \texttt{spread\_le\_quarter}, \texttt{spread\_eq\_zero\_iff}, \texttt{certainty\_val},
+    \texttt{certainty\_half}, \texttt{certainty\_ge\_three\_quarters}, \texttt{certainty\_eq\_one\_iff}
+    \item \textbf{Idempotence:} \texttt{conj\_idempotent\_iff}, \texttt{conj\_not\_idempotent}
+    \item \textbf{Collapse homomorphisms:} \texttt{collapse\_neg}, \texttt{collapse\_conj},
+    \texttt{collapse\_disj} (proving Theorem~\ref{thm:rm3-fragment})
+    \item \textbf{Three-valued algebra:} \texttt{ThreeVal} type with \texttt{rm3\_impl},
+    \texttt{rm3\_ex\_falso}, and the complete RM3 implication table
+    \item \textbf{Conditioning table entries:} \texttt{cond\_zero\_zero\_any},
+    \texttt{cond\_pos\_unique}, \texttt{cond\_quarter\_half}, and related theorems
+    verifying Theorem~\ref{thm:rm3-impl-differs}
+\end{itemize}
+
 \begin{remark}[Version Note]
 Comments reference Lean theorem and definition names (e.g., \texttt{neg\_neg},
 \texttt{conditioning\_zero\_any}), which are stable identifiers that will not
@@ -1594,6 +1636,11 @@ R.T. Cox.
 R. Brady.
 \newblock \emph{Universal Logic}.
 \newblock CSLI Publications, 2006.
+
+\bibitem{chang1997}
+J.T. Chang and D. Pollard.
+\newblock Conditioning as disintegration.
+\newblock \emph{Statistica Neerlandica}, 51(3):287--317, 1997.
 
 \bibitem{dacosta1974}
 N.C.A. da Costa.
