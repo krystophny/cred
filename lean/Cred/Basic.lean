@@ -229,6 +229,19 @@ theorem conditioning_exists (joint evidence : Credence) (h_pos : 0 < evidence.va
   · rw [div_le_one h_pos]; exact h_le
   · ext; simp only [conj_val]; field_simp
 
+/-- If a Conditioning structure exists, then joint ≤ evidence.
+    Proof: joint = condCred * evidence ≤ 1 * evidence = evidence.
+    Note: For evidence > 0, this is the converse of conditioning_exists precondition.
+    For evidence = 0, conditioning_zero_forces_joint_zero gives the stronger result joint = 0. -/
+theorem conditioning_implies_joint_le_evidence (joint evidence : Credence)
+    (cond : Conditioning joint evidence) : joint.val ≤ evidence.val := by
+  have h := congrArg (·.val) cond.chainRule
+  simp only [conj_val] at h
+  calc joint.val = cond.condCred.val * evidence.val := h.symm
+    _ ≤ 1 * evidence.val := by
+        apply mul_le_mul_of_nonneg_right cond.condCred.le_one evidence.nonneg
+    _ = evidence.val := one_mul _
+
 /-- Uniqueness of conditioning when evidence > 0 -/
 theorem conditioning_unique (joint evidence : Credence) (h_pos : 0 < evidence.val)
     (c₁ c₂ : Conditioning joint evidence) : c₁.condCred = c₂.condCred := by
