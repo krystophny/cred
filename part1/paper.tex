@@ -248,11 +248,15 @@ paradox.
 
 Probability theory also uses $[0, 1]$ values. How does Cred differ?
 
-The key difference is in how we handle \emph{conditioning}. In probability:
+The key difference is in how we handle \emph{conditioning}. In elementary
+probability:
 \[
 P(A \mid B) = \frac{P(A \land B)}{P(B)} \quad \text{when } P(B) > 0
 \]
-When $P(B) = 0$, this is \emph{undefined} (division by zero).
+When $P(B) = 0$, this ratio is undefined (division by zero). Measure-theoretic
+probability addresses this through regular conditional probability and
+disintegration (see Section~\ref{sec:measure-theory} for details). Here we
+contrast Cred with the elementary definition.
 
 In Cred, conditioning is \emph{primitive}, governed by an axiom:
 \[
@@ -1718,6 +1722,7 @@ This is mathematically sophisticated but focused on measure theory, not logic
 foundations or avoiding ex falso.
 
 \subsection{Measure-Theoretic Probability and Disintegration}
+\label{sec:measure-theory}
 
 In measure-theoretic probability, conditioning on events of measure zero requires
 the machinery of \emph{regular conditional probability} and
