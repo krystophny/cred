@@ -208,6 +208,13 @@ theorem conditioning_zero_any (c : Credence) :
     ∃ cond : Conditioning 0 0, cond.condCred = c := by
   use ⟨c, by simp⟩
 
+/-- When evidence = 0, the chain rule forces joint = 0 -/
+theorem conditioning_zero_forces_joint_zero (joint : Credence)
+    (cond : Conditioning joint 0) : joint = 0 := by
+  have h := cond.chainRule
+  simp only [conj_zero] at h
+  exact h.symm
+
 /-- When evidence = 1, cred(A | B) = cred(A ∧ B) -/
 theorem conditioning_one (joint : Credence) :
     ∃ cond : Conditioning joint 1, cond.condCred = joint := by
