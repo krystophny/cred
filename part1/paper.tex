@@ -1095,19 +1095,20 @@ only when independence holds.
 
 \begin{example}[Three-Valued Collapse]
 \label{ex:collapse}
-Let $c_1 = 0.7$ and $c_2 = 0.3$. In the full algebra:
+Let $c_1 = 0$ and $c_2 = 0.7$. In the full algebra:
 \begin{align*}
-c_1 \conjc c_2 &= 0.7 \times 0.3 = 0.21 \\
-c_1 \disjc c_2 &= 0.7 + 0.3 - 0.21 = 0.79
+c_1 \conjc c_2 &= 0 \times 0.7 = 0 \\
+c_1 \disjc c_2 &= 0 + 0.7 - 0 = 0.7
 \end{align*}
 Under the three-valued collapse defined in Section~6.1:
-$\text{collapse}(0.7) = \frac{1}{2}$, $\text{collapse}(0.3) = \frac{1}{2}$.
+$\text{collapse}(0) = 0$, $\text{collapse}(0.7) = \frac{1}{2}$.
 \begin{align*}
-\text{collapse}(c_1 \conjc c_2) &= \text{collapse}(0.21) = \tfrac{1}{2} \\
-\text{collapse}(c_1) \conjc_{\text{RM3}} \text{collapse}(c_2) &= \tfrac{1}{2}
-    \conjc_{\text{RM3}} \tfrac{1}{2} = \tfrac{1}{2}
+\text{collapse}(c_1 \conjc c_2) &= \text{collapse}(0) = 0 \\
+\text{collapse}(c_1) \conjc_{\text{RM3}} \text{collapse}(c_2) &= 0
+    \conjc_{\text{RM3}} \tfrac{1}{2} = 0
 \end{align*}
-The collapse preserves the operation: both methods yield $\frac{1}{2}$.
+This boundary case demonstrates that collapse preserves the operation:
+operating before or after collapse yields the same result.
 This is Theorem~\ref{thm:rm3-fragment} in action.
 \end{example}
 
