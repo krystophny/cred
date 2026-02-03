@@ -496,7 +496,14 @@ Conjunction does \emph{not} distribute over disjunction:
 \[
 \exists\, c_1, c_2, c_3: \quad c_1 \conjc (c_2 \disjc c_3) \neq (c_1 \conjc c_2) \disjc (c_1 \conjc c_3)
 \]
-Counterexample: $c_1 = c_2 = c_3 = 0.5$ gives LHS $= 0.375$, RHS $= 0.4375$.
+Counterexample: $c_1 = c_2 = c_3 = 0.5$. Using Definition~\ref{def:indep-conj}
+and the explicit formula $c_1 \disjc c_2 = c_1 + c_2 - c_1 \cdot c_2$:
+\begin{align*}
+\text{LHS} &= 0.5 \conjc (0.5 \disjc 0.5) = 0.5 \cdot (0.5 + 0.5 - 0.5 \cdot 0.5)
+= 0.5 \cdot 0.75 = 0.375 \\
+\text{RHS} &= (0.5 \conjc 0.5) \disjc (0.5 \conjc 0.5) = 0.25 \disjc 0.25
+= 0.25 + 0.25 - 0.25 \cdot 0.25 = 0.4375
+\end{align*}
 \end{theorem}
 \noindent\textit{Proof.} Verified in Lean: \texttt{conj\_disj\_not\_distrib}. \hfill$\square$
 
