@@ -815,7 +815,9 @@ The value $0.5$ is the \emph{unique} fixed point of negation:
 \end{theorem}
 
 \begin{proof}
-If $\negc c = c$, then $1 - c = c$, so $c = 0.5$.
+($\Rightarrow$) If $\negc c = c$, then $1 - c = c$, so $c = 0.5$.
+($\Leftarrow$) Conversely, $\negc 0.5 = 1 - 0.5 = 0.5$ (Theorem~\ref{thm:liar}).
+Verified in Lean: \texttt{neg\_fixed\_point\_unique}.
 \end{proof}
 
 \subsection{Application to Self-Negating Sentences}
