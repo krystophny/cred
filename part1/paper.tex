@@ -544,7 +544,7 @@ the two-element Boolean algebra and is essential for modeling uncertainty correc
 \label{sec:conditioning}
 %=============================================================================
 
-% Lean: Conditioning, conditioning_zero_any, conditioning_one, conditioning_exists, conditioning_unique
+% Lean: Conditioning, conditioning_zero_any, conditioning_one, conditioning_mk, conditioning_unique
 
 \subsection{The Chain Rule Axiom}
 
@@ -695,7 +695,7 @@ $\cred(A \mid 0) = 1$; it does not follow from conditioning alone.
 
 \subsection{Existence and Uniqueness}
 
-% Lean: conditioning_exists, conditioning_unique
+% Lean: conditioning_mk, conditioning_unique
 \begin{theorem}[Existence of Conditioning]
 \label{thm:condexists}
 If $\cred(B) > 0$ and $\cred(A \land B) \leq \cred(B)$, then there exists
@@ -704,7 +704,7 @@ a unique conditional credence:
 \cred(A \mid B) = \frac{\cred(A \land B)}{\cred(B)}
 \]
 \end{theorem}
-\noindent\textit{Proof.} Verified in Lean: \texttt{conditioning\_exists}. \hfill$\square$
+\noindent\textit{Proof.} Verified in Lean: \texttt{conditioning\_mk}. \hfill$\square$
 
 \begin{remark}[Axiom vs.\ Existence Proof]
 \label{rmk:axiom-vs-proof}

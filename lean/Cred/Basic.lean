@@ -220,18 +220,17 @@ theorem conditioning_one (joint : Credence) :
     ∃ cond : Conditioning joint 1, cond.condCred = joint := by
   use ⟨joint, by simp⟩
 
-/-- Existence of conditioning when evidence > 0 and joint ≤ evidence -/
-theorem conditioning_exists (joint evidence : Credence) (h_pos : 0 < evidence.val)
-    (h_le : joint.val ≤ evidence.val) :
-    ∃ _ : Conditioning joint evidence, True := by
-  refine ⟨⟨⟨joint.val / evidence.val, ?_, ?_⟩, ?_⟩, trivial⟩
-  · exact div_nonneg joint.nonneg (le_of_lt h_pos)
-  · rw [div_le_one h_pos]; exact h_le
-  · ext; simp only [conj_val]; field_simp
+/-- Construct conditioning when evidence > 0 and joint ≤ evidence -/
+noncomputable def conditioning_mk (joint evidence : Credence) (h_pos : 0 < evidence.val)
+    (h_le : joint.val ≤ evidence.val) : Conditioning joint evidence where
+  condCred := ⟨joint.val / evidence.val,
+    div_nonneg joint.nonneg (le_of_lt h_pos),
+    by rw [div_le_one h_pos]; exact h_le⟩
+  chainRule := by ext; simp only [conj_val]; field_simp
 
 /-- If a Conditioning structure exists, then joint ≤ evidence.
     Proof: joint = condCred * evidence ≤ 1 * evidence = evidence.
-    Note: For evidence > 0, this is the converse of conditioning_exists precondition.
+    Note: For evidence > 0, this is the converse of conditioning_mk precondition.
     For evidence = 0, conditioning_zero_forces_joint_zero gives the stronger result joint = 0. -/
 theorem conditioning_implies_joint_le_evidence (joint evidence : Credence)
     (cond : Conditioning joint evidence) : joint.val ≤ evidence.val := by
