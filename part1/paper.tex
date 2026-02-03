@@ -590,17 +590,19 @@ The central innovation of Cred is treating conditioning as \emph{primitive}:
 \begin{definition}[Conditioning Structure (Chain Rule Constraint)]
 \label{def:conditioning}
 A \emph{conditioning structure} for a pair (joint, evidence) $\in [0,1]^2$
-is a conditional credence condCred $\in [0,1]$ satisfying the chain rule equation:
+is a choice of conditional credence condCred $\in [0,1]$ together with a proof
+of the chain rule equation:
 \[
 \text{condCred} \conjc \text{evidence} = \text{joint}.
 \]
 
-When evidence $> 0$, the inequality joint $\leq$ evidence is necessary for
-existence of a witness in $[0,1]$: otherwise the unique solution
-condCred $=$ joint/evidence would exceed $1$. In the Lean development this
-inequality is a derived property of any inhabiting conditioning structure
-(Theorem \texttt{conditioning\_implies\_joint\_le\_evidence}), and is also used as
-a hypothesis for the existence construction (\texttt{conditioning\_mk}).
+\noindent We call a pair (joint, evidence) \emph{admissible} if a conditioning
+structure exists for it. When evidence $> 0$, admissibility implies joint
+$\leq$ evidence: otherwise the unique solution condCred $=$ joint/evidence would
+exceed $1$. In Lean, this inequality is derived from inhabitation of the
+\texttt{Conditioning} structure (Theorem \texttt{conditioning\_implies\_joint\_le\_evidence}),
+and it is also used as a hypothesis for the existence construction
+(\texttt{conditioning\_mk}).
 
 \textbf{Propositional notation:} We write $\cred(A \mid B)$ for the conditional
 credence where joint $= \cred(A \land B)$ and evidence $= \cred(B)$, so the
