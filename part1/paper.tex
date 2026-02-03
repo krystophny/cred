@@ -732,7 +732,7 @@ a non-paradoxical assignment.
 \section{Uncertainty Spread}
 %=============================================================================
 
-% Lean: contradiction, tautology and related theorems
+% Lean: spread, certainty and related theorems
 
 The function $c(1-c)$ measures how far a credence is from certainty. This is
 the \emph{variance of a Bernoulli random variable} with parameter $c$---a
@@ -748,7 +748,7 @@ Rather, it is a derived algebraic quantity measuring uncertainty.
 
 \subsection{Spread Function}
 
-% Lean: contradiction, contradiction_val, contradiction_half, contradiction_le_quarter, contradiction_eq_zero_iff
+% Lean: spread, spread_val, spread_half, spread_le_quarter, spread_eq_zero_iff
 \begin{definition}[Spread]
 \[
 \text{spread}(c) := c(1-c)
@@ -773,7 +773,7 @@ uncertainty), spread reaches its maximum of $0.25$.
 
 \subsection{Complement: $1 - c(1-c)$}
 
-% Lean: tautology, tautology_val, tautology_half, tautology_ge_three_quarters, tautology_eq_one_iff
+% Lean: certainty, certainty_val, certainty_half, certainty_ge_three_quarters, certainty_eq_one_iff
 The De Morgan dual $c \disjc \negc c = 1 - c(1-c)$ is simply $1 - \text{spread}(c)$.
 
 \begin{theorem}[Complement Bounds]

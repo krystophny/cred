@@ -355,87 +355,83 @@ measuring how far a credence is from certainty.
 Properties:
 - Maximum value 0.25 at c = 0.5 (maximum uncertainty)
 - Zero at c = 0 or c = 1 (certainty)
-- The De Morgan dual c ⊔ ~c = 1 - c*(1-c) is the complement (min 0.75 at c=0.5)
-
-The function names `contradiction` and `tautology` are historical artifacts
-retained for API stability. The paper (Section 5) uses the more accurate
-terminology "spread" and "spread complement".
+- The De Morgan dual c ⊔ ~c = 1 - c*(1-c) is the certainty (min 0.75 at c=0.5)
 -/
 
 /-- Spread (Bernoulli variance): c ⊗ ~c = c * (1-c). Measures distance from certainty. -/
-def contradiction (c : Credence) : Credence := c ⊗ ~c
+def spread (c : Credence) : Credence := c ⊗ ~c
 
-theorem contradiction_val (c : Credence) : (contradiction c).val = c.val * (1 - c.val) := by
-  simp only [contradiction, conj_val, neg_val]
+theorem spread_val (c : Credence) : (spread c).val = c.val * (1 - c.val) := by
+  simp only [spread, conj_val, neg_val]
 
-/-- Maximum contradiction at c = 0.5 gives 0.25 (measures uncertainty) -/
-theorem contradiction_half : (contradiction half).val = 0.25 := by
-  simp only [contradiction_val, half_val]
+/-- Maximum spread at c = 0.5 gives 0.25 (maximum uncertainty) -/
+theorem spread_half : (spread half).val = 0.25 := by
+  simp only [spread_val, half_val]
   norm_num
 
-/-- Contradiction is always ≤ 0.25 -/
-theorem contradiction_le_quarter (c : Credence) :
-    (contradiction c).val ≤ 0.25 := by
-  simp only [contradiction_val]
+/-- Spread is always ≤ 0.25 -/
+theorem spread_le_quarter (c : Credence) :
+    (spread c).val ≤ 0.25 := by
+  simp only [spread_val]
   have h1 := c.nonneg
   have h2 := c.le_one
   nlinarith [sq_nonneg (c.val - 0.5)]
 
-/-- Contradiction is 0 only at extremes (certainty) -/
-theorem contradiction_eq_zero_iff (c : Credence) :
-    contradiction c = 0 ↔ c = 0 ∨ c = 1 := by
+/-- Spread is 0 only at extremes (certainty) -/
+theorem spread_eq_zero_iff (c : Credence) :
+    spread c = 0 ↔ c = 0 ∨ c = 1 := by
   constructor
   · intro h
     have hv : c.val * (1 - c.val) = 0 := by
       have := congrArg (·.val) h
-      simp only [contradiction_val, zero_val] at this
+      simp only [spread_val, zero_val] at this
       exact this
     rcases mul_eq_zero.mp hv with hz | h1
     · left; ext; exact hz
     · right; ext; simp only [one_val]; linarith
   · intro h
     rcases h with rfl | rfl
-    · ext; simp [contradiction_val]
-    · ext; simp [contradiction_val]
+    · ext; simp [spread_val]
+    · ext; simp [spread_val]
 
-/-- Spread complement: c ⊔ ~c = 1 - c*(1-c). De Morgan dual of spread. -/
-def tautology (c : Credence) : Credence := c ⊔ ~c
+/-- Certainty: c ⊔ ~c = 1 - c*(1-c). De Morgan dual of spread. -/
+def certainty (c : Credence) : Credence := c ⊔ ~c
 
-theorem tautology_val (c : Credence) : (tautology c).val = 1 - c.val * (1 - c.val) := by
-  simp only [tautology, disj_val, neg_val]
+theorem certainty_val (c : Credence) : (certainty c).val = 1 - c.val * (1 - c.val) := by
+  simp only [certainty, disj_val, neg_val]
   ring
 
-/-- Tautology equals 1 at extremes (certainty) -/
-theorem tautology_zero : tautology (0 : Credence) = 1 := by
+/-- Certainty equals 1 at extremes -/
+theorem certainty_zero : certainty (0 : Credence) = 1 := by
   ext
-  simp only [tautology_val, zero_val, one_val]
+  simp only [certainty_val, zero_val, one_val]
   norm_num
 
-theorem tautology_one : tautology (1 : Credence) = 1 := by
+theorem certainty_one : certainty (1 : Credence) = 1 := by
   ext
-  simp only [tautology_val, one_val, sub_self, mul_zero, sub_zero]
+  simp only [certainty_val, one_val, sub_self, mul_zero, sub_zero]
 
-/-- Minimum tautology at half gives 0.75 (maximum uncertainty) -/
-theorem tautology_half : (tautology half).val = 0.75 := by
-  simp only [tautology_val, half_val]
+/-- Minimum certainty at half gives 0.75 (maximum uncertainty) -/
+theorem certainty_half : (certainty half).val = 0.75 := by
+  simp only [certainty_val, half_val]
   norm_num
 
-/-- Tautology is always at least 0.75 -/
-theorem tautology_ge_three_quarters (c : Credence) :
-    (tautology c).val ≥ 0.75 := by
-  simp only [tautology_val]
+/-- Certainty is always at least 0.75 -/
+theorem certainty_ge_three_quarters (c : Credence) :
+    (certainty c).val ≥ 0.75 := by
+  simp only [certainty_val]
   have h1 := c.nonneg
   have h2 := c.le_one
   nlinarith [sq_nonneg (c.val - 0.5)]
 
-/-- Tautology equals 1 only at extremes -/
-theorem tautology_eq_one_iff (c : Credence) :
-    tautology c = 1 ↔ c = 0 ∨ c = 1 := by
+/-- Certainty equals 1 only at extremes -/
+theorem certainty_eq_one_iff (c : Credence) :
+    certainty c = 1 ↔ c = 0 ∨ c = 1 := by
   constructor
   · intro h
     have hv : 1 - c.val * (1 - c.val) = 1 := by
       have := congrArg (·.val) h
-      simp only [tautology_val, one_val] at this
+      simp only [certainty_val, one_val] at this
       exact this
     have hzero : c.val * (1 - c.val) = 0 := by linarith
     rcases mul_eq_zero.mp hzero with hz | h1
@@ -443,8 +439,8 @@ theorem tautology_eq_one_iff (c : Credence) :
     · right; ext; simp only [one_val]; linarith
   · intro h
     rcases h with rfl | rfl
-    · exact tautology_zero
-    · exact tautology_one
+    · exact certainty_zero
+    · exact certainty_one
 
 end Credence
 
