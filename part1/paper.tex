@@ -228,9 +228,11 @@ The conditional is \emph{unconstrained} by the axiom, rather than undefined
 \label{ex:liar}
 % Lean: liar_fixed_point
 Consider $L = $ ``This sentence is false.'' In Cred, if we adopt the
-principle that logically equivalent propositions receive equal credences, and
-model $L$ as satisfying $L \leftrightarrow \neg L$, then $\cred(L) = \cred(\neg L)$,
-so $\cred(L) = 1 - \cred(L)$, giving $\cred(L) = 0.5$. Since negation is
+principle that logically equivalent propositions receive equal credences---a
+standard rationality constraint in formal epistemology, justified by Dutch book
+arguments~\cite{ramsey1931,definetti1937} showing that violations lead to sure
+loss---and model $L$ as satisfying $L \leftrightarrow \neg L$, then
+$\cred(L) = \cred(\neg L)$, so $\cred(L) = 1 - \cred(L)$, giving $\cred(L) = 0.5$. Since negation is
 complement ($\negc c = 1 - c$), this is the unique fixed point of the negation
 operation (Theorem~\ref{thm:fixedunique}).
 
