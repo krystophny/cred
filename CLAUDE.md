@@ -51,6 +51,13 @@ This aligns with:
 - **de Finetti's Coherence**: Probability assignments must be self-consistent under all constraints
 - **Walley's Imprecise Probability**: Credal sets as constraint regions bounding feasible beliefs
 
+### The "Conditional First" Principle
+
+Conditioning is more fundamental than absolute assignment—paralleling set theory:
+- **Set theory**: Only subsets of sets, not unrestricted comprehension (avoids Russell's paradox)
+- **Probability**: Only conditional credences primitive; absolute credence = cred(A|Ω)
+- **Logic**: No ex falso; conditioning on impossibility is unconstrained, not "everything follows"
+
 ## Architecture
 
 ```

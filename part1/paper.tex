@@ -48,22 +48,21 @@
 
 \begin{abstract}
 We present \emph{Cred}, a foundational system for graded mathematics based on
-credence values in the unit interval $[0,1]$. Unlike classical logic where
-propositions are simply true or false, Cred assigns each proposition a
-\emph{credence}---a degree of belief or certainty. The key innovation is treating
-conditioning as a \emph{primitive operation} governed by a chain rule axiom,
-rather than defining it via division. This approach naturally avoids the
-problematic ``ex falso quodlibet'' principle: from impossibility, anything follows.
-We show that Cred shares the key ``no ex falso'' property with relevant logic
-through semantic means: conditioning from impossibility is unconstrained rather
-than forcing everything to be certain. Following van Fraassen's (1983) work on
-probabilistic semantics for relevant logic, we establish that Boolean Cred
-corresponds to a semantic model for relevance, achieving the same effect as
-syntactic variable-sharing conditions. The core algebra (negation, conjunction,
-disjunction, conditioning, fixed points) is formalized in Lean 4 with
-machine-checked proofs. We compare Cred to fuzzy logics,
-many-valued logics, and probability theory, highlighting the crucial differences
-in how each handles conditioning and contradiction.
+\emph{credences}---degrees of belief in the unit interval $[0,1]$. Credence is
+the standard term in formal epistemology for subjective probability, but Cred
+differs from probability theory in a crucial way: conditioning is a
+\emph{primitive operation} governed by a chain rule axiom, not defined via
+division. When evidence has credence zero, the conditional is \emph{unconstrained}
+(any value satisfies the axiom), not undefined. This naturally blocks
+``ex falso quodlibet'': from impossibility, anything follows. We show that Cred
+shares this key ``no ex falso'' property with relevant logic through semantic
+means. Following van Fraassen's (1983) work on probabilistic semantics for
+relevant logic, we establish that Boolean Cred corresponds to a semantic model
+for relevance. The core algebra (negation, conjunction, disjunction,
+conditioning, fixed points) is formalized in Lean 4 with machine-checked proofs.
+We compare Cred to probability theory, fuzzy logics, and many-valued logics,
+highlighting the crucial difference: treating conditioning as primitive
+(like R\'enyi and Popper) rather than derived.
 \end{abstract}
 
 \tableofcontents
@@ -73,7 +72,74 @@ in how each handles conditioning and contradiction.
 \section{Introduction and Motivation}
 %=============================================================================
 
-% This section provides context for readers unfamiliar with graded logic
+\subsection{What is Credence?}
+
+\textbf{Credence} is the term used in formal epistemology and Bayesian philosophy
+for \emph{degree of belief}---a real number in $[0,1]$ representing how confident
+a rational agent is in a proposition. If you are familiar with probability theory,
+credence is essentially \emph{subjective probability} in the sense of de Finetti,
+Ramsey, Savage, and Jaynes~\cite{definetti1937,jaynes2003}.
+
+\begin{center}
+\begin{tabular}{lcc}
+\toprule
+\textbf{Aspect} & \textbf{Standard Probability} & \textbf{Credence (Cred)} \\
+\midrule
+Interpretation & Various (frequentist, etc.) & Epistemic (degree of belief) \\
+Conditioning at 0 & Undefined ($0/0$) & Unconstrained (any value) \\
+Chain rule & Derived: $P(A|B) = P(A \land B)/P(B)$ & \textbf{Primitive axiom} \\
+Boolean collapse & Classical logic & Relevant logic (no ex falso) \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\textbf{Why ``credence'' instead of ``probability''?}
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{Terminological clarity:} ``Credence'' is unambiguous---it
+    always means degree of belief. ``Probability'' is overloaded (frequentist,
+    propensity, subjective, logical interpretations).
+
+    \item \textbf{Different edge-case behavior:} When evidence has measure
+    zero, probability theory says conditioning is \emph{undefined}. Cred says
+    it is \emph{unconstrained}---any value satisfies the chain rule. This
+    difference blocks ex falso quodlibet.
+
+    \item \textbf{Alignment with epistemology:} The term is standard in
+    philosophy (Ramsey 1926, de Finetti 1937, Pettigrew 2016, Easwaran 2011).
+\end{enumerate}
+
+\subsection{The ``Conditional First'' Principle}
+
+A key philosophical stance in Cred is that \textbf{conditioning is more
+fundamental than absolute assignment}. This parallels a crucial lesson from
+set theory:
+
+\begin{quote}
+\emph{In naive set theory, unrestricted comprehension (``the set of all $x$
+such that $\phi(x)$'') leads to Russell's paradox. The solution: there are
+only \textbf{subsets of sets}, not ``the subset of everything.'' Absolute,
+unrestricted set formation is replaced by relative, conditional set formation.}
+\end{quote}
+
+The same principle applies to probability:
+
+\begin{quote}
+\emph{R\'enyi (1955) and Popper (1959) argued that \textbf{conditional
+probability is more fundamental than absolute probability}. Instead of
+defining $P(A|B) = P(A \land B)/P(B)$ (which fails when $P(B) = 0$), we
+take conditioning as primitive and derive absolute probability as the
+special case $P(A) = P(A | \Omega)$.}
+\end{quote}
+
+Cred adopts this ``conditional first'' philosophy:
+\begin{itemize}
+    \item \textbf{Set theory:} Only subsets of sets, not unrestricted comprehension
+    \item \textbf{Cred:} Only conditional credences as primitive, with absolute
+    credence as a derived special case
+\end{itemize}
+
+Both avoid paradoxes by restricting the ``absolute'' or ``unrestricted''
+construction that causes problems.
 
 \subsection{The Limitations of Binary Truth}
 
@@ -1355,6 +1421,13 @@ K. Popper.
 G. Priest.
 \newblock The logic of paradox.
 \newblock \emph{Journal of Philosophical Logic}, 8:219--241, 1979.
+
+\bibitem{ramsey1926}
+F.P. Ramsey.
+\newblock Truth and probability.
+\newblock In R.B. Braithwaite, editor, \emph{The Foundations of Mathematics
+and other Logical Essays}, pages 156--198. Kegan Paul, 1931.
+\newblock (Written 1926.)
 
 \bibitem{renyi1955}
 A. R\'enyi.
