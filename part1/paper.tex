@@ -593,20 +593,51 @@ When $\cred(B) = 0$, conditioning is not unique---any value works. This
 non-uniqueness is precisely what blocks ex falso.
 
 \begin{remark}[Interpretation of ``Unconstrained'']
-``Unconstrained'' means the chain rule axiom \emph{does not determine} a
-value, not that an agent may arbitrarily choose one. The proper interpretation:
+\label{rmk:unconstrained}
+``Unconstrained'' is a \emph{mathematical} term: it means the chain rule axiom
+does not determine a unique value. This requires careful interpretation.
 \begin{itemize}
-    \item \textbf{Mathematically:} The conditioning relation is \emph{total}
-    but \emph{not functional} when evidence $= 0$.
-    \item \textbf{Epistemically:} Asking ``what is $\cred(A \mid B)$?'' when
-    $\cred(B) = 0$ is a \emph{vacuous question}---like asking the velocity of
-    a nonexistent object.
-    \item \textbf{Practically:} Reasoning should not depend on $\cred(A \mid B)$
-    when $\cred(B) = 0$. The chain rule yields $\cred(A \mid B) \cdot 0 = 0$,
-    so any downstream computation multiplies by zero regardless.
+    \item \textbf{Algebraically:} The chain rule is a constraint equation.
+    When $\cred(B) = 0$, the equation $\cred(A \mid B) \cdot 0 = 0$ is satisfied
+    by all values in $[0,1]$---the axiom is \emph{silent} on this case.
+    This is a mathematical fact about the equation, nothing more.
+
+    \item \textbf{Epistemically:} ``Unconstrained by the chain rule'' does
+    \emph{not} mean a rational agent may hold any belief whatsoever, nor that
+    the agent simultaneously holds all beliefs. Rather, the chain rule axiom
+    simply does not govern this case---the question ``what is my degree of
+    belief in $A$ given evidence I regard as impossible?'' lies outside the
+    axiom's scope. A rational agent faced with this question has several
+    coherent options:
+    \begin{enumerate}[label=(\alph*)]
+        \item \textbf{The question does not arise:} If $\cred(B) = 0$, the agent
+        never conditions on $B$, so $\cred(A \mid B)$ is not invoked in reasoning.
+        \item \textbf{Counterfactual analysis:} The agent may have principled
+        beliefs about counterfactuals (``if $B$ were true, then\ldots'') derived
+        from causal or modal reasoning independent of the chain rule.
+        \item \textbf{Undefined:} The agent may simply lack any belief about
+        $\cred(A \mid B)$ when $\cred(B) = 0$, treating it as a meaningless query.
+    \end{enumerate}
+    Cox's theorem~\cite{cox1961} requires conditioning to be \emph{functional}
+    (unique outputs). Cred intentionally relaxes this: the chain rule defines
+    a \emph{relation}, not a function. This is a design choice that trades
+    Cox-compliance for the benefit of blocking ex falso. Epistemic agents using
+    Cred may still have unique conditional beliefs---those beliefs are simply
+    not determined by the chain rule when evidence is impossible.
+
+    \item \textbf{Semantically:} For the degree-of-truth reading,
+    ``unconstrained'' is natural: when the antecedent has truth degree 0,
+    the conditional has no determinate truth value. This parallels
+    presupposition failure in natural language semantics and supervaluationist
+    treatments of conditionals with false antecedents.
 \end{itemize}
-This differs from probability (where $P(A|B)$ is \emph{undefined} when $P(B)=0$)
-by making the expression syntactically valid but semantically inert.
+
+\noindent\textbf{Key point:} In all cases, downstream computations are unaffected:
+$\cred(A \mid B) \cdot 0 = 0$ regardless of the conditional's value, so
+reasoning never depends on the unconstrained case. The expression is
+syntactically valid but \emph{semantically inert}---it propagates no information.
+This differs from probability theory (where $P(A|B)$ is \emph{undefined} when
+$P(B)=0$) and from classical logic (where $\bot \to A$ is forced to be true).
 \end{remark}
 
 \subsection{Analogy: Division vs. Chain Rule}
