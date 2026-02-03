@@ -67,13 +67,14 @@ representation in formal epistemology. Cred adopts a well-known approach from
 R\'enyi (1955) and Popper (1959): conditioning is a \emph{primitive operation}
 governed by a chain rule axiom, not defined via division. When evidence has
 credence zero, the conditional is \emph{unconstrained} (any value satisfies
-the axiom), not undefined. This blocks ``ex falso quodlibet'' (from falsehood,
-anything follows)---a property shared with relevant logic, though achieved
-through different mechanisms. Van Fraassen (1983) established the theoretical
-connection between probabilistic semantics and relevant logic; Cred is not
-itself a semantics for relevant logic. The core algebra is formalized in
-Lean 4 with machine-checked proofs. Our contribution is the systematic
-integration: using the chain rule to block ex falso, the collapse tower
+the axiom), not undefined. This avoids forcing ``ex falso quodlibet'' (from
+falsehood, anything follows)---a property shared with relevant logic, though
+achieved through different mechanisms. Van Fraassen (1983) established the
+theoretical connection between probabilistic semantics and relevant logic;
+Cred is not itself a semantics for relevant logic. The core algebra is
+formalized in Lean 4 with machine-checked proofs. Our contribution is the
+systematic integration: using the chain rule to avoid forcing ex falso, the
+collapse tower
 connecting to RM3, and machine-verified proofs---not the underlying ideas,
 which derive from prior work.
 \end{abstract}
@@ -122,7 +123,7 @@ arises from different mechanisms (chain rule vs.\ variable-sharing).}
     \item \textbf{Different edge-case behavior:} When evidence has measure
     zero, probability theory says conditioning is \emph{undefined}. Cred says
     it is \emph{unconstrained}---any value satisfies the chain rule. This
-    difference blocks ex falso quodlibet.
+    difference avoids forcing ex falso quodlibet.
 
     \item \textbf{Alignment with epistemology:} The term is standard in
     philosophy~\cite{ramsey1931,definetti1937}.
@@ -529,7 +530,9 @@ The central innovation of Cred is treating conditioning as \emph{primitive}:
 \label{def:conditioning}
 A \emph{conditioning structure} assigns to each pair of propositions $A, B$
 a \emph{conditional credence} $\condc{A}{B} \in [0,1]$, representing the
-credence in $A$ given evidence $B$.
+credence in $A$ given evidence $B$. (Note: This propositional notation is
+informal; the Lean formalization works purely with credence values---see
+Remark~\ref{rmk:algebraic-foundation}.)
 \end{definition}
 
 \begin{axiom}[Chain Rule --- The Sole Axiom]
@@ -567,6 +570,45 @@ The algebra has \emph{two} conjunction-related concepts:
 In practice: if independence holds, use $\conjc$. Otherwise, the joint credence
 must be specified separately (e.g., given by context or derived from known
 relationships).
+\end{remark}
+
+\begin{remark}[Cred as a Conditional Algebra, Not a Probability Theory]
+\label{rmk:conditional-algebra}
+It is important to understand what Cred is and is not:
+\begin{itemize}
+    \item \textbf{What Cred provides:} An algebra of credence values with primitive
+    conditioning. Given joint credences $\cred(A \land B)$ and marginal credences
+    $\cred(B)$ as \emph{inputs}, the chain rule constrains (or leaves unconstrained)
+    the conditional credence $\cred(A \mid B)$.
+    \item \textbf{What Cred does not provide:} A method for \emph{computing} joint
+    credences for dependent propositions. For dependent $A$ and $B$, the value
+    $\cred(A \land B)$ must be supplied externally---it is a \emph{parameter},
+    not derived from $\cred(A)$ and $\cred(B)$ alone.
+\end{itemize}
+This is a deliberate design choice, paralleling how Boolean algebra defines
+operations on truth values without specifying which propositions have which
+values. Cred provides the algebraic structure; propositional interpretation
+requires additional semantic machinery (see Remark~\ref{rmk:algebraic-foundation}).
+\end{remark}
+
+\begin{remark}[Cred is an Algebra, Not a Logic]
+\label{rmk:algebra-not-logic}
+Cred has no \emph{consequence relation} ($\vdash$ or $\models$). Claims about
+``avoiding ex falso'' must be understood algebraically, not logically:
+\begin{itemize}
+    \item \textbf{Ex falso in logic:} In a logic with consequence relation $\vdash$,
+    ex falso means $\bot \vdash A$ for all $A$ (from falsehood, anything follows).
+    This is a property of the \emph{inference relation}.
+    \item \textbf{What Cred avoids:} The chain rule axiom does not \emph{force}
+    $\cred(A \mid 0) = 1$. Any value satisfies the axiom when evidence is zero.
+    This is a property of the \emph{conditioning operation}, not a statement about
+    logical inference.
+\end{itemize}
+An agent could still \emph{choose} to adopt $\cred(A \mid 0) = 1$ for all $A$
+without violating Cred's axioms---the axioms simply do not require this choice.
+If one were to define a consequence relation for Cred, whether it exhibits
+explosion would depend on the choice of designated values and inference rules
+(see Remark~\ref{rmk:soundness-completeness}).
 \end{remark}
 
 \subsection{Behavior at Boundary Cases}
@@ -650,7 +692,7 @@ the chain rule.
 \end{theorem}
 
 When $\cred(B) = 0$, conditioning is not unique---any value works. This
-non-uniqueness is precisely what blocks ex falso.
+non-uniqueness is precisely what avoids forcing ex falso.
 
 \begin{remark}[Interpretation of ``Unconstrained'']
 \label{rmk:unconstrained}
@@ -681,7 +723,7 @@ does not determine a unique value. This requires careful interpretation.
     Cox's theorem~\cite{cox1961} requires conditioning to be \emph{functional}
     (unique outputs). Cred intentionally relaxes this: the chain rule is
     satisfied by multiple values when evidence $= 0$. This is a design choice
-    that trades Cox-compliance for the benefit of blocking ex falso. Epistemic agents using
+    that trades Cox-compliance for the benefit of not forcing ex falso. Epistemic agents using
     Cred may still have unique conditional beliefs---those beliefs are simply
     not determined by the chain rule when evidence is impossible.
 
@@ -1083,7 +1125,7 @@ Despite differing on implication, both systems are paraconsistent
 (contradictions do not explode). RM3 achieves this via designated-value
 semantics: only 1 is designated for inference, so premises with value 0
 cannot drive valid inferences. Cred achieves this via the chain rule:
-conditioning on impossibility is unconstrained, blocking ex falso directly.
+conditioning on impossibility is unconstrained, avoiding forcing ex falso directly.
 \end{remark}
 
 \textbf{Summary:} Three-valued Cred $\equiv$ RM3 for $\{\negc, \conjc, \disjc\}$,
@@ -1150,9 +1192,9 @@ Boolean Cred (with conditioning instead of material implication) shares
 a key property with relevant logic R: rejection of ex falso quodlibet.
 \begin{enumerate}[label=(\roman*)]
     \item In relevant logic R: $(A \land \neg A) \to B$ is \emph{not} a theorem
-    (variable-sharing requirement blocks it syntactically)
+    (variable-sharing requirement excludes it syntactically)
     \item In Boolean Cred: $\condc{B}{A \land \neg A}$ is \emph{unconstrained}
-    when $A \land \neg A = 0$ (chain rule blocks it semantically)
+    when $A \land \neg A = 0$ (chain rule does not force it semantically)
 \end{enumerate}
 This is a \emph{shared property}, not a deep structural correspondence.
 Many systems reject ex falso (paraconsistent logics, LP, RM3, etc.), and
@@ -1370,8 +1412,8 @@ conditional probability, establishing the theoretical connection.
 \begin{remark}[Difference in Mechanism]
 The mechanisms differ: relevant logic R uses De Morgan monoid semantics with
 residuated implication ($a \to b = \max\{c : c \cdot a \leq b\}$), while Cred
-uses conditioning via the chain rule. Both achieve relevance---the blocking
-of ex falso---but through structurally different means. Cred's approach is
+uses conditioning via the chain rule. Both achieve relevance---avoiding forcing
+ex falso---but through structurally different means. Cred's approach is
 \emph{semantic} (arising from the algebra of conditioning) rather than
 \emph{syntactic} (variable-sharing) or \emph{algebraic} (residuation).
 \end{remark}
@@ -1435,7 +1477,7 @@ probability functions can model relevant logic's consequence relation.
 Specifically, he demonstrated that:
 \begin{itemize}
     \item A probability function $P$ with primitive conditioning can validate
-    relevant implication while rejecting ex falso
+    relevant implication while not forcing ex falso
     \item The ``betting'' interpretation of conditionals provides a semantic
     framework for relevance: rational bets do not depend on impossible events
     \item When $P(A) = 0$, the conditional $P(B|A)$ need not be 1---the bet
@@ -1443,16 +1485,16 @@ Specifically, he demonstrated that:
 \end{itemize}
 \textbf{Relation to Cred:} Van Fraassen's construction uses standard probability
 with primitive conditioning; Cred formalizes this as an algebra with machine-checked
-proofs. The key insight---that chain-rule conditioning avoids ex falso---is
+proofs. The key insight---that chain-rule conditioning avoids forcing ex falso---is
 van Fraassen's. Cred's contribution is the systematic development with Lean
 verification and the collapse tower connecting to RM3.
 
 \textbf{What these authors did NOT do} (as far as we can determine):
 \begin{itemize}
     \item Systematically develop conditioning via chain rule as a foundation
-    for blocking ex falso in a complete graded algebra
+    for avoiding forced ex falso in a complete graded algebra
     \item Provide the structured collapse tower $[0,1] \to \{0,\frac{1}{2},1\}
-    \to \{0,1\}$ with shared ``no ex falso'' property preserved at each level
+    \to \{0,1\}$ with the property of not forcing ex falso preserved at each level
     \item Treat self-reference via fixed points with machine-verified proofs
     \item Provide complete Lean 4 formalizations
 \end{itemize}
@@ -1487,7 +1529,7 @@ everywhere.
 \subsection{Relevant Logic}
 
 \textbf{Anderson \& Belnap (1975)~\cite{anderson1975}:} Comprehensive development
-of relevant logics R and E, rejecting ex falso via \emph{syntactic} relevance
+of relevant logics R and E, avoiding ex falso via \emph{syntactic} relevance
 conditions (antecedent and consequent must share a propositional variable).
 
 \textbf{Dunn (1976)~\cite{dunn1976}:} Algebraic semantics connecting relevant
@@ -1522,7 +1564,7 @@ explosion, but differ fundamentally:
 \midrule
 Paradox treatment & ``Both'' (true AND false)${}^*$ & $0.5$ (intermediate value) \\
 Semantic structure & Three-valued with gluts & Continuum $[0,1]$ \\
-Ex falso blocked via & Designated values${}^\dagger$ & Chain rule underdetermination \\
+Ex falso avoided via & Designated values${}^\dagger$ & Chain rule underdetermination \\
 Consequence relation & Defined (LP-valid inferences) & Not defined (algebra only) \\
 \bottomrule
 \end{tabular}
@@ -1539,12 +1581,12 @@ value $B$, not $1$, and premises must be designated to transmit validity,
 explosion is blocked at the level of consequence, not truth tables.}
 \end{center}
 LP is a \emph{logic} with a defined consequence relation; Cred is an \emph{algebra}
-of credence values. LP blocks explosion via designated-value semantics (only
-$\{1, B\}$ can serve as premises); Cred blocks it via the chain rule making
+of credence values. LP avoids explosion via designated-value semantics (only
+$\{1, B\}$ can serve as premises); Cred avoids forcing it via the chain rule making
 conditioning at zero underdetermined.
 
-\textbf{Note on ``blocking ex falso'' for an algebra:} Since Cred does not define
-a consequence relation, ``blocks ex falso'' means the chain rule axiom does not
+\textbf{Note on ``avoiding ex falso'' for an algebra:} Since Cred does not define
+a consequence relation, ``avoids forcing ex falso'' means the chain rule axiom does not
 \emph{force} $\cred(A \mid 0) = 1$. If a consequence relation were defined for Cred,
 whether it has explosion would depend on the choice of designated values and
 inference rules---not determined by the algebra alone.
@@ -1598,7 +1640,7 @@ using ``Markov categories'' where conditioning is handled via disintegration
 without division.
 
 This is mathematically sophisticated but focused on measure theory, not logic
-foundations or blocking ex falso.
+foundations or avoiding ex falso.
 
 \subsection{Measure-Theoretic Probability and Disintegration}
 
@@ -1621,11 +1663,11 @@ the scope of this paper.
 Given the extensive prior art, we claim the following contributions are novel:
 
 \begin{enumerate}
-    \item \textbf{Systematic ex falso blocking via chain rule:} While
+    \item \textbf{Systematic avoidance of forced ex falso via chain rule:} While
     Popper-R\'enyi axiomatized primitive conditioning and van Fraassen
     connected probability to relevant logic, we provide a systematic
     development showing that the chain rule axiom naturally makes conditioning
-    from impossibility unconstrained, thereby blocking ex falso without
+    from impossibility unconstrained, thereby avoiding forcing ex falso without
     syntactic relevance conditions.
 
     \item \textbf{The collapse tower:} The conceptual observation that
@@ -1633,10 +1675,10 @@ Given the extensive prior art, we claim the following contributions are novel:
     Cred to RM3-like and Boolean structures. At each level, conditioning
     remains distinct from material implication (Theorem~\ref{thm:rm3-impl-differs}).
     The three-valued collapse homomorphism is Lean-verified for
-    $\{\negc, \conjc, \disjc\}$; the ``no ex falso'' preservation is conceptual.
+    $\{\negc, \conjc, \disjc\}$; the avoidance of forced ex falso is conceptual.
 
     \item \textbf{Shared property with relevant logic:} Boolean Cred
-    with conditioning shares the ``no ex falso'' property with relevant
+    with conditioning shares the property of not forcing ex falso with relevant
     logic, achieved through the chain rule rather than syntactic
     variable-sharing. This is a shared property, not a correspondence.
 
@@ -1654,7 +1696,7 @@ Given the extensive prior art, we claim the following contributions are novel:
 We do not claim to have invented primitive conditional probability
 (Popper-R\'enyi) or probabilistic semantics for relevant logic (van Fraassen).
 Our contribution is the systematic \emph{integration}: using the chain rule
-to block ex falso, noting the shared property with relevant logic, and providing
+to avoid forcing ex falso, noting the shared property with relevant logic, and providing
 machine-verified proofs.
 \end{remark}
 
@@ -1764,10 +1806,10 @@ key contributions are:
 
 \begin{enumerate}
     \item \textbf{Primitive conditioning:} Using the chain rule axiom
-    rather than division eliminates ex falso naturally.
+    rather than division avoids forcing ex falso naturally.
 
-    \item \textbf{Shared property with relevant logic:} The ``no ex falso''
-    property emerges naturally from the chain rule axiom. This parallels a
+    \item \textbf{Shared property with relevant logic:} The property of not
+    forcing ex falso emerges naturally from the chain rule axiom. This parallels a
     key feature of relevant logic (though achieved through different mechanisms:
     chain rule vs.\ variable-sharing).
 
