@@ -554,9 +554,21 @@ The chain rule is the \emph{only} axiom of Cred. The operations in Section~2
 
 \begin{remark}[Lean Formalization]
 \label{rmk:lean-conditioning}
-The Lean formalization (Theorem~\texttt{conditioning\_exists}) explicitly
-includes the constraint joint $\leq$ evidence when constructing conditioning
-structures with evidence $> 0$.
+The Lean code defines \texttt{Conditioning(joint, evidence)} as a structure
+parameterized by credence \emph{values}, not propositions:
+\begin{itemize}
+    \item \texttt{joint}: the credence value $\cred(A \land B)$
+    \item \texttt{evidence}: the credence value $\cred(B)$
+    \item \texttt{condCred}: the conditional credence $\cred(A \mid B)$
+\end{itemize}
+The paper's propositional notation $\cred(A \mid B)$ is informal shorthand;
+Lean works purely with numeric credence values and the algebraic constraint
+\texttt{condCred $\otimes$ evidence = joint}. This design reflects
+Remark~\ref{rmk:algebraic-foundation}: the algebra operates on $[0,1]$
+values, not on a domain of propositions.
+
+The existence theorem (\texttt{conditioning\_exists}) requires
+joint $\leq$ evidence when evidence $> 0$.
 \end{remark}
 
 \begin{remark}[Independence Product vs.\ Joint Credence]
