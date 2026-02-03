@@ -341,8 +341,8 @@ Lean: \texttt{conditioning\_mk}.
 If $\cred(B) > 0$, the conditional credence is uniquely determined.
 \end{theorem}
 \begin{proof}
-If $c_1 \conjc \text{evidence} = c_2 \conjc \text{evidence} = \text{joint}$
-and evidence $> 0$, then $c_1 = c_2$.
+Suppose $c_1 \cdot e = c_2 \cdot e = j$ where $e = \cred(B) > 0$.
+Since $e > 0$ we may cancel: $c_1 = j/e = c_2$.
 Lean: \texttt{conditioning\_unique}.
 \end{proof}
 
@@ -439,15 +439,36 @@ where the three-valued operations are $\mathrm{neg}(c) = 1-c$,
 $\mathrm{conj} = \min$, $\mathrm{disj} = \max$.
 \end{theorem}
 \begin{proof}
-Case analysis on whether each $c_i$ equals $0$, $1$, or lies in $(0,1)$.
-The key cases are:
-\begin{itemize}
-\item If $c_1 = 0$ or $c_2 = 0$, then $c_1 \conjc c_2 = 0$, and $\min(v_1, v_2) = 0$.
-\item If $c_1 = 1$, then $c_1 \conjc c_2 = c_2$, and $\min(1, v_2) = v_2$.
-\item If $0 < c_1, c_2 < 1$, then $0 < c_1 \conjc c_2 < 1$, so both sides
-collapse to $\tfrac{1}{2}$, and $\min(\tfrac{1}{2}, \tfrac{1}{2}) = \tfrac{1}{2}$.
-\end{itemize}
-Similar analysis for negation and disjunction.
+We verify each operation by case analysis on whether each $c_i$ is $0$, $1$,
+or in the open interval $(0,1)$.
+
+\emph{Negation.}
+If $c = 0$ then $\negc c = 1$, and $\mathrm{neg}(0) = 1$.
+If $c = 1$ then $\negc c = 0$, and $\mathrm{neg}(1) = 0$.
+If $0 < c < 1$ then $0 < 1 - c < 1$, so both $c$ and $\negc c$ collapse to
+$\tfrac{1}{2}$, and $\mathrm{neg}(\tfrac{1}{2}) = \tfrac{1}{2}$.
+
+\emph{Conjunction.}
+If $c_1 = 0$ or $c_2 = 0$: $c_1 \conjc c_2 = 0$ (absorber), and
+$\min(v_1, v_2) = 0$ whenever either $v_i = 0$.
+If $c_1 = 1$: $c_1 \conjc c_2 = c_2$ (identity), and $\min(1, v_2) = v_2$.
+Symmetrically for $c_2 = 1$.
+The remaining case is $0 < c_1, c_2 < 1$.
+Then $0 < c_1 c_2$ (product of positives) and $c_1 c_2 < c_1 < 1$
+(since $c_2 < 1$), so $c_1 \conjc c_2 \in (0,1)$ collapses to $\tfrac{1}{2}$,
+and $\min(\tfrac{1}{2}, \tfrac{1}{2}) = \tfrac{1}{2}$.
+
+\emph{Disjunction.}
+If $c_1 = 1$ or $c_2 = 1$: $c_1 \disjc c_2 = 1$, and $\max(v_1, v_2) = 1$.
+If $c_1 = 0$: $c_1 \disjc c_2 = c_2$, and $\max(0, v_2) = v_2$.
+If $0 < c_1, c_2 < 1$: the disjunction is $c_1 + c_2 - c_1 c_2$.
+This is positive (since $c_1 c_2 < c_1 + c_2$) and strictly less than $1$
+(since $c_1 + c_2 - c_1 c_2 = 1 - (1-c_1)(1-c_2) < 1$), so it collapses to
+$\tfrac{1}{2} = \max(\tfrac{1}{2}, \tfrac{1}{2})$.
+
+Surjectivity: $\mathrm{collapse}(0) = 0$, $\mathrm{collapse}(\tfrac{1}{2}) = \tfrac{1}{2}$,
+$\mathrm{collapse}(1) = 1$.
+
 Lean: \texttt{collapse\_neg}, \texttt{collapse\_conj}, \texttt{collapse\_disj}.
 \end{proof}
 
@@ -490,35 +511,107 @@ $\tfrac{1}{2}$ & $\tfrac{1}{2}$ & $\tfrac{1}{2}$ & 1 \\
 \end{tabular}
 \end{center}
 
-\textbf{Conditioning differs from RM3 implication.}
-RM3 defines implication as $a \to b = \max(\negc a, b)$, giving $0 \to b = 1$
-for all $b$ (ex falso).
-Cred conditioning at evidence $= 0$ is unconstrained.
+\subsubsection*{Conditioning and Implication}
+
+\textbf{Scope of the collapse.}
+The homomorphism of Theorem~\ref{thm:collapse} covers $\{\negc, \conjc, \disjc\}$.
+Implication is a separate question: the Kleene algebra has no canonical arrow,
+and the three logics (K$_3$, LP, RM3) that share it each define implication
+differently.
+
+\textbf{Conditioning is ternary, not binary.}
+Cred conditioning takes three inputs: evidence, joint, and the conclusion.
+The chain rule constrains the conclusion given the other two.
+For evidence $> 0$, the conditional is $\text{joint}/\text{evidence}$, which
+requires joint $\leq$ evidence.
+
+\begin{center}
+\begin{tabular}{cc|c}
+\textit{evidence} & \textit{joint} & $\cred(A \mid B)$ \\
+\hline
+0 & 0 & $*$ \\
+$\tfrac{1}{2}$ & 0 & 0 \\
+$\tfrac{1}{2}$ & $\tfrac{1}{4}$ & $\tfrac{1}{2}$ \\
+$\tfrac{1}{2}$ & $\tfrac{1}{2}$ & 1 \\
+1 & 0 & 0 \\
+1 & $\tfrac{1}{2}$ & $\tfrac{1}{2}$ \\
+1 & 1 & 1
+\end{tabular}
+\end{center}
+{\footnotesize $*$ = unconstrained (any value satisfies chain rule).
+Only entries with joint $\leq$ evidence are valid.}
+
+\medskip
+\textbf{Conditioning as a binary arrow.}
+To compare with standard implications, fix the joint to the Kleene conjunction
+$\min(a, b)$.
+For evidence $a > 0$, the chain rule gives
+$\text{cond}(a, b) = \text{joint}/a = \min(a, b)/a$.
+If $b \leq a$ this is $b/a$; if $b > a$ this is $a/a = 1$.
+In both cases:
+\[
+\text{cond}(a, b) \;=\; \min(b/a,\; 1)
+\]
+This is exactly the \emph{product residuated implication} of H\'ajek's
+$\Pi$-logic~\cite{hajek1998}.
+
+\textbf{Three-way comparison on $\{0, \tfrac{1}{2}, 1\}$.}
 
 \begin{center}
 \begin{tabular}{c|ccc}
-\multicolumn{4}{c}{\textbf{RM3 Implication}} \\
+\multicolumn{4}{c}{\textbf{RM3}: $\max(\negc a, b)$} \\
 & 0 & $\tfrac{1}{2}$ & 1 \\
 \hline
 0 & 1 & 1 & 1 \\
 $\tfrac{1}{2}$ & $\tfrac{1}{2}$ & $\tfrac{1}{2}$ & 1 \\
 1 & 0 & $\tfrac{1}{2}$ & 1
 \end{tabular}
-\qquad
+\quad
 \begin{tabular}{c|ccc}
-\multicolumn{4}{c}{\textbf{Cred Conditioning}} \\
-\textit{evidence} & \multicolumn{3}{c}{\textit{joint}} \\
+\multicolumn{4}{c}{\textbf{G\"odel/Resid.}: $\min(b/a, 1)$} \\
 & 0 & $\tfrac{1}{2}$ & 1 \\
 \hline
-0 & * & * & * \\
-$\tfrac{1}{2}$ & 0 & $\dagger$ & 1 \\
+0 & 1 & 1 & 1 \\
+$\tfrac{1}{2}$ & 0 & 1 & 1 \\
+1 & 0 & $\tfrac{1}{2}$ & 1
+\end{tabular}
+\quad
+\begin{tabular}{c|ccc}
+\multicolumn{4}{c}{\textbf{Cred}: joint $= \min(a,b)$} \\
+& 0 & $\tfrac{1}{2}$ & 1 \\
+\hline
+0 & $*$ & $*$ & $*$ \\
+$\tfrac{1}{2}$ & 0 & 1 & 1 \\
 1 & 0 & $\tfrac{1}{2}$ & 1
 \end{tabular}
 \end{center}
-\footnotesize{* = unconstrained (any value satisfies chain rule);
-$\dagger$ = depends on joint (e.g., $\tfrac{1}{4}/\tfrac{1}{2} = \tfrac{1}{2}$
-or $\tfrac{1}{2}/\tfrac{1}{2} = 1$)}
-\normalsize
+\smallskip
+{\footnotesize $*$ = unconstrained. Rows with evidence $> 0$ are uniquely
+determined.}
+
+\smallskip
+RM3 and G\"odel/residuated agree when evidence $\in \{0, 1\}$ but differ at
+evidence $= \tfrac{1}{2}$: RM3 gives $\tfrac{1}{2} \to 0 = \tfrac{1}{2}$,
+while G\"odel/residuated gives $0$.
+Cred conditioning (with Kleene joint) matches G\"odel/residuated for evidence
+$> 0$ and replaces the evidence $= 0$ row with~$*$.
+
+Lean: \texttt{godel\_impl}, \texttt{godel\_impl\_ne\_rm3\_impl},
+\texttt{cred\_no\_ex\_falso\_godel}.
+
+\textbf{G\"odel coincidence.}
+On the finite set $\{0, \tfrac{1}{2}, 1\}$, the product residuated implication
+$\min(b/a, 1)$ and the G\"odel implication coincide (both have the same
+truth table above).
+On $[0,1]$ they diverge: G\"odel implication is $1$ when $a \leq b$ and $b$
+otherwise, while the product residuated implication is $\min(b/a, 1)$.
+
+\textbf{Full $[0,1]$ structure.}
+On $[0,1]$, conditioning is parametric in the joint---a family of arrows
+indexed by the joint credence, not one specific binary arrow.
+The product residuated implication is the specific instantiation with
+joint $= \min(a, b)$ (the Kleene conjunction).
+Product fuzzy logic commits to this choice; Cred leaves the joint free.
 
 \subsection{Boolean Restriction}
 
@@ -547,8 +640,13 @@ $\disjc$ & 0 & 1 \\
 \end{center}
 These are exactly the two-element Boolean algebra operations $(\neg, \land, \lor)$.
 
-Conditioning remains distinct from material implication: material implication
-gives $0 \to B = 1$, while conditioning at $0$ is unconstrained.
+On $\{0, 1\}$, conditioning with Kleene joint matches the classical material
+implication for evidence $> 0$: both give $1 \to 0 = 0$, $1 \to 1 = 1$,
+$0 \to b = 1$ classically.
+Indeed, all three arrows---material, G\"odel, and product residuated---coincide
+on Boolean values.
+The sole difference is at evidence $= 0$: material implication gives
+$0 \to b = 1$; conditioning is unconstrained.
 To recover classical logic from Boolean Cred, one must \emph{add} the axiom
 $\cred(A \mid 0) = 1$.
 
@@ -609,6 +707,7 @@ $\mathrm{neg}_G(\tfrac{1}{2}) = 0 \neq \tfrac{1}{2}$,
 $\mathrm{neg}_G(1) = 0 \neq 1$.
 But $\varphi(\tfrac{1}{2}) = \varphi(1 - \tfrac{1}{2}) = \mathrm{neg}_G(\varphi(\tfrac{1}{2}))$
 requires $\varphi(\tfrac{1}{2})$ to be a fixed point.
+Lean: \texttt{no\_godel\_collapse}, \texttt{godel\_neg\_no\_fixed\_point}.
 \end{proof}
 
 \begin{proposition}[No Collapse to \L ukasiewicz Logic]
@@ -620,12 +719,20 @@ negation ($\varphi(1-c) = 1-\varphi(c)$) and conjunction
 ($\varphi(c_1 \cdot c_2) = \mathrm{conj}_{\text{\L}}(\varphi(c_1), \varphi(c_2))$).
 \end{proposition}
 \begin{proof}
-Negation at $c = \tfrac{1}{2}$ gives $\varphi(\tfrac{1}{2}) = \tfrac{1}{2}$.
-Pick any $c \in (0,1)$ with $c^2 = \tfrac{1}{2}$ (e.g.\ $c = 1/\!\sqrt{2}$).
+Negation preservation at $c = \tfrac{1}{2}$:
+$\varphi(\tfrac{1}{2}) = \varphi(1 - \tfrac{1}{2}) = 1 - \varphi(\tfrac{1}{2})$,
+so $\varphi(\tfrac{1}{2}) = \tfrac{1}{2}$.
+Pick $c = 1/\!\sqrt{2} \in (0,1)$; then $c \conjc c = c^2 = \tfrac{1}{2}$.
 Conjunction preservation gives
 $\varphi(\tfrac{1}{2}) = \mathrm{conj}_{\text{\L}}(\varphi(c), \varphi(c))$.
-But $\mathrm{conj}_{\text{\L}}(v,v) = \max(2v-1,0)$ takes values $0, 0, 1$
-for $v \in \{0, \tfrac{1}{2}, 1\}$ respectively---none equals $\tfrac{1}{2}$.
+Since $\varphi(c) \in \{0, \tfrac{1}{2}, 1\}$:
+\[
+\mathrm{conj}_{\text{\L}}(0,0) = 0,\quad
+\mathrm{conj}_{\text{\L}}(\tfrac{1}{2},\tfrac{1}{2}) = 0,\quad
+\mathrm{conj}_{\text{\L}}(1,1) = 1
+\]
+None equals $\tfrac{1}{2} = \varphi(\tfrac{1}{2})$.
+Lean: \texttt{no\_luk\_collapse}, \texttt{luk\_conj\_half\_half}.
 \end{proof}
 
 The pattern: the negation fixed point at $\tfrac{1}{2}$ propagates constraints
@@ -710,13 +817,14 @@ at the level of consequence rather than at the truth-table level.
 \smallskip
 The table makes the hierarchy explicit.
 Probability is a special case of Cred (same chain rule, additional structure).
-Product fuzzy logic shares the product and De Morgan dual with Cred but diverges
-on implication: residuated implication forces $0 \to y = 1$, while Cred's
-chain-rule conditioning is unconstrained at zero.
-Neither is a special case of the other.
-Cred shares with relevant logic the property that conditioning/implication from
-impossibility is not forced to yield $1$; the mechanisms differ (chain rule
-constraint vs.\ syntactic variable-sharing).
+Cred's algebra $\{\negc, \conjc, \disjc\}$ collapses to the Kleene algebra
+shared by K$_3$, LP, and RM3.
+Cred's conditioning, when instantiated as a binary arrow via the Kleene joint,
+gives the product residuated implication for evidence $> 0$---distinct from
+RM3's $\max(\negc a, b)$.
+The relationship is: \emph{same connective algebra, different arrow}.
+Product fuzzy logic commits to the residuated arrow (including $0 \to y = 1$);
+Cred leaves the joint free and the evidence-zero row unconstrained.
 
 \subsection{Related Work}
 
@@ -746,8 +854,13 @@ and $0 \to y = 1$); the residuated implication forces ex falso.
 Klement, Mesiar, and Pap~\cite{klement2000} gave a comprehensive treatment of
 triangular norms; the product t-norm, probabilistic sum, and standard complement
 form the product De Morgan triplet.
-Cred shares this triplet but replaces the residuated implication with chain-rule
-conditioning---the point of divergence.
+Cred shares this triplet and, when conditioning is instantiated with the Kleene
+joint $\min(a, b)$, \emph{recovers} the product residuated implication for
+evidence $> 0$.
+The divergence is solely at evidence $= 0$: product logic forces $0 \to y = 1$;
+Cred conditioning is unconstrained.
+On the finite set $\{0, \tfrac{1}{2}, 1\}$, the product residuated implication
+coincides with the G\"odel implication; on $[0,1]$ they diverge.
 
 \textbf{Fuzzy Logic and Conditional Probability.}
 H\'ajek, Godo, and Esteva~\cite{hajek1995} studied conditional probability
@@ -833,7 +946,7 @@ and classical targets, and Lean verification.
 %=============================================================================
 
 The core algebra is formalized in Lean~4 with Mathlib.
-The formalization comprises approximately 870 lines covering:
+The formalization comprises approximately 1070 lines covering:
 
 \begin{itemize}
 \item \textbf{Types:} \texttt{Credence} (value in $[0,1]$), \texttt{Conditioning}
@@ -872,6 +985,9 @@ The \texttt{joint} parameter is supplied as input, representing $\cred(A \land B
 \texttt{boolean\_disj\_closed}: $\{0,1\}$ is a subalgebra
 \item \texttt{three\_val\_conj\_not\_closed}: $\{0,\tfrac{1}{2},1\}$ is not a subalgebra
 \item \texttt{no\_boolean\_neg\_retraction}: no negation-preserving map $[0,1] \to \{0,1\}$
+\item \texttt{no\_godel\_collapse}: no negation-preserving map to G\"odel algebra
+\item \texttt{no\_luk\_collapse}: no negation-and-conjunction-preserving map to \L ukasiewicz
+\item \texttt{godel\_impl}, \texttt{rm3\_impl}: implication tables with comparison theorems
 \end{itemize}
 
 Verification: \texttt{cd lean \&\& lake build}.
@@ -893,12 +1009,14 @@ theory that would resolve it.
 
 The product and its De Morgan dual provide the natural algebra on $[0,1]$,
 shared with product fuzzy logic.
-The divergence is in conditioning: where product fuzzy logic uses residuated
-implication (forcing ex falso), Cred uses the chain rule.
 The three-valued collapse establishes a surjective homomorphism to the Kleene
-algebra---the shared foundation of K$_3$, LP, and RM3---and no analogous
-collapse exists for \L ukasiewicz, G\"odel, or classical targets.
-Conditioning remains distinct from the implication used in these three-valued logics.
+algebra---the shared foundation of K$_3$, LP, and RM3---for the connective
+fragment $\{\negc, \conjc, \disjc\}$, and no analogous collapse exists for
+\L ukasiewicz, G\"odel, or classical targets.
+Conditioning, when instantiated as a binary arrow via the Kleene joint,
+recovers the product residuated implication for positive evidence; the sole
+divergence from product fuzzy logic is at evidence zero, where Cred is
+unconstrained rather than forced to~$1$.
 The negation fixed point at $\tfrac{1}{2}$ provides a natural algebraic value
 for self-negating sentences.
 All core results are machine-checked in Lean~4.

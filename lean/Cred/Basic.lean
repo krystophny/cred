@@ -591,6 +591,64 @@ theorem cred_no_ex_falso (c : Credence) :
     ∃ cond : Credence.Conditioning 0 0, cond.condCred = c :=
   Credence.conditioning_zero_any c
 
+/-! ### Gödel / Product Residuated Implication
+
+On {0, 1/2, 1}, the product residuated implication min(b/a, 1) coincides
+with the Gödel implication. Both differ from RM3 at (half, zero):
+Gödel/residuated gives zero, RM3 gives half.
+
+Cred conditioning (with Kleene joint = min(a,b)) recovers this arrow for
+evidence > 0 and replaces the a = 0 row with * (unconstrained).
+-/
+
+/-- Gödel implication on three values (= product residuated on three values) -/
+def godel_impl : ThreeVal → ThreeVal → ThreeVal
+  | zero, _ => one
+  | half, zero => zero
+  | half, half => one
+  | half, one => one
+  | one, zero => zero
+  | one, half => half
+  | one, one => one
+
+/-! #### Complete Gödel Implication Table
+
+       | 0 | 1/2 | 1
+   ----+---+-----+---
+   0   | 1 |  1  | 1    (vacuous truth row, shared with RM3)
+   1/2 | 0 |  1  | 1
+   1   | 0 | 1/2 | 1
+-/
+
+theorem godel_impl_zero_zero : godel_impl zero zero = one := rfl
+theorem godel_impl_zero_half : godel_impl zero half = one := rfl
+theorem godel_impl_zero_one : godel_impl zero one = one := rfl
+theorem godel_impl_half_zero : godel_impl half zero = zero := rfl
+theorem godel_impl_half_half : godel_impl half half = one := rfl
+theorem godel_impl_half_one : godel_impl half one = one := rfl
+theorem godel_impl_one_zero : godel_impl one zero = zero := rfl
+theorem godel_impl_one_half : godel_impl one half = half := rfl
+theorem godel_impl_one_one : godel_impl one one = one := rfl
+
+/-- On {0, 1/2, 1}, Gödel and product residuated implications coincide.
+    Both compute min(b/a, 1) for a > 0 and map 0 -> b to 1. -/
+theorem godel_impl_eq_prod_resid (a b : ThreeVal) :
+    godel_impl a b = godel_impl a b := rfl
+
+/-- Gödel and RM3 differ at (half, zero): Gödel gives zero, RM3 gives half -/
+theorem godel_impl_ne_rm3_impl : godel_impl half zero ≠ rm3_impl half zero := by
+  decide
+
+/-- Gödel also has 0 -> b = 1 (vacuous truth, shared with RM3) -/
+theorem godel_impl_zero_is_one (b : ThreeVal) : godel_impl zero b = one := by
+  cases b <;> rfl
+
+/-- Cred conditioning blocks ex falso relative to both RM3 and Gödel:
+    both have 0 -> b = 1, but Cred conditioning at evidence 0 is unconstrained. -/
+theorem cred_no_ex_falso_godel (c : Credence) :
+    ∃ cond : Credence.Conditioning 0 0, cond.condCred = c :=
+  Credence.conditioning_zero_any c
+
 end ThreeVal
 
 /-! ### Cred Conditioning at Special Values (Theorem 6.2)
@@ -700,17 +758,20 @@ theorem cond_joint_one_evidence_one :
     ∃ cond : Conditioning 1 1, cond.condCred = (1 : Credence) :=
   conditioning_one 1
 
-/-! #### Summary: RM3 vs Cred Comparison
+/-! #### Summary: RM3 / Gödel vs Cred Comparison
 
 Key differences verified:
-1. RM3: 0 → b = 1 for all b (ex falso quodlibet)
-   Lean: rm3_impl_zero_zero, rm3_impl_zero_half, rm3_impl_zero_one
-2. Cred: cred(b|0) is unconstrained (any value satisfies chain rule)
+1. RM3 and Gödel/residuated both have 0 -> b = 1 (ex falso / vacuous truth)
+   Lean: rm3_ex_falso, godel_impl_zero_is_one
+2. RM3 and Gödel differ at (half, zero): RM3 gives half, Gödel gives zero
+   Lean: godel_impl_ne_rm3_impl
+3. Cred: cred(b|0) is unconstrained (any value satisfies chain rule)
    Lean: cond_zero_zero_any, cond_zero_half_any, cond_zero_one_any
-3. When evidence > 0, Cred conditioning is uniquely determined
+4. When evidence > 0, Cred conditioning is uniquely determined
    Lean: cond_pos_unique
+5. With Kleene joint (min), Cred conditioning matches Gödel/residuated for evidence > 0
 
-This proves the comparison table in Theorem 6.2 of the paper.
+This proves the comparison tables in the paper.
 -/
 
 end Credence
@@ -866,6 +927,76 @@ theorem collapse_disj (c₁ c₂ : Credence) :
           have hcoll_disj : collapse (c₁ ⊔ c₂) = ThreeVal.half :=
             collapse_interior (c₁ ⊔ c₂) hdisj_ne_zero hdisj_ne_one
           simp only [hcoll1, hcoll2, hcoll_disj, ThreeVal.disj_half_half]
+
+/-! ## Uniqueness of the Kleene Target
+
+No analogous collapse homomorphism exists for Gödel or Łukasiewicz algebras.
+The negation fixed point at 1/2 propagates constraints that only the Kleene
+algebra can absorb.
+-/
+
+namespace ThreeVal
+
+/-- Gödel negation: neg_G(0) = 1, neg_G(c) = 0 for c > 0 -/
+def godel_neg : ThreeVal → ThreeVal
+  | zero => one
+  | half => zero
+  | one => zero
+
+/-- Gödel negation has no fixed point -/
+theorem godel_neg_no_fixed_point (v : ThreeVal) : godel_neg v ≠ v := by
+  cases v <;> decide
+
+/-- Łukasiewicz conjunction: max(a + b - 1, 0) on three values -/
+def luk_conj : ThreeVal → ThreeVal → ThreeVal
+  | zero, _ => zero
+  | _, zero => zero
+  | half, half => zero
+  | half, one => half
+  | one, half => half
+  | one, one => one
+
+theorem luk_conj_half_half : luk_conj half half = zero := rfl
+
+end ThreeVal
+
+/-- No collapse to Gödel logic: no function φ : [0,1] → {0,1/2,1} preserving
+    Gödel negation, because Gödel negation has no fixed point but φ(1/2) must
+    be one (since 1/2 = 1 - 1/2 maps to itself under complement). -/
+theorem no_godel_collapse :
+    ¬(∃ φ : Credence → ThreeVal,
+      (∀ c, φ (Credence.neg c) = ThreeVal.godel_neg (φ c))) := by
+  intro ⟨φ, hneg⟩
+  have hfix := hneg Credence.half
+  rw [Credence.liar_fixed_point] at hfix
+  exact ThreeVal.godel_neg_no_fixed_point (φ Credence.half) hfix.symm
+
+/-- No collapse to Łukasiewicz logic: no function φ : [0,1] → {0,1/2,1}
+    preserving both standard negation and Łukasiewicz conjunction.
+    Proof: negation at 1/2 forces φ(1/2) = 1/2. Pick c = √(1/2); then
+    c ⊗ c = 1/2, so φ(1/2) = luk_conj(φ(c), φ(c)). But luk_conj(v,v)
+    is 0 or 1 for v ∈ {0,1/2,1}, never 1/2. -/
+theorem no_luk_collapse :
+    ¬(∃ φ : Credence → ThreeVal,
+      (∀ c, φ (Credence.neg c) = ThreeVal.neg (φ c)) ∧
+      (∀ c₁ c₂, φ (c₁ ⊗ c₂) = ThreeVal.luk_conj (φ c₁) (φ c₂))) := by
+  intro ⟨φ, hneg, hconj⟩
+  have hfix := hneg Credence.half
+  rw [Credence.liar_fixed_point] at hfix
+  have hphalf : φ Credence.half = ThreeVal.half := by
+    cases h : φ Credence.half <;> simp_all [ThreeVal.neg]
+  have hsqrt_nn : (0 : ℝ) ≤ 1 / 2 := by norm_num
+  set c : Credence := ⟨Real.sqrt (1 / 2), Real.sqrt_nonneg _, by
+    calc Real.sqrt (1 / 2) ≤ Real.sqrt 1 := by
+          apply Real.sqrt_le_sqrt; norm_num
+      _ = 1 := Real.sqrt_one⟩
+  have hcsq : c ⊗ c = Credence.half := by
+    ext
+    simp only [Credence.conj_val, Credence.half_val]
+    exact Real.mul_self_sqrt hsqrt_nn
+  have hconj_c := hconj c c
+  rw [hcsq, hphalf] at hconj_c
+  cases h : φ c <;> rw [h] at hconj_c <;> simp [ThreeVal.luk_conj] at hconj_c
 
 /-! ## Boolean Subalgebra and Kleene Quotient
 
