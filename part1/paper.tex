@@ -456,6 +456,16 @@ For all $c, c_1, c_2, c_3 \in [0,1]$:
 \end{theorem}
 \noindent\textit{Proof.} Verified in Lean: \texttt{disj\_comm}, \texttt{disj\_assoc}, \texttt{disj\_zero}, \texttt{disj\_one}. \hfill$\square$
 
+\begin{remark}[De Morgan Duality]
+\label{rmk:demorgan-duality}
+The disjunction properties (Theorem~\ref{thm:disjunction}) are De Morgan duals
+of the independence product properties (Theorem~\ref{thm:conjunction}), obtained
+by exchanging $0 \leftrightarrow 1$ and $\conjc \leftrightarrow \disjc$:
+identity $1$ becomes identity $0$, and annihilator $0$ becomes annihilator $1$.
+This duality follows algebraically from Definition~\ref{def:disj} and negation
+involution ($\negc\negc c = c$).
+\end{remark}
+
 \begin{proof}[Proof sketch for (b)]
 Expanding $c_1 \disjc c_2 = c_1 + c_2 - c_1 \cdot c_2$ and substituting into both
 sides yields a polynomial identity verified by Lean's \texttt{ring} tactic.
