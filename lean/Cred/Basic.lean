@@ -13,7 +13,7 @@
   PHILOSOPHY: Inference as Constraint
   -----------------------------------
   Inference narrows possibilities from uncertainty toward specificity.
-  - Prior: Start with maximal uncertainty (flat prior, credence 0.5)
+  - Prior: Start with maximal uncertainty (flat prior, credence 1/2)
   - Evidence constrains: Each piece of evidence narrows consistent beliefs
   - No evidence = no constraint: Credence 0 evidence cannot narrow anything
 
@@ -262,15 +262,15 @@ theorem conditioning_unique (joint evidence : Credence) (h_pos : 0 < evidence.va
 
 /-! ## Fixed Points -/
 
-/-- The fixed point credence for self-referential negation: L = ~L implies L = 0.5 -/
-def half : Credence where
-  val := 0.5
+/-- The fixed point credence for self-referential negation: L = ~L implies L = 1/2 -/
+noncomputable def half : Credence where
+  val := (1 : ℝ) / 2
   nonneg := by norm_num
   le_one := by norm_num
 
-@[simp] theorem half_val : half.val = 0.5 := rfl
+@[simp] theorem half_val : half.val = (1 : ℝ) / 2 := rfl
 
-/-- Conjunction is NOT idempotent: c ⊗ c ≠ c in general (fails at 0.5) -/
+/-- Conjunction is NOT idempotent: c ⊗ c ≠ c in general (fails at 1/2) -/
 theorem conj_not_idempotent : ∃ c : Credence, c ⊗ c ≠ c := by
   use half
   intro h
@@ -278,13 +278,13 @@ theorem conj_not_idempotent : ∃ c : Credence, c ⊗ c ≠ c := by
   simp only [half_val] at this
   norm_num at this
 
-/-- The liar sentence has credence 0.5 -/
+/-- The liar sentence has credence 1/2 -/
 theorem liar_fixed_point : ~half = half := by
   ext
   simp only [neg_val, half_val]
   ring
 
-/-- 0.5 is the unique fixed point of negation -/
+/-- 1/2 is the unique fixed point of negation -/
 theorem neg_fixed_point_unique (c : Credence) (h : ~c = c) : c = half := by
   ext
   have hval : c.val = 1 - c.val := by
@@ -356,14 +356,9 @@ theorem conj_disj_not_distrib :
     ∃ c₁ c₂ c₃ : Credence, c₁ ⊗ (c₂ ⊔ c₃) ≠ (c₁ ⊗ c₂) ⊔ (c₁ ⊗ c₃) := by
   use half, half, half
   intro h
-  have hlhs : (half ⊗ (half ⊔ half)).val = 0.5 * (0.5 + 0.5 - 0.5 * 0.5) := by
-    simp only [conj_val, disj_val, half_val]
-  have hrhs : ((half ⊗ half) ⊔ (half ⊗ half)).val =
-      0.5 * 0.5 + 0.5 * 0.5 - (0.5 * 0.5) * (0.5 * 0.5) := by
-    simp only [conj_val, disj_val, half_val]
   have heq : (half ⊗ (half ⊔ half)).val = ((half ⊗ half) ⊔ (half ⊗ half)).val :=
     congrArg (·.val) h
-  simp only [hlhs, hrhs] at heq
+  simp only [conj_val, disj_val, half_val] at heq
   norm_num at heq
 
 /-! ## Spread (Bernoulli Variance)
@@ -377,9 +372,9 @@ contradiction is impossible). Rather, it is a derived algebraic quantity
 measuring how far a credence is from certainty.
 
 Properties:
-- Maximum value 0.25 at c = 0.5 (maximum uncertainty)
+- Maximum value 1/4 at c = 1/2 (maximum uncertainty)
 - Zero at c = 0 or c = 1 (certainty)
-- The De Morgan dual c ⊔ ~c = 1 - c*(1-c) is the certainty (min 0.75 at c=0.5)
+- The De Morgan dual c ⊔ ~c = 1 - c*(1-c) is the certainty (min 3/4 at c=1/2)
 -/
 
 /-- Spread (Bernoulli variance): c ⊗ ~c = c * (1-c). Measures distance from certainty. -/
@@ -388,18 +383,18 @@ def spread (c : Credence) : Credence := c ⊗ ~c
 theorem spread_val (c : Credence) : (spread c).val = c.val * (1 - c.val) := by
   simp only [spread, conj_val, neg_val]
 
-/-- Maximum spread at c = 0.5 gives 0.25 (maximum uncertainty) -/
-theorem spread_half : (spread half).val = 0.25 := by
+/-- Maximum spread at c = 1/2 gives 1/4 (maximum uncertainty) -/
+theorem spread_half : (spread half).val = (1 : ℝ) / 4 := by
   simp only [spread_val, half_val]
   norm_num
 
-/-- Spread is always ≤ 0.25 -/
+/-- Spread is always ≤ 1/4 -/
 theorem spread_le_quarter (c : Credence) :
-    (spread c).val ≤ 0.25 := by
+    (spread c).val ≤ (1 : ℝ) / 4 := by
   simp only [spread_val]
   have h1 := c.nonneg
   have h2 := c.le_one
-  nlinarith [sq_nonneg (c.val - 0.5)]
+  nlinarith [sq_nonneg (c.val - (1 : ℝ) / 2)]
 
 /-- Spread is 0 only at extremes (certainty) -/
 theorem spread_eq_zero_iff (c : Credence) :
@@ -435,18 +430,18 @@ theorem certainty_one : certainty (1 : Credence) = 1 := by
   ext
   simp only [certainty_val, one_val, sub_self, mul_zero, sub_zero]
 
-/-- Minimum certainty at half gives 0.75 (maximum uncertainty) -/
-theorem certainty_half : (certainty half).val = 0.75 := by
+/-- Minimum certainty at half gives 3/4 (maximum uncertainty) -/
+theorem certainty_half : (certainty half).val = (3 : ℝ) / 4 := by
   simp only [certainty_val, half_val]
   norm_num
 
-/-- Certainty is always at least 0.75 -/
+/-- Certainty is always at least 3/4 -/
 theorem certainty_ge_three_quarters (c : Credence) :
-    (certainty c).val ≥ 0.75 := by
+    (certainty c).val ≥ (3 : ℝ) / 4 := by
   simp only [certainty_val]
   have h1 := c.nonneg
   have h2 := c.le_one
-  nlinarith [sq_nonneg (c.val - 0.5)]
+  nlinarith [sq_nonneg (c.val - (1 : ℝ) / 2)]
 
 /-- Certainty equals 1 only at extremes -/
 theorem certainty_eq_one_iff (c : Credence) :
@@ -470,9 +465,9 @@ end Credence
 
 /-! ## Three-Valued Collapse
 
-The three-valued collapse maps [0,1] to {0, 0.5, 1}:
+The three-valued collapse maps [0,1] to {0, 1/2, 1}:
 - 0 maps to 0
-- (0,1) maps to 0.5
+- (0,1) maps to 1/2
 - 1 maps to 1
 
 This collapsed algebra matches RM3 for {negation, conjunction, disjunction},
@@ -677,12 +672,12 @@ theorem cond_half_half : ∃ cond : Conditioning half half, cond.condCred = (1 :
 
 /-- Alternative: When joint = 1/4 and evidence = half, cred(A|half) = 1/2.
     This shows the conditioning value depends on the joint credence. -/
-def quarter : Credence where
-  val := 0.25
+noncomputable def quarter : Credence where
+  val := (1 : ℝ) / 4
   nonneg := by norm_num
   le_one := by norm_num
 
-@[simp] theorem quarter_val : quarter.val = 0.25 := rfl
+@[simp] theorem quarter_val : quarter.val = (1 : ℝ) / 4 := rfl
 
 theorem cond_quarter_half : ∃ cond : Conditioning quarter half, cond.condCred = half := by
   refine ⟨⟨half, ?_⟩, rfl⟩
@@ -726,7 +721,7 @@ The collapse function maps the continuous [0,1] credence algebra to the discrete
 three-valued algebra. This section proves that collapse is a homomorphism for
 negation, conjunction, and disjunction (Theorem 6.1 in the paper).
 
-Key insight: The operations on ThreeVal are defined as min/max on {0, 0.5, 1},
+Key insight: The operations on ThreeVal are defined as min/max on {0, 1/2, 1},
 which exactly matches what happens when Cred operations are applied to these
 boundary values and then collapsed.
 -/

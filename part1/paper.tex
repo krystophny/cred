@@ -73,7 +73,7 @@ Our broader goal is foundational: to rebuild familiar mathematical constructions
 Our contributions are:
 (1)~primitive conditioning via the chain rule constraint, avoiding ex falso;
 (2)~showing this property is shared with relevant logic (through different mechanisms);
-(3)~fixed points including $0.5$ for the liar;
+(3)~fixed points including $\tfrac{1}{2}$ for the liar;
 (4)~machine-checked Lean formalization of algebraic properties; and
 (5)~clear connections to probability, fuzzy logic, relevant logic, and paraconsistent logic---not
 the underlying ideas, which derive from prior work.
@@ -202,7 +202,7 @@ values in the unit interval $[0, 1]$.
 \begin{tikzpicture}[scale=6]
     \draw[thick,->] (-0.1,0) -- (1.2,0);
     \draw[thick] (0,-0.05) -- (0,0.05) node[below=5pt] {$0$};
-    \draw[thick] (0.5,-0.05) -- (0.5,0.05) node[below=5pt] {$0.5$};
+    \draw[thick] (0.5,-0.05) -- (0.5,0.05) node[below=5pt] {$\tfrac{1}{2}$};
     \draw[thick] (1,-0.05) -- (1,0.05) node[below=5pt] {$1$};
     \node[above] at (0,0.05) {impossible};
     \node[above] at (0.5,0.05) {uncertain};
@@ -213,7 +213,7 @@ values in the unit interval $[0, 1]$.
 \begin{itemize}
     \item $\cred(A) = 0$: proposition $A$ is impossible/certainly false
     \item $\cred(A) = 1$: proposition $A$ is certain/certainly true
-    \item $\cred(A) = 0.5$: maximum uncertainty about $A$
+    \item $\cred(A) = \tfrac{1}{2}$: maximum uncertainty about $A$
     \item $\cred(A) \in (0, 1)$: partial evidence for or against $A$
 \end{itemize}
 
@@ -226,7 +226,7 @@ satisfying certain axioms. As such, it admits multiple interpretations:
     in a proposition. Example~\ref{ex:graded} illustrates this reading.
     \item \textbf{Semantic} (degree of truth): A proposition's truth value in
     a many-valued semantics. Example~\ref{ex:liar} illustrates this reading:
-    $\cred(L) = 0.5$ means $L$ is \emph{half-true}, a fixed point of negation,
+    $\cred(L) = \tfrac{1}{2}$ means $L$ is \emph{half-true}, a fixed point of negation,
     not an expression of agent uncertainty.
 \end{itemize}
 The algebraic theorems (Sections~2--5) hold regardless of interpretation.
@@ -253,12 +253,12 @@ principle that logically equivalent propositions receive equal credences---a
 standard rationality constraint in formal epistemology, justified by Dutch book
 arguments~\cite{ramsey1931,definetti1937} showing that violations lead to sure
 loss---and model $L$ as satisfying $L \leftrightarrow \neg L$, then
-$\cred(L) = \cred(\neg L)$, so $\cred(L) = 1 - \cred(L)$, giving $\cred(L) = 0.5$. Since negation is
+$\cred(L) = \cred(\neg L)$, so $\cred(L) = 1 - \cred(L)$, giving $\cred(L) = \tfrac{1}{2}$. Since negation is
 complement ($\negc c = 1 - c$), this is the unique fixed point of the negation
 operation (Theorem~\ref{thm:fixedunique}).
 
 \textbf{Important caveat:} This illustrates that Cred's algebra has a natural
-value for self-negating sentences, but assigning 0.5 to the liar is just one
+value for self-negating sentences, but assigning $\tfrac{1}{2}$ to the liar is just one
 of many approaches in the extensive literature on semantic paradoxes. Kripke's
 groundedness approach~\cite{kripke1975} assigns the liar neither truth nor
 falsity (a truth-value gap) at minimal fixed points; Priest's dialetheism~\cite{priest1979} treats it as \emph{both}
@@ -319,7 +319,7 @@ The intuition has three parts:
 
 \begin{enumerate}[label=(\roman*)]
     \item \textbf{Prior as uncertainty.} Without information about a binary
-    proposition, one may start with $\cred(A) = 0.5$. This reflects maximum
+    proposition, one may start with $\cred(A) = \tfrac{1}{2}$. This reflects maximum
     entropy (Jaynes~\cite{jaynes2003}), though the principle of indifference
     is controversial---see Bertrand's paradox and the problem of priors.
 
@@ -332,7 +332,7 @@ The intuition has three parts:
     $\cred(B) = 0$, the chain rule becomes $\cred(A \mid 0) \conjc 0 = 0$,
     satisfied by \emph{any} value. Note: $\cred(B) = 0$ means $B$ is
     \emph{impossible}, not ``no evidence for $B$'' (which would be
-    $\cred(B) = 0.5$). The rationale is pragmatic: downstream computations
+    $\cred(B) = \tfrac{1}{2}$). The rationale is pragmatic: downstream computations
     using $\cred(A \mid B) \conjc 0 = 0$ are unaffected by the conditional's
     value, so the constraint need not determine it.
 \end{enumerate}
@@ -429,7 +429,7 @@ c_1 \conjc c_2 = c_1 \cdot c_2
 Cred has no general conjunction operator that computes joint credence
 from marginal credences alone. The independence product $\conjc$ equals
 $\cred(A \land B)$ \emph{only} when $A$ and $B$ are probabilistically independent.
-For example, $\cred(A) \conjc \cred(\neg A) = 0.25$ when $\cred(A) = 0.5$, but the
+For example, $\cred(A) \conjc \cred(\neg A) = \tfrac{1}{4}$ when $\cred(A) = \tfrac{1}{2}$, but the
 actual $\cred(A \land \neg A) = 0$ always (a contradiction is impossible).
 For dependent propositions, the joint credence must be provided as input:
 \begin{itemize}
@@ -546,7 +546,7 @@ boundary points:
 \[
 c \conjc c = c \iff c \in \{0, 1\}
 \]
-In particular, $0.5 \conjc 0.5 = 0.25 \neq 0.5$.
+In particular, $\tfrac{1}{2} \conjc \tfrac{1}{2} = \tfrac{1}{4} \neq \tfrac{1}{2}$.
 \end{theorem}
 \noindent\textit{Proof.} Verified in Lean: \texttt{conj\_idempotent\_iff}, \texttt{conj\_not\_idempotent}. \hfill$\square$
 
@@ -561,13 +561,15 @@ The independence product does \emph{not} distribute over disjunction:
 \[
 \exists\, c_1, c_2, c_3: \quad c_1 \conjc (c_2 \disjc c_3) \neq (c_1 \conjc c_2) \disjc (c_1 \conjc c_3)
 \]
-Counterexample: $c_1 = c_2 = c_3 = 0.5$. Using Definition~\ref{def:indep-conj}
+Counterexample: $c_1 = c_2 = c_3 = \tfrac{1}{2}$. Using Definition~\ref{def:indep-conj}
 and the explicit formula $c_1 \disjc c_2 = c_1 + c_2 - c_1 \cdot c_2$:
 \begin{align*}
-\text{LHS} &= 0.5 \conjc (0.5 \disjc 0.5) = 0.5 \cdot (0.5 + 0.5 - 0.5 \cdot 0.5)
-= 0.5 \cdot 0.75 = 0.375 \\
-\text{RHS} &= (0.5 \conjc 0.5) \disjc (0.5 \conjc 0.5) = 0.25 \disjc 0.25
-= 0.25 + 0.25 - 0.25 \cdot 0.25 = 0.4375
+\text{LHS} &= \tfrac{1}{2} \conjc (\tfrac{1}{2} \disjc \tfrac{1}{2})
+= \tfrac{1}{2} \cdot (\tfrac{1}{2} + \tfrac{1}{2} - \tfrac{1}{2} \cdot \tfrac{1}{2})
+= \tfrac{1}{2} \cdot \tfrac{3}{4} = \tfrac{3}{8} \\
+\text{RHS} &= (\tfrac{1}{2} \conjc \tfrac{1}{2}) \disjc (\tfrac{1}{2} \conjc \tfrac{1}{2})
+= \tfrac{1}{4} \disjc \tfrac{1}{4}
+= \tfrac{1}{4} + \tfrac{1}{4} - \tfrac{1}{4} \cdot \tfrac{1}{4} = \tfrac{7}{16}
 \end{align*}
 \end{theorem}
 \noindent\textit{Proof.} Verified in Lean: \texttt{conj\_disj\_not\_distrib}. \hfill$\square$
@@ -912,9 +914,9 @@ The negation operation $\negc c = 1 - c$ has a unique fixed point:
 % Lean: liar_fixed_point
 \begin{theorem}[Negation Fixed Point]
 \label{thm:liar}
-The credence $0.5$ is a fixed point of negation:
+The credence $\tfrac{1}{2}$ is a fixed point of negation:
 \[
-\negc 0.5 = 1 - 0.5 = 0.5
+\negc \tfrac{1}{2} = 1 - \tfrac{1}{2} = \tfrac{1}{2}
 \]
 \end{theorem}
 \noindent\textit{Proof.} Verified in Lean: \texttt{liar\_fixed\_point}. \hfill$\square$
@@ -922,16 +924,16 @@ The credence $0.5$ is a fixed point of negation:
 % Lean: neg_fixed_point_unique
 \begin{theorem}[Uniqueness of Negation Fixed Point]
 \label{thm:fixedunique}
-For all $c \in [0,1]$, the value $0.5$ is the \emph{unique} fixed point of
+For all $c \in [0,1]$, the value $\tfrac{1}{2}$ is the \emph{unique} fixed point of
 negation:
 \[
-\negc c = c \iff c = 0.5
+\negc c = c \iff c = \tfrac{1}{2}
 \]
 \end{theorem}
 
 \begin{proof}
-($\Rightarrow$) If $\negc c = c$, then $1 - c = c$, so $c = 0.5$.
-($\Leftarrow$) Conversely, $\negc 0.5 = 1 - 0.5 = 0.5$ (Theorem~\ref{thm:liar}).
+($\Rightarrow$) If $\negc c = c$, then $1 - c = c$, so $c = \tfrac{1}{2}$.
+($\Leftarrow$) Conversely, $\negc \tfrac{1}{2} = 1 - \tfrac{1}{2} = \tfrac{1}{2}$ (Theorem~\ref{thm:liar}).
 Verified in Lean: \texttt{neg\_fixed\_point\_unique}.
 \end{proof}
 
@@ -939,7 +941,7 @@ Verified in Lean: \texttt{neg\_fixed\_point\_unique}.
 
 If we model a self-negating sentence $L$ (satisfying $L \leftrightarrow \neg L$)
 by requiring $\cred(L) = \cred(\neg L) = \negc \cred(L)$, then by
-Theorem~\ref{thm:fixedunique}, $\cred(L) = 0.5$.
+Theorem~\ref{thm:fixedunique}, $\cred(L) = \tfrac{1}{2}$.
 
 \begin{remark}[Scope and Limitations]
 \label{rmk:liar-scope}
@@ -955,9 +957,9 @@ offers multiple approaches:
     \item \textbf{Priest's dialetheism}~\cite{priest1979}: The liar is
     \emph{both} true and false (a truth-value glut).
     \item \textbf{Cred's fixed point}: The liar receives the intermediate
-    value $0.5$.
+    value $\tfrac{1}{2}$.
 \end{itemize}
-Each approach has trade-offs. Cred's assignment of $0.5$ does not address
+Each approach has trade-offs. Cred's assignment of $\tfrac{1}{2}$ does not address
 the \emph{strengthened liar} (``This sentence is not true'') or
 \emph{revenge paradoxes} that arise when we try to express the semantic
 status of paradoxical sentences within the language itself.
@@ -1010,19 +1012,20 @@ $c(1-c)$ is the variance of a single Bernoulli trial.
 \begin{theorem}[Spread Bounds]
 \label{thm:spread}
 \begin{enumerate}[label=(\alph*)]
-    \item $\text{spread}(c) \leq 0.25$ for all $c \in [0, 1]$
-    \item Maximum at $c = 0.5$: $\text{spread}(0.5) = 0.25$
+    \item $\text{spread}(c) \leq \tfrac{1}{4}$ for all $c \in [0, 1]$
+    \item Maximum at $c = \tfrac{1}{2}$: $\text{spread}(\tfrac{1}{2}) = \tfrac{1}{4}$
     \item Zero at extremes: $\text{spread}(c) = 0 \iff c \in \{0, 1\}$
 \end{enumerate}
 \end{theorem}
-\noindent\textit{Proof.} (a) By completing the square: $c(1-c) = -(c - 0.5)^2 + 0.25 \leq 0.25$
-since $(c - 0.5)^2 \geq 0$. (b) Direct computation. (c) The product $c(1-c) = 0$
+\noindent\textit{Proof.} (a) By completing the square:
+$c(1-c) = -(c - \tfrac{1}{2})^2 + \tfrac{1}{4} \leq \tfrac{1}{4}$
+since $(c - \tfrac{1}{2})^2 \geq 0$. (b) Direct computation. (c) The product $c(1-c) = 0$
 iff $c = 0$ or $c = 1$. Verified in Lean: \texttt{spread\_le\_quarter},
 \texttt{spread\_half}, \texttt{spread\_eq\_zero\_iff}. \hfill$\square$
 
 \textbf{Interpretation:} Spread quantifies uncertainty via Bernoulli variance. At
-$c = 0$ or $c = 1$ (certainty), spread is zero. At $c = 0.5$ (maximum
-uncertainty), spread reaches its maximum of $0.25$.
+$c = 0$ or $c = 1$ (certainty), spread is zero. At $c = \tfrac{1}{2}$ (maximum
+uncertainty), spread reaches its maximum of $\tfrac{1}{4}$.
 
 \subsection{\texorpdfstring{Complement: $1 - c(1-c)$}{Complement: 1 - c(1-c)}}
 
@@ -1032,8 +1035,8 @@ The De Morgan dual $c \disjc \negc c = 1 - c(1-c)$ is simply $1 - \text{spread}(
 \begin{theorem}[Complement Bounds]
 \label{thm:complement}
 \begin{enumerate}[label=(\alph*)]
-    \item $1 - c(1-c) \geq 0.75$ for all $c \in [0, 1]$
-    \item Minimum at $c = 0.5$: value $0.75$
+    \item $1 - c(1-c) \geq \tfrac{3}{4}$ for all $c \in [0, 1]$
+    \item Minimum at $c = \tfrac{1}{2}$: value $\tfrac{3}{4}$
     \item Unity at extremes: $1 - c(1-c) = 1 \iff c \in \{0, 1\}$
 \end{enumerate}
 \end{theorem}
@@ -1064,14 +1067,14 @@ Both functions are quadratic:
     \draw[dashed,gray] (0,0.75) -- (1,0.75);
     \draw[dashed,gray] (0.5,0) -- (0.5,1);
 
-    % Labels
-    \node[left] at (0,0) {$0$};
-    \node[left] at (0,0.25) {$0.25$};
-    \node[left] at (0,0.75) {$0.75$};
-    \node[left] at (0,1) {$1$};
-    \node[below] at (0,0) {$0$};
-    \node[below] at (0.5,0) {$0.5$};
-    \node[below] at (1,0) {$1$};
+	    % Labels
+	    \node[left] at (0,0) {$0$};
+	    \node[left] at (0,0.25) {$\tfrac{1}{4}$};
+	    \node[left] at (0,0.75) {$\tfrac{3}{4}$};
+	    \node[left] at (0,1) {$1$};
+	    \node[below] at (0,0) {$0$};
+	    \node[below] at (0.5,0) {$\tfrac{1}{2}$};
+	    \node[below] at (1,0) {$1$};
 \end{tikzpicture}
 \end{center}
 
@@ -1099,13 +1102,13 @@ $\cred(A \mid B)$ is \emph{unconstrained}.
 
 \begin{example}[Independence vs.\ Dependence]
 \label{ex:independence}
-Let $\cred(A) = 0.5$ (uncertain about $A$).
+Let $\cred(A) = \tfrac{1}{2}$ (uncertain about $A$).
 \begin{enumerate}[label=(\alph*)]
     \item \textbf{Independent propositions:} If $B$ is independent of $A$ with
-    $\cred(B) = 0.5$, then $\cred(A \land B) = \cred(A) \conjc \cred(B) = 0.5
-    \times 0.5 = 0.25$.
+    $\cred(B) = \tfrac{1}{2}$, then $\cred(A \land B) = \cred(A) \conjc \cred(B)
+    = \tfrac{1}{2} \times \tfrac{1}{2} = \tfrac{1}{4}$.
     \item \textbf{Dependent propositions:} If $B = \neg A$, then
-    $\cred(A \land \neg A) = 0$ (contradiction), \emph{not} $0.5 \times 0.5 = 0.25$.
+    $\cred(A \land \neg A) = 0$ (contradiction), \emph{not} $\tfrac{1}{2} \times \tfrac{1}{2} = \tfrac{1}{4}$.
     The independence product $\conjc$ does not equal joint credence for dependent propositions.
 \end{enumerate}
 This illustrates Remark~\ref{rmk:independence}: $\conjc$ equals joint credence
@@ -1120,7 +1123,7 @@ c_1 \conjc c_2 &= 0 \times 0.7 = 0 \\
 c_1 \disjc c_2 &= 0 + 0.7 - 0 = 0.7
 \end{align*}
 Under the three-valued collapse defined in Section~6.1:
-$\text{collapse}(0) = 0$, $\text{collapse}(0.7) = \frac{1}{2}$.
+$\text{collapse}(0) = 0$, $\text{collapse}(0.7) = \tfrac{1}{2}$.
 \begin{align*}
 \text{collapse}(c_1 \conjc c_2) &= \text{collapse}(0) = 0 \\
 \text{collapse}(c_1) \conjc_{\text{RM3}} \text{collapse}(c_2) &= 0
@@ -1234,7 +1237,7 @@ $c_i.val$ equals 0, 1, or lies strictly between.
 \textbf{Note on operations vs.\ results:} Cred's independence product is multiplication
 ($c_1 \cdot c_2$), while RM3 conjunction equals min on $\{0, \tfrac{1}{2}, 1\}$ (ThreeVal.conj
 computes: zero absorbs, one is identity, $\tfrac{1}{2} \land \tfrac{1}{2} = \tfrac{1}{2}$). The homomorphism holds because \emph{collapsed}
-results match: $\text{collapse}(0.25) = \tfrac{1}{2} = \min(\tfrac{1}{2}, \tfrac{1}{2})$.
+results match: $\text{collapse}(\tfrac{1}{4}) = \tfrac{1}{2} = \min(\tfrac{1}{2}, \tfrac{1}{2})$.
 The algebras are different; only the three-valued quotient coincides.
 \end{proof}
 
@@ -1767,7 +1770,7 @@ explosion, but differ fundamentally:
 \toprule
 & \textbf{LP} & \textbf{Cred} \\
 \midrule
-Paradox treatment & ``Both'' (true AND false)${}^*$ & $0.5$ (intermediate value) \\
+Paradox treatment & ``Both'' (true AND false)${}^*$ & $\tfrac{1}{2}$ (intermediate value) \\
 Semantic structure & Three-valued with gluts & Continuum $[0,1]$ \\
 Ex falso avoided via & Designated values${}^\dagger$ & Chain rule underdetermination \\
 Consequence relation & Defined (LP-valid inferences) & Not defined (algebra only) \\
@@ -1776,7 +1779,7 @@ Consequence relation & Defined (LP-valid inferences) & Not defined (algebra only
 
 \smallskip
 \footnotesize{${}^*$In LP, ``both'' (B) means the sentence is \emph{both true and false}---a truth-value
-glut. This differs from Cred's $0.5$, which is an intermediate value on a continuum,
+glut. This differs from Cred's $\tfrac{1}{2}$, which is an intermediate value on a continuum,
 not a superposition of classical values.}
 
 \smallskip
@@ -1991,12 +1994,12 @@ The algebraic theorems in Sections 2--5 have been formally verified. Notable pro
 
 \begin{itemize}
     \item \textbf{neg\_neg} (involution): Uses Lean's \texttt{ring} tactic
-    \item \textbf{conj\_disj\_not\_distrib} (non-distributivity): Counterexample at $c = 0.5$
+    \item \textbf{conj\_disj\_not\_distrib} (non-distributivity): Counterexample at $c = \tfrac{1}{2}$
     \item \textbf{conditioning\_mk}: Constructs witness via division when evidence $> 0$
     \item \textbf{conditioning\_unique}: Algebraic manipulation proves uniqueness
     \item \textbf{conditioning\_zero\_any}: Any credence satisfies chain rule when evidence $= 0$
-    \item \textbf{liar\_fixed\_point}: $\negc 0.5 = 0.5$
-    \item \textbf{neg\_fixed\_point\_unique}: $0.5$ is the unique negation fixed point
+    \item \textbf{liar\_fixed\_point}: $\negc \tfrac{1}{2} = \tfrac{1}{2}$
+    \item \textbf{neg\_fixed\_point\_unique}: $\tfrac{1}{2}$ is the unique negation fixed point
 \end{itemize}
 
 The formalization also includes additional helper lemmas and derived results not
@@ -2023,18 +2026,17 @@ The Lean formalization can be verified by running \texttt{lake build} in the
 (see \texttt{lean-toolchain} and \texttt{lakefile.toml}).
 Comments reference Lean theorem and definition names (e.g., \texttt{neg\_neg},
 \texttt{conditioning\_zero\_any}), which are stable identifiers.
-The Lean code defines \texttt{half} as the credence $0.5$ and uses \texttt{ThreeVal}
+The Lean code defines \texttt{half} as the credence $\tfrac{1}{2}$ and uses \texttt{ThreeVal}
 with constructors \texttt{zero}, \texttt{half}, \texttt{one}---numerical names
 that are interpretation-neutral.
 
-\textbf{Notational convention:} This paper uses $0.5$ (decimal) when discussing
-credences on the continuous interval $[0,1]$, and $\tfrac{1}{2}$ (fraction) when
-discussing the discrete three-valued logic $\{0, \tfrac{1}{2}, 1\}$. Both denote
-the same numerical value; the notation signals whether the context is the full
-algebra or its three-valued collapse.
+\textbf{Notational convention:} We write special values like $\tfrac{1}{2}$,
+$\tfrac{1}{4}$, and $\tfrac{3}{4}$ as rationals (to emphasize exactness), while
+other examples may use decimals (e.g.\ $0.7$). In particular, $\tfrac{1}{2}$ and
+$0.5$ denote the same real number.
 
 Note that RM3's middle value is sometimes interpreted as ``both''
-(true and false) or ``neither'' (a gap); Cred's $0.5$ represents intermediate
+(true and false) or ``neither'' (a gap); Cred's $\tfrac{1}{2}$ represents intermediate
 credence on a continuum, a different interpretation that happens to yield
 matching truth tables for $\{\negc, \conjc, \disjc\}$.
 
@@ -2081,8 +2083,8 @@ key contributions are:
     key feature of relevant logic (though achieved through different mechanisms:
     chain rule vs.\ variable-sharing).
 
-    \item \textbf{Fixed points:} The negation operation has a unique fixed
-    point at $0.5$, providing a natural (though not novel) algebraic value for
+\item \textbf{Fixed points:} The negation operation has a unique fixed
+    point at $\tfrac{1}{2}$, providing a natural (though not novel) algebraic value for
     self-negating sentences. This illustrates the algebra, not a solution to
     semantic paradoxes.
 
