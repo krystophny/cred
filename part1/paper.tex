@@ -566,6 +566,25 @@ a unique conditional credence:
 \]
 \end{theorem}
 
+\begin{remark}[Axiom vs.\ Existence Proof]
+\label{rmk:axiom-vs-proof}
+There is an important distinction between the \emph{axiom} and the
+\emph{existence proof}:
+\begin{itemize}
+    \item \textbf{The axiom (chain rule)} is stated multiplicatively:
+    $\cred(A \mid B) \cdot \cred(B) = \cred(A \land B)$. Division does not
+    appear in the axiom itself.
+    \item \textbf{The existence proof} constructs the witness by computing
+    $\cred(A \land B) / \cred(B)$ when $\cred(B) > 0$.
+\end{itemize}
+This is entirely standard: axioms are often stated in forms that avoid
+problematic operations, while proofs of existence or uniqueness may use
+those operations in controlled settings. Compare how group axioms mention
+only multiplication, yet proofs about groups freely use division (multiplication
+by inverse). The key property---that the chain rule \emph{axiom} does not
+require division---is what allows the unconstrained behavior at $\cred(B) = 0$.
+\end{remark}
+
 \begin{theorem}[Uniqueness of Conditioning]
 \label{thm:condunique}
 If $\cred(B) > 0$, the conditional credence is uniquely determined by
@@ -633,9 +652,14 @@ $P(B)=0$) and from classical logic (where $\bot \to A$ is forced to be true).
 Definition & $P(A \mid B) = P(A \land B) / P(B)$ & $\cred(A \mid B) \cdot \cred(B) = \cred(A \land B)$ \\
 At $B = 0$ & Undefined (divide by zero) & Unconstrained (any value) \\
 Ex falso & Avoided (undefined) & Blocked (no unique value) \\
-Structure & Requires division & Only multiplication \\
+Axiom form & Division in definition & Multiplication only$^*$ \\
 \bottomrule
 \end{tabular}
+
+\smallskip
+\footnotesize{${}^*$The \emph{axiom} uses only multiplication; the existence proof
+(Theorem~\ref{thm:condexists}) constructs the witness via division when evidence $> 0$.
+See Remark~\ref{rmk:axiom-vs-proof}.}
 \end{center}
 
 %=============================================================================
