@@ -420,6 +420,7 @@ verified in Lean:
 % Lean: neg_neg, neg_zero, neg_one
 \begin{theorem}[Negation Properties]
 \label{thm:negation}
+For all $c, c_1, c_2 \in [0,1]$:
 \begin{enumerate}[label=(\alph*)]
     \item Involution: $\negc\negc c = c$
     \item Boundary: $\negc 0 = 1$ and $\negc 1 = 0$
@@ -432,6 +433,7 @@ verified in Lean:
 % Lean: conj_comm, conj_assoc, conj_one, one_conj, conj_zero, zero_conj
 \begin{theorem}[Independence Product Properties]
 \label{thm:conjunction}
+For all $c, c_1, c_2, c_3 \in [0,1]$:
 \begin{enumerate}[label=(\alph*)]
     \item Commutativity: $c_1 \conjc c_2 = c_2 \conjc c_1$
     \item Associativity: $(c_1 \conjc c_2) \conjc c_3 = c_1 \conjc (c_2 \conjc c_3)$
@@ -444,6 +446,7 @@ verified in Lean:
 % Lean: disj_comm, disj_assoc, disj_zero, zero_disj, disj_one, one_disj
 \begin{theorem}[Disjunction Properties]
 \label{thm:disjunction}
+For all $c, c_1, c_2, c_3 \in [0,1]$:
 \begin{enumerate}[label=(\alph*)]
     \item Commutativity: $c_1 \disjc c_2 = c_2 \disjc c_1$
     \item Associativity: $(c_1 \disjc c_2) \disjc c_3 = c_1 \disjc (c_2 \disjc c_3)$
@@ -463,6 +466,7 @@ $c_1 + c_2 + c_3 - c_1 \cdot c_2 - c_1 \cdot c_3 - c_2 \cdot c_3 + c_1 \cdot c_2
 % Lean: de_morgan_conj, de_morgan_disj
 \begin{theorem}[De Morgan Laws]
 \label{thm:demorgan}
+For all $c_1, c_2 \in [0,1]$:
 \begin{enumerate}[label=(\alph*)]
     \item $\negc(c_1 \conjc c_2) = \negc c_1 \disjc \negc c_2$
     \item $\negc(c_1 \disjc c_2) = \negc c_1 \conjc \negc c_2$
@@ -479,7 +483,8 @@ Unlike the two-element Boolean algebra $\{0,1\}$, the credence algebra has impor
 % Lean: conj_idempotent_iff, conj_not_idempotent
 \begin{theorem}[Idempotence Characterization]
 \label{thm:idempotence}
-The independence product is idempotent at exactly two points:
+For all $c \in [0,1]$, the independence product is idempotent at exactly the
+boundary points:
 \[
 c \conjc c = c \iff c \in \{0, 1\}
 \]
@@ -646,8 +651,8 @@ conditional is \emph{unconstrained}.
 \begin{theorem}[Conditioning Underdetermination]
 \label{thm:noexfalso}
 % Lean: conditioning_zero_any
-When $\cred(B) = 0$, the chain rule axiom is satisfied by \emph{any} value
-of $\cred(A \mid B) \in [0,1]$.
+For all propositions $A$ and $B$: when $\cred(B) = 0$, the chain rule axiom
+is satisfied by \emph{any} value of $\cred(A \mid B) \in [0,1]$.
 \end{theorem}
 
 \begin{proof}
@@ -820,7 +825,8 @@ The credence $0.5$ is a fixed point of negation:
 % Lean: neg_fixed_point_unique
 \begin{theorem}[Uniqueness of Negation Fixed Point]
 \label{thm:fixedunique}
-The value $0.5$ is the \emph{unique} fixed point of negation:
+For all $c \in [0,1]$, the value $0.5$ is the \emph{unique} fixed point of
+negation:
 \[
 \negc c = c \iff c = 0.5
 \]
