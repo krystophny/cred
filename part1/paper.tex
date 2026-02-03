@@ -1146,9 +1146,10 @@ This yields a three-valued logic with values $\{0, \tfrac{1}{2}, 1\}$.
 \begin{theorem}[Collapse Homomorphism for RM3 Fragment]
 \label{thm:rm3-fragment}
 % Lean: collapse_neg, collapse_conj, collapse_disj
-The three-valued collapse function is a homomorphism from Cred to RM3 for
-the connectives $\{\negc, \conjc, \disjc\}$. That is, for all credences
-$c, c_1, c_2 \in [0,1]$:
+The collapse function is a surjective homomorphism of De Morgan algebras
+from $(\mathrm{Cred}, \negc, \conjc, \disjc, 0, 1)$ to the three-valued
+algebra $(\{0, \tfrac{1}{2}, 1\}, \mathrm{neg}, \mathrm{conj}, \mathrm{disj}, 0, 1)$.
+That is, for all credences $c, c_1, c_2 \in [0,1]$:
 \begin{align*}
 \mathrm{collapse}(\negc c) &= \mathrm{neg}_{\mathrm{RM3}}(\mathrm{collapse}(c)) \\
 \mathrm{collapse}(c_1 \conjc c_2) &= \mathrm{conj}_{\mathrm{RM3}}(\mathrm{collapse}(c_1), \mathrm{collapse}(c_2)) \\
