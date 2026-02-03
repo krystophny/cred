@@ -1480,17 +1480,18 @@ present algebraic formulation, which deals only with finitary operations.
 \toprule
 \textbf{Logic} & \textbf{Values} & \textbf{Ex falso?} & \textbf{Relation to Cred} \\
 \midrule
-Kleene K3~\cite{kleene1952} & $\{T, U, F\}$ & Yes${}^d$ & Different \\
+Kleene K3~\cite{kleene1952} & $\{T, U, F\}$ & Yes${}^a$ & Different \\
 Priest LP & $\{T, B, F\}$ & No${}^b$ & Shares paraconsistency \\
 RM3 & $\{T, U, F\}$ & No${}^c$ & Three-valued collapse \\
-\L ukasiewicz \L 3 & $\{0, \tfrac{1}{2}, 1\}$ & Yes${}^a$ & Different \\
-\L ukasiewicz $[0,1]$ & $[0, 1]$ & Yes${}^a$ & Different (has ex falso) \\
+\L ukasiewicz \L 3 & $\{0, \tfrac{1}{2}, 1\}$ & Yes${}^d$ & Different \\
+\L ukasiewicz $[0,1]$ & $[0, 1]$ & Yes${}^d$ & Different (has ex falso) \\
 \bottomrule
 \end{tabular}
 
 \smallskip
-\footnotesize{${}^a$Uses material implication: $a \to b = \max(\negc a, b)$ or similar,
-giving $0 \to b = 1$.}
+\footnotesize{${}^a$K3's \emph{conditional connective} satisfies $0 \to b = 1$, but K3
+\emph{consequence} (preserving truth value $1$) does not have explosion: a contradiction
+$A \land \neg A$ has value $U$, and $U$ does not preserve truth to arbitrary conclusions.}
 
 \smallskip
 \footnotesize{${}^b$LP uses $a \to b = \max(\negc a, b)$ but only $\{1, B\}$ are designated
@@ -1504,9 +1505,8 @@ is designated for inference, blocking explosion. RM3 rejects ex falso via
 designated-value semantics, while Cred rejects it via underdetermination.}
 
 \smallskip
-\footnotesize{${}^d$K3's \emph{conditional connective} satisfies $0 \to b = 1$, but K3
-\emph{consequence} (preserving truth value $1$) does not have explosion: a contradiction
-$A \land \neg A$ has value $U$, and $U$ does not preserve truth to arbitrary conclusions.}
+\footnotesize{${}^d$Uses material implication: $a \to b = \max(\negc a, b)$ or similar,
+giving $0 \to b = 1$.}
 \end{center}
 
 Cred's three-valued collapse corresponds to RM3 for $\{\negc, \conjc, \disjc\}$,
