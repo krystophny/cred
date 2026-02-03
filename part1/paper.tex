@@ -1118,7 +1118,8 @@ $\cred(A \mid B) = \tfrac{1}{2}$; if joint $= \tfrac{1}{2}$, then $\cred(A \mid 
 \end{theorem}
 
 \begin{proof}
-RM3 uses $a \to b = \max(\negc a, b)$, giving $0 \to b = 1$ (ex falso).
+RM3 uses the Kleene strong implication $a \to b = \max(\negc a, b)$,
+giving $0 \to b = 1$ (ex falso).
 Cred conditioning satisfies $\condc{b}{a} \cdot a = b \conjc a$. When $a = 0$:
 $\condc{b}{0} \cdot 0 = 0$, satisfied by any value. Thus Cred conditioning
 is \emph{unconstrained} at $a = 0$, not forced to 1.
@@ -1127,8 +1128,8 @@ is \emph{unconstrained} at $a = 0$, not forced to 1.
 \begin{remark}[Both Are Paraconsistent]
 Despite differing on implication, both systems are paraconsistent
 (contradictions do not explode). RM3 achieves this via designated-value
-semantics: only 1 is designated for inference, so premises with value 0
-cannot drive valid inferences. Cred achieves this via the chain rule:
+semantics: both 1 and $\tfrac{1}{2}$ are designated, so only premises with
+value 0 fail to drive valid inferences. Cred achieves this via the chain rule:
 conditioning on impossibility is unconstrained, avoiding forcing ex falso directly.
 \end{remark}
 
