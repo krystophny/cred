@@ -25,16 +25,14 @@ We work in graded credences as the PRIMARY setting:
 
 | Binary Logic | Cred |
 |--------------|------|
-| Undecidable = stuck, no value | Undecidable = cred 0.5 (meaningful!) |
-| Paradoxes break the system | Paradoxes → fixed points |
-| Gödel: "true but unprovable" limbo | Gödel: cred 0.5 (a value) |
-| Self-reference problematic | Self-reference natural |
-| Ex falso: nonsense follows | No ex falso |
+| Paradoxes break the system | Paradoxes (liar) → fixed points (cred 0.5) |
+| Self-reference problematic | Self-negating reference works naturally |
+| Ex falso: nonsense follows | No ex falso (unconstrained, not trivial) |
+| Conditioning undefined at 0 | Conditioning unconstrained at 0 |
 
 ## The Key Insight
 
-In binary logic, undecidability is a PROBLEM — statements stuck in limbo.
+Self-negating sentences like the liar ("This sentence is false") have cred = 0.5.
+This is a meaningful fixed point, not a paradox.
 
-In Cred, undecidability is a VALUE — credence 0.5 is meaningful.
-
-**Cred doesn't avoid Gödel. It makes Gödel's "undecidable" statements have definite values.**
+**Important:** Godel sentences are NOT self-negating. "This is unprovable" is not the same as "This is false." Cred handles the liar; Godel's incompleteness applies to any system strong enough to encode arithmetic, including Cred if extended.

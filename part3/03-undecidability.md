@@ -3,26 +3,22 @@
 ## Classical Undecidability
 
 A statement P is **undecidable** in system S if:
-- S ⊬ P (cannot prove P)
-- S ⊬ ~P (cannot prove ~P)
+- S cannot prove P
+- S cannot prove NOT P
 
 Examples:
 - Continuum Hypothesis (CH) in ZFC
-- Gödel sentence G in PA
-- Halting problem (algorithmically)
+- Halting problem (algorithmically undecidable)
 
-Classical logic says nothing about the "truth" of undecidable statements.
+## Cred and Undecidability
 
-## Cred Undecidability
+Important distinctions:
 
-In Cred, undecidability is a **credence value**:
-```
-cred(P) = 0.5 means P is undecidable
-```
+1. **Self-negating sentences** (liar: L = NOT L) have cred = 0.5 as a fixed point
+2. **Independent sentences** (CH in ZFC) have unconstrained credence given the axioms
+3. **Godel sentences** have definite truth values in standard models (TRUE for consistent systems)
 
-More precisely:
-- cred(P) = 0.5 and no evidence can move it
-- The credence is "stuck" at maximum uncertainty
+Cred does NOT automatically assign 0.5 to all "undecidable" statements. The 0.5 fixed point applies only to self-negating sentences.
 
 ## Types of 0.5 Credence
 
@@ -89,12 +85,12 @@ But ZFC doesn't constrain CH, so cred(CH | ZFC) is **genuinely indeterminate**.
 
 This is different from 0.5. It's "not determined by the axioms."
 
-## Working With Undecidable Statements
+## Working With Independent Statements
 
-### Strategy 1: Accept 0.5
+### Strategy 1: Recognize Independence
 ```
-cred(G) = 0.5 (Gödel sentence)
-This is informative! We know it's undecidable.
+cred(CH | ZFC) is unconstrained by ZFC axioms
+This is different from self-negation (which forces 0.5)
 ```
 
 ### Strategy 2: Add Axioms
@@ -117,16 +113,17 @@ cred(CH is "true" in intended model) ≈ ???
 Philosophical/intuitive judgment
 ```
 
-## The Undecidability Spectrum
+## The Credence Spectrum
 
 ```
-Decidable true:    cred = 1, computable
-Decidable false:   cred = 0, computable
-Independent:       cred unconstrained, axiom-dependent
-Undecidable:       cred = 0.5, stuck
-Self-referential:  cred = 0.5, fixed point
-Unknown:           cred = 0.5, could be moved by evidence
+Provably true:     cred = 1 (from axioms)
+Provably false:    cred = 0 (from axioms)
+Independent:       cred unconstrained by axioms
+Self-negating:     cred = 0.5 (negation fixed point, e.g., liar)
+Unknown:           cred reflects epistemic uncertainty
 ```
+
+Note: "Self-negating" (X = NOT X) is different from "independent" (axioms don't determine X). The liar is self-negating. CH is independent. Godel sentences are TRUE in standard models but unprovable.
 
 ## Practical Implications
 

@@ -2,22 +2,21 @@
 
 ## The Classical Problem
 
-Self-referential statements cause paradoxes:
-- Liar: "This statement is false" — neither true nor false
-- Russell: {x | x ∉ x} — contradiction
-- Gödel: "This statement is unprovable" — true but unprovable
+Self-referential statements cause issues in binary logic:
+- Liar: "This statement is false" — self-negating, neither consistently true nor false
+- Russell: {x | x not in x} — self-negating membership, contradiction
 
 ## The Cred Solution
 
-Self-referential statements find **fixed point credences**.
+Self-NEGATING statements find fixed point credences via the negation operator.
 
 ### The Liar Sentence
 
-L = "This statement is false" = "L is false" = ~L
+L = "This statement is false" = "L is false" = NOT L
 
 In Cred:
 ```
-cred(L) = cred(~L) = 1 - cred(L)
+cred(L) = cred(NOT L) = 1 - cred(L)
 
 Let c = cred(L):
 c = 1 - c
@@ -27,42 +26,38 @@ c = 0.5
 
 The liar sentence has credence **exactly 0.5**.
 
-Not a paradox. A fixed point.
+Not a paradox. A fixed point of negation.
 
 ### Russell's Predicate
 
-R = {x | x ∉ x}
+R = {x | x not in x}
 
-Is R ∈ R?
+Is R in R?
 ```
-R(R) = ~(R(R))
+R(R) = NOT(R(R))
 
-Let c = cred(R ∈ R):
+Let c = cred(R in R):
 c = 1 - c
 c = 0.5
 ```
 
 Russell's set has credence 0.5 of containing itself.
 
-No paradox. The predicate is well-defined with this credence.
+The predicate is self-negating, so it gets the negation fixed point.
 
-### Gödel's Sentence
+### Important: Godel Sentences are Different
 
 G = "G is not provable in system S"
 
-This is trickier because "provable" relates credence to derivability.
+This is fundamentally different from the liar. "Not provable" is NOT "false."
 
-Interpretation: cred(G) = credence that G is true.
+- Liar: L means NOT L (self-negating: c = 1-c)
+- Godel: G means NOT(Provable(G)) (NOT self-negating)
 
-If G is true: G is unprovable, so cred(G) can't reach 1 via proof.
-If G is false: G is provable, but then G would be true. Contradiction in classical logic.
+If S is consistent, Godel showed G is TRUE (in standard models) but unprovable.
+Assigning cred(G) = 0.5 would be incorrect; G has a definite truth value.
 
-In Cred:
-```
-cred(G) = 0.5
-```
-
-G is "undecidable" — credence exactly 0.5 (fixed point).
+**Cred handles self-negation. Godel's incompleteness concerns provability in formal systems and applies to Cred if extended to express arithmetic.**
 
 ## The Fixed Point Theorem
 
@@ -119,10 +114,11 @@ The negation fixed point at 0.5 is neutrally stable.
 
 | Statement | Equation | Fixed Point |
 |-----------|----------|-------------|
-| Liar: "I am false" | c = 1-c | 0.5 |
-| Truth-teller: "I am true" | c = c | any c |
-| Asserter: "I am provable" | c = cred(proof exists) | depends on system |
-| Denier: "I am unprovable" | c = 1 - cred(proof exists) | = 0.5 (Gödel) |
+| Liar: "I am false" | c = 1-c | 0.5 (negation fixed point) |
+| Truth-teller: "I am true" | c = c | any c (trivial identity) |
+| "I imply myself" | c = cred(c -> c) = 1 | 1 |
+
+Note: Statements involving "provable" are NOT self-negating in the same way as the liar. Godel sentences have definite truth values in standard models.
 
 ## Chains of Self-Reference
 
@@ -141,24 +137,17 @@ cred(A) + cred(B) = 1
 
 Mutual reference creates constraint, not paradox.
 
-## The Diagonal Lemma in Cred
-
-Gödel's diagonal lemma: For any formula φ(x), there exists G with G ↔ φ(⌜G⌝).
-
-In Cred: G has cred(G) satisfying cred(G) = cred(φ(⌜G⌝)).
-
-This always has a solution (fixed point theorem).
-
-## Paradoxes Dissolved
+## Self-Negating Paradoxes Resolved
 
 | Classical | Cred |
 |-----------|------|
-| Liar paradox | Fixed point at 0.5 |
-| Russell paradox | Fixed point at 0.5 |
-| Grelling-Nelson | Fixed point at 0.5 |
-| Berry paradox | Fixed point at 0.5 |
+| Liar paradox | Negation fixed point at 0.5 |
+| Russell paradox | Negation fixed point at 0.5 |
+| Grelling-Nelson | Negation fixed point at 0.5 |
 
-All semantic paradoxes become fixed point equations with solutions.
+Self-NEGATING paradoxes (where X = NOT X) have the unique solution cred = 0.5.
+
+Note: Not all "paradoxes" are self-negating. Berry's paradox involves definability, not simple self-negation. Godel's theorem involves provability. These require more careful analysis.
 
 ## Open Questions
 

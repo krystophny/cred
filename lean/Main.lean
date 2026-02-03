@@ -1,4 +1,4 @@
 import Cred
 
 def main : IO Unit :=
-  IO.println s!"Hello, {hello}!"
+  IO.println "Cred: A Foundation for Graded Mathematics"

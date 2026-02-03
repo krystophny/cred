@@ -4,21 +4,18 @@ What becomes possible when truth is graded and self-reference works.
 
 ## The Opportunities
 
-### 1. Undecidability Has Value
-Binary logic: Undecidable = stuck in limbo, no truth value.
+### 1. Self-Negating Reference Works
+Binary logic: Self-negating sentences → paradoxes.
 
-Cred: Undecidable = credence 0.5. **This is a value, not a failure.**
+Cred: Self-negating sentences → fixed points. The liar sentence ("This is false") has cred = 0.5.
 
-### 2. Self-Reference Works
-Binary logic: Self-reference → paradoxes, incompleteness.
+### 2. No Ex Falso
+Binary logic: From contradiction, anything follows.
 
-Cred: Self-reference → fixed points. The liar sentence has cred = 0.5.
+Cred: Conditioning on impossibility is unconstrained, not trivially true.
 
-### 3. Self-Hosting Cred
-Since Cred handles self-reference via fixed points (not paradoxes), we can:
-- Implement Cred in Cred
-- Reason about Cred within Cred
-- Achieve true foundational autonomy
+### 3. Metareasoning
+Cred's handling of self-reference enables certain forms of metareasoning about uncertainty that binary systems cannot express.
 
 ## Files
 
@@ -30,35 +27,32 @@ Since Cred handles self-reference via fixed points (not paradoxes), we can:
 
 ## Key Ideas
 
-### Fixed Points
+### Fixed Points for Self-Negation
 ```
 cred(L) = ~cred(L) implies cred(L) = 0.5
 ```
-Self-referential statements find stable credence, not paradox.
+Self-negating sentences (like the liar) find a stable fixed point credence.
 
-### Gödel Dissolved
-```
-cred(G) = 0.5 where G = "G is not provable"
-```
-G is not "true but unprovable." G has credence 0.5 — that's its truth value.
+### Godel Still Applies
+Godel's incompleteness is about provability, not truth. The sentence "G is not provable in S" is NOT self-negating (unprovable is not false). If Cred is extended to express arithmetic, Godel's theorem applies. Cred handles the liar sentence; it does not dissolve Godel.
 
-### Self-Hosting
+### Chain Rule Semantics
 ```
-Cred described in Cred
-Meta-Cred = Cred (fixed point)
+cred(A | B) * cred(B) = cred(A AND B)
+When cred(B) = 0: any value satisfies the chain rule
 ```
-The system can fully describe itself without Gödelian limitations.
+This semantic property blocks ex falso without syntactic restrictions.
 
 ## The Big Picture
 
-Binary logic hits walls:
-- Gödel's incompleteness
-- Tarski's undefinability
-- Halting problem
+Binary logic encounters:
+- Self-negating paradoxes (liar sentence breaks boolean assignment)
+- Ex falso quodlibet (from contradiction, anything follows)
+- Undefined conditioning (P(A|B) undefined when P(B)=0)
 
-Cred goes through these walls:
-- Undecidable statements have value 0.5
-- Self-reference gives fixed points
-- Self-description becomes possible
+Cred handles these differently:
+- Self-negating sentences have fixed point cred = 0.5
+- No ex falso (conditioning on 0 is unconstrained, not trivially true)
+- Conditioning always syntactically valid (though semantically inert at 0)
 
-**We're not avoiding the theorems. We're showing they're limitations of binary logic, not mathematics itself.**
+**Important:** Godel, Tarski, and the halting problem apply to ANY sufficiently powerful formal system. Cred, if extended to express arithmetic, would be subject to the same limitations. Cred's innovation is in handling self-negation and blocking ex falso, not in escaping fundamental computability limits.

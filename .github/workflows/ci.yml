@@ -8,74 +8,48 @@ on:
   workflow_dispatch:
 
 jobs:
-  ocaml:
-    name: OCaml (credtt-impl)
+  lean:
+    name: Lean (formalization)
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup OCaml
-        uses: ocaml/setup-ocaml@v3
-        with:
-          ocaml-compiler: "4.14"
-          dune-cache: true
+      - name: Setup elan (Lean toolchain manager)
+        run: |
+          curl https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -sSf | sh -s -- -y
+          echo "$HOME/.elan/bin" >> $GITHUB_PATH
 
-      - name: Install dependencies
-        run: opam install . --deps-only --with-test -y
-        working-directory: credtt-impl
-
-      - name: Build
-        run: opam exec -- dune build
-        working-directory: credtt-impl
-
-      - name: Test
-        run: opam exec -- dune runtest
-        working-directory: credtt-impl
-
-  agda:
-    name: Agda type-check
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup Agda
-        uses: wenkokke/setup-agda@latest
-        with:
-          agda-version: "2.7.0"
-          agda-stdlib-version: "recommended"
-
-      - name: Cache Agda build
+      - name: Cache Lean build
         uses: actions/cache@v4
         with:
-          path: agda/_build
-          key: agda-${{ runner.os }}-${{ hashFiles('agda/**/*.agda') }}
+          path: lean/.lake
+          key: lean-${{ runner.os }}-${{ hashFiles('lean/lake-manifest.json', 'lean/lakefile.toml') }}
           restore-keys: |
-            agda-${{ runner.os }}-
+            lean-${{ runner.os }}-
 
-      - name: Type-check Everything
-        run: agda Everything.agda
-        working-directory: agda
+      - name: Build Lean project
+        run: lake build
+        working-directory: lean
 
   latex:
-    name: LaTeX (papers)
+    name: LaTeX (part1 paper)
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Build CredTT paper
+      - name: Build Cred paper
         uses: xu-cheng/latex-action@v3
         with:
-          working_directory: papers/credtt
-          root_file: credtt.tex
+          working_directory: part1
+          root_file: paper.tex
           latexmk_use_lualatex: false
           args: -pdf -interaction=nonstopmode -halt-on-error
 
       - name: Upload PDF
         uses: actions/upload-artifact@v4
         with:
-          name: credtt-paper
-          path: papers/credtt/credtt.pdf
+          name: cred-paper
+          path: part1/paper.pdf
           retention-days: 30

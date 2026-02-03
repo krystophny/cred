@@ -208,7 +208,7 @@ by the chain rule, rather than undefined (probability) or forced to 1
 \end{example}
 
 \begin{example}[The Liar Sentence]
-% Lean: Basic.lean:248 liar_fixed_point
+% Lean: Basic.lean:258 liar_fixed_point
 Consider $L = $ ``This sentence is false.'' In Cred, we can assign
 $\cred(L) = 0.5$. Since negation is complement ($\negc c = 1 - c$),
 we have $\cred(\neg L) = 1 - 0.5 = 0.5 = \cred(L)$. The liar sentence
@@ -329,22 +329,22 @@ The ``inference as constraint'' philosophy directly explains Cred's design:
 \section{The Credence Algebra: Formal Development}
 %=============================================================================
 
-% Lean: Basic.lean:23-441 (entire formalization)
+% Lean: Basic.lean:33-561 (entire formalization)
 
 \subsection{Primitive Operations}
 
-% Lean: Basic.lean:29-32 Credence structure
+% Lean: Basic.lean:39-42 Credence structure
 \begin{definition}[Credence Value]
 A \emph{credence} is a real number $c \in [0, 1]$. The set of all credences
 is denoted $\Cred = [0, 1] \subset \Real$.
 \end{definition}
 
-% Lean: Basic.lean:36-37 Zero and One instances
+% Lean: Basic.lean:46-47 Zero and One instances
 \begin{definition}[Distinguished Elements]
 The credences $0$ (impossibility) and $1$ (certainty) are the boundary values.
 \end{definition}
 
-% Lean: Basic.lean:48-51 neg definition
+% Lean: Basic.lean:58-61 neg definition
 \begin{definition}[Negation]
 The \emph{negation} of a credence $c$ is:
 \[
@@ -355,7 +355,7 @@ The \emph{negation} of a credence $c$ is:
 This satisfies our intuition: if we are 70\% confident in $A$, we are
 30\% confident in $\neg A$.
 
-% Lean: Basic.lean:78-84 conj definition
+% Lean: Basic.lean:88-94 conj definition
 \begin{definition}[Independence Conjunction]
 \label{def:indep-conj}
 The \emph{independence conjunction} of credences $c_1$ and $c_2$ is:
@@ -378,7 +378,7 @@ The Lean formalization uses $\conjc$ as an algebraic operation on credences;
 it does NOT claim $c_1 \conjc c_2 = \cred(A \land B)$ for arbitrary propositions.
 \end{remark}
 
-% Lean: Basic.lean:266 disj definition
+% Lean: Basic.lean:276 disj definition
 \begin{definition}[Disjunction (De Morgan Dual)]
 The \emph{disjunction} of credences is defined via De Morgan:
 \[
@@ -393,7 +393,7 @@ This is the probabilistic inclusion-exclusion formula for independent events.
 The credence algebra satisfies the following properties, all formally
 verified in Lean:
 
-% Lean: Basic.lean:57-73 negation properties
+% Lean: Basic.lean:68-84 negation properties
 \begin{theorem}[Negation Properties]
 \label{thm:negation}
 \begin{enumerate}[label=(\alph*)]
@@ -404,7 +404,7 @@ verified in Lean:
 \end{enumerate}
 \end{theorem}
 
-% Lean: Basic.lean:90-116 conjunction properties
+% Lean: Basic.lean:101-127 conjunction properties
 \begin{theorem}[Conjunction Properties]
 \label{thm:conjunction}
 \begin{enumerate}[label=(\alph*)]
@@ -415,7 +415,7 @@ verified in Lean:
 \end{enumerate}
 \end{theorem}
 
-% Lean: Basic.lean:274-301 disjunction properties
+% Lean: Basic.lean:285-312 disjunction properties
 \begin{theorem}[Disjunction Properties]
 \label{thm:disjunction}
 \begin{enumerate}[label=(\alph*)]
@@ -433,7 +433,7 @@ The full expansion shows both sides equal
 $c_1 + c_2 + c_3 - c_1 c_2 - c_1 c_3 - c_2 c_3 + c_1 c_2 c_3$.
 \end{proof}
 
-% Lean: Basic.lean:303-312 De Morgan laws
+% Lean: Basic.lean:314-322 De Morgan laws
 \begin{theorem}[De Morgan Laws]
 \label{thm:demorgan}
 \begin{enumerate}[label=(\alph*)]
@@ -446,7 +446,7 @@ $c_1 + c_2 + c_3 - c_1 c_2 - c_1 c_3 - c_2 c_3 + c_1 c_2 c_3$.
 
 Unlike Boolean algebra, the credence algebra has important differences:
 
-% Lean: Basic.lean:149-162, 239-245 idempotence failure
+% Lean: Basic.lean:160-173, 250-256 idempotence failure
 \begin{theorem}[Idempotence Fails]
 \label{thm:idempotence}
 Conjunction is \emph{not} idempotent in general:
@@ -460,7 +460,7 @@ This makes sense: knowing $A$ with credence $0.5$ and independently knowing
 $A$ again with credence $0.5$ gives $A \land A$ credence $0.25$---uncertainty
 compounds.
 
-% Lean: Basic.lean:320-333 non-distributivity
+% Lean: Basic.lean:331-344 non-distributivity
 \begin{theorem}[Distributivity Fails]
 \label{thm:nondistrib}
 Conjunction does \emph{not} distribute over disjunction:
@@ -478,13 +478,13 @@ Boolean algebra and is essential for modeling uncertainty correctly.
 \label{sec:conditioning}
 %=============================================================================
 
-% Lean: Basic.lean:164-227 Conditioning structure and theorems
+% Lean: Basic.lean:174-238 Conditioning structure and theorems
 
 \subsection{The Chain Rule Axiom}
 
 The central innovation of Cred is treating conditioning as \emph{primitive}:
 
-% Lean: Basic.lean:186-190 Conditioning structure
+% Lean: Basic.lean:196-200 Conditioning structure
 \begin{definition}[Conditioning]
 A \emph{conditioning} of joint credence $\cred(A \land B)$ on evidence
 credence $\cred(B)$ consists of a conditional credence $\condc{A}{B}$
@@ -526,20 +526,20 @@ The chain rule determines conditioning behavior naturally:
 \[
 \cred(A \mid 1) \cdot 1 = \cred(A \land B) \implies \cred(A \mid 1) = \cred(A \land B)
 \]
-% Lean: Basic.lean:201-204 conditioning_one
+% Lean: Basic.lean:212-214 conditioning_one
 Conditioning on certainty simply returns the joint credence.
 
 \textbf{Case 2: $\cred(B) = 0$ (impossible evidence).}
 \[
 \cred(A \mid 0) \cdot 0 = \cred(A \land B) = 0
 \]
-% Lean: Basic.lean:192-199 conditioning_zero_any
+% Lean: Basic.lean:207-210 conditioning_zero_any
 This is satisfied for \emph{any} value of $\cred(A \mid 0)$. The
 conditional is \emph{unconstrained}.
 
 \begin{theorem}[Conditioning Underdetermination]
 \label{thm:noexfalso}
-% Lean: Basic.lean:196-199 conditioning_zero_any
+% Lean: Basic.lean:207-210 conditioning_zero_any
 When $\cred(B) = 0$, the chain rule axiom is satisfied by \emph{any} value
 of $\cred(A \mid B) \in [0,1]$.
 \end{theorem}
@@ -562,7 +562,7 @@ $\cred(A \mid 0) = 1$; it does not follow from conditioning alone.
 
 \subsection{Existence and Uniqueness}
 
-% Lean: Basic.lean:206-227 existence and uniqueness
+% Lean: Basic.lean:217-238 existence and uniqueness
 \begin{theorem}[Existence of Conditioning]
 \label{thm:condexists}
 If $\cred(B) > 0$ and $\cred(A \land B) \leq \cred(B)$, then there exists
@@ -617,7 +617,7 @@ Structure & Requires division & Only multiplication \\
 \section{Fixed Points and Self-Reference}
 %=============================================================================
 
-% Lean: Basic.lean:229-261 Fixed points
+% Lean: Basic.lean:239-272 Fixed points
 
 \subsection{The Liar Sentence}
 
@@ -627,7 +627,7 @@ $L \leftrightarrow \neg L$. What credence should it have?
 If $\cred(L) = c$, and $L = \neg L$, then $c = \negc c = 1 - c$.
 Solving: $2c = 1$, so $c = 0.5$.
 
-% Lean: Basic.lean:248-251 liar_fixed_point
+% Lean: Basic.lean:258-261 liar_fixed_point
 \begin{theorem}[Liar Fixed Point]
 \label{thm:liar}
 The credence $0.5$ is a fixed point of negation:
@@ -636,7 +636,7 @@ The credence $0.5$ is a fixed point of negation:
 \]
 \end{theorem}
 
-% Lean: Basic.lean:253-261 neg_fixed_point_unique
+% Lean: Basic.lean:264-272 neg_fixed_point_unique
 \begin{theorem}[Uniqueness of Negation Fixed Point]
 \label{thm:fixedunique}
 The value $0.5$ is the \emph{unique} fixed point of negation:
@@ -673,7 +673,7 @@ a non-paradoxical assignment.
 \section{Uncertainty Measures (Under Independence)}
 %=============================================================================
 
-% Lean: Basic.lean:335-437 Contradiction and tautology
+% Lean: Basic.lean:345-448 Contradiction and tautology
 
 \begin{remark}[Important Caveat]
 The functions in this section use the independence operators $\conjc$ and
@@ -690,7 +690,7 @@ a distinct algebraic quantity, not a claim about actual conjunctions.
 
 \subsection{Uncertainty Spread (``Pseudo-Contradiction'')}
 
-% Lean: Basic.lean:356-389 contradiction
+% Lean: Basic.lean:366-400 contradiction
 \begin{definition}[Uncertainty Spread Function]
 \[
 \text{spread}(c) := c \conjc \negc c = c \cdot (1 - c)
@@ -713,7 +713,7 @@ extremes ($c = 0$ or $c = 1$), the spread is zero.
 
 \subsection{Certainty Complement (``Pseudo-Tautology'')}
 
-% Lean: Basic.lean:391-437 tautology
+% Lean: Basic.lean:402-448 tautology
 \begin{definition}[Certainty Complement Function]
 \[
 \text{certainty}(c) := c \disjc \negc c = 1 - c \cdot (1 - c)
@@ -1292,27 +1292,27 @@ lean/
   lakefile.toml          -- Project configuration
   lean-toolchain         -- Lean version (4.x)
   Cred/
-    Basic.lean           -- Core credence algebra (441 lines)
+    Basic.lean           -- Core credence algebra (562 lines)
 \end{verbatim}
 
 \subsection{Key Definitions (Lean Syntax)}
 
 \begin{verbatim}
--- Credence type (Basic.lean:29-32)
+-- Credence type (Basic.lean:39-42)
 structure Credence where
   val : R
   nonneg : 0 <= val
   le_one : val <= 1
 
--- Negation (Basic.lean:48-51)
+-- Negation (Basic.lean:58-61)
 def neg (c : Credence) : Credence where
   val := 1 - c.val
 
--- Conjunction (Basic.lean:78-84)
+-- Conjunction (Basic.lean:88-94)
 def conj (c1 c2 : Credence) : Credence where
   val := c1.val * c2.val
 
--- Conditioning (Basic.lean:186-190)
+-- Conditioning (Basic.lean:196-200)
 structure Conditioning (joint evidence : Credence) where
   condCred : Credence
   chainRule : condCred * evidence = joint
