@@ -835,10 +835,18 @@ Collapse the continuum to three values:
 
 This yields a three-valued logic with values $\{0, \tfrac{1}{2}, 1\}$.
 
-\begin{theorem}[Fragment Equivalence with RM3]
+\begin{theorem}[Collapse Homomorphism for RM3 Fragment]
 \label{thm:rm3-fragment}
-Three-valued Cred shares the same truth tables as RM3 for the connectives
-$\{\negc, \conjc, \disjc\}$:
+% Lean: collapse_neg, collapse_conj, collapse_disj (lines 603-711)
+The three-valued collapse function is a homomorphism from Cred to RM3 for
+the connectives $\{\negc, \conjc, \disjc\}$. That is, for all credences
+$c, c_1, c_2 \in [0,1]$:
+\begin{align*}
+\mathrm{collapse}(\negc c) &= \mathrm{neg}_{\mathrm{RM3}}(\mathrm{collapse}(c)) \\
+\mathrm{collapse}(c_1 \conjc c_2) &= \mathrm{conj}_{\mathrm{RM3}}(\mathrm{collapse}(c_1), \mathrm{collapse}(c_2)) \\
+\mathrm{collapse}(c_1 \disjc c_2) &= \mathrm{disj}_{\mathrm{RM3}}(\mathrm{collapse}(c_1), \mathrm{collapse}(c_2))
+\end{align*}
+where the RM3 operations on $\{0, \tfrac{1}{2}, 1\}$ are given by the truth tables:
 \end{theorem}
 
 \begin{center}
@@ -866,11 +874,28 @@ $\tfrac{1}{2}$ & $\tfrac{1}{2}$ & $\tfrac{1}{2}$ & 1 \\
 \end{center}
 
 \begin{proof}
-Conjunction: $\tfrac{1}{2} \conjc \tfrac{1}{2} = 0.5 \times 0.5 = 0.25$,
-which collapses to $\tfrac{1}{2}$ since $0 < 0.25 < 1$. This matches RM3's
-minimum operation. Disjunction: $\tfrac{1}{2} \disjc \tfrac{1}{2} =
-0.5 + 0.5 - 0.25 = 0.75$, collapsing to $\tfrac{1}{2}$. This matches RM3's
-maximum operation. All other cases follow directly.
+The Lean formalization verifies all cases exhaustively via the theorems
+\texttt{collapse\_neg}, \texttt{collapse\_conj}, and \texttt{collapse\_disj}.
+We sketch the structure here.
+
+\textbf{Negation:} Three cases by the value of $\mathrm{collapse}(c)$. If
+$c = 0$, then $\negc c = 1$, so both sides yield 1. If $c = 1$, then
+$\negc c = 0$, so both sides yield 0. If $0 < c < 1$, then $0 < \negc c < 1$,
+so both sides yield $\tfrac{1}{2}$.
+
+\textbf{Conjunction:} Nine cases by the values of $\mathrm{collapse}(c_1)$
+and $\mathrm{collapse}(c_2)$. The key case: when both collapse to $\tfrac{1}{2}$
+(i.e., $0 < c_1, c_2 < 1$), we have $0 < c_1 \cdot c_2 < 1$, so the product
+also collapses to $\tfrac{1}{2}$, matching RM3's $\tfrac{1}{2} \land \tfrac{1}{2} = \tfrac{1}{2}$.
+Boundary cases (0 or 1 inputs) follow from absorption and identity laws.
+
+\textbf{Disjunction:} Similarly nine cases. When both collapse to $\tfrac{1}{2}$,
+$c_1 \disjc c_2 = c_1 + c_2 - c_1 \cdot c_2$ satisfies $0 < c_1 \disjc c_2 < 1$
+(since $0 < c_i < 1$ implies the product is positive and the sum is less than 2),
+so it collapses to $\tfrac{1}{2}$, matching RM3.
+
+The Lean proofs handle all cases by nested case splits on whether each
+$c_i.val$ equals 0, 1, or lies strictly between.
 \end{proof}
 
 \begin{theorem}[Implication Differs from RM3]
@@ -976,6 +1001,12 @@ it establishes that probabilistic and relevance-based approaches can be
 related. The mechanisms differ fundamentally: De Morgan monoids (relevant
 logic) use residuated implication, while Cred uses conditioning via the
 chain rule.
+
+\textbf{Note:} This remark describes a conceptual relationship, not a formal
+correspondence. The Lean formalization does not include relevant logic R,
+Boolean collapse, or a proof of correspondence. The claim is that both systems
+reject ex falso---a shared property verified separately in each system---not
+that we have machine-checked the relationship between them.
 \end{remark}
 
 \subsection{Classical Logic: Adding Ex Falso}
@@ -1334,9 +1365,11 @@ machine-verified proofs.
 \section{The Lean Formalization}
 %=============================================================================
 
-The entire credence algebra has been formalized in Lean 4 using the
+The core credence algebra has been formalized in Lean 4 using the
 Mathlib library. The formalization provides machine-checked proofs of
-all theorems in this paper.
+all theorems in Sections 2--5 of this paper. Section 6 (collapse variants)
+includes remarks comparing Cred to other systems; these remarks describe
+conceptual relationships and are \emph{not} machine-verified.
 
 \subsection{File Structure}
 
