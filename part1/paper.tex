@@ -341,7 +341,7 @@ formalization (Section~9) works entirely with these numerical values and
 operations on them. Propositional notation such as $\cred(A)$, $\cred(A \land B)$,
 or $\cred(A \mid B)$ is used informally throughout this paper to aid intuition,
 but formally, we work only with credence values and algebraic operations
-(negation, conjunction, disjunction, conditioning). A full propositional
+(negation, independence product, disjunction, conditioning). A full propositional
 semantics---mapping a domain of propositions to credences---is not required
 for the algebraic development. This parallels how Boolean algebra can be
 studied purely as operations on $\{0, 1\}$ without requiring a domain of
@@ -367,29 +367,30 @@ This satisfies our intuition: if we are 70\% confident in $A$, we are
 30\% confident in $\neg A$.
 
 % Lean: conj
-\begin{definition}[Independence Conjunction]
+\begin{definition}[Independence Product]
 \label{def:indep-conj}
-The \emph{independence conjunction} of credences $c_1$ and $c_2$ is:
+The \emph{independence product} of credences $c_1$ and $c_2$ is:
 \[
 c_1 \conjc c_2 = c_1 \cdot c_2
 \]
 (standard multiplication)
 \end{definition}
 
-\begin{remark}[Independence Required]
+\begin{remark}[No General Conjunction]
 \label{rmk:independence}
-The operator $\conjc$ is \emph{not} general conjunction. It computes
+Cred has no general conjunction operator that computes joint credence
+from marginal credences alone. The independence product $\conjc$ equals
 $\cred(A \land B)$ \emph{only} when $A$ and $B$ are probabilistically independent.
 For example, $\cred(A) \conjc \cred(\neg A) = 0.25$ when $\cred(A) = 0.5$, but the
 actual $\cred(A \land \neg A) = 0$ always (a contradiction is impossible).
-For dependent propositions, the joint credence must be obtained differently:
+For dependent propositions, the joint credence must be provided as input:
 \begin{itemize}
-    \item Via the conditioning structure: $\cred(A \land B) = \cred(A \mid B) \cdot \cred(B)$
-    \item Or provided directly as a parameter (see Section~\ref{sec:conditioning})
+    \item As a parameter in the conditioning structure (see Section~\ref{sec:conditioning})
+    \item Or derived from known relationships (e.g., $\cred(A \land \neg A) = 0$)
 \end{itemize}
-The Lean formalization uses $\conjc$ as an algebraic operation on credences;
+The Lean formalization uses $\conjc$ as an algebraic operation on credence values;
 it does NOT claim $c_1 \conjc c_2 = \cred(A \land B)$ for arbitrary propositions.
-See also Remark~\ref{rmk:two-conjunctions} for further clarification.
+See also Remark~\ref{rmk:product-vs-joint} for further clarification.
 \end{remark}
 
 % Lean: disj
@@ -429,7 +430,7 @@ verified in Lean:
 \noindent\textit{Proof.} Verified in Lean: \texttt{neg\_neg}, \texttt{neg\_zero}, \texttt{neg\_one}. \hfill$\square$
 
 % Lean: conj_comm, conj_assoc, conj_one, one_conj, conj_zero, zero_conj
-\begin{theorem}[Conjunction Properties]
+\begin{theorem}[Independence Product Properties]
 \label{thm:conjunction}
 \begin{enumerate}[label=(\alph*)]
     \item Commutativity: $c_1 \conjc c_2 = c_2 \conjc c_1$
@@ -478,7 +479,7 @@ Unlike the two-element Boolean algebra $\{0,1\}$, the credence algebra has impor
 % Lean: conj_idempotent_iff, conj_not_idempotent
 \begin{theorem}[Idempotence Characterization]
 \label{thm:idempotence}
-Conjunction is idempotent at exactly two points:
+The independence product is idempotent at exactly two points:
 \[
 c \conjc c = c \iff c \in \{0, 1\}
 \]
@@ -493,7 +494,7 @@ It is \emph{not} the credence of ``$A \land A$'' (which equals $\cred(A)$).
 % Lean: conj_disj_not_distrib
 \begin{theorem}[Distributivity Fails]
 \label{thm:nondistrib}
-Conjunction does \emph{not} distribute over disjunction:
+The independence product does \emph{not} distribute over disjunction:
 \[
 \exists\, c_1, c_2, c_3: \quad c_1 \conjc (c_2 \disjc c_3) \neq (c_1 \conjc c_2) \disjc (c_1 \conjc c_3)
 \]
@@ -544,7 +545,7 @@ For any conditioning structure (Definition~\ref{def:conditioning}):
 \text{condCred} \cdot \text{evidence} = \text{joint}
 \]
 The chain rule is the \emph{only} axiom of Cred. The operations in Section~2
-(negation, conjunction, disjunction) are \emph{definitions}, not axioms.
+(negation, independence product, disjunction) are \emph{definitions}, not axioms.
 \end{axiom}
 
 \begin{remark}[Validity Constraint]
@@ -555,20 +556,18 @@ Lean formalization (Theorem~\texttt{conditioning\_exists}) explicitly includes
 this constraint when constructing conditioning structures with $\cred(B) > 0$.
 \end{remark}
 
-\begin{remark}[Two Notions of Conjunction]
-\label{rmk:two-conjunctions}
-The algebra has \emph{two} conjunction-related concepts:
+\begin{remark}[Independence Product vs.\ Joint Credence]
+\label{rmk:product-vs-joint}
+The algebra distinguishes two concepts:
 \begin{itemize}
-    \item $c_1 \conjc c_2 = c_1 \cdot c_2$: The \emph{independence conjunction}
-    (Def.~\ref{def:indep-conj}), computing $\cred(A \land B)$ when $A, B$ are
-    probabilistically independent.
-    \item $\cred(A \land B)$: The \emph{actual joint credence}, which is a
-    parameter in the chain rule. For dependent propositions, this
-    may differ from $\cred(A) \conjc \cred(B)$.
+    \item $c_1 \conjc c_2 = c_1 \cdot c_2$: The \emph{independence product}
+    (Def.~\ref{def:indep-conj}), an algebraic operation on credence values.
+    This equals $\cred(A \land B)$ only when $A, B$ are probabilistically independent.
+    \item $\cred(A \land B)$: The \emph{joint credence}, which is a
+    parameter in the chain rule---not computed from marginals alone.
 \end{itemize}
-In practice: if independence holds, use $\conjc$. Otherwise, the joint credence
-must be specified separately (e.g., given by context or derived from known
-relationships).
+In practice: if independence holds, $\cred(A \land B) = \cred(A) \conjc \cred(B)$.
+Otherwise, the joint credence must be provided as input.
 \end{remark}
 
 \begin{remark}[Cred as a Conditional Algebra, Not a Probability Theory]
@@ -869,7 +868,7 @@ arises naturally from the algebra and has a clean interpretation.
 
 \begin{remark}[Algebraic Origin]
 The expression $c \conjc \negc c = c \cdot (1-c)$ applies the independence
-conjunction to a credence and its complement. This does \textbf{not} compute
+product to a credence and its complement. This does \textbf{not} compute
 $\cred(A \land \neg A)$, which is always 0 (a contradiction is impossible).
 Rather, it is a derived algebraic quantity measuring uncertainty.
 \end{remark}
@@ -975,9 +974,9 @@ Let $\cred(A) = 0.5$ (uncertain about $A$).
     \times 0.5 = 0.25$.
     \item \textbf{Dependent propositions:} If $B = \neg A$, then
     $\cred(A \land \neg A) = 0$ (contradiction), \emph{not} $0.5 \times 0.5 = 0.25$.
-    The independence conjunction $\conjc$ does not apply to dependent propositions.
+    The independence product $\conjc$ does not equal joint credence for dependent propositions.
 \end{enumerate}
-This illustrates Remark~\ref{rmk:independence}: $\conjc$ computes joint credence
+This illustrates Remark~\ref{rmk:independence}: $\conjc$ equals joint credence
 only when independence holds.
 \end{example}
 
@@ -1081,7 +1080,7 @@ so it collapses to $\tfrac{1}{2}$, matching RM3.
 The Lean proofs handle all cases by nested case splits on whether each
 $c_i.val$ equals 0, 1, or lies strictly between.
 
-\textbf{Note on operations vs.\ results:} Cred conjunction is multiplication
+\textbf{Note on operations vs.\ results:} Cred's independence product is multiplication
 ($c_1 \cdot c_2$), while RM3 conjunction equals min on $\{0, \tfrac{1}{2}, 1\}$ (ThreeVal.conj
 computes: zero absorbs, one is identity, $\tfrac{1}{2} \land \tfrac{1}{2} = \tfrac{1}{2}$). The homomorphism holds because \emph{collapsed}
 results match: $\text{collapse}(0.25) = \tfrac{1}{2} = \min(\tfrac{1}{2}, \tfrac{1}{2})$.
@@ -1120,7 +1119,7 @@ $\cred(A \mid B) = \tfrac{1}{2}$; if joint $= \tfrac{1}{2}$, then $\cred(A \mid 
 \begin{proof}
 RM3 uses the Kleene strong implication $a \to b = \max(\negc a, b)$,
 giving $0 \to b = 1$ (ex falso).
-Cred conditioning satisfies $\condc{b}{a} \cdot a = b \conjc a$. When $a = 0$:
+Cred conditioning satisfies $\condc{b}{a} \cdot a = \text{joint}$. When $a = 0$:
 $\condc{b}{0} \cdot 0 = 0$, satisfied by any value. Thus Cred conditioning
 is \emph{unconstrained} at $a = 0$, not forced to 1.
 \end{proof}
@@ -1819,7 +1818,7 @@ formalized in Lean.
 
 \begin{remark}[Computational Complexity]
 \label{rmk:complexity}
-All Cred operations are constant-time arithmetic: negation, conjunction, and
+All Cred operations are constant-time arithmetic: negation, independence product, and
 disjunction each require $O(1)$ operations. Conditioning existence checking is
 also $O(1)$: for evidence $> 0$, verify joint $\leq$ evidence; for evidence $= 0$,
 any conditioning trivially exists (joint must be $0$).
@@ -1884,8 +1883,8 @@ arithmetic, would be subject to the same limitations.
 \begin{description}
 \item[Credence] A value in $[0,1]$ representing degree of belief (epistemic)
     or degree of truth (semantic). Section~1.1.
-\item[Independence conjunction ($\conjc$)] Product operation $c_1 \cdot c_2$;
-    computes joint credence only for independent propositions. Definition~\ref{def:indep-conj}.
+\item[Independence product ($\conjc$)] Algebraic product $c_1 \cdot c_2$;
+    equals joint credence only when propositions are independent. Definition~\ref{def:indep-conj}.
 \item[Disjunction ($\disjc$)] De Morgan dual: $c_1 + c_2 - c_1 c_2$.
     Definition~\ref{def:disj}.
 \item[Conditioning] Primitive operation governed by the chain rule axiom.
