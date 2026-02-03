@@ -20,9 +20,11 @@
   This is why conditioning is primitive (inference IS constraining) and why
   there is no ex falso (impossible evidence provides no constraint).
 
-  IMPORTANT: The binary operations ⊗ and ⊔ compute the credence of conjunctions
-  and disjunctions under an INDEPENDENCE assumption. For dependent propositions,
-  the joint credence cred(A ∧ B) ≠ cred(A) ⊗ cred(B) in general.
+  IMPORTANT: The binary operations ⊗ and ⊔ are algebraic operations on credence
+  values. Under a probabilistic interpretation they coincide with conjunction
+  and disjunction only under an independence assumption. In general, joint
+  credence cred(A ∧ B) is not determined by cred(A), cred(B) and must be treated
+  as separate data (in particular, it is an explicit parameter in Conditioning).
 
   The Conditioning structure handles the general case where joint credences
   are provided as parameters, not computed from marginals.
