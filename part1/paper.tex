@@ -713,64 +713,167 @@ prevents deriving $\cred(A \mid \bot) = 1$. This is arguably more natural,
 as relevance emerges from the algebra rather than being imposed syntactically.
 
 %=============================================================================
-\section{Literature Survey}
+\section{Literature Survey and Prior Art}
 %=============================================================================
 
-\subsection{Foundations of Conditioning}
+We now provide a comprehensive survey of prior work, clearly distinguishing
+what has been done before from the novel contributions of this paper.
+
+\subsection{Probability as Logic: Cox and Jaynes}
+
+\textbf{Cox's Theorem} (1946, 1961)~\cite{cox1961} proves that any consistent
+system for plausible reasoning satisfying certain desiderata must be
+isomorphic to probability theory. \textbf{Jaynes}~\cite{jaynes2003} developed
+this into a philosophical framework: ``Probability Theory: The Logic of Science.''
+
+\begin{quote}
+\emph{``The standard rules of probability can be interpreted as uniquely valid
+principles in logic.''} --- Jaynes
+\end{quote}
+
+\textbf{Key insight:} At the extremes (probability 0 or 1), probability
+reduces to Boolean logic.
+
+\textbf{What Cox-Jaynes did NOT address:}
+\begin{itemize}
+    \item They collapse to \emph{classical} logic, not relevant logic
+    \item Conditioning at zero remains undefined or problematic
+    \item No systematic connection to blocking ex falso
+\end{itemize}
+
+\subsection{Primitive Conditional Probability: Popper, R\'enyi, van Fraassen}
+
+This is the \textbf{closest prior art} to Cred's approach:
 
 \begin{itemize}
-    \item \textbf{R\'enyi (1955):} First axiomatization of conditional probability
-    as primitive, avoiding division. Our chain rule is a simplified version of
-    R\'enyi's axioms.
+    \item \textbf{R\'enyi (1955)~\cite{renyi1955}:} First axiomatization of
+    conditional probability as \emph{primitive}, avoiding division entirely.
+    His axioms include what we call the chain rule.
 
-    \item \textbf{Popper (1959):} Argued that conditional probability is more
-    fundamental than absolute probability, anticipating the Cred approach.
+    \item \textbf{Popper (1959)~\cite{popper1959}:} Argued that conditional
+    probability is more fundamental than absolute probability. Developed
+    ``Popper functions'' for conditional probability.
 
-    \item \textbf{Markov Categories (Fritz, 2020):} Categorical treatment of
-    conditioning using ``disintegration'' without division. Cred can be
-    viewed as a special case in the category of probability monads.
+    \item \textbf{van Fraassen (1976):} Extended the Popper-R\'enyi approach,
+    showing how to handle conditionals probabilistically. Called Lewis's
+    triviality result ``a veritable bombshell.''
 \end{itemize}
+
+\textbf{Critical assessment:} These authors axiomatized $P(A|B)$ primitively
+using essentially our chain rule: $P(A|B) \cdot P(B) = P(A \land B)$.
+
+\textbf{What they did NOT do} (as far as we can determine):
+\begin{itemize}
+    \item Systematically connect ``unconstrained at zero'' to blocking ex falso
+    \item Derive \emph{relevant logic} as the Boolean collapse
+    \item Build a complete graded logic with fixed points for self-reference
+    \item Provide machine-verified formalizations
+\end{itemize}
+
+\subsection{Adams and Lewis: Conditionals and Triviality}
+
+\textbf{Adams (1965, 1998)~\cite{adams1998}:} Developed probabilistic semantics
+for conditionals where $P(A \to B) = P(B|A)$ (``Adams' Thesis'').
+
+\textbf{Lewis's Triviality Result (1976)~\cite{lewis1976}:} Proved that treating
+conditionals as propositions with $P(A \to B) = P(B|A)$ leads to ``triviality''---
+the probability function must be degenerate.
+
+\textbf{Implication for Cred:} We avoid triviality by NOT treating conditionals
+as propositions. The conditioning structure relates credences without creating
+a conditional proposition.
 
 \subsection{Relevant Logic}
 
-\begin{itemize}
-    \item \textbf{Anderson \& Belnap (1975):} Comprehensive development of
-    relevant logics R and E, motivated by rejecting ex falso.
+\textbf{Anderson \& Belnap (1975)~\cite{anderson1975}:} Comprehensive development
+of relevant logics R and E, rejecting ex falso via \emph{syntactic} relevance
+conditions (antecedent and consequent must share a propositional variable).
 
-    \item \textbf{Dunn (1976):} Algebraic semantics for relevant logic,
-    connecting to De Morgan lattices.
+\textbf{Dunn (1976)~\cite{dunn1976}:} Algebraic semantics connecting relevant
+logic to De Morgan lattices.
 
-    \item \textbf{Meyer \& Routley (1977):} RM (R-mingle) and its three-valued
-    version RM3, which corresponds to our three-valued collapse.
-\end{itemize}
+\textbf{Meyer \& Routley:} Developed RM3 (three-valued relevant logic), which
+corresponds to our three-valued collapse.
+
+\textbf{Key difference:} Anderson-Belnap enforce relevance \emph{syntactically}.
+Cred achieves relevance \emph{semantically} through the chain rule.
 
 \subsection{Paraconsistent Logic}
 
 \begin{itemize}
-    \item \textbf{da Costa (1974):} Paraconsistent logics that tolerate
-    contradiction without explosion.
+    \item \textbf{da Costa (1974)~\cite{dacosta1974}:} Paraconsistent logics
+    tolerating contradiction without explosion.
 
-    \item \textbf{Priest (1979):} Logic of Paradox (LP), which assigns
-    ``both true and false'' to paradoxical sentences.
+    \item \textbf{Priest (1979)~\cite{priest1979}:} Logic of Paradox (LP),
+    assigning ``both true and false'' to paradoxical sentences.
 
-    \item \textbf{Brady \& Weber:} Relevant set theory using paraconsistent
-    logic, allowing unrestricted comprehension.
+    \item \textbf{Brady \& Weber~\cite{weber2010}:} Relevant set theory with
+    unrestricted comprehension.
 \end{itemize}
 
-\subsection{Fuzzy and Many-Valued Logic}
+Cred is related but distinct: we assign credence 0.5 to paradoxes (not
+``both values''), and derive paraconsistency from the algebra.
+
+\subsection{Fuzzy Logic and Many-Valued Logics}
 
 \begin{itemize}
-    \item \textbf{Zadeh (1965):} Introduction of fuzzy sets and fuzzy logic.
+    \item \textbf{Zadeh (1965)~\cite{zadeh1965}:} Fuzzy sets and fuzzy logic
+    with $[0,1]$ truth values.
 
-    \item \textbf{\L ukasiewicz (1920):} Three-valued logic \L 3 and
-    infinite-valued logic, precursor to fuzzy logic.
+    \item \textbf{\L ukasiewicz (1920)~\cite{lukasiewicz1920}:} Three-valued
+    and infinite-valued logics.
 
-    \item \textbf{H\'ajek (1998):} Comprehensive treatment of fuzzy logic
-    and its relationship to t-norms.
-
-    \item \textbf{Kleene (1952):} Strong Kleene logic K3 for partial
-    recursive functions.
+    \item \textbf{H\'ajek (1998)~\cite{hajek1998}:} Comprehensive treatment of
+    fuzzy logic and t-norms.
 \end{itemize}
+
+\textbf{Critical distinction:}
+\begin{center}
+\begin{tabular}{lcc}
+\toprule
+& \textbf{Fuzzy/\L ukasiewicz} & \textbf{Cred} \\
+\midrule
+Ex falso & \textbf{Yes} ($0 \to b = 1$) & \textbf{No} (unconstrained) \\
+Boolean collapse & Classical logic & Relevant logic \\
+Implication & Material ($\max(1-a,b)$) & Chain rule \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+Fuzzy logic generalizes \emph{classical} logic to $[0,1]$.
+Cred generalizes \emph{relevant} logic to $[0,1]$.
+
+\subsection{Markov Categories}
+
+\textbf{Fritz (2020)~\cite{fritz2020}:} Categorical treatment of probability
+using ``Markov categories'' where conditioning is handled via disintegration
+without division.
+
+This is mathematically sophisticated but focused on measure theory, not logic
+foundations or blocking ex falso.
+
+\subsection{Summary: What is Novel in Cred}
+
+Given the extensive prior art, we claim the following contributions are novel:
+
+\begin{enumerate}
+    \item \textbf{Systematic ex falso blocking:} While Popper-R\'enyi-van Fraassen
+    axiomatized primitive conditioning, we systematically develop the consequence
+    that ``unconstrained at zero'' blocks ex falso and yields relevant logic.
+
+    \item \textbf{The collapse tower:} The structured observation that
+    $[0,1] \to \{0, \frac{1}{2}, 1\} \to \{0,1\}$ collapses give RM3-like
+    and then Boolean \emph{relevant} (not classical!) logic.
+
+    \item \textbf{Semantic relevance:} Achieving relevance from the algebra
+    itself, not from syntactic variable-sharing conditions.
+
+    \item \textbf{Self-reference fixed points:} Formal treatment of
+    $\cred(L) = 0.5$ for liar sentences with machine-verified proofs.
+
+    \item \textbf{Machine formalization:} Complete Lean 4 formalization with
+    all proofs verified.
+\end{enumerate}
 
 %=============================================================================
 \section{The Lean Formalization}
@@ -857,10 +960,20 @@ comprehension, and exploring self-hosting (Cred formalized within Cred).
 
 \begin{thebibliography}{99}
 
+\bibitem{adams1998}
+E.W. Adams.
+\newblock \emph{A Primer of Probability Logic}.
+\newblock CSLI Publications, Stanford, 1998.
+
 \bibitem{anderson1975}
 A.R. Anderson and N.D. Belnap.
 \newblock \emph{Entailment: The Logic of Relevance and Necessity}, Vol. I.
 \newblock Princeton University Press, 1975.
+
+\bibitem{cox1961}
+R.T. Cox.
+\newblock \emph{The Algebra of Probable Inference}.
+\newblock Johns Hopkins University Press, 1961.
 
 \bibitem{brady2006}
 R. Brady.
@@ -888,10 +1001,20 @@ P. H\'ajek.
 \newblock \emph{Metamathematics of Fuzzy Logic}.
 \newblock Kluwer, 1998.
 
+\bibitem{jaynes2003}
+E.T. Jaynes.
+\newblock \emph{Probability Theory: The Logic of Science}.
+\newblock Cambridge University Press, 2003.
+
 \bibitem{kleene1952}
 S.C. Kleene.
 \newblock \emph{Introduction to Metamathematics}.
 \newblock North-Holland, 1952.
+
+\bibitem{lewis1976}
+D. Lewis.
+\newblock Probabilities of conditionals and conditional probabilities.
+\newblock \emph{Philosophical Review}, 85:297--315, 1976.
 
 \bibitem{lukasiewicz1920}
 J. \L ukasiewicz.
