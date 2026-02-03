@@ -1,8 +1,7 @@
-% Cred: A Credence Algebra for Graded Mathematics
-% Publication-quality paper with complete formal development
+% Cred: A Credence Algebra with Primitive Conditioning
+% Publication-quality paper
 %
 % References to Lean formalization: lean/Cred/Basic.lean
-% Each major definition/theorem includes a comment pointing to the Lean source
 
 \documentclass[11pt,a4paper]{article}
 
@@ -32,7 +31,6 @@
 \newtheorem{definition}[theorem]{Definition}
 \newtheorem{example}[theorem]{Example}
 \newtheorem{remark}[theorem]{Remark}
-\newtheorem{axiom}[theorem]{Axiom}
 
 % Custom commands
 \newcommand{\cred}{\mathsf{cred}}
@@ -55,1095 +53,366 @@
 \maketitle
 
 \begin{abstract}
-We present \emph{Cred}, a credence algebra for graded mathematics and reasoning under uncertainty.
-A \emph{credence} is a real number in $[0,1]$ representing degree of belief---the
-standard representation in formal epistemology (Definition~\ref{def:credence}). Cred adopts a well-known approach from
-R\'enyi (1955) and Popper (1959): conditioning is a \emph{primitive operation}
-governed by a chain rule equation/constraint, not defined via division. When evidence has
-credence zero, the conditional is \emph{unconstrained} (any value satisfies
-the equation), not undefined. The chain rule equation is satisfied by any value
-in $[0,1]$ when evidence is zero, rather than forcing the conditional to $1$.
-This property is shared with relevant logic, though achieved through different
-mechanisms. Van Fraassen (1983) established the
-theoretical connection between probabilistic semantics and relevant logic;
-Cred is not itself a semantics for relevant logic. The core algebra is
-formalized in Lean 4 with machine-checked proofs of algebraic properties
-derived from the chain rule constraint (the constraint itself is taken as primitive, not derived).
-Our broader goal is foundational: to rebuild familiar mathematical constructions in a setting where propositions and proofs can be graded in $[0,1]$, and where impossible evidence does not trivialize inference.
-Our contributions are:
-(1)~primitive conditioning via the chain rule constraint, avoiding ex falso;
-(2)~showing this property is shared with relevant logic (through different mechanisms);
-(3)~fixed points including $\tfrac{1}{2}$ for the liar;
-(4)~machine-checked Lean formalization of algebraic properties; and
-(5)~clear connections to probability, fuzzy logic, relevant logic, and paraconsistent logic---not
-the underlying ideas, which derive from prior work.
+We present \emph{Cred}, a weakening of probability theory that retains values in
+$[0,1]$ and the complement but drops the measure space and sigma-additivity.
+The sole structural axiom is the chain rule: $\cred(A \mid B) \cdot \cred(B) =
+\cred(A \land B)$.
+When evidence is positive, division emerges as the unique solution; when evidence
+has credence zero, the constraint is satisfied by any value---the conditional is
+\emph{unconstrained}, and no division is needed.
+Every probability space satisfies Cred's axioms, but Cred requires neither a
+sigma-algebra nor additivity.
+We establish a surjective homomorphism from Cred to the three-valued algebra
+underlying RM3, prove that negation has a unique fixed point at $\tfrac{1}{2}$,
+and provide machine-checked proofs in Lean~4.
 \end{abstract}
 
 %=============================================================================
-\section{Introduction and Motivation}
+\section{Introduction}
+\label{sec:intro}
 %=============================================================================
 
-\subsection{What is Credence?}
+A \emph{credence} is a real number in $[0,1]$ representing degree of belief---the
+standard representation in formal epistemology~\cite{ramsey1931,definetti1937,jaynes2003}.
+The value $0$ represents impossibility, $1$ represents certainty, and intermediate
+values represent partial confidence.
 
-\textbf{Credence} is the term used in formal epistemology and Bayesian philosophy
-for \emph{degree of belief}---a real number in $[0,1]$ representing how confident
-a rational agent is in a proposition. If you are familiar with probability theory,
-credence is essentially \emph{subjective probability} in the sense of de Finetti,
-Ramsey, Savage, and Jaynes~\cite{ramsey1931,definetti1937,jaynes2003}.
+Probability theory builds on credences by introducing a sigma-algebra of events,
+a measure, and sigma-additivity.
+Conditional probability is then derived via division:
+$P(A \mid B) = P(A \land B)/P(B)$ when $P(B) > 0$; when $P(B) = 0$, the ratio
+is undefined.
+R\'enyi~\cite{renyi1955,renyi1970} and Popper~\cite{popper1959} proposed an
+alternative: treat conditioning as \emph{primitive}, governed by the chain rule
+$P(A \mid B) \cdot P(B) = P(A \land B)$ without invoking division in the
+definition.
+Van Fraassen~\cite{vanfraassen1983} showed that this primitive approach
+connects naturally to relevant logic: both avoid forcing ``from impossibility,
+anything follows.''
 
-\begin{center}
-\begin{tabular}{lcc}
-\toprule
-\textbf{Aspect} & \textbf{Standard Probability} & \textbf{Credence (Cred)} \\
-\midrule
-Interpretation & Various (frequentist, etc.) & Epistemic (degree of belief) \\
-Conditioning at 0 & Undefined ($0/0$)${}^a$ & Unconstrained (any value)${}^a$ \\
-Chain rule & Derived: $P(A|B) = P(A \land B)/P(B)$ & \textbf{Primitive constraint} \\
-At Boolean values & Classical logic (material impl.) & Conditioning${}^b$ (no ex falso) \\
-\bottomrule
-\end{tabular}
+Cred takes this further: drop the measure entirely.
+Keep only values in $[0,1]$, the complement $\negc c = 1 - c$, and the chain
+rule $\cred(A \mid B) \cdot \cred(B) = \cred(A \land B)$ as the sole structural
+axiom for conditioning.
+This is strictly weaker than probability---every probability space satisfies
+Cred's axioms, but Cred requires neither a sigma-algebra nor additivity.
+When $\cred(B) = 0$, the chain rule becomes $\cred(A \mid B) \cdot 0 = 0$,
+satisfied by \emph{any} value of $\cred(A \mid B)$: the conditional is
+unconstrained.
+Division emerges as the unique solution when evidence is positive; at zero,
+no division is needed.
 
-\smallskip
-\footnotesize{${}^a$Both ``undefined'' and ``unconstrained'' avoid forcing $1$; they differ in whether
-the expression is syntactically ill-formed (probability) or well-formed but underdetermined (Cred).
-Neither is obviously superior---see Section~\ref{sec:conditioning} for discussion.}
+The product $c_1 \cdot c_2$ and its De Morgan dual $c_1 + c_2 - c_1 c_2$ are
+available as algebraic operations on $[0,1]$---the same product that appears in
+the chain rule.
+These form the \emph{product De Morgan triplet}, well-known in fuzzy
+logic~\cite{klement2000,hajek1998}.
+But where product fuzzy logic uses residuated implication (forcing $0 \to y = 1$,
+i.e.\ ex falso), Cred uses chain-rule conditioning (leaving the conditional
+unconstrained at zero).
 
-\smallskip
-\footnotesize{${}^b$When restricted to Boolean values $\{0,1\}$: classical logic's
-implication-like inference uses material implication ($\neg A \lor B$), giving
-$0 \to B = 1$ for all $B$ (ex falso). Cred uses conditioning, where conditioning on
-$0$ is underdetermined---any value satisfies the chain rule $\condc{B}{0} \conjc 0 = 0$.}
-\end{center}
-
-\textbf{Why ``credence'' instead of ``probability''?}
-\begin{enumerate}[label=(\roman*)]
-    \item \textbf{Terminological clarity:} ``Credence'' is unambiguous---it
-    always means degree of belief. ``Probability'' is overloaded (frequentist,
-    propensity, subjective, logical interpretations).
-
-    \item \textbf{Different edge-case behavior:} When evidence has measure
-    zero, probability theory says conditioning is \emph{undefined}. Cred says
-    it is \emph{unconstrained}---any value satisfies the chain rule. This
-    difference avoids forcing ex falso quodlibet.
-
-    \item \textbf{Alignment with epistemology:} The term is standard in
-    philosophy~\cite{ramsey1931,definetti1937}.
+\textbf{Contributions.}
+\begin{enumerate}[label=(\arabic*)]
+\item A weakening of probability that retains the chain rule as primitive
+conditioning, where division is derived (unique when evidence $> 0$) and
+conditioning is unconstrained at evidence zero (Section~\ref{sec:conditioning}).
+\item A surjective homomorphism from Cred to the three-valued RM3 algebra for
+$\{\negc, \conjc, \disjc\}$, with machine-checked proof (Section~\ref{sec:connections}).
+\item Fixed-point analysis: $\tfrac{1}{2}$ is the unique fixed point of negation
+(Section~\ref{sec:fixed-points}).
+\item Lean~4 formalization of the core algebra (Section~\ref{sec:lean}).
 \end{enumerate}
 
-\subsection{Goal: A Foundation for Graded Mathematics}
-
-Although credences originate in epistemology, Cred is used here \emph{algebraically} as a candidate foundation: we aim to develop mathematics in a setting where propositions can take values in $[0,1]$ and inference is governed by constraints rather than by explosion at impossibility. Part~1 (this paper) isolates the primitive operations and proves their core consequences (with Lean verification). Later work builds graded mathematics (predicates, quantifiers, and proofs) and explores proof techniques that become available when intermediate values and fixed points are treated as first-class.
-
-\subsection{The ``Conditional First'' Principle}
-
-A key philosophical stance in Cred is that \textbf{conditioning is more
-fundamental than absolute assignment}. This follows R\'enyi (1955) and
-Popper (1959), who argued that conditional probability should be primitive:
-
-\begin{quote}
-\emph{Instead of defining $P(A|B) = P(A \land B)/P(B)$ (which fails when
-$P(B) = 0$), we take conditioning as primitive via the chain rule and
-derive absolute probability as the special case $P(A) = P(A | \Omega)$.}
-\end{quote}
-
-Cred adopts this ``conditional first'' approach: the chain rule equation
-$\cred(A|B) \conjc \cred(B) = \cred(A \land B)$ governs conditioning, and
-absolute credence is the special case where evidence is certain.
-
-\begin{remark}[What ``Primitive'' Means]
-\label{rem:primitive-meaning}
-By \emph{primitive} we mean that conditioning is defined directly via the chain
-rule equation/constraint, not derived from other operations (as in probability theory where
-$P(A|B) = P(A \land B)/P(B)$). Negation, conjunction, and disjunction are also
-primitively defined---they are characterized by their properties, not derived from
-conditioning. The term ``primitive'' here is analogous to ``point'' in geometry:
-a foundational undefined term, not a claim of greater importance than other
-operations.
-\end{remark}
-
-
-
-\subsection{The Limitations of Binary Truth}
-
-Classical logic, the foundation of most mathematics, operates on a simple
-principle: every proposition is either \emph{true} or \emph{false}. This
-binary view has served mathematics well for millennia, but it encounters
-difficulties in several important situations:
-
-\begin{enumerate}[label=(\roman*)]
-    \item \textbf{Self-reference and paradox.} The liar sentence ``This
-    statement is false'' has no consistent Boolean truth value. Assigning
-    it \emph{true} makes it false; assigning it \emph{false} makes it true.
-
-    \item \textbf{Partial knowledge.} Binary truth cannot express degrees of
-    confidence: ``The defendant is guilty'' may be supported by evidence without
-    being established with certainty. Cred models such epistemic states.
-    (Note: Semantic vagueness---``Is this shade red?''---is a distinct phenomenon
-    addressed by fuzzy logic; see Section~7.1 for the distinction.)
-
-    \item \textbf{Uncertain evidence.} In practice, we often have partial
-    evidence for a claim. The proposition ``It will rain tomorrow'' is not
-    simply true or false---we have some degree of confidence in it.
-
-    \item \textbf{Ex falso quodlibet} (Latin: ``from falsehood, anything
-    [follows]''). In classical logic, $\bot \to A$ is a theorem for all $A$:
-    from the falsum constant, anything follows. The related \emph{principle of
-    explosion} states that from a contradiction, anything follows
-    ($A, \neg A \vdash B$). These are equivalent in classical logic but
-    distinct in some paraconsistent systems. Both seem intuitively wrong.
-\end{enumerate}
-
-\subsection{The Credence Approach}
-
-Instead of binary truth values $\{0, 1\}$, we work with \emph{credences}:
-values in the unit interval $[0, 1]$.
-
-\begin{center}
-\begin{tikzpicture}[scale=6]
-    \draw[thick,->] (-0.1,0) -- (1.2,0);
-    \draw[thick] (0,-0.05) -- (0,0.05) node[below=5pt] {$0$};
-    \draw[thick] (0.5,-0.05) -- (0.5,0.05) node[below=5pt] {$\tfrac{1}{2}$};
-    \draw[thick] (1,-0.05) -- (1,0.05) node[below=5pt] {$1$};
-    \node[above] at (0,0.05) {impossible};
-    \node[above] at (0.5,0.05) {uncertain};
-    \node[above] at (1,0.05) {certain};
-\end{tikzpicture}
-\end{center}
-
-\begin{itemize}
-    \item $\cred(A) = 0$: proposition $A$ is impossible/certainly false
-    \item $\cred(A) = 1$: proposition $A$ is certain/certainly true
-    \item $\cred(A) = \tfrac{1}{2}$: maximum uncertainty about $A$
-    \item $\cred(A) \in (0, 1)$: partial evidence for or against $A$
-\end{itemize}
-
-\begin{remark}[Algebraic Structure and Interpretations]
-\label{rmk:interpretation}
-Cred is first and foremost an \emph{algebraic structure}: operations on $[0,1]$
-satisfying certain axioms. As such, it admits multiple interpretations:
-\begin{itemize}
-    \item \textbf{Epistemic} (degree of belief): A rational agent's confidence
-    in a proposition. Example~\ref{ex:graded} illustrates this reading.
-    \item \textbf{Semantic} (degree of truth): A proposition's truth value in
-    a many-valued semantics. Example~\ref{ex:liar} illustrates this reading:
-    $\cred(L) = \tfrac{1}{2}$ means $L$ is \emph{half-true}, a fixed point of negation,
-    not an expression of agent uncertainty.
-\end{itemize}
-The algebraic theorems (Sections~2--5) hold regardless of interpretation.
-Examples~\ref{ex:graded} and~\ref{ex:liar} illustrate the two readings;
-subsequent worked examples are interpretation-neutral algebraic calculations.
-\end{remark}
-
-\begin{example}[Graded Assessment (Epistemic)]
-\label{ex:graded}
-A researcher assigns $\cred(H) = 0.7$ (70\% confidence). Here $H$ is the
-proposition ``hypothesis $H$ holds.'' Cred handles an edge case differently
-than probability: suppose evidence $E$ is regarded as impossible
-($\cred(E) = 0$). The chain rule equation $\cred(H \mid E) \conjc 0 = 0$ is
-satisfied by \emph{any} value.
-The conditional is \emph{unconstrained} by the constraint, rather than undefined
-(probability) or forced to 1 (classical ex falso).
-\end{example}
-
-\begin{example}[The Liar Sentence --- Semantic Interpretation]
-\label{ex:liar}
-% Lean: liar_fixed_point
-Consider $L = $ ``This sentence is false.'' In Cred, if we adopt the
-principle that logically equivalent propositions receive equal credences---a
-standard rationality constraint in formal epistemology, justified by Dutch book
-arguments~\cite{ramsey1931,definetti1937} showing that violations lead to sure
-loss---and model $L$ as satisfying $L \leftrightarrow \neg L$, then
-$\cred(L) = \cred(\neg L)$, so $\cred(L) = 1 - \cred(L)$, giving $\cred(L) = \tfrac{1}{2}$. Since negation is
-complement ($\negc c = 1 - c$), this is the unique fixed point of the negation
-operation (Theorem~\ref{thm:fixedunique}).
-
-\textbf{Important caveat:} This illustrates that Cred's algebra has a natural
-value for self-negating sentences, but assigning $\tfrac{1}{2}$ to the liar is just one
-of many approaches in the extensive literature on semantic paradoxes. Kripke's
-groundedness approach~\cite{kripke1975} assigns the liar neither truth nor
-falsity (a truth-value gap) at minimal fixed points; Priest's dialetheism~\cite{priest1979} treats it as \emph{both}
-true and false. The strengthened liar (``This sentence is not true'') and
-revenge paradoxes present further challenges that a simple fixed-point
-assignment does not resolve. We present this example as an \emph{illustration}
-of Cred's fixed-point theorem, not as a philosophical solution to the liar
-paradox.
-\end{example}
-
-\subsection{Why Not Probability Theory?}
-
-Probability theory also uses $[0, 1]$ values. How does Cred differ?
-
-The key difference is in how we handle \emph{conditioning}. In elementary
-probability:
-\[
-P(A \mid B) = \frac{P(A \land B)}{P(B)} \quad \text{when } P(B) > 0
-\]
-When $P(B) = 0$, this ratio is undefined (division by zero). Measure-theoretic
-probability addresses this through regular conditional probability and
-disintegration (see Section~\ref{sec:measure-theory} for details). Here we
-contrast Cred with the elementary definition.
-
-In Cred, conditioning is \emph{primitive}, governed by a constraint equation:
-\[
-\cred(A \mid B) \conjc \cred(B) = \cred(A \land B)
-\]
-When $\cred(B) = 0$, this equation becomes $\cred(A \mid 0) \conjc 0 = 0$,
-which is satisfied for \emph{any} value of $\cred(A \mid 0)$. The
-conditional is \emph{unconstrained}, not undefined and not forced to
-equal 1.
-
-This subtle difference eliminates ex falso: we cannot derive that
-$\cred(A \mid \bot) = 1$ for all $A$.
-
-\subsection{Historical Context}
-
-The idea of treating conditioning as primitive goes back to
-R\'enyi~\cite{renyi1955,renyi1970} and Popper~\cite{popper1959}, who argued that
-conditional probability is more fundamental than absolute probability.
-Recent work on Markov categories~\cite{fritz2020} formalizes this
-categorically.
-
-The connection to relevant logic was developed by Anderson and
-Belnap~\cite{anderson1975}, who rejected ex falso on philosophical grounds.
-They enforced relevance through syntactic conditions (premises must share
-variables with conclusions). Cred achieves the same result semantically.
-
-\subsection{Design Motivation: Inference as Constraint}
-
-The design of Cred is motivated by an intuition about inference:
-\textbf{evidence constrains possibilities from uncertainty toward specificity}.
-This is a \emph{design choice} that guides Cred's axioms, not a theorem
-derived from first principles.
-
-The intuition has three parts:
-
-\begin{enumerate}[label=(\roman*)]
-    \item \textbf{Prior as uncertainty.} Without information about a binary
-    proposition, one may start with $\cred(A) = \tfrac{1}{2}$. This reflects maximum
-    entropy (Jaynes~\cite{jaynes2003}), though the principle of indifference
-    is controversial---see Bertrand's paradox and the problem of priors.
-
-    \item \textbf{Evidence constrains.} Each piece of evidence $B$ with
-    $\cred(B) > 0$ narrows the space of consistent beliefs. The chain rule
-    $\cred(A \mid B) \conjc \cred(B) = \cred(A \land B)$ expresses how
-    evidence constrains the joint credence.
-
-    \item \textbf{Impossible evidence is algebraically inert.} When
-    $\cred(B) = 0$, the chain rule becomes $\cred(A \mid 0) \conjc 0 = 0$,
-    satisfied by \emph{any} value. Note: $\cred(B) = 0$ means $B$ is
-    \emph{impossible}, not ``no evidence for $B$'' (which would be
-    $\cred(B) = \tfrac{1}{2}$). The rationale is pragmatic: downstream computations
-    using $\cred(A \mid B) \conjc 0 = 0$ are unaffected by the conditional's
-    value, so the constraint need not determine it.
-\end{enumerate}
-
-This motivates Cred's treatment of conditioning at zero as unconstrained---a
-\emph{design choice}, not a philosophical necessity. Probability theory makes
-a different choice (undefined); classical logic makes another (forced to 1).
-
-\begin{remark}[Scope of the Motivation]
-This ``inference as constraint'' intuition is \emph{informal motivation}
-for Cred's design, not a derivation from first principles. Cred can be
-motivated in multiple ways; we present this one as accessible, not canonical.
-R\'enyi and Popper's primitive conditioning (Section~1.6) provides the
-mathematical framework we adopt. Our interpretation of ``unconstrained
-means no constraint'' is a design choice, not a consequence of their axioms.
-\end{remark}
+\textbf{Outline.}
+Section~\ref{sec:algebra} defines the credence algebra.
+Section~\ref{sec:conditioning} develops primitive conditioning.
+Section~\ref{sec:fixed-points} treats fixed points.
+Section~\ref{sec:connections} relates Cred to other systems.
+Section~\ref{sec:lean} describes the Lean formalization.
 
 %=============================================================================
-\section{The Credence Algebra: Formal Development}
+\section{The Credence Algebra}
+\label{sec:algebra}
 %=============================================================================
-
-% Lean: Cred/Basic.lean
 
 \subsection{Primitive Operations}
 
-% Lean: Credence structure
-\begin{definition}[Credence Value]
+\begin{definition}[Credence]
 \label{def:credence}
-A \emph{credence} is a real number $c \in [0, 1]$. The set of all credences
-is denoted $\Cred = [0, 1] \subset \Real$.
+A \emph{credence} is a real number $c \in [0, 1]$.
+The set of credences is $\Cred = [0, 1] \subset \Real$.
 \end{definition}
 
-\begin{remark}[Algebraic Foundation]
-\label{rmk:algebraic-foundation}
-Cred is defined as a pure algebra on credence values $c \in [0,1]$. The Lean
-formalization (Section~9) works entirely with these numerical values and
-operations on them. Propositional notation such as $\cred(A)$, $\cred(A \land B)$,
-or $\cred(A \mid B)$ is used informally throughout this paper to aid intuition,
-but formally, we work only with credence values and algebraic operations
-(negation, independence product, disjunction, conditioning). A full propositional
-semantics---mapping a domain of propositions to credences---is not required
-for the algebraic development. This parallels how Boolean algebra can be
-studied purely as operations on $\{0, 1\}$ without requiring a domain of
-propositions. Future work may explore propositional semantics; the present
-paper establishes the algebraic core.
-\end{remark}
-
-\begin{remark}[Precise Algebraic Characterization]
-\label{rmk:algebraic-characterization}
-Cred has the following algebraic structure:
-\begin{itemize}
-    \item $([0,1], \conjc, 1)$ is a commutative monoid (identity $1$, annihilator $0$)
-    \item $([0,1], \disjc, 0)$ is a commutative monoid (identity $0$, annihilator $1$)
-    \item $\negc$ is an involution ($\negc\negc c = c$) swapping $0 \leftrightarrow 1$
-    \item De Morgan laws hold: $\negc(c_1 \conjc c_2) = \negc c_1 \disjc \negc c_2$
-\end{itemize}
-This makes $([0,1], \conjc, \disjc, \negc, 0, 1)$ a \emph{bounded De Morgan bisemigroup}:
-two dual monoid structures connected by an order-reversing involution.
-Unlike Boolean algebras, Cred is \emph{non-idempotent} ($c \conjc c \neq c$ for
-$c \notin \{0,1\}$) and \emph{non-distributive} ($\conjc$ does not distribute
-over $\disjc$). These failures are essential for modeling uncertainty
-(Theorems~\ref{thm:idempotence}--\ref{thm:nondistrib}).
-\end{remark}
-
-% Lean: Zero, One instances
-\begin{definition}[Distinguished Elements]
-The credences $0$ (impossibility) and $1$ (certainty) are the boundary values.
-\end{definition}
-
-% Lean: neg
 \begin{definition}[Negation]
-The \emph{negation} of a credence $c$ is:
-\[
-\negc c = 1 - c
-\]
-(standard complement)
+\label{def:neg}
+The \emph{negation} of $c$ is $\negc c = 1 - c$.
 \end{definition}
 
-This satisfies our intuition: if we are 70\% confident in $A$, we are
-30\% confident in $\neg A$.
+Negation is the standard complement: if we assign credence $0.7$ to proposition $A$,
+we assign credence $0.3$ to its negation.
 
-% Lean: conj
-\begin{definition}[Independence Product]
-\label{def:indep-conj}
-The \emph{independence product} of credences $c_1$ and $c_2$ is:
-\[
-c_1 \conjc c_2 = c_1 \cdot c_2
-\]
-(standard multiplication)
+\begin{definition}[Product]
+\label{def:conj}
+The \emph{product} of $c_1$ and $c_2$ is $c_1 \conjc c_2 = c_1 \cdot c_2$.
 \end{definition}
 
-\begin{remark}[No General Conjunction]
-\label{rmk:independence}
-Cred has no general conjunction operator that computes joint credence
-from marginal credences alone. The independence product $\conjc$ equals
-$\cred(A \land B)$ \emph{only} when $A$ and $B$ are probabilistically independent.
-For example, $\cred(A) \conjc \cred(\neg A) = \tfrac{1}{4}$ when $\cred(A) = \tfrac{1}{2}$, but the
-actual $\cred(A \land \neg A) = 0$ always (a contradiction is impossible).
-For dependent propositions, the joint credence must be provided as input:
-\begin{itemize}
-    \item As a parameter in the conditioning structure (see Section~\ref{sec:conditioning})
-    \item Or derived from known relationships (e.g., $\cred(A \land \neg A) = 0$)
-\end{itemize}
-The Lean formalization uses $\conjc$ as an algebraic operation on credence values;
-it does NOT claim $c_1 \conjc c_2 = \cred(A \land B)$ for arbitrary propositions.
-See also Remark~\ref{rmk:product-vs-joint} for further clarification.
-\end{remark}
+The product is multiplication on $[0,1]$---the same operation that appears in the
+chain rule (Section~\ref{sec:conditioning}).
+It equals the joint probability $P(A \land B)$ when $A$ and $B$ are independent,
+hence the alternative name \emph{independence product}.
+For dependent propositions, the joint credence must be supplied as an external
+parameter; $\conjc$ does not claim to compute the joint of arbitrary propositions.
 
-% Lean: disj
-\begin{definition}[Disjunction (De Morgan Dual)]
+\begin{definition}[Disjunction]
 \label{def:disj}
-The \emph{disjunction} of credences is defined via De Morgan:
+The \emph{disjunction} of $c_1$ and $c_2$ is defined via De Morgan duality:
 \[
-c_1 \disjc c_2 = \negc(\negc c_1 \conjc \negc c_2)
+c_1 \disjc c_2 = \negc(\negc c_1 \conjc \negc c_2) = c_1 + c_2 - c_1 \cdot c_2
 \]
 \end{definition}
 
-Expanding the definition yields the explicit formula:
-\begin{align*}
-c_1 \disjc c_2 &= \negc(\negc c_1 \conjc \negc c_2) \\
-&= \negc((1-c_1) \cdot (1-c_2)) \\
-&= 1 - (1-c_1) \cdot (1-c_2) \\
-&= 1 - (1 - c_1 - c_2 + c_1 \cdot c_2) \\
-&= c_1 + c_2 - c_1 \cdot c_2
-\end{align*}
-This is the probabilistic inclusion-exclusion formula for independent events.
+The triple $(\conjc, \disjc, \negc)$ is the \emph{product De Morgan triplet}:
+conjunction is the product t-norm, disjunction its dual t-conorm (the
+``probabilistic sum''), and negation the standard
+complement~\cite{klement2000,hajek1998}.
+These operations are truth-functional---determined entirely by the operand
+values---which is what makes the collapse homomorphism to RM3 possible
+(Section~\ref{sec:connections}).
+
+\begin{remark}[Credence vs.\ Probability]
+\label{rem:not-probability}
+Cred's core consists of three ingredients: values in $[0,1]$, the complement
+$\negc c = 1 - c$, and the chain rule for conditioning.
+Probability adds a sigma-algebra, a measure, and sigma-additivity; every
+probability space therefore satisfies Cred's axioms, making probability a
+special case.
+In probability, the joint $P(A \land B)$ is determined by the measure---not
+by the product of marginals (unless events are independent).
+Cred makes no such determination: $c_1 \conjc c_2$ is multiplication on
+$[0,1]$, not a claim about the actual joint of arbitrary propositions.
+The actual joint is an external input to conditioning.
+Cred's disjunction $c_1 \disjc c_2 = c_1 + c_2 - c_1 c_2$ is the De Morgan
+dual of the product; probability's inclusion-exclusion
+$P(A \lor B) = P(A) + P(B) - P(A \land B)$ uses the actual joint instead.
+\end{remark}
 
 \subsection{Algebraic Properties}
 
-The credence algebra satisfies the following properties, all formally
-verified in Lean:
-
-% Lean: neg_neg, neg_zero, neg_one
-\begin{theorem}[Negation Properties]
-\label{thm:negation}
-For all $c, c_1, c_2 \in [0,1]$:
+\begin{theorem}[Algebraic Properties]
+\label{thm:algebraic}
+The following hold for all $c, c_1, c_2, c_3 \in [0,1]$:
 \begin{enumerate}[label=(\alph*)]
-    \item Involution: $\negc\negc c = c$
-    \item Boundary: $\negc 0 = 1$ and $\negc 1 = 0$
-    \item Order reversal: $c_1 \leq c_2 \iff \negc c_2 \leq \negc c_1$
-    (immediate: $\negc c = 1-c$ is monotonically decreasing)
+\item $\negc\negc c = c$ \hfill (involution)
+\item $\negc 0 = 1$, $\negc 1 = 0$ \hfill (boundary)
+\item $c_1 \conjc c_2 = c_2 \conjc c_1$, $(c_1 \conjc c_2) \conjc c_3 = c_1 \conjc (c_2 \conjc c_3)$ \hfill (comm., assoc.)
+\item $c \conjc 1 = c$, $c \conjc 0 = 0$ \hfill (identity, annihilator)
+\item $c_1 \disjc c_2 = c_2 \disjc c_1$, $(c_1 \disjc c_2) \disjc c_3 = c_1 \disjc (c_2 \disjc c_3)$ \hfill (comm., assoc.)
+\item $c \disjc 0 = c$, $c \disjc 1 = 1$ \hfill (identity, annihilator)
+\item $\negc(c_1 \conjc c_2) = \negc c_1 \disjc \negc c_2$ \hfill (De Morgan)
 \end{enumerate}
 \end{theorem}
-\noindent\textit{Proof.} Verified in Lean: \texttt{neg\_neg}, \texttt{neg\_zero}, \texttt{neg\_one}. \hfill$\square$
-
-% Lean: conj_comm, conj_assoc, conj_one, one_conj, conj_zero, zero_conj
-\begin{theorem}[Independence Product Properties]
-\label{thm:conjunction}
-For all $c, c_1, c_2, c_3 \in [0,1]$:
-\begin{enumerate}[label=(\alph*)]
-    \item Commutativity: $c_1 \conjc c_2 = c_2 \conjc c_1$
-    \item Associativity: $(c_1 \conjc c_2) \conjc c_3 = c_1 \conjc (c_2 \conjc c_3)$
-    \item Identity: $c \conjc 1 = c$
-    \item Annihilation: $c \conjc 0 = 0$
-\end{enumerate}
-\end{theorem}
-\noindent\textit{Proof.} Verified in Lean: \texttt{conj\_comm}, \texttt{conj\_assoc}, \texttt{conj\_one}, \texttt{conj\_zero}. \hfill$\square$
-
-% Lean: disj_comm, disj_assoc, disj_zero, zero_disj, disj_one, one_disj
-\begin{theorem}[Disjunction Properties]
-\label{thm:disjunction}
-For all $c, c_1, c_2, c_3 \in [0,1]$:
-\begin{enumerate}[label=(\alph*)]
-    \item Commutativity: $c_1 \disjc c_2 = c_2 \disjc c_1$
-    \item Associativity: $(c_1 \disjc c_2) \disjc c_3 = c_1 \disjc (c_2 \disjc c_3)$
-    \item Identity: $c \disjc 0 = c$
-    \item Annihilation: $c \disjc 1 = 1$
-\end{enumerate}
-\end{theorem}
-\noindent\textit{Proof.} Verified in Lean: \texttt{disj\_comm}, \texttt{disj\_assoc}, \texttt{disj\_zero}, \texttt{disj\_one}. \hfill$\square$
-
-\begin{remark}[De Morgan Duality]
-\label{rmk:demorgan-duality}
-The disjunction properties (Theorem~\ref{thm:disjunction}) are De Morgan duals
-of the independence product properties (Theorem~\ref{thm:conjunction}), obtained
-by exchanging $0 \leftrightarrow 1$ and $\conjc \leftrightarrow \disjc$:
-identity $1$ becomes identity $0$, and annihilator $0$ becomes annihilator $1$.
-This duality follows algebraically from Definition~\ref{def:disj} and negation
-involution ($\negc\negc c = c$).
-\end{remark}
-
-\begin{proof}[Proof sketch for (b)]
-Expanding $c_1 \disjc c_2 = c_1 + c_2 - c_1 \cdot c_2$ and substituting into both
-sides yields a polynomial identity (routine algebraic simplification).
-The full expansion shows both sides equal
-$c_1 + c_2 + c_3 - c_1 \cdot c_2 - c_1 \cdot c_3 - c_2 \cdot c_3 + c_1 \cdot c_2 \cdot c_3$.
+\begin{proof}
+Routine verification.
+Lean: \texttt{neg\_neg}, \texttt{conj\_comm}, \texttt{conj\_assoc},
+\texttt{disj\_comm}, \texttt{disj\_assoc}, \texttt{de\_morgan\_conj}.
 \end{proof}
 
-% Lean: de_morgan_conj, de_morgan_disj
-\begin{theorem}[De Morgan Laws]
-\label{thm:demorgan}
-For all $c_1, c_2 \in [0,1]$:
-\begin{enumerate}[label=(\alph*)]
-    \item $\negc(c_1 \conjc c_2) = \negc c_1 \disjc \negc c_2$
-    \item $\negc(c_1 \disjc c_2) = \negc c_1 \conjc \negc c_2$
-\end{enumerate}
-\end{theorem}
-\noindent\textit{Proof.} Part (b) is immediate from Definition~2.6 and involution.
-Part (a) follows by expanding both sides using the explicit formulas. Verified
-in Lean: \texttt{de\_morgan\_conj}, \texttt{de\_morgan\_disj}. \hfill$\square$
+The structure $([0,1], \conjc, \disjc, \negc, 0, 1)$ forms a \emph{bounded De Morgan
+bisemigroup}: two dual commutative monoids ($([0,1], \conjc, 1)$ and $([0,1], \disjc, 0)$)
+connected by an order-reversing involution $\negc$.
 
 \subsection{Non-Idempotence and Non-Distributivity}
 
-Unlike the two-element Boolean algebra $\{0,1\}$, the credence algebra has important differences:
+Unlike the two-element Boolean algebra $\{0,1\}$, the credence algebra is neither
+idempotent nor distributive.
 
-% Lean: conj_idempotent_iff, conj_not_idempotent
-\begin{theorem}[Idempotence Characterization]
+\begin{theorem}[Non-Idempotence]
 \label{thm:idempotence}
-For all $c \in [0,1]$, the independence product is idempotent at exactly the
-boundary points:
-\[
-c \conjc c = c \iff c \in \{0, 1\}
-\]
-In particular, $\tfrac{1}{2} \conjc \tfrac{1}{2} = \tfrac{1}{4} \neq \tfrac{1}{2}$.
+$c \conjc c = c$ if and only if $c \in \{0, 1\}$.
 \end{theorem}
-\noindent\textit{Proof.} Verified in Lean: \texttt{conj\_idempotent\_iff}, \texttt{conj\_not\_idempotent}. \hfill$\square$
+\begin{proof}
+$c^2 = c$ iff $c(c-1) = 0$ iff $c \in \{0,1\}$.
+In particular, $\tfrac{1}{2} \conjc \tfrac{1}{2} = \tfrac{1}{4} \neq \tfrac{1}{2}$.
+Lean: \texttt{conj\_idempotent\_iff}.
+\end{proof}
 
-\textbf{Note:} The product $c \conjc c = c^2$ is the credence of two
-\emph{independent} propositions $A$ and $B$ where $\cred(A) = \cred(B) = c$.
-It is \emph{not} the credence of ``$A \land A$'' (which equals $\cred(A)$).
+The product $c \conjc c = c^2$ is the credence of two \emph{independent} copies
+of a proposition with credence $c$---not the credence of ``$A \land A$'' (which
+equals $\cred(A)$).
 
-% Lean: conj_disj_not_distrib
-\begin{theorem}[Distributivity Fails]
+\begin{theorem}[Non-Distributivity]
 \label{thm:nondistrib}
-The independence product does \emph{not} distribute over disjunction:
-\[
-\exists\, c_1, c_2, c_3: \quad c_1 \conjc (c_2 \disjc c_3) \neq (c_1 \conjc c_2) \disjc (c_1 \conjc c_3)
-\]
-Counterexample: $c_1 = c_2 = c_3 = \tfrac{1}{2}$. Using Definition~\ref{def:indep-conj}
-and the explicit formula $c_1 \disjc c_2 = c_1 + c_2 - c_1 \cdot c_2$:
+The independence product does not distribute over disjunction.
+\end{theorem}
+\begin{proof}
+Counterexample at $c_1 = c_2 = c_3 = \tfrac{1}{2}$:
 \begin{align*}
 \text{LHS} &= \tfrac{1}{2} \conjc (\tfrac{1}{2} \disjc \tfrac{1}{2})
-= \tfrac{1}{2} \cdot (\tfrac{1}{2} + \tfrac{1}{2} - \tfrac{1}{2} \cdot \tfrac{1}{2})
+= \tfrac{1}{2} \cdot (\tfrac{1}{2} + \tfrac{1}{2} - \tfrac{1}{4})
 = \tfrac{1}{2} \cdot \tfrac{3}{4} = \tfrac{3}{8} \\
 \text{RHS} &= (\tfrac{1}{2} \conjc \tfrac{1}{2}) \disjc (\tfrac{1}{2} \conjc \tfrac{1}{2})
 = \tfrac{1}{4} \disjc \tfrac{1}{4}
-= \tfrac{1}{4} + \tfrac{1}{4} - \tfrac{1}{4} \cdot \tfrac{1}{4} = \tfrac{7}{16}
+= \tfrac{1}{4} + \tfrac{1}{4} - \tfrac{1}{16} = \tfrac{7}{16}
 \end{align*}
-\end{theorem}
-\noindent\textit{Proof.} Verified in Lean: \texttt{conj\_disj\_not\_distrib}. \hfill$\square$
+Lean: \texttt{conj\_disj\_not\_distrib}.
+\end{proof}
 
-This failure of distributivity is a key feature distinguishing Cred from
-the two-element Boolean algebra and is essential for modeling uncertainty correctly.
+This failure of distributivity distinguishes Cred from Boolean algebra and is
+essential for modeling uncertainty.
 
 %=============================================================================
-\section{Conditioning and the Chain Rule}
+\section{Primitive Conditioning}
 \label{sec:conditioning}
 %=============================================================================
 
-% Lean: Conditioning, conditioning_zero_any, conditioning_one, conditioning_mk, conditioning_unique
+\subsection{The Chain Rule Constraint}
 
-\subsection{Primitive Conditioning via the Chain Rule}
-
-The central innovation of Cred is treating conditioning as \emph{primitive}:
-
-% Lean: Conditioning structure
-\begin{definition}[Conditioning Structure (Chain Rule Constraint)]
+\begin{definition}[Conditioning Structure]
 \label{def:conditioning}
-A \emph{conditioning structure} for a pair (joint, evidence) $\in [0,1]^2$
-is a choice of conditional credence condCred $\in [0,1]$ together with a proof
-of the chain rule equation:
+A \emph{conditioning structure} for parameters $(\text{joint}, \text{evidence}) \in [0,1]^2$
+consists of a conditional credence $\text{condCred} \in [0,1]$ satisfying:
 \[
-\text{condCred} \conjc \text{evidence} = \text{joint}.
+\text{condCred} \conjc \text{evidence} = \text{joint}
 \]
-
-\noindent\textbf{Derived well-formedness:} If a conditioning structure exists,
-then necessarily joint $\leq$ evidence (Lean: Theorem \texttt{conditioning\_implies\_joint\_le\_evidence}).
-When evidence $> 0$, this inequality is also necessary for existence of a witness
-in $[0,1]$: otherwise the unique solution condCred $=$ joint/evidence would exceed
-$1$. The existence construction in Lean (\texttt{conditioning\_mk}) therefore
-assumes evidence $> 0$ and joint $\leq$ evidence.
-
-\textbf{Propositional notation:} We write $\cred(A \mid B)$ for the conditional
-credence where joint $= \cred(A \land B)$ and evidence $= \cred(B)$, so the
-chain rule becomes $\condc{A}{B} \conjc \cred(B) = \cred(A \land B)$. This
-notation is informal; the Lean formalization works purely with credence
-values---see Remark~\ref{rmk:algebraic-foundation}.
+In propositional notation: $\condc{A}{B} \conjc \cred(B) = \cred(A \land B)$.
 \end{definition}
 
-\begin{remark}[Lean Formalization: Primitive Constraint vs.\ Derived Theorems]
-\label{rmk:lean-conditioning}
-The Lean code represents conditioning as a structure that \emph{packages a witness}
-\texttt{condCred} together with a proof of the chain rule equation. The structure
-\texttt{Conditioning(joint, evidence)} is parameterized by credence \emph{values},
-not propositions:
-\begin{itemize}
-    \item \texttt{joint}: the credence value $\cred(A \land B)$
-    \item \texttt{evidence}: the credence value $\cred(B)$
-    \item \texttt{condCred}: the conditional credence $\cred(A \mid B)$
-\end{itemize}
-The paper's propositional notation $\cred(A \mid B)$ is informal shorthand;
-Lean works purely with numeric credence values and the algebraic constraint
-\texttt{conj condCred evidence = joint} (where \texttt{conj} is multiplication on credence values). This design
-reflects Remark~\ref{rmk:algebraic-foundation}: the algebra operates on $[0,1]$
-values, not on a domain of propositions.
+The \texttt{joint} parameter represents $\cred(A \land B)$ and is supplied
+as input---it is not computed from marginal credences.
+This parametric design parallels how Boolean algebra defines operations on
+truth values without specifying which propositions have which values.
 
-\textbf{Important:} The chain rule multiplies credence \emph{values} using the
-same operation $\conjc$ from Definition~\ref{def:indep-conj}. The point is not
-that $\conjc$ computes joint credence from marginal credences: the \texttt{joint}
-parameter is supplied as input and represents $\cred(A \land B)$.
-The \texttt{joint} parameter is supplied directly---it is never computed as
-\texttt{condCred $\conjc$ something}. See Remark~\ref{rmk:product-vs-joint}.
+\subsection{Boundary Behavior}
 
-The existence construction (\texttt{conditioning\_mk}) requires evidence $> 0$
-and joint $\leq$ evidence.
+\textbf{Evidence = 1.}
+The chain rule gives $\cred(A \mid 1) \conjc 1 = \cred(A \land B)$,
+so $\cred(A \mid 1) = \cred(A \land B)$.
+Conditioning on certainty returns the joint credence.
 
-\textbf{What is verified vs.\ what is constructed:} Lean does not define a total
-function taking \texttt{joint} and \texttt{evidence} to \texttt{condCred}. Instead it proves
-existence of witnesses under hypotheses (evidence $> 0$, joint $\leq$ evidence),
-proves uniqueness when evidence $> 0$, and proves that when evidence $= 0$ the
-only possible joint is $0$ and then any condCred works. These correspond to
-\texttt{conditioning\_mk}, \texttt{conditioning\_unique},
-\texttt{conditioning\_zero\_forces\_joint\_zero}, and \texttt{conditioning\_zero\_any}.
-\end{remark}
+\textbf{Evidence = 0.}
+The chain rule gives $\cred(A \mid 0) \conjc 0 = 0$.
+Since $c \conjc 0 = 0$ for all $c \in [0,1]$, this equation is satisfied by any value.
+The conditional is \emph{unconstrained}.
 
-\begin{remark}[Independence Product vs.\ Joint Credence]
-\label{rmk:product-vs-joint}
-The algebra distinguishes two concepts:
-\begin{itemize}
-    \item $c_1 \conjc c_2 = c_1 \cdot c_2$: The \emph{independence product}
-    (Def.~\ref{def:indep-conj}), an algebraic operation on credence values.
-    This equals $\cred(A \land B)$ only when $A, B$ are probabilistically independent.
-    \item $\cred(A \land B)$: The \emph{joint credence}, which is a
-    parameter in the chain rule---not computed from marginals alone.
-\end{itemize}
-
-\noindent\textbf{Warning:} Do not substitute $\cred(A) \conjc \cred(B)$ for
-$\cred(A \land B)$ in the chain rule. The chain rule
-$\cred(A \mid B) \conjc \cred(B) = \cred(A \land B)$ requires the actual joint
-credence as input. The independence product $\conjc$ computes this joint
-\emph{only} when $A$ and $B$ are independent; for dependent propositions,
-$\cred(A \land B)$ must be provided externally.
-
-\noindent In practice: if independence holds, $\cred(A \land B) = \cred(A) \conjc \cred(B)$.
-Otherwise, the joint credence must be provided as input.
-\end{remark}
-
-\begin{remark}[Cred as a Conditional Algebra, Not a Probability Theory]
-\label{rmk:conditional-algebra}
-Cred is a \emph{conditional} algebra in the following precise sense: it takes
-joint credences as input parameters and constrains conditional credences as
-output. It does not form a complete reasoning system without an external source
-of joint credence information (e.g., a probability model, expert assessment, or
-domain-specific knowledge).
-\begin{itemize}
-    \item \textbf{What Cred provides:} An algebra of credence values with primitive
-    conditioning. Given joint credences $\cred(A \land B)$ and marginal credences
-    $\cred(B)$ as \emph{input parameters}, the chain rule constrains (or leaves
-    unconstrained) the conditional credence $\cred(A \mid B)$.
-    \item \textbf{What Cred requires externally:} Joint credences for dependent
-    propositions. For dependent $A$ and $B$, the value $\cred(A \land B)$ must be
-    supplied---it is a \emph{parameter} to the algebra, not derivable from
-    $\cred(A)$ and $\cred(B)$ alone. (For independent propositions, the product
-    $\cred(A) \conjc \cred(B)$ suffices.)
-\end{itemize}
-This parametric design is deliberate, paralleling how Boolean algebra defines
-operations on truth values without specifying which propositions have which
-values. Cred provides algebraic structure for reasoning \emph{given} joint
-credences; obtaining those joint credences requires additional semantic
-machinery (see Remark~\ref{rmk:algebraic-foundation}).
-\end{remark}
-
-\begin{remark}[Cred is an Algebra, Not a Logic]
-\label{rmk:algebra-not-logic}
-Cred has no \emph{consequence relation} ($\vdash$ or $\models$). Claims about
-``avoiding ex falso'' must be understood algebraically, not logically:
-\begin{itemize}
-    \item \textbf{Ex falso in logic:} In a logic with consequence relation $\vdash$,
-    ex falso means $\bot \vdash A$ for all $A$ (from falsehood, anything follows).
-    This is a property of the \emph{inference relation}.
-    \item \textbf{What Cred avoids:} The chain rule constraint does not \emph{force}
-    $\cred(A \mid 0) = 1$. Any value satisfies the constraint when evidence is zero.
-    This is a property of the \emph{conditioning operation}, not a statement about
-    logical inference.
-\end{itemize}
-An agent could still \emph{choose} to adopt $\cred(A \mid 0) = 1$ for all $A$
-without violating the chain rule constraint---the theory simply does not require this choice.
-If one were to define a consequence relation for Cred, whether it exhibits
-explosion would depend on the choice of designated values and inference rules
-(see Remark~\ref{rmk:soundness-completeness}).
-\end{remark}
-
-\subsection{Boundary Cases: Underdetermination at Zero}
-
-The chain rule determines conditioning behavior naturally:
-
-\textbf{Case 1: $\cred(B) = 1$ (certain evidence).}
-\[
-\cred(A \mid 1) \conjc 1 = \cred(A \land B) \implies \cred(A \mid 1) = \cred(A \land B)
-\]
-% Lean: conditioning_one
-Conditioning on certainty simply returns the joint credence.
-
-\textbf{Case 2: $\cred(B) = 0$ (impossible evidence).}
-\[
-\cred(A \mid 0) \conjc 0 = \cred(A \land B) = 0
-\]
-% Lean: conditioning_zero_any
-This is satisfied for \emph{any} value of $\cred(A \mid 0)$. The
-conditional is \emph{unconstrained}.
-
-\begin{theorem}[Conditioning Underdetermination]
+\begin{theorem}[Underdetermination at Zero]
 \label{thm:noexfalso}
-% Lean: conditioning_zero_any
-When evidence has credence $0$, the chain rule constraint underdetermines the conditional:
+When evidence $= 0$:
 \begin{enumerate}[label=(\alph*)]
-    \item If a conditioning structure exists with evidence $= 0$, then necessarily joint $= 0$.
-    \item For joint $= 0$ and evidence $= 0$, the chain rule constraint is satisfied by \emph{any}
-    conditional value in $[0,1]$.
+\item If a conditioning structure exists, then joint $= 0$.
+\item For joint $= 0$, any $c \in [0,1]$ satisfies the chain rule.
 \end{enumerate}
 \end{theorem}
-
 \begin{proof}
-Let $\text{evidence} = 0$. By Definition~\ref{def:conditioning}, the defining equation is
-$\text{condCred} \conjc \text{evidence} = \text{joint}$, hence $\text{condCred} \conjc 0 = \text{joint}$.
-Therefore joint $= 0$. Conversely, if joint $= 0$, then for any $c \in [0,1]$ we have $c \conjc 0 = 0$,
-so any conditional value satisfies the constraint. (Lean: \texttt{conditioning\_zero\_forces\_joint\_zero},
-\texttt{conditioning\_zero\_any})
+(a) If $\text{condCred} \conjc 0 = \text{joint}$, then $\text{joint} = 0$.
+(b) For any $c$, we have $c \conjc 0 = 0$, so the equation $c \conjc 0 = 0$ holds.
+Lean: \texttt{conditioning\_zero\_forces\_joint\_zero}, \texttt{conditioning\_zero\_any}.
 \end{proof}
 
 \begin{corollary}[No Forced Ex Falso]
-\label{cor:noexfalso}
-The chain rule constraint does \emph{not} force $\cred(A \mid 0) = 1$ for arbitrary
-$A$. In particular, the value $\cred(A \mid 0) = 0$ is equally consistent
-with the constraint.
+The chain rule does not force $\cred(A \mid 0) = 1$.
 \end{corollary}
 
-This is the key result: the chain rule constraint does not entail ``from impossibility,
-anything follows.'' To obtain ex falso, one must \emph{add} the extra axiom
+This is the central result: conditioning on impossible evidence is unconstrained
+by the chain rule.
+The constraint-based definition means division is derived (as the unique solution
+when evidence $> 0$) rather than primitive; at zero, no division is needed.
+To obtain ``from impossibility, anything follows,'' one must add an axiom
 $\cred(A \mid 0) = 1$; it does not follow from conditioning alone.
 
 \subsection{Existence and Uniqueness}
 
-% Lean: conditioning_mk, conditioning_unique
-\begin{theorem}[Existence of Conditioning]
-\label{thm:condexists}
-If $\cred(B) > 0$ and $\cred(A \land B) \leq \cred(B)$, then there exists
-a unique conditional credence:
-\[
-\cred(A \mid B) = \frac{\cred(A \land B)}{\cred(B)}
-\]
+\begin{theorem}[Existence]
+\label{thm:existence}
+If $\cred(B) > 0$ and $\cred(A \land B) \leq \cred(B)$, then there exists a
+conditioning structure with $\cred(A \mid B) = \cred(A \land B)/\cred(B)$.
 \end{theorem}
-\noindent\textit{Proof.} Verified in Lean: \texttt{conditioning\_mk}. \hfill$\square$
-
-\begin{remark}[Constraint vs.\ Existence Proof]
-\label{rmk:axiom-vs-proof}
-There is an important distinction between the \emph{defining constraint} and the
-\emph{existence proof}:
-\begin{itemize}
-    \item \textbf{The defining equation (chain rule)} is stated multiplicatively:
-    $\cred(A \mid B) \conjc \cred(B) = \cred(A \land B)$. Division does not
-    appear in the defining equation itself.
-    \item \textbf{The existence proof} constructs the witness by computing
-    $\cred(A \land B) / \cred(B)$ when $\cred(B) > 0$.
-\end{itemize}
-This is entirely standard: axioms are often stated in forms that avoid
-problematic operations, while proofs of existence or uniqueness may use
-those operations in controlled settings. Compare how group axioms mention
-only multiplication, yet proofs about groups freely use division (multiplication
-by inverse). The key property---that the chain rule \emph{equation} does not
-require division---is what allows the unconstrained behavior at $\cred(B) = 0$.
-\end{remark}
-
-\begin{theorem}[Uniqueness of Conditioning]
-\label{thm:condunique}
-If $\cred(B) > 0$, the conditional credence is uniquely determined by
-the chain rule.
-\end{theorem}
-\noindent\textit{Proof.} Verified in Lean: \texttt{conditioning\_unique}. \hfill$\square$
-
-When $\cred(B) = 0$, conditioning is not unique---any value works. This
-non-uniqueness is precisely what avoids forcing ex falso.
-
-\begin{remark}[Interpretation of ``Unconstrained'']
-\label{rmk:unconstrained}
-``Unconstrained'' is a \emph{mathematical} term: it means the chain rule constraint
-does not determine a unique value. This requires careful interpretation.
-\begin{itemize}
-    \item \textbf{Algebraically:} The chain rule is a constraint equation.
-    When $\cred(B) = 0$, the equation $\cred(A \mid B) \conjc 0 = 0$ is satisfied
-    by all values in $[0,1]$---the constraint is \emph{silent} on this case.
-    This is a mathematical fact about the equation, nothing more.
-
-    \item \textbf{Epistemically:} ``Unconstrained by the chain rule'' does
-    \emph{not} mean a rational agent may hold any belief whatsoever, nor that
-    the agent simultaneously holds all beliefs. Rather, the chain rule constraint
-    simply does not govern this case---the question ``what is my degree of
-    belief in $A$ given evidence I regard as impossible?'' lies outside the
-    constraint's scope. A rational agent faced with this question has several
-    coherent options:
-    \begin{enumerate}[label=(\alph*)]
-        \item \textbf{The question does not arise:} If $\cred(B) = 0$, the agent
-        never conditions on $B$, so $\cred(A \mid B)$ is not invoked in reasoning.
-        \item \textbf{Counterfactual analysis:} The agent may have principled
-        beliefs about counterfactuals (``if $B$ were true, then\ldots'') derived
-        from causal or modal reasoning independent of the chain rule.
-        \item \textbf{Undefined:} The agent may simply lack any belief about
-        $\cred(A \mid B)$ when $\cred(B) = 0$, treating it as a meaningless query.
-    \end{enumerate}
-    Cox's theorem~\cite{cox1961,jaynes2003} derives probability from desiderata:
-    (1) plausibility is a real number, (2) qualitative correspondence with common
-    sense, and (3) consistency (equivalent states of knowledge yield equivalent
-    plausibilities). A key consequence is that the plausibility of a conjunction
-    given evidence must be a \emph{function}---uniquely determined by the
-    plausibilities of its components. Cred relaxes precisely this functional
-    requirement: conditioning is a \emph{relation} satisfying the chain rule,
-    which becomes non-functional when evidence $= 0$ (multiple values satisfy
-    $c \conjc 0 = 0$). This trade-off is justified pragmatically:
-    (i) the underdetermined case is computationally inert, so no reasoning
-    depends on it; (ii) forcing a unique value would require axioms beyond
-    the chain rule, artificially constraining a case the algebra leaves open.
-    Cred retains Cox's other desiderata (real-valued, monotonic, consistent).
-    Epistemic agents using Cred may still have unique conditional beliefs---those
-    beliefs are simply not determined by the chain rule when evidence is impossible.
-
-    \item \textbf{Semantically:} For the degree-of-truth reading,
-    ``unconstrained'' is natural: when the antecedent has truth degree 0,
-    the conditional has no determinate truth value. This parallels
-    presupposition failure in natural language semantics and supervaluationist
-    treatments of conditionals with false antecedents.
-\end{itemize}
-
-\noindent\textbf{Key point:} In all cases, downstream computations are unaffected:
-$\cred(A \mid B) \conjc 0 = 0$ regardless of the conditional's value, so
-reasoning never depends on the unconstrained case. The expression is
-syntactically valid but \emph{semantically inert}---it propagates no information.
-This differs from probability theory (where $P(A|B)$ is \emph{undefined} when
-$P(B)=0$) and from classical logic (where $\bot \to A$ is forced to be true).
-\end{remark}
-
-\subsection{Analogy: Division vs. Chain Rule}
-
-\begin{center}
-\begin{tabular}{lcc}
-\toprule
-& \textbf{Division Approach} & \textbf{Chain Rule Approach} \\
-\midrule
-Definition & $P(A \mid B) = P(A \land B) / P(B)$ & $\cred(A \mid B) \conjc \cred(B) = \cred(A \land B)$ \\
-At $B = 0$ & Undefined (divide by zero) & Underdetermined (any value)${}^\dagger$ \\
-Ex falso status & Avoided (expression excluded) & Avoided (no unique value) \\
-Axiom form & Division in definition & Multiplication only${}^*$ \\
-\bottomrule
-\end{tabular}
-
-\smallskip
-\footnotesize{${}^*$The \emph{constraint} uses only multiplication; the existence proof
-(Theorem~\ref{thm:condexists}) constructs the witness via division when evidence $> 0$.
-See Remark~\ref{rmk:axiom-vs-proof}.}
-
-\smallskip
-\footnotesize{${}^\dagger$``Undefined'' excludes the expression syntactically;
-``underdetermined'' allows the expression but leaves its value unconstrained by the constraint.
-Both avoid forcing $1$; see Remark~\ref{rmk:unconstrained} for further discussion.}
-\end{center}
-
-\begin{remark}[Iterated Conditioning]
-\label{rmk:iterated-conditioning}
-The present formalization handles single conditioning $\cred(A \mid B)$. For
-multiple pieces of evidence, Cred uses conjunction of evidence:
-$\cred(A \mid B \land C)$ rather than nested conditionals. For example,
-updating on $B$ then $C$ yields $\cred(A \mid B \land C) = \cred(A \land B \land C) / \cred(B \land C)$
-when $\cred(B \land C) > 0$. Since conditioning produces a credence value but
-takes propositions as arguments, $\cred(A \mid B) \mid C$ is not well-formed.
-A full treatment of Jeffrey conditioning~\cite{jeffrey1983}---which updates
-beliefs when evidence itself has uncertain probability rather than being
-observed with certainty---is beyond the scope of this paper.
-\end{remark}
-
-%=============================================================================
-\section{Fixed Points and Self-Reference}
-%=============================================================================
-
-% Lean: half, liar_fixed_point, neg_fixed_point_unique
-
-\subsection{Negation Fixed Points}
-
-The negation operation $\negc c = 1 - c$ has a unique fixed point:
-
-% Lean: liar_fixed_point
-\begin{theorem}[Negation Fixed Point]
-\label{thm:liar}
-The credence $\tfrac{1}{2}$ is a fixed point of negation:
-\[
-\negc \tfrac{1}{2} = 1 - \tfrac{1}{2} = \tfrac{1}{2}
-\]
-\end{theorem}
-\noindent\textit{Proof.} Verified in Lean: \texttt{liar\_fixed\_point}. \hfill$\square$
-
-% Lean: neg_fixed_point_unique
-\begin{theorem}[Uniqueness of Negation Fixed Point]
-\label{thm:fixedunique}
-For all $c \in [0,1]$, the value $\tfrac{1}{2}$ is the \emph{unique} fixed point of
-negation:
-\[
-\negc c = c \iff c = \tfrac{1}{2}
-\]
-\end{theorem}
-
 \begin{proof}
-($\Rightarrow$) If $\negc c = c$, then $1 - c = c$, so $c = \tfrac{1}{2}$.
-($\Leftarrow$) Conversely, $\negc \tfrac{1}{2} = 1 - \tfrac{1}{2} = \tfrac{1}{2}$ (Theorem~\ref{thm:liar}).
-Verified in Lean: \texttt{neg\_fixed\_point\_unique}.
+The value $\cred(A \land B)/\cred(B)$ lies in $[0,1]$ (by the hypotheses) and
+satisfies the chain rule.
+Lean: \texttt{conditioning\_mk}.
 \end{proof}
 
-\subsection{Application to Self-Negating Sentences}
-
-If we model a self-negating sentence $L$ (satisfying $L \leftrightarrow \neg L$)
-by requiring $\cred(L) = \cred(\neg L) = \negc \cred(L)$, then by
-Theorem~\ref{thm:fixedunique}, $\cred(L) = \tfrac{1}{2}$.
-
-\begin{remark}[Scope and Limitations]
-\label{rmk:liar-scope}
-This fixed-point analysis provides a \emph{natural algebraic value} for
-self-negating sentences within Cred, but it does not constitute a philosophical
-solution to the liar paradox. The extensive literature on semantic paradoxes
-offers multiple approaches:
-\begin{itemize}
-    \item \textbf{Kripke's groundedness}~\cite{kripke1975}: The liar sentence
-    is \emph{ungrounded} and receives no truth value at the \emph{minimal}
-    fixed point; other fixed points in Kripke's construction may assign it
-    a value.
-    \item \textbf{Priest's dialetheism}~\cite{priest1979}: The liar is
-    \emph{both} true and false (a truth-value glut).
-    \item \textbf{Cred's fixed point}: The liar receives the intermediate
-    value $\tfrac{1}{2}$.
-\end{itemize}
-Each approach has trade-offs. Cred's assignment of $\tfrac{1}{2}$ does not address
-the \emph{strengthened liar} (``This sentence is not true'') or
-\emph{revenge paradoxes} that arise when we try to express the semantic
-status of paradoxical sentences within the language itself.
-
-\textbf{What Cred provides:} An algebraic setting where the negation operation
-has a unique fixed point, giving self-negating sentences a natural value.
-\textbf{What Cred does not provide:} A resolution of the deeper philosophical
-issues surrounding self-reference, truth, and the expressive limitations that
-give rise to semantic paradoxes.
-\end{remark}
-
-\begin{remark}[Scope: Self-Negation Only]
-The fixed-point analysis applies only to \emph{self-negating} sentences like
-the liar ($L \equiv \neg L$). It does \emph{not} apply to G\"odel sentences,
-which assert their own unprovability (a different modality than falsity).
-Since G\"odel sentences are not self-negating, Cred's fixed-point theorem
-does not assign them any particular value.
-\end{remark}
-
-%=============================================================================
-\section{Spread and Worked Examples}
-%=============================================================================
-
-% Lean: spread, certainty and related theorems
-
-The function $c(1-c)$ measures how far a credence is from certainty. This is
-the \emph{variance of a Bernoulli random variable} with parameter $c$---a
-well-known quantity in probability theory. We include it here because it
-arises naturally from the algebra and has a clean interpretation.
-
-\begin{remark}[Algebraic Origin]
-The expression $c \conjc \negc c = c \cdot (1-c)$ applies the independence
-product to a credence and its complement. This does \textbf{not} compute
-$\cred(A \land \neg A)$, which is always 0 (a contradiction is impossible).
-Rather, it is a derived algebraic quantity measuring uncertainty.
-\end{remark}
-
-\subsection{Spread Function}
-
-% Lean: spread, spread_val, spread_half, spread_le_quarter, spread_eq_zero_iff
-\begin{definition}[Spread]
-\[
-\text{spread}(c) := c(1-c)
-\]
-\end{definition}
-
-This is the Bernoulli variance: if $c$ is the probability of success, then
-$c(1-c)$ is the variance of a single Bernoulli trial.
-
-\begin{theorem}[Spread Bounds]
-\label{thm:spread}
-\begin{enumerate}[label=(\alph*)]
-    \item $\text{spread}(c) \leq \tfrac{1}{4}$ for all $c \in [0, 1]$
-    \item Maximum at $c = \tfrac{1}{2}$: $\text{spread}(\tfrac{1}{2}) = \tfrac{1}{4}$
-    \item Zero at extremes: $\text{spread}(c) = 0 \iff c \in \{0, 1\}$
-\end{enumerate}
+\begin{theorem}[Uniqueness]
+\label{thm:uniqueness}
+If $\cred(B) > 0$, the conditional credence is uniquely determined.
 \end{theorem}
-\noindent\textit{Proof.} (a) By completing the square:
-$c(1-c) = -(c - \tfrac{1}{2})^2 + \tfrac{1}{4} \leq \tfrac{1}{4}$
-since $(c - \tfrac{1}{2})^2 \geq 0$. (b) Direct computation. (c) The product $c(1-c) = 0$
-iff $c = 0$ or $c = 1$. Verified in Lean: \texttt{spread\_le\_quarter},
-\texttt{spread\_half}, \texttt{spread\_eq\_zero\_iff}. \hfill$\square$
+\begin{proof}
+If $c_1 \conjc \text{evidence} = c_2 \conjc \text{evidence} = \text{joint}$
+and evidence $> 0$, then $c_1 = c_2$.
+Lean: \texttt{conditioning\_unique}.
+\end{proof}
 
-\textbf{Interpretation:} Spread quantifies uncertainty via Bernoulli variance. At
-$c = 0$ or $c = 1$ (certainty), spread is zero. At $c = \tfrac{1}{2}$ (maximum
-uncertainty), spread reaches its maximum of $\tfrac{1}{4}$.
+The defining constraint uses only multiplication.
+Division appears in the existence proof as a construction technique, not in the
+definition itself---it is derived, not primitive.
+Probability satisfies the same chain rule: $P(A \mid B) \cdot P(B) = P(A \land B)$.
+Cred's conditioning is not new machinery---it is probability's chain rule without
+the surrounding measure theory.
 
-\subsection{\texorpdfstring{Complement: $1 - c(1-c)$}{Complement: 1 - c(1-c)}}
+\subsection{Worked Example}
 
-% Lean: certainty, certainty_val, certainty_half, certainty_ge_three_quarters, certainty_eq_one_iff
-The De Morgan dual $c \disjc \negc c = 1 - c(1-c)$ is simply $1 - \text{spread}(c)$.
-
-\begin{theorem}[Complement Bounds]
-\label{thm:complement}
-\begin{enumerate}[label=(\alph*)]
-    \item $1 - c(1-c) \geq \tfrac{3}{4}$ for all $c \in [0, 1]$
-    \item Minimum at $c = \tfrac{1}{2}$: value $\tfrac{3}{4}$
-    \item Unity at extremes: $1 - c(1-c) = 1 \iff c \in \{0, 1\}$
-\end{enumerate}
-\end{theorem}
-\noindent\textit{Proof.} Verified in Lean:\\
-\texttt{certainty\_ge\_three\_quarters}, \texttt{certainty\_half},
-\texttt{certainty\_eq\_one\_iff}. \hfill$\square$
-
-\subsection{Graph}
-
-Both functions are quadratic:
-
-\begin{center}
-\begin{tikzpicture}[scale=4]
-    % Axes
-    \draw[->] (-0.1,0) -- (1.2,0) node[right] {credence $c$};
-    \draw[->] (0,-0.1) -- (0,1.1) node[above] {value};
-
-    % Spread curve (parabola opening down, max at 0.5)
-    \draw[thick,blue,domain=0:1,samples=50] plot (\x, {\x*(1-\x)});
-    \node[blue,right] at (0.7,0.15) {$c(1-c)$};
-
-    % Complement curve (parabola opening up from 0.75)
-    \draw[thick,red,domain=0:1,samples=50] plot (\x, {1-\x*(1-\x)});
-    \node[red,right] at (0.7,0.9) {$1-c(1-c)$};
-
-    % Reference lines
-    \draw[dashed,gray] (0,0.25) -- (1,0.25);
-    \draw[dashed,gray] (0,0.75) -- (1,0.75);
-    \draw[dashed,gray] (0.5,0) -- (0.5,1);
-
-	    % Labels
-	    \node[left] at (0,0) {$0$};
-	    \node[left] at (0,0.25) {$\tfrac{1}{4}$};
-	    \node[left] at (0,0.75) {$\tfrac{3}{4}$};
-	    \node[left] at (0,1) {$1$};
-	    \node[below] at (0,0) {$0$};
-	    \node[below] at (0.5,0) {$\tfrac{1}{2}$};
-	    \node[below] at (1,0) {$1$};
-\end{tikzpicture}
-\end{center}
-
-\subsection{Worked Examples}
-
-\begin{example}[Conditioning Calculation]
-\label{ex:conditioning-calc}
-Suppose $\cred(A) = 0.8$, $\cred(B) = 0.6$, and the joint credence
-$\cred(A \land B) = 0.4$. This joint credence is an \emph{input} to the Cred
-algebra, not computed via $\conjc$ (which applies only to independent
-propositions). In practice, joint credences come from external sources: empirical
-data, domain expertise, physical models, or subjective assessment---just as
-probabilities are inputs in probability theory. Cred provides the algebraic
-structure; the values themselves must be supplied (see
-Remark~\ref{rmk:conditional-algebra}). The chain rule gives:
+\begin{example}
+\label{ex:conditioning}
+Suppose $\cred(B) = 0.6$ and $\cred(A \land B) = 0.4$.
+The joint credence is an input---it might come from empirical data, domain expertise,
+or a probability model.
+The chain rule gives:
 \[
-\cred(A \mid B) = \frac{\cred(A \land B)}{\cred(B)} = \frac{0.4}{0.6} = \frac{2}{3} \approx 0.667
+\cred(A \mid B) = \frac{0.4}{0.6} = \frac{2}{3}
 \]
-Verification: $\frac{2}{3} \conjc 0.6 = 0.4 = \cred(A \land B)$. \checkmark
+Verification: $\frac{2}{3} \cdot 0.6 = 0.4 = \cred(A \land B)$.
 
-If instead $\cred(B) = 0$, then $\cred(A \land B) = 0$ (joint cannot exceed
-marginal), and any value $c \in [0,1]$ satisfies $c \conjc 0 = 0$. The conditional
-$\cred(A \mid B)$ is \emph{unconstrained}.
-\end{example}
-
-\begin{example}[Independence vs.\ Dependence]
-\label{ex:independence}
-Let $\cred(A) = \tfrac{1}{2}$ (uncertain about $A$).
-\begin{enumerate}[label=(\alph*)]
-    \item \textbf{Independent propositions:} If $B$ is independent of $A$ with
-    $\cred(B) = \tfrac{1}{2}$, then $\cred(A \land B) = \cred(A) \conjc \cred(B)
-    = \tfrac{1}{2} \times \tfrac{1}{2} = \tfrac{1}{4}$.
-    \item \textbf{Dependent propositions:} If $B = \neg A$, then
-    $\cred(A \land \neg A) = 0$ (contradiction), \emph{not} $\tfrac{1}{2} \times \tfrac{1}{2} = \tfrac{1}{4}$.
-    The independence product $\conjc$ does not equal joint credence for dependent propositions.
-\end{enumerate}
-This illustrates Remark~\ref{rmk:independence}: $\conjc$ equals joint credence
-only when independence holds.
-\end{example}
-
-\begin{example}[Three-Valued Collapse]
-\label{ex:collapse}
-Let $c_1 = 0$ and $c_2 = 0.7$. In the full algebra:
-\begin{align*}
-c_1 \conjc c_2 &= 0 \times 0.7 = 0 \\
-c_1 \disjc c_2 &= 0 + 0.7 - 0 = 0.7
-\end{align*}
-Under the three-valued collapse defined in Section~6.1:
-$\text{collapse}(0) = 0$, $\text{collapse}(0.7) = \tfrac{1}{2}$.
-\begin{align*}
-\text{collapse}(c_1 \conjc c_2) &= \text{collapse}(0) = 0 \\
-\text{collapse}(c_1) \conjc_{\text{RM3}} \text{collapse}(c_2) &= 0
-    \conjc_{\text{RM3}} \tfrac{1}{2} = 0
-\end{align*}
-This boundary case demonstrates that collapse preserves the operation:
-operating before or after collapse yields the same result.
-This is Theorem~\ref{thm:rm3-fragment} in action.
+If instead $\cred(B) = 0$, then necessarily $\cred(A \land B) = 0$, and any
+value $c \in [0,1]$ satisfies $c \cdot 0 = 0$.
+The conditional is unconstrained.
 \end{example}
 
 %=============================================================================
-\section{Collapse Variants: Connecting to Known Logics}
+\section{Fixed Points}
+\label{sec:fixed-points}
 %=============================================================================
 
-The full credence algebra $[0, 1]$ can be ``collapsed'' to simpler systems.
-These collapses connect Cred to well-known logics.
+\begin{theorem}[Negation Fixed Point]
+\label{thm:liar}
+$\negc \tfrac{1}{2} = \tfrac{1}{2}$.
+\end{theorem}
+\begin{proof}
+$1 - \tfrac{1}{2} = \tfrac{1}{2}$.
+Lean: \texttt{liar\_fixed\_point}.
+\end{proof}
 
-\subsection{Three-Valued Collapse: Relationship to RM3}
+\begin{theorem}[Uniqueness]
+\label{thm:fixedunique}
+$\negc c = c$ if and only if $c = \tfrac{1}{2}$.
+\end{theorem}
+\begin{proof}
+$1 - c = c$ implies $c = \tfrac{1}{2}$.
+Lean: \texttt{neg\_fixed\_point\_unique}.
+\end{proof}
 
-Collapse the continuum to three values:
+If a self-negating sentence $L$ satisfies $L \leftrightarrow \neg L$, requiring
+$\cred(L) = \negc \cred(L)$ gives $\cred(L) = \tfrac{1}{2}$.
+This provides a natural algebraic value for such sentences.
+
+\begin{remark}[Scope]
+This fixed-point result is algebraic, not philosophical.
+It does not resolve the liar paradox or address the strengthened liar
+(``This sentence is not true'').
+The extensive literature on semantic paradoxes offers multiple approaches:
+Kripke's groundedness~\cite{kripke1975} assigns no truth value to the liar at
+minimal fixed points; Priest's dialetheism~\cite{priest1979} treats it as both
+true and false.
+Cred's $\tfrac{1}{2}$ is simply the unique fixed point of complement on $[0,1]$.
+\end{remark}
+
+%=============================================================================
+\section{Connections to Other Systems}
+\label{sec:connections}
+%=============================================================================
+
+\subsection{Three-Valued Collapse and RM3}
+
+Define the collapse function:
 \[
 \text{collapse}(c) = \begin{cases}
 0 & \text{if } c = 0 \\
@@ -1152,32 +421,41 @@ Collapse the continuum to three values:
 \end{cases}
 \]
 
-This yields a three-valued logic with values $\{0, \tfrac{1}{2}, 1\}$.
-
-\begin{theorem}[Collapse Homomorphism for RM3 Fragment]
-\label{thm:rm3-fragment}
-% Lean: collapse_neg, collapse_conj, collapse_disj
-The collapse function is a surjective homomorphism of De Morgan algebras
-from $(\mathrm{Cred}, \negc, \conjc, \disjc, 0, 1)$ to the three-valued
-algebra $(\{0, \tfrac{1}{2}, 1\}, \mathrm{neg}, \mathrm{conj}, \mathrm{disj}, 0, 1)$.
-That is, for all credences $c, c_1, c_2 \in [0,1]$:
+\begin{theorem}[Collapse Homomorphism]
+\label{thm:collapse}
+The collapse is a surjective homomorphism from $(\Cred, \negc, \conjc, \disjc)$
+to the three-valued algebra $(\{0, \tfrac{1}{2}, 1\}, \mathrm{neg}, \mathrm{conj}, \mathrm{disj})$:
 \begin{align*}
-\mathrm{collapse}(\negc c) &= \mathrm{neg}_{\mathrm{RM3}}(\mathrm{collapse}(c)) \\
-\mathrm{collapse}(c_1 \conjc c_2) &= \mathrm{conj}_{\mathrm{RM3}}(\mathrm{collapse}(c_1), \mathrm{collapse}(c_2)) \\
-\mathrm{collapse}(c_1 \disjc c_2) &= \mathrm{disj}_{\mathrm{RM3}}(\mathrm{collapse}(c_1), \mathrm{collapse}(c_2))
+\mathrm{collapse}(\negc c) &= \mathrm{neg}(\mathrm{collapse}(c)) \\
+\mathrm{collapse}(c_1 \conjc c_2) &= \mathrm{conj}(\mathrm{collapse}(c_1), \mathrm{collapse}(c_2)) \\
+\mathrm{collapse}(c_1 \disjc c_2) &= \mathrm{disj}(\mathrm{collapse}(c_1), \mathrm{collapse}(c_2))
 \end{align*}
-where the RM3 operations on $\{0, \tfrac{1}{2}, 1\}$ are given by the truth tables:
+where the three-valued operations match RM3.
 \end{theorem}
+\begin{proof}
+Case analysis on whether each $c_i$ equals $0$, $1$, or lies in $(0,1)$.
+The key cases are:
+\begin{itemize}
+\item If $c_1 = 0$ or $c_2 = 0$, then $c_1 \conjc c_2 = 0$, matching RM3.
+\item If $c_1 = 1$, then $c_1 \conjc c_2 = c_2$, matching RM3.
+\item If $0 < c_1, c_2 < 1$, then $0 < c_1 \conjc c_2 < 1$, so both sides collapse to $\tfrac{1}{2}$.
+\end{itemize}
+Similar analysis for negation and disjunction.
+Lean: \texttt{collapse\_neg}, \texttt{collapse\_conj}, \texttt{collapse\_disj}.
+\end{proof}
 
+The three-valued operations are:
 \begin{center}
-\begin{tabular}{c|ccc}
-$\negc$ & 0 & $\tfrac{1}{2}$ & 1 \\
+\begin{tabular}{c|c}
+$c$ & $\mathrm{neg}(c)$ \\
 \hline
-& 1 & $\tfrac{1}{2}$ & 0
+0 & 1 \\
+$\tfrac{1}{2}$ & $\tfrac{1}{2}$ \\
+1 & 0
 \end{tabular}
 \quad
 \begin{tabular}{c|ccc}
-$\conjc$ & 0 & $\tfrac{1}{2}$ & 1 \\
+$\mathrm{conj}$ & 0 & $\tfrac{1}{2}$ & 1 \\
 \hline
 0 & 0 & 0 & 0 \\
 $\tfrac{1}{2}$ & 0 & $\tfrac{1}{2}$ & $\tfrac{1}{2}$ \\
@@ -1185,7 +463,7 @@ $\tfrac{1}{2}$ & 0 & $\tfrac{1}{2}$ & $\tfrac{1}{2}$ \\
 \end{tabular}
 \quad
 \begin{tabular}{c|ccc}
-$\disjc$ & 0 & $\tfrac{1}{2}$ & 1 \\
+$\mathrm{disj}$ & 0 & $\tfrac{1}{2}$ & 1 \\
 \hline
 0 & 0 & $\tfrac{1}{2}$ & 1 \\
 $\tfrac{1}{2}$ & $\tfrac{1}{2}$ & $\tfrac{1}{2}$ & 1 \\
@@ -1193,125 +471,39 @@ $\tfrac{1}{2}$ & $\tfrac{1}{2}$ & $\tfrac{1}{2}$ & 1 \\
 \end{tabular}
 \end{center}
 
-\begin{proof}
-The Lean formalization verifies all cases exhaustively via the theorems
-\texttt{collapse\_neg}, \texttt{collapse\_conj}, and \texttt{collapse\_disj}.
-We sketch the structure here.
+\textbf{Conditioning differs from RM3 implication.}
+RM3 defines implication as $a \to b = \max(\negc a, b)$, giving $0 \to b = 1$
+for all $b$ (ex falso).
+Cred conditioning at evidence $= 0$ is unconstrained.
 
-\textbf{Negation:} Three cases by the value of $\mathrm{collapse}(c)$. If
-$c = 0$, then $\negc c = 1$, so both sides yield 1. If $c = 1$, then
-$\negc c = 0$, so both sides yield 0. If $0 < c < 1$, then $0 < \negc c < 1$,
-so both sides yield $\tfrac{1}{2}$.
-
-\textbf{Conjunction:} Nine cases by the values of $\mathrm{collapse}(c_1)$
-and $\mathrm{collapse}(c_2)$:
-\begin{itemize}
-\item $(0, 0), (0, \tfrac{1}{2}), (0, 1), (\tfrac{1}{2}, 0), (1, 0)$: Zero absorbs---if either
-  $c_i = 0$, then $c_1 \cdot c_2 = 0$, matching RM3.
-\item $(1, 1)$: Identity---$1 \cdot 1 = 1$, matching RM3.
-\item $(1, \tfrac{1}{2}), (\tfrac{1}{2}, 1)$: If $c_1 = 1$ and $0 < c_2 < 1$, then
-  $c_1 \cdot c_2 = c_2$, so $0 < c_1 \cdot c_2 < 1$, collapsing to $\tfrac{1}{2}$. Symmetric
-  for $(\tfrac{1}{2}, 1)$.
-\item $(\tfrac{1}{2}, \tfrac{1}{2})$: The key case---when $0 < c_1, c_2 < 1$, we have
-  $0 < c_1 \cdot c_2 < 1$, so the product collapses to $\tfrac{1}{2}$, matching
-  RM3's $\tfrac{1}{2} \land \tfrac{1}{2} = \tfrac{1}{2}$.
-\end{itemize}
-
-\textbf{Disjunction:} Similarly nine cases:
-\begin{itemize}
-\item $(1, 1), (1, \tfrac{1}{2}), (1, 0), (\tfrac{1}{2}, 1), (0, 1)$: One absorbs---if either
-  $c_i = 1$, then $c_1 \disjc c_2 = 1$, matching RM3.
-\item $(0, 0)$: Identity---$0 \disjc 0 = 0$, matching RM3.
-\item $(0, \tfrac{1}{2}), (\tfrac{1}{2}, 0)$: If $c_1 = 0$ and $0 < c_2 < 1$, then
-  $c_1 \disjc c_2 = c_2$, so $0 < c_1 \disjc c_2 < 1$, collapsing to $\tfrac{1}{2}$.
-  Symmetric for $(\tfrac{1}{2}, 0)$.
-\item $(\tfrac{1}{2}, \tfrac{1}{2})$: The key case---when $0 < c_1, c_2 < 1$,
-  $c_1 \disjc c_2 = c_1 + c_2 - c_1 \cdot c_2$ satisfies $0 < c_1 \disjc c_2 < 1$
-  (since $0 < c_i < 1$ implies the product is positive and the sum is less than 2),
-  so it collapses to $\tfrac{1}{2}$, matching RM3.
-\end{itemize}
-
-The Lean proofs handle all cases by nested case splits on whether each
-$c_i.val$ equals 0, 1, or lies strictly between.
-
-\textbf{Note on operations vs.\ results:} Cred's independence product is multiplication
-($c_1 \cdot c_2$), while RM3 conjunction equals min on $\{0, \tfrac{1}{2}, 1\}$ (ThreeVal.conj
-computes: zero absorbs, one is identity, $\tfrac{1}{2} \land \tfrac{1}{2} = \tfrac{1}{2}$). The homomorphism holds because \emph{collapsed}
-results match: $\text{collapse}(\tfrac{1}{4}) = \tfrac{1}{2} = \min(\tfrac{1}{2}, \tfrac{1}{2})$.
-The algebras are different; only the three-valued quotient coincides.
-\end{proof}
-
-\begin{theorem}[Implication Differs from RM3]
-\label{thm:rm3-impl-differs}
-Three-valued Cred conditioning differs fundamentally from RM3 implication:
 \begin{center}
 \begin{tabular}{c|ccc}
- & \multicolumn{3}{c}{\textit{consequent}} \\
-\textit{antecedent} & 0 & $\tfrac{1}{2}$ & 1 \\
+\multicolumn{4}{c}{\textbf{RM3 Implication}} \\
+& 0 & $\tfrac{1}{2}$ & 1 \\
 \hline
 0 & 1 & 1 & 1 \\
 $\tfrac{1}{2}$ & $\tfrac{1}{2}$ & $\tfrac{1}{2}$ & 1 \\
 1 & 0 & $\tfrac{1}{2}$ & 1
 \end{tabular}
-\quad
+\qquad
 \begin{tabular}{c|ccc}
- & \multicolumn{3}{c}{\textit{joint}} \\
-\textit{evidence} & 0 & $\tfrac{1}{2}$ & 1 \\
+\multicolumn{4}{c}{\textbf{Cred Conditioning}} \\
+\textit{evidence} & \multicolumn{3}{c}{\textit{joint}} \\
+& 0 & $\tfrac{1}{2}$ & 1 \\
 \hline
-0 & --- & --- & --- \\
+0 & * & * & * \\
 $\tfrac{1}{2}$ & 0 & $\dagger$ & 1 \\
 1 & 0 & $\tfrac{1}{2}$ & 1
 \end{tabular}
 \end{center}
-\footnotesize{--- = unconstrained: any value in $\{0, \tfrac{1}{2}, 1\}$ satisfies the chain rule when evidence $= 0$.}
+\footnotesize{* = unconstrained (any value satisfies chain rule);
+$\dagger$ = depends on joint (e.g., $\tfrac{1}{4}/\tfrac{1}{2} = \tfrac{1}{2}$
+or $\tfrac{1}{2}/\tfrac{1}{2} = 1$)}
+\normalsize
 
-\smallskip
-\footnotesize{$\dagger$ = depends on joint: if $\cred(A \land B) = \tfrac{1}{4}$ (independence), then
-$\cred(A \mid B) = \tfrac{1}{2}$; if joint $= \tfrac{1}{2}$, then $\cred(A \mid B) = 1$.}
+\subsection{Boolean Restriction}
 
-\smallskip
-\footnotesize{Terminology: RM3 implication uses \emph{antecedent}/\emph{consequent} (rows/columns in left table).
-Cred conditioning uses \emph{evidence}/\emph{joint} (rows/columns in right table).}
-\end{theorem}
-
-\begin{proof}
-RM3 uses the Kleene strong implication $a \to b = \max(\negc a, b)$,
-giving $0 \to b = 1$ (ex falso).
-Cred conditioning satisfies $\condc{b}{a} \cdot a = \text{joint}$. When $a = 0$:
-$\condc{b}{0} \conjc 0 = 0$, satisfied by any value. Thus Cred conditioning
-is \emph{unconstrained} at $a = 0$, not forced to 1.
-\end{proof}
-
-\begin{remark}[Both Are Paraconsistent]
-Despite differing on implication, both systems are paraconsistent
-(contradictions do not explode). RM3 achieves this via designated-value
-semantics: both 1 and $\tfrac{1}{2}$ are designated, so only premises with
-value 0 fail to drive valid inferences. Cred achieves this via the chain rule:
-conditioning on impossibility is unconstrained, avoiding forcing ex falso directly.
-\end{remark}
-
-\textbf{Summary:} Three-valued Cred $\equiv$ RM3 for $\{\negc, \conjc, \disjc\}$,
-but Cred conditioning $\neq$ RM3 implication. Both reject ex falso, but
-through different mechanisms.
-
-\subsection{\texorpdfstring{Boolean Cred: Restriction to $\{0, 1\}$}{Boolean Cred: Restriction to {0,1}}}
-
-\begin{definition}[Boolean Cred]
-\label{def:boolean-cred}
-\emph{Boolean Cred} is the restriction of the Cred algebra to credences in
-$\{0, 1\}$. Formally, let $\mathbf{B} = \{0, 1\} \subset [0,1]$. Boolean Cred
-is the structure $(\mathbf{B}, \negc, \conjc, \disjc)$ where:
-\begin{align*}
-\negc c &= 1 - c \\
-c_1 \conjc c_2 &= c_1 \cdot c_2 \\
-c_1 \disjc c_2 &= c_1 + c_2 - c_1 \cdot c_2
-\end{align*}
-\end{definition}
-
-\begin{proposition}[Boolean Cred = Boolean Algebra]
-\label{prop:boolean-cred-algebra}
-The operations $\{\negc, \conjc, \disjc\}$ restricted to $\{0, 1\}$ are
-exactly the operations of the two-element Boolean algebra $\mathbf{2}$:
+Restricting Cred to $\{0, 1\}$, the operations $\{\negc, \conjc, \disjc\}$ become:
 \begin{center}
 \begin{tabular}{c|c}
 $c$ & $\negc c$ \\
@@ -1334,817 +526,257 @@ $\disjc$ & 0 & 1 \\
 1 & 1 & 1
 \end{tabular}
 \end{center}
-These match the standard Boolean operations $\neg$, $\land$, $\lor$.
-\end{proposition}
+These are exactly the two-element Boolean algebra operations $(\neg, \land, \lor)$.
 
-\textbf{Conditioning differs from material implication.}
-While Boolean Cred matches Boolean algebra for $\{\negc, \conjc, \disjc\}$,
-conditioning is \emph{not} material implication.
+Conditioning remains distinct from material implication: material implication
+gives $0 \to B = 1$, while conditioning at $0$ is unconstrained.
+To recover classical logic from Boolean Cred, one must \emph{add} the axiom
+$\cred(A \mid 0) = 1$.
 
-Recall material implication: $A \to B := \neg A \lor B$
+\subsection{Relationship to Probability}
+\label{sec:probability}
+
+Every probability space satisfies Cred's axioms: it has values in $[0,1]$,
+the complement $P(\neg A) = 1 - P(A)$, and the chain rule
+$P(A \mid B) \cdot P(B) = P(A \land B)$.
+Probability is therefore a special case of Cred.
+
+What probability adds:
+\begin{itemize}
+\item A sigma-algebra of events, providing structure for ``what can be measured.''
+\item A countably additive measure, determining the joint $P(A \land B)$ from
+the measure rather than requiring it as input.
+\item Sigma-additivity: $P(A \lor B) = P(A) + P(B)$ for disjoint events.
+\end{itemize}
+
+These additions buy concrete benefits.
+The joint is determined, not parameterized: $P(A \land B)$ is a consequence of
+the measure, so conditioning needs only $A$ and $B$, not the joint as a separate
+input.
+Disjunction uses the actual joint via inclusion-exclusion:
+$P(A \lor B) = P(A) + P(B) - P(A \land B)$.
+Conditioning at zero can sometimes be resolved through
+disintegration~\cite{chang1997}, yielding a specific (a.e.\ unique) value
+determined by the measure structure.
+
+What Cred drops: no measure, no sigma-algebra, no additivity, no event structure.
+The product $c_1 \conjc c_2$ is multiplication, not a claim about the actual joint.
+Conditioning requires the joint as external input.
+At evidence zero, Cred leaves the conditional unconstrained rather than
+undefined (as in standard probability) or resolved (as via disintegration).
+
+\subsection{Comparison Table}
+
 \begin{center}
-\begin{tabular}{cc|c|c}
+\small
+\begin{tabular}{lp{3.8cm}p{3.5cm}l}
 \toprule
-evidence & joint & material impl. & conditioning \\
-$\cred(B)$ & $\cred(A \land B)$ & $B \to A$ & $\condc{A}{B}$ \\
+\textbf{System} & \textbf{Core axioms} & \textbf{Adds on top} & \textbf{At evidence $= 0$} \\
 \midrule
-0 & 0 & 1 & --- \\
-1 & 0 & 0 & 0 \\
-1 & 1 & 1 & 1 \\
+\textbf{Cred} & $[0,1]$ + complement + chain rule & --- & Unconstrained \\
+Probability & Cred's axioms & Measure + $\sigma$-additivity & Undefined$^*$ \\
+Product fuzzy ($\Pi$) & $[0,1]$ + product t-norm + residuated impl. & Deductive calculus & $0 \to y = 1$ \\
+Classical logic & $\{0,1\}$ + Boolean ops + material impl. & --- & $0 \to y = 1$ \\
+RM3 & $\{0,\tfrac{1}{2},1\}$ + De Morgan ops + $\max$ impl. & Designated values & $0 \to y = 1$$^\dagger$ \\
 \bottomrule
 \end{tabular}
-
-\smallskip
-\footnotesize{--- = unconstrained (any value in $[0,1]$ satisfies the chain rule when evidence $= 0$)}
-\end{center}
 \normalsize
-\begin{center}
-\begin{minipage}{0.85\textwidth}
-\footnotesize
-Note: This comparison shows how the two operations differ at Boolean values.
-Material implication $B \to A$ is a \emph{function} returning a definite value
-(1 when $B = 0$, regardless of $A$---this is ex falso). Cred conditioning
-$\condc{A}{B}$ when $\cred(B) = 0$ is \emph{underdetermined}---any value in
-$[0,1]$ satisfies the chain rule equation $\condc{A}{B} \conjc 0 = 0$. The key
-difference: material implication \emph{forces} 1; conditioning leaves the
-value \emph{unconstrained}.
-\end{minipage}
 \end{center}
 
-Material implication gives $B \to A = 1$ when $B = 0$ (ex falso).
-The chain rule gives \emph{unconstrained} conditioning when $B = 0$.
+\smallskip
+\noindent $^*$Undefined: the expression is ill-formed (division by zero).
+Unconstrained: the expression is well-formed but any value satisfies it.
 
-\begin{remark}[Algebraic Property Shared with Relevant Logic]
-\label{rmk:relevant-logic-relationship}
-Cred is an \emph{algebra} (operations on credence values); relevant logic R is
-a \emph{logic} (a formal system with a consequence relation). These are different
-kinds of mathematical objects. \textbf{They share exactly one property: both avoid
-forcing that conditioning/implication from impossibility/contradiction yields a
-designated/true value.} This is where the connection ends---the mechanisms,
-syntax, semantics, and algebraic structures differ fundamentally.
-\begin{enumerate}[label=(\roman*)]
-    \item In relevant logic R: $(A \land \neg A) \to B$ is \emph{not} a theorem
-    (variable-sharing requirement excludes it syntactically)
-    \item In the Cred algebra: $\condc{B}{A \land \neg A}$ is \emph{unconstrained}
-    when $A \land \neg A = 0$ (chain rule does not force it semantically)
-\end{enumerate}
-Many systems reject ex falso (paraconsistent logics, LP, RM3, etc.), and
-sharing this single property does not imply that the systems are equivalent or
-that one provides semantics for the other.
-
-Van Fraassen~\cite{vanfraassen1983} showed that probabilistic semantics
-can be given \emph{for} relevant logic---that is, probability theory can
-model relevant logic's consequence relation. This does not mean that Cred
-\emph{is} relevant logic or that Cred provides a semantics for R; rather,
-it establishes that probabilistic and relevance-based approaches can be
-related. The mechanisms differ fundamentally: De Morgan monoids (relevant
-logic) use residuated implication, while Cred uses conditioning via the
-chain rule.
-
-\textbf{Note:} This remark describes a conceptual relationship, not a formal
-correspondence. The Lean formalization does not include relevant logic R,
-Boolean collapse, or a proof of correspondence. The claim is that both systems
-reject ex falso---a shared property verified separately in each system---not
-that we have machine-checked the relationship between them.
-\end{remark}
-
-\subsection{Classical Logic: Adding Ex Falso}
-
-To recover classical logic from Boolean Cred, we must \emph{add} the
-ex falso axiom:
-\[
-\cred(A \mid 0) = 1 \quad \text{for all } A
-\]
-
-This forces the unconstrained cases to equal 1, recovering material
-implication and classical logic.
-
-\subsection{Summary: From Cred to Classical Logic}
-
-The following diagram summarizes the relationships between Cred and simpler
-systems. Only the first arrow (Cred to Three-Valued) is a proven homomorphism
-for $\{\negc, \conjc, \disjc\}$ (Theorem~\ref{thm:rm3-fragment}). The other
-transitions are conceptual: restriction drops information, and replacing
-conditioning with material implication changes the structure.
-
-\begin{center}
-\begin{tikzpicture}[node distance=1.8cm, auto]
-    \node[draw,rectangle,minimum width=6cm,minimum height=1cm] (cred)
-        {\textbf{Cred} $[0,1]$ --- Graded credences, no ex falso};
-    \node[draw,rectangle,minimum width=6cm,minimum height=1cm,below of=cred] (three)
-        {\textbf{Three-Valued} $\{0, \tfrac{1}{2}, 1\}$ --- RM3-like};
-    \node[draw,rectangle,minimum width=6cm,minimum height=1cm,below of=three] (bool)
-        {\textbf{Boolean + Conditioning} $\{0, 1\}$ --- no ex falso};
-    \node[draw,rectangle,minimum width=6cm,minimum height=1cm,below of=bool] (class)
-        {\textbf{Classical} $\{0, 1\}$ + material impl. --- FOL};
-
-    \draw[-{Stealth}] (cred) -- node[right] {collapse: homomorphism (Thm.~\ref{thm:rm3-fragment})} (three);
-    \draw[-{Stealth}] (three) -- node[right] {restrict domain: not a homomorphism} (bool);
-    \draw[-{Stealth}] (bool) -- node[right] {add axiom: $\cred(A \mid 0) = 1$} (class);
-\end{tikzpicture}
-\end{center}
-
-\begin{remark}[Algebra vs Logic]
-\label{rmk:soundness-completeness}
-Cred is an \emph{algebra}, not a \emph{logic}. It equips $[0,1]$ with operations
-$\negc$, $\conjc$, $\disjc$, and primitive conditioning, but it does not define a
-consequence relation ($\vdash$ or $\models$). The distinction matters:
-\begin{itemize}
-    \item \textbf{Algebras} define operations on values
-    (e.g., $c_1 \conjc c_2 = c_1 \cdot c_2$)
-    \item \textbf{Logics} define which inferences are valid (e.g., $A, A \to B \vdash B$)
-\end{itemize}
-When we say Cred ``avoids ex falso,'' we mean the algebraic claim: the chain rule
-constraint does not force $\cred(A \mid 0) = 1$. We do \emph{not} claim Cred has a
-paraconsistent consequence relation.
-
-The Lean formalization verifies \emph{algebraic identities} (e.g., that
-$\negc\negc c = c$), not logical inferences. Questions of soundness and
-completeness require a proof system and semantic entailment, which Cred does
-not define. If one wished to build a logic \emph{from} Cred, one would need to
-specify designated values and inference rules; the resulting
-soundness/completeness questions would depend on those choices.
-
-Comparing Cred to logics (relevant logic, LP, RM3) means comparing algebraic
-properties that both happen to satisfy---not claiming Cred is itself a logic.
-\end{remark}
-
-%=============================================================================
-\section{Comparison with Related Systems}
-%=============================================================================
-
-\subsection{Fuzzy Logic}
-
-Fuzzy logic (Zadeh, 1965) also uses $[0, 1]$ truth values, but differs
-crucially:
-
-\begin{center}
-\begin{tabular}{lcc}
-\toprule
-& \textbf{Standard Fuzzy Logics}${}^*$ & \textbf{Cred} \\
-\midrule
-Conjunction & Various t-norms${}^\dagger$ & Product${}^\S$ \\
-Implication & Residuum of t-norm${}^\dagger$ & Chain rule conditioning \\
-At antecedent $= 0$ & $0 \to b = 1$ (ex falso) & Unconstrained${}^\ddagger$ \\
-At Boolean values & Classical logic & Conditioning (no ex falso) \\
-\bottomrule
-\end{tabular}
+\noindent $^\dagger$RM3 has $0 \to b = 1$ in its truth table, but only values
+$\{1, \tfrac{1}{2}\}$ are designated for valid inference, so explosion is blocked
+at the level of consequence rather than at the truth-table level.
 
 \smallskip
-\footnotesize{${}^*$\L ukasiewicz, G\"odel, and product fuzzy logics. Each has a different t-norm
-and corresponding residuated implication; all satisfy $0 \to b = 1$.}
-
-\smallskip
-\footnotesize{${}^\dagger$\L ukasiewicz: $a \land b = \max(0, a+b-1)$, $a \to b = \min(1, 1-a+b)$.
-G\"odel: $a \land b = \min(a,b)$, $a \to b = 1$ if $a \leq b$, else $b$.
-Product: $a \land b = ab$, $a \to b = 1$ if $a \leq b$ (including $a = 0$), else $b/a$.}
-
-\smallskip
-\footnotesize{${}^\ddagger$``Unconstrained'' means any value satisfies the chain rule constraint;
-this differs from ``undefined'' (probability) and from forcing $1$ (fuzzy implication).
-See Remark~\ref{rmk:unconstrained} for epistemic interpretation.}
-
-\smallskip
-\footnotesize{${}^\S$Cred uses product conjunction because it models independent combination:
-$\cred(A \land B) = \cred(A) \conjc \cred(B)$ when $A$ and $B$ are epistemically independent.
-Alternative t-norms (min, \L ukasiewicz) would yield different algebras; we leave
-exploration of such variants to future work.}
-\end{center}
-
-\begin{remark}
-``Fuzzy logic'' encompasses many systems. The standard ones (\L ukasiewicz,
-G\"odel, product) all have ex falso: their implications satisfy $0 \to b = 1$.
-This is because they define implication as a derived operation (e.g.,
-$\max(1-a, b)$), not as a primitive. Cred avoids ex falso by using
-\emph{conditioning} (a different operation) as primitive.
-\end{remark}
-
-\subsection{Probability Theory}
-
-\begin{center}
-\begin{tabular}{lcc}
-\toprule
-& \textbf{Probability} & \textbf{Cred} \\
-\midrule
-Values & $[0, 1]$ & $[0, 1]$ \\
-Conditioning at 0 & Undefined${}^*$ & Unconstrained${}^*$ \\
-Additivity & $P(A \cup B) = P(A) + P(B) - P(A \cap B)$ & $c_1 \disjc c_2 = c_1 + c_2 - c_1 \cdot c_2$${}^\dagger$ \\
-Application & Random events & Epistemic uncertainty \\
-\bottomrule
-\end{tabular}
-
-\smallskip
-\footnotesize{${}^*$``Undefined'' (probability): the expression $P(A|B)$ when $P(B)=0$ has no value;
-it is a syntactic error to write it. ``Unconstrained'' (Cred): the expression
-$\cred(A \mid B)$ when $\cred(B)=0$ is well-formed but underdetermined by the chain rule constraint.
-Both approaches avoid forcing $\cred(A \mid 0) = 1$; they differ in how.
-See Remark~\ref{rmk:unconstrained} for detailed comparison.}
-
-\smallskip
-\footnotesize{${}^\dagger$The formulas look similar but differ in assumptions:
-probability's inclusion-exclusion applies to any events (using $P(A \cap B)$),
-while Cred's disjunction formula assumes independence (where $\cred(A \land B) = c_1 \cdot c_2$).
-See Remark~\ref{rmk:additivity}.}
-\end{center}
-
-Probability theory treats conditioning at zero as undefined (division by zero);
-Cred treats it as unconstrained (any value satisfies the chain rule). Both
-avoid ex falso, but in different ways: probability by excluding the expression,
-Cred by leaving it underdetermined.
-
-\begin{remark}[Additivity]
-\label{rmk:additivity}
-Standard probability is \emph{finitely additive}: $P(A \cup B) = P(A) + P(B)$
-for disjoint events. Cred's disjunction formula $c_1 \disjc c_2 = c_1 + c_2 -
-c_1 \cdot c_2$ is the inclusion-exclusion formula for \emph{independent} events,
-not disjoint events. For truly disjoint propositions (where $\cred(A \land B) = 0$
-by semantics, not by independence), the joint credence would need to be specified
-separately. Sigma-additivity (countable additivity) is not addressed in the
-present algebraic formulation, which deals only with finitary operations.
-\end{remark}
-
-\subsection{Many-Valued Logics}
-
-\begin{center}
-\begin{tabular}{lccc}
-\toprule
-\textbf{Logic} & \textbf{Values} & \textbf{Ex falso?} & \textbf{Relation to Cred} \\
-\midrule
-Kleene K3~\cite{kleene1952} & $\{T, U, F\}$ & Yes${}^a$ & Different \\
-Priest LP & $\{T, B, F\}$ & No${}^b$ & Shares paraconsistency \\
-RM3 & $\{T, U, F\}$ & No${}^c$ & Three-valued collapse \\
-\L ukasiewicz \L 3 & $\{0, \tfrac{1}{2}, 1\}$ & Yes${}^d$ & Different \\
-\L ukasiewicz $[0,1]$ & $[0, 1]$ & Yes${}^d$ & Different (has ex falso) \\
-\bottomrule
-\end{tabular}
-
-\smallskip
-\footnotesize{${}^a$K3's \emph{conditional connective} satisfies $0 \to b = 1$, but K3
-\emph{consequence} (preserving truth value $1$) does not have explosion: a contradiction
-$A \land \neg A$ has value $U$, and $U$ does not preserve truth to arbitrary conclusions.}
-
-\smallskip
-\footnotesize{${}^b$LP uses $a \to b = \max(\negc a, b)$ but only $\{1, B\}$ are designated
-for valid inference. Since $0$ is not designated, $0 \to b = 1$ does not produce
-explosion in the consequence relation. LP is paraconsistent via designated-value
-semantics, not by rejecting $0 \to b = 1$.}
-
-\smallskip
-\footnotesize{${}^c$RM3 also has $0 \to b = 1$ in its truth table, but like LP, only $1$
-is designated for inference, blocking explosion. RM3 rejects ex falso via
-designated-value semantics, while Cred rejects it via underdetermination.}
-
-\smallskip
-\footnotesize{${}^d$Uses material implication: $a \to b = \max(\negc a, b)$ or similar,
-giving $0 \to b = 1$.}
-\end{center}
-
-Cred's three-valued collapse corresponds to RM3 for $\{\negc, \conjc, \disjc\}$,
-but conditioning differs from RM3 implication (Theorem~\ref{thm:rm3-impl-differs}).
-The full $[0, 1]$ Cred differs from \L ukasiewicz infinite-valued logic: both
-use $[0,1]$ values, but \L ukasiewicz has ex falso via its implication
-$a \to b = \min(1, 1-a+b)$, giving $0 \to b = 1$.
-
-\subsection{Relevant Logic}
-
-Anderson and Belnap's relevant logics (R, E, T) reject ex falso through
-\emph{syntactic} relevance conditions: the antecedent must share a variable
-with the consequent. The algebraic semantics uses De Morgan monoids, where
-relevant implication is defined via residuation~\cite{dunn1976}.
-
-Cred achieves the same \emph{key property} (no ex falso) through
-\emph{semantic} means. The chain rule makes conditioning from impossibility
-unconstrained rather than trivially true. Van Fraassen \cite{vanfraassen1983}
-showed that probabilistic semantics can be given for relevant logic using
-conditional probability, establishing the theoretical connection.
-
-\begin{remark}[Difference in Mechanism]
-The mechanisms differ: relevant logic R uses De Morgan monoid semantics with
-residuated implication ($a \to b = \max\{c : c \cdot a \leq b\}$), while Cred
-uses conditioning via the chain rule. Both achieve relevance---avoiding forcing
-ex falso---but through structurally different means. Cred's approach is
-\emph{semantic} (arising from the algebra of conditioning) rather than
-\emph{syntactic} (variable-sharing) or \emph{algebraic} (residuation).
-\end{remark}
-
-%=============================================================================
-\section{Related Work}
-%=============================================================================
-
-We survey prior work directly relevant to Cred, distinguishing what has been
-done before from our contributions.
-
-\subsection{Probability as Logic: Cox and Jaynes}
-
-\textbf{Cox's Theorem} (1946, 1961)~\cite{cox1961} proves that any consistent
-system for plausible reasoning satisfying certain desiderata must be
-isomorphic to probability theory. \textbf{Jaynes}~\cite{jaynes2003} developed
-this into a philosophical framework: ``Probability Theory: The Logic of Science.''
-
-\begin{quote}
-\emph{``The standard rules of probability can be interpreted as uniquely valid
-principles in logic.''} --- Jaynes
-\end{quote}
-
-\textbf{Relation to Cred:} Cox's desiderata include that conditioning is a
-\emph{function} (unique output for each input). Cred relaxes this: conditioning
-is a \emph{relation} that becomes non-functional when evidence $= 0$. Thus Cred
-does \emph{not} satisfy Cox's desiderata---which is intentional, as this is
-precisely how we avoid being forced to standard probability with undefined
-conditioning at zero.
-
-\textbf{What Cox-Jaynes did NOT address:}
-\begin{itemize}
-    \item At the extremes, they collapse to \emph{classical} logic (with ex falso)
-    \item Conditioning at zero is undefined (not merely unconstrained)
-\end{itemize}
-
-\subsection{Primitive Conditional Probability: Popper, R\'enyi, van Fraassen}
-
-This is the \textbf{closest prior art} to Cred's approach:
-
-\begin{itemize}
-    \item \textbf{R\'enyi (1955, 1970)~\cite{renyi1955,renyi1970}:} First
-    axiomatization of conditional probability as \emph{primitive}, avoiding
-    division entirely. His axioms include what we call the chain rule. The 1970
-    book provides the systematic development.
-
-    \item \textbf{Popper (1959)~\cite{popper1959}:} Argued that conditional
-    probability is more fundamental than absolute probability. Developed
-    ``Popper functions'' for conditional probability.
-
-    \item \textbf{van Fraassen~\cite{vanfraassen1976}:} Extended the Popper-R\'enyi
-    approach, showing how to handle conditionals probabilistically. Called Lewis's
-    triviality result ``a veritable bombshell.''
-\end{itemize}
-
-\textbf{Critical assessment:} These authors axiomatized $P(A|B)$ primitively
-using essentially our chain rule: $P(A|B) \cdot P(B) = P(A \land B)$.
-
-\textbf{Van Fraassen (1983)~\cite{vanfraassen1983}:} In ``Gentlemen's Wagers:
-Relevant Logic and Probability,'' van Fraassen showed that conditional
-probability functions can model relevant logic's consequence relation.
-Specifically, he demonstrated that:
-\begin{itemize}
-    \item A probability function $P$ with primitive conditioning can validate
-    relevant implication while not forcing ex falso
-    \item The ``betting'' interpretation of conditionals provides a semantic
-    framework: rational bets need not depend on impossible events
-    \item When $P(A) = 0$, the conditional $P(B|A)$ need not be forced to $1$
-\end{itemize}
-\textbf{Relation to Cred:} Van Fraassen's construction uses standard probability
-with primitive conditioning; Cred formalizes this as an algebra with machine-checked
-proofs. The key insight---that chain-rule conditioning avoids forcing ex falso---is
-van Fraassen's. Cred's contribution is the systematic development with Lean
-verification and the three-valued collapse homomorphism connecting to RM3.
-
-\textbf{Cred's specific contributions beyond this prior work:}
-\begin{itemize}
-    \item The three-valued collapse homomorphism $[0,1] \to \{0,\frac{1}{2},1\}$
-    with Lean-verified preservation of $\{\negc, \conjc, \disjc\}$ operations,
-    explicitly connecting to RM3 relevant logic
-    \item Treatment of self-reference via fixed points with machine-verified proofs
-    \item Complete Lean 4 formalizations of the algebra and its properties
-\end{itemize}
-
-\subsection{Adams and Lewis: Conditionals and Triviality}
-
-\textbf{Adams (1965, 1998)~\cite{adams1965,adams1998}:} Developed probabilistic semantics
-for conditionals where $P(A \to B) = P(B|A)$ (``Adams' Thesis'').
-
-\textbf{Lewis's Triviality Result (1976)~\cite{lewis1976}:} Proved that treating
-conditionals as propositions with $P(A \to B) = P(B|A)$ leads to ``triviality''---
-the probability function must be degenerate.
-
-\textbf{Adams's solution:} Adams restricts to ``flat'' conditionals---no nested
-conditionals, no conditionals in Boolean combinations. This restriction avoids
-the triviality result while preserving $P(A \to B) = P(B|A)$ for simple conditionals.
-
-\textbf{How Cred sidesteps triviality:} Like Adams, Cred avoids embedding
-conditionals as propositions:
-\begin{enumerate}[label=(\roman*)]
-    \item The conditioning operation $\cred(A \mid B)$ is a structural operation,
-    not a credence assigned to a ``conditional proposition.''
-    \item We do NOT define $\cred(A \to B)$ as a credence value.
-    \item Nested conditionals like $\cred((A \mid B) \mid C)$ are not formed;
-    the conditioning structure takes credence values as inputs, not conditionals.
-\end{enumerate}
-This architectural choice---shared with Adams's approach---avoids the triviality
-result's preconditions. The difference is that Cred additionally leaves
-conditioning at zero underdetermined, rather than requiring functional behavior
-everywhere.
-
-\subsection{Relevant Logic}
-
-\textbf{Anderson \& Belnap (1975)~\cite{anderson1975}:} Comprehensive development
-of relevant logics R and E, avoiding ex falso via \emph{syntactic} relevance
-conditions (antecedent and consequent must share a propositional variable).
-
-\textbf{Dunn (1976)~\cite{dunn1976}:} Algebraic semantics connecting relevant
-logic to De Morgan lattices.
-
-\textbf{RM3 (three-valued relevant logic):} Studied in Meyer \&
-Routley~\cite{meyer1972} and related work; corresponds to our three-valued collapse.
-
-\textbf{Key difference:} Anderson-Belnap enforce relevance \emph{syntactically}.
-Cred achieves relevance \emph{semantically} through the chain rule.
-
-\subsection{Paraconsistent Logic}
-
-\begin{itemize}
-    \item \textbf{da Costa (1974)~\cite{dacosta1974}:} Paraconsistent logics
-    tolerating contradiction without explosion.
-
-    \item \textbf{Priest (1979)~\cite{priest1979}:} Logic of Paradox (LP),
-    assigning ``both true and false'' to paradoxical sentences.
-
-    \item \textbf{Brady~\cite{brady2006} \& Weber~\cite{weber2010}:} Relevant
-    set theory with unrestricted comprehension.
-\end{itemize}
-
-\begin{remark}[Comparison with LP]
-Cred and Priest's Logic of Paradox (LP) both handle contradictions without
-explosion, but differ fundamentally:
-\begin{center}
-\begin{tabular}{lcc}
-\toprule
-& \textbf{LP} & \textbf{Cred} \\
-\midrule
-Paradox treatment & ``Both'' (true AND false)${}^*$ & $\tfrac{1}{2}$ (intermediate value) \\
-Semantic structure & Three-valued with gluts & Continuum $[0,1]$ \\
-Ex falso avoided via & Designated values${}^\dagger$ & Chain rule underdetermination \\
-Consequence relation & Defined (LP-valid inferences) & Not defined (algebra only) \\
-\bottomrule
-\end{tabular}
-
-\smallskip
-\footnotesize{${}^*$In LP, ``both'' (B) means the sentence is \emph{both true and false}---a truth-value
-glut. This differs from Cred's $\tfrac{1}{2}$, which is an intermediate value on a continuum,
-not a superposition of classical values.}
-
-\smallskip
-\footnotesize{${}^\dagger$LP defines $0 \to b = 1$ (material implication), but only $\{1, B\}$ are
-\emph{designated} for valid inference. Since a contradiction $(A \land \neg A)$ has
-value $B$, not $1$, and premises must be designated to transmit validity,
-explosion is blocked at the level of consequence, not truth tables.}
-\end{center}
-LP is a \emph{logic} with a defined consequence relation; Cred is an \emph{algebra}
-of credence values. LP avoids explosion via designated-value semantics (only
-$\{1, B\}$ can serve as premises); Cred avoids forcing it via the chain rule making
-conditioning at zero underdetermined.
-
-\textbf{Note on ``avoiding ex falso'' for an algebra:} Since Cred does not define
-a consequence relation, ``avoids forcing ex falso'' means the chain rule constraint does not
-\emph{force} $\cred(A \mid 0) = 1$. If a consequence relation were defined for Cred,
-whether it has explosion would depend on the choice of designated values and
-inference rules---not determined by the algebra alone.
-\end{remark}
-
-\subsection{Fuzzy Logic and Many-Valued Logics}
-
-\begin{itemize}
-    \item \textbf{Zadeh (1965)~\cite{zadeh1965}:} Fuzzy sets and fuzzy logic
-    with $[0,1]$ truth values.
-
-    \item \textbf{\L ukasiewicz (1920)~\cite{lukasiewicz1920}:} Three-valued
-    and infinite-valued logics.
-
-    \item \textbf{H\'ajek (1998)~\cite{hajek1998}:} Comprehensive treatment of
-    fuzzy logic and t-norms.
-\end{itemize}
-
-\textbf{Critical distinction:}
-\begin{center}
-\begin{tabular}{lcc}
-\toprule
-& \textbf{Fuzzy/\L ukasiewicz} & \textbf{Cred} \\
-\midrule
-At antecedent $= 0$ & $0 \to b = 1$ & Underdetermined${}^*$ \\
-At Boolean values & Classical logic & Conditioning (no ex falso) \\
-Implication type & Residuated${}^\dagger$ & Chain rule \\
-\bottomrule
-\end{tabular}
-
-\smallskip
-\footnotesize{${}^*$``Underdetermined'' means the chain rule constraint does not fix a unique value
-for $\cred(A \mid 0)$---any value in $[0,1]$ satisfies the constraint. This differs from
-``undefined'' (probability) and from $0 \to b = 1$ (fuzzy/classical).}
-
-\smallskip
-\footnotesize{${}^\dagger$Fuzzy implications are residua of t-norms: $a \to b = \sup\{c : a \land c \leq b\}$.
-\L ukasiewicz: $\max(1-a,b)$ is the residuum of $\max(0, a+b-1)$.}
-\end{center}
-
-Fuzzy logics generalize \emph{classical} logic to $[0,1]$, preserving
-$0 \to b = 1$. Cred uses a different operation (conditioning via chain rule)
-that leaves $\cred(A \mid 0)$ underdetermined. At Boolean values $\{0,1\}$,
-fuzzy implication reduces to material implication (with ex falso), while
-Cred conditioning remains distinct from material implication (without ex falso).
-
-\subsection{Markov Categories}
-
-\textbf{Fritz (2020)~\cite{fritz2020}:} Categorical treatment of probability
-using ``Markov categories'' where conditioning is handled via disintegration
-without division.
-
-This is mathematically sophisticated but focused on measure theory, not logic
-foundations or avoiding ex falso.
-
-\subsection{Measure-Theoretic Probability and Disintegration}
-\label{sec:measure-theory}
-
-In measure-theoretic probability, conditioning on events of measure zero requires
-the machinery of \emph{regular conditional probability} and
-\emph{disintegration}~\cite{chang1997}. When $P(B) = 0$, one cannot simply compute
-$P(A|B) = P(A \cap B)/P(B)$; instead, conditional probability is defined as an
-essentially unique measurable function satisfying certain integral equations.
-
-This approach handles conditioning on null sets rigorously but differs from Cred's
-treatment: measure-theoretic conditioning yields a \emph{specific} (a.e.\ unique)
-value determined by the underlying measure structure, whereas Cred's chain rule
-leaves conditioning on zero \emph{unconstrained} by the constraint. Both avoid the
-na\"ive ``undefined'' of elementary probability, but through different mechanisms.
-A detailed comparison of Cred with measure-theoretic conditioning is beyond
-the scope of this paper.
-
-\subsection{Summary: What is Novel in Cred}
-
-Given the extensive prior art, we claim the following contributions are novel:
-
-\begin{enumerate}
-    \item \textbf{Systematic avoidance of forced ex falso via chain rule:} While
-    Popper-R\'enyi axiomatized primitive conditioning and van Fraassen
-    connected probability to relevant logic, we provide a systematic
-    development showing that the chain rule constraint naturally makes conditioning
-    from impossibility unconstrained, thereby avoiding forcing ex falso without
-    syntactic relevance conditions.
-
-    \item \textbf{The three-valued collapse homomorphism:} The proven
-    homomorphism $[0,1] \to \{0, \frac{1}{2}, 1\}$ preserves
-    $\{\negc, \conjc, \disjc\}$ (Theorem~\ref{thm:rm3-fragment}, Lean-verified),
-    connecting Cred to RM3. Further restriction to $\{0,1\}$ is conceptual
-    (not a homomorphism); conditioning remains distinct from material
-    implication (Theorem~\ref{thm:rm3-impl-differs}).
-
-    \item \textbf{Shared property with relevant logic:} Boolean Cred
-    with conditioning shares the property of not forcing ex falso with relevant
-    logic, achieved through the chain rule rather than syntactic
-    variable-sharing. This is a shared property, not a correspondence.
-
-    \item \textbf{Self-reference fixed points:} Assigning intermediate values
-    to paradoxical sentences is not new---three-valued logics since \L ukasiewicz
-    (1920) use $\tfrac{1}{2}$ for paradoxes. Our contribution is the Lean
-    formalization of Cred's negation fixed point, not the underlying idea.
-
-    \item \textbf{Machine formalization:} Lean 4 formalization of the core
-    algebra (this is novel for Cred specifically, not for logic formalization
-    in general).
+The table makes the hierarchy explicit.
+Probability is a special case of Cred (same chain rule, additional structure).
+Product fuzzy logic shares the product and De Morgan dual with Cred but diverges
+on implication: residuated implication forces $0 \to y = 1$, while Cred's
+chain-rule conditioning is unconstrained at zero.
+Neither is a special case of the other.
+Cred shares with relevant logic the property that conditioning/implication from
+impossibility is not forced to yield $1$; the mechanisms differ (chain rule
+constraint vs.\ syntactic variable-sharing).
+
+\subsection{Related Work}
+
+Cred sits in a web of prior work.
+The hierarchy---Cred as a weakening of probability, distinct from product fuzzy
+logic---organizes the relationships.
+
+\textbf{Primitive Conditional Probability.}
+R\'enyi~\cite{renyi1955,renyi1970} first axiomatized conditional probability as
+primitive, with the chain rule as a defining constraint rather than division.
+Popper~\cite{popper1959} independently argued that conditional probability is more
+fundamental than absolute probability, developing ``Popper functions.''
+Van Fraassen~\cite{vanfraassen1976} extended the Popper-R\'enyi approach.
+Cred inherits the chain rule from this tradition but drops the measure space
+entirely.
+
+\textbf{Probability and Relevant Logic.}
+Van Fraassen~\cite{vanfraassen1983} showed that conditional probability functions
+can model relevant logic's consequence relation, connecting probabilistic and
+relevance-based approaches.
+Cred makes this connection algebraically explicit through the collapse homomorphism.
+
+\textbf{Product Fuzzy Logic.}
+H\'ajek~\cite{hajek1998} developed product logic ($\Pi$), which uses the product
+t-norm with \emph{residuated} implication ($x \to y = \min(y/x, 1)$ for $x > 0$,
+and $0 \to y = 1$); the residuated implication forces ex falso.
+Klement, Mesiar, and Pap~\cite{klement2000} gave a comprehensive treatment of
+triangular norms; the product t-norm, probabilistic sum, and standard complement
+form the product De Morgan triplet.
+Cred shares this triplet but replaces the residuated implication with chain-rule
+conditioning---the point of divergence.
+
+\textbf{Fuzzy Logic and Conditional Probability.}
+H\'ajek, Godo, and Esteva~\cite{hajek1995} studied conditional probability
+within fuzzy logic and noted that the product residuated implication is
+discontinuous.
+As a workaround, they expressed $P(\psi \mid \varphi) \geq a$ via the
+chain rule constraint $P(\varphi \land \psi) \geq a \cdot P(\varphi)$
+rather than division---essentially the same move Cred makes.
+They treated this as a technical device; Cred adopts it as the defining
+design choice and explores its algebraic consequences.
+
+\textbf{Cox-Jaynes Probability Logic.}
+Cox's theorem~\cite{cox1961} proves that any consistent system for plausible
+reasoning satisfying certain desiderata must be isomorphic to probability theory.
+Jaynes~\cite{jaynes2003} developed this into ``Probability Theory: The Logic of
+Science.''
+Cox's desiderata require conditioning to be a \emph{function} (unique output for
+each input). Cred relaxes this: conditioning is a \emph{relation} that becomes
+non-functional when evidence $= 0$.
+
+\textbf{Conditionals and Triviality.}
+Adams~\cite{adams1965,adams1998} developed probabilistic semantics for conditionals
+where $P(A \to B) = P(B|A)$.
+Lewis~\cite{lewis1976} proved that treating conditionals as propositions with this
+property leads to triviality.
+Cred sidesteps triviality by treating conditioning as a structural operation,
+not as a credence assigned to a conditional proposition.
+
+\textbf{Relevant Logic.}
+Anderson and Belnap~\cite{anderson1975} developed relevant logics R and E,
+rejecting ex falso via syntactic relevance conditions.
+Dunn~\cite{dunn1976} provided algebraic semantics connecting relevant logic to
+De Morgan lattices.
+RM3~\cite{meyer1972} is a three-valued relevant logic; our collapse homomorphism
+connects Cred to its underlying algebra.
+
+\textbf{Paraconsistent Logic.}
+Da Costa~\cite{dacosta1974} developed paraconsistent logics tolerating contradiction
+without explosion.
+Priest~\cite{priest1979} introduced the Logic of Paradox (LP), assigning ``both
+true and false'' to paradoxical sentences.
+Brady~\cite{brady2006} and Weber~\cite{weber2010} developed paraconsistent set
+theory with unrestricted comprehension.
+
+\textbf{Many-Valued Logics.}
+\L ukasiewicz~\cite{lukasiewicz1920} introduced three-valued and infinite-valued logics.
+Kleene~\cite{kleene1952} developed strong and weak three-valued logics.
+Zadeh~\cite{zadeh1965} introduced fuzzy sets with $[0,1]$ membership degrees.
+
+\textbf{Measure-Theoretic Conditioning.}
+In measure theory, conditioning on null sets uses disintegration~\cite{chang1997},
+yielding a specific (a.e.\ unique) value determined by the measure structure.
+Fritz~\cite{fritz2020} treats conditioning categorically via Markov categories.
+Cred drops the measure, so disintegration does not apply; at evidence zero, the
+conditional is unconstrained rather than determined.
+
+\textbf{Cred's Contributions.}
+The product De Morgan triplet is standard; primitive conditioning is due to
+R\'enyi and Popper; the connection to relevant logic is van Fraassen's;
+the chain rule constraint in a fuzzy setting appears in H\'ajek et al.
+Given this prior art, Cred contributes:
+\begin{enumerate}[label=(\arabic*)]
+\item Identifying the chain rule as the sole structural axiom needed beyond
+$[0,1]$ and complement---a weakening of probability that retains conditioning
+while dropping the measure.
+\item Adopting chain-rule conditioning as a design choice (not a workaround),
+replacing residuated implication in the product De Morgan triplet.
+\item The explicit three-valued collapse homomorphism to RM3 with Lean
+verification.
+\item Systematic treatment of fixed points with machine-checked proofs.
 \end{enumerate}
 
-\begin{remark}[Priority and Scope]
-We do not claim to have invented primitive conditional probability
-(Popper-R\'enyi) or probabilistic semantics for relevant logic (van Fraassen).
-Our contribution is the systematic \emph{integration}: using the chain rule
-to avoid forcing ex falso, noting the shared property with relevant logic, and providing
-machine-verified proofs.
-\end{remark}
-
 %=============================================================================
-\section{The Lean Formalization}
+\section{Lean Formalization}
+\label{sec:lean}
 %=============================================================================
 
-The core credence algebra has been formalized in Lean 4 using the
-Mathlib library. The formalization provides machine-checked proofs of
-algebraic properties \emph{derived from} the chain rule constraint---the constraint
-itself is postulated as a constraint in the \texttt{Conditioning} structure,
-not computed or derived. Specifically:
+The core algebra is formalized in Lean~4 with Mathlib.
+The formalization comprises approximately 870 lines covering:
+
 \begin{itemize}
-    \item \textbf{Primitive constraint:} The chain rule $\texttt{condCred} \cdot \texttt{evidence} = \texttt{joint}$
-    is a field constraint in the \texttt{Conditioning} structure.
-    \item \textbf{Verified:} Existence of satisfying values (when evidence $> 0$),
-    uniqueness (when evidence $> 0$), underdetermination (when evidence $= 0$),
-    and all algebraic identities for $\negc$, $\conjc$, $\disjc$.
+\item \textbf{Types:} \texttt{Credence} (value in $[0,1]$), \texttt{Conditioning}
+(packaging conditional with chain rule proof), \texttt{ThreeVal} (three-valued type).
+\item \textbf{Operations:} \texttt{neg}, \texttt{conj}, \texttt{disj}, \texttt{spread},
+\texttt{certainty}, \texttt{collapse}.
+\item \textbf{Theorems:} Algebraic properties, conditioning behavior, fixed points,
+collapse homomorphism.
 \end{itemize}
-This approach---axiomatizing a relation rather than defining a total function---is
-consistent with treating conditioning as a relation (Section~\ref{sec:conditioning}).
-The formalization covers all theorems in Sections 2--5 and the collapse
-homomorphism (Theorem~6.1). Sections 6.2--6.4 contain conceptual comparisons
-to other systems without Lean verification.
 
-\subsection{File Structure}
-
+\textbf{Key definitions (Lean syntax):}
 \begin{verbatim}
-lean/
-  lakefile.toml          -- Project configuration
-  lean-toolchain         -- Lean version (4.16.0)
-  Cred/
-    Basic.lean           -- Core credence algebra (~870 lines)
-\end{verbatim}
-
-\noindent The formalization comprises approximately 870 lines of Lean~4 code:
-\begin{itemize}
-    \item \textbf{Definitions:} Core types (\texttt{Credence}, \texttt{Conditioning},
-    \texttt{ThreeVal}) and operations (\texttt{neg}, \texttt{conj}, \texttt{disj},
-    \texttt{spread}, \texttt{certainty}, \texttt{collapse})
-    \item \textbf{Theorems:} 75 machine-checked proofs covering algebraic properties,
-    conditioning behavior, fixed points, and collapse homomorphisms
-    \item \textbf{Proof techniques:} \texttt{ring} for polynomial identities,
-    \texttt{nlinarith} for nonlinear arithmetic, \texttt{linarith} for linear
-    arithmetic, and explicit case analysis
-\end{itemize}
-
-\subsection{Key Definitions (Lean Syntax)}
-
-\begin{verbatim}
--- Credence type
 structure Credence where
   val : R
   nonneg : 0 <= val
   le_one : val <= 1
 
--- Negation: neg (proof obligations omitted)
-def neg (c : Credence) : Credence where
-  val := 1 - c.val
-  -- nonneg, le_one proofs omitted
-
--- Conjunction: conj (proof obligations omitted)
-def conj (c1 c2 : Credence) : Credence where
-  val := c1.val * c2.val
-  -- nonneg, le_one proofs omitted
-
--- Conditioning: Conditioning structure
--- In Lean, conj is used (multiplication on credence values).
--- The paper writes the chain rule with ordinary multiplication (·).
 structure Conditioning (joint evidence : Credence) where
   condCred : Credence
   chainRule : conj condCred evidence = joint
-    -- multiplication on credence values
 \end{verbatim}
 
-\noindent\textbf{Note on Lean notation:} In the \texttt{Conditioning} structure,
-$\otimes$ is just multiplication of credence values. The \texttt{joint} parameter
-is the credence $\cred(A \land B)$ supplied as input---it is \emph{not} computed
-via the independence product from marginal credences. See Remark~\ref{rmk:product-vs-joint}
-for the distinction between $c_1 \conjc c_2$ (independence product) and $\cred(A \land B)$
-(joint credence).
+The chain rule uses \texttt{conj} (multiplication on credence values).
+The \texttt{joint} parameter is supplied as input, representing $\cred(A \land B)$.
 
-\subsection{Verified Theorems}
-
-The algebraic theorems in Sections 2--5 have been formally verified. Notable proofs:
-
+\textbf{Key theorems:}
 \begin{itemize}
-    \item \textbf{neg\_neg} (involution): Uses Lean's \texttt{ring} tactic
-    \item \textbf{conj\_disj\_not\_distrib} (non-distributivity): Counterexample at $c = \tfrac{1}{2}$
-    \item \textbf{conditioning\_mk}: Constructs witness via division when evidence $> 0$
-    \item \textbf{conditioning\_unique}: Algebraic manipulation proves uniqueness
-    \item \textbf{conditioning\_zero\_any}: Any credence satisfies chain rule when evidence $= 0$
-    \item \textbf{liar\_fixed\_point}: $\negc \tfrac{1}{2} = \tfrac{1}{2}$
-    \item \textbf{neg\_fixed\_point\_unique}: $\tfrac{1}{2}$ is the unique negation fixed point
+\item \texttt{conditioning\_zero\_any}: any credence satisfies chain rule when evidence $= 0$
+\item \texttt{conditioning\_unique}: uniqueness when evidence $> 0$
+\item \texttt{liar\_fixed\_point}: $\negc \tfrac{1}{2} = \tfrac{1}{2}$
+\item \texttt{neg\_fixed\_point\_unique}: $\tfrac{1}{2}$ is the unique negation fixed point
+\item \texttt{collapse\_neg}, \texttt{collapse\_conj}, \texttt{collapse\_disj}: homomorphism proofs
+\item \texttt{conj\_disj\_not\_distrib}: non-distributivity counterexample
+\item \texttt{conj\_idempotent\_iff}: idempotence only at $\{0,1\}$
 \end{itemize}
 
-The formalization also includes additional helper lemmas and derived results not
-individually referenced in this paper:
-\begin{itemize}
-    \item \textbf{Spread and certainty:} \texttt{spread\_val}, \texttt{spread\_half},\\
-    \texttt{spread\_le\_quarter}, \texttt{spread\_eq\_zero\_iff},\\
-    \texttt{certainty\_val}, \texttt{certainty\_half},\\
-    \texttt{certainty\_ge\_three\_quarters}, \texttt{certainty\_eq\_one\_iff}
-    \item \textbf{Idempotence:} \texttt{conj\_idempotent\_iff}, \texttt{conj\_not\_idempotent}
-    \item \textbf{Collapse homomorphisms:} \texttt{collapse\_neg}, \texttt{collapse\_conj},
-    \texttt{collapse\_disj} (proving Theorem~\ref{thm:rm3-fragment})
-    \item \textbf{Three-valued algebra:} \texttt{ThreeVal} type with \texttt{rm3\_impl},
-    \texttt{rm3\_ex\_falso}, and the complete RM3 implication table
-    \item \textbf{Conditioning table entries:} \texttt{cond\_zero\_zero\_any},
-    \texttt{cond\_pos\_unique},\\
-    \texttt{cond\_quarter\_half}, and related theorems
-    verifying Theorem~\ref{thm:rm3-impl-differs}
-\end{itemize}
-
-\begin{remark}[Verification and Naming]
-The Lean formalization can be verified by running \texttt{lake build} in the
-\texttt{lean/} directory. The code uses Lean 4.16.0 with Mathlib4 v4.16.0
-(see \texttt{lean-toolchain} and \texttt{lakefile.toml}).
-Comments reference Lean theorem and definition names (e.g., \texttt{neg\_neg},
-\texttt{conditioning\_zero\_any}), which are stable identifiers.
-The Lean code defines \texttt{half} as the credence $\tfrac{1}{2}$ and uses \texttt{ThreeVal}
-with constructors \texttt{zero}, \texttt{half}, \texttt{one}---numerical names
-that are interpretation-neutral.
-
-\textbf{Notational convention:} We write special values like $\tfrac{1}{2}$,
-$\tfrac{1}{4}$, and $\tfrac{3}{4}$ as rationals (to emphasize exactness), while
-other examples may use decimals (e.g.\ $0.7$). In particular, $\tfrac{1}{2}$ and
-$0.5$ denote the same real number.
-
-Note that RM3's middle value is sometimes interpreted as ``both''
-(true and false) or ``neither'' (a gap); Cred's $\tfrac{1}{2}$ represents intermediate
-credence on a continuum, a different interpretation that happens to yield
-matching truth tables for $\{\negc, \conjc, \disjc\}$.
-
-\textbf{Noncomputable collapse:}
-The \texttt{collapse} function is marked \texttt{noncomputable} in Lean because
-real number equality is undecidable in constructive mathematics---comparing
-whether $c = 0$ or $c = 1$ requires classical logic.
-The proofs remain valid; only runtime computation is unavailable.
-\end{remark}
-
-\begin{remark}[Conditioning Satisfiability]
-\label{rmk:decidability}
-Given joint and evidence credences, a valid conditioning exists iff
-joint $\leq$ evidence (when evidence $> 0$) or joint $= 0$ (when evidence $= 0$).
-This follows from Theorem~\ref{thm:condexists} (existence when evidence $> 0$)
-and Theorem~\ref{thm:noexfalso} (any value satisfies the chain rule when
-evidence $= 0$).
-\end{remark}
-
-\begin{remark}[Computational Complexity]
-\label{rmk:complexity}
-All Cred operations are constant-time arithmetic: negation, independence product, and
-disjunction each require $O(1)$ operations. Conditioning existence checking is
-also $O(1)$: for evidence $> 0$, verify joint $\leq$ evidence; for evidence $= 0$,
-any conditioning trivially exists (joint must be $0$).
-\end{remark}
+Verification: \texttt{cd lean \&\& lake build}.
+Toolchain: Lean 4.16.0 with Mathlib 4.16.0.
 
 %=============================================================================
 \section{Conclusion}
+\label{sec:conclusion}
 %=============================================================================
 
-We have presented Cred, a credence algebra with primitive conditioning. The
-key contributions are:
+Cred is probability without the measure: values in $[0,1]$, the complement, and the
+chain rule as the sole structural axiom.
+Every probability space satisfies these axioms; Cred drops the sigma-algebra
+and sigma-additivity.
+When evidence has credence zero, the chain rule is satisfied by any value,
+leaving the conditional unconstrained---avoiding ``from impossibility, anything
+follows'' by the same chain rule that probability uses, without the measure
+theory that would resolve it.
 
-\begin{enumerate}
-    \item \textbf{Primitive conditioning:} The chain rule constraint
-    $\cred(A \mid B) \conjc \cred(B) = \cred(A \land B)$ is a design choice.
-    From this choice, unconstrained conditioning at zero emerges as a
-    mathematical consequence: when $\cred(B) = 0$, any value satisfies the
-    equation, so the constraint imposes no constraint.
+The product and its De Morgan dual provide the natural algebra on $[0,1]$,
+shared with product fuzzy logic.
+The divergence is in conditioning: where product fuzzy logic uses residuated
+implication (forcing ex falso), Cred uses the chain rule.
+The three-valued collapse establishes a surjective homomorphism to RM3 for
+$\{\negc, \conjc, \disjc\}$, while conditioning remains distinct from RM3
+implication.
+The negation fixed point at $\tfrac{1}{2}$ provides a natural algebraic value
+for self-negating sentences.
+All core results are machine-checked in Lean~4.
 
-    \item \textbf{Shared property with relevant logic:} The property of not
-    forcing ex falso follows from the chain rule constraint. This parallels a
-    key feature of relevant logic (though achieved through different mechanisms:
-    chain rule vs.\ variable-sharing).
-
-\item \textbf{Fixed points:} The negation operation has a unique fixed
-    point at $\tfrac{1}{2}$, providing a natural (though not novel) algebraic value for
-    self-negating sentences. This illustrates the algebra, not a solution to
-    semantic paradoxes.
-
-    \item \textbf{Formalization:} Machine-checked proofs in Lean 4 for the core
-    algebra (Sections 2--5). Section 6 comparisons are conceptual, not formalized.
-
-    \item \textbf{Connections:} Clear relationships to probability theory,
-    fuzzy logic, relevant logic, and paraconsistent logic.
-\end{enumerate}
-
-Future work includes:
-\begin{itemize}
-    \item Extending Cred to first-order with graded quantifiers. One approach
-    defines
-    \[
-        \cred(\forall x.\, P(x)) = \inf\{\cred(P(a)) : a \in D\}
-    \]
-    for domain $D$, requiring $D$ to be non-empty and the infimum to exist
-    (e.g., $D$ finite or the credence function bounded below). Conditioning raises
-    further questions: $\cred(\forall x.\, P(x) \mid Q)$ might require
-    $\inf\{\cred(P(a) \mid Q) : a \in D\}$, but the interaction between
-    infinitary operations and unconstrained conditioning (when $\cred(Q) = 0$)
-    remains an open problem.
-    \item Exploring whether Cred's treatment of conditioning could inform
-    set-theoretic constructions. Prior work on paraconsistent set theory
-    (Brady~\cite{brady2006}, Weber~\cite{weber2010}) suggests this direction,
-    though significant open questions remain about whether graded credences
-    offer advantages over existing approaches.
-    \item Formalizing additional theorems in Lean, particularly extending
-    the collapse homomorphism and RM3 correspondence.
-\end{itemize}
-
-%=============================================================================
-% Glossary
-%=============================================================================
-
-\subsection*{Glossary of Key Terms}
-
-\begin{description}
-\item[Credence] A value in $[0,1]$ representing degree of belief (epistemic)
-    or degree of truth (semantic). Section~1.1.
-\item[Independence product ($\conjc$)] Algebraic product $c_1 \cdot c_2$;
-    equals joint credence only when propositions are independent. Definition~\ref{def:indep-conj}.
-\item[Disjunction ($\disjc$)] De Morgan dual: $c_1 + c_2 - c_1 c_2$.
-    Definition~\ref{def:disj}.
-\item[Conditioning] Primitive operation governed by the chain rule constraint.
-    Definition~\ref{def:conditioning}.
-\item[Chain rule] The defining equation $\cred(A \mid B) \conjc \cred(B) = \cred(A \land B)$.
-    Definition~\ref{def:conditioning}.
-\item[Unconstrained] When $\cred(B) = 0$, any value satisfies the chain rule;
-    the constraint does not determine $\cred(A \mid B)$. Theorem~\ref{thm:noexfalso}.
-\item[Ex falso quodlibet] ``From falsehood, anything follows''; the principle
-    that a contradiction implies any conclusion. Section~1.3.
-\item[Collapse] Mapping continuous credences to discrete values
-    ($[0,1] \to \{0, \frac{1}{2}, 1\}$ or $\{0,1\}$). Section~6.
-\item[RM3] A three-valued relevant logic; Cred's three-valued collapse
-    matches RM3 for $\{\negc, \conjc, \disjc\}$. Theorem~\ref{thm:rm3-fragment}.
-\item[Spread] The function $c(1-c)$, measuring distance from certainty.
-    Section~5.
-\end{description}
+Future work includes extending Cred to first-order with graded quantifiers and
+exploring connections to paraconsistent set theory.
 
 %=============================================================================
 % Bibliography
@@ -2167,20 +799,20 @@ Anderson, A.R. and Belnap, N.D.
 \newblock \emph{Entailment: The Logic of Relevance and Necessity}, Vol.~I.
 \newblock Princeton University Press, 1975.
 
-\bibitem{cox1961}
-Cox, R.T.
-\newblock \emph{The Algebra of Probable Inference}.
-\newblock Johns Hopkins University Press, 1961, x + 114 pp.
-
 \bibitem{brady2006}
 Brady, R.
 \newblock \emph{Universal Logic}.
-\newblock CSLI Lecture Notes, vol.~109. CSLI Publications, 2006, xii + 346 pp.
+\newblock CSLI Lecture Notes, vol.~109. CSLI Publications, 2006.
 
 \bibitem{chang1997}
 Chang, J.T. and Pollard, D.
 \newblock Conditioning as disintegration.
 \newblock \emph{Statistica Neerlandica}, 51(3):287--317, 1997.
+
+\bibitem{cox1961}
+Cox, R.T.
+\newblock \emph{The Algebra of Probable Inference}.
+\newblock Johns Hopkins University Press, 1961.
 
 \bibitem{dacosta1974}
 da Costa, N.C.A.
@@ -2201,17 +833,23 @@ Dunn, J.M.
 Fritz, T.
 \newblock A synthetic approach to Markov kernels, conditional independence
 and theorems on sufficient statistics.
-\newblock \emph{Advances in Mathematics}, 370, Article 107239, 98 pp., 2020.
+\newblock \emph{Advances in Mathematics}, 370, Article 107239, 2020.
+
+\bibitem{hajek1995}
+H\'ajek, P., Godo, L., and Esteva, F.
+\newblock Fuzzy logic and probability.
+\newblock In \emph{Proceedings of the 11th Conference on Uncertainty in
+Artificial Intelligence (UAI)}, pages 237--244, 1995.
 
 \bibitem{hajek1998}
 H\'ajek, P.
 \newblock \emph{Metamathematics of Fuzzy Logic}.
-\newblock Trends in Logic, vol.~4. Kluwer, 1998, viii + 297 pp.
+\newblock Trends in Logic, vol.~4. Kluwer, 1998.
 
 \bibitem{jaynes2003}
 Jaynes, E.T.
 \newblock \emph{Probability Theory: The Logic of Science}.
-\newblock Cambridge University Press, 2003, xxix + 727 pp.
+\newblock Cambridge University Press, 2003.
 
 \bibitem{jeffrey1983}
 Jeffrey, R.C.
@@ -2222,6 +860,11 @@ Jeffrey, R.C.
 Kleene, S.C.
 \newblock \emph{Introduction to Metamathematics}.
 \newblock North-Holland, 1952.
+
+\bibitem{klement2000}
+Klement, E.P., Mesiar, R., and Pap, E.
+\newblock \emph{Triangular Norms}.
+\newblock Trends in Logic, vol.~8. Kluwer, 2000.
 
 \bibitem{kripke1975}
 Kripke, S.
@@ -2243,22 +886,10 @@ Meyer, R.K. and Routley, R.
 \newblock Algebraic analysis of entailment I.
 \newblock \emph{Logique et Analyse}, 15:407--428, 1972.
 
-\bibitem{vanfraassen1976}
-van Fraassen, B.C.
-\newblock Probabilities of conditionals.
-\newblock In Harper, W.L. and Hooker, C.A., editors, \emph{Foundations of
-Probability Theory, Statistical Inference, and Statistical Theories of
-Science}, Vol.~1, pages 261--308. Reidel, 1976.
-
-\bibitem{vanfraassen1983}
-van Fraassen, B.C.
-\newblock Gentlemen's wagers: Relevant logic and probability.
-\newblock \emph{Philosophical Studies}, 43:47--61, 1983.
-
 \bibitem{popper1959}
 Popper, K.
 \newblock \emph{The Logic of Scientific Discovery}.
-\newblock Hutchinson, 1959, 480 pp.
+\newblock Hutchinson, 1959.
 
 \bibitem{priest1979}
 Priest, G.
@@ -2270,7 +901,6 @@ Ramsey, F.P.
 \newblock Truth and probability.
 \newblock In Braithwaite, R.B., editor, \emph{The Foundations of Mathematics
 and other Logical Essays}, pages 156--198. Kegan Paul, 1931.
-\newblock (Written 1926.)
 
 \bibitem{renyi1955}
 R\'enyi, A.
@@ -2281,6 +911,18 @@ R\'enyi, A.
 R\'enyi, A.
 \newblock \emph{Foundations of Probability}.
 \newblock Holden-Day, 1970.
+
+\bibitem{vanfraassen1976}
+van Fraassen, B.C.
+\newblock Probabilities of conditionals.
+\newblock In Harper, W.L. and Hooker, C.A., editors, \emph{Foundations of
+Probability Theory, Statistical Inference, and Statistical Theories of
+Science}, Vol.~1, pages 261--308. Reidel, 1976.
+
+\bibitem{vanfraassen1983}
+van Fraassen, B.C.
+\newblock Gentlemen's wagers: Relevant logic and probability.
+\newblock \emph{Philosophical Studies}, 43:47--61, 1983.
 
 \bibitem{weber2010}
 Weber, Z.
