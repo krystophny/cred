@@ -1,22 +1,16 @@
 # LaTeX build artifacts
-papers/**/*.pdf
-papers/**/*.aux
-papers/**/*.log
-papers/**/*.out
-papers/**/*.toc
-papers/**/*.synctex.gz
-papers/**/*.fls
-papers/**/*.fdb_latexmk
-papers/**/*.bbl
-papers/**/*.blg
+*.aux
+*.log
+*.out
+*.toc
+*.synctex.gz
+*.fls
+*.fdb_latexmk
+*.bbl
+*.blg
 
-# Agda build artifacts
-agda/_build/
-**/*.agdai
-
-# OCaml/Dune build artifacts
-credtt-impl/_build/
-**/*.install
+# Lean build artifacts
+lean/.lake/
 
 # OS files
 .DS_Store
