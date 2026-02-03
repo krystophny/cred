@@ -64,7 +64,7 @@ Proof:
 
 ### Example: Any Liar-like Sentence
 ```
-Theorem: All sentences of form "S ↔ ~φ(S)" have cred = 0.5
+Theorem: Any sentence that enforces the equation cred(S) = ~cred(S) has cred(S) = 0.5
 
 Proof: Fixed point of c = 1 - c.
 ```

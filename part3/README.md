@@ -21,7 +21,7 @@ Cred's handling of self-reference enables certain forms of metareasoning about u
 
 - `01-asymptotic-proofs.md` — Proofs approaching certainty
 - `02-fixed-points.md` — Self-reference and paradox dissolution
-- `03-undecidability.md` — Working with cred = 0.5 statements
+- `03-undecidability.md` — Incompleteness and underdetermination (don’t conflate with 0.5 fixed points)
 - `04-new-techniques.md` — Proof techniques unique to Cred
 - `05-open-questions.md` — Research directions including self-hosting
 

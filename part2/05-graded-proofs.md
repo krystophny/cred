@@ -114,10 +114,11 @@ Gödel's incompleteness: Some true statements are unprovable.
 
 In Cred:
 - "Unprovable" means: no derivation reaches cred = 1
-- "Undecidable" means: cred stays at 0.5
-- Gödel sentence G: cred(G) = 0.5 (fixed point)
+- "Undecidable (in a proof system)" means: neither P nor ¬P is derivable from the given axioms/rules.
 
-The undecidability IS the credence being stuck at 0.5.
+Part 1 does not imply that incompleteness phenomena automatically correspond to the numerical value 0.5. The special value 0.5 is forced by a *self-negation equation* (`c = ~c`), not by “unprovable”.
+
+A reasonable modelling choice for “no evidence either way (so far)” is to set a prior near 0.5, but that is epistemic and contingent; it is not a theorem.
 
 ## What Counts as a Proof?
 
@@ -126,7 +127,7 @@ A **proof** is a process where credence CONVERGES to 1:
 ```
 Proof:       cred(P) → 1 (converges to certainty)
 Refutation:  cred(P) → 0 (converges to impossibility)
-Undecidable: cred(P) = 0.5 (fixed point)
+No decision: cred(P) does not converge to 0 or 1 (may plateau at an intermediate value)
 ```
 
 **Important**: There is no "weak proof at 0.9" or "partial proof at 0.7". Having cred(P) = 0.7 means you have partial evidence — which is meaningful! — but it's not a proof unless it's part of a sequence converging to 1.

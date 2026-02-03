@@ -74,7 +74,7 @@ We have asymptotic evidence for Con(ZFC), not proof.
 cred = 1        Classical proof
 cred → 1        Asymptotic proof (converging to certainty)
 cred ∈ (0.5,1)  Partial evidence (degree of belief)
-cred = 0.5      Undecided/undecidable
+cred = 0.5      Undecided (neutral prior)
 cred ∈ (0,0.5)  Partial counter-evidence
 cred → 0        Asymptotic refutation
 cred = 0        Classical refutation
