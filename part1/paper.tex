@@ -729,36 +729,37 @@ a non-paradoxical assignment.
 \end{remark}
 
 %=============================================================================
-\section{Uncertainty Measures (Under Independence)}
+\section{Uncertainty Spread}
 %=============================================================================
 
-% Lean: Basic.lean:345-448 Contradiction and tautology
+% Lean: Basic.lean:345-448
 
-\begin{remark}[Important Caveat]
-The functions in this section use the independence operators $\conjc$ and
-$\disjc$. They do \textbf{not} compute actual $\cred(A \land \neg A)$ or
-$\cred(A \lor \neg A)$, because $A$ and $\neg A$ are \emph{never}
-probabilistically independent---they are maximally anti-correlated.
+The function $c(1-c)$ measures how far a credence is from certainty. This is
+the \emph{variance of a Bernoulli random variable} with parameter $c$---a
+well-known quantity in probability theory. We include it here because it
+arises naturally from the algebra and has a clean interpretation.
 
-In standard probability: $P(A \land \neg A) = 0$ always.
-
-These functions instead measure an \textbf{uncertainty spread} based on
-applying the independence formula to a credence and its complement. This is
-a distinct algebraic quantity, not a claim about actual conjunctions.
+\begin{remark}[Algebraic Origin]
+The expression $c \conjc \negc c = c \cdot (1-c)$ applies the independence
+conjunction to a credence and its complement. This does \textbf{not} compute
+$\cred(A \land \neg A)$, which is always 0 (a contradiction is impossible).
+Rather, it is a derived algebraic quantity measuring uncertainty.
 \end{remark}
 
-\subsection{Uncertainty Spread (``Pseudo-Contradiction'')}
+\subsection{Spread Function}
 
-% Lean: Basic.lean:366-400 contradiction
-\begin{definition}[Uncertainty Spread Function]
+% Lean: Basic.lean:366-400
+\begin{definition}[Spread]
 \[
-\text{spread}(c) := c \conjc \negc c = c \cdot (1 - c)
+\text{spread}(c) := c(1-c)
 \]
-This is the independence-formula output when combining $c$ with $1-c$.
 \end{definition}
 
-\begin{theorem}[Uncertainty Spread Bounds]
-\label{thm:contradict}
+This is the Bernoulli variance: if $c$ is the probability of success, then
+$c(1-c)$ is the variance of a single Bernoulli trial.
+
+\begin{theorem}[Spread Bounds]
+\label{thm:spread}
 \begin{enumerate}[label=(\alph*)]
     \item $\text{spread}(c) \leq 0.25$ for all $c \in [0, 1]$
     \item Maximum at $c = 0.5$: $\text{spread}(0.5) = 0.25$
@@ -766,35 +767,27 @@ This is the independence-formula output when combining $c$ with $1-c$.
 \end{enumerate}
 \end{theorem}
 
-\textbf{Interpretation:} This measures how far $c$ is from certainty.
-Maximum uncertainty ($c = 0.5$) gives maximum spread (0.25). At the
-extremes ($c = 0$ or $c = 1$), the spread is zero.
+\textbf{Interpretation:} Spread measures distance from certainty. At
+$c = 0$ or $c = 1$ (certainty), spread is zero. At $c = 0.5$ (maximum
+uncertainty), spread reaches its maximum of $0.25$.
 
-\subsection{Certainty Complement (``Pseudo-Tautology'')}
+\subsection{Complement: $1 - c(1-c)$}
 
-% Lean: Basic.lean:402-448 tautology
-\begin{definition}[Certainty Complement Function]
-\[
-\text{certainty}(c) := c \disjc \negc c = 1 - c \cdot (1 - c)
-\]
-This is the De Morgan dual of the uncertainty spread.
-\end{definition}
+% Lean: Basic.lean:402-448
+The De Morgan dual $c \disjc \negc c = 1 - c(1-c)$ is simply $1 - \text{spread}(c)$.
 
-\begin{theorem}[Certainty Complement Bounds]
-\label{thm:tautology}
+\begin{theorem}[Complement Bounds]
+\label{thm:complement}
 \begin{enumerate}[label=(\alph*)]
-    \item $\text{certainty}(c) \geq 0.75$ for all $c \in [0, 1]$
-    \item Minimum at $c = 0.5$: $\text{certainty}(0.5) = 0.75$
-    \item Unity at extremes: $\text{certainty}(c) = 1 \iff c \in \{0, 1\}$
+    \item $1 - c(1-c) \geq 0.75$ for all $c \in [0, 1]$
+    \item Minimum at $c = 0.5$: value $0.75$
+    \item Unity at extremes: $1 - c(1-c) = 1 \iff c \in \{0, 1\}$
 \end{enumerate}
 \end{theorem}
 
-\textbf{Interpretation:} This is $1 - \text{spread}(c)$. At the extremes
-(certainty), it equals 1. At maximum uncertainty, it drops to 0.75.
+\subsection{Graph}
 
-\subsection{The Uncertainty Parabola}
-
-Both functions are quadratic in $c$:
+Both functions are quadratic:
 
 \begin{center}
 \begin{tikzpicture}[scale=4]
@@ -802,11 +795,11 @@ Both functions are quadratic in $c$:
     \draw[->] (-0.1,0) -- (1.2,0) node[right] {$c$};
     \draw[->] (0,-0.1) -- (0,1.1) node[above] {};
 
-    % Contradiction curve (parabola opening down, max at 0.5)
+    % Spread curve (parabola opening down, max at 0.5)
     \draw[thick,blue,domain=0:1,samples=50] plot (\x, {\x*(1-\x)});
     \node[blue,right] at (0.7,0.15) {$c(1-c)$};
 
-    % Tautology curve (parabola opening up from 0.75)
+    % Complement curve (parabola opening up from 0.75)
     \draw[thick,red,domain=0:1,samples=50] plot (\x, {1-\x*(1-\x)});
     \node[red,right] at (0.7,0.9) {$1-c(1-c)$};
 

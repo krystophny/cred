@@ -342,27 +342,27 @@ theorem conj_disj_not_distrib :
   simp only [hlhs, hrhs] at heq
   norm_num at heq
 
-/-! ## Contradiction and Tautology (Under Independence)
+/-! ## Spread (Bernoulli Variance)
 
-These operations compute c ⊗ ~c and c ⊔ ~c using the independence formulas.
+The expression c * (1-c) is the variance of a Bernoulli random variable with
+parameter c. This is a well-known quantity in probability theory.
 
-IMPORTANT: In classical probability, P(A ∧ ~A) = 0 and P(A ∨ ~A) = 1 always,
-because A and ~A are mutually exclusive. However, in this graded algebra:
+Algebraically, c ⊗ ~c applies the independence conjunction to a credence and
+its complement. This does NOT compute cred(A ∧ ~A), which is always 0 (a
+contradiction is impossible). Rather, it is a derived algebraic quantity
+measuring how far a credence is from certainty.
 
-1. We use the INDEPENDENCE formula: c ⊗ ~c = c * (1-c)
-2. This gives nonzero "contradiction" (max 0.25 at c=0.5)
-3. And non-unity "tautology" (min 0.75 at c=0.5)
+Properties:
+- Maximum value 0.25 at c = 0.5 (maximum uncertainty)
+- Zero at c = 0 or c = 1 (certainty)
+- The De Morgan dual c ⊔ ~c = 1 - c*(1-c) is the complement (min 0.75 at c=0.5)
 
-This is INTENTIONAL and meaningful for the graded logic:
-- It measures the "uncertainty" or "spread" in a credence
-- c = 0.5 maximizes uncertainty (highest contradiction, lowest tautology)
-- c = 0 or 1 minimizes uncertainty (zero contradiction, full tautology)
-
-For dependent propositions (like A and ~A which are maximally anti-correlated),
-use the Conditioning structure with proper joint credences instead.
+The function names `contradiction` and `tautology` are historical artifacts
+retained for API stability. The paper (Section 5) uses the more accurate
+terminology "spread" and "spread complement".
 -/
 
-/-- Pseudo-contradiction under independence: c ⊗ ~c = c * (1-c) -/
+/-- Spread (Bernoulli variance): c ⊗ ~c = c * (1-c). Measures distance from certainty. -/
 def contradiction (c : Credence) : Credence := c ⊗ ~c
 
 theorem contradiction_val (c : Credence) : (contradiction c).val = c.val * (1 - c.val) := by
@@ -398,7 +398,7 @@ theorem contradiction_eq_zero_iff (c : Credence) :
     · ext; simp [contradiction_val]
     · ext; simp [contradiction_val]
 
-/-- Pseudo-tautology under independence: c ⊔ ~c = 1 - c*(1-c) -/
+/-- Spread complement: c ⊔ ~c = 1 - c*(1-c). De Morgan dual of spread. -/
 def tautology (c : Credence) : Credence := c ⊔ ~c
 
 theorem tautology_val (c : Credence) : (tautology c).val = 1 - c.val * (1 - c.val) := by
