@@ -979,8 +979,13 @@ Both functions are quadratic:
 \begin{example}[Conditioning Calculation]
 \label{ex:conditioning-calc}
 Suppose $\cred(A) = 0.8$, $\cred(B) = 0.6$, and the joint credence
-$\cred(A \land B) = 0.4$ (given, not computed via $\conjc$ since $A, B$ may be
-dependent). The chain rule gives:
+$\cred(A \land B) = 0.4$. This joint credence is an \emph{input} to the Cred
+algebra, not computed via $\conjc$ (which applies only to independent
+propositions). In practice, joint credences come from external sources: empirical
+data, domain expertise, physical models, or subjective assessment---just as
+probabilities are inputs in probability theory. Cred provides the algebraic
+structure; the values themselves must be supplied (see
+Remark~\ref{rmk:conditional-algebra}). The chain rule gives:
 \[
 \cred(A \mid B) = \frac{\cred(A \land B)}{\cred(B)} = \frac{0.4}{0.6} = \frac{2}{3} \approx 0.667
 \]
