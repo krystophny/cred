@@ -1953,11 +1953,14 @@ We have presented Cred, a credence algebra with primitive conditioning. The
 key contributions are:
 
 \begin{enumerate}
-    \item \textbf{Primitive conditioning:} Using the chain rule axiom
-    rather than division avoids forcing ex falso naturally.
+    \item \textbf{Primitive conditioning:} The chain rule axiom
+    $\cred(A \mid B) \cdot \cred(B) = \cred(A \land B)$ is a design choice.
+    From this choice, unconstrained conditioning at zero emerges as a
+    mathematical consequence: when $\cred(B) = 0$, any value satisfies the
+    equation, so the axiom imposes no constraint.
 
     \item \textbf{Shared property with relevant logic:} The property of not
-    forcing ex falso emerges naturally from the chain rule axiom. This parallels a
+    forcing ex falso follows from the chain rule axiom. This parallels a
     key feature of relevant logic (though achieved through different mechanisms:
     chain rule vs.\ variable-sharing).
 
