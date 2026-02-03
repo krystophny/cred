@@ -105,9 +105,10 @@ the expression is syntactically ill-formed (probability) or well-formed but unde
 Neither is obviously superior---see Section~\ref{sec:conditioning} for discussion.}
 
 \smallskip
-\footnotesize{${}^b$Cred's conditioning operation differs from material implication
-($\neg A \lor B$). The ``no ex falso'' property is shared with relevant logic but
-arises from different mechanisms (chain rule vs.\ variable-sharing).}
+\footnotesize{${}^b$When restricted to Boolean values $\{0,1\}$: classical logic's
+implication-like inference uses material implication ($\neg A \lor B$), giving
+$0 \to B = 1$ for all $B$ (ex falso). Cred uses conditioning, where conditioning on
+$0$ is underdetermined---any value satisfies the chain rule $\condc{B}{0} \cdot 0 = 0$.}
 \end{center}
 
 \textbf{Why ``credence'' instead of ``probability''?}
