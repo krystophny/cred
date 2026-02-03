@@ -1134,30 +1134,54 @@ conditioning on impossibility is unconstrained, avoiding forcing ex falso direct
 but Cred conditioning $\neq$ RM3 implication. Both reject ex falso, but
 through different mechanisms.
 
-\subsection{Boolean Collapse: Relevant Logic}
+\subsection{Boolean Cred: Restriction to $\{0, 1\}$}
 
-Collapse to two values $\{0, 1\}$ via the function:
-\[
-\text{boolCollapse}(c) = \begin{cases}
-0 & \text{if } c = 0 \\
-1 & \text{if } c > 0
-\end{cases}
-\]
-This is \emph{not} a homomorphism for intermediate values (e.g.,
-$\text{boolCollapse}(0.5 \conjc 0.5) = \text{boolCollapse}(0.25) = 1$, but
-$\text{boolCollapse}(0.5) \land \text{boolCollapse}(0.5) = 1 \land 1 = 1$---this
-case happens to match, but $\text{boolCollapse}(0.5) = 1 \neq 0.5$). The Boolean
-collapse is meaningful only when applied to \emph{already Boolean} values.
+\begin{definition}[Boolean Cred]
+\label{def:boolean-cred}
+\emph{Boolean Cred} is the restriction of the Cred algebra to credences in
+$\{0, 1\}$. Formally, let $\mathbf{B} = \{0, 1\} \subset [0,1]$. Boolean Cred
+is the structure $(\mathbf{B}, \negc, \conjc, \disjc)$ where:
+\begin{align*}
+\negc c &= 1 - c \\
+c_1 \conjc c_2 &= c_1 \cdot c_2 \\
+c_1 \disjc c_2 &= c_1 + c_2 - c_1 \cdot c_2
+\end{align*}
+\end{definition}
 
-When restricted to $\{0, 1\}$, the operations become:
-\[
-\negc c = 1 - c, \quad c_1 \conjc c_2 = c_1 \cdot c_2
-\]
-which are exactly the operations of the two-element Boolean algebra.
+\begin{proposition}[Boolean Cred = Boolean Algebra]
+\label{prop:boolean-cred-algebra}
+The operations $\{\negc, \conjc, \disjc\}$ restricted to $\{0, 1\}$ are
+exactly the operations of the two-element Boolean algebra $\mathbf{2}$:
+\begin{center}
+\begin{tabular}{c|c}
+$c$ & $\negc c$ \\
+\hline
+0 & 1 \\
+1 & 0
+\end{tabular}
+\qquad
+\begin{tabular}{c|cc}
+$\conjc$ & 0 & 1 \\
+\hline
+0 & 0 & 0 \\
+1 & 0 & 1
+\end{tabular}
+\qquad
+\begin{tabular}{c|cc}
+$\disjc$ & 0 & 1 \\
+\hline
+0 & 0 & 1 \\
+1 & 1 & 1
+\end{tabular}
+\end{center}
+These match the standard Boolean operations $\neg$, $\land$, $\lor$.
+\end{proposition}
 
-\textbf{But conditioning differs from material implication!}
+\textbf{Conditioning differs from material implication.}
+While Boolean Cred matches Boolean algebra for $\{\negc, \conjc, \disjc\}$,
+conditioning is \emph{not} material implication.
 
-Material implication: $A \to B := \neg A \lor B$
+Recall material implication: $A \to B := \neg A \lor B$
 \begin{center}
 \begin{tabular}{cc|c|c}
 \toprule
@@ -1191,8 +1215,9 @@ The chain rule gives \emph{unconstrained} conditioning when $A = 0$.
 
 \begin{remark}[Relationship to Relevant Logic]
 \label{rmk:relevant-logic-relationship}
-Boolean Cred (with conditioning instead of material implication) shares
-a key property with relevant logic R: rejection of ex falso quodlibet.
+Boolean Cred (Definition~\ref{def:boolean-cred}), equipped with conditioning
+instead of material implication, shares a key property with relevant logic R:
+rejection of ex falso quodlibet.
 \begin{enumerate}[label=(\roman*)]
     \item In relevant logic R: $(A \land \neg A) \to B$ is \emph{not} a theorem
     (variable-sharing requirement excludes it syntactically)
