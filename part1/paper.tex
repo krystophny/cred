@@ -1800,8 +1800,20 @@ lean/
   lakefile.toml          -- Project configuration
   lean-toolchain         -- Lean version (4.x)
   Cred/
-    Basic.lean           -- Core credence algebra
+    Basic.lean           -- Core credence algebra (~870 lines)
 \end{verbatim}
+
+\noindent The formalization comprises approximately 870 lines of Lean~4 code:
+\begin{itemize}
+    \item \textbf{Definitions:} Core types (\texttt{Credence}, \texttt{Conditioning},
+    \texttt{ThreeVal}) and operations (\texttt{neg}, \texttt{conj}, \texttt{disj},
+    \texttt{spread}, \texttt{certainty}, \texttt{collapse})
+    \item \textbf{Theorems:} 76 machine-checked proofs covering algebraic properties,
+    conditioning behavior, fixed points, and collapse homomorphisms
+    \item \textbf{Proof techniques:} \texttt{ring} for polynomial identities,
+    \texttt{nlinarith} for nonlinear arithmetic, \texttt{linarith} for linear
+    arithmetic, and explicit case analysis
+\end{itemize}
 
 \subsection{Key Definitions (Lean Syntax)}
 
