@@ -3,9 +3,11 @@
 
   This formalizes the credence algebra and its core properties.
   Credences are values in [0,1] with:
-  - Conjunction (multiplication): assumes independence, i.e., cred(A) * cred(B)
+  - Independence product (multiplication on values): c₁ ⊗ c₂ = c₁.val * c₂.val.
+    Under a probabilistic interpretation this equals cred(A ∧ B) only when A and B
+    are independent; in general joint credence is a separate parameter.
   - Negation (complement): ~c = 1 - c
-  - Disjunction (De Morgan): c₁ + c₂ - c₁*c₂ (independence formula)
+  - Disjunction (De Morgan dual): c₁ ⊔ c₂ = ~(~c₁ ⊗ ~c₂)
   - Conditioning (primitive, via chain rule)
 
   PHILOSOPHY: Inference as Constraint
@@ -20,7 +22,7 @@
 
   IMPORTANT: The binary operations ⊗ and ⊔ compute the credence of conjunctions
   and disjunctions under an INDEPENDENCE assumption. For dependent propositions,
-  the joint credence cred(A ∧ B) ≠ cred(A) * cred(B) in general.
+  the joint credence cred(A ∧ B) ≠ cred(A) ⊗ cred(B) in general.
 
   The Conditioning structure handles the general case where joint credences
   are provided as parameters, not computed from marginals.
@@ -84,7 +86,7 @@ prefix:80 "~" => neg
 
 /-! ## Conjunction (Multiplication) -/
 
-/-- Conjunction: c₁ * c₂ (product of credences) -/
+/-- Conjunction: c₁ ⊗ c₂ (product of credences) -/
 def conj (c₁ c₂ : Credence) : Credence where
   val := c₁.val * c₂.val
   nonneg := mul_nonneg c₁.nonneg c₂.nonneg
@@ -180,23 +182,23 @@ Parameters:
 - `joint`: the credence cred(A ∧ B) of the conjunction (given, not computed)
 - `evidence`: the credence cred(B) of the evidence
 
-The chain rule states: cred(A | B) * cred(B) = cred(A ∧ B)
+The chain rule states: cred(A | B) ⊗ cred(B) = cred(A ∧ B)
 
-Note: `joint` is NOT assumed to equal `evidence * something`; it is an
+Note: `joint` is NOT assumed to equal `evidence ⊗ something`; it is an
 independent parameter representing the actual joint credence, which may
 differ from the product of marginals for dependent propositions.
 
 Edge case when evidence = 0:
-The chain rule requires condCred * 0 = joint. Since anything times 0 equals 0,
+The chain rule requires condCred ⊗ 0 = joint. Since anything times 0 equals 0,
 this forces joint = 0 but leaves condCred unconstrained (any value satisfies
-c * 0 = 0). Conditioning on impossible evidence provides no constraint on belief.
+c ⊗ 0 = 0). Conditioning on impossible evidence provides no constraint on belief.
 See `conditioning_zero_any` for the proof that any credence works.
 This is intentional: there is no ex falso in graded logic.
 -/
 structure Conditioning (joint evidence : Credence) where
   /-- The conditional credence cred(A | B) -/
   condCred : Credence
-  /-- Chain rule: cred(A | B) * cred(B) = cred(A ∧ B) -/
+  /-- Chain rule: cred(A | B) ⊗ cred(B) = cred(A ∧ B) -/
   chainRule : condCred ⊗ evidence = joint
 
 /-- When evidence = 0, any conditioning produces 0 -/
@@ -229,7 +231,7 @@ noncomputable def conditioning_mk (joint evidence : Credence) (h_pos : 0 < evide
   chainRule := by ext; simp only [conj_val]; field_simp
 
 /-- If a Conditioning structure exists, then joint ≤ evidence.
-    Proof: joint = condCred * evidence ≤ 1 * evidence = evidence.
+    Proof: joint.val = condCred.val * evidence.val ≤ 1 * evidence.val = evidence.val.
     Note: For evidence > 0, this is the converse of conditioning_mk precondition.
     For evidence = 0, conditioning_zero_forces_joint_zero gives the stronger result joint = 0. -/
 theorem conditioning_implies_joint_le_evidence (joint evidence : Credence)
@@ -633,7 +635,7 @@ theorem cond_zero_one_any (c : Credence) :
 /-! #### Row 2 and 3: Evidence > 0 (determined)
 
 When evidence > 0, the conditional credence is uniquely determined
-by the chain rule: cred(A|B) = cred(A and B) / cred(B).
+by the chain rule: in the real-valued model, condCred.val = joint.val / evidence.val.
 -/
 
 /-- When evidence > 0, conditioning is uniquely determined -/

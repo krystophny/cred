@@ -88,11 +88,13 @@ Fixed points at 0 and 1.
 ### Conditioning Fixed Point
 ```
 c = (c | c)
-Chain rule: (c | c) * c = c * c = c²
-If c > 0: (c | c) = c
-So c = c is trivially satisfied for any c.
+Conditioning depends on a *joint* parameter; it is not a unary operation `f(c)`.
+
+If you choose evidence `= c` and joint `= c²`, then the chain rule forces
+`(c | c) = c` when `c > 0`. This is a tautology about how you chose the joint,
+not a new fixed-point phenomenon.
 ```
-All credences are fixed points!
+So: “conditioning fixed points” is not a meaningful notion without fixing how joint values are supplied.
 
 ## Stability of Fixed Points
 

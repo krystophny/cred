@@ -30,19 +30,29 @@ Axioms:
 
 No division anywhere.
 
-## Our Approach (Chain Rule Axiom)
+## Our Approach (Chain Rule Constraint)
 
-We simplify further:
+We simplify further, and we are explicit about the type of object we are postulating.
 
 ```
-Primitive: (a | b) : C → C → C
+Conditioning is primitive, but it is NOT a total function C × C → C.
 
-Axiom (Chain Rule):
-    (a | b) * b = a * b
+At the level of credence values, we model conditioning as a relation/structure:
 
-Derived behavior:
-    b = 1: (a | 1) * 1 = a * 1 = a, so (a | 1) = a
-    b = 0: (a | 0) * 0 = a * 0 = 0, satisfied for ANY (a | 0)
+Given:
+  evidence ∈ C   (think: cred(B))
+  joint    ∈ C   (think: cred(A ∧ B))
+
+a conditioning witness is a value condCred ∈ C such that:
+  condCred ⊗ evidence = joint
+
+(Lean: `Cred.Credence.Conditioning joint evidence` packages `condCred` together
+with a proof of this equation.)
+
+Derived behavior (as equations, not vibes):
+  evidence = 1:  condCred = joint
+  evidence = 0:  possible iff joint = 0; then any condCred works (underdetermined)
+  evidence > 0 and joint ≤ evidence: condCred = joint / evidence (unique)
 ```
 
 ## What Happens at Zero?
@@ -77,20 +87,20 @@ They enforce this via syntactic "relevance" conditions (variable sharing).
 
 We get the same result SEMANTICALLY via the chain rule:
 ```
-(A | ⊥) * ⊥ = A * ⊥ = ⊥
+cred(A | ⊥) ⊗ 0 = 0
 ```
-This is satisfied for any (A | ⊥), so we cannot derive (A | ⊥) = 1.
+This is satisfied for any value of `cred(A | ⊥)` (provided the joint is 0), so we cannot derive `cred(A | ⊥) = 1`.
 
 ## The Graded Ex Falso Spectrum
 
-As the condition becomes less certain:
+As the evidence credence becomes small, the chain rule makes conditioning computationally inert:
 
-| cred(B) | (A \| B) is... |
-|---------|----------------|
-| 1 | fully determined by chain rule |
-| 0.5 | weakly constrained |
-| ε (small) | almost unconstrained |
-| 0 | completely unconstrained |
+| cred(B) | effect on joint `cred(A ∧ B)` |
+|---------|-------------------------------|
+| 1 | `cred(A ∧ B) = cred(A|B)` |
+| 0.5 | `cred(A ∧ B) = 0.5 ⊗ cred(A|B)` (bounded impact) |
+| ε (small) | `cred(A ∧ B) = ε ⊗ cred(A|B)` (tiny impact) |
+| 0 | `cred(A ∧ B) = 0` (and `cred(A|B)` is underdetermined) |
 
 Classical logic only sees the endpoints. Cred sees the entire spectrum.
 
@@ -101,4 +111,4 @@ Classical logic only sees the endpoints. Cred sees the entire spectrum.
 | Rényi (1955) | Conditional probability as primitive |
 | Popper (1959) | Conditional more fundamental than absolute |
 | Markov categories (2020) | Categorical disintegration (no division) |
-| **Cred** | Chain rule axiom for logic foundation |
+| **Cred** | Chain rule constraint as primitive conditioning (underdetermined at 0) |

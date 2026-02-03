@@ -18,10 +18,10 @@ Characteristic function:
 A graded predicate S assigns a credence to each element:
 ```
 S : X → [0, 1]
-S(x) = credence that x "belongs to" S
+S(x) = a graded membership/truth value
 ```
 
-This is like a fuzzy set, but we interpret it foundationally, not as "uncertain membership."
+This is like a fuzzy set. In the Cred program we treat gradedness as fundamental; the algebra is primary and interpretation comes later (epistemic vs semantic, etc.).
 
 ## Examples
 
@@ -43,12 +43,14 @@ Crisp sets are special cases where the predicate only takes values 0 and 1.
 
 ## Operations on Graded Predicates
 
-**Intersection (AND)**
+These operations are defined pointwise using the Cred algebra on `[0,1]`. Do not silently read them as classical set-theoretic operations unless you also supply a semantics connecting the predicate values to propositions.
+
+**Algebraic intersection (product t-norm)**
 ```
 (S ∩ T)(x) := S(x) * T(x)
 ```
 
-**Union (OR)**
+**Algebraic union (De Morgan dual)**
 ```
 (S ∪ T)(x) := S(x) + T(x) := ~(~S(x) * ~T(x))
             = S(x) + T(x) - S(x) * T(x)
@@ -66,14 +68,15 @@ S ⊆ T  iff  ∀x: S(x) ≤ T(x)
 
 ## Conditioning on Predicates
 
-If S and T are predicates:
-```
-(S | T)(x) = credence of S(x) given T(x)
-```
+Conditioning is not “conditioning a number by a number”. The pointwise values are numbers; conditioning is a primitive constraint relating a joint and an evidence quantity.
 
-Chain rule:
+If you have:
+- an evidence predicate `T : X → [0,1]` (think: `cred(B(x))`)
+- a joint predicate `J : X → [0,1]` (think: `cred(A(x) ∧ B(x))`)
+
+then a conditional predicate `K : X → [0,1]` (think: `cred(A(x) | B(x))`) is any function satisfying the chain rule constraint pointwise:
 ```
-(S | T)(x) * T(x) = (S ∩ T)(x)
+K(x) * T(x) = J(x)
 ```
 
 ## The Empty Predicate

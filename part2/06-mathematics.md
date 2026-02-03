@@ -122,12 +122,12 @@ Definitions don't change credences; they introduce names.
 
 Algebraic structures (groups, rings, etc.) are predicates on tuples:
 ```
-Group : (G, *, e, inv) → [0, 1]
+Group : (G, op, e, inv) → [0, 1]
 
-Group(G, *, e, inv) =
-  cred(* is associative) *
-  cred(e is identity) *
-  cred(inv gives inverses)
+Group(G, op, e, inv) =
+  cred(op is associative) ⊗
+  cred(e is identity for op) ⊗
+  cred(inv gives inverses for op)
 ```
 
 A crisp group has Group(...) ∈ {0, 1}.

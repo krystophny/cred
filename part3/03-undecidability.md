@@ -1,161 +1,52 @@
-# Working with Undecidable Statements
+# Working with Incompleteness and Underdetermination
 
-## Classical Undecidability
+This note is intentionally conservative: Part 1 does **not** contain a formal theory that assigns credences to mathematical statements from proofs. It provides an algebra on `[0,1]` and a primitive conditioning constraint. Anything that connects “provability in a system” to “credence” is additional structure.
 
-A statement P is **undecidable** in system S if:
-- S cannot prove P
-- S cannot prove NOT P
+## Three Different Notions (Do Not Conflate)
 
-Examples:
-- Continuum Hypothesis (CH) in ZFC
-- Halting problem (algorithmically undecidable)
+### 1) Algebraic fixed points (forced)
 
-## Cred and Undecidability
-
-Important distinctions:
-
-1. **Self-negating sentences** (liar: L = NOT L) have cred = 0.5 as a fixed point
-2. **Independent sentences** (CH in ZFC) have unconstrained credence given the axioms
-3. **Godel sentences** have definite truth values in standard models (TRUE for consistent systems)
-
-Cred does NOT automatically assign 0.5 to all "undecidable" statements. The 0.5 fixed point applies only to self-negating sentences.
-
-## Types of 0.5 Credence
-
-Not all cred = 0.5 is the same:
-
-### Unknown (Epistemic)
+If a credence value satisfies a self-negating equation,
 ```
-cred(P) = 0.5 because we lack evidence
-Evidence could move it toward 0 or 1
+c = ~c
 ```
+then (in the real-valued model) `c = 0.5`. This is the mechanism behind the liar fixed point in Part 1.
 
-### Undecidable (Logical)
+This has nothing to do with Gödel incompleteness; it is a fixed point of the negation map on `[0,1]`.
+
+### 2) Epistemic ignorance (chosen)
+
+You might choose a prior like `cred(P)=0.5` to represent “no evidence either way”. This is a modelling choice, not a theorem.
+
+### 3) Proof-theoretic incompleteness / independence (meta-theoretic)
+
+Statements like CH being independent of ZFC mean (roughly) that ZFC neither proves CH nor proves ¬CH. This does **not** force any particular numerical credence in Cred.
+
+In particular:
+- “independent of axioms” is not the same thing as “unconstrained” in Cred,
+- because “unconstrained” has a precise technical meaning tied to the conditioning equation at evidence `0`.
+
+## What “Unconstrained” Means in Cred
+
+In Part 1, “unconstrained” refers to the chain rule constraint:
 ```
-cred(P) = 0.5 because no proof exists either way
-Evidence cannot move it (in principle)
+cred(A|B) ⊗ cred(B) = cred(A ∧ B)
 ```
+When `cred(B)=0`, the equation becomes `x ⊗ 0 = 0`, which is satisfied by any `x` (provided the joint is `0`). That is a statement about an equation, not about axioms being incomplete.
 
-### Self-Referential (Fixed Point)
-```
-cred(P) = 0.5 because P = ~P
-The value is forced by self-reference
-```
+## How One Might Relate Theories and Credences (Future Work)
 
-## The Halting Problem in Cred
+If we want to talk about “credence in CH given ZFC”, we need to define how proof-theoretic or model-theoretic information supplies constraints on credence assignments. For example, one could imagine a principle of the form:
+- if a theory `T` proves `P`, then `cred(P|T)=1`,
 
-Does program M halt on input x?
+but spelling this out requires (at least) a formal notion of what `T` is as “evidence”, and how joints like `cred(P ∧ T)` are supplied. None of that is in Part 1 yet.
 
-```
-Halt(M, x) : {0, 1}  — crisp, but uncomputable
+## Practical Takeaway
 
-cred(Halt(M, x)) = ???
-```
-
-For specific M, x:
-- If we run M and it halts: cred → 1
-- If we run M and it hasn't halted yet: cred = 0.5 (unknown)
-- If we prove M loops: cred → 0
-
-The undecidability is: no algorithm computes cred(Halt(M, x)) for all M, x.
-
-But for individual cases, cred can be determined!
-
-## Independence in Cred
-
-CH is independent of ZFC:
-```
-ZFC ⊬ CH
-ZFC ⊬ ~CH
-```
-
-In Cred:
-```
-cred(CH | ZFC) = unconstrained
-```
-
-The chain rule: cred(CH | ZFC) * cred(ZFC) = cred(CH ∧ ZFC)
-
-If cred(ZFC) = 1 (we accept ZFC):
-```
-cred(CH | ZFC) = cred(CH ∧ ZFC)
-```
-
-But ZFC doesn't constrain CH, so cred(CH | ZFC) is **genuinely indeterminate**.
-
-This is different from 0.5. It's "not determined by the axioms."
-
-## Working With Independent Statements
-
-### Strategy 1: Recognize Independence
-```
-cred(CH | ZFC) is unconstrained by ZFC axioms
-This is different from self-negation (which forces 0.5)
-```
-
-### Strategy 2: Add Axioms
-```
-cred(CH | ZFC + CH) = 1
-cred(CH | ZFC + ~CH) = 0
-```
-
-Adding axioms determines previously undetermined credences.
-
-### Strategy 3: Consider Extensions
-```
-cred(CH | ZFC + large cardinals) might be constrained
-Different extensions give different credences
-```
-
-### Strategy 4: Meta-Analysis
-```
-cred(CH is "true" in intended model) ≈ ???
-Philosophical/intuitive judgment
-```
-
-## The Credence Spectrum
-
-```
-Provably true:     cred = 1 (from axioms)
-Provably false:    cred = 0 (from axioms)
-Independent:       cred unconstrained by axioms
-Self-negating:     cred = 0.5 (negation fixed point, e.g., liar)
-Unknown:           cred reflects epistemic uncertainty
-```
-
-Note: "Self-negating" (X = NOT X) is different from "independent" (axioms don't determine X). The liar is self-negating. CH is independent. Godel sentences are TRUE in standard models but unprovable.
-
-## Practical Implications
-
-### For Mathematics
-- Undecidable doesn't mean "unknown" — it means cred = 0.5 exactly
-- We can still reason about undecidable statements
-- Adding axioms is explicit credence assignment
-
-### For Computer Science
-- Halting problem: uncomputable, but cred is well-defined
-- Algorithmic: can compute cred for restricted classes
-- Approximation: can bound cred with partial evidence
-
-### For Philosophy
-- "Is CH true?" becomes "What is cred(CH)?"
-- The question has an answer (possibly 0.5 or unconstrained)
-- Truth = credence 1, not some Platonic fact
-
-## Computing with Undecidable Credences
-
-Even if cred(P) = 0.5 (undecidable), we can still:
-
-1. **Combine**: cred(P ∧ Q) = cred(P) * cred(Q) = 0.25
-2. **Negate**: cred(~P) = 0.5
-3. **Condition**: cred(Q | P) via chain rule
-4. **Bound**: cred(P) ∈ [0.4, 0.6] with partial evidence
-
-The undecidable value participates in reasoning.
+Part 1 gives a rigorous, Lean-checked algebra for manipulating credence values once they are assigned (and for understanding when conditioning is determined or underdetermined). It does not turn incompleteness results into specific numbers like `0.5`.
 
 ## Open Questions
 
-1. Can we characterize which statements have cred exactly 0.5?
-2. Is there a hierarchy of undecidability degrees in Cred?
-3. How does independence (unconstrained) differ from undecidability (0.5)?
-4. Can forcing (set theory) be understood as credence manipulation?
+1. What additional principles connect proof objects (or models) to credence constraints without reintroducing explosion?
+2. Is there a useful notion of “credence not determined by theory T” that is distinct from evidence-0 underdetermination?
+3. Which fixed points beyond `c = ~c` matter for self-reference in richer settings?

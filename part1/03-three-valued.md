@@ -22,23 +22,23 @@ C = {0, ½, 1}
 ```
 
 ### Multiplication (Conjunction)
-For closure, we need a convention for ½ * ½:
+For closure, we need a convention for ½ ⊗ ½:
 
 **Option A: Uncertainty propagates**
 ```
-½ * ½ = ½
+½ ⊗ ½ = ½
 ```
 
 **Option B: Łukasiewicz-style**
 ```
-½ * ½ = max(0, ½ + ½ - 1) = 0
+½ ⊗ ½ = max(0, ½ + ½ - 1) = 0
 ```
 
 We prefer Option A (uncertainty propagates) as it's more conservative.
 
 Full table (Option A):
 ```
-*  | 0   ½   1
+⊗  | 0   ½   1
 ---+-----------
 0  | 0   0   0
 ½  | 0   ½   ½
@@ -49,12 +49,12 @@ Full table (Option A):
 ```
 (a | 1) = a
 (a | 0) = unconstrained (we can set to ½)
-(a | ½) determined by chain rule: (a | ½) * ½ = a * ½
+(a | ½) determined by chain rule: (a | ½) ⊗ ½ = a ⊗ ½
 ```
 
-When a = 1: (1 | ½) * ½ = ½, so (1 | ½) = 1
-When a = ½: (½ | ½) * ½ = ½, so (½ | ½) could be 1 or ½
-When a = 0: (0 | ½) * ½ = 0, so (0 | ½) = 0
+When a = 1: (1 | ½) ⊗ ½ = ½, so (1 | ½) = 1
+When a = ½: (½ | ½) ⊗ ½ = ½, so (½ | ½) could be 1 or ½
+When a = 0: (0 | ½) ⊗ ½ = 0, so (0 | ½) = 0
 
 ## Connection to Known Logics
 
@@ -99,9 +99,10 @@ Relevant logic
 In Cred, ½ represents:
 
 1. **Epistemic uncertainty**: We don't know if true or false
-2. **Undecidability**: The proposition is undecidable (Gödel sentences)
-3. **Self-reference fixed point**: The liar sentence "This is false" has credence ½
-4. **Maximum entropy**: No information either way
+2. **Self-reference fixed point**: the liar-style equation `c = ~c` forces `c = ½`
+3. **Maximum entropy**: No information either way (a reasonable prior choice)
+
+It does not follow from Part 1 that all Gödel-style incompleteness phenomena “have credence ½”; connecting provability to credences requires extra structure beyond the Part 1 algebra.
 
 ## The Collapse Map
 

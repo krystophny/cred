@@ -59,19 +59,19 @@ We present \emph{Cred}, a credence algebra for graded mathematics and reasoning 
 A \emph{credence} is a real number in $[0,1]$ representing degree of belief---the
 standard representation in formal epistemology (Definition~\ref{def:credence}). Cred adopts a well-known approach from
 R\'enyi (1955) and Popper (1959): conditioning is a \emph{primitive operation}
-governed by a chain rule axiom, not defined via division. When evidence has
+governed by a chain rule equation/constraint, not defined via division. When evidence has
 credence zero, the conditional is \emph{unconstrained} (any value satisfies
-the axiom), not undefined. The chain rule axiom is satisfied by any value
+the equation), not undefined. The chain rule equation is satisfied by any value
 in $[0,1]$ when evidence is zero, rather than forcing the conditional to $1$.
 This property is shared with relevant logic, though achieved through different
 mechanisms. Van Fraassen (1983) established the
 theoretical connection between probabilistic semantics and relevant logic;
 Cred is not itself a semantics for relevant logic. The core algebra is
 formalized in Lean 4 with machine-checked proofs of algebraic properties
-derived from the chain rule axiom (the axiom itself is postulated, not derived).
+derived from the chain rule constraint (the constraint itself is taken as primitive, not derived).
 Our broader goal is foundational: to rebuild familiar mathematical constructions in a setting where propositions and proofs can be graded in $[0,1]$, and where impossible evidence does not trivialize inference.
 Our contributions are:
-(1)~primitive conditioning via chain rule axiom avoiding ex falso;
+(1)~primitive conditioning via the chain rule constraint, avoiding ex falso;
 (2)~showing this property is shared with relevant logic (through different mechanisms);
 (3)~fixed points including $0.5$ for the liar;
 (4)~machine-checked Lean formalization of algebraic properties; and
@@ -98,7 +98,7 @@ Ramsey, Savage, and Jaynes~\cite{ramsey1931,definetti1937,jaynes2003}.
 \midrule
 Interpretation & Various (frequentist, etc.) & Epistemic (degree of belief) \\
 Conditioning at 0 & Undefined ($0/0$)${}^a$ & Unconstrained (any value)${}^a$ \\
-Chain rule & Derived: $P(A|B) = P(A \land B)/P(B)$ & \textbf{Primitive axiom} \\
+Chain rule & Derived: $P(A|B) = P(A \land B)/P(B)$ & \textbf{Primitive constraint} \\
 At Boolean values & Classical logic (material impl.) & Conditioning${}^b$ (no ex falso) \\
 \bottomrule
 \end{tabular}
@@ -146,16 +146,16 @@ $P(B) = 0$), we take conditioning as primitive via the chain rule and
 derive absolute probability as the special case $P(A) = P(A | \Omega)$.}
 \end{quote}
 
-Cred adopts this ``conditional first'' approach: the chain rule axiom
+Cred adopts this ``conditional first'' approach: the chain rule equation
 $\cred(A|B) \cdot \cred(B) = \cred(A \land B)$ governs conditioning, and
 absolute credence is the special case where evidence is certain.
 
 \begin{remark}[What ``Primitive'' Means]
 \label{rem:primitive-meaning}
 By \emph{primitive} we mean that conditioning is defined directly via the chain
-rule axiom, not derived from other operations (as in probability theory where
+rule equation/constraint, not derived from other operations (as in probability theory where
 $P(A|B) = P(A \land B)/P(B)$). Negation, conjunction, and disjunction are also
-primitively defined---they are axiomatized by their properties, not derived from
+primitively defined---they are characterized by their properties, not derived from
 conditioning. The term ``primitive'' here is analogous to ``point'' in geometry:
 a foundational undefined term, not a claim of greater importance than other
 operations.
@@ -241,7 +241,7 @@ confidence representing the agent's degree of belief. Cred handles an
 edge case differently than probability: suppose evidence $E$ is regarded as
 impossible ($\cred(E) = 0$). The chain rule equation
 $\cred(\text{H} \mid E) \cdot 0 = 0$ is satisfied by \emph{any} value.
-The conditional is \emph{unconstrained} by the axiom, rather than undefined
+The conditional is \emph{unconstrained} by the constraint, rather than undefined
 (probability) or forced to 1 (classical ex falso).
 \end{example}
 
@@ -283,7 +283,7 @@ probability addresses this through regular conditional probability and
 disintegration (see Section~\ref{sec:measure-theory} for details). Here we
 contrast Cred with the elementary definition.
 
-In Cred, conditioning is \emph{primitive}, governed by an axiom:
+In Cred, conditioning is \emph{primitive}, governed by a constraint equation:
 \[
 \cred(A \mid B) \cdot \cred(B) = \cred(A \land B)
 \]
@@ -334,7 +334,7 @@ The intuition has three parts:
     \emph{impossible}, not ``no evidence for $B$'' (which would be
     $\cred(B) = 0.5$). The rationale is pragmatic: downstream computations
     using $\cred(A \mid B) \cdot 0 = 0$ are unaffected by the conditional's
-    value, so the axiom need not determine it.
+    value, so the constraint need not determine it.
 \end{enumerate}
 
 This motivates Cred's treatment of conditioning at zero as unconstrained---a
@@ -609,7 +609,7 @@ notation is informal; the Lean formalization works purely with credence
 values---see Remark~\ref{rmk:algebraic-foundation}.
 \end{definition}
 
-\begin{remark}[Lean Formalization: Axiom vs.\ Derived Theorems]
+\begin{remark}[Lean Formalization: Primitive Constraint vs.\ Derived Theorems]
 \label{rmk:lean-conditioning}
 The Lean code represents conditioning as a structure that \emph{packages a witness}
 \texttt{condCred} together with a proof of the chain rule equation. The structure
@@ -622,7 +622,7 @@ not propositions:
 \end{itemize}
 The paper's propositional notation $\cred(A \mid B)$ is informal shorthand;
 Lean works purely with numeric credence values and the algebraic constraint
-\texttt{condCred * evidence = joint} (ordinary multiplication). This design
+\texttt{conj condCred evidence = joint} (where \texttt{conj} is multiplication on credence values). This design
 reflects Remark~\ref{rmk:algebraic-foundation}: the algebra operates on $[0,1]$
 values, not on a domain of propositions.
 
@@ -698,13 +698,13 @@ Cred has no \emph{consequence relation} ($\vdash$ or $\models$). Claims about
     \item \textbf{Ex falso in logic:} In a logic with consequence relation $\vdash$,
     ex falso means $\bot \vdash A$ for all $A$ (from falsehood, anything follows).
     This is a property of the \emph{inference relation}.
-    \item \textbf{What Cred avoids:} The chain rule axiom does not \emph{force}
-    $\cred(A \mid 0) = 1$. Any value satisfies the axiom when evidence is zero.
+    \item \textbf{What Cred avoids:} The chain rule constraint does not \emph{force}
+    $\cred(A \mid 0) = 1$. Any value satisfies the constraint when evidence is zero.
     This is a property of the \emph{conditioning operation}, not a statement about
     logical inference.
 \end{itemize}
 An agent could still \emph{choose} to adopt $\cred(A \mid 0) = 1$ for all $A$
-without violating Cred's axioms---the axioms simply do not require this choice.
+without violating the chain rule constraint---the theory simply does not require this choice.
 If one were to define a consequence relation for Cred, whether it exhibits
 explosion would depend on the choice of designated values and inference rules
 (see Remark~\ref{rmk:soundness-completeness}).
@@ -732,26 +732,30 @@ conditional is \emph{unconstrained}.
 \begin{theorem}[Conditioning Underdetermination]
 \label{thm:noexfalso}
 % Lean: conditioning_zero_any
-For all propositions $A$ and $B$: when $\cred(B) = 0$, the chain rule axiom
-is satisfied by \emph{any} value of $\cred(A \mid B) \in [0,1]$.
+When evidence has credence $0$, the chain rule constraint underdetermines the conditional:
+\begin{enumerate}[label=(\alph*)]
+    \item If a conditioning structure exists with evidence $= 0$, then necessarily joint $= 0$.
+    \item For joint $= 0$ and evidence $= 0$, the chain rule constraint is satisfied by \emph{any}
+    conditional value in $[0,1]$.
+\end{enumerate}
 \end{theorem}
 
 \begin{proof}
-The conditioning structure (Definition~\ref{def:conditioning}) requires
-joint $\leq$ evidence. When $\cred(B) = 0$, we must have
-$\cred(A \land B) \leq 0$; since credences are non-negative,
-$\cred(A \land B) = 0$. For any $c \in [0,1]$: $c \cdot 0 = 0 = \cred(A \land B)$.
-Thus every credence value satisfies the chain rule. (Lean: \texttt{conditioning\_zero\_any})
+Let $\text{evidence} = 0$. By Definition~\ref{def:conditioning}, the defining equation is
+$\text{condCred} \cdot \text{evidence} = \text{joint}$, hence $\text{condCred} \cdot 0 = \text{joint}$.
+Therefore joint $= 0$. Conversely, if joint $= 0$, then for any $c \in [0,1]$ we have $c \cdot 0 = 0$,
+so any conditional value satisfies the constraint. (Lean: \texttt{conditioning\_zero\_forces\_joint\_zero},
+\texttt{conditioning\_zero\_any})
 \end{proof}
 
 \begin{corollary}[No Forced Ex Falso]
 \label{cor:noexfalso}
-The chain rule axiom does \emph{not} force $\cred(A \mid 0) = 1$ for arbitrary
+The chain rule constraint does \emph{not} force $\cred(A \mid 0) = 1$ for arbitrary
 $A$. In particular, the value $\cred(A \mid 0) = 0$ is equally consistent
-with the axioms.
+with the constraint.
 \end{corollary}
 
-This is the key result: the axioms do not entail ``from impossibility,
+This is the key result: the chain rule constraint does not entail ``from impossibility,
 anything follows.'' To obtain ex falso, one must \emph{add} the extra axiom
 $\cred(A \mid 0) = 1$; it does not follow from conditioning alone.
 
@@ -768,14 +772,14 @@ a unique conditional credence:
 \end{theorem}
 \noindent\textit{Proof.} Verified in Lean: \texttt{conditioning\_mk}. \hfill$\square$
 
-\begin{remark}[Axiom vs.\ Existence Proof]
+\begin{remark}[Constraint vs.\ Existence Proof]
 \label{rmk:axiom-vs-proof}
-There is an important distinction between the \emph{axiom} and the
+There is an important distinction between the \emph{defining constraint} and the
 \emph{existence proof}:
 \begin{itemize}
-    \item \textbf{The axiom (chain rule)} is stated multiplicatively:
+    \item \textbf{The defining equation (chain rule)} is stated multiplicatively:
     $\cred(A \mid B) \cdot \cred(B) = \cred(A \land B)$. Division does not
-    appear in the axiom itself.
+    appear in the defining equation itself.
     \item \textbf{The existence proof} constructs the witness by computing
     $\cred(A \land B) / \cred(B)$ when $\cred(B) > 0$.
 \end{itemize}
@@ -783,7 +787,7 @@ This is entirely standard: axioms are often stated in forms that avoid
 problematic operations, while proofs of existence or uniqueness may use
 those operations in controlled settings. Compare how group axioms mention
 only multiplication, yet proofs about groups freely use division (multiplication
-by inverse). The key property---that the chain rule \emph{axiom} does not
+by inverse). The key property---that the chain rule \emph{equation} does not
 require division---is what allows the unconstrained behavior at $\cred(B) = 0$.
 \end{remark}
 
@@ -799,20 +803,20 @@ non-uniqueness is precisely what avoids forcing ex falso.
 
 \begin{remark}[Interpretation of ``Unconstrained'']
 \label{rmk:unconstrained}
-``Unconstrained'' is a \emph{mathematical} term: it means the chain rule axiom
+``Unconstrained'' is a \emph{mathematical} term: it means the chain rule constraint
 does not determine a unique value. This requires careful interpretation.
 \begin{itemize}
     \item \textbf{Algebraically:} The chain rule is a constraint equation.
     When $\cred(B) = 0$, the equation $\cred(A \mid B) \cdot 0 = 0$ is satisfied
-    by all values in $[0,1]$---the axiom is \emph{silent} on this case.
+    by all values in $[0,1]$---the constraint is \emph{silent} on this case.
     This is a mathematical fact about the equation, nothing more.
 
     \item \textbf{Epistemically:} ``Unconstrained by the chain rule'' does
     \emph{not} mean a rational agent may hold any belief whatsoever, nor that
-    the agent simultaneously holds all beliefs. Rather, the chain rule axiom
+    the agent simultaneously holds all beliefs. Rather, the chain rule constraint
     simply does not govern this case---the question ``what is my degree of
     belief in $A$ given evidence I regard as impossible?'' lies outside the
-    axiom's scope. A rational agent faced with this question has several
+    constraint's scope. A rational agent faced with this question has several
     coherent options:
     \begin{enumerate}[label=(\alph*)]
         \item \textbf{The question does not arise:} If $\cred(B) = 0$, the agent
@@ -869,13 +873,13 @@ Axiom form & Division in definition & Multiplication only${}^*$ \\
 \end{tabular}
 
 \smallskip
-\footnotesize{${}^*$The \emph{axiom} uses only multiplication; the existence proof
+\footnotesize{${}^*$The \emph{constraint} uses only multiplication; the existence proof
 (Theorem~\ref{thm:condexists}) constructs the witness via division when evidence $> 0$.
 See Remark~\ref{rmk:axiom-vs-proof}.}
 
 \smallskip
 \footnotesize{${}^\dagger$``Undefined'' excludes the expression syntactically;
-``underdetermined'' allows the expression but leaves its value unconstrained by the axiom.
+``underdetermined'' allows the expression but leaves its value unconstrained by the constraint.
 Both avoid forcing $1$; see Remark~\ref{rmk:unconstrained} for further discussion.}
 \end{center}
 
@@ -1353,7 +1357,7 @@ Note: This comparison shows how the two operations differ at Boolean values.
 Material implication $B \to A$ is a \emph{function} returning a definite value
 (1 when $B = 0$, regardless of $A$---this is ex falso). Cred conditioning
 $\condc{A}{B}$ when $\cred(B) = 0$ is \emph{underdetermined}---any value in
-$[0,1]$ satisfies the chain rule axiom $\condc{A}{B} \cdot 0 = 0$. The key
+$[0,1]$ satisfies the chain rule equation $\condc{A}{B} \cdot 0 = 0$. The key
 difference: material implication \emph{forces} 1; conditioning leaves the
 value \emph{unconstrained}.
 \end{minipage}
@@ -1442,7 +1446,7 @@ $\models$). The distinction matters:
     \item \textbf{Logics} define which inferences are valid (e.g., $A, A \to B \vdash B$)
 \end{itemize}
 When we say Cred ``avoids ex falso,'' we mean the algebraic claim: the chain rule
-axiom does not force $\cred(A \mid 0) = 1$. We do \emph{not} claim Cred has a
+constraint does not force $\cred(A \mid 0) = 1$. We do \emph{not} claim Cred has a
 paraconsistent consequence relation.
 
 The Lean formalization verifies \emph{algebraic identities} (e.g., that
@@ -1487,7 +1491,7 @@ G\"odel: $a \land b = \min(a,b)$, $a \to b = 1$ if $a \leq b$, else $b$.
 Product: $a \land b = ab$, $a \to b = 1$ if $a \leq b$ (including $a = 0$), else $b/a$.}
 
 \smallskip
-\footnotesize{${}^\ddagger$``Unconstrained'' means any value satisfies the chain rule axiom;
+\footnotesize{${}^\ddagger$``Unconstrained'' means any value satisfies the chain rule constraint;
 this differs from ``undefined'' (probability) and from forcing $1$ (fuzzy implication).
 See Remark~\ref{rmk:unconstrained} for epistemic interpretation.}
 
@@ -1523,7 +1527,7 @@ Application & Random events & Epistemic uncertainty \\
 \smallskip
 \footnotesize{${}^*$``Undefined'' (probability): the expression $P(A|B)$ when $P(B)=0$ has no value;
 it is a syntactic error to write it. ``Unconstrained'' (Cred): the expression
-$\cred(A \mid B)$ when $\cred(B)=0$ is well-formed but underdetermined by the chain rule axiom.
+$\cred(A \mid B)$ when $\cred(B)=0$ is well-formed but underdetermined by the chain rule constraint.
 Both approaches avoid forcing $\cred(A \mid 0) = 1$; they differ in how.
 See Remark~\ref{rmk:unconstrained} for detailed comparison.}
 
@@ -1781,7 +1785,7 @@ $\{1, B\}$ can serve as premises); Cred avoids forcing it via the chain rule mak
 conditioning at zero underdetermined.
 
 \textbf{Note on ``avoiding ex falso'' for an algebra:} Since Cred does not define
-a consequence relation, ``avoids forcing ex falso'' means the chain rule axiom does not
+a consequence relation, ``avoids forcing ex falso'' means the chain rule constraint does not
 \emph{force} $\cred(A \mid 0) = 1$. If a consequence relation were defined for Cred,
 whether it has explosion would depend on the choice of designated values and
 inference rules---not determined by the algebra alone.
@@ -1813,8 +1817,8 @@ Implication type & Residuated${}^\dagger$ & Chain rule \\
 \end{tabular}
 
 \smallskip
-\footnotesize{${}^*$``Underdetermined'' means the chain rule axiom does not fix a unique value
-for $\cred(A \mid 0)$---any value in $[0,1]$ satisfies the axiom. This differs from
+\footnotesize{${}^*$``Underdetermined'' means the chain rule constraint does not fix a unique value
+for $\cred(A \mid 0)$---any value in $[0,1]$ satisfies the constraint. This differs from
 ``undefined'' (probability) and from $0 \to b = 1$ (fuzzy/classical).}
 
 \smallskip
@@ -1849,7 +1853,7 @@ essentially unique measurable function satisfying certain integral equations.
 This approach handles conditioning on null sets rigorously but differs from Cred's
 treatment: measure-theoretic conditioning yields a \emph{specific} (a.e.\ unique)
 value determined by the underlying measure structure, whereas Cred's chain rule
-leaves conditioning on zero \emph{unconstrained} by the axiom. Both avoid the
+leaves conditioning on zero \emph{unconstrained} by the constraint. Both avoid the
 na\"ive ``undefined'' of elementary probability, but through different mechanisms.
 A detailed comparison of Cred with measure-theoretic conditioning is beyond
 the scope of this paper.
@@ -1862,7 +1866,7 @@ Given the extensive prior art, we claim the following contributions are novel:
     \item \textbf{Systematic avoidance of forced ex falso via chain rule:} While
     Popper-R\'enyi axiomatized primitive conditioning and van Fraassen
     connected probability to relevant logic, we provide a systematic
-    development showing that the chain rule axiom naturally makes conditioning
+    development showing that the chain rule constraint naturally makes conditioning
     from impossibility unconstrained, thereby avoiding forcing ex falso without
     syntactic relevance conditions.
 
@@ -1902,11 +1906,11 @@ machine-verified proofs.
 
 The core credence algebra has been formalized in Lean 4 using the
 Mathlib library. The formalization provides machine-checked proofs of
-algebraic properties \emph{derived from} the chain rule axiom---the axiom
+algebraic properties \emph{derived from} the chain rule constraint---the constraint
 itself is postulated as a constraint in the \texttt{Conditioning} structure,
 not computed or derived. Specifically:
 \begin{itemize}
-    \item \textbf{Postulated:} The chain rule $\texttt{condCred} \cdot \texttt{evidence} = \texttt{joint}$
+    \item \textbf{Primitive constraint:} The chain rule $\texttt{condCred} \cdot \texttt{evidence} = \texttt{joint}$
     is a field constraint in the \texttt{Conditioning} structure.
     \item \textbf{Verified:} Existence of satisfying values (when evidence $> 0$),
     uniqueness (when evidence $> 0$), underdetermination (when evidence $= 0$),
@@ -1960,10 +1964,10 @@ def conj (c1 c2 : Credence) : Credence where
   -- nonneg, le_one proofs omitted
 
 -- Conditioning: Conditioning structure
--- In Lean, (*) is used; paper uses otimes symbol
+-- In Lean, conj is used (multiplication on credence values); the paper writes the chain rule with ordinary multiplication (·).
 structure Conditioning (joint evidence : Credence) where
   condCred : Credence
-  chainRule : condCred * evidence = joint  -- plain multiplication
+  chainRule : conj condCred evidence = joint  -- multiplication on credence values
 \end{verbatim}
 
 \noindent\textbf{Note on Lean notation:} In the \texttt{Conditioning} structure,
@@ -2056,14 +2060,14 @@ We have presented Cred, a credence algebra with primitive conditioning. The
 key contributions are:
 
 \begin{enumerate}
-    \item \textbf{Primitive conditioning:} The chain rule axiom
+    \item \textbf{Primitive conditioning:} The chain rule constraint
     $\cred(A \mid B) \cdot \cred(B) = \cred(A \land B)$ is a design choice.
     From this choice, unconstrained conditioning at zero emerges as a
     mathematical consequence: when $\cred(B) = 0$, any value satisfies the
-    equation, so the axiom imposes no constraint.
+    equation, so the constraint imposes no constraint.
 
     \item \textbf{Shared property with relevant logic:} The property of not
-    forcing ex falso follows from the chain rule axiom. This parallels a
+    forcing ex falso follows from the chain rule constraint. This parallels a
     key feature of relevant logic (though achieved through different mechanisms:
     chain rule vs.\ variable-sharing).
 

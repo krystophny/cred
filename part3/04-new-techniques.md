@@ -152,31 +152,25 @@ Useful for distinguishing almost-equal credences.
 
 ## Technique 10: Conditioning Chains
 
-**Idea**: Build up credence through chains of conditioning.
+**Idea**: Factor joint credences through chains of conditioning.
 
 ```
-cred(Z) = cred(Z | Y) * cred(Y)
-        = cred(Z | Y) * cred(Y | X) * cred(X)
-        = ...
+cred(Z ∧ Y) = cred(Z | Y) ⊗ cred(Y)
+cred(Z ∧ Y ∧ X) = cred(Z | Y ∧ X) ⊗ cred(Y | X) ⊗ cred(X)
 ```
 
-Chain through intermediate propositions.
+This is the familiar “chain rule factorization”, but note what it actually computes: **joint** credences. Turning joints into marginals (e.g. getting `cred(Z)` from `cred(Z ∧ Y)` and `cred(Y)`) requires additional principles (a Cred analogue of marginalization / total probability), which are not part of Part 1.
 
-## Classical Techniques That Still Work
+## What Definitely Changes vs Classical
 
-All classical techniques work when credences are 0 or 1:
-- Direct proof: Derive P with cred = 1
-- Contradiction: Show ~P leads to cred(⊥) > 0, contradiction
-- Induction: As usual
-- Cases: Combine cases with cred product/sum
-- Contrapositive: Works for conditioning
+Even in the `{0,1}` collapse, Cred does not automatically become classical logic: ex falso is not forced, and conditionals can be underdetermined at evidence `0`. A genuine proof theory for Cred will need to specify which classical proof patterns survive (and under what extra assumptions), rather than asserting “everything still works”.
 
 ## Techniques That Change
 
 | Classical | Cred |
 |-----------|------|
 | Ex falso (from ⊥, anything) | Doesn't work |
-| Law of excluded middle | cred(P) + cred(~P) = 1, but P ∨ ~P might have cred < 1 |
+| Law of excluded middle | algebraically, `c ⊔ ~c = 1 - c(1-c)` can be < 1 for `c∈(0,1)` |
 | Double negation elimination | Works: ~~c = c |
 
 ## Combinations

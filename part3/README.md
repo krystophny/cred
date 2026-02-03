@@ -38,7 +38,7 @@ Godel's incompleteness is about provability, not truth. The sentence "G is not p
 
 ### Chain Rule Semantics
 ```
-cred(A | B) * cred(B) = cred(A AND B)
+cred(A | B) ⊗ cred(B) = cred(A ∧ B)
 When cred(B) = 0: any value satisfies the chain rule
 ```
 This semantic property blocks ex falso without syntactic restrictions.

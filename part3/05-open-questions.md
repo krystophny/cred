@@ -19,8 +19,8 @@ Is there a mathematical structure satisfying all Cred axioms?
 
 Candidate: [0,1] with product, complement, standard order, and conditioning via chain rule.
 
-### Q4: Is the Conditioning Axiom Complete?
-Does the chain rule capture everything we want from conditioning?
+### Q4: Is the Chain Rule Constraint Complete?
+Does the chain rule equation/constraint capture everything we want from conditioning?
 
 Might need additional axioms:
 - (A | A) = 1? (when A > 0)

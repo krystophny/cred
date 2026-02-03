@@ -9,7 +9,7 @@ This is intentionally the smallest layer: primitives + their core consequences, 
 ```
 C = [0, 1]              credence values
 0, 1                    impossibility, certainty
-*                       conjunction (multiplication)
+⊗                       conjunction (product / multiplication on values)
 ~                       negation (complement)
 ≤                       ordering
 _|_                     conditioning (chain rule)
@@ -17,14 +17,14 @@ _|_                     conditioning (chain rule)
 
 ## Why These Primitives?
 
-- **Multiplication (*)**: Credences compound — uncertainty multiplies
+- **Product (⊗)**: Credences compound — uncertainty multiplies
 - **Complement (~)**: ~c = 1 - c, natural negation
 - **Conditioning (_|_)**: Via chain rule, NOT division — avoids ex falso
 
 ## The Chain Rule
 
 ```
-(A | B) * B = A ∧ B
+cred(A|B) ⊗ cred(B) = cred(A ∧ B)
 ```
 
 When B = 0: (A | 0) is unconstrained. No ex falso.

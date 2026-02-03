@@ -18,135 +18,52 @@ A @ c₁, (B | A) @ c₂ ⊢ B @ ?
 
 How does credence propagate?
 
-## The Chain Rule as Inference
+## What Part 1 Actually Provides
 
-The chain rule:
-```
-(B | A) * A = A ∧ B
-```
-
-As an inference:
-```
-If cred(A) = c₁ and cred(B | A) = c₂
-Then cred(A ∧ B) = c₁ * c₂
-```
-
-## Modus Ponens in Cred
-
-Classical: A, A → B ⊢ B
-
-Cred version:
-```
-cred(A) = c₁
-cred(B | A) = c₂
-─────────────────
-cred(B) ≥ c₁ * c₂
-```
-
-Why ≥ instead of =? Because B might have credence from other sources too.
-
-When c₁ = c₂ = 1 (certain premises):
-```
-cred(A) = 1
-cred(B | A) = 1
-─────────────────
-cred(B) = 1
-```
-
-We recover classical modus ponens.
-
-## Conjunction Introduction
+Part 1 formalizes an algebra on `[0,1]` plus a primitive conditioning relation constrained by the chain rule:
 
 ```
-cred(A) = c₁
-cred(B) = c₂
-─────────────────
-cred(A ∧ B) = c₁ * c₂
+cred(B|A) ⊗ cred(A) = cred(B ∧ A)
 ```
 
-Credences multiply.
+Here `cred(B ∧ A)` is a **joint** credence value. It is not generally computable from `cred(A)` and `cred(B)` (dependence is real; joint information is additional data).
 
-## Conjunction Elimination
-
-```
-cred(A ∧ B) = c
-─────────────────
-cred(A) ≥ c
-cred(B) ≥ c
-```
-
-## Disjunction Introduction
+So, even if you know the numbers `cred(A)=c₁` and `cred(B|A)=c₂`, the chain rule only lets you infer the joint:
 
 ```
-cred(A) = c
-─────────────────
-cred(A ∨ B) ≥ c
+cred(B ∧ A) = c₂ ⊗ c₁
 ```
 
-## Contrapositive
+That is already valuable: it tells you what your joint commitments must be if you claim those conditionals and that evidence.
 
-```
-cred(B | A) = c
-─────────────────
-cred(~A | ~B) = c
-```
+## Why This Is Not Yet a Proof Calculus
 
-Contrapositive preserves credence.
+To go from a joint credence `cred(A ∧ B)` to a marginal credence `cred(B)` you need additional **structural principles** (e.g. some monotonicity principle expressing that `A ∧ B` should not be more credible than `B`). Part 1 deliberately does **not** postulate such a bridge, because it is precisely where “logic” (about propositions) enters, and it is easy to smuggle in classical explosion by accident.
 
-## Proof by Contradiction
+In particular, statements like
+- “`cred(B) ≥ cred(A ∧ B)`”
+- “`cred(A ∧ B) = cred(A) ⊗ cred(B)`”
+- “Contrapositive preserves conditional credence”
 
-```
-cred(⊥ | ~P) = 1    (assuming ~P leads to contradiction)
-─────────────────
-cred(P) = 1
-```
+are not consequences of the Part 1 algebra alone; they require extra semantics connecting propositions and the algebra.
 
-Why? From chain rule:
-```
-cred(⊥ | ~P) * cred(~P) = cred(⊥ ∧ ~P) = 0
-1 * cred(~P) = 0
-cred(~P) = 0
-cred(P) = 1
-```
+## A Conservative Reading (Constraint-First)
 
-## No Ex Falso
+One safe way to think about “inference” in Cred is:
+- inference introduces **constraints** relating credence values (including joints),
+- and additional information (models, priors, or further principles) is needed to extract a single derived number.
 
-We CANNOT derive:
-```
-cred(⊥) = 1
-─────────────────
-cred(A) = 1    ✗ INVALID
-```
+This is aligned with the Part 1 philosophy: inference narrows possibilities rather than producing explosion.
 
-Because cred(A | ⊥) is unconstrained, not 1.
+## Future Work (Part 2 Proper)
 
-## Credence Bounds
+Part 2 is where we will specify (and then justify) extra principles that connect:
+- proposition-level connectives (`∧`, `∨`, `¬`) and entailment,
+- to the value-level algebra (`⊗`, `⊔`, `~`) and to conditioning constraints.
 
-Inference gives bounds, not exact values:
-```
-cred(A) = 0.7
-cred(B | A) = 0.8
-─────────────────
-cred(B) ∈ [0.56, 1]
-```
-
-The lower bound is c₁ * c₂ = 0.56. Upper bound is 1 (B could be certain independently).
-
-## The Inference Judgment
-
-We can write:
-```
-Γ ⊢ P @ c
-```
-
-Meaning: From premises Γ (with their credences), we can derive P with credence at least c.
-
-## Soundness
-
-The inference rules are sound with respect to the credence algebra:
-- If premises have their stated credences
-- And we apply valid rules
-- Then conclusions have at least their derived credences
+The goal is to end up with a bona fide, Lean-checked notion of “graded proof” that:
+- agrees with classical proofs in the `{0,1}` collapse only when the *extra classical principles* are explicitly assumed,
+- but otherwise treats impossible evidence and contradiction as constraint-silent cases (no ex falso).
 
 ## Example Derivation
 

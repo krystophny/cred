@@ -1,6 +1,6 @@
 # Cred: A Foundation for Graded Mathematics
 
-Cred is an algebra on **credences** (values in `[0,1]`) intended as a foundation for doing mathematics and reasoning when truth, evidence, and proofs are **graded** rather than purely Boolean. The core design choice is **primitive conditioning** via a chain rule, which blocks explosion from impossible evidence: when `cred(B)=0`, the axiom imposes no constraint on `cred(A|B)` (no ex falso).
+Cred is an algebra on **credences** (values in `[0,1]`) intended as a foundation for doing mathematics and reasoning when truth, evidence, and proofs are **graded** rather than purely Boolean. The core design choice is **primitive conditioning** via a chain rule equation/constraint, which blocks explosion from impossible evidence: when `cred(B)=0`, the equation imposes no constraint on `cred(A|B)` (no ex falso).
 
 This repo contains:
 - a Lean 4 library formalizing the Part 1 primitives and theorems (`lean/`)

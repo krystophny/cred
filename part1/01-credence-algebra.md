@@ -6,19 +6,19 @@
 C     : [0, 1]              -- credence values
 0     : C                   -- impossibility
 1     : C                   -- certainty
-*     : C → C → C           -- conjunction (multiplication)
+⊗     : C → C → C           -- independence product (multiplication on values)
 ~     : C → C               -- negation (~c = 1 - c)
 ≤     : C → C → Prop        -- ordering
-_|_   : C → C → C           -- conditioning (PRIMITIVE)
+Conditioning(joint, evidence)  -- primitive conditioning relation/structure
 ```
 
-## Axioms for *, ~, ≤ (De Morgan Algebra)
+## Axioms for ⊗, ~, ≤ (De Morgan Algebra)
 
 ```
-c * 1 = c                           identity
-c * 0 = 0                           annihilation
-(a * b) * c = a * (b * c)           associativity
-a * b = b * a                       commutativity
+c ⊗ 1 = c                           identity
+c ⊗ 0 = 0                           annihilation
+(a ⊗ b) ⊗ c = a ⊗ (b ⊗ c)           associativity
+a ⊗ b = b ⊗ a                       commutativity
 
 ~0 = 1                              complement bounds
 ~1 = 0
@@ -33,30 +33,32 @@ a ≤ b ∧ b ≤ a → a = b               antisymmetry
 ## Axioms for Conditioning (The Innovation)
 
 ```
-(a | b) * b = a * b                 chain rule
-(a | 1) = a                         certain condition
-(a | 0) unconstrained               impossible condition
+condCred ⊗ evidence = joint         chain rule constraint (conditioning)
+evidence = 1  ⇒  condCred = joint   certain evidence
+evidence = 0  ⇒  joint = 0 and condCred underdetermined
 ```
 
-Note: When b = 0, the chain rule becomes:
+Here `evidence` is the credence value `cred(B)` and `joint` is the credence value `cred(A ∧ B)`. Conditioning is not a total function `C × C → C`; it is a relation (or structure) packaging a `condCred ∈ C` together with a proof of the chain rule equation.
+
+Note: When `evidence = 0`, the chain rule becomes:
 ```
-(a | 0) * 0 = a * 0 = 0
+condCred ⊗ 0 = joint
 ```
-This is satisfied for ANY value of (a | 0). The conditional is **unconstrained**, not defined to be 1.
+This forces `joint = 0` and leaves `condCred` **underdetermined** (any value in `[0,1]` works).
 
 ## Derived Operations
 
 ```
-a + b := ~(~a * ~b)                 disjunction (De Morgan dual)
+a ⊔ b := ~(~a ⊗ ~b)                 disjunction (De Morgan dual)
 ```
 
-Note: We do NOT derive implication as ~a + b. Material implication is NOT part of Cred.
+Note: We do NOT define implication as ~a ⊔ b. Material implication is NOT part of Cred.
 
 ## Comparison
 
 | Operation | Material Implication | Conditioning |
 |-----------|---------------------|--------------|
-| Definition | A → B := ~A + B | (B \| A) primitive |
+| Definition | A → B := ~A ⊔ B | (B \| A) primitive |
 | At A = 0 | A → B = 1 | (B \| A) unconstrained |
 | Ex falso | ⊥ → C = 1 (anything follows) | (C \| ⊥) = ? (nothing determined) |
 | Nature | Truth-functional | Relational (chain rule) |
@@ -78,7 +80,7 @@ C = [0, 1]
 * = multiplication
 ~ c = 1 - c
 ≤ = standard
-(a | b) via chain rule
+Conditioning via chain rule constraint on (joint, evidence)
 ```
 
 ### Instance 2: Three-Valued {0, ½, 1}
@@ -86,7 +88,7 @@ C = [0, 1]
 C = {0, ½, 1}
 * = multiplication (with ½ * ½ → ½ by convention)
 ~ c = 1 - c
-(a | b) via chain rule
+Conditioning via chain rule constraint on (joint, evidence)
 ```
 
 ### Instance 3: Boolean {0, 1}
@@ -94,5 +96,5 @@ C = {0, ½, 1}
 C = {0, 1}
 * = AND
 ~ = NOT
-(a | b) = a when b = 1, unconstrained when b = 0
+Conditioning: condCred * b = joint (so b = 1 ⇒ condCred = joint; b = 0 ⇒ joint = 0 and condCred underdetermined)
 ```

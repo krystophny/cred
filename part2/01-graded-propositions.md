@@ -10,32 +10,39 @@ P ∈ {0, 1}
 
 ## The Cred View
 
-A proposition P IS its credence.
+We assign a credence to each proposition.
 ```
-P : C
-P ∈ [0, 1]
+cred(P) : C
+cred(P) ∈ [0, 1]
 ```
 
-A proposition isn't something that HAS a credence. A proposition IS a credence value.
+Interpretation is a choice:
+- Epistemic: `cred(P)` is degree of belief.
+- Semantic: `cred(P)` is degree of truth.
+
+Part 1 treats Cred as an algebra on `[0,1]` that admits multiple interpretations; graded mathematics is built on top of that algebra.
 
 ## Operations on Propositions
 
-Since propositions are credences, operations are credence operations:
+Cred defines algebraic operations on credence values. Be careful about what is definitional vs what requires assumptions (e.g. independence, or supplying joint credences).
 
 ```
-P AND Q := P * Q              multiplication
-P OR Q  := P + Q := ~(~P * ~Q)   De Morgan dual
-NOT P   := ~P := 1 - P        complement
-P GIVEN Q := (P | Q)          conditioning (primitive)
+Independence product:  c₁ ⊗ c₂ := c₁ · c₂
+De Morgan dual:        c₁ ⊔ c₂ := ~(~c₁ ⊗ ~c₂)
+Negation:              ~c := 1 - c
+
+Conditioning (primitive, chain rule constraint):
+choose condCred such that  condCred ⊗ cred(Q) = cred(P ∧ Q)
+(here `cred(P ∧ Q)` is a joint value, not computed from marginals unless you assume independence)
 ```
 
 ## Examples
 
 ```
-"It will rain" = 0.7
-"It will be sunny" = 0.3  (note: not necessarily ~rain)
-"Rain AND sunny" = 0.7 * 0.3 = 0.21  (if independent)
-"Rain GIVEN cloudy" = (rain | cloudy) via chain rule
+cred("It will rain") = 0.7
+cred("It will be sunny") = 0.3  (note: not necessarily ~rain)
+If rain and sunny are independent: cred(rain ∧ sunny) = 0.7 ⊗ 0.3 = 0.21
+Conditioning uses the chain rule: cred(rain | cloudy) ⊗ cred(cloudy) = cred(rain ∧ cloudy)
 ```
 
 ## Compound Propositions
@@ -44,10 +51,10 @@ P GIVEN Q := (P | Q)          conditioning (primitive)
 "If it rains, the ground is wet"
 = (wet | rain)
 
-Chain rule: (wet | rain) * rain = rain AND wet
+Chain rule: cred(wet | rain) ⊗ cred(rain) = cred(wet ∧ rain)
 
-If rain = 0.7 and rain AND wet = 0.65:
-(wet | rain) = 0.65 / 0.7 ≈ 0.93
+If cred(rain) = 0.7 and cred(wet ∧ rain) = 0.65:
+cred(wet | rain) = 0.65 / 0.7 ≈ 0.93
 ```
 
 ## Tautologies and Contradictions
@@ -62,13 +69,11 @@ In Cred:
 - Everything else: credence in (0, 1)
 
 ```
-"P OR NOT P" = P + ~P = P + (1 - P) = 1  (tautology, but only for OR)
-
-"P AND NOT P" = P * ~P = P * (1 - P)
-Maximum at P = 0.5: 0.5 * 0.5 = 0.25
+spread(c) := c ⊗ ~c = c(1-c)          (max 1/4 at c=1/2)
+certainty(c) := c ⊔ ~c = 1 - c(1-c)   (min 3/4 at c=1/2)
 ```
 
-Note: Contradictions have credence at most 0.25, not 0!
+These are useful derived quantities, but they are not laws like `cred(P ∨ ¬P)=1` or `cred(P ∧ ¬P)=0` unless you add additional semantics connecting the algebra to propositions. In Part 1, `spread` and `certainty` are explicitly treated as algebraic measures on a single credence value, not logical tautologies/contradictions.
 
 ## The Liar Sentence
 
@@ -91,10 +96,7 @@ Gödel's G: "This sentence is not provable"
 
 Classical: G is true but unprovable (incompleteness)
 
-Cred: G has credence ≈ 0.5
-- Not provable (credence doesn't reach 1)
-- Not refutable (credence doesn't reach 0)
-- The undecidability IS the credence 0.5
+Cred does not make incompleteness disappear: Gödel sentences are not self-negating (unprovable is not false). Representing “undecidable” as a stable intermediate credence is a proposal for later work, not a theorem of Part 1.
 
 ## Comparison
 
@@ -102,14 +104,10 @@ Cred: G has credence ≈ 0.5
 |------------------|-----------|------|
 | Tautology | True | 1 |
 | Contingent truth | True | (0.5, 1) |
-| Undecidable | ??? | 0.5 |
+| Undecidable | ??? | (not fixed by Part 1) |
 | Contingent falsehood | False | (0, 0.5) |
-| Contradiction | False | [0, 0.25] |
+| Contradiction | False | 0 |
 
 ## The Ontological Claim
 
-We're not saying "propositions have degrees of truth" (that's fuzzy logic framing).
-
-We're saying "a proposition IS a credence value." There's no underlying Boolean truth that we're uncertain about. The credence IS the reality.
-
-This is analogous to quantum mechanics: the wave function isn't uncertainty about a hidden state; the wave function IS the state.
+We are not committed to a single metaphysical reading. Cred can be read epistemically (belief) or semantically (truth degree), and Part 1 is careful to keep the algebra independent of that choice.
