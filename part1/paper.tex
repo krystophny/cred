@@ -591,9 +591,14 @@ parameterized by credence \emph{values}, not propositions:
 \end{itemize}
 The paper's propositional notation $\cred(A \mid B)$ is informal shorthand;
 Lean works purely with numeric credence values and the algebraic constraint
-\texttt{condCred $\otimes$ evidence = joint}. This design reflects
-Remark~\ref{rmk:algebraic-foundation}: the algebra operates on $[0,1]$
+\texttt{condCred * evidence = joint} (ordinary multiplication). This design
+reflects Remark~\ref{rmk:algebraic-foundation}: the algebra operates on $[0,1]$
 values, not on a domain of propositions.
+
+\textbf{Important:} The chain rule uses ordinary multiplication, \emph{not} the
+independence product $\conjc$ in the sense of computing joint credence.
+The \texttt{joint} parameter is supplied directly---it is never computed as
+\texttt{condCred $\conjc$ something}. See Remark~\ref{rmk:product-vs-joint}.
 
 The existence theorem (\texttt{conditioning\_exists}) requires
 joint $\leq$ evidence when evidence $> 0$.
@@ -609,7 +614,15 @@ The algebra distinguishes two concepts:
     \item $\cred(A \land B)$: The \emph{joint credence}, which is a
     parameter in the chain rule---not computed from marginals alone.
 \end{itemize}
-In practice: if independence holds, $\cred(A \land B) = \cred(A) \conjc \cred(B)$.
+
+\noindent\textbf{Warning:} Do not substitute $\cred(A) \conjc \cred(B)$ for
+$\cred(A \land B)$ in the chain rule. The chain rule
+$\cred(A \mid B) \cdot \cred(B) = \cred(A \land B)$ requires the actual joint
+credence as input. The independence product $\conjc$ computes this joint
+\emph{only} when $A$ and $B$ are independent; for dependent propositions,
+$\cred(A \land B)$ must be provided externally.
+
+\noindent In practice: if independence holds, $\cred(A \land B) = \cred(A) \conjc \cred(B)$.
 Otherwise, the joint credence must be provided as input.
 \end{remark}
 
@@ -1872,11 +1885,18 @@ def conj (c1 c2 : Credence) : Credence where
   -- nonneg, le_one proofs omitted
 
 -- Conditioning: Conditioning structure
--- The operator ⊗ is defined as infix notation for conj
+-- In Lean, (*) is used; paper uses otimes symbol
 structure Conditioning (joint evidence : Credence) where
   condCred : Credence
-  chainRule : condCred ⊗ evidence = joint
+  chainRule : condCred * evidence = joint  -- plain multiplication
 \end{verbatim}
+
+\noindent\textbf{Note on Lean notation:} In the \texttt{Conditioning} structure,
+$\otimes$ is just multiplication of credence values. The \texttt{joint} parameter
+is the credence $\cred(A \land B)$ supplied as input---it is \emph{not} computed
+via the independence product from marginal credences. See Remark~\ref{rmk:product-vs-joint}
+for the distinction between $c_1 \conjc c_2$ (independence product) and $\cred(A \land B)$
+(joint credence).
 
 \subsection{Verified Theorems}
 
