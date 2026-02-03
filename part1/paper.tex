@@ -219,12 +219,21 @@ by the chain rule, rather than undefined (probability) or forced to 1
 \begin{example}[The Liar Sentence --- Semantic Interpretation]
 \label{ex:liar}
 % Lean: liar_fixed_point
-Consider $L = $ ``This sentence is false.'' In Cred, we can assign
-$\cred(L) = 0.5$, meaning $L$ is \emph{half-true} (not that an agent is
-uncertain about it). Since negation is complement ($\negc c = 1 - c$),
-we have $\cred(\neg L) = 1 - 0.5 = 0.5 = \cred(L)$. The liar sentence
-has a \emph{fixed point} truth value---it is its own negation. This is
-not a paradox but a meaningful semantic value.
+Consider $L = $ ``This sentence is false.'' In Cred, if we model $L$
+as satisfying $\cred(L) = \cred(\neg L)$, then $\cred(L) = 1 - \cred(L)$,
+so $\cred(L) = 0.5$. Since negation is complement ($\negc c = 1 - c$),
+this is the unique fixed point of the negation operation (Theorem~\ref{thm:fixedunique}).
+
+\textbf{Important caveat:} This illustrates that Cred's algebra has a natural
+value for self-negating sentences, but assigning 0.5 to the liar is just one
+of many approaches in the extensive literature on semantic paradoxes. Kripke's
+groundedness approach~\cite{kripke1975} leaves the liar \emph{undefined} rather
+than half-true; Priest's dialetheism~\cite{priest1979} treats it as \emph{both}
+true and false. The strengthened liar (``This sentence is not true'') and
+revenge paradoxes present further challenges that a simple fixed-point
+assignment does not resolve. We present this example as an \emph{illustration}
+of Cred's fixed-point theorem, not as a philosophical solution to the liar
+paradox.
 \end{example}
 
 \subsection{Why Not Probability Theory?}
@@ -668,16 +677,12 @@ See Remark~\ref{rmk:axiom-vs-proof}.}
 
 % Lean: half, liar_fixed_point, neg_fixed_point_unique
 
-\subsection{The Liar Sentence}
+\subsection{Negation Fixed Points}
 
-Consider the liar sentence $L = $ ``This sentence is false,'' which satisfies
-$L \leftrightarrow \neg L$. What credence should it have?
-
-If $\cred(L) = c$, and $L = \neg L$, then $c = \negc c = 1 - c$.
-Solving: $2c = 1$, so $c = 0.5$.
+The negation operation $\negc c = 1 - c$ has a unique fixed point:
 
 % Lean: liar_fixed_point
-\begin{theorem}[Liar Fixed Point]
+\begin{theorem}[Negation Fixed Point]
 \label{thm:liar}
 The credence $0.5$ is a fixed point of negation:
 \[
@@ -698,10 +703,37 @@ The value $0.5$ is the \emph{unique} fixed point of negation:
 If $\negc c = c$, then $1 - c = c$, so $c = 0.5$.
 \end{proof}
 
-\subsection{Interpretation}
+\subsection{Application to Self-Negating Sentences}
 
-The liar sentence has credence $0.5$---maximum uncertainty. This is not a
-paradox but a \emph{meaningful truth value}.
+If we model a self-negating sentence $L$ (satisfying $L \leftrightarrow \neg L$)
+by requiring $\cred(L) = \cred(\neg L) = \negc \cred(L)$, then by
+Theorem~\ref{thm:fixedunique}, $\cred(L) = 0.5$.
+
+\begin{remark}[Scope and Limitations]
+\label{rmk:liar-scope}
+This fixed-point analysis provides a \emph{natural algebraic value} for
+self-negating sentences within Cred, but it does not constitute a philosophical
+solution to the liar paradox. The extensive literature on semantic paradoxes
+offers multiple approaches:
+\begin{itemize}
+    \item \textbf{Kripke's groundedness}~\cite{kripke1975}: The liar sentence
+    is \emph{ungrounded} and receives no truth value (a truth-value gap).
+    \item \textbf{Priest's dialetheism}~\cite{priest1979}: The liar is
+    \emph{both} true and false (a truth-value glut).
+    \item \textbf{Cred's fixed point}: The liar receives the intermediate
+    value $0.5$.
+\end{itemize}
+Each approach has trade-offs. Cred's assignment of $0.5$ does not address
+the \emph{strengthened liar} (``This sentence is not true'') or
+\emph{revenge paradoxes} that arise when we try to express the semantic
+status of paradoxical sentences within the language itself.
+
+\textbf{What Cred provides:} An algebraic setting where the negation operation
+has a unique fixed point, giving self-negating sentences a natural value.
+\textbf{What Cred does not provide:} A resolution of the deeper philosophical
+issues surrounding self-reference, truth, and the expressive limitations that
+give rise to semantic paradoxes.
+\end{remark}
 
 \begin{remark}[Liar vs.\ G\"odel Sentences]
 The fixed-point analysis applies only to \emph{self-negating} sentences like
@@ -713,9 +745,10 @@ G\"odel showed that if $S$ is consistent, the G\"odel sentence $G$ is
 \emph{true} (in standard models) but unprovable in $S$. Assigning
 $\cred(G) = 0.5$ would conflate unprovability with uncertainty.
 
-What Cred \emph{does} offer: for genuinely self-contradictory sentences
+What Cred \emph{does} offer: for genuinely self-negating sentences
 ($L \equiv \neg L$), the unique fixed point $\cred(L) = 0.5$ provides
-a non-paradoxical assignment.
+a natural algebraic value---though as noted in Remark~\ref{rmk:liar-scope},
+this does not resolve the deeper philosophical issues.
 \end{remark}
 
 %=============================================================================
@@ -1429,8 +1462,10 @@ key contributions are:
     property emerges from the algebra, paralleling relevant logic's rejection
     of ex falso (though through different mechanisms).
 
-    \item \textbf{Fixed points:} Self-referential sentences receive
-    determinate credences (e.g., the liar at 0.5).
+    \item \textbf{Fixed points:} The negation operation has a unique fixed
+    point at $0.5$, providing a natural (though not novel) algebraic value for
+    self-negating sentences. This illustrates the algebra, not a solution to
+    semantic paradoxes.
 
     \item \textbf{Formalization:} Complete machine-checked proofs in Lean 4.
 
@@ -1516,6 +1551,11 @@ E.T. Jaynes.
 S.C. Kleene.
 \newblock \emph{Introduction to Metamathematics}.
 \newblock North-Holland, 1952.
+
+\bibitem{kripke1975}
+S. Kripke.
+\newblock Outline of a theory of truth.
+\newblock \emph{Journal of Philosophy}, 72(19):690--716, 1975.
 
 \bibitem{lewis1976}
 D. Lewis.
