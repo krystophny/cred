@@ -529,7 +529,11 @@ The central innovation of Cred is treating conditioning as \emph{primitive}:
 A \emph{conditioning structure} for a pair (joint, evidence) $\in [0,1]^2$
 with joint $\leq$ evidence is a conditional credence condCred $\in [0,1]$
 satisfying the chain rule (Axiom~\ref{axiom:chainrule}).
-The constraint joint $\leq$ evidence ensures condCred $\in [0,1]$.
+
+The constraint joint $\leq$ evidence is necessary: logically, $A \land B$
+entails $B$, so $\cred(A \land B) \leq \cred(B)$---the joint cannot exceed
+the evidence. Without this constraint, conditioning would yield values
+outside $[0,1]$ when evidence $> 0$.
 
 \textbf{Propositional notation:} We write $\cred(A \mid B)$ for the conditional
 credence where joint $= \cred(A \land B)$ and evidence $= \cred(B)$, so the
@@ -548,12 +552,11 @@ The chain rule is the \emph{only} axiom of Cred. The operations in Section~2
 (negation, independence product, disjunction) are \emph{definitions}, not axioms.
 \end{axiom}
 
-\begin{remark}[Validity Constraint]
-\label{rmk:validity-constraint}
-For the chain rule to yield a conditional credence in $[0,1]$, we require
-$\cred(A \land B) \leq \cred(B)$---the joint cannot exceed the marginal. The
-Lean formalization (Theorem~\texttt{conditioning\_exists}) explicitly includes
-this constraint when constructing conditioning structures with $\cred(B) > 0$.
+\begin{remark}[Lean Formalization]
+\label{rmk:lean-conditioning}
+The Lean formalization (Theorem~\texttt{conditioning\_exists}) explicitly
+includes the constraint joint $\leq$ evidence when constructing conditioning
+structures with evidence $> 0$.
 \end{remark}
 
 \begin{remark}[Independence Product vs.\ Joint Credence]
