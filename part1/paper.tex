@@ -67,9 +67,9 @@ algebra---the shared foundation of K$_3$, LP, and RM3---and prove this collapse
 target is unique: no analogous homomorphism exists for \L ukasiewicz, G\"odel,
 or classical algebras.
 Applying the chain rule from both directions (Bayes' theorem) selects the
-product residuated implication as the unique Bayes-consistent binary arrow.
+product residuated implication as the unique standard Bayes-consistent binary arrow.
 Negation has a unique fixed point at $\tfrac{1}{2}$.
-All results are machine-checked in Lean~4.
+All core results are machine-checked in Lean~4.
 \end{abstract}
 
 %=============================================================================
@@ -227,9 +227,11 @@ Lean: \texttt{neg\_neg}, \texttt{conj\_comm}, \texttt{conj\_assoc},
 \texttt{disj\_comm}, \texttt{disj\_assoc}, \texttt{de\_morgan\_conj}.
 \end{proof}
 
-The structure $([0,1], \conjc, \disjc, \negc, 0, 1)$ forms a \emph{bounded De Morgan
-bisemigroup}: two dual commutative monoids ($([0,1], \conjc, 1)$ and $([0,1], \disjc, 0)$)
-connected by an order-reversing involution $\negc$.
+The structure $([0,1], \conjc, \disjc, \negc, 0, 1)$ consists of two dual
+commutative monoids ($([0,1], \conjc, 1)$ and $([0,1], \disjc, 0)$) connected
+by an order-reversing involution $\negc$ satisfying De Morgan's laws---a
+bounded De Morgan algebra in which the lattice absorption and idempotence
+laws fail (since $\conjc$ is not idempotent; see below).
 
 \subsection{Non-Idempotence and Non-Distributivity}
 
@@ -632,7 +634,9 @@ $a, b$.
 \begin{proposition}[Product Residuated is Bayes-Consistent]
 \label{prop:resid-bayes}
 The product residuated implication $f(a, b) = \min(b/a,\; 1)$ (with
-$f(0, b) = 1$) is Bayes-consistent: $f(a, b) \cdot a = \min(a, b) = f(b, a) \cdot b$.
+the standard convention $f(0, b) = 1$, i.e.\ ex falso---the convention that
+Cred's chain-rule conditioning replaces with ``unconstrained'') is
+Bayes-consistent: $f(a, b) \cdot a = \min(a, b) = f(b, a) \cdot b$.
 \end{proposition}
 \begin{proof}
 If $b \leq a$ then $f(a, b) \cdot a = (b/a) \cdot a = b = \min(a, b)$.
@@ -890,9 +894,9 @@ lattice~\cite{belnap1977,dunn1976}, via the inclusion
 $\{0, \tfrac{1}{2}, 1\} \hookrightarrow \{\mathbf{f}, \mathbf{b}, \mathbf{t}, \mathbf{n}\}$
 mapping $0 \mapsto \mathbf{f}$, $\tfrac{1}{2} \mapsto \mathbf{b}$, $1 \mapsto \mathbf{t}$.
 The Cred collapse therefore factors through the Belnap-Dunn algebra.
-A surjective homomorphism from Cred to the full four-valued algebra would require
-reaching $\mathbf{n}$ (``neither true nor false''), which has no natural preimage
-in $[0,1]$.
+A surjective homomorphism from Cred to the full four-valued algebra would need
+to reach $\mathbf{n}$ (``neither true nor false''), which appears to have no
+natural preimage in $[0,1]$.
 \end{remark}
 
 \subsection{Relationship to Probability}
@@ -1105,13 +1109,13 @@ copula-derived, with RM3 and G\"odel as counterexamples (machine-checked).
 %=============================================================================
 
 The core algebra is formalized in Lean~4 with Mathlib.
-The formalization comprises approximately 1070 lines covering:
+The formalization comprises approximately 1120 lines covering:
 
 \begin{itemize}
 \item \textbf{Types:} \texttt{Credence} (value in $[0,1]$), \texttt{Conditioning}
 (packaging conditional with chain rule proof), \texttt{ThreeVal} (three-valued type).
-\item \textbf{Operations:} \texttt{neg}, \texttt{conj}, \texttt{disj}, \texttt{spread},
-\texttt{certainty}, \texttt{collapse}.
+\item \textbf{Operations:} \texttt{neg}, \texttt{conj}, \texttt{disj},
+\texttt{collapse}.
 \item \textbf{Theorems:} Algebraic properties, conditioning behavior, fixed points,
 collapse homomorphism.
 \end{itemize}
@@ -1181,9 +1185,9 @@ recovers the product residuated implication for positive evidence; the sole
 divergence from product fuzzy logic is at evidence zero, where Cred is
 unconstrained rather than forced to~$1$.
 Applying the chain rule from both directions (Bayes' theorem) selects the
-product residuated implication as the unique standard Bayes-consistent binary
-arrow on $[0,1]$: RM3's arrow fails even on three values, and G\"odel's
-fails on the continuum.
+product residuated implication as the unique Bayes-consistent arrow among
+standard logic implications: RM3's arrow fails even on three values, and
+G\"odel's fails on the continuum.
 The product residuated implication is copula-derived---it arises from
 conditioning under the Fr\'echet upper bound (maximum positive
 dependence)---and Bayes consistency is equivalent to copula-derivability,
@@ -1284,11 +1288,6 @@ H\'ajek, P.
 Jaynes, E.T.
 \newblock \emph{Probability Theory: The Logic of Science}.
 \newblock Cambridge University Press, 2003.
-
-\bibitem{jeffrey1983}
-Jeffrey, R.C.
-\newblock \emph{The Logic of Decision}.
-\newblock University of Chicago Press, 2nd edition, 1983.
 
 \bibitem{kleene1952}
 Kleene, S.C.

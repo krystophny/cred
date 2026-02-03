@@ -661,10 +661,21 @@ theorem godel_impl_one_zero : godel_impl one zero = zero := rfl
 theorem godel_impl_one_half : godel_impl one half = half := rfl
 theorem godel_impl_one_one : godel_impl one one = one := rfl
 
-/-- On {0, 1/2, 1}, Gödel and product residuated implications coincide.
-    Both compute min(b/a, 1) for a > 0 and map 0 -> b to 1. -/
+/-- Product residuated implication on three values: min(b/a, 1) for a > 0, 1 for a = 0.
+    Defined independently of godel_impl to verify their coincidence. -/
+def prod_resid_impl : ThreeVal → ThreeVal → ThreeVal
+  | zero, _ => one        -- convention: 0 → b = 1
+  | half, zero => zero    -- min(0 / (1/2), 1) = 0
+  | half, half => one     -- min((1/2) / (1/2), 1) = min(1, 1) = 1
+  | half, one => one      -- min(1 / (1/2), 1) = min(2, 1) = 1
+  | one, zero => zero     -- min(0/1, 1) = 0
+  | one, half => half     -- min((1/2)/1, 1) = 1/2
+  | one, one => one       -- min(1/1, 1) = 1
+
+/-- On {0, 1/2, 1}, Gödel and product residuated implications coincide. -/
 theorem godel_impl_eq_prod_resid (a b : ThreeVal) :
-    godel_impl a b = godel_impl a b := rfl
+    godel_impl a b = prod_resid_impl a b := by
+  cases a <;> cases b <;> rfl
 
 /-- Gödel and RM3 differ at (half, zero): Gödel gives zero, RM3 gives half -/
 theorem godel_impl_ne_rm3_impl : godel_impl half zero ≠ rm3_impl half zero := by
