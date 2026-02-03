@@ -657,21 +657,27 @@ Otherwise, the joint credence must be provided as input.
 
 \begin{remark}[Cred as a Conditional Algebra, Not a Probability Theory]
 \label{rmk:conditional-algebra}
-It is important to understand what Cred is and is not:
+Cred is a \emph{conditional} algebra in the following precise sense: it takes
+joint credences as input parameters and constrains conditional credences as
+output. It does not form a complete reasoning system without an external source
+of joint credence information (e.g., a probability model, expert assessment, or
+domain-specific knowledge).
 \begin{itemize}
     \item \textbf{What Cred provides:} An algebra of credence values with primitive
     conditioning. Given joint credences $\cred(A \land B)$ and marginal credences
-    $\cred(B)$ as \emph{inputs}, the chain rule constrains (or leaves unconstrained)
-    the conditional credence $\cred(A \mid B)$.
-    \item \textbf{What Cred does not provide:} A method for \emph{computing} joint
-    credences for dependent propositions. For dependent $A$ and $B$, the value
-    $\cred(A \land B)$ must be supplied externally---it is a \emph{parameter},
-    not derived from $\cred(A)$ and $\cred(B)$ alone.
+    $\cred(B)$ as \emph{input parameters}, the chain rule constrains (or leaves
+    unconstrained) the conditional credence $\cred(A \mid B)$.
+    \item \textbf{What Cred requires externally:} Joint credences for dependent
+    propositions. For dependent $A$ and $B$, the value $\cred(A \land B)$ must be
+    supplied---it is a \emph{parameter} to the algebra, not derivable from
+    $\cred(A)$ and $\cred(B)$ alone. (For independent propositions, the product
+    $\cred(A) \conjc \cred(B)$ suffices.)
 \end{itemize}
-This is a deliberate design choice, paralleling how Boolean algebra defines
+This parametric design is deliberate, paralleling how Boolean algebra defines
 operations on truth values without specifying which propositions have which
-values. Cred provides the algebraic structure; propositional interpretation
-requires additional semantic machinery (see Remark~\ref{rmk:algebraic-foundation}).
+values. Cred provides algebraic structure for reasoning \emph{given} joint
+credences; obtaining those joint credences requires additional semantic
+machinery (see Remark~\ref{rmk:algebraic-foundation}).
 \end{remark}
 
 \begin{remark}[Cred is an Algebra, Not a Logic]
