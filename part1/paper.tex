@@ -1834,7 +1834,7 @@ systems without Lean verification.
 \begin{verbatim}
 lean/
   lakefile.toml          -- Project configuration
-  lean-toolchain         -- Lean version (4.x)
+  lean-toolchain         -- Lean version (4.16.0)
   Cred/
     Basic.lean           -- Core credence algebra (~870 lines)
 \end{verbatim}
@@ -1909,7 +1909,8 @@ individually referenced in this paper:
 
 \begin{remark}[Verification and Naming]
 The Lean formalization can be verified by running \texttt{lake build} in the
-\texttt{lean/} directory. The code uses Lean 4.16.0 (see \texttt{lean-toolchain}) with Mathlib4.
+\texttt{lean/} directory. The code uses Lean 4.16.0 with Mathlib4 v4.16.0
+(see \texttt{lean-toolchain} and \texttt{lakefile.toml}).
 Comments reference Lean theorem and definition names (e.g., \texttt{neg\_neg},
 \texttt{conditioning\_zero\_any}), which are stable identifiers.
 The Lean code defines \texttt{half} as the credence $0.5$ and uses \texttt{ThreeVal}
