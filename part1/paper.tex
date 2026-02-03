@@ -57,8 +57,8 @@
 
 \begin{abstract}
 We present \emph{Cred}, a credence algebra for reasoning under uncertainty.
-\emph{Credences} are degrees of belief in the unit interval $[0,1]$, the standard
-representation in formal epistemology. Cred adopts a well-known approach from
+A \emph{credence} is a real number in $[0,1]$ representing degree of belief---the
+standard representation in formal epistemology (Definition~\ref{def:credence}). Cred adopts a well-known approach from
 R\'enyi (1955) and Popper (1959): conditioning is a \emph{primitive operation}
 governed by a chain rule axiom, not defined via division. When evidence has
 credence zero, the conditional is \emph{unconstrained} (any value satisfies
@@ -342,6 +342,7 @@ means no constraint'' is a design choice, not a consequence of their axioms.
 
 % Lean: Credence structure
 \begin{definition}[Credence Value]
+\label{def:credence}
 A \emph{credence} is a real number $c \in [0, 1]$. The set of all credences
 is denoted $\Cred = [0, 1] \subset \Real$.
 \end{definition}
