@@ -709,7 +709,10 @@ is satisfied by \emph{any} value of $\cred(A \mid B) \in [0,1]$.
 \end{theorem}
 
 \begin{proof}
-For any $c \in [0,1]$: $c \cdot 0 = 0 = \cred(A \land B)$ when $\cred(B) = 0$.
+The conditioning structure (Definition~\ref{def:conditioning}) requires
+joint $\leq$ evidence. When $\cred(B) = 0$, we must have
+$\cred(A \land B) \leq 0$; since credences are non-negative,
+$\cred(A \land B) = 0$. For any $c \in [0,1]$: $c \cdot 0 = 0 = \cred(A \land B)$.
 Thus every credence value satisfies the chain rule. (Lean: \texttt{conditioning\_zero\_any})
 \end{proof}
 
