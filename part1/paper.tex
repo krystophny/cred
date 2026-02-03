@@ -2000,6 +2000,12 @@ Note that RM3's middle value is sometimes interpreted as ``both''
 (true and false) or ``neither'' (a gap); Cred's $0.5$ represents intermediate
 credence on a continuum, a different interpretation that happens to yield
 matching truth tables for $\{\negc, \conjc, \disjc\}$.
+
+\textbf{Noncomputable collapse:}
+The \texttt{collapse} function is marked \texttt{noncomputable} in Lean because
+real number equality is undecidable in constructive mathematics---comparing
+whether $c = 0$ or $c = 1$ requires classical logic.
+The proofs remain valid; only runtime computation is unavailable.
 \end{remark}
 
 \begin{remark}[Conditioning Satisfiability]
