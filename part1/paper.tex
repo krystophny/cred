@@ -1236,7 +1236,7 @@ Three-valued Cred conditioning differs fundamentally from RM3 implication:
 \begin{center}
 \begin{tabular}{c|ccc}
  & \multicolumn{3}{c}{\textit{consequent}} \\
-RM3 $\to$ & 0 & $\tfrac{1}{2}$ & 1 \\
+\textit{antecedent} & 0 & $\tfrac{1}{2}$ & 1 \\
 \hline
 0 & 1 & 1 & 1 \\
 $\tfrac{1}{2}$ & $\tfrac{1}{2}$ & $\tfrac{1}{2}$ & 1 \\
@@ -1257,6 +1257,10 @@ $\tfrac{1}{2}$ & 0 & $\dagger$ & 1 \\
 \smallskip
 \footnotesize{$\dagger$ = depends on joint: if $\cred(A \land B) = \tfrac{1}{4}$ (independence), then
 $\cred(A \mid B) = \tfrac{1}{2}$; if joint $= \tfrac{1}{2}$, then $\cred(A \mid B) = 1$.}
+
+\smallskip
+\footnotesize{Terminology: RM3 implication uses \emph{antecedent}/\emph{consequent} (rows/columns in left table).
+Cred conditioning uses \emph{evidence}/\emph{joint} (rows/columns in right table).}
 \end{theorem}
 
 \begin{proof}
@@ -1330,7 +1334,8 @@ Recall material implication: $A \to B := \neg A \lor B$
 \begin{center}
 \begin{tabular}{cc|c|c}
 \toprule
-$\cred(A)$ & $\cred(A \land B)$ & $A \to B$ & $\condc{B}{A}$ \\
+evidence & joint & material impl. & conditioning \\
+$\cred(B)$ & $\cred(A \land B)$ & $B \to A$ & $\condc{A}{B}$ \\
 \midrule
 0 & 0 & 1 & --- \\
 1 & 0 & 0 & 0 \\
@@ -1346,17 +1351,17 @@ $\cred(A)$ & $\cred(A \land B)$ & $A \to B$ & $\condc{B}{A}$ \\
 \begin{minipage}{0.85\textwidth}
 \footnotesize
 Note: This comparison shows how the two operations differ at Boolean values.
-Material implication $A \to B$ is a \emph{function} returning a definite value
-(1 when $A = 0$, regardless of $B$---this is ex falso). Cred conditioning
-$\condc{B}{A}$ when $\cred(A) = 0$ is \emph{underdetermined}---any value in
-$[0,1]$ satisfies the chain rule axiom $\condc{B}{A} \cdot 0 = 0$. The key
+Material implication $B \to A$ is a \emph{function} returning a definite value
+(1 when $B = 0$, regardless of $A$---this is ex falso). Cred conditioning
+$\condc{A}{B}$ when $\cred(B) = 0$ is \emph{underdetermined}---any value in
+$[0,1]$ satisfies the chain rule axiom $\condc{A}{B} \cdot 0 = 0$. The key
 difference: material implication \emph{forces} 1; conditioning leaves the
 value \emph{unconstrained}.
 \end{minipage}
 \end{center}
 
-Material implication gives $A \to B = 1$ when $A = 0$ (ex falso).
-The chain rule gives \emph{unconstrained} conditioning when $A = 0$.
+Material implication gives $B \to A = 1$ when $B = 0$ (ex falso).
+The chain rule gives \emph{unconstrained} conditioning when $B = 0$.
 
 \begin{remark}[Algebraic Property Shared with Relevant Logic]
 \label{rmk:relevant-logic-relationship}
