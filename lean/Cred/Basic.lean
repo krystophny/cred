@@ -558,4 +558,156 @@ theorem cred_no_ex_falso :
 
 end ThreeVal
 
+/-! ## Three-Valued Collapse Homomorphism
+
+The collapse function maps the continuous [0,1] credence algebra to the discrete
+three-valued algebra. This section proves that collapse is a homomorphism for
+negation, conjunction, and disjunction (Theorem 6.1 in the paper).
+
+Key insight: The operations on ThreeVal are defined as min/max on {0, 0.5, 1},
+which exactly matches what happens when Cred operations are applied to these
+boundary values and then collapsed.
+-/
+
+/-- Collapse maps Credence to ThreeVal: 0 → zero, 1 → one, else → half -/
+noncomputable def collapse (c : Credence) : ThreeVal :=
+  if c.val = 0 then ThreeVal.zero
+  else if c.val = 1 then ThreeVal.one
+  else ThreeVal.half
+
+/-- Collapse of 0 is zero -/
+@[simp] theorem collapse_zero : collapse (0 : Credence) = ThreeVal.zero := by
+  unfold collapse
+  simp only [Credence.zero_val, ↓reduceIte]
+
+/-- Collapse of 1 is one -/
+@[simp] theorem collapse_one : collapse (1 : Credence) = ThreeVal.one := by
+  unfold collapse
+  simp only [Credence.one_val, one_ne_zero, ↓reduceIte]
+
+/-- Collapse of half is half -/
+@[simp] theorem collapse_half : collapse Credence.half = ThreeVal.half := by
+  unfold collapse
+  simp only [Credence.half_val, ↓reduceIte]
+  norm_num
+
+/-- Helper: c.val in open interval (0,1) implies collapse c = half -/
+theorem collapse_interior (c : Credence) (h0 : c.val ≠ 0) (h1 : c.val ≠ 1) :
+    collapse c = ThreeVal.half := by
+  unfold collapse
+  simp only [h0, h1, ↓reduceIte]
+
+/-! ### Negation Homomorphism -/
+
+/-- Collapse respects negation: collapse(~c) = ThreeVal.neg(collapse c) -/
+theorem collapse_neg (c : Credence) : collapse (~c) = ThreeVal.neg (collapse c) := by
+  by_cases h0 : c.val = 0
+  · have hc : c = 0 := by ext; exact h0
+    subst hc
+    simp only [Credence.neg_zero, collapse_one, collapse_zero, ThreeVal.neg]
+  · by_cases h1 : c.val = 1
+    · have hc : c = 1 := by ext; exact h1
+      subst hc
+      simp only [Credence.neg_one, collapse_zero, collapse_one, ThreeVal.neg]
+    · have hcoll : collapse c = ThreeVal.half := collapse_interior c h0 h1
+      have hneg_ne_zero : (~c).val ≠ 0 := by
+        simp only [Credence.neg_val]
+        intro heq
+        have : c.val = 1 := by linarith
+        exact h1 this
+      have hneg_ne_one : (~c).val ≠ 1 := by
+        simp only [Credence.neg_val]
+        intro heq
+        have : c.val = 0 := by linarith
+        exact h0 this
+      have hcoll_neg : collapse (~c) = ThreeVal.half :=
+        collapse_interior (~c) hneg_ne_zero hneg_ne_one
+      simp only [hcoll, hcoll_neg, ThreeVal.neg]
+
+/-! ### Conjunction Homomorphism -/
+
+/-- Collapse respects conjunction: collapse(c1 ⊗ c2) = ThreeVal.conj(collapse c1)(collapse c2) -/
+theorem collapse_conj (c₁ c₂ : Credence) :
+    collapse (c₁ ⊗ c₂) = ThreeVal.conj (collapse c₁) (collapse c₂) := by
+  by_cases h1_zero : c₁.val = 0
+  · have hc1 : c₁ = 0 := by ext; exact h1_zero
+    subst hc1
+    simp only [Credence.zero_conj, collapse_zero, ThreeVal.conj_zero]
+  · by_cases h2_zero : c₂.val = 0
+    · have hc2 : c₂ = 0 := by ext; exact h2_zero
+      subst hc2
+      simp only [Credence.conj_zero, collapse_zero, ThreeVal.zero_conj]
+    · by_cases h1_one : c₁.val = 1
+      · have hc1 : c₁ = 1 := by ext; exact h1_one
+        subst hc1
+        simp only [Credence.one_conj, collapse_one, ThreeVal.conj_one]
+      · by_cases h2_one : c₂.val = 1
+        · have hc2 : c₂ = 1 := by ext; exact h2_one
+          subst hc2
+          simp only [Credence.conj_one, collapse_one, ThreeVal.one_conj]
+        · have hcoll1 : collapse c₁ = ThreeVal.half := collapse_interior c₁ h1_zero h1_one
+          have hcoll2 : collapse c₂ = ThreeVal.half := collapse_interior c₂ h2_zero h2_one
+          have hprod_pos : 0 < c₁.val * c₂.val := by
+            apply mul_pos
+            · exact lt_of_le_of_ne c₁.nonneg (Ne.symm h1_zero)
+            · exact lt_of_le_of_ne c₂.nonneg (Ne.symm h2_zero)
+          have hprod_lt_one : c₁.val * c₂.val < 1 := by
+            have h1_lt : c₁.val < 1 := lt_of_le_of_ne c₁.le_one h1_one
+            have h2_lt : c₂.val < 1 := lt_of_le_of_ne c₂.le_one h2_one
+            calc c₁.val * c₂.val < c₁.val * 1 := by
+                   apply mul_lt_mul_of_pos_left h2_lt
+                   exact lt_of_le_of_ne c₁.nonneg (Ne.symm h1_zero)
+              _ = c₁.val := mul_one _
+              _ < 1 := h1_lt
+          have hconj_ne_zero : (c₁ ⊗ c₂).val ≠ 0 := ne_of_gt hprod_pos
+          have hconj_ne_one : (c₁ ⊗ c₂).val ≠ 1 := ne_of_lt hprod_lt_one
+          have hcoll_conj : collapse (c₁ ⊗ c₂) = ThreeVal.half :=
+            collapse_interior (c₁ ⊗ c₂) hconj_ne_zero hconj_ne_one
+          simp only [hcoll1, hcoll2, hcoll_conj, ThreeVal.conj_half_half]
+
+/-! ### Disjunction Homomorphism -/
+
+/-- Collapse respects disjunction: collapse(c1 ⊔ c2) = ThreeVal.disj(collapse c1)(collapse c2) -/
+theorem collapse_disj (c₁ c₂ : Credence) :
+    collapse (c₁ ⊔ c₂) = ThreeVal.disj (collapse c₁) (collapse c₂) := by
+  by_cases h1_one : c₁.val = 1
+  · have hc1 : c₁ = 1 := by ext; exact h1_one
+    subst hc1
+    simp only [Credence.one_disj, collapse_one, ThreeVal.disj_one]
+  · by_cases h2_one : c₂.val = 1
+    · have hc2 : c₂ = 1 := by ext; exact h2_one
+      subst hc2
+      simp only [Credence.disj_one, collapse_one, ThreeVal.one_disj]
+    · by_cases h1_zero : c₁.val = 0
+      · have hc1 : c₁ = 0 := by ext; exact h1_zero
+        subst hc1
+        simp only [Credence.zero_disj, collapse_zero, ThreeVal.disj_zero]
+      · by_cases h2_zero : c₂.val = 0
+        · have hc2 : c₂ = 0 := by ext; exact h2_zero
+          subst hc2
+          simp only [Credence.disj_zero, collapse_zero, ThreeVal.zero_disj]
+        · have hcoll1 : collapse c₁ = ThreeVal.half := collapse_interior c₁ h1_zero h1_one
+          have hcoll2 : collapse c₂ = ThreeVal.half := collapse_interior c₂ h2_zero h2_one
+          have h1_pos : 0 < c₁.val := lt_of_le_of_ne c₁.nonneg (Ne.symm h1_zero)
+          have h2_pos : 0 < c₂.val := lt_of_le_of_ne c₂.nonneg (Ne.symm h2_zero)
+          have h1_lt : c₁.val < 1 := lt_of_le_of_ne c₁.le_one h1_one
+          have h2_lt : c₂.val < 1 := lt_of_le_of_ne c₂.le_one h2_one
+          have hdisj_pos : 0 < (c₁ ⊔ c₂).val := by
+            simp only [Credence.disj_val]
+            have hprod_lt : c₁.val * c₂.val < c₁.val + c₂.val := by
+              have hp1 : c₁.val * c₂.val < c₁.val := by
+                calc c₁.val * c₂.val < c₁.val * 1 := mul_lt_mul_of_pos_left h2_lt h1_pos
+                  _ = c₁.val := mul_one _
+              linarith
+            linarith
+          have hdisj_lt_one : (c₁ ⊔ c₂).val < 1 := by
+            simp only [Credence.disj_val]
+            have hprod_pos : 0 < c₁.val * c₂.val := mul_pos h1_pos h2_pos
+            nlinarith
+          have hdisj_ne_zero : (c₁ ⊔ c₂).val ≠ 0 := ne_of_gt hdisj_pos
+          have hdisj_ne_one : (c₁ ⊔ c₂).val ≠ 1 := ne_of_lt hdisj_lt_one
+          have hcoll_disj : collapse (c₁ ⊔ c₂) = ThreeVal.half :=
+            collapse_interior (c₁ ⊔ c₂) hdisj_ne_zero hdisj_ne_one
+          simp only [hcoll1, hcoll2, hcoll_disj, ThreeVal.disj_half_half]
+
 end Cred
