@@ -234,13 +234,13 @@ Examples~\ref{ex:graded} and~\ref{ex:liar} illustrate the two readings;
 subsequent worked examples are interpretation-neutral algebraic calculations.
 \end{remark}
 
-\begin{example}[Graded Assessment --- Epistemic Interpretation]
+\begin{example}[Graded Assessment (Epistemic)]
 \label{ex:graded}
-A researcher assigns $\cred(\text{``hypothesis H holds''}) = 0.7$---a 70\%
-confidence representing the agent's degree of belief. Cred handles an
-edge case differently than probability: suppose evidence $E$ is regarded as
-impossible ($\cred(E) = 0$). The chain rule equation
-$\cred(\text{H} \mid E) \cdot 0 = 0$ is satisfied by \emph{any} value.
+A researcher assigns $\cred(H) = 0.7$ (70\% confidence). Here $H$ is the
+proposition ``hypothesis $H$ holds.'' Cred handles an edge case differently
+than probability: suppose evidence $E$ is regarded as impossible
+($\cred(E) = 0$). The chain rule equation $\cred(H \mid E) \cdot 0 = 0$ is
+satisfied by \emph{any} value.
 The conditional is \emph{unconstrained} by the constraint, rather than undefined
 (probability) or forced to 1 (classical ex falso).
 \end{example}
@@ -635,7 +635,7 @@ The existence construction (\texttt{conditioning\_mk}) requires evidence $> 0$
 and joint $\leq$ evidence.
 
 \textbf{What is verified vs.\ what is constructed:} Lean does not define a total
-function $(\text{joint},\text{evidence}) \mapsto \text{condCred}$. Instead it proves
+function taking \texttt{joint} and \texttt{evidence} to \texttt{condCred}. Instead it proves
 existence of witnesses under hypotheses (evidence $> 0$, joint $\leq$ evidence),
 proves uniqueness when evidence $> 0$, and proves that when evidence $= 0$ the
 only possible joint is $0$ and then any condCred works. These correspond to
@@ -1021,7 +1021,7 @@ iff $c = 0$ or $c = 1$. Verified in Lean: \texttt{spread\_le\_quarter},
 $c = 0$ or $c = 1$ (certainty), spread is zero. At $c = 0.5$ (maximum
 uncertainty), spread reaches its maximum of $0.25$.
 
-\subsection{Complement: $1 - c(1-c)$}
+\subsection{\texorpdfstring{Complement: $1 - c(1-c)$}{Complement: 1 - c(1-c)}}
 
 % Lean: certainty, certainty_val, certainty_half, certainty_ge_three_quarters, certainty_eq_one_iff
 The De Morgan dual $c \disjc \negc c = 1 - c(1-c)$ is simply $1 - \text{spread}(c)$.
@@ -1034,7 +1034,9 @@ The De Morgan dual $c \disjc \negc c = 1 - c(1-c)$ is simply $1 - \text{spread}(
     \item Unity at extremes: $1 - c(1-c) = 1 \iff c \in \{0, 1\}$
 \end{enumerate}
 \end{theorem}
-\noindent\textit{Proof.} Verified in Lean: \texttt{certainty\_ge\_three\_quarters}, \texttt{certainty\_half}, \texttt{certainty\_eq\_one\_iff}. \hfill$\square$
+\noindent\textit{Proof.} Verified in Lean:\\
+\texttt{certainty\_ge\_three\_quarters}, \texttt{certainty\_half},
+\texttt{certainty\_eq\_one\_iff}. \hfill$\square$
 
 \subsection{Graph}
 
@@ -1286,7 +1288,7 @@ conditioning on impossibility is unconstrained, avoiding forcing ex falso direct
 but Cred conditioning $\neq$ RM3 implication. Both reject ex falso, but
 through different mechanisms.
 
-\subsection{Boolean Cred: Restriction to $\{0, 1\}$}
+\subsection{\texorpdfstring{Boolean Cred: Restriction to $\{0, 1\}$}{Boolean Cred: Restriction to {0,1}}}
 
 \begin{definition}[Boolean Cred]
 \label{def:boolean-cred}
@@ -1438,11 +1440,12 @@ conditioning with material implication changes the structure.
 
 \begin{remark}[Algebra vs Logic]
 \label{rmk:soundness-completeness}
-Cred is an \emph{algebra}---a set with operations ($\negc$, $\conjc$, $\disjc$,
-conditioning)---not a \emph{logic} with a consequence relation ($\vdash$ or
-$\models$). The distinction matters:
+Cred is an \emph{algebra}, not a \emph{logic}. It equips $[0,1]$ with operations
+$\negc$, $\conjc$, $\disjc$, and primitive conditioning, but it does not define a
+consequence relation ($\vdash$ or $\models$). The distinction matters:
 \begin{itemize}
-    \item \textbf{Algebras} define operations on values (e.g., $c_1 \conjc c_2 = c_1 \cdot c_2$)
+    \item \textbf{Algebras} define operations on values
+    (e.g., $c_1 \conjc c_2 = c_1 \cdot c_2$)
     \item \textbf{Logics} define which inferences are valid (e.g., $A, A \to B \vdash B$)
 \end{itemize}
 When we say Cred ``avoids ex falso,'' we mean the algebraic claim: the chain rule
@@ -1604,8 +1607,8 @@ with the consequent. The algebraic semantics uses De Morgan monoids, where
 relevant implication is defined via residuation~\cite{dunn1976}.
 
 Cred achieves the same \emph{key property} (no ex falso) through
-\emph{semantic} means: the chain rule makes conditioning from impossibility
-unconstrained rather than trivially true. Van Fraassen~\cite{vanfraassen1983}
+\emph{semantic} means. The chain rule makes conditioning from impossibility
+unconstrained rather than trivially true. Van Fraassen \cite{vanfraassen1983}
 showed that probabilistic semantics can be given for relevant logic using
 conditional probability, establishing the theoretical connection.
 
@@ -1964,10 +1967,12 @@ def conj (c1 c2 : Credence) : Credence where
   -- nonneg, le_one proofs omitted
 
 -- Conditioning: Conditioning structure
--- In Lean, conj is used (multiplication on credence values); the paper writes the chain rule with ordinary multiplication (·).
+-- In Lean, conj is used (multiplication on credence values).
+-- The paper writes the chain rule with ordinary multiplication (·).
 structure Conditioning (joint evidence : Credence) where
   condCred : Credence
-  chainRule : conj condCred evidence = joint  -- multiplication on credence values
+  chainRule : conj condCred evidence = joint
+    -- multiplication on credence values
 \end{verbatim}
 
 \noindent\textbf{Note on Lean notation:} In the \texttt{Conditioning} structure,
@@ -1994,16 +1999,18 @@ The algebraic theorems in Sections 2--5 have been formally verified. Notable pro
 The formalization also includes additional helper lemmas and derived results not
 individually referenced in this paper:
 \begin{itemize}
-    \item \textbf{Spread and certainty:} \texttt{spread\_val}, \texttt{spread\_half},
-    \texttt{spread\_le\_quarter}, \texttt{spread\_eq\_zero\_iff}, \texttt{certainty\_val},
-    \texttt{certainty\_half}, \texttt{certainty\_ge\_three\_quarters}, \texttt{certainty\_eq\_one\_iff}
+    \item \textbf{Spread and certainty:} \texttt{spread\_val}, \texttt{spread\_half},\\
+    \texttt{spread\_le\_quarter}, \texttt{spread\_eq\_zero\_iff},\\
+    \texttt{certainty\_val}, \texttt{certainty\_half},\\
+    \texttt{certainty\_ge\_three\_quarters}, \texttt{certainty\_eq\_one\_iff}
     \item \textbf{Idempotence:} \texttt{conj\_idempotent\_iff}, \texttt{conj\_not\_idempotent}
     \item \textbf{Collapse homomorphisms:} \texttt{collapse\_neg}, \texttt{collapse\_conj},
     \texttt{collapse\_disj} (proving Theorem~\ref{thm:rm3-fragment})
     \item \textbf{Three-valued algebra:} \texttt{ThreeVal} type with \texttt{rm3\_impl},
     \texttt{rm3\_ex\_falso}, and the complete RM3 implication table
     \item \textbf{Conditioning table entries:} \texttt{cond\_zero\_zero\_any},
-    \texttt{cond\_pos\_unique}, \texttt{cond\_quarter\_half}, and related theorems
+    \texttt{cond\_pos\_unique},\\
+    \texttt{cond\_quarter\_half}, and related theorems
     verifying Theorem~\ref{thm:rm3-impl-differs}
 \end{itemize}
 
@@ -2086,9 +2093,12 @@ key contributions are:
 Future work includes:
 \begin{itemize}
     \item Extending Cred to first-order with graded quantifiers. One approach
-    defines $\cred(\forall x.\, P(x)) = \inf\{\cred(P(a)) : a \in D\}$ for
-    domain $D$, requiring $D$ to be non-empty and the infimum to exist (e.g.,
-    $D$ finite or the credence function bounded below). Conditioning raises
+    defines
+    \[
+        \cred(\forall x.\, P(x)) = \inf\{\cred(P(a)) : a \in D\}
+    \]
+    for domain $D$, requiring $D$ to be non-empty and the infimum to exist
+    (e.g., $D$ finite or the credence function bounded below). Conditioning raises
     further questions: $\cred(\forall x.\, P(x) \mid Q)$ might require
     $\inf\{\cred(P(a) \mid Q) : a \in D\}$, but the interaction between
     infinitary operations and unconstrained conditioning (when $\cred(Q) = 0$)
