@@ -21,10 +21,11 @@
   there is no ex falso (impossible evidence provides no constraint).
 
   IMPORTANT: The binary operations ⊗ and ⊔ are algebraic operations on credence
-  values. Under a probabilistic interpretation they coincide with conjunction
-  and disjunction only under an independence assumption. In general, joint
-  credence cred(A ∧ B) is not determined by cred(A), cred(B) and must be treated
-  as separate data (in particular, it is an explicit parameter in Conditioning).
+  values; they do not, in general, determine joint credences of propositions
+  from marginals alone. Under an independence assumption one may set
+  cred(A ∧ B) = cred(A) ⊗ cred(B) (and similarly for disjunction), but in
+  general joint credence is separate data (in particular, it is an explicit
+  parameter in Conditioning).
 
   The Conditioning structure handles the general case where joint credences
   are provided as parameters, not computed from marginals.
