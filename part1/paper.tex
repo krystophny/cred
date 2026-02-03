@@ -68,11 +68,13 @@ This property is shared with relevant logic, though achieved through different
 mechanisms. Van Fraassen (1983) established the
 theoretical connection between probabilistic semantics and relevant logic;
 Cred is not itself a semantics for relevant logic. The core algebra is
-formalized in Lean 4 with machine-checked proofs. Our contributions are:
+formalized in Lean 4 with machine-checked proofs of algebraic properties
+derived from the chain rule axiom (the axiom itself is postulated, not derived).
+Our contributions are:
 (1)~primitive conditioning via chain rule axiom avoiding ex falso;
 (2)~showing this property is shared with relevant logic (through different mechanisms);
 (3)~fixed points including $0.5$ for the liar;
-(4)~machine-checked Lean formalization; and
+(4)~machine-checked Lean formalization of algebraic properties; and
 (5)~clear connections to probability, fuzzy logic, relevant logic, and paraconsistent logic---not
 the underlying ideas, which derive from prior work.
 \end{abstract}
@@ -597,10 +599,12 @@ The chain rule is the \emph{only} axiom of Cred. The operations in Section~2
 (negation, independence product, disjunction) are \emph{definitions}, not axioms.
 \end{axiom}
 
-\begin{remark}[Lean Formalization]
+\begin{remark}[Lean Formalization: Axiom vs.\ Derived Theorems]
 \label{rmk:lean-conditioning}
-The Lean code defines \texttt{Conditioning(joint, evidence)} as a structure
-parameterized by credence \emph{values}, not propositions:
+The Lean code \emph{axiomatizes} conditioning via a structure that postulates
+the existence of a value satisfying the chain rule---it does not compute
+conditioning as a function. The structure \texttt{Conditioning(joint, evidence)}
+is parameterized by credence \emph{values}, not propositions:
 \begin{itemize}
     \item \texttt{joint}: the credence value $\cred(A \land B)$
     \item \texttt{evidence}: the credence value $\cred(B)$
@@ -619,6 +623,14 @@ The \texttt{joint} parameter is supplied directly---it is never computed as
 
 The existence theorem (\texttt{conditioning\_exists}) requires
 joint $\leq$ evidence when evidence $> 0$.
+
+\textbf{What is verified vs.\ what is postulated:} The chain rule
+(Axiom~\ref{axiom:chainrule}) is \emph{postulated}---the Lean structure
+declares that \texttt{condCred} satisfies the equation, not that there is
+an algorithm computing it. The Lean proofs then verify \emph{derived}
+properties: existence of witnesses when evidence $> 0$, uniqueness in that
+case, and that any value satisfies the axiom when evidence $= 0$. This is
+standard mathematical practice: axioms are stated, consequences are proven.
 \end{remark}
 
 \begin{remark}[Independence Product vs.\ Joint Credence]
@@ -1861,9 +1873,21 @@ machine-verified proofs.
 
 The core credence algebra has been formalized in Lean 4 using the
 Mathlib library. The formalization provides machine-checked proofs of
-all theorems in Sections 2--5 and the collapse homomorphism (Theorem~6.1)
-in Section 6.1. Sections 6.2--6.4 contain conceptual comparisons to other
-systems without Lean verification.
+algebraic properties \emph{derived from} the chain rule axiom---the axiom
+itself is postulated as a constraint in the \texttt{Conditioning} structure,
+not computed or derived. Specifically:
+\begin{itemize}
+    \item \textbf{Postulated:} The chain rule $\texttt{condCred} \cdot \texttt{evidence} = \texttt{joint}$
+    is a field constraint in the \texttt{Conditioning} structure.
+    \item \textbf{Verified:} Existence of satisfying values (when evidence $> 0$),
+    uniqueness (when evidence $> 0$), underdetermination (when evidence $= 0$),
+    and all algebraic identities for $\negc$, $\conjc$, $\disjc$.
+\end{itemize}
+This approach---axiomatizing a relation rather than defining a total function---is
+consistent with treating conditioning as a relation (Section~\ref{sec:conditioning}).
+The formalization covers all theorems in Sections 2--5 and the collapse
+homomorphism (Theorem~6.1). Sections 6.2--6.4 contain conceptual comparisons
+to other systems without Lean verification.
 
 \subsection{File Structure}
 
