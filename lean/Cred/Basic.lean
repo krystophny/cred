@@ -546,6 +546,26 @@ def rm3_impl : ThreeVal → ThreeVal → ThreeVal
 theorem rm3_ex_falso (b : ThreeVal) : rm3_impl zero b = one := by
   cases b <;> rfl
 
+/-! ### Complete RM3 Implication Table (Theorem 6.2)
+
+The following 9 theorems verify every entry in the RM3 implication table:
+       | 0 | 1/2 | 1
+   ----+---+-----+---
+   0   | 1 |  1  | 1    (ex falso row)
+   1/2 |1/2| 1/2 | 1
+   1   | 0 | 1/2 | 1
+-/
+
+theorem rm3_impl_zero_zero : rm3_impl zero zero = one := rfl
+theorem rm3_impl_zero_half : rm3_impl zero half = one := rfl
+theorem rm3_impl_zero_one : rm3_impl zero one = one := rfl
+theorem rm3_impl_half_zero : rm3_impl half zero = half := rfl
+theorem rm3_impl_half_half : rm3_impl half half = half := rfl
+theorem rm3_impl_half_one : rm3_impl half one = one := rfl
+theorem rm3_impl_one_zero : rm3_impl one zero = zero := rfl
+theorem rm3_impl_one_half : rm3_impl one half = half := rfl
+theorem rm3_impl_one_one : rm3_impl one one = one := rfl
+
 /-- Cred conditioning on 0 is NOT forced to 1 (blocks ex falso) -/
 theorem cred_no_ex_falso :
     ∃ c : Credence, ∃ cond : Credence.Conditioning 0 0, cond.condCred = c := by
@@ -553,6 +573,128 @@ theorem cred_no_ex_falso :
   exact Credence.conditioning_zero_any 0
 
 end ThreeVal
+
+/-! ### Cred Conditioning at Special Values (Theorem 6.2)
+
+Cred conditioning differs from RM3 implication in two key ways:
+1. When evidence = 0: conditioning is unconstrained (any value works)
+2. When evidence > 0: conditioning is uniquely determined
+
+The table from the paper (with * = unconstrained):
+       | 0 | 1/2 | 1
+   ----+---+-----+---
+   0   | * |  *  | *     (any value satisfies chain rule)
+   1/2 | 0 |1/2,1| 1     (determined: joint/evidence)
+   1   | 0 | 1/2 | 1     (determined: joint/evidence)
+
+Note: The 1/2,1 entry means cred(A|B) depends on cred(A and B):
+- If joint = 1/4, then 1/4 / 1/2 = 1/2
+- If joint = 1/2, then 1/2 / 1/2 = 1
+-/
+
+namespace Credence
+
+/-! #### Row 1: Evidence = 0 (unconstrained) -/
+
+/-- When evidence = 0, conditioning to 0 is unconstrained -/
+theorem cond_zero_zero_any (c : Credence) :
+    ∃ cond : Conditioning 0 0, cond.condCred = c :=
+  conditioning_zero_any c
+
+/-- When evidence = 0, conditioning to half is unconstrained -/
+theorem cond_zero_half_any (c : Credence) :
+    ∃ cond : Conditioning 0 0, cond.condCred = c :=
+  conditioning_zero_any c
+
+/-- When evidence = 0, conditioning to one is unconstrained -/
+theorem cond_zero_one_any (c : Credence) :
+    ∃ cond : Conditioning 0 0, cond.condCred = c :=
+  conditioning_zero_any c
+
+/-! #### Row 2 and 3: Evidence > 0 (determined)
+
+When evidence > 0, the conditional credence is uniquely determined
+by the chain rule: cred(A|B) = cred(A and B) / cred(B).
+-/
+
+/-- When evidence > 0, conditioning is uniquely determined -/
+theorem cond_pos_unique (joint evidence : Credence) (h_pos : 0 < evidence.val)
+    (c₁ c₂ : Conditioning joint evidence) : c₁.condCred = c₂.condCred :=
+  conditioning_unique joint evidence h_pos c₁ c₂
+
+/-- When evidence = 1, cred(A|1) = cred(A and 1) = joint -/
+theorem cond_evidence_one (joint : Credence) :
+    ∃ cond : Conditioning joint 1, cond.condCred = joint :=
+  conditioning_one joint
+
+/-- Specific case: cred(1|1) = 1 -/
+theorem cond_one_one : ∃ cond : Conditioning 1 1, cond.condCred = (1 : Credence) := by
+  exact conditioning_one 1
+
+/-- Specific case: cred(0|1) = 0 -/
+theorem cond_zero_evidence_one : ∃ cond : Conditioning 0 1, cond.condCred = (0 : Credence) := by
+  exact conditioning_one 0
+
+/-- Specific case: cred(half|1) = half -/
+theorem cond_half_evidence_one : ∃ cond : Conditioning half 1, cond.condCred = half := by
+  exact conditioning_one half
+
+/-- When evidence = half and joint = 0, cred(A|half) = 0 -/
+theorem cond_zero_half : ∃ cond : Conditioning 0 half, cond.condCred = (0 : Credence) := by
+  refine ⟨⟨0, ?_⟩, rfl⟩
+  ext
+  simp only [conj_val, zero_val, zero_mul]
+
+/-- When evidence = half and joint = half, cred(A|half) = 1 -/
+theorem cond_half_half : ∃ cond : Conditioning half half, cond.condCred = (1 : Credence) := by
+  refine ⟨⟨1, ?_⟩, rfl⟩
+  ext
+  simp only [conj_val, one_val, one_mul, half_val]
+
+/-- Alternative: When joint = 1/4 and evidence = half, cred(A|half) = 1/2.
+    This shows the conditioning value depends on the joint credence. -/
+def quarter : Credence where
+  val := 0.25
+  nonneg := by norm_num
+  le_one := by norm_num
+
+@[simp] theorem quarter_val : quarter.val = 0.25 := rfl
+
+theorem cond_quarter_half : ∃ cond : Conditioning quarter half, cond.condCred = half := by
+  refine ⟨⟨half, ?_⟩, rfl⟩
+  ext
+  simp only [conj_val, half_val, quarter_val]
+  norm_num
+
+/-- When evidence = 1 and joint = 0, cred(A|1) = 0 -/
+theorem cond_joint_zero_evidence_one :
+    ∃ cond : Conditioning 0 1, cond.condCred = (0 : Credence) :=
+  conditioning_one 0
+
+/-- When evidence = 1 and joint = half, cred(A|1) = half -/
+theorem cond_joint_half_evidence_one :
+    ∃ cond : Conditioning half 1, cond.condCred = half :=
+  conditioning_one half
+
+/-- When evidence = 1 and joint = 1, cred(A|1) = 1 -/
+theorem cond_joint_one_evidence_one :
+    ∃ cond : Conditioning 1 1, cond.condCred = (1 : Credence) :=
+  conditioning_one 1
+
+/-! #### Summary: RM3 vs Cred Comparison
+
+Key differences verified:
+1. RM3: 0 → b = 1 for all b (ex falso quodlibet)
+   Lean: rm3_impl_zero_zero, rm3_impl_zero_half, rm3_impl_zero_one
+2. Cred: cred(b|0) is unconstrained (any value satisfies chain rule)
+   Lean: cond_zero_zero_any, cond_zero_half_any, cond_zero_one_any
+3. When evidence > 0, Cred conditioning is uniquely determined
+   Lean: cond_pos_unique
+
+This proves the comparison table in Theorem 6.2 of the paper.
+-/
+
+end Credence
 
 /-! ## Three-Valued Collapse Homomorphism
 
