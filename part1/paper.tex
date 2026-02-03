@@ -1975,9 +1975,14 @@ key contributions are:
 
 Future work includes:
 \begin{itemize}
-    \item Extending Cred to first-order with graded quantifiers, where
-    $\cred(\forall x.\, P(x))$ could be defined as $\inf\{\cred(P(a)) : a \in D\}$
-    for domain $D$.
+    \item Extending Cred to first-order with graded quantifiers. One approach
+    defines $\cred(\forall x.\, P(x)) = \inf\{\cred(P(a)) : a \in D\}$ for
+    domain $D$, requiring $D$ to be non-empty and the infimum to exist (e.g.,
+    $D$ finite or the credence function bounded below). Conditioning raises
+    further questions: $\cred(\forall x.\, P(x) \mid Q)$ might require
+    $\inf\{\cred(P(a) \mid Q) : a \in D\}$, but the interaction between
+    infinitary operations and unconstrained conditioning (when $\cred(Q) = 0$)
+    remains an open problem.
     \item Exploring whether Cred's treatment of conditioning could inform
     set-theoretic constructions. Prior work on paraconsistent set theory
     (Brady~\cite{brady2006}, Weber~\cite{weber2010}) suggests this direction,
