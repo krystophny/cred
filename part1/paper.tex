@@ -86,11 +86,21 @@ Ramsey, Savage, and Jaynes~\cite{ramsey1931,definetti1937,jaynes2003}.
 \textbf{Aspect} & \textbf{Standard Probability} & \textbf{Credence (Cred)} \\
 \midrule
 Interpretation & Various (frequentist, etc.) & Epistemic (degree of belief) \\
-Conditioning at 0 & Undefined ($0/0$) & Unconstrained (any value) \\
+Conditioning at 0 & Undefined ($0/0$)${}^a$ & Unconstrained (any value)${}^a$ \\
 Chain rule & Derived: $P(A|B) = P(A \land B)/P(B)$ & \textbf{Primitive axiom} \\
-Boolean collapse & Classical logic & No ex falso (shared with relevant logic) \\
+At Boolean values & Classical logic (material impl.) & Conditioning${}^b$ (no ex falso) \\
 \bottomrule
 \end{tabular}
+
+\smallskip
+\footnotesize{${}^a$Both ``undefined'' and ``unconstrained'' avoid forcing $1$; they differ in whether
+the expression is syntactically ill-formed (probability) or well-formed but underdetermined (Cred).
+Neither is obviously superior---see Section~\ref{sec:conditioning} for discussion.}
+
+\smallskip
+\footnotesize{${}^b$Cred's conditioning operation differs from material implication
+($\neg A \lor B$). The ``no ex falso'' property is shared with relevant logic but
+arises from different mechanisms (chain rule vs.\ variable-sharing).}
 \end{center}
 
 \textbf{Why ``credence'' instead of ``probability''?}
@@ -659,9 +669,9 @@ $P(B)=0$) and from classical logic (where $\bot \to A$ is forced to be true).
 & \textbf{Division Approach} & \textbf{Chain Rule Approach} \\
 \midrule
 Definition & $P(A \mid B) = P(A \land B) / P(B)$ & $\cred(A \mid B) \cdot \cred(B) = \cred(A \land B)$ \\
-At $B = 0$ & Undefined (divide by zero) & Unconstrained (any value) \\
-Ex falso & Avoided (undefined) & Blocked (no unique value) \\
-Axiom form & Division in definition & Multiplication only$^*$ \\
+At $B = 0$ & Undefined (divide by zero) & Underdetermined (any value)${}^\dagger$ \\
+Ex falso status & Avoided (expression excluded) & Avoided (no unique value) \\
+Axiom form & Division in definition & Multiplication only${}^*$ \\
 \bottomrule
 \end{tabular}
 
@@ -669,6 +679,11 @@ Axiom form & Division in definition & Multiplication only$^*$ \\
 \footnotesize{${}^*$The \emph{axiom} uses only multiplication; the existence proof
 (Theorem~\ref{thm:condexists}) constructs the witness via division when evidence $> 0$.
 See Remark~\ref{rmk:axiom-vs-proof}.}
+
+\smallskip
+\footnotesize{${}^\dagger$``Undefined'' excludes the expression syntactically;
+``underdetermined'' allows the expression but leaves its value unconstrained by the axiom.
+Both avoid forcing $1$; see Remark~\ref{rmk:unconstrained} for further discussion.}
 \end{center}
 
 %=============================================================================
@@ -1076,13 +1091,26 @@ crucially:
 \toprule
 & \textbf{Standard Fuzzy Logics}${}^*$ & \textbf{Cred} \\
 \midrule
-Conjunction & Various t-norms & Product (multiplication) \\
-Implication & $\max(1-a, b)$ (\L ukasiewicz) & Chain rule conditioning \\
-Ex falso & Holds ($0 \to b = 1$) & Blocked (unconstrained) \\
-Boolean collapse & Classical logic & No ex falso (like relevant logic) \\
+Conjunction & Various t-norms${}^\dagger$ & Product (multiplication) \\
+Implication & Residuum of t-norm${}^\dagger$ & Chain rule conditioning \\
+At antecedent $= 0$ & $0 \to b = 1$ (ex falso) & Unconstrained${}^\ddagger$ \\
+At Boolean values & Classical logic & Conditioning (no ex falso) \\
 \bottomrule
-\multicolumn{3}{l}{\footnotesize ${}^*$\L ukasiewicz, G\"odel, and product fuzzy logics all have ex falso.}
 \end{tabular}
+
+\smallskip
+\footnotesize{${}^*$\L ukasiewicz, G\"odel, and product fuzzy logics. Each has a different t-norm
+and corresponding residuated implication; all satisfy $0 \to b = 1$.}
+
+\smallskip
+\footnotesize{${}^\dagger$\L ukasiewicz: $a \land b = \max(0, a+b-1)$, $a \to b = \min(1, 1-a+b)$.
+G\"odel: $a \land b = \min(a,b)$, $a \to b = 1$ if $a \leq b$, else $b$.
+Product: $a \land b = ab$, $a \to b = 1$ if $a \leq b$, else $b/a$.}
+
+\smallskip
+\footnotesize{${}^\ddagger$``Unconstrained'' means any value satisfies the chain rule axiom;
+this differs from ``undefined'' (probability) and from forcing $1$ (fuzzy implication).
+See Remark~\ref{rmk:unconstrained} for epistemic interpretation.}
 \end{center}
 
 \begin{remark}
@@ -1114,16 +1142,24 @@ $\max(1-a, b)$), not as a primitive. Cred avoids ex falso by using
 & \textbf{Probability} & \textbf{Cred} \\
 \midrule
 Values & $[0, 1]$ & $[0, 1]$ \\
-Conditioning at 0 & Undefined & Unconstrained \\
+Conditioning at 0 & Undefined${}^*$ & Unconstrained${}^*$ \\
 Additivity & $P(A \cup B) = P(A) + P(B) - P(A \cap B)$ & Same for disjunction \\
 Application & Random events & Epistemic uncertainty \\
 \bottomrule
 \end{tabular}
+
+\smallskip
+\footnotesize{${}^*$``Undefined'' (probability): the expression $P(A|B)$ when $P(B)=0$ has no value;
+it is a syntactic error to write it. ``Unconstrained'' (Cred): the expression
+$\cred(A \mid B)$ when $\cred(B)=0$ is well-formed but underdetermined by the chain rule axiom.
+Both approaches avoid forcing $\cred(A \mid 0) = 1$; they differ in how.
+See Remark~\ref{rmk:unconstrained} for detailed comparison.}
 \end{center}
 
-Probability theory requires conditioning to be undefined at zero;
-Cred allows it to be unconstrained. This philosophical difference
-has logical consequences.
+Probability theory treats conditioning at zero as undefined (division by zero);
+Cred treats it as unconstrained (any value satisfies the chain rule). Both
+avoid ex falso, but in different ways: probability by excluding the expression,
+Cred by leaving it underdetermined.
 
 \subsection{Many-Valued Logics}
 
@@ -1132,18 +1168,35 @@ has logical consequences.
 \toprule
 \textbf{Logic} & \textbf{Values} & \textbf{Ex falso?} & \textbf{Relation to Cred} \\
 \midrule
-Kleene K3~\cite{kleene1952} & $\{T, U, F\}$ & Yes & Different \\
-Priest LP & $\{T, B, F\}$ & No & Similar (paraconsistent) \\
-RM3 & $\{T, U, F\}$ & No & Three-valued collapse \\
-\L ukasiewicz \L 3 & $\{0, \tfrac{1}{2}, 1\}$ & Yes & Different \\
-\L ukasiewicz $[0,1]$ & $[0, 1]$ & Yes & Different (has ex falso) \\
+Kleene K3~\cite{kleene1952} & $\{T, U, F\}$ & Yes${}^a$ & Different \\
+Priest LP & $\{T, B, F\}$ & No${}^b$ & Shares paraconsistency \\
+RM3 & $\{T, U, F\}$ & No${}^c$ & Three-valued collapse \\
+\L ukasiewicz \L 3 & $\{0, \tfrac{1}{2}, 1\}$ & Yes${}^a$ & Different \\
+\L ukasiewicz $[0,1]$ & $[0, 1]$ & Yes${}^a$ & Different (has ex falso) \\
 \bottomrule
 \end{tabular}
+
+\smallskip
+\footnotesize{${}^a$Uses material implication: $a \to b = \max(\negc a, b)$ or similar,
+giving $0 \to b = 1$.}
+
+\smallskip
+\footnotesize{${}^b$LP uses $a \to b = \max(\negc a, b)$ but only $\{1, B\}$ are designated
+for valid inference. Since $0$ is not designated, $0 \to b = 1$ does not produce
+explosion in the consequence relation. LP is paraconsistent via designated-value
+semantics, not by rejecting $0 \to b = 1$.}
+
+\smallskip
+\footnotesize{${}^c$RM3 also has $0 \to b = 1$ in its truth table, but like LP, only $1$
+is designated for inference, blocking explosion. RM3 rejects ex falso via
+designated-value semantics, while Cred rejects it via underdetermination.}
 \end{center}
 
-Cred's three-valued collapse most closely resembles RM3. The full
-$[0, 1]$ Cred differs from \L ukasiewicz infinite-valued logic in
-that the latter has ex falso.
+Cred's three-valued collapse corresponds to RM3 for $\{\negc, \conjc, \disjc\}$,
+but conditioning differs from RM3 implication (Theorem~\ref{thm:rm3-impl-differs}).
+The full $[0, 1]$ Cred differs from \L ukasiewicz infinite-valued logic: both
+use $[0,1]$ values, but \L ukasiewicz has ex falso via its implication
+$a \to b = \min(1, 1-a+b)$, giving $0 \to b = 1$.
 
 \subsection{Relevant Logic}
 
@@ -1293,16 +1346,30 @@ explosion, but differ fundamentally:
 \toprule
 & \textbf{LP} & \textbf{Cred} \\
 \midrule
-Paradox value & ``Both'' (true AND false) & $0.5$ (uncertain) \\
-Semantic type & Glut (overdetermined) & Intermediate \\
-Designated values & $\{1, \text{both}\}$ & Not defined \\
+Paradox treatment & ``Both'' (true AND false)${}^*$ & $0.5$ (intermediate value) \\
+Semantic structure & Three-valued with gluts & Continuum $[0,1]$ \\
+Ex falso blocked via & Designated values${}^\dagger$ & Chain rule underdetermination \\
+Consequence relation & Defined (LP-valid inferences) & Not defined (algebra only) \\
 \bottomrule
 \end{tabular}
+
+\smallskip
+\footnotesize{${}^*$In LP, ``both'' (B) means the sentence is \emph{both true and false}---a truth-value
+glut. This differs from Cred's $0.5$, which is an intermediate value on a continuum,
+not a superposition of classical values.}
+
+\smallskip
+\footnotesize{${}^\dagger$LP defines $0 \to b = 1$ (material implication), but only $\{1, B\}$ are
+\emph{designated} for valid inference. Since a contradiction $(A \land \neg A)$ has
+value $B$, not $1$, and premises must be designated to transmit validity,
+explosion is blocked at the level of consequence, not truth tables.}
 \end{center}
-In LP, a sentence with value ``both'' is designated for inference purposes.
-Cred does not define a consequence relation; it is an algebra of credences,
-not a logic with entailment. Whether $0.5$ counts as ``designated'' depends
-on the application context, not the algebra itself.
+LP is a \emph{logic} with a defined consequence relation; Cred is an \emph{algebra}
+of credence values. LP blocks explosion via designated-value semantics (only
+$\{1, B\}$ can serve as premises); Cred blocks it via the chain rule making
+conditioning at zero underdetermined. Both are paraconsistent in the sense
+that contradictions do not trivialize the system, but through different
+architectural choices.
 \end{remark}
 
 \subsection{Fuzzy Logic and Many-Valued Logics}
@@ -1324,16 +1391,27 @@ on the application context, not the algebra itself.
 \toprule
 & \textbf{Fuzzy/\L ukasiewicz} & \textbf{Cred} \\
 \midrule
-Ex falso & \textbf{Yes} ($0 \to b = 1$) & \textbf{No} (unconstrained) \\
-Boolean collapse & Classical logic (has ex falso) & No ex falso (like relevant logic) \\
-Implication & Material ($\max(1-a,b)$) & Chain rule conditioning \\
+At antecedent $= 0$ & $0 \to b = 1$ & Underdetermined${}^*$ \\
+At Boolean values & Classical logic & Conditioning (no ex falso) \\
+Implication type & Residuated${}^\dagger$ & Chain rule \\
 \bottomrule
 \end{tabular}
+
+\smallskip
+\footnotesize{${}^*$``Underdetermined'' means the chain rule axiom does not fix a unique value
+for $\cred(A \mid 0)$---any value in $[0,1]$ satisfies the axiom. This differs from
+``undefined'' (probability) and from $0 \to b = 1$ (fuzzy/classical).}
+
+\smallskip
+\footnotesize{${}^\dagger$Fuzzy implications are residua of t-norms: $a \to b = \sup\{c : a \land c \leq b\}$.
+\L ukasiewicz: $\max(1-a,b)$ is the residuum of $\max(0, a+b-1)$.}
 \end{center}
 
-Fuzzy logic generalizes \emph{classical} logic to $[0,1]$, preserving ex falso.
-Cred shares the key ``no ex falso'' property with \emph{relevant} logic,
-achieved through different mechanisms (chain rule vs.\ variable-sharing).
+Fuzzy logics generalize \emph{classical} logic to $[0,1]$, preserving
+$0 \to b = 1$. Cred uses a different operation (conditioning via chain rule)
+that leaves $\cred(A \mid 0)$ underdetermined. At Boolean values $\{0,1\}$,
+fuzzy implication reduces to material implication (with ex falso), while
+Cred conditioning remains distinct from material implication (without ex falso).
 
 \subsection{Markov Categories}
 
