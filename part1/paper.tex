@@ -1288,18 +1288,20 @@ value \emph{unconstrained}.
 Material implication gives $A \to B = 1$ when $A = 0$ (ex falso).
 The chain rule gives \emph{unconstrained} conditioning when $A = 0$.
 
-\begin{remark}[Relationship to Relevant Logic]
+\begin{remark}[Algebraic Property Shared with Relevant Logic]
 \label{rmk:relevant-logic-relationship}
-Boolean Cred (Definition~\ref{def:boolean-cred}), equipped with conditioning
-instead of material implication, shares a key property with relevant logic R:
-rejection of ex falso quodlibet.
+Cred is an \emph{algebra} (operations on credence values); relevant logic R is
+a \emph{logic} (a formal system with a consequence relation). These are different
+kinds of mathematical objects. Nevertheless, they share an \emph{algebraic property}:
+neither forces ex falso quodlibet.
 \begin{enumerate}[label=(\roman*)]
     \item In relevant logic R: $(A \land \neg A) \to B$ is \emph{not} a theorem
     (variable-sharing requirement excludes it syntactically)
-    \item In Boolean Cred: $\condc{B}{A \land \neg A}$ is \emph{unconstrained}
+    \item In the Cred algebra: $\condc{B}{A \land \neg A}$ is \emph{unconstrained}
     when $A \land \neg A = 0$ (chain rule does not force it semantically)
 \end{enumerate}
-This is a \emph{shared property}, not a deep structural correspondence.
+This is a \emph{shared algebraic property}, not a claim that Cred is a logic or
+that it provides semantics for relevant logic.
 Many systems reject ex falso (paraconsistent logics, LP, RM3, etc.), and
 sharing this property does not imply that the systems are equivalent or
 that one provides semantics for the other.
@@ -1356,17 +1358,28 @@ conditioning with material implication changes the structure.
 \end{tikzpicture}
 \end{center}
 
-\begin{remark}[Soundness and Completeness]
+\begin{remark}[Algebra vs Logic]
 \label{rmk:soundness-completeness}
-Cred is an \emph{algebra} on credence values, not a \emph{logic} with a
-consequence relation. Claims about ``avoiding ex falso'' are therefore algebraic:
-the chain rule axiom does not force $\cred(A \mid 0) = 1$, not that Cred has a
-paraconsistent consequence relation. Questions of soundness and completeness require a
-proof system and semantic entailment relation, which Cred does not define.
+Cred is an \emph{algebra}---a set with operations ($\negc$, $\conjc$, $\disjc$,
+conditioning)---not a \emph{logic} with a consequence relation ($\vdash$ or
+$\models$). The distinction matters:
+\begin{itemize}
+    \item \textbf{Algebras} define operations on values (e.g., $c_1 \conjc c_2 = c_1 \cdot c_2$)
+    \item \textbf{Logics} define which inferences are valid (e.g., $A, A \to B \vdash B$)
+\end{itemize}
+When we say Cred ``avoids ex falso,'' we mean the algebraic claim: the chain rule
+axiom does not force $\cred(A \mid 0) = 1$. We do \emph{not} claim Cred has a
+paraconsistent consequence relation.
+
 The Lean formalization verifies \emph{algebraic identities} (e.g., that
-$\negc\negc c = c$), not logical inferences. If one wished to define a Cred
-logic, one would need to specify designated values and inference rules; the
-resulting soundness/completeness questions would depend on those choices.
+$\negc\negc c = c$), not logical inferences. Questions of soundness and
+completeness require a proof system and semantic entailment, which Cred does
+not define. If one wished to build a logic \emph{from} Cred, one would need to
+specify designated values and inference rules; the resulting
+soundness/completeness questions would depend on those choices.
+
+Comparing Cred to logics (relevant logic, LP, RM3) means comparing algebraic
+properties that both happen to satisfy---not claiming Cred is itself a logic.
 \end{remark}
 
 %=============================================================================
