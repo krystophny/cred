@@ -796,12 +796,12 @@ to emphasize that it is a connective on the Kleene lattice, not specific
 to any one logic's consequence relation.}
 \smallskip
 The Kleene material conditional and the product residuated agree when
-evidence $\in \{0, 1\}$ but differ at
-evidence $= \tfrac{1}{2}$: the Kleene material gives
-$\tfrac{1}{2} \to 0 = \tfrac{1}{2}$ while the product residuated gives $0$,
-and the Kleene material gives
-$\tfrac{1}{2} \to \tfrac{1}{2} = \tfrac{1}{2}$ while the product residuated
-gives $1$.
+evidence $\in \{0, 1\}$ but differ at both interior entries of the
+evidence $= \tfrac{1}{2}$ row:
+$\tfrac{1}{2} \to 0$ is $\tfrac{1}{2}$ (Kleene material) vs.\ $0$
+(product residuated), and
+$\tfrac{1}{2} \to \tfrac{1}{2}$ is $\tfrac{1}{2}$ (Kleene material)
+vs.\ $1$ (product residuated).
 Cred conditioning (with Kleene joint) matches the product residuated for
 evidence $> 0$ and replaces the evidence $= 0$ row with~$*$.
 
@@ -980,12 +980,14 @@ $\cred(A \land B) \geq \cred(A) + \cred(B) - 1$.
 Lean: \texttt{frechet\_upper}, \texttt{frechet\_lower}.
 \end{proof}
 
-Complement non-negativity is the only additional assumption needed for the
-lower bound: the other three cells of the $2 \times 2$ table are
-automatically non-negative (the joint is non-negative by definition, and
-the upper bound gives
-$\cred(A) - \cred(A \land B) \geq 0$ and
-$\cred(B) - \cred(A \land B) \geq 0$).
+Complement non-negativity is not a consequence of the chain rule; it is
+an additional assumption motivated by probability's requirement for a valid
+joint distribution.
+The chain rule alone yields only the upper bound.
+The other three cells of the $2 \times 2$ table are automatically
+non-negative: the joint is non-negative by definition, and the upper bound
+gives $\cred(A) - \cred(A \land B) \geq 0$ and
+$\cred(B) - \cred(A \land B) \geq 0$.
 
 \begin{corollary}[Tightness of the Fr\'echet-Hoeffding Bounds]
 \label{cor:frechet-tight}
@@ -1230,9 +1232,14 @@ output value---void ($*$)---that is not in the Kleene lattice.
 The four conditioning outputs $\{0, \tfrac{1}{2}, 1, {*}\}$ align naturally
 with the four Belnap-Dunn values via $0 \mapsto \mathbf{f}$,
 $\tfrac{1}{2} \mapsto \mathbf{b}$, $1 \mapsto \mathbf{t}$,
-${*} \mapsto \mathbf{n}$: de Finetti's void (``the antecedent does not
-obtain, so the conditional has no determinate value'') corresponds to
-Belnap's $\mathbf{n}$ (``neither true nor false---no information'').
+${*} \mapsto \mathbf{n}$.
+The alignment is suggestive but not exact: de Finetti's void means
+``the antecedent does not obtain, so the question does not arise,''
+while Belnap's $\mathbf{n}$ means ``neither true nor false---no
+information is available.''
+The former is semantic (the conditioning event failed), the latter
+epistemic (no data either way); whether this conceptual gap can be
+bridged formally remains open.
 The connective algebra alone collapses to the three-valued Kleene sublattice;
 conditioning fills in the fourth value, suggesting that the full Cred
 system---connectives plus conditioning---has a natural four-valued
