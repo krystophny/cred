@@ -791,6 +791,26 @@ Fixing a specific copula (dependence structure) selects a specific arrow;
 Cred's parametric conditioning encompasses all of them.
 \end{remark}
 
+\begin{remark}[Relationship to T-Norm Fuzzy Logics]
+\label{rem:tnorm}
+Standard t-norm fuzzy logics~\cite{hajek1998,klement2000} vary the t-norm and
+derive the implication via residuation: each t-norm determines a unique arrow.
+Cred is orthogonal: it fixes the t-norm (product) but varies the arrow via the
+joint parameter.
+Every copula-derived arrow---including the product residuated (Fr\'echet upper
+bound), the trivial arrow (independence copula), and the Fr\'echet lower-bound
+arrow---is an instantiation of Cred's parametric conditioning.
+In this sense Cred is more general than any single t-norm logic in the
+implication dimension, while being committed to the product t-norm for the
+connective algebra.
+The product t-norm is distinguished among continuous t-norms for this role:
+it is the only one where the chain rule $c \cdot e = j$ yields a unique
+conditional ($j/e$) for positive evidence, makes the copula connection
+natural (copulas generalize the product t-norm), and preserves the open
+interval $(0,1)$ under conjunction---the property that makes the Kleene
+collapse work.
+\end{remark}
+
 \subsection{Boolean Restriction}
 
 Restricting Cred to $\{0, 1\}$, the operations $\{\negc, \conjc, \disjc\}$ become:
@@ -1254,6 +1274,13 @@ dependence)---and every symmetric copula yields a Bayes-consistent arrow,
 explaining why the non-copula RM3 and G\"odel arrows fail.
 The negation fixed point at $\tfrac{1}{2}$ provides a natural algebraic value
 for self-negating sentences.
+Standard t-norm fuzzy logics vary the t-norm and derive a fixed implication via
+residuation; Cred is orthogonal, fixing the product t-norm but parametrizing
+over all copula-derived arrows.
+The product t-norm is forced by the desiderata: it is the only continuous
+t-norm where the chain rule yields unique conditioning at positive evidence,
+the copula connection is natural, and the open interval is preserved under
+conjunction (enabling the Kleene collapse).
 The core algebra, conditioning, fixed points, collapse, and impossibility
 results are machine-checked in Lean~4.
 
