@@ -68,7 +68,8 @@ target is unique: no analogous homomorphism exists for \L ukasiewicz, G\"odel,
 or classical algebras.
 Applying the chain rule from both directions (Bayes' theorem) yields a
 Bayes-consistency criterion that the product residuated implication satisfies
-but that the RM3 and G\"odel implications fail.
+but that RM3 fails (even on three values) and G\"odel fails (on the
+continuum).
 Negation has a unique fixed point at $\tfrac{1}{2}$.
 All core results are machine-checked in Lean~4.
 \end{abstract}
@@ -127,7 +128,7 @@ K$_3$, LP, and RM3) for $\{\negc, \conjc, \disjc\}$, with impossibility results
 for alternative targets and machine-checked proof (Section~\ref{sec:connections}).
 \item Bayes consistency---the chain rule applied from both directions---as a
 selection criterion: the product residuated implication passes; RM3 and
-G\"odel fail.  Every copula yields a Bayes-consistent arrow
+G\"odel fail.  Every symmetric copula yields a Bayes-consistent arrow
 (Section~\ref{sec:connections}).
 \item Fixed-point analysis: $\tfrac{1}{2}$ is the unique fixed point of negation
 (Section~\ref{sec:fixed-points}).
@@ -654,8 +655,11 @@ Cred's chain-rule conditioning replaces with ``unconstrained'') is
 Bayes-consistent: $f(a, b) \cdot a = \min(a, b) = f(b, a) \cdot b$.
 \end{proposition}
 \begin{proof}
-If $b \leq a$ then $f(a, b) \cdot a = (b/a) \cdot a = b = \min(a, b)$.
-If $a < b$ then $f(a, b) \cdot a = 1 \cdot a = a = \min(a, b)$.
+If $a = 0$: $f(0, b) \cdot 0 = 0 = \min(0, b)$, and symmetrically
+$f(b, 0) \cdot b = 0$ (since $f(b, 0) = \min(0/b, 1) = 0$ for $b > 0$,
+and $f(0, 0) \cdot 0 = 0$).
+If $a > 0$ and $b \leq a$: $f(a, b) \cdot a = (b/a) \cdot a = b = \min(a, b)$.
+If $a > 0$ and $a < b$: $f(a, b) \cdot a = 1 \cdot a = a = \min(a, b)$.
 By symmetry of $\min$, $f(b, a) \cdot b = \min(a, b)$ as well.
 \end{proof}
 
@@ -697,10 +701,12 @@ The failure occurs only on the full interval $[0,1]$.
 \label{rem:copula}
 A binary arrow $f$ is Bayes-consistent if and only if the induced joint
 $J(a,b) = f(a,b) \cdot a$ is symmetric.
-Every copula $C$ (a symmetric function $[0,1]^2 \to [0,1]$ satisfying the
-boundary conditions $C(a,0) = 0$, $C(a,1) = a$ and the 2-increasing
-property~\cite{nelsen2006}) yields a Bayes-consistent arrow via
-$I_C(a,b) = C(a,b)/a$.
+A copula is a function $C : [0,1]^2 \to [0,1]$ satisfying
+$C(a,0) = C(0,b) = 0$, $C(a,1) = a$, $C(1,b) = b$, and the 2-increasing
+property~\cite{nelsen2006}.
+Every \emph{symmetric} copula ($C(a,b) = C(b,a)$) yields a Bayes-consistent
+arrow via $I_C(a,b) = C(a,b)/a$, since the induced joint $I_C(a,b) \cdot a
+= C(a,b)$ is symmetric.
 Grzegorzewski~\cite{grzegorzewski2013} computed three cases:
 the Fr\'echet upper bound $C(a,b) = \min(a,b)$ gives the product
 residuated (Goguen) implication; the independence copula $C(a,b) = ab$
@@ -802,13 +808,12 @@ $\disjc$ & 0 & 1 \\
 \end{center}
 These are exactly the two-element Boolean algebra operations $(\neg, \land, \lor)$.
 
-On $\{0, 1\}$, conditioning with Kleene joint matches the classical material
-implication for evidence $> 0$: both give $1 \to 0 = 0$, $1 \to 1 = 1$,
-$0 \to b = 1$ classically.
+On $\{0, 1\}$ with evidence $> 0$, conditioning with Kleene joint matches the
+classical material implication: both give $1 \to 0 = 0$ and $1 \to 1 = 1$.
 Indeed, all three arrows---material, G\"odel, and product residuated---coincide
-on Boolean values.
-The sole difference is at evidence $= 0$: material implication gives
-$0 \to b = 1$; conditioning is unconstrained.
+on Boolean values when evidence $> 0$.
+At evidence $= 0$, material implication gives $0 \to b = 1$; Cred conditioning
+is unconstrained.
 To recover classical logic from Boolean Cred, one must \emph{add} the axiom
 $\cred(A \mid 0) = 1$.
 
@@ -1119,8 +1124,8 @@ replacing residuated implication in the product De Morgan triplet.
 K$_3$, LP, and RM3), with impossibility results for \L ukasiewicz, G\"odel,
 and classical targets, and Lean verification.
 \item Bayes consistency as a selection criterion: the product residuated
-implication passes; RM3 and G\"odel fail.  Every copula yields a
-Bayes-consistent arrow (machine-checked on three values; pen-and-paper
+implication passes; RM3 and G\"odel fail.  Every symmetric copula yields
+a Bayes-consistent arrow (machine-checked on three values; pen-and-paper
 on $[0,1]$).
 \item Systematic treatment of fixed points with machine-checked proofs.
 \end{enumerate}
@@ -1173,8 +1178,8 @@ The \texttt{joint} parameter is supplied as input, representing $\cred(A \land B
 \item \texttt{no\_godel\_collapse}: no negation-preserving map to G\"odel algebra
 \item \texttt{no\_luk\_collapse}: no negation-and-conjunction-preserving map to \L ukasiewicz
 \item \texttt{godel\_impl}, \texttt{rm3\_impl}: implication tables with comparison theorems
-\item \texttt{rm3\_not\_bayes\_consistent}: RM3 implication fails Bayes consistency
-\item \texttt{godel\_bayes\_consistent}: G\"odel/product residuated is Bayes-consistent on $\{0,\tfrac{1}{2},1\}$
+\item \texttt{rm3\_not\_bayes\_consistent}: RM3 implication fails Bayes consistency (using \texttt{ThreeVal.conj}, i.e.\ $\min$; on $\{0,\tfrac{1}{2},1\}$ the $\min$ and multiplication checks coincide)
+\item \texttt{godel\_bayes\_consistent}: G\"odel/product residuated is Bayes-consistent on $\{0,\tfrac{1}{2},1\}$ (same remark)
 \item \texttt{frechet\_upper}, \texttt{frechet\_lower}: Fr\'echet-Hoeffding bounds
 \item \texttt{frechet\_conditioning\_exists}: bidirectional conditioning for any joint in bounds
 \end{itemize}
@@ -1220,8 +1225,8 @@ but that RM3's arrow fails (even on three values) and G\"odel's fails
 (on the continuum).
 The product residuated implication is copula-derived---it arises from
 conditioning under the Fr\'echet upper bound (maximum positive
-dependence)---and every copula yields a Bayes-consistent arrow, explaining
-why the non-copula RM3 and G\"odel arrows fail.
+dependence)---and every symmetric copula yields a Bayes-consistent arrow,
+explaining why the non-copula RM3 and G\"odel arrows fail.
 The negation fixed point at $\tfrac{1}{2}$ provides a natural algebraic value
 for self-negating sentences.
 All core results are machine-checked in Lean~4.
