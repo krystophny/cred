@@ -73,7 +73,7 @@ but that RM3 fails (even on three values) and G\"odel fails (on the
 continuum).
 Negation has a unique fixed point at $\tfrac{1}{2}$.
 All results are machine-checked in Lean~4, including
-Bayes consistency on $[0,1]$ and the copula connection.
+Bayes consistency on $[0,1]$ and the copula symmetry argument.
 \end{abstract}
 
 %=============================================================================
@@ -262,9 +262,10 @@ The following hold for all $c, c_1, c_2, c_3 \in [0,1]$:
 \end{theorem}
 \begin{proof}
 Routine verification.
-Lean: \texttt{neg\_neg}, \texttt{conj\_comm}, \texttt{conj\_assoc},
-\texttt{disj\_comm}, \texttt{disj\_assoc}, \texttt{de\_morgan\_conj},
-\texttt{de\_morgan\_disj}.
+Lean: \texttt{neg\_neg}, \texttt{neg\_zero}, \texttt{neg\_one},
+\texttt{conj\_comm}, \texttt{conj\_assoc}, \texttt{conj\_one}, \texttt{conj\_zero},
+\texttt{disj\_comm}, \texttt{disj\_assoc}, \texttt{disj\_zero}, \texttt{disj\_one},
+\texttt{de\_morgan\_conj}, \texttt{de\_morgan\_disj}.
 \end{proof}
 
 The structure $([0,1], \conjc, \disjc, \negc, 0, 1)$ consists of two dual
@@ -498,7 +499,8 @@ Define the collapse function:
 
 \begin{theorem}[Collapse Homomorphism]
 \label{thm:collapse}
-The collapse is a surjective homomorphism from $(\Cred, \negc, \conjc, \disjc)$
+The collapse is a surjective homomorphism of the algebraic signature
+$\{\negc, \conjc, \disjc\}$ from $(\Cred, \negc, \conjc, \disjc)$
 to the three-valued algebra $(\{0, \tfrac{1}{2}, 1\}, \mathrm{neg}, \mathrm{conj}, \mathrm{disj})$:
 \begin{align*}
 \mathrm{collapse}(\negc c) &= \mathrm{neg}(\mathrm{collapse}(c)) \\
@@ -626,6 +628,9 @@ This is exactly the \emph{product residuated implication} of H\'ajek's
 $\Pi$-logic~\cite{hajek1998}.
 
 \textbf{Three-way comparison on $\{0, \tfrac{1}{2}, 1\}$.}
+The tables below fix the joint to the Kleene conjunction $\min(a,b)$ and
+display the resulting binary arrow $f(a,b)$ indexed by evidence $a$ (rows)
+and conclusion $b$ (columns), in contrast to the (evidence, joint) table above.
 
 \begin{center}
 \begin{tabular}{c|ccc}
@@ -694,9 +699,12 @@ Applying the chain rule from both directions gives Bayes' theorem:
 \[
 \cred(A \mid B) \cdot \cred(B) = \cred(A \land B) = \cred(B \land A) = \cred(B \mid A) \cdot \cred(A).
 \]
-A binary arrow $f(a, b)$ used as conditioning is \emph{Bayes-consistent} when
-the joint it induces is symmetric: $f(a, b) \cdot a = f(b, a) \cdot b$ for all
-$a, b$.
+\begin{definition}[Bayes Consistency]
+\label{def:bayes}
+A binary arrow $f : [0,1]^2 \to [0,1]$ used as conditioning is
+\emph{Bayes-consistent} when the joint it induces is symmetric:
+$f(a, b) \cdot a = f(b, a) \cdot b$ for all $a, b$.
+\end{definition}
 
 \begin{proposition}[Product Residuated is Bayes-Consistent]
 \label{prop:resid-bayes}
@@ -1008,7 +1016,8 @@ negation ($\varphi(1-c) = 1-\varphi(c)$) and conjunction
 Negation preservation at $c = \tfrac{1}{2}$:
 $\varphi(\tfrac{1}{2}) = \varphi(1 - \tfrac{1}{2}) = 1 - \varphi(\tfrac{1}{2})$,
 so $\varphi(\tfrac{1}{2}) = \tfrac{1}{2}$.
-Pick $c = 1/\!\sqrt{2} \in (0,1)$; then $c \conjc c = c^2 = \tfrac{1}{2}$.
+Pick $c = 1/\!\sqrt{2}$; since $0 < 1/\!\sqrt{2} < 1$, we have $c \in (0,1)$,
+and $c \conjc c = c^2 = \tfrac{1}{2}$.
 Conjunction preservation gives
 $\varphi(\tfrac{1}{2}) = \mathrm{conj}_{\text{\L}}(\varphi(c), \varphi(c))$.
 Since $\varphi(c) \in \{0, \tfrac{1}{2}, 1\}$:
@@ -1031,9 +1040,10 @@ Kleene value $\min(\tfrac{1}{2}, \tfrac{1}{2}) = \tfrac{1}{2}$: the
 self-conjunction of the fixed point must equal the fixed point, and only the
 Kleene lattice satisfies this.
 A related observation comes from game semantics:
-Ferm\"uller~\cite{fermuller2014} showed that straightforward generalizations of
-Hintikka's classical evaluation game to a many-valued setting do not lead
-beyond Kleene logic; stronger logics require introducing randomized moves.
+Ferm\"uller~\cite{fermuller2014} showed (Main Theorem) that straightforward
+generalizations of Hintikka's classical evaluation game to a many-valued
+setting do not lead beyond Kleene logic; stronger logics require introducing
+randomized moves.
 
 \begin{remark}[Belnap-Dunn Four-Valued Logic]
 \label{rem:fde}
@@ -1234,8 +1244,8 @@ Zadeh~\cite{zadeh1965} introduced fuzzy sets with $[0,1]$ membership degrees.
 Section~\ref{sec:scope} shows that no analogous collapse exists for
 \L ukasiewicz, G\"odel, or classical algebras, making the Kleene lattice the only standard three-valued quotient of Cred.
 Ferm\"uller~\cite{fermuller2014} reached the same conclusion from game
-semantics: straightforward generalizations of Hintikka's evaluation game
-yield Kleene logic and nothing stronger.
+semantics (Main Theorem): straightforward generalizations of Hintikka's
+evaluation game yield Kleene logic and nothing stronger.
 
 \textbf{Copulas and Fuzzy Implications.}
 Grzegorzewski~\cite{grzegorzewski2013} defined \emph{probabilistic
@@ -1302,19 +1312,23 @@ The formalization covers:
 collapse homomorphism.
 \end{itemize}
 
-\textbf{Key definitions (Lean syntax):}
-\begin{verbatim}
-structure Credence where
-  val : R
-  nonneg : 0 <= val
-  le_one : val <= 1
+\textbf{Key definitions} (rendered from Lean Unicode):
 
-structure Conditioning (joint evidence : Credence) where
-  condCred : Credence
-  chainRule : conj condCred evidence = joint
-\end{verbatim}
+\medskip
+\noindent
+\texttt{structure Credence where}\\
+\null\quad \texttt{val :}~$\Real$\\
+\null\quad \texttt{nonneg : 0}~$\leq$~\texttt{val}\\
+\null\quad \texttt{le\_one : val}~$\leq$~\texttt{1}
 
-The chain rule uses \texttt{conj} (multiplication on credence values).
+\medskip
+\noindent
+\texttt{structure Conditioning (joint evidence : Credence) where}\\
+\null\quad \texttt{condCred : Credence}\\
+\null\quad \texttt{chainRule : condCred}~$\otimes$~\texttt{evidence = joint}
+
+\medskip
+The chain rule uses $\otimes$ (multiplication on credence values).
 The \texttt{joint} parameter is supplied as input, representing $\cred(A \land B)$.
 
 \textbf{Key theorems:}
@@ -1347,8 +1361,10 @@ The \texttt{joint} parameter is supplied as input, representing $\cred(A \land B
 \textbf{Scope of formalization.}
 The Lean file covers the core algebra, conditioning, fixed points, the
 collapse homomorphism and its impossibility results, Bayes consistency
-on both three values and $[0,1]$, the copula connection, and the
+on both three values and $[0,1]$, the copula symmetry argument, and the
 t-norm conditioning uniqueness results.
+The file also contains auxiliary results (spread/certainty of credences)
+not discussed in this paper.
 
 Verification: \texttt{cd lean \&\& lake build}.
 Toolchain: Lean 4.16.0 with Mathlib 4.16.0.

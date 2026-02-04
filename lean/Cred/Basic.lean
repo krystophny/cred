@@ -841,7 +841,7 @@ negation, conjunction, and disjunction (Theorem 5.1 in the paper).
 
 Key insight: The operations on ThreeVal are defined as min/max on {0, 1/2, 1},
 which exactly matches what happens when Cred operations are applied to these
-boundary values and then collapsed.
+boundary values and then collapsed (Collapse Homomorphism theorem in the paper).
 -/
 
 /-- Collapse maps Credence to ThreeVal: 0 → zero, 1 → one, else → half -/
