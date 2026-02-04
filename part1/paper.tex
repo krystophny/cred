@@ -486,7 +486,11 @@ On the Boolean restriction $\{0, 1\}$, conditioning produces outputs in
 $\{0, 1, {*}\}$---three values, recovering de Finetti's original three-valued
 conditional.
 On the collapsed Kleene algebra $\{0, \tfrac{1}{2}, 1\}$, conditioning
-produces outputs in $\{0, \tfrac{1}{2}, 1, {*}\}$---four values.
+produces outputs in $\{0, \tfrac{1}{2}, 1, {*}\}$---four values
+(evidence $= 0$ gives $*$; evidence $= \tfrac{1}{2}$ with
+joint $\in \{0, \tfrac{1}{2}\}$ gives condCred $\in \{0, 1\}$;
+evidence $= 1$ with joint $\in \{0, \tfrac{1}{2}, 1\}$ gives
+condCred $\in \{0, \tfrac{1}{2}, 1\}$).
 On the full interval $[0,1]$, conditioning produces outputs in
 $[0,1] \cup \{{*}\}$.
 In the finite cases, the connective algebra has $n$ values and the full
@@ -758,7 +762,7 @@ and conclusion $b$ (columns), in contrast to the (evidence, joint) table above.
 
 \begin{center}
 \begin{tabular}{c|ccc}
-\multicolumn{4}{c}{\textbf{Kleene material}\footnotemark: $\max(\negc a, b)$} \\
+\multicolumn{4}{c}{\textbf{Kleene material}\footnotemark\ (Lean: \texttt{rm3\_impl}): $\max(\negc a, b)$} \\
 & 0 & $\tfrac{1}{2}$ & 1 \\
 \hline
 0 & 1 & 1 & 1 \\
@@ -997,11 +1001,13 @@ conditioning structures in both directions.
 \begin{proof}
 Case 1: both marginals positive---division gives the conditional
 (Lean: \texttt{frechet\_conditioning\_exists}).
-Case 2: exactly one marginal is zero (say $\cred(A) = 0$, $\cred(B) > 0$)---%
-then joint $= 0$ (since $0 \leq \text{joint} \leq \min(0, \cred(B)) = 0$);
-conditioning given $B$ gives condCred $= 0$
-(\texttt{conditioning\_mk}), and conditioning given $A = 0$ is
-unconstrained (\texttt{conditioning\_zero\_any}).
+Case 2: exactly one marginal is zero (say $\cred(A) = 0$, $\cred(B) > 0$).
+The Fr\'echet-Hoeffding interval degenerates to $\{0\}$ (since
+$0 \leq \text{joint} \leq \min(0, \cred(B)) = 0$), so joint $= 0$.
+Conditioning given $B$: condCred $= 0/\cred(B) = 0$
+(\texttt{conditioning\_mk}).
+Conditioning given $A = 0$: unconstrained
+(\texttt{conditioning\_zero\_any}).
 Case 3: both marginals zero---then joint $= 0$; both directions are
 unconstrained (\texttt{conditioning\_zero\_any} applied twice).
 \end{proof}
