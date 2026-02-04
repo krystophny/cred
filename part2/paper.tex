@@ -243,8 +243,9 @@ $v(A \wedge A) = \tfrac{1}{4} \neq \tfrac{1}{2}$.
 From Definition~\ref{def:indep-valuation}:
 $v(A \wedge A) = v(A) \conjc v(A) = v(A)^2$.
 Part~1's idempotence characterization (Lean: \texttt{conj\_idempotent\_iff})
-shows $c \conjc c = c$ iff $c \in \{0, 1\}$.
-Lean: \texttt{IndepValuation.conj\_not\_idempotent}.
+shows $c \conjc c = c$ iff $c \in \{0, 1\}$, giving the general claim.
+The specific case $v(A) = \tfrac{1}{2}$ is
+\texttt{IndepValuation.conj\_not\_idempotent}.
 \end{proof}
 
 This is not a defect but a diagnostic: an independent valuation treats
@@ -300,9 +301,9 @@ Lean: \texttt{joint\_frechet\_upper}, \texttt{joint\_frechet\_lower}
 $v(A) + v(B) - 1 \leq j(A,B)$ with non-negativity of credences).
 \end{proposition}
 \begin{proof}
-Direct application of Part~1's Fr\'echet bounds
-(\texttt{frechet\_upper}, \texttt{frechet\_lower}) to the valuation's
-joint function.
+The upper bound follows from the two marginal-bound axioms of
+\texttt{JointValuation}; the lower bound is immediate from the
+complement non-negativity hypothesis by arithmetic.
 \end{proof}
 
 Complement non-negativity is not part of the \texttt{JointValuation}
@@ -436,7 +437,8 @@ only~$1$ and is maximally paracomplete: it has no tautologies at all.
 
 \begin{proposition}[K$_3$ Has No Tautologies]
 \label{prop:k3-no-taut}
-Under K$_3$ consequence, no formula is a tautology:
+Under K$_3$ consequence (for nonempty proposition types),
+no formula is a tautology:
 $\not\models_{\mathrm{K}_3} A$ for any $A$.
 \end{proposition}
 \begin{proof}
@@ -559,7 +561,8 @@ Lean: \texttt{no\_explosion\_at\_half}, \texttt{graded\_no\_explosion}.
 The algebraic ingredient is Part~1's
 \texttt{conditioning\_zero\_any}: when evidence has credence~$0$, the
 chain rule $c \cdot 0 = 0$ is satisfied by any $c \in [0,1]$
-(re-exported as \texttt{unconstrained\_blocks\_explosion}).
+(re-exported in Consequence.lean as
+\texttt{unconstrained\_blocks\_explosion}).
 The consequence-level Lean proofs (\texttt{lp\_no\_explosion},
 \texttt{graded\_no\_explosion}) construct direct witness valuations
 without invoking the conditioning machinery; the connection to
@@ -860,6 +863,7 @@ by any instance (Lean: \texttt{le\_exists}).
 
 \begin{theorem}[Quantifier Duality]
 \label{thm:quantifier-duality}
+For $P$ over a nonempty domain:
 \[
 1 - \inf_x P(x) = \sup_x (1 - P(x)).
 \]
