@@ -214,6 +214,17 @@ to the Cred algebra for all three connectives
 This is the natural choice for product fuzzy logic, where conjunction
 \emph{is} the product t-norm.
 
+\begin{example}[Rain and Wet Street]
+\label{ex:rain}
+Let $R$ = ``it rained'' and $W$ = ``the street is wet,'' with
+$v(R) = 0.7$ and $v(W) = 0.9$.
+An independent valuation gives
+$v(R \wedge W) = 0.7 \times 0.9 = 0.63$---the product treats $R$ and $W$
+as independent evidence.
+But rain causes wet streets, so in practice one expects
+$v(R \wedge W) > 0.63$.
+\end{example}
+
 \begin{proposition}[Idempotence Problem]
 \label{prop:idempotence}
 Under an independent valuation, $v(A \wedge A) = v(A)^2 \neq v(A)$
@@ -251,6 +262,18 @@ $v(B)$ alone.
 This is how probability works: the joint $P(A \land B)$ is determined
 by the measure, not by the marginals.
 Cred allows the same approach without requiring a measure.
+
+\begin{example}[Rain and Wet Street, Continued]
+\label{ex:rain-joint}
+Continuing Example~\ref{ex:rain}: with $v(R) = 0.7$, $v(W) = 0.9$,
+one might supply $j(R, W) = 0.65$ from data or domain knowledge.
+This gives $v(W \mid R) = j(R,W) / v(R) = 0.65 / 0.7 \approx 0.93$:
+knowing it rained raises the credence of a wet street from $0.9$
+to $0.93$.
+The Fr\'echet bounds require
+$\max(0.7 + 0.9 - 1, 0) = 0.6 \leq j(R,W) \leq \min(0.7, 0.9) = 0.7$,
+and $0.65$ is within this interval.
+\end{example}
 
 \begin{proposition}[Fr\'echet Bounds on Valuations]
 \label{prop:frechet-valuations}
@@ -466,6 +489,17 @@ Lean: \texttt{graded\_at\_one\_is\_strict}.
 The key structural result: Cred's unconstrained conditioning at zero
 forces explosion to fail.
 
+\begin{example}[Explosion Fails]
+\label{ex:no-explosion}
+In classical logic, if both ``it rained'' and ``it did not rain'' hold,
+then every proposition follows---including ``the moon is made of cheese.''
+In Cred at threshold $t = 0.3$: set $v(R) = 0.5$, so
+$\negc v(R) = 0.5$; both exceed $0.3$.
+But $v(\text{moon-cheese}) = 0$, which is below $0.3$.
+The contradiction in $R$ does not force acceptance of an unrelated
+proposition.
+\end{example}
+
 \begin{theorem}[No Explosion]
 \label{thm:no-explosion}
 For any threshold $0 < t \leq \tfrac{1}{2}$, graded consequence at~$t$
@@ -554,6 +588,16 @@ Lean: \texttt{bayesianUpdate}, \texttt{bayesianUpdateValuation}.
 
 The Bayesian update is the conditioning structure from Part~1 applied
 propositionwise: $v'(A) \cdot v(B) = j(A, B)$ at every~$A$.
+
+\begin{example}[Rain and Wet Street: Update]
+\label{ex:rain-update}
+From Example~\ref{ex:rain-joint}: $v(R) = 0.7$, $v(W) = 0.9$,
+$j(R, W) = 0.65$.
+You observe that it rained ($B = R$).
+The Bayesian posterior for $W$ is
+$v'(W) = j(R,W) / v(R) = 0.65 / 0.7 \approx 0.93$:
+your credence in a wet street rises from $0.9$ to $0.93$.
+\end{example}
 
 \begin{proposition}[Chain-Rule Preservation]
 \label{prop:chain-rule-preservation}
