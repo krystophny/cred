@@ -72,8 +72,8 @@ Bayes-consistency criterion: the product residuated implication is
 Bayes-consistent, but RM3 fails (even on three values) and G\"odel
 fails (on the continuum).
 Negation has a unique fixed point at $\tfrac{1}{2}$.
-All results are machine-checked in Lean~4, including
-Bayes consistency on $[0,1]$ and the copula symmetry argument.
+The main results are machine-checked in Lean~4, including
+Bayes consistency on $[0,1]$.
 Cred is a constraint algebra, not a logic: it has no consequence relation and
 no interpretation function.
 Building a full reasoning system requires additional structure---a measure
@@ -322,7 +322,9 @@ Lean: \texttt{neg\_neg}, \texttt{neg\_zero}, \texttt{neg\_one},
 
 The structure $([0,1], \conjc, \disjc, \negc, 0, 1)$ consists of two dual
 commutative monoids ($([0,1], \conjc, 1)$ and $([0,1], \disjc, 0)$) connected
-by an order-reversing involution $\negc$ satisfying De Morgan's laws.
+by an involution $\negc$ that reverses the natural order on $[0,1]$
+($c_1 \leq c_2$ iff $\negc c_2 \leq \negc c_1$) and satisfies
+De Morgan's laws.
 It is not a De Morgan algebra in the lattice-theoretic sense: in particular,
 $\conjc$ is not idempotent (see below), and distributivity fails
 (Theorem~\ref{thm:nondistrib}).
@@ -394,8 +396,9 @@ In propositional notation: $\condc{A}{B} \conjc \cred(B) = \cred(A \land B)$.
 The \texttt{joint} parameter represents $\cred(A \land B)$ and is supplied
 as input---it is not computed from marginal credences.
 Note that a conditioning structure need not exist for all parameter values:
+as we show after Theorem~\ref{thm:uniqueness},
 $\text{joint} \leq \text{evidence}$ is necessary (since
-$\text{condCred} \leq 1$; see below Theorem~\ref{thm:uniqueness}).
+$\text{condCred} \leq 1$).
 This differs from R\'enyi--Popper conditioning, where $P(A \mid B)$ is a
 two-argument function: here conditioning is a three-parameter constraint
 (joint, evidence, conditional) related by the chain rule.
@@ -454,8 +457,9 @@ This is the central result: conditioning on impossible evidence is unconstrained
 by the chain rule.
 The constraint-based definition means division is derived (as the unique solution
 when evidence $> 0$) rather than primitive; at zero, no division is needed.
-To obtain ``from impossibility, anything follows,'' one must add an axiom
-$\cred(A \mid 0) = 1$; it does not follow from conditioning alone.
+The chain rule is consistent with $\cred(A \mid 0) = 1$ (since
+$1 \cdot 0 = 0$), but does not imply it; to obtain ``from
+impossibility, anything follows,'' one must add this as an extra axiom.
 More generally, the chain rule constrains how credence values relate but says
 nothing about which propositions receive which credences or what follows from
 what.
@@ -483,9 +487,11 @@ On the collapsed Kleene algebra $\{0, \tfrac{1}{2}, 1\}$, conditioning
 produces outputs in $\{0, \tfrac{1}{2}, 1, {*}\}$---four values.
 On the full interval $[0,1]$, conditioning produces outputs in
 $[0,1] \cup \{{*}\}$.
-In every case, the connective algebra has $n$ values and the full system
-with conditioning has $n + 1$: void can be viewed as the uniform extra
-that Cred's chain rule introduces at evidence zero.
+In the finite cases, the connective algebra has $n$ values and the full
+system with conditioning has $n + 1$; on $[0,1]$, conditioning adjoins a
+single extra output.
+Void can be viewed as the uniform extra that Cred's chain rule
+introduces at evidence zero.
 K$_3$, LP, and RM3 all resolve this extra value by committing to a definite
 implication (each has $0 \to b = 1$ in its truth table); product logic does
 the same via residuation.
@@ -750,7 +756,7 @@ and conclusion $b$ (columns), in contrast to the (evidence, joint) table above.
 
 \begin{center}
 \begin{tabular}{c|ccc}
-\multicolumn{4}{c}{\textbf{Kleene material}: $\max(\negc a, b)$} \\
+\multicolumn{4}{c}{\textbf{Kleene material}\footnotemark: $\max(\negc a, b)$} \\
 & 0 & $\tfrac{1}{2}$ & 1 \\
 \hline
 0 & 1 & 1 & 1 \\
@@ -780,10 +786,17 @@ $\tfrac{1}{2}$ & 0 & 1 & 1 \\
 {\footnotesize $*$ = unconstrained. Rows with evidence $> 0$ are uniquely
 determined.}
 
+\footnotetext{The Kleene material conditional $\max(\negc a, b)$ is the
+truth-functional arrow shared by K$_3$, LP, and
+RM3~\cite[Table~7.3.3]{priest2008}. We use the term ``Kleene material''
+to emphasize that it is a connective on the Kleene lattice, not specific
+to any one logic's consequence relation.}
 \smallskip
-RM3 and the product residuated agree when evidence $\in \{0, 1\}$ but differ at
-evidence $= \tfrac{1}{2}$: RM3 gives $\tfrac{1}{2} \to 0 = \tfrac{1}{2}$
-while the product residuated gives $0$, and RM3 gives
+The Kleene material conditional and the product residuated agree when
+evidence $\in \{0, 1\}$ but differ at
+evidence $= \tfrac{1}{2}$: the Kleene material gives
+$\tfrac{1}{2} \to 0 = \tfrac{1}{2}$ while the product residuated gives $0$,
+and the Kleene material gives
 $\tfrac{1}{2} \to \tfrac{1}{2} = \tfrac{1}{2}$ while the product residuated
 gives $1$.
 Cred conditioning (with Kleene joint) matches the product residuated for
@@ -1590,7 +1603,7 @@ G\"odel (on the continuum); the copula framework explains why.
 Among continuous t-norms, the product is uniquely suited: it alone yields
 unique conditioning at positive evidence and preserves $(0,1)$ under
 conjunction, enabling the collapse.
-All results are machine-checked in Lean~4.
+The main results are machine-checked in Lean~4.
 
 \medskip
 \textbf{What Cred provides and what it does not.}

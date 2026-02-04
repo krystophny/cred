@@ -196,7 +196,7 @@ The chain rule requires condCred ⊗ 0 = joint. Since anything times 0 equals 0,
 this forces joint = 0 but leaves condCred unconstrained (any value satisfies
 c ⊗ 0 = 0). Conditioning on impossible evidence provides no constraint on belief.
 See `conditioning_zero_any` for the proof that any credence works.
-This is intentional: there is no ex falso in graded logic.
+This is intentional: there is no ex falso in the credence algebra.
 -/
 structure Conditioning (joint evidence : Credence) where
   /-- The conditional credence cred(A | B) -/
