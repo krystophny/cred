@@ -64,7 +64,8 @@ preserve credence), and \emph{update rules} (revising credences given new
 evidence)---and extends to first order via \emph{graded predicates} with
 inf/sup quantifiers.
 Different choices at each layer recover different systems: probability,
-product fuzzy logic, K$_3$, LP, RM3, and imprecise probability.
+product fuzzy logic, K$_3$, LP, and RM3; zero-evidence
+underdetermination connects to imprecise probability.
 We prove that explosion (the classical principle that a contradiction
 entails every proposition) fails non-vacuously for LP and for graded
 consequence at thresholds $0 < t \leq \tfrac{1}{2}$
@@ -294,7 +295,9 @@ non-negativity), then
 \[
 \max(v(A) + v(B) - 1, 0) \leq j(A, B).
 \]
-Lean: \texttt{joint\_frechet\_upper}, \texttt{joint\_frechet\_lower}.
+Lean: \texttt{joint\_frechet\_upper}, \texttt{joint\_frechet\_lower}
+(the $\max(\cdot, 0)$ form combines the Lean bound
+$v(A) + v(B) - 1 \leq j(A,B)$ with non-negativity of credences).
 \end{proposition}
 \begin{proof}
 Direct application of Part~1's Fr\'echet bounds
@@ -308,9 +311,9 @@ Part~1.
 
 When $v(B) > 0$, the chain rule has a unique solution; we write
 $v(A \mid B) = j(A, B) / v(B)$ for the conditional credence
-(Lean: \texttt{JointValuation.conditioning}, via Part~1's
-\texttt{conditioning\_mk} for existence and
-\texttt{conditioning\_unique} for uniqueness).
+(Lean: \texttt{JointValuation.conditioning}, which constructs the
+value via Part~1's \texttt{conditioning\_mk}; uniqueness follows
+separately from \texttt{conditioning\_unique}).
 
 \subsection{Collapse Composition}
 
@@ -363,8 +366,11 @@ all $A$), is complement-preserving because
 $\tfrac{1}{2} = 1 - \tfrac{1}{2}$ (the negation fixed point from Part~1).
 This is a degenerate example (every proposition equals its own negation),
 used as a technical witness.
-Its collapse to three values gives the constant-$\tfrac{1}{2}$
-three-valued valuation used in the K$_3$ no-tautology proof.
+Its collapse to three values gives a constant-$\tfrac{1}{2}$
+three-valued valuation.
+(The K$_3$ no-tautology proof constructs the constant-$\tfrac{1}{2}$
+function directly at the three-valued level, without using the
+collapse.)
 Lean: \texttt{CpValuation.constant\_half}.
 
 %=============================================================================
@@ -397,10 +403,10 @@ consequence relations, differing only in which values are
 K$_3$ designates $\{1\}$ (only certainty counts).
 LP designates $\{1, \tfrac{1}{2}\}$ (certainty and the
 intermediate value both count).
-RM3 uses the same designation as LP ($\{1, \tfrac{1}{2}\}$) but
-adds a relevance condition: its material conditional $A \to B$
-receives value~$0$ when $A$ and $B$ share no propositional
-variable~\cite{priest2008}.
+RM3 uses the same designation as LP ($\{1, \tfrac{1}{2}\}$) with
+a distinct implication truth table; RM3-valid entailments satisfy the
+variable-sharing property (premises and conclusion share a
+propositional variable)~\cite{priest2008}.
 Lean: \texttt{isDesignatedK3}, \texttt{isDesignatedLP}.
 (RM3 designation is not formalized; the relevance condition is
 syntactic.)
@@ -572,10 +578,10 @@ at zero is resolved by the measure, not left unconstrained.
 \textbf{System} & \textbf{Designated} & \textbf{Tautologies?}
   & \textbf{Excl.\ middle?} & \textbf{Explosion?} \\
 \midrule
-Classical$^\|$ & $\{1\}$ (two-valued) & Yes & Yes & Yes \\
+Classical & $\{1\}$ (two-valued) & Yes$^\|$ & Yes$^\|$ & Yes \\
 K$_3$ & $\{1\}$ & No & No & Holds vacuously$^\S$ \\
-LP$^\|$ & $\{1, \tfrac{1}{2}\}$ & Yes & Yes & No \\
-RM3$^{\dagger\|}$ & $\{1, \tfrac{1}{2}\}$+relev. & Yes & Yes & No \\
+LP & $\{1, \tfrac{1}{2}\}$ & Yes$^\|$ & Yes$^\|$ & No \\
+RM3$^\dagger$ & $\{1, \tfrac{1}{2}\}$+relev. & Yes$^\|$ & Yes$^\|$ & No \\
 Graded ($t \leq \tfrac{1}{2}$) & $\{c \geq t\}$ & $^\ddagger$ & $^\ddagger$ & No \\
 \bottomrule
 \end{tabular}
@@ -690,7 +696,8 @@ v'(A) = v(A \mid B) \cdot q + v(A \mid \negc B) \cdot (1 - q).
 This is a weighted mixture of the conditional-on-$B$ and
 conditional-on-$\negc B$ valuations.
 Determining $v(A \mid B)$ and $v(A \mid \negc B)$ from a joint-parametrized
-valuation requires $v(B) > 0$ and $v(\negc B) > 0$, respectively.
+valuation requires $v(B) > 0$ and $v(\sigma(B)) > 0$ (i.e.,
+$v(B) < 1$, by complement preservation), respectively.
 
 \begin{definition}[Jeffrey Update]
 \label{def:jeffrey-update}
@@ -845,6 +852,8 @@ Lean: \texttt{credInf} / \texttt{forall'}, \texttt{credSup} / \texttt{exists'}.
 
 The infimum and supremum are well-defined because credence values are
 bounded in $[0,1]$.
+All results in this subsection require $X$ to be nonempty
+(Lean: \texttt{[Nonempty $\alpha$]}).
 The universal quantifier is bounded above by any instance
 (Lean: \texttt{forall\_le}); the existential quantifier is bounded below
 by any instance (Lean: \texttt{le\_exists}).
@@ -1072,6 +1081,8 @@ The quantifier infrastructure uses wrapper functions (\texttt{credSup},
 \texttt{credInf}) around Mathlib's conditional supremum/infimum on
 $\Real$, with explicit Lean proofs that the results stay in $[0,1]$.
 Results not formalized:
+K$_3$ vacuous explosion (a standard result, verified by case analysis
+in the text);
 RM3 properties (the relevance condition is syntactic);
 LP tautologies at the consequence level (only the value-level
 \texttt{lp\_excluded\_middle} is in Lean);
