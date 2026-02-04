@@ -99,9 +99,44 @@ Van Fraassen~\cite{vanfraassen1983} showed that this primitive approach
 connects naturally to relevant logic: both avoid forcing ``from impossibility,
 anything follows.''
 
-Cred takes this further: drop the measure entirely.
-Keep only values in $[0,1]$, the complement $\negc c = 1 - c$, and the chain
-rule $\cred(A \mid B) \cdot \cred(B) = \cred(A \land B)$ as the sole structural
+Fuzzy logic takes a different route to $[0,1]$-valued reasoning.
+Rather than starting from probability's chain rule, it generalizes Boolean
+conjunction via \emph{triangular norms} (t-norms): commutative, associative,
+monotone binary operations on $[0,1]$ with identity
+$1$~\cite{klement2000,hajek1998}.
+The three basic continuous t-norms are the minimum (G\"odel), the algebraic
+product, and the \L ukasiewicz t-norm $\max(a + b - 1, 0)$.
+Each t-norm determines a unique implication via \emph{residuation}:
+$a \to b = \sup\{c \in [0,1] : a \otimes c \leq b\}$,
+the largest value making conjunction ``work'' in the sense that
+$a \otimes (a \to b) \leq b$ (graded modus ponens)~\cite{hajek1998}.
+This coupling is fundamental: in every t-norm logic, the arrow is not a free
+parameter but is forced by the choice of conjunction.
+
+The coupling has a uniform consequence at zero: since $0 \otimes c = 0 \leq b$
+for all $c$ and $b$, the residuum gives $0 \to b = 1$ for every
+t-norm---\emph{ex falso quodlibet} is built into the
+framework~\cite{hajek1998}.
+Probability avoids this not by weakening the t-norm but by using a different
+mechanism altogether: the chain rule $P(A \mid B) \cdot P(B) = P(A \land B)$ is
+a multiplicative constraint, not a residuation.
+When $P(B) = 0$, the constraint becomes $c \cdot 0 = 0$, satisfied by any $c$;
+the conditional is undefined (or, in R\'enyi's primitive approach,
+unconstrained) rather than forced to~$1$.
+
+Both traditions share the same carrier ($[0,1]$) and the same complement
+($1 - c$).
+When the t-norm is the algebraic product, they also share the same
+conjunction---the \emph{product De Morgan triplet}: the product t-norm, the
+probabilistic sum $c_1 + c_2 - c_1 c_2$, and the standard
+complement~\cite{klement2000}.
+The sole point of divergence is the arrow: residuation (forcing
+$0 \to y = 1$) vs.\ chain-rule conditioning (unconstrained at zero).
+
+Cred makes this divergence the defining design choice.
+Drop the measure entirely; keep only values in $[0,1]$, the complement
+$\negc c = 1 - c$, and the chain rule
+$\cred(A \mid B) \cdot \cred(B) = \cred(A \land B)$ as the sole structural
 axiom for conditioning.
 This is strictly weaker than probability---every probability space satisfies
 Cred's axioms, but Cred requires neither a sigma-algebra nor additivity.
@@ -110,21 +145,17 @@ satisfied by \emph{any} value of $\cred(A \mid B)$: the conditional is
 unconstrained.
 Division emerges as the unique solution when evidence is positive; at zero,
 no division is needed.
-
-The product $c_1 \cdot c_2$ and its De Morgan dual $c_1 + c_2 - c_1 c_2$ are
-available as algebraic operations on $[0,1]$---the same product that appears in
-the chain rule.
-These form the \emph{product De Morgan triplet}, well-known in fuzzy
-logic~\cite{klement2000,hajek1998}.
-But where product fuzzy logic uses residuated implication (forcing $0 \to y = 1$,
-i.e.\ ex falso), Cred uses chain-rule conditioning (leaving the conditional
-unconstrained at zero).
+Cred thus inherits the product De Morgan triplet from fuzzy logic and the
+chain rule from probability, replacing residuation's ex falso with the chain
+rule's unconstrained conditioning at zero.
 
 \textbf{Contributions.}
 \begin{enumerate}[label=(\arabic*)]
 \item A weakening of probability that retains the chain rule as primitive
-conditioning, where division is derived (unique when evidence $> 0$) and
-conditioning is unconstrained at evidence zero (Section~\ref{sec:conditioning}).
+conditioning and shares the product De Morgan triplet with product fuzzy logic,
+replacing residuation with chain-rule conditioning.
+Division is derived (unique when evidence $> 0$); conditioning is unconstrained
+at evidence zero (Section~\ref{sec:conditioning}).
 \item A surjective homomorphism from Cred to the Kleene lattice (underlying
 K$_3$, LP, and RM3) for $\{\negc, \conjc, \disjc\}$, with impossibility results
 for alternative targets and machine-checked proof (Section~\ref{sec:connections}).
@@ -723,8 +754,12 @@ gives the trivial arrow $b$; the Fr\'echet lower bound
 $C(a,b) = \max(a+b-1, 0)$ gives a third arrow.
 Among the standard logic implications (RM3, G\"odel, product residuated),
 only the product residuated is copula-derived (from the Fr\'echet upper
-bound); RM3's $\max(\negc a, b)$ and G\"odel's implication are not
-copula-derived, which is why they fail Bayes consistency.
+bound).
+RM3's induced joint $\max(\negc a, b) \cdot a$ violates copula boundary
+conditions ($a = \tfrac{1}{2}, b = 0$ gives $\tfrac{1}{4} \neq 0$);
+G\"odel's induced joint is not symmetric, so it cannot arise from a
+symmetric copula.
+Neither is Bayes-consistent.
 \end{remark}
 
 \begin{remark}[Dependence Interpretation]
@@ -793,8 +828,8 @@ Cred's parametric conditioning encompasses all of them.
 
 \begin{remark}[Relationship to T-Norm Fuzzy Logics]
 \label{rem:tnorm}
-Standard t-norm fuzzy logics~\cite{hajek1998,klement2000} vary the t-norm and
-derive the implication via residuation: each t-norm determines a unique arrow.
+As discussed in the introduction, t-norm fuzzy logics couple the arrow to the
+t-norm via residuation: each t-norm determines a unique implication.
 Cred is orthogonal: it fixes the t-norm (product) but varies the arrow via the
 joint parameter.
 Every copula-derived arrow---including the product residuated (Fr\'echet upper
@@ -803,25 +838,33 @@ arrow---is an instantiation of Cred's parametric conditioning.
 In this sense Cred is more general than any single t-norm logic in the
 implication dimension, while being committed to the product t-norm for the
 connective algebra.
-The product t-norm is distinguished among continuous t-norms for this role:
-it is the only one where the chain rule $c \cdot e = j$ yields a unique
-conditional ($j/e$) for positive evidence, makes the copula connection
-natural (copulas generalize the product t-norm), and preserves the open
-interval $(0,1)$ under conjunction---the property that makes the Kleene
-collapse work.
 
-The relationship is a two-way bridge.
-If Cred is required to commit to a single binary arrow via residuation
-(becoming a t-norm fuzzy logic), the product t-norm forces the Fr\'echet
-upper bound, recovering exactly H\'ajek's product logic
-$\Pi$~\cite{hajek1998}.
+The product t-norm is distinguished among the three basic continuous t-norms
+for this role.
+The minimum (G\"odel) t-norm fails unique conditioning: $\min(c, e) = j$
+with $j = e$ is satisfied by any $c \geq e$, not just one value.
+The \L ukasiewicz t-norm fails similarly: $\max(c + e - 1, 0) = 0$ is
+satisfied by any $c \leq 1 - e$, not just one value.
+The product is the only basic continuous t-norm where $c \cdot e = j$ with
+$e > 0$ determines $c$ uniquely ($c = j/e$).
+More generally, among continuous t-norms, unique conditioning at positive
+evidence characterizes the strict (cancellative) family, all of which are
+order-isomorphic to the product~\cite{klement2000}.
+The product t-norm also preserves the open interval $(0,1)$ under
+conjunction---the property that makes the Kleene collapse work---and its
+independence copula $ab$ sits naturally inside the copula framework.
+
+The relationship to product logic $\Pi$ is a two-way bridge.
+If Cred commits to a single binary arrow via residuation (becoming a t-norm
+fuzzy logic), the product t-norm forces the Fr\'echet upper bound, recovering
+exactly H\'ajek's product logic $\Pi$~\cite{hajek1998}.
 Conversely, if a t-norm fuzzy logic is required to support chain-rule
-conditioning with unique solutions, Bayes consistency, and copula structure,
-the product t-norm is the only viable choice.
-Product logic and Cred are thus two views of the same structure: product
-logic is the committed view (one specific arrow, ex falso at evidence zero),
-Cred is the parametric view (a family of arrows indexed by the joint,
-unconstrained at evidence zero).
+conditioning with unique solutions, the product t-norm is forced (by the
+cancellation argument above).
+Product logic and Cred are thus two views of the same algebraic
+structure: product logic is the committed view (one specific arrow, ex falso
+at evidence zero), Cred is the parametric view (a family of arrows indexed
+by the joint, unconstrained at evidence zero).
 They coincide for positive evidence when the joint is set to the
 Fr\'echet upper bound.
 \end{remark}
@@ -964,7 +1007,7 @@ $\mathrm{conj}_{\text{\L}}(\tfrac{1}{2}, \tfrac{1}{2}) = 0$ disagrees with the
 Kleene value $\min(\tfrac{1}{2}, \tfrac{1}{2}) = \tfrac{1}{2}$: the
 self-conjunction of the fixed point must equal the fixed point, and only the
 Kleene lattice satisfies this.
-An independent line of evidence comes from game semantics:
+A related observation comes from game semantics:
 Ferm\"uller~\cite{fermuller2014} showed that straightforward generalizations of
 Hintikka's classical evaluation game to a many-valued setting do not lead
 beyond Kleene logic; stronger logics require introducing randomized moves.
@@ -1292,14 +1335,15 @@ for self-negating sentences.
 Standard t-norm fuzzy logics vary the t-norm and derive a fixed implication via
 residuation; Cred is orthogonal, fixing the product t-norm but parametrizing
 over all copula-derived arrows.
-The product t-norm is forced by the desiderata: it is the only continuous
-t-norm where the chain rule yields unique conditioning at positive evidence,
-the copula connection is natural, and the open interval is preserved under
-conjunction (enabling the Kleene collapse).
+Among the three basic continuous t-norms, the product is uniquely suited:
+it is the only one where the chain rule yields unique conditioning at
+positive evidence (the minimum and \L ukasiewicz t-norms both fail
+uniqueness), and it preserves the open interval $(0,1)$ under conjunction,
+enabling the Kleene collapse.
 The relationship is a two-way bridge: requiring Cred to commit to a single
 arrow via residuation recovers product logic; requiring a t-norm fuzzy logic
-to support chain-rule conditioning with Bayes consistency forces the product
-t-norm.
+to support chain-rule conditioning with unique solutions forces the product
+t-norm (more precisely, a strict t-norm isomorphic to the product).
 The core algebra, conditioning, fixed points, collapse, and impossibility
 results are machine-checked in Lean~4.
 
