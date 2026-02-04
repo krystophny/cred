@@ -3,14 +3,15 @@
 Cred is an algebra on **credences** (values in `[0,1]`) intended as a foundation for doing mathematics and reasoning when truth, evidence, and proofs are **graded** rather than purely Boolean. The core design choice is **primitive conditioning** via a chain rule equation/constraint, which blocks explosion from impossible evidence: when `cred(B)=0`, the equation imposes no constraint on `cred(A|B)` (no ex falso).
 
 This repo contains:
-- a Lean 4 library formalizing the Part 1 primitives and theorems (`lean/`)
-- a publication paper aligned with the Lean source (`part1/paper.tex`; built in CI)
-- a roadmap toward graded mathematics (Part 2) and new proof techniques/self-hosting (Part 3)
+- a Lean 4 library formalizing the Part 1 and Part 2 definitions and theorems (`lean/`)
+- two publication papers aligned with the Lean source (`part1/paper.tex`, `part2/paper.tex`; built in CI)
+- a roadmap toward new proof techniques/self-hosting (Part 3)
 
-## Download Latest Paper (CI build)
+## Download Latest Papers (CI build)
 
-- Latest PDF: [paper.pdf](releases/download/paper-latest/paper.pdf)
-- Per-run artifacts: [CI workflow runs](actions/workflows/ci.yml) (open the latest successful run and download `cred-paper-pdf`)
+- Part 1 (Core Algebra): [paper.pdf](https://github.com/krystophny/cred/releases/download/paper-latest/paper.pdf)
+- Part 2 (From Algebra to Reasoning): [paper.pdf](https://github.com/krystophny/cred/releases/download/paper-part2-latest/paper.pdf)
+- Per-run artifacts: [CI workflow runs](https://github.com/krystophny/cred/actions/workflows/ci.yml)
 
 ## Why This Exists
 
@@ -18,9 +19,9 @@ This repo contains:
 - **Self-reference has fixed points, not contradictions:** self-negating equations like `L ≡ ¬L` stabilize at `cred(L)=0.5`.
 - **Classical mathematics is a limiting case, not the starting point:** collapsing `[0,1]` down to `{0,1}` recovers familiar binary systems (and shows exactly what extra principles introduce ex falso).
 
-## Current Milestone (Part 1)
+## Current Milestone (Part 2)
 
-Establish the core Cred algebra with full Lean proofs and a paper that makes the motivation and consequences obvious on first read.
+Part 1 established the core algebra. Part 2 adds three layers—valuations, consequence relations, and update rules—and extends to first-order via graded predicates with inf/sup quantifiers. All results are machine-checked in Lean.
 
 ## Primitives (Part 1)
 
@@ -36,10 +37,18 @@ When `cred(B)=0`, the chain rule becomes `x·0=0`, satisfied by any `x`: conditi
 
 ## Key Results (Lean)
 
+Part 1 (core algebra):
 - `Cred.Credence.conditioning_zero_any` — conditioning on 0 is unconstrained (no ex falso)
 - `Cred.Credence.conditioning_unique` — uniqueness when evidence has positive credence
 - `Cred.Credence.liar_fixed_point`, `Cred.Credence.neg_fixed_point_unique` — `0.5` fixed point and uniqueness
 - `Cred.Credence.conj_disj_not_distrib` — `⊗` does not distribute over `⊔`
+
+Part 2 (from algebra to reasoning):
+- `Cred.CpValuation` — complement-preserving valuations with collapse composition
+- `Cred.no_explosion_at_half` — explosion fails at credence `1/2`
+- `Cred.bayesianUpdate_chain_rule` — Bayesian update preserves the chain rule
+- `Cred.GradedPredicate.quantifier_duality_val` — `~(inf P) = sup (~P)` for graded quantifiers
+- `Cred.GradedPredicate.russell_fixed_point` — Russell self-reference yields `1/2`
 
 ## Collapse Tower (orientation)
 
@@ -50,9 +59,9 @@ Cred      RM3-like    Relevant     (ex falso appears)
 
 ## Repo Layout
 
-- `lean/` — Lean 4 formalization (authoritative for Part 1 definitions/theorems)
+- `lean/` — Lean 4 formalization (authoritative for Part 1 and Part 2 definitions/theorems)
 - `part1/` — paper + Part 1 notes (primitives and collapse connections)
-- `part2/` — roadmap: graded mathematics as the primary setting
+- `part2/` — paper + Part 2 notes (valuations, consequence, update, graded predicates)
 - `part3/` — roadmap: new proof techniques, undecidability, self-hosting
 
 ## Build
@@ -60,8 +69,7 @@ Cred      RM3-like    Relevant     (ex falso appears)
 ```bash
 cd lean && lake build
 cd part1 && latexmk -pdf -interaction=nonstopmode -halt-on-error paper.tex
-# fallback:
-# cd part1 && pdflatex paper.tex && pdflatex paper.tex
+cd part2 && latexmk -pdf -interaction=nonstopmode -halt-on-error paper.tex
 ```
 
 ## References

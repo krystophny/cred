@@ -68,9 +68,45 @@ jobs:
         uses: ncipollo/release-action@v1
         with:
           tag: paper-latest
-          name: Latest paper (auto)
+          name: Latest paper — Part 1 (auto)
           artifacts: part1/paper.pdf
           artifactContentType: application/pdf
           allowUpdates: true
           replacesArtifacts: true
           makeLatest: true
+
+  paper-part2:
+    name: Paper (Part 2)
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Build Part 2 paper
+        uses: xu-cheng/latex-action@v3
+        with:
+          working_directory: part2
+          root_file: paper.tex
+          latexmk_use_lualatex: false
+          args: -pdf -interaction=nonstopmode -halt-on-error
+
+      - name: Upload PDF artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: cred-paper-part2-pdf
+          path: part2/paper.pdf
+          retention-days: 30
+
+      - name: Publish "paper-part2-latest" release asset
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        uses: ncipollo/release-action@v1
+        with:
+          tag: paper-part2-latest
+          name: Latest paper — Part 2 (auto)
+          artifacts: part2/paper.pdf
+          artifactContentType: application/pdf
+          allowUpdates: true
+          replacesArtifacts: true
+          makeLatest: false

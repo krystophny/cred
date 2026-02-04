@@ -4,7 +4,20 @@ Part 1 establishes Cred as a constraint algebra on [0,1]: values, complement, pr
 
 Part 2 adds these three layers, one at a time, and extends to first-order.
 
-## Files
+## Paper
+
+`paper.tex` — publication paper covering valuations, consequence relations, update rules, and graded predicates. All named claims cross-reference machine-checked Lean theorems.
+
+## Lean Formalization
+
+| File | Contents |
+|------|----------|
+| `Cred/Valuation.lean` | Complement-preserving, independent, and joint valuations; collapse composition; Fréchet bounds |
+| `Cred/Consequence.lean` | K3/LP designated values; three-valued and graded consequence; no-explosion theorems |
+| `Cred/Update.lean` | Bayesian and Jeffrey conditionalization; chain-rule preservation; zero-evidence underdetermination |
+| `Cred/Predicate.lean` | Graded predicates; pointwise operations; inf/sup quantifiers; quantifier duality; Russell fixed point |
+
+## Notes
 
 - `01-valuations.md` — Interpretation: mapping propositions to credences
 - `02-consequence-relations.md` — Consequence: when does A entail B?
