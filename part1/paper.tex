@@ -53,8 +53,9 @@
 \maketitle
 
 \begin{abstract}
-We present \emph{Cred}, a weakening of probability theory that retains values in
-$[0,1]$ and the complement but drops the measure space and sigma-additivity.
+We present \emph{Cred}, a generalization of the numerical structure of
+probability that retains values in $[0,1]$ and the complement but drops
+the measure space and sigma-additivity.
 The sole structural axiom for conditioning is the chain rule:
 $\cred(A \mid B) \cdot \cred(B) = \cred(A \land B)$.
 When evidence is positive, division emerges as the unique solution; when evidence
@@ -325,7 +326,7 @@ commutative monoids ($([0,1], \conjc, 1)$ and $([0,1], \disjc, 0)$) connected
 by an involution $\negc$ that reverses the natural order on $[0,1]$
 ($c_1 \leq c_2$ iff $\negc c_2 \leq \negc c_1$) and satisfies
 De Morgan's laws.
-It is not a De Morgan algebra in the lattice-theoretic sense: in particular,
+It is not a De Morgan algebra in the lattice-theoretic sense: for example,
 $\conjc$ is not idempotent (see below), and distributivity fails
 (Theorem~\ref{thm:nondistrib}).
 Throughout this paper, ``Cred'' refers to this concrete algebra on
@@ -661,8 +662,8 @@ The three-valued algebra $(\{0, \tfrac{1}{2}, 1\}, \min, \max, 1{-}c)$ is the
 \emph{Kleene lattice}: the three-element totally ordered set with
 $\mathrm{conj} = \min$, $\mathrm{disj} = \max$, and involution
 $\mathrm{neg}(c) = 1 - c$~\cite{kleene1952}.
-It is a De Morgan lattice (conjunction is idempotent, distributive, and
-absorptive on three elements).
+It is a De Morgan lattice: a bounded distributive lattice with an
+involutive order-reversing negation satisfying De Morgan's laws.
 This algebra underlies three well-known logics that share the same truth tables for
 negation, conjunction, and disjunction:
 strong Kleene logic K$_3$~\cite{kleene1952},
@@ -784,7 +785,8 @@ $\tfrac{1}{2}$ & 0 & 1 & 1 \\
 \end{center}
 \smallskip
 {\footnotesize $*$ = unconstrained. Rows with evidence $> 0$ are uniquely
-determined.}
+determined. The product residuated and Cred tables agree everywhere except
+the evidence $= 0$ row.}
 
 \footnotetext{The Kleene material conditional $\max(\negc a, b)$ is the
 truth-functional arrow shared by K$_3$, LP, and
@@ -1166,7 +1168,7 @@ negation ($\varphi(1-c) = 1-\varphi(c)$) and conjunction
 Negation preservation at $c = \tfrac{1}{2}$:
 $\varphi(\tfrac{1}{2}) = \varphi(1 - \tfrac{1}{2}) = 1 - \varphi(\tfrac{1}{2})$,
 so $\varphi(\tfrac{1}{2}) = \tfrac{1}{2}$.
-Pick $c = 1/\!\sqrt{2}$; since $0 < 1/\!\sqrt{2} < 1$, we have $c \in (0,1)$,
+Pick $c = \sqrt{1/2}$; since $0 < \sqrt{1/2} < 1$, we have $c \in (0,1)$,
 and $c \conjc c = c^2 = \tfrac{1}{2}$.
 Conjunction preservation gives
 $\varphi(\tfrac{1}{2}) = \mathrm{conj}_{\text{\L}}(\varphi(c), \varphi(c))$.
@@ -1558,6 +1560,10 @@ on both three values and $[0,1]$, the copula symmetry argument, and the
 t-norm conditioning uniqueness results.
 The file also contains auxiliary results (spread/certainty of credences)
 not discussed in this paper.
+The copula-specific claims in Remark~\ref{rem:copula} (boundary violation
+for RM3, non-symmetry for G\"odel, Grzegorzewski's characterizations)
+are pen-and-paper; the formalized results are the symmetric-implies-Bayes-consistent
+theorem and the Bayes-consistency failures for RM3 and G\"odel on $[0,1]$.
 The converse of Proposition~\ref{prop:frechet} (existence of conditioning
 for any joint in the Fr\'echet-Hoeffding interval) is formalized for the
 both-marginals-positive case (\texttt{frechet\_conditioning\_exists});
@@ -1567,14 +1573,18 @@ single combined theorem.
 
 \textbf{Formalization notes.}
 The collapse homomorphism proofs require careful case analysis
-(nine cases for conjunction and disjunction) to show that boundary
-values map correctly and that the open interval $(0,1)$ is preserved.
+(five cases each for conjunction and disjunction, covering the
+$\{0, (0{,}1), 1\}^2$ grid) to show that boundary values map correctly
+and that the open interval $(0,1)$ is preserved.
 The \L ukasiewicz impossibility proof uses Lean's \texttt{Real.sqrt} to
-construct an intermediate credence $c = 1/\!\sqrt{2}$ satisfying
+construct an intermediate credence $c = \sqrt{1/2}$ satisfying
 $c \conjc c = \tfrac{1}{2}$---a witness that does not appear in
 the three-valued set.
 The three-valued comparisons (RM3 vs.\ G\"odel vs.\ Cred) use Lean's
 \texttt{decide} tactic for exhaustive checking of finite truth tables.
+The Lean identifier \texttt{rm3\_impl} refers to the Kleene material
+conditional; the name reflects the RM3 tradition from which the table
+originates.
 
 Verification: \texttt{cd lean \&\& lake build}.
 Toolchain: Lean 4.16.0 with Mathlib 4.16.0.
