@@ -67,7 +67,8 @@ algebra---the shared foundation of K$_3$, LP, and RM3---and prove this collapse
 target is unique: no analogous homomorphism exists for \L ukasiewicz, G\"odel,
 or classical algebras.
 Applying the chain rule from both directions (Bayes' theorem) selects the
-product residuated implication as the unique standard Bayes-consistent binary arrow.
+product residuated implication as the unique Bayes-consistent arrow among the
+standard logic implications (RM3, G\"odel, product residuated).
 Negation has a unique fixed point at $\tfrac{1}{2}$.
 All core results are machine-checked in Lean~4.
 \end{abstract}
@@ -186,8 +187,8 @@ conjunction is the product t-norm, disjunction its dual t-conorm (the
 ``probabilistic sum''), and negation the standard
 complement~\cite{klement2000,hajek1998}.
 These operations are truth-functional---determined entirely by the operand
-values---which is what makes the collapse homomorphism to RM3 possible
-(Section~\ref{sec:connections}).
+values---which is what makes the collapse homomorphism to the Kleene algebra
+possible (Section~\ref{sec:connections}).
 
 \begin{remark}[Credence vs.\ Probability]
 \label{rem:not-probability}
@@ -218,20 +219,23 @@ The following hold for all $c, c_1, c_2, c_3 \in [0,1]$:
 \item $c \conjc 1 = c$, $c \conjc 0 = 0$ \hfill (identity, annihilator)
 \item $c_1 \disjc c_2 = c_2 \disjc c_1$, $(c_1 \disjc c_2) \disjc c_3 = c_1 \disjc (c_2 \disjc c_3)$ \hfill (comm., assoc.)
 \item $c \disjc 0 = c$, $c \disjc 1 = 1$ \hfill (identity, annihilator)
-\item $\negc(c_1 \conjc c_2) = \negc c_1 \disjc \negc c_2$ \hfill (De Morgan)
+\item $\negc(c_1 \conjc c_2) = \negc c_1 \disjc \negc c_2$, $\negc(c_1 \disjc c_2) = \negc c_1 \conjc \negc c_2$ \hfill (De Morgan)
 \end{enumerate}
 \end{theorem}
 \begin{proof}
 Routine verification.
 Lean: \texttt{neg\_neg}, \texttt{conj\_comm}, \texttt{conj\_assoc},
-\texttt{disj\_comm}, \texttt{disj\_assoc}, \texttt{de\_morgan\_conj}.
+\texttt{disj\_comm}, \texttt{disj\_assoc}, \texttt{de\_morgan\_conj},
+\texttt{de\_morgan\_disj}.
 \end{proof}
 
 The structure $([0,1], \conjc, \disjc, \negc, 0, 1)$ consists of two dual
 commutative monoids ($([0,1], \conjc, 1)$ and $([0,1], \disjc, 0)$) connected
-by an order-reversing involution $\negc$ satisfying De Morgan's laws---a
-bounded De Morgan algebra in which the lattice absorption and idempotence
-laws fail (since $\conjc$ is not idempotent; see below).
+by an order-reversing involution $\negc$ satisfying De Morgan's laws.
+This is the \emph{product De Morgan triplet}~\cite{klement2000}: a t-norm,
+its dual t-conorm, and the standard complement.
+It is not a De Morgan algebra in the lattice-theoretic sense, since
+$\conjc$ is neither idempotent nor absorptive (see below).
 
 \subsection{Non-Idempotence and Non-Distributivity}
 
@@ -344,7 +348,7 @@ satisfies the chain rule.
 Lean: \texttt{conditioning\_mk}.
 \end{proof}
 
-\begin{theorem}[Uniqueness]
+\begin{theorem}[Uniqueness of Conditioning]
 \label{thm:uniqueness}
 If $\cred(B) > 0$, the conditional credence is uniquely determined.
 \end{theorem}
@@ -354,6 +358,10 @@ Since $e > 0$ we may cancel: $c_1 = j/e = c_2$.
 Lean: \texttt{conditioning\_unique}.
 \end{proof}
 
+The condition $\cred(A \land B) \leq \cred(B)$ is both necessary and sufficient
+for existence when $\cred(B) > 0$: any conditioning structure forces
+$\text{joint} \leq \text{evidence}$ (since $\text{condCred} \leq 1$;
+Lean: \texttt{conditioning\_implies\_joint\_le\_evidence}).
 The defining constraint uses only multiplication.
 Division appears in the existence proof as a construction technique, not in the
 definition itself---it is derived, not primitive.
@@ -393,7 +401,7 @@ $1 - \tfrac{1}{2} = \tfrac{1}{2}$.
 Lean: \texttt{liar\_fixed\_point}.
 \end{proof}
 
-\begin{theorem}[Uniqueness]
+\begin{theorem}[Uniqueness of Fixed Point]
 \label{thm:fixedunique}
 $\negc c = c$ if and only if $c = \tfrac{1}{2}$.
 \end{theorem}
@@ -610,7 +618,10 @@ Lean: \texttt{godel\_impl}, \texttt{godel\_impl\_ne\_rm3\_impl},
 \textbf{G\"odel coincidence.}
 On the finite set $\{0, \tfrac{1}{2}, 1\}$, the product residuated implication
 $\min(b/a, 1)$ and the G\"odel implication coincide (both have the same
-truth table above).
+truth table above; Lean: \texttt{godel\_impl\_eq\_prod\_resid}).
+The coincidence occurs because on a three-element chain with uniform spacing,
+the ratio $b/a$ and G\"odel's ``return $b$'' rule happen to agree at every
+entry.
 On $[0,1]$ they diverge: G\"odel implication is $1$ when $a \leq b$ and $b$
 otherwise, while the product residuated implication is $\min(b/a, 1)$.
 
@@ -678,22 +689,23 @@ Lean: \texttt{godel\_bayes\_consistent}.
 The failure occurs only on the full interval $[0,1]$.
 \end{remark}
 
-\begin{remark}[Copula Characterization]
+\begin{remark}[Copula Connection]
 \label{rem:copula}
 A binary arrow $f$ is Bayes-consistent if and only if the induced joint
 $J(a,b) = f(a,b) \cdot a$ is symmetric.
-A symmetric function $J : [0,1]^2 \to [0,1]$ satisfying $J(a,0) = 0$ and
-$J(a,1) = a$ is a (symmetric) copula~\cite{nelsen2006}.
-Grzegorzewski~\cite{grzegorzewski2013} defined \emph{probabilistic
-implications} $I_C(a,b) = C(a,b)/a$ from a copula $C$ and computed three
-cases: the Fr\'echet upper bound $C(a,b) = \min(a,b)$ gives the product
+Every copula $C$ (a symmetric function $[0,1]^2 \to [0,1]$ satisfying the
+boundary conditions $C(a,0) = 0$, $C(a,1) = a$ and the 2-increasing
+property~\cite{nelsen2006}) yields a Bayes-consistent arrow via
+$I_C(a,b) = C(a,b)/a$.
+Grzegorzewski~\cite{grzegorzewski2013} computed three cases:
+the Fr\'echet upper bound $C(a,b) = \min(a,b)$ gives the product
 residuated (Goguen) implication; the independence copula $C(a,b) = ab$
 gives the trivial arrow $b$; the Fr\'echet lower bound
 $C(a,b) = \max(a+b-1, 0)$ gives a third arrow.
-Among the standard logic implications, only the product residuated is
-copula-derived (from the Fr\'echet upper bound); RM3's $\max(\negc a, b)$
-and G\"odel's implication are not copula-derived, which is why they fail
-Bayes consistency.
+Among the standard logic implications (RM3, G\"odel, product residuated),
+only the product residuated is copula-derived (from the Fr\'echet upper
+bound); RM3's $\max(\negc a, b)$ and G\"odel's implication are not
+copula-derived, which is why they fail Bayes consistency.
 \end{remark}
 
 \begin{remark}[Dependence Interpretation]
@@ -735,8 +747,10 @@ Lower bound: the complement cell
 $1 - \cred(A) - \cred(B) + \cred(A \land B) \geq 0$ rearranges to
 $\cred(A \land B) \geq \cred(A) + \cred(B) - 1$.
 Conversely, any joint in the Fr\'echet-Hoeffding interval admits
-conditioning structures in both directions (by division when marginals
-are positive).
+conditioning structures in both directions: by division when marginals
+are positive (\texttt{frechet\_conditioning\_exists}), and by
+\texttt{conditioning\_zero\_any} when a marginal is zero (forcing
+joint $= 0$).
 Lean: \texttt{frechet\_upper}, \texttt{frechet\_lower},
 \texttt{frechet\_conditioning\_exists}.
 \end{proof}
@@ -1097,9 +1111,10 @@ replacing residuated implication in the product De Morgan triplet.
 K$_3$, LP, and RM3), with impossibility results for \L ukasiewicz, G\"odel,
 and classical targets, and Lean verification.
 \item Bayes consistency as a selection criterion: the chain rule applied from
-both directions uniquely selects the product residuated implication among
-standard arrows, equivalently characterizing Bayes-consistent arrows as
-copula-derived, with RM3 and G\"odel as counterexamples (machine-checked).
+both directions selects the product residuated implication as the unique
+Bayes-consistent arrow among RM3, G\"odel, and product residuated
+implications, with every copula yielding a Bayes-consistent arrow
+(machine-checked on three values; pen-and-paper on $[0,1]$).
 \item Systematic treatment of fixed points with machine-checked proofs.
 \end{enumerate}
 
@@ -1186,8 +1201,9 @@ divergence from product fuzzy logic is at evidence zero, where Cred is
 unconstrained rather than forced to~$1$.
 Applying the chain rule from both directions (Bayes' theorem) selects the
 product residuated implication as the unique Bayes-consistent arrow among
-standard logic implications: RM3's arrow fails even on three values, and
-G\"odel's fails on the continuum.
+the standard logic implications (RM3, G\"odel, product residuated):
+RM3's arrow fails even on three values, and G\"odel's fails on the
+continuum.
 The product residuated implication is copula-derived---it arises from
 conditioning under the Fr\'echet upper bound (maximum positive
 dependence)---and Bayes consistency is equivalent to copula-derivability,
