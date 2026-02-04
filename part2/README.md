@@ -1,38 +1,32 @@
-# Part 2: Graded Mathematics (Primary)
+# Part 2: From Algebra to Reasoning
 
-**This is where we live.** Building mathematics directly in [0,1] credences.
+Part 1 establishes Cred as a constraint algebra on [0,1]: values, complement, product, De Morgan dual, and the chain rule for conditioning. It deliberately provides no interpretation, no consequence relation, and no update rule.
 
-## The Vision
-
-We work in graded credences as the PRIMARY setting:
-- Graded propositions (not binary truth)
-- Graded predicates (not crisp sets)
-- Graded inference (not binary derivation)
-- Graded proofs (credence approaching 1)
-
-**Binary/crisp is NOT the foundation. It's a degenerate special case.**
+Part 2 adds these three layers, one at a time, and extends to first-order.
 
 ## Files
 
-- `01-graded-propositions.md` — Propositions AS credences
-- `02-graded-predicates.md` — Non-crisp sets
-- `03-graded-inference.md` — Reasoning with credences
-- `04-graded-quantifiers.md` — Forall and exists in graded setting
-- `05-graded-proofs.md` — What "proof" means when truth is graded
-- `06-mathematics.md` — Building math on graded foundation
+- `01-valuations.md` — Interpretation: mapping propositions to credences
+- `02-consequence-relations.md` — Consequence: when does A entail B?
+- `03-update-rules.md` — Update: how beliefs change with new evidence
+- `04-graded-predicates.md` — Predicates, quantifiers, and first-order extension
+- `05-open-questions.md` — Research directions for Part 2
 
-## Why Graded is Better
+## Relationship to Part 1
 
-| Binary Logic | Cred |
-|--------------|------|
-| Paradoxes break the system | Paradoxes (liar) → fixed points (cred 0.5) |
-| Self-reference problematic | Self-negating reference works naturally |
-| Ex falso: nonsense follows | No ex falso (unconstrained, not trivial) |
-| Conditioning undefined at 0 | Conditioning unconstrained at 0 |
+Part 1 (conclusion, "What Cred provides and what it does not") identifies three missing layers:
 
-## The Key Insight
+| Layer | Part 1 status | Part 2 goal |
+|-------|---------------|-------------|
+| Interpretation | None (algebra only) | Cred valuations |
+| Consequence relation | None | Graded entailment |
+| Update rule | None | Conditionalization |
 
-Self-negating sentences like the liar ("This sentence is false") have cred = 0.5.
-This is a meaningful fixed point, not a paradox.
+Each layer adds exactly the structure that the algebra leaves open. Different choices at each layer yield different systems (probability, K3, LP, RM3, product logic, etc.).
 
-**Important:** Godel sentences are NOT self-negating. "This is unprovable" is not the same as "This is false." Cred handles the liar; Godel's incompleteness applies to any system strong enough to encode arithmetic, including Cred if extended.
+## What is deferred to Part 3
+
+- Graded proofs and asymptotic proof (convergence to credence 1)
+- Building mathematics on Cred (graded foundations)
+- Self-hosting, metareasoning, and self-reference beyond fixed points
+- Undecidability and incompleteness considerations

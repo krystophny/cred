@@ -1,58 +1,28 @@
-# Part 3: New Techniques, Undecidability, and Self-Hosting
+# Part 3: Graded Proofs, Self-Reference, and Metatheory
 
-What becomes possible when truth is graded and self-reference works.
-
-## The Opportunities
-
-### 1. Self-Negating Reference Works
-Binary logic: Self-negating sentences → paradoxes.
-
-Cred: Self-negating sentences → fixed points. The liar sentence ("This is false") has cred = 0.5.
-
-### 2. No Ex Falso
-Binary logic: From contradiction, anything follows.
-
-Cred: Conditioning on impossibility is unconstrained, not trivially true.
-
-### 3. Metareasoning
-Cred's handling of self-reference enables certain forms of metareasoning about uncertainty that binary systems cannot express.
+Part 1 establishes the constraint algebra. Part 2 adds interpretation, consequence relations, and update rules. Part 3 goes further: graded proofs, self-reference, undecidability, and building mathematics on Cred.
 
 ## Files
 
-- `01-asymptotic-proofs.md` — Proofs approaching certainty
+- `01-asymptotic-proofs.md` — Proofs approaching certainty (cred -> 1)
 - `02-fixed-points.md` — Self-reference and paradox dissolution
-- `03-undecidability.md` — Incompleteness and underdetermination (don’t conflate with 0.5 fixed points)
+- `03-undecidability.md` — Incompleteness and underdetermination (distinct from the 1/2 fixed point)
 - `04-new-techniques.md` — Proof techniques unique to Cred
 - `05-open-questions.md` — Research directions including self-hosting
+- `06-graded-mathematics.md` — Building mathematics (arithmetic, analysis, set theory) on graded foundations
 
-## Key Ideas
+## Deferred from Part 2
 
-### Fixed Points for Self-Negation
-```
-cred(L) = ~cred(L) implies cred(L) = 0.5
-```
-Self-negating sentences (like the liar) find a stable fixed point credence.
+The following topics were originally in Part 2 but belong here because they require the full machinery of Parts 1 and 2:
 
-### Godel Still Applies
-Godel's incompleteness is about provability, not truth. The sentence "G is not provable in S" is NOT self-negating (unprovable is not false). If Cred is extended to express arithmetic, Godel's theorem applies. Cred handles the liar sentence; it does not dissolve Godel.
+- **Graded proofs**: what it means to "prove" something when truth is graded (convergence to credence 1 vs. partial evidence). Covered in `01-asymptotic-proofs.md`.
+- **Graded mathematics**: building arithmetic, analysis, and set theory on graded predicates. Covered in `06-graded-mathematics.md`.
+- **Self-hosting**: using Cred to reason about Cred itself, enabled by self-reference handling. Related material in `02-fixed-points.md` and `05-open-questions.md`.
 
-### Chain Rule Semantics
-```
-cred(A | B) ⊗ cred(B) = cred(A ∧ B)
-When cred(B) = 0: any value satisfies the chain rule
-```
-This semantic property blocks ex falso without syntactic restrictions.
+## Key distinctions
 
-## The Big Picture
+1. **Self-negation vs. incompleteness**: the liar sentence (c = ~c, forced to 1/2) is algebraic. Godel incompleteness (unprovable ≠ false) is proof-theoretic. Cred handles the first; the second applies to any system strong enough to encode arithmetic. See `03-undecidability.md`.
 
-Binary logic encounters:
-- Self-negating paradoxes (liar sentence breaks boolean assignment)
-- Ex falso quodlibet (from contradiction, anything follows)
-- Undefined conditioning (P(A|B) undefined when P(B)=0)
+2. **Unconstrained vs. undecidable**: "unconstrained" in Part 1 means the chain rule imposes no constraint when evidence is zero. "Undecidable" means a formal system neither proves nor refutes. These are different notions. See `03-undecidability.md`.
 
-Cred handles these differently:
-- Self-negating sentences have fixed point cred = 0.5
-- No ex falso (conditioning on 0 is unconstrained, not trivially true)
-- Conditioning always syntactically valid (though semantically inert at 0)
-
-**Important:** Godel, Tarski, and the halting problem apply to ANY sufficiently powerful formal system. Cred, if extended to express arithmetic, would be subject to the same limitations. Cred's innovation is in handling self-negation and blocking ex falso, not in escaping fundamental computability limits.
+3. **Proof vs. evidence**: classical proof establishes credence 1 exactly. Asymptotic proof converges to 1. Partial evidence gives intermediate credence. All three are meaningful but distinct. See `01-asymptotic-proofs.md`.
