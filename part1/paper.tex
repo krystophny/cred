@@ -809,6 +809,21 @@ conditional ($j/e$) for positive evidence, makes the copula connection
 natural (copulas generalize the product t-norm), and preserves the open
 interval $(0,1)$ under conjunction---the property that makes the Kleene
 collapse work.
+
+The relationship is a two-way bridge.
+If Cred is required to commit to a single binary arrow via residuation
+(becoming a t-norm fuzzy logic), the product t-norm forces the Fr\'echet
+upper bound, recovering exactly H\'ajek's product logic
+$\Pi$~\cite{hajek1998}.
+Conversely, if a t-norm fuzzy logic is required to support chain-rule
+conditioning with unique solutions, Bayes consistency, and copula structure,
+the product t-norm is the only viable choice.
+Product logic and Cred are thus two views of the same structure: product
+logic is the committed view (one specific arrow, ex falso at evidence zero),
+Cred is the parametric view (a family of arrows indexed by the joint,
+unconstrained at evidence zero).
+They coincide for positive evidence when the joint is set to the
+Fr\'echet upper bound.
 \end{remark}
 
 \subsection{Boolean Restriction}
@@ -1281,6 +1296,10 @@ The product t-norm is forced by the desiderata: it is the only continuous
 t-norm where the chain rule yields unique conditioning at positive evidence,
 the copula connection is natural, and the open interval is preserved under
 conjunction (enabling the Kleene collapse).
+The relationship is a two-way bridge: requiring Cred to commit to a single
+arrow via residuation recovers product logic; requiring a t-norm fuzzy logic
+to support chain-rule conditioning with Bayes consistency forces the product
+t-norm.
 The core algebra, conditioning, fixed points, collapse, and impossibility
 results are machine-checked in Lean~4.
 
