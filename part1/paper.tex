@@ -123,7 +123,7 @@ product, and the \L ukasiewicz t-norm $\max(a + b - 1, 0)$.
 Each t-norm determines a unique implication via \emph{residuation}:
 $a \to b = \sup\{c \in [0,1] : a \otimes c \leq b\}$,
 the largest value making conjunction ``work'' in the sense that
-$a \otimes (a \to b) \leq b$ (graded modus ponens)~\cite{hajek1998}.
+$a \otimes (a \to b) \leq b$ (the residuation inequality)~\cite{hajek1998}.
 This coupling is fundamental: in every t-norm logic, the arrow is not a free
 parameter but is forced by the choice of conjunction.
 
@@ -255,8 +255,8 @@ The \emph{product} of $c_1$ and $c_2$ is $c_1 \conjc c_2 = c_1 \cdot c_2$.
 
 The product is multiplication on $[0,1]$---the same operation that appears in the
 chain rule (Section~\ref{sec:conditioning}).
-It equals the joint probability $P(A \land B)$ when $A$ and $B$ are independent;
-we therefore call it the \emph{independence product}.
+It is the product t-norm of fuzzy logic~\cite{klement2000}, which equals
+the joint probability $P(A \land B)$ when $A$ and $B$ are independent.
 For dependent propositions, the joint credence must be supplied as an external
 parameter; $\conjc$ does not claim to compute the joint of arbitrary propositions.
 
@@ -349,7 +349,7 @@ equals $\cred(A)$).
 
 \begin{theorem}[Non-Distributivity]
 \label{thm:nondistrib}
-The independence product does not distribute over disjunction.
+The product does not distribute over disjunction.
 \end{theorem}
 \begin{proof}
 Counterexample at $c_1 = c_2 = c_3 = \tfrac{1}{2}$:
@@ -389,6 +389,9 @@ In propositional notation: $\condc{A}{B} \conjc \cred(B) = \cred(A \land B)$.
 
 The \texttt{joint} parameter represents $\cred(A \land B)$ and is supplied
 as input---it is not computed from marginal credences.
+Note that a conditioning structure need not exist for all parameter values:
+$\text{joint} \leq \text{evidence}$ is necessary (since
+$\text{condCred} \leq 1$; see below Theorem~\ref{thm:uniqueness}).
 This differs from R\'enyi--Popper conditioning, where $P(A \mid B)$ is a
 two-argument function: here conditioning is a three-parameter constraint
 (joint, evidence, conditional) related by the chain rule.
@@ -605,6 +608,10 @@ to the three-valued algebra $(\{0, \tfrac{1}{2}, 1\}, \mathrm{neg}, \mathrm{conj
 \end{align*}
 where the three-valued operations are $\mathrm{neg}(c) = 1-c$,
 $\mathrm{conj} = \min$, $\mathrm{disj} = \max$.
+(The roman-font names $\mathrm{neg}$, $\mathrm{conj}$, $\mathrm{disj}$
+denote the target algebra's operations; $\negc$, $\conjc$, $\disjc$
+denote Cred's. Both negations are $1 - c$, but the notational distinction
+tracks source vs.\ target.)
 \end{theorem}
 \begin{proof}
 We verify each operation by case analysis on whether each $c_i$ is $0$, $1$,
@@ -739,7 +746,7 @@ and conclusion $b$ (columns), in contrast to the (evidence, joint) table above.
 
 \begin{center}
 \begin{tabular}{c|ccc}
-\multicolumn{4}{c}{\textbf{Material (Kleene)}: $\max(\negc a, b)$} \\
+\multicolumn{4}{c}{\textbf{RM3 / material}: $\max(\negc a, b)$} \\
 & 0 & $\tfrac{1}{2}$ & 1 \\
 \hline
 0 & 1 & 1 & 1 \\
@@ -778,16 +785,17 @@ gives $1$.
 Cred conditioning (with Kleene joint) matches the product residuated for
 evidence $> 0$ and replaces the evidence $= 0$ row with~$*$.
 
-Lean: \texttt{godel\_impl}, \texttt{godel\_impl\_ne\_rm3\_impl},
-\texttt{cred\_no\_ex\_falso\_godel}.
+Lean: \texttt{rm3\_impl}, \texttt{godel\_impl},
+\texttt{godel\_impl\_ne\_rm3\_impl}, \texttt{cred\_no\_ex\_falso\_godel}.
 
 \textbf{G\"odel coincidence.}
 On the finite set $\{0, \tfrac{1}{2}, 1\}$, the product residuated implication
 $\min(b/a, 1)$ and the G\"odel implication coincide (both have the same
 truth table above; Lean: \texttt{godel\_impl\_eq\_prod\_resid}).
-The coincidence occurs because on a three-element chain with uniform spacing,
-the ratio $b/a$ and G\"odel's ``return $b$'' rule happen to agree at every
-entry.
+The coincidence is structural: on any totally ordered finite chain
+$\{0, 1/(n{-}1), 2/(n{-}1), \ldots, 1\}$ with uniform spacing, the ratio
+$b/a$ and G\"odel's ``if $a \leq b$ then $1$, else $b$'' rule agree at
+every entry.
 On $[0,1]$ they diverge: G\"odel implication is $1$ when $a \leq b$ and $b$
 otherwise, while the product residuated implication is $\min(b/a, 1)$.
 
@@ -942,8 +950,15 @@ $\cred(A \land B) \leq \cred(A)$ and $\cred(A \land B) \leq \cred(B)$.
 Lower bound: the complement cell
 $1 - \cred(A) - \cred(B) + \cred(A \land B) \geq 0$ rearranges to
 $\cred(A \land B) \geq \cred(A) + \cred(B) - 1$.
+Lean: \texttt{frechet\_upper}, \texttt{frechet\_lower}.
+\end{proof}
+
+\begin{corollary}[Tightness of the Fr\'echet-Hoeffding Bounds]
+\label{cor:frechet-tight}
 Conversely, any joint in the Fr\'echet-Hoeffding interval admits
 conditioning structures in both directions.
+\end{corollary}
+\begin{proof}
 Case 1: both marginals positive---division gives the conditional
 (Lean: \texttt{frechet\_conditioning\_exists}).
 Case 2: exactly one marginal is zero (say $\cred(A) = 0$, $\cred(B) > 0$)---%
@@ -952,10 +967,6 @@ then joint $= 0$; conditioning given $B$ gives condCred $= 0$
 unconstrained (\texttt{conditioning\_zero\_any}).
 Case 3: both marginals zero---then joint $= 0$; both directions are
 unconstrained (\texttt{conditioning\_zero\_any} applied twice).
-Lean (bounds): \texttt{frechet\_upper}, \texttt{frechet\_lower}.
-Lean (existence, Case 1): \texttt{frechet\_conditioning\_exists}.
-Cases 2--3 follow from \texttt{conditioning\_zero\_any} and
-\texttt{conditioning\_mk} individually.
 \end{proof}
 
 \begin{remark}[Freedom of the Joint]
