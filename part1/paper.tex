@@ -55,8 +55,8 @@
 \begin{abstract}
 We present \emph{Cred}, a weakening of probability theory that retains values in
 $[0,1]$ and the complement but drops the measure space and sigma-additivity.
-The sole structural axiom is the chain rule: $\cred(A \mid B) \cdot \cred(B) =
-\cred(A \land B)$.
+The sole structural axiom for conditioning is the chain rule:
+$\cred(A \mid B) \cdot \cred(B) = \cred(A \land B)$.
 When evidence is positive, division emerges as the unique solution; when evidence
 has credence zero, the constraint is satisfied by any value---the conditional is
 \emph{unconstrained}, and no division is needed.
@@ -200,9 +200,11 @@ G\"odel fail.  Every symmetric copula yields a Bayes-consistent arrow
 \end{enumerate}
 
 \textbf{Scope and limitations.}
-Cred is a constraint algebra on $[0,1]$: it specifies how credence values must
-relate to each other (through the product, complement, and chain rule) but
-provides no further structure.
+We call Cred a \emph{constraint algebra} on $[0,1]$: it specifies how
+credence values must relate to each other (through the product, complement,
+and chain rule) but provides no further structure.
+(``Constraint algebra'' is informal usage, not a reference to a standard
+algebraic variety.)
 In particular:
 \begin{itemize}
 \item It has no \emph{interpretation}: it does not map propositions to credences.
@@ -268,6 +270,8 @@ c_1 \disjc c_2 = \negc(\negc c_1 \conjc \negc c_2) = c_1 + c_2 - c_1 \cdot c_2
 \]
 \end{definition}
 
+The symbol $\disjc$ denotes the De Morgan dual of the product, not a
+lattice join (which would be idempotent).
 The triple $(\conjc, \disjc, \negc)$ is the \emph{product De Morgan triplet}:
 conjunction is the product t-norm, disjunction its dual t-conorm (the
 ``probabilistic sum''), and negation the standard
@@ -480,8 +484,8 @@ produces outputs in $\{0, \tfrac{1}{2}, 1, {*}\}$---four values.
 On the full interval $[0,1]$, conditioning produces outputs in
 $[0,1] \cup \{{*}\}$.
 In every case, the connective algebra has $n$ values and the full system
-with conditioning has $n + 1$: void is the uniform extra that Cred's
-chain rule introduces at evidence zero.
+with conditioning has $n + 1$: void can be viewed as the uniform extra
+that Cred's chain rule introduces at evidence zero.
 K$_3$, LP, and RM3 all resolve this extra value by committing to a definite
 implication (each has $0 \to b = 1$ in its truth table); product logic does
 the same via residuation.
@@ -564,8 +568,8 @@ $1 - c = c$ implies $c = \tfrac{1}{2}$.
 Lean: \texttt{neg\_fixed\_point\_unique}.
 \end{proof}
 
-If one models a self-negating sentence $L$ by requiring
-$\cred(L) = \negc \cred(L)$, the unique solution is $\cred(L) = \tfrac{1}{2}$.
+If one imposes the constraint $\cred(L) = \negc \cred(L)$ for a
+self-negating sentence $L$, the unique solution is $\cred(L) = \tfrac{1}{2}$.
 This provides a natural algebraic value for such sentences.
 
 \begin{remark}[Scope]
@@ -629,8 +633,8 @@ $\min(v_1, v_2) = 0$ whenever either $v_i = 0$.
 If $c_1 = 1$: $c_1 \conjc c_2 = c_2$ (identity), and $\min(1, v_2) = v_2$.
 Symmetrically for $c_2 = 1$.
 The remaining case is $0 < c_1, c_2 < 1$.
-Then $0 < c_1 c_2$ (product of positives) and $c_1 c_2 < c_1 < 1$
-(since $c_2 < 1$), so $c_1 \conjc c_2 \in (0,1)$ collapses to $\tfrac{1}{2}$,
+Then $0 < c_1 c_2$ (product of positives) and $c_1 c_2 < c_1 \cdot 1 = c_1 < 1$
+(using $c_1 > 0$ and $c_2 < 1$), so $c_1 \conjc c_2 \in (0,1)$ collapses to $\tfrac{1}{2}$,
 and $\min(\tfrac{1}{2}, \tfrac{1}{2}) = \tfrac{1}{2}$.
 
 \emph{Disjunction.}
@@ -746,7 +750,7 @@ and conclusion $b$ (columns), in contrast to the (evidence, joint) table above.
 
 \begin{center}
 \begin{tabular}{c|ccc}
-\multicolumn{4}{c}{\textbf{RM3 / material}: $\max(\negc a, b)$} \\
+\multicolumn{4}{c}{\textbf{Kleene material}: $\max(\negc a, b)$} \\
 & 0 & $\tfrac{1}{2}$ & 1 \\
 \hline
 0 & 1 & 1 & 1 \\
@@ -792,10 +796,10 @@ Lean: \texttt{rm3\_impl}, \texttt{godel\_impl},
 On the finite set $\{0, \tfrac{1}{2}, 1\}$, the product residuated implication
 $\min(b/a, 1)$ and the G\"odel implication coincide (both have the same
 truth table above; Lean: \texttt{godel\_impl\_eq\_prod\_resid}).
-The coincidence is structural: on any totally ordered finite chain
-$\{0, 1/(n{-}1), 2/(n{-}1), \ldots, 1\}$ with uniform spacing, the ratio
-$b/a$ and G\"odel's ``if $a \leq b$ then $1$, else $b$'' rule agree at
-every entry.
+The coincidence is specific to $\{0, \tfrac{1}{2}, 1\}$: on
+$\{0, \tfrac{1}{3}, \tfrac{2}{3}, 1\}$, for instance, the two
+implications already differ (at $a = \tfrac{2}{3}, b = \tfrac{1}{3}$:
+product residuated gives $\tfrac{1}{2}$, G\"odel gives $\tfrac{1}{3}$).
 On $[0,1]$ they diverge: G\"odel implication is $1$ when $a \leq b$ and $b$
 otherwise, while the product residuated implication is $\min(b/a, 1)$.
 
@@ -816,7 +820,7 @@ Applying the chain rule from both directions gives Bayes' theorem:
 \label{def:bayes}
 A binary arrow $f : [0,1]^2 \to [0,1]$ is
 \emph{Bayes-consistent} when the joint it induces is symmetric:
-$f(a, b) \cdot a = f(b, a) \cdot b$ for all $a, b$.
+$f(a, b) \cdot a = f(b, a) \cdot b$ for all $a, b \in [0,1]$.
 Here $a$ is the evidence (first argument), $b$ the conclusion, and
 $f(a,b) \cdot a$ is the induced joint---the product of the conditional
 $f(a,b)$ and the evidence $a$.
@@ -854,8 +858,9 @@ Lean: \texttt{godel\_not\_bayes\_consistent\_real}.
 
 \begin{proposition}[RM3 is Not Bayes-Consistent]
 \label{prop:rm3-not-bayes}
-The RM3 material conditional $\max(\negc a, b)$---the Kleene-lattice
-analogue of material implication---fails Bayes consistency even on
+The Kleene material conditional $\max(\negc a, b)$---the three-valued
+analogue of material implication, used in RM3, LP, and K$_3$---fails
+Bayes consistency even on
 $\{0, \tfrac{1}{2}, 1\}$.
 \end{proposition}
 \begin{proof}
@@ -935,7 +940,8 @@ If additionally the four cells of the $2 \times 2$ table---$\cred(A \land B)$,
 $\cred(A) - \cred(A \land B)$,
 $\cred(B) - \cred(A \land B)$, and
 $1 - \cred(A) - \cred(B) + \cred(A \land B)$---are all non-negative
-(the standard condition for a valid joint distribution), then
+(a condition borrowed from probability's requirement for a valid
+joint distribution), then
 \[
 \max(\cred(A) + \cred(B) - 1,\; 0) \;\leq\; \cred(A \land B).
 \]
@@ -962,7 +968,8 @@ conditioning structures in both directions.
 Case 1: both marginals positive---division gives the conditional
 (Lean: \texttt{frechet\_conditioning\_exists}).
 Case 2: exactly one marginal is zero (say $\cred(A) = 0$, $\cred(B) > 0$)---%
-then joint $= 0$; conditioning given $B$ gives condCred $= 0$
+then joint $= 0$ (since $0 \leq \text{joint} \leq \min(0, \cred(B)) = 0$);
+conditioning given $B$ gives condCred $= 0$
 (\texttt{conditioning\_mk}), and conditioning given $A = 0$ is
 unconstrained (\texttt{conditioning\_zero\_any}).
 Case 3: both marginals zero---then joint $= 0$; both directions are
@@ -1008,8 +1015,9 @@ The product is the only basic continuous t-norm where $c \cdot e = j$ with
 $e > 0$ determines $c$ uniquely ($c = j/e$).
 Lean: \texttt{min\_tnorm\_not\_unique}, \texttt{luk\_tnorm\_not\_unique}.
 More generally, among continuous t-norms, unique conditioning at positive
-evidence characterizes the strict (cancellative) family, all of which are
-order-isomorphic to the product~\cite{klement2000}.
+evidence characterizes the strict family (continuous and strictly monotone;
+equivalently, cancellative and continuous), all of which are
+order-isomorphic to the product~\cite[Theorem~5.1]{klement2000}.
 The product t-norm also preserves the open interval $(0,1)$ under
 conjunction---the property that makes the Kleene collapse work---and the
 product $ab$ is the independence copula.
@@ -1564,7 +1572,7 @@ Toolchain: Lean 4.16.0 with Mathlib 4.16.0.
 %=============================================================================
 
 Cred is probability without the measure: values in $[0,1]$, the complement,
-and the chain rule as the sole structural axiom.
+and the chain rule as the sole structural axiom for conditioning.
 When evidence has credence zero, the chain rule is satisfied by any
 value---de Finetti's void conditional~\cite{definetti1936} in a graded
 setting---avoiding ``from impossibility, anything follows'' without the
