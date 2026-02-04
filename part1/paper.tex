@@ -690,14 +690,16 @@ Then $f(a, b) = \max(\tfrac{1}{2}, 0) = \tfrac{1}{2}$, so
 $f(a, b) \cdot a = \tfrac{1}{4}$.
 But $f(b, a) = \max(1, \tfrac{1}{2}) = 1$, so $f(b, a) \cdot b = 0$.
 Since $\tfrac{1}{4} \neq 0$, RM3 is not Bayes-consistent.
-Lean: \texttt{rm3\_not\_bayes\_consistent}.
+Lean: \texttt{rm3\_not\_bayes\_consistent} (using $\min$ on three values;
+the conclusion transfers to real multiplication by the same counterexample).
 \end{proof}
 
 \begin{remark}
 On $\{0, \tfrac{1}{2}, 1\}$, the G\"odel implication coincides with the product
 residuated implication (Section~\ref{sec:collapse}), so it is Bayes-consistent
 on this finite set.
-Lean: \texttt{godel\_bayes\_consistent}.
+Lean: \texttt{godel\_bayes\_consistent} (using $\min$ on three values;
+transfers to real multiplication by case analysis).
 The failure occurs only on the full interval $[0,1]$.
 \end{remark}
 
