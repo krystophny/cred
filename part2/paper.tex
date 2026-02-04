@@ -68,8 +68,8 @@ product fuzzy logic, K$_3$, LP, RM3, and imprecise probability.
 We prove that explosion (the classical principle that a contradiction
 entails every proposition) fails non-vacuously for LP and for graded
 consequence at thresholds $0 < t \leq \tfrac{1}{2}$
-(K$_3$ has explosion only vacuously), and that the Russell predicate
-yields credence~$\tfrac{1}{2}$ rather than a paradox.
+(K$_3$ has explosion only vacuously, a standard result), and that the
+Russell predicate yields credence~$\tfrac{1}{2}$ rather than a paradox.
 The main definitions and theorems are machine-checked in Lean~4.
 \end{abstract}
 
@@ -261,10 +261,8 @@ valuation equipped with a joint function
 $j : \alpha \times \alpha \to [0,1]$ satisfying
 $j(A, B) \leq v(A)$ and $j(A, B) \leq v(B)$ (marginal bounds).
 Lean: \texttt{JointValuation}.
-Symmetry ($j(A,B) = j(B,A)$) is not required; this allows
-ordered conditioning contexts where $j(A,B) \neq j(B,A)$.
-When modelling a commutative conjunction, one may additionally
-impose symmetry.
+Symmetry ($j(A,B) = j(B,A)$) is not required; when modelling a
+commutative conjunction, one may additionally impose symmetry.
 \end{definition}
 
 The joint function is external data---not computed from $v(A)$ and
@@ -309,7 +307,7 @@ definition; it must be supplied as an additional hypothesis, as in
 Part~1.
 
 When $v(B) > 0$, the chain rule has a unique solution; we write
-$v(A \mid B) := j(A, B) / v(B)$ for this conditional credence
+$v(A \mid B) = j(A, B) / v(B)$ for the conditional credence
 (Lean: \texttt{JointValuation.conditioning}, via Part~1's
 \texttt{conditioning\_mk} for existence and
 \texttt{conditioning\_unique} for uniqueness).
@@ -400,8 +398,9 @@ K$_3$ designates $\{1\}$ (only certainty counts).
 LP designates $\{1, \tfrac{1}{2}\}$ (certainty and the
 intermediate value both count).
 RM3 uses the same designation as LP ($\{1, \tfrac{1}{2}\}$) but
-restricts valid consequence to inferences where premises and
-conclusion share a propositional variable~\cite{priest2008}.
+adds a relevance condition: its material conditional $A \to B$
+receives value~$0$ when $A$ and $B$ share no propositional
+variable~\cite{priest2008}.
 Lean: \texttt{isDesignatedK3}, \texttt{isDesignatedLP}.
 (RM3 designation is not formalized; the relevance condition is
 syntactic.)
@@ -440,7 +439,7 @@ $\tfrac{1}{2}$, which is not K$_3$-designated.
 Lean: \texttt{k3\_no\_tautology}.
 \end{proof}
 
-\begin{proposition}[K$_3$: Excluded Middle Value Failure]
+\begin{proposition}[K$_3$: Excluded Middle Fails]
 \label{prop:k3-em}
 There exists a value $v$ such that $v \disjc \mathrm{neg}(v)$ is not
 K$_3$-designated.
@@ -535,8 +534,12 @@ proposition.
 For any threshold $0 < t \leq \tfrac{1}{2}$, graded consequence at~$t$
 does not have explosion: there exist propositions $A$, $B$ and a
 function $v$ with $v(A) \geq t$, $1 - v(A) \geq t$, and $v(B) < t$.
-(The condition is on the algebraic complement $1 - v(A)$, not on $v$
-applied to a propositional negation.)
+The condition is on the algebraic complement $1 - v(A)$, which is
+strictly weaker than requiring $v(\sigma(A)) \geq t$ for a
+complement-preserving valuation; since any complement-preserving
+witness is also a valid unrestricted witness, the result implies
+a~fortiori that explosion fails for complement-preserving valuations
+as well.
 \end{theorem}
 \begin{proof}
 Set $v(A) = \tfrac{1}{2}$, $v(B) = 0$.
@@ -569,10 +572,10 @@ at zero is resolved by the measure, not left unconstrained.
 \textbf{System} & \textbf{Designated} & \textbf{Tautologies?}
   & \textbf{Excl.\ middle?} & \textbf{Explosion?} \\
 \midrule
-Classical & $\{1\}$ (two-valued) & Yes & Yes & Yes \\
+Classical$^\|$ & $\{1\}$ (two-valued) & Yes & Yes & Yes \\
 K$_3$ & $\{1\}$ & No & No & Holds vacuously$^\S$ \\
-LP & $\{1, \tfrac{1}{2}\}$ & Yes & Yes & No \\
-RM3$^\dagger$ & $\{1, \tfrac{1}{2}\}$+relev. & Yes & Yes & No \\
+LP$^\|$ & $\{1, \tfrac{1}{2}\}$ & Yes & Yes & No \\
+RM3$^{\dagger\|}$ & $\{1, \tfrac{1}{2}\}$+relev. & Yes & Yes & No \\
 Graded ($t \leq \tfrac{1}{2}$) & $\{c \geq t\}$ & $^\ddagger$ & $^\ddagger$ & No \\
 \bottomrule
 \end{tabular}
@@ -581,6 +584,15 @@ Graded ($t \leq \tfrac{1}{2}$) & $\{c \geq t\}$ & $^\ddagger$ & $^\ddagger$ & No
 
 \smallskip
 \noindent
+$^\|$\,Tautology and excluded-middle entries for Classical, LP, and
+RM3 hold under the standard restriction to homomorphic
+(truth-table-respecting) valuations.
+Definition~\ref{def:three-val-consequence} quantifies over all
+functions $\alpha \to \{0, \tfrac{1}{2}, 1\}$; under that definition,
+no formula is a tautology in any of these systems (the constant-$0$
+function defeats every formula).
+The K$_3$ no-tautology result and the LP/graded no-explosion
+results are proved under the all-functions definition.\\
 $^\S$\,K$_3$ has explosion vacuously: no valuation makes both $v(A)$
 and $\mathrm{neg}(v(A))$ K$_3$-designated, so the premise of explosion
 is never fulfilled.\\
@@ -588,14 +600,18 @@ $^\dagger$\,RM3 properties are well-known~\cite{priest2008}; they are not
 formalized in Lean.\\
 $^\ddagger$\,Tautologies and excluded middle for graded consequence depend
 on the threshold and are not formalized.
-At $t = 0$, every formula is a tautology; at $t > 0$, the
-constant-$0$ valuation (which is not complement-preserving) assigns
-every formula value~$0 < t$, so no formula is a tautology.
-Excluded middle holds whenever $t \leq \tfrac{3}{4}$
+At $t = 0$, trivially every formula is a tautology (all credences
+are $\geq 0$ by definition); at $t > 0$, the constant-$0$ valuation
+assigns every formula value~$0 < t$, so no formula is a tautology.
+At the algebraic level, excluded middle holds whenever
+$t \leq \tfrac{3}{4}$ for complement-preserving valuations
 (Part~1, \texttt{certainty\_ge\_three\_quarters}; not connected to
-graded consequence at the Lean level):
-$v(A) \disjc \negc v(A) = 1 - v(A)(1 - v(A)) \geq \tfrac{3}{4}$
-for all $v(A) \in [0,1]$, since $v(A)(1 - v(A)) \leq \tfrac{1}{4}$.
+graded consequence at the Lean level): expanding the De~Morgan
+definition, $v(A) \disjc \negc v(A) = 1 - v(A)(1 - v(A)) \geq
+\tfrac{3}{4}$ for all $v(A) \in [0,1]$, since
+$v(A)(1 - v(A)) \leq \tfrac{1}{4}$.
+This does not extend to unrestricted graded consequence, where $v$
+need not be complement-preserving.
 
 %=============================================================================
 \section{Update Rules}
@@ -630,7 +646,7 @@ $\alpha \to \mathrm{Credence}$, not necessarily complement-preserving).
 The Bayesian update is the conditioning structure from Part~1 applied
 propositionwise: $v'(A) \cdot v(B) = j(A, B)$ at every~$A$.
 The posterior is well-defined ($j(A,B)/v(B) \in [0,1]$) because
-$j(A,B) \leq v(B)$ by the marginal bound.
+$j(A,B) \leq v(B)$ by the marginal bound on the second argument.
 Note that $v'$ need not be a complement-preserving valuation.
 
 \begin{example}[Rain and Wet Street: Update]
@@ -885,8 +901,6 @@ $\sup = \exists$ in the classical sense.
 \begin{theorem}[Negation Fixed-Point Resolution]
 \label{thm:russell}
 If a credence $c$ satisfies $c = \negc c$, then $c = \tfrac{1}{2}$.
-In particular, any self-referential predicate $R$ satisfying
-$R(R) = \negc R(R)$ would have $R(R) = \tfrac{1}{2}$.
 \end{theorem}
 \begin{proof}
 The equation $c = 1 - c$ has a unique solution at $c = \tfrac{1}{2}$
@@ -894,6 +908,8 @@ The equation $c = 1 - c$ has a unique solution at $c = \tfrac{1}{2}$
 Lean: \texttt{russell\_fixed\_point}.
 \end{proof}
 
+In particular, any self-referential predicate $R$ satisfying
+$R(R) = \negc R(R)$ would have $R(R) = \tfrac{1}{2}$.
 Russell's predicate $R = \{x : x \notin x\}$ applied to itself gives
 $R(R) = \negc R(R) = \tfrac{1}{2}$: the set half-contains itself.
 The algebraic core---$c = \negc c$ implies $c = \tfrac{1}{2}$---is
