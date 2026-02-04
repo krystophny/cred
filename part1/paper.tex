@@ -71,7 +71,9 @@ Bayes-consistency criterion that the product residuated implication satisfies
 but that RM3 fails (even on three values) and G\"odel fails (on the
 continuum).
 Negation has a unique fixed point at $\tfrac{1}{2}$.
-All core results are machine-checked in Lean~4.
+The core algebra, conditioning, fixed points, collapse homomorphism,
+and impossibility results are machine-checked in Lean~4; Bayes consistency
+on $[0,1]$ and the copula connection are pen-and-paper.
 \end{abstract}
 
 %=============================================================================
@@ -1151,7 +1153,7 @@ on $[0,1]$).
 %=============================================================================
 
 The core algebra is formalized in Lean~4 with Mathlib.
-The formalization comprises approximately 1120 lines covering:
+The formalization comprises 1124 lines covering:
 
 \begin{itemize}
 \item \textbf{Types:} \texttt{Credence} (value in $[0,1]$), \texttt{Conditioning}
@@ -1244,7 +1246,8 @@ dependence)---and every symmetric copula yields a Bayes-consistent arrow,
 explaining why the non-copula RM3 and G\"odel arrows fail.
 The negation fixed point at $\tfrac{1}{2}$ provides a natural algebraic value
 for self-negating sentences.
-All core results are machine-checked in Lean~4.
+The core algebra, conditioning, fixed points, collapse, and impossibility
+results are machine-checked in Lean~4.
 
 Future work includes extending Cred to first-order with graded quantifiers and
 exploring connections to paraconsistent set theory.
