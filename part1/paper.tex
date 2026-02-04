@@ -63,9 +63,9 @@ has credence zero, the constraint is satisfied by any value---the conditional is
 Every probability space satisfies Cred's axioms, but Cred requires neither a
 sigma-algebra nor additivity.
 We establish a surjective homomorphism from Cred to the three-valued Kleene
-algebra---the shared foundation of K$_3$, LP, and RM3---and prove this collapse
-target is unique: no analogous homomorphism exists for \L ukasiewicz, G\"odel,
-or classical algebras.
+lattice---the shared foundation of K$_3$, LP, and RM3---and show that no
+analogous homomorphism exists for the other standard three-valued algebras
+(\L ukasiewicz, G\"odel, or classical).
 Applying the chain rule from both directions (Bayes' theorem) yields a
 Bayes-consistency criterion that the product residuated implication satisfies
 but that RM3 fails (even on three values) and G\"odel fails (on the
@@ -237,6 +237,9 @@ This is the \emph{product De Morgan triplet}~\cite{klement2000}: a t-norm,
 its dual t-conorm, and the standard complement.
 It is not a De Morgan algebra in the lattice-theoretic sense, since
 $\conjc$ is not idempotent (see below).
+Throughout this paper, ``Cred'' refers to this concrete algebra on $[0,1]$,
+not an abstract axiom system: the carrier, operations, and chain rule are
+all fixed.
 
 \subsection{Non-Idempotence and Non-Distributivity}
 
@@ -877,6 +880,14 @@ requires $\varphi(\tfrac{1}{2})$ to be a fixed point.
 Lean: \texttt{no\_godel\_collapse}, \texttt{godel\_neg\_no\_fixed\_point}.
 \end{proof}
 
+Note: G\"odel's three-valued logic~\cite{godel1932} contributes two distinct
+operations to this paper.
+Its \emph{negation} (strong negation: $\mathrm{neg}_G(0)=1$, $\mathrm{neg}_G(c)=0$
+for $c > 0$) blocks the collapse above because it lacks a fixed point.
+Its \emph{implication} ($1$ if $a \leq b$, else $b$) coincides with the product
+residuated on $\{0,\tfrac{1}{2},1\}$ (Section~\ref{sec:collapse}) and is used in
+the Bayes-consistency comparison.
+
 \begin{proposition}[No Collapse to \L ukasiewicz Logic]
 \label{prop:no-luk}
 Let $\mathrm{conj}_{\text{\L}} (a, b) = \max(a + b - 1,\; 0)$ be the \L ukasiewicz
@@ -1083,8 +1094,7 @@ Belnap~\cite{belnap1977} introduced a four-valued logic for reasoning with
 incomplete and contradictory information.
 Zadeh~\cite{zadeh1965} introduced fuzzy sets with $[0,1]$ membership degrees.
 Section~\ref{sec:scope} shows that no analogous collapse exists for
-\L ukasiewicz, G\"odel, or classical algebras, making the Kleene lattice the
-unique natural three-valued quotient of Cred.
+\L ukasiewicz, G\"odel, or classical algebras, making the Kleene lattice the only standard three-valued quotient of Cred.
 
 \textbf{Copulas and Fuzzy Implications.}
 Grzegorzewski~\cite{grzegorzewski2013} defined \emph{probabilistic
@@ -1178,8 +1188,8 @@ The \texttt{joint} parameter is supplied as input, representing $\cred(A \land B
 \item \texttt{no\_godel\_collapse}: no negation-preserving map to G\"odel algebra
 \item \texttt{no\_luk\_collapse}: no negation-and-conjunction-preserving map to \L ukasiewicz
 \item \texttt{godel\_impl}, \texttt{rm3\_impl}: implication tables with comparison theorems
-\item \texttt{rm3\_not\_bayes\_consistent}: RM3 implication fails Bayes consistency (using \texttt{ThreeVal.conj}, i.e.\ $\min$; on $\{0,\tfrac{1}{2},1\}$ the $\min$ and multiplication checks coincide)
-\item \texttt{godel\_bayes\_consistent}: G\"odel/product residuated is Bayes-consistent on $\{0,\tfrac{1}{2},1\}$ (same remark)
+\item \texttt{rm3\_not\_bayes\_consistent}: RM3 fails Bayes consistency (using \texttt{ThreeVal.conj}${}= \min$; the equality/inequality conclusions hold under real multiplication as well, verified by case analysis)
+\item \texttt{godel\_bayes\_consistent}: product residuated is Bayes-consistent on $\{0,\tfrac{1}{2},1\}$ (same remark)
 \item \texttt{frechet\_upper}, \texttt{frechet\_lower}: Fr\'echet-Hoeffding bounds
 \item \texttt{frechet\_conditioning\_exists}: bidirectional conditioning for any joint in bounds
 \end{itemize}
