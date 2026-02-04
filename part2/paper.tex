@@ -66,9 +66,9 @@ inf/sup quantifiers.
 Different choices at each layer recover different systems: probability,
 product fuzzy logic, K$_3$, LP, RM3, and imprecise probability.
 We prove that explosion (the classical principle that a contradiction
-entails every proposition) fails non-vacuously for LP and graded
+entails every proposition) fails non-vacuously for LP and for graded
 consequence at thresholds $0 < t \leq \tfrac{1}{2}$
-(while K$_3$ avoids explosion vacuously), and that the Russell predicate
+(K$_3$ has explosion only vacuously), and that the Russell predicate
 yields credence~$\tfrac{1}{2}$ rather than a paradox.
 The main definitions and theorems are machine-checked in Lean~4.
 \end{abstract}
@@ -132,8 +132,10 @@ Bayesian and Jeffrey update both derive from the chain rule.
 The paper then extends to first order via graded predicates
 (Section~\ref{sec:predicates})---functions from a domain to
 $[0,1]$, generalizing fuzzy set membership~\cite{zadeh1965}---with
-inf/sup quantifiers satisfying duality, and shows that unrestricted
-comprehension yields fixed points rather than paradoxes.
+inf/sup quantifiers satisfying duality, and shows that the
+self-referential equation $c = \negc c$ (as would arise from
+unrestricted comprehension) yields a fixed point ($\tfrac{1}{2}$)
+rather than a paradox.
 
 \textbf{Contributions.}
 \begin{enumerate}[label=(\arabic*)]
@@ -146,7 +148,7 @@ idempotence problem as a diagnostic for independence
 (K$_3$, LP, RM3) via the three-valued collapse, and graded consequence
 parametrized by a threshold on $[0,1]$.
 Explosion fails non-vacuously for LP and graded consequence at
-$0 < t \leq \tfrac{1}{2}$; K$_3$ avoids explosion vacuously
+$0 < t \leq \tfrac{1}{2}$; K$_3$ has explosion only vacuously
 (Section~\ref{sec:consequence}).
 \item Bayesian and Jeffrey conditionalization as update rules on Cred
 valuations, with chain-rule preservation and zero-evidence
@@ -189,6 +191,9 @@ v(\sigma(A)) = \negc v(A) = 1 - v(A)
 \]
 for all $A \in \alpha$.
 Lean: \texttt{CpValuation}.
+Note that $\sigma$ is not required to be involutive
+($\sigma(\sigma(A)) = A$); involutivity is an additional hypothesis
+where needed.
 \end{definition}
 
 Complement preservation is the minimal constraint connecting the
@@ -375,12 +380,13 @@ every valuation that accepts the premises also accepts $B$.
 In classical logic, consequence has \emph{explosion} (ex falso quodlibet):
 a contradiction entails every proposition.
 This section defines consequence relations for Cred and shows that
-explosion fails for LP and graded consequence (non-vacuously), and
-that K$_3$ avoids explosion vacuously: for each three-valued
+explosion fails non-vacuously for LP and graded consequence, while
+K$_3$ has explosion only vacuously: for each three-valued
 value~$v$, at least one of $v$ and $\mathrm{neg}(v)$ is not in
 $\{1\}$ ($\mathrm{neg}(0) = 1$ but $0 \notin \{1\}$;
 $\mathrm{neg}(\tfrac{1}{2}) = \tfrac{1}{2} \notin \{1\}$;
-$\mathrm{neg}(1) = 0 \notin \{1\}$).
+$\mathrm{neg}(1) = 0 \notin \{1\}$), so the premise of explosion
+is never satisfied.
 
 \subsection{Designated Values}
 
@@ -468,13 +474,14 @@ Lean: \texttt{lp\_excluded\_middle}.
 
 \begin{proposition}[LP: Explosion Fails]
 \label{prop:lp-no-explosion}
-There exists a three-valued valuation where both $A$ and $\negc A$
-are LP-designated but some $B$ is not.
+There exists a three-valued function $v$ and propositions $A$, $B$
+such that both $v(A)$ and $\mathrm{neg}(v(A))$ are LP-designated but
+$v(B)$ is not.
 \end{proposition}
 \begin{proof}
 Set $v(A) = \tfrac{1}{2}$ and $v(B) = 0$.
 Then $\mathrm{neg}(\tfrac{1}{2}) = \tfrac{1}{2}$, so both $v(A)$ and
-$v(\negc A)$ are LP-designated, but $v(B) = 0$ is not.
+$\mathrm{neg}(v(A))$ are LP-designated, but $v(B) = 0$ is not.
 Lean: \texttt{lp\_no\_explosion}.
 \end{proof}
 
@@ -495,8 +502,9 @@ A_1, \ldots, A_n \models_t B \iff
 Lean: \texttt{gradedConsequence}.
 Here $v$ ranges over all functions $\alpha \to [0,1]$, not just
 complement-preserving valuations.
-The no-explosion proof uses this generality (the witness
-valuation need not be complement-preserving).
+This makes the consequence relation weaker (more functions must be
+checked) but the no-explosion existential easier (the witness need
+not be complement-preserving); see Theorem~\ref{thm:no-explosion}.
 \end{definition}
 
 \begin{proposition}[Graded at $t=1$ Is Strict]
@@ -562,7 +570,7 @@ at zero is resolved by the measure, not left unconstrained.
   & \textbf{Excl.\ middle?} & \textbf{Explosion?} \\
 \midrule
 Classical & $\{1\}$ (two-valued) & Yes & Yes & Yes \\
-K$_3$ & $\{1\}$ & No & No & Vacuous$^\S$ \\
+K$_3$ & $\{1\}$ & No & No & Holds vacuously$^\S$ \\
 LP & $\{1, \tfrac{1}{2}\}$ & Yes & Yes & No \\
 RM3$^\dagger$ & $\{1, \tfrac{1}{2}\}$+relev. & Yes & Yes & No \\
 Graded ($t \leq \tfrac{1}{2}$) & $\{c \geq t\}$ & $^\ddagger$ & $^\ddagger$ & No \\
@@ -573,8 +581,9 @@ Graded ($t \leq \tfrac{1}{2}$) & $\{c \geq t\}$ & $^\ddagger$ & $^\ddagger$ & No
 
 \smallskip
 \noindent
-$^\S$\,K$_3$ avoids explosion vacuously: no valuation makes both $A$
-and $\negc A$ K$_3$-designated.\\
+$^\S$\,K$_3$ has explosion vacuously: no valuation makes both $v(A)$
+and $\mathrm{neg}(v(A))$ K$_3$-designated, so the premise of explosion
+is never fulfilled.\\
 $^\dagger$\,RM3 properties are well-known~\cite{priest2008}; they are not
 formalized in Lean.\\
 $^\ddagger$\,Tautologies and excluded middle for graded consequence depend
@@ -582,7 +591,9 @@ on the threshold and are not formalized.
 At $t = 0$, every formula is a tautology; at $t > 0$, the
 constant-$0$ valuation (which is not complement-preserving) assigns
 every formula value~$0 < t$, so no formula is a tautology.
-Excluded middle holds whenever $t \leq \tfrac{3}{4}$ (pen-and-paper):
+Excluded middle holds whenever $t \leq \tfrac{3}{4}$
+(Part~1, \texttt{certainty\_ge\_three\_quarters}; not connected to
+graded consequence at the Lean level):
 $v(A) \disjc \negc v(A) = 1 - v(A)(1 - v(A)) \geq \tfrac{3}{4}$
 for all $v(A) \in [0,1]$, since $v(A)(1 - v(A)) \leq \tfrac{1}{4}$.
 
@@ -612,12 +623,15 @@ v'(A) = \frac{j(A, B)}{v(B)}
 \]
 where $j(A, B)$ is the joint credence.
 Lean: \texttt{bayesianUpdate} (single proposition),
-\texttt{bayesianUpdateValuation} (returns a function $\alpha \to [0,1]$,
-not necessarily complement-preserving).
+\texttt{bayesianUpdateValuation} (returns a function
+$\alpha \to \mathrm{Credence}$, not necessarily complement-preserving).
 \end{definition}
 
 The Bayesian update is the conditioning structure from Part~1 applied
 propositionwise: $v'(A) \cdot v(B) = j(A, B)$ at every~$A$.
+The posterior is well-defined ($j(A,B)/v(B) \in [0,1]$) because
+$j(A,B) \leq v(B)$ by the marginal bound.
+Note that $v'$ need not be a complement-preserving valuation.
 
 \begin{example}[Rain and Wet Street: Update]
 \label{ex:rain-update}
@@ -805,8 +819,7 @@ Each law follows from the corresponding Part~1 law applied at every point.
 
 \begin{definition}[Quantifiers]
 \label{def:quantifiers}
-For a graded predicate $P : X \to [0,1]$ over a nonempty domain
-(Lean: \texttt{[Nonempty $\alpha$]}):
+For a graded predicate $P : X \to [0,1]$ over a nonempty domain~$X$:
 \begin{align*}
 \cred(\forall x.\; P(x)) &= \inf_{x \in X} P(x), \\
 \cred(\exists x.\; P(x)) &= \sup_{x \in X} P(x).
@@ -896,17 +909,6 @@ $\tfrac{1}{2}$, the unique negation fixed point.
 \section{Related Work}
 \label{sec:related}
 %=============================================================================
-
-Part~2 asks: given the Cred algebra (values in $[0,1]$, complement,
-product conjunction, chain-rule conditioning), how does one build a
-reasoning system on top of it?
-A \emph{valuation} assigns credences to propositions---it is the
-interpretation layer that connects syntax to the algebra.
-A \emph{consequence relation} determines which inferences are valid given
-a class of valuations.
-An \emph{update rule} prescribes how a valuation changes when new evidence
-arrives.
-This section surveys the prior work that each layer draws on.
 
 \textbf{Product Fuzzy Logic and Valuations.}
 Goguen~\cite{goguen1969} introduced the product t-norm as a conjunction
@@ -1052,13 +1054,15 @@ All definitions and the theorems listed above are fully formalized in
 Lean~4 with Mathlib.
 The quantifier infrastructure uses wrapper functions (\texttt{credSup},
 \texttt{credInf}) around Mathlib's conditional supremum/infimum on
-$\Real$, with manual proofs that the results stay in $[0,1]$.
+$\Real$, with explicit Lean proofs that the results stay in $[0,1]$.
 Results not formalized:
 RM3 properties (the relevance condition is syntactic);
 LP tautologies at the consequence level (only the value-level
 \texttt{lp\_excluded\_middle} is in Lean);
-graded excluded middle for $t \leq \tfrac{3}{4}$ and graded
-tautologies at $t = 0$ (pen-and-paper only);
+graded excluded middle for $t \leq \tfrac{3}{4}$ (the value-level
+bound \texttt{certainty\_ge\_three\_quarters} is in Part~1, but
+not connected to graded consequence) and graded tautologies at
+$t = 0$;
 the complementary cases of classical agreement;
 Adams-type bounds (require additivity, which Cred does not assume).
 
@@ -1093,7 +1097,8 @@ Collapse composition maps any Cred valuation to a Kleene valuation.
 consequence (K$_3$, LP, RM3) via the collapse, and graded consequence
 parametrized by a threshold.
 Explosion fails non-vacuously for LP and graded consequence;
-K$_3$ avoids it vacuously.
+K$_3$ has explosion only vacuously (no contradiction is
+K$_3$-designatable).
 Unconstrained conditioning at zero is the algebraic property that
 distinguishes Cred from systems with ex falso.
 
