@@ -74,6 +74,11 @@ continuum).
 Negation has a unique fixed point at $\tfrac{1}{2}$.
 All results are machine-checked in Lean~4, including
 Bayes consistency on $[0,1]$ and the copula symmetry argument.
+Cred is a constraint algebra, not a logic: it has no consequence relation and
+no interpretation function.
+Building a full reasoning system requires additional structure---a measure
+(probability), a deductive calculus (product logic), or designated values
+(K$_3$/LP/RM3).
 \end{abstract}
 
 %=============================================================================
@@ -102,6 +107,11 @@ truth value rather than vacuous truth.
 Van Fraassen~\cite{vanfraassen1983} showed that the primitive approach
 connects naturally to relevant logic: both avoid forcing ``from impossibility,
 anything follows.''
+
+For readers more familiar with probability than with mathematical logic: the
+next two paragraphs describe how fuzzy logic generalizes Boolean conjunction to
+$[0,1]$, using operations called t-norms, and how this forces a specific
+behavior at zero that probability avoids.
 
 Fuzzy logic takes a different route to $[0,1]$-valued reasoning.
 Rather than starting from probability's chain rule, it generalizes Boolean
@@ -137,13 +147,29 @@ complement~\cite{klement2000}.
 The sole point of divergence is the arrow: residuation (forcing
 $0 \to y = 1$) vs.\ chain-rule conditioning (unconstrained at zero).
 
+A concrete example makes the divergence vivid.
+Under the material conditional, ``if the moon is made of cheese, then my
+birthday is on any date you choose'' is true---$\lnot a \lor b$ holds
+vacuously when $a$ is false---yet sounds absurd as a claim about reality.
+Two responses are available: read the conditional literally (it says ``the
+moon is not made of cheese, or my birthday is on that date,'' which is
+perfectly true) or change the formalism so that a false antecedent yields no
+definite value rather than automatic truth.
+De Finetti's void conditional takes the second path.
+A further subtlety: explosion is a property of the consequence relation,
+not the conditional connective---even a logic whose conditional is void at
+false antecedents can have explosion at the consequence-relation
+level~\cite{priest2008}.
+Cred sidesteps this: as a pure algebra with no consequence relation, it
+replaces ``forced to~$1$'' with ``unconstrained by the chain rule.''
+
 Cred makes this divergence the defining design choice.
 Drop the measure entirely; keep only values in $[0,1]$, the complement
 $\negc c = 1 - c$, and the chain rule
 $\cred(A \mid B) \cdot \cred(B) = \cred(A \land B)$ as the sole structural
 axiom for conditioning.
-This is strictly weaker than probability---every probability space satisfies
-Cred's axioms, but Cred requires neither a sigma-algebra nor additivity.
+This is strictly weaker than probability: every probability space satisfies
+these axioms, but Cred requires neither a sigma-algebra nor additivity.
 When $\cred(B) = 0$, the chain rule becomes $\cred(A \mid B) \cdot 0 = 0$,
 satisfied by \emph{any} value of $\cred(A \mid B)$: the conditional is
 unconstrained.
@@ -171,6 +197,26 @@ G\"odel fail.  Every symmetric copula yields a Bayes-consistent arrow
 (Section~\ref{sec:fixed-points}).
 \item Lean~4 formalization of the core algebra (Section~\ref{sec:lean}).
 \end{enumerate}
+
+\textbf{Scope and limitations.}
+Cred is a constraint algebra on $[0,1]$: it specifies how credence values must
+relate to each other (through the product, complement, and chain rule) but
+provides no further structure.
+In particular:
+\begin{itemize}
+\item It has no \emph{interpretation}: it does not map propositions to credences.
+\item It has no \emph{consequence relation}: it cannot express ``$A$ entails $B$.''
+\item It has no \emph{update rule}: when new evidence arrives, Cred does not prescribe how to revise credences.
+\end{itemize}
+These are not oversights---they are by design.
+Just as Boolean algebra is the algebraic foundation for propositional logic
+(which adds a valuation and a consequence relation), and $[0,1]$ arithmetic
+is the foundation for probability theory (which adds a measure space and
+sigma-additivity), Cred provides the algebraic layer that multiple
+higher-level systems can build on.
+Staying algebraic is what allows the collapse homomorphism to connect Cred
+simultaneously to K$_3$, LP, and RM3---three logics that share the same
+algebra but differ in their consequence relations.
 
 \textbf{Outline.}
 Section~\ref{sec:algebra} defines the credence algebra.
@@ -271,13 +317,13 @@ Lean: \texttt{neg\_neg}, \texttt{neg\_zero}, \texttt{neg\_one},
 The structure $([0,1], \conjc, \disjc, \negc, 0, 1)$ consists of two dual
 commutative monoids ($([0,1], \conjc, 1)$ and $([0,1], \disjc, 0)$) connected
 by an order-reversing involution $\negc$ satisfying De Morgan's laws.
-This is the \emph{product De Morgan triplet}~\cite{klement2000}: a t-norm,
-its dual t-conorm, and the standard complement.
 It is not a De Morgan algebra in the lattice-theoretic sense, since
 $\conjc$ is not idempotent (see below).
-Throughout this paper, ``Cred'' refers to this concrete algebra on $[0,1]$,
-not an abstract axiom system: the carrier, operations, and chain rule are
-all fixed.
+Throughout this paper, ``Cred'' refers to this concrete algebra on
+$[0,1]$---a carrier, three operations, and the chain rule.
+It is not a logic: there is no consequence relation, no designated truth
+values, and no notion of valid inference.
+Those require additional structure (Section~\ref{sec:conclusion}).
 
 \subsection{Non-Idempotence and Non-Distributivity}
 
@@ -344,6 +390,23 @@ When $\cred(B) > 0$, the constraint uniquely determines the conditional
 from joint and evidence, recovering the two-argument function as a
 derived concept.
 
+\begin{remark}[Algebraic vs.\ Interpreted Conditioning]
+\label{rem:algebraic-conditioning}
+The defining equation $\text{condCred} \conjc \text{evidence} = \text{joint}$
+is a constraint on three numbers in $[0,1]$.
+It mentions no propositions, no events, and no measure.
+The propositional notation $\condc{A}{B} \conjc \cred(B) = \cred(A \land B)$
+is mnemonic---it suggests the intended application but is not part of the
+algebra.
+This is a deliberate design choice: in probability, the chain rule
+$P(A \mid B) \cdot P(B) = P(A \land B)$ is an interpreted statement that
+references events through the measure $P$; in Cred, the same equation
+is an uninterpreted constraint on values.
+Keeping the algebra free of propositional content is what allows a single
+structure to underlie both probability (Section~\ref{sec:probability})
+and the Kleene-based logics (Section~\ref{sec:collapse}).
+\end{remark}
+
 \subsection{Boundary Behavior}
 
 \textbf{Evidence = 1.}
@@ -380,6 +443,11 @@ The constraint-based definition means division is derived (as the unique solutio
 when evidence $> 0$) rather than primitive; at zero, no division is needed.
 To obtain ``from impossibility, anything follows,'' one must add an axiom
 $\cred(A \mid 0) = 1$; it does not follow from conditioning alone.
+More generally, the chain rule constrains how credence values relate but says
+nothing about which propositions receive which credences or what follows from
+what.
+These questions belong to a higher-level theory (probability, product logic,
+or a logic with designated values) built on top of the algebra.
 
 De Finetti's three-valued conditional~\cite{definetti1936} captures the same
 principle in a discrete setting: when the conditioning event does not obtain,
@@ -389,6 +457,28 @@ the chain rule,'' reflecting the path-dependence of the ratio
 $\text{joint}/\text{evidence}$ as both approach zero: the limit depends on the
 rate at which the joint decays relative to the evidence, and no single value
 is canonical.
+
+\begin{remark}[Void as an Extra Value]
+\label{rem:void-value}
+The unconstrained status at evidence zero is not merely the absence of a
+result---it is a genuine extra value in the output of conditioning, exactly
+de Finetti's void~\cite{definetti1936}.
+On the Boolean restriction $\{0, 1\}$, conditioning produces outputs in
+$\{0, 1, {*}\}$---three values, recovering de Finetti's original three-valued
+conditional.
+On the collapsed Kleene algebra $\{0, \tfrac{1}{2}, 1\}$, conditioning
+produces outputs in $\{0, \tfrac{1}{2}, 1, {*}\}$---four values.
+On the full interval $[0,1]$, conditioning produces outputs in
+$[0,1] \cup \{{*}\}$.
+In every case, the connective algebra has $n$ values and the full system
+with conditioning has $n + 1$: void is the uniform extra that Cred's
+chain rule introduces at evidence zero.
+K$_3$, LP, and RM3 all resolve this extra value by committing to a definite
+implication (each has $0 \to b = 1$ in its truth table); product logic does
+the same via residuation.
+Cred leaves the void unresolved---the choice of how to fill it in is
+deferred to whatever system is built on top (Section~\ref{sec:connections}).
+\end{remark}
 
 \subsection{Existence and Uniqueness}
 
@@ -551,10 +641,14 @@ negation, conjunction, and disjunction:
 strong Kleene logic K$_3$~\cite{kleene1952},
 Priest's Logic of Paradox LP~\cite{priest1979}, and
 RM3~\cite{meyer1972}.
-These logics differ only in their consequence relations (which truth values are
-designated for valid inference), not in the algebra.
-Since Cred is an algebra without a consequence relation, the collapse connects it
-to all three simultaneously.
+These logics differ only in their consequence relations---which truth values
+count as ``designated'' for valid inference---not in their truth tables for
+negation, conjunction, and disjunction.
+K$_3$ designates only $1$; LP designates $1$ and $\tfrac{1}{2}$; RM3 designates
+$1$ and $\tfrac{1}{2}$ with an additional relevance condition.
+Since Cred is an algebra without a consequence relation, the collapse connects
+it to all three simultaneously: the algebra is shared, and the choice of
+consequence relation is left to whatever system is built on top.
 
 The three-valued operations are:
 \begin{center}
@@ -886,8 +980,8 @@ More generally, among continuous t-norms, unique conditioning at positive
 evidence characterizes the strict (cancellative) family, all of which are
 order-isomorphic to the product~\cite{klement2000}.
 The product t-norm also preserves the open interval $(0,1)$ under
-conjunction---the property that makes the Kleene collapse work---and the product $ab$ is the independence copula, sitting naturally
-inside the copula framework.
+conjunction---the property that makes the Kleene collapse work---and the
+product $ab$ is the independence copula.
 
 The relationship to product logic $\Pi$ is a two-way bridge.
 If Cred commits to a single binary arrow via residuation (becoming a t-norm
@@ -1060,16 +1154,62 @@ Belnap-Dunn negation has \emph{two} fixed points ($\mathbf{b}$ and
 $\mathbf{n}$), while Cred's complement has exactly one ($\tfrac{1}{2}$);
 the Kleene lattice also has exactly one ($\tfrac{1}{2}$), matching Cred.
 This fixed-point mismatch is the structural reason the three-valued
-Kleene target works while extending to four values is problematic.
+Kleene target works for the \emph{connective} algebra while extending to
+four values is problematic.
+
+However, including conditioning changes the picture.
+As noted in Remark~\ref{rem:void-value}, conditioning introduces a fourth
+output value---void ($*$)---that is not in the Kleene lattice.
+The four conditioning outputs $\{0, \tfrac{1}{2}, 1, {*}\}$ align naturally
+with the four Belnap-Dunn values via $0 \mapsto \mathbf{f}$,
+$\tfrac{1}{2} \mapsto \mathbf{b}$, $1 \mapsto \mathbf{t}$,
+${*} \mapsto \mathbf{n}$: de Finetti's void (``the antecedent does not
+obtain, so the conditional has no determinate value'') corresponds to
+Belnap's $\mathbf{n}$ (``neither true nor false---no information'').
+The connective algebra alone collapses to the three-valued Kleene sublattice;
+conditioning fills in the fourth value, suggesting that the full Cred
+system---connectives plus conditioning---has a natural four-valued
+structure.
+Making this a formal homomorphism claim would require specifying how void
+interacts with the connectives (as \'Egr\'e, Rossi, and
+Sprenger~\cite{egre2021} do for de Finetti's conditional); we leave this
+for future work.
 \end{remark}
 
 \subsection{Relationship to Probability}
 \label{sec:probability}
 
-Every probability space satisfies Cred's axioms: it has values in $[0,1]$,
-the complement $P(\neg A) = 1 - P(A)$, and the chain rule
-$P(A \mid B) \cdot P(B) = P(A \land B)$.
-Probability is therefore a special case of Cred.
+As established in Section~\ref{sec:intro}, every probability space satisfies
+Cred's axioms, making probability a special case.
+The relationship is not merely one of axiom inclusion: probability and logic
+differ in \emph{where the semantic layer enters}.
+
+In logic, the algebra is uninterpreted.
+Boolean algebra is a self-contained structure on $\{0,1\}$; a valuation
+$v : \text{Prop} \to \{0,1\}$ is a separate layer that maps propositions to
+truth values; a consequence relation is a third layer on top.
+The same pattern holds for the Kleene lattice: the algebra on
+$\{0, \tfrac{1}{2}, 1\}$ stands alone, and K$_3$, LP, and RM3 each add a
+valuation and then differ only in designated values.
+
+In probability, the algebra and semantics are fused from the start.
+The Kolmogorov axioms define $P$ as a function from events---elements of a
+sigma-algebra---to $[0,1]$.
+The chain rule $P(A \mid B) \cdot P(B) = P(A \land B)$ is simultaneously an
+algebraic identity on numbers and a semantic statement about the measure of
+events.
+Conditional probability $P(A \mid B)$ is not a free-standing algebraic
+operation: it is derived from the measure, and resolving it at zero
+(via disintegration) requires the full semantic apparatus.
+
+Cred stays on the logic side of this divide
+(Remark~\ref{rem:algebraic-conditioning}).
+Its chain rule constrains three numbers---conditional, evidence, joint---with
+no reference to propositions or a measure.
+This is why Cred can serve as an algebraic foundation for multiple systems:
+probability fuses the chain rule with a measure; product logic fuses it with
+residuation; K$_3$/LP/RM3 fuse the collapsed algebra with designated values.
+Cred provides the unfused algebraic core.
 
 What probability adds:
 \begin{itemize}
@@ -1089,7 +1229,8 @@ Conditioning at zero can sometimes be resolved through
 disintegration~\cite{chang1997}, yielding a specific (a.e.\ unique) value
 determined by the measure structure.
 
-What Cred drops: no measure, no sigma-algebra, no additivity, no event structure.
+What Cred drops: no measure, no sigma-algebra, no additivity, no event
+structure, and no consequence relation or notion of valid inference.
 The product $c_1 \conjc c_2$ is multiplication, not a claim about the actual joint.
 Conditioning requires the joint as external input.
 At evidence zero, Cred leaves the conditional unconstrained rather than
@@ -1099,15 +1240,15 @@ undefined (as in standard probability) or resolved (as via disintegration).
 
 \begin{center}
 \small
-\begin{tabular}{lp{3.8cm}p{3.5cm}l}
+\begin{tabular}{llp{3.5cm}l}
 \toprule
-\textbf{System} & \textbf{Core axioms} & \textbf{Adds on top} & \textbf{At evidence $= 0$} \\
+\textbf{System} & \textbf{Layer} & \textbf{Core axioms} & \textbf{At evidence $= 0$} \\
 \midrule
-\textbf{Cred} & $[0,1]$ + complement + chain rule & --- & Unconstrained$^{**}$ \\
-Probability & Cred's axioms & Measure + $\sigma$-additivity & Undefined$^*$ \\
-Product fuzzy ($\Pi$) & $[0,1]$ + product t-norm + residuated impl. & Deductive calculus & $0 \to y = 1$ \\
-Classical logic & $\{0,1\}$ + Boolean ops + material impl. & --- & $0 \to y = 1$ \\
-RM3 & $\{0,\tfrac{1}{2},1\}$ + De Morgan ops + $\max$ impl. & Designated values & $0 \to y = 1$$^\dagger$ \\
+\textbf{Cred} & Constraint algebra & $[0,1]$ + complement + chain rule & Unconstrained$^{**}$ \\
+Probability & Semantic system & Cred + measure + $\sigma$-additivity & Undefined$^*$ \\
+Product fuzzy ($\Pi$) & Deductive system & $[0,1]$ + product + residuated impl. & $0 \to y = 1$ \\
+Classical logic & Deductive system & $\{0,1\}$ + Boolean ops + material impl. & $0 \to y = 1$ \\
+RM3 & Deductive system & $\{0,\tfrac{1}{2},1\}$ + De Morgan + $\max$ impl. & $0 \to y = 1$$^\dagger$ \\
 \bottomrule
 \end{tabular}
 \normalsize
@@ -1153,23 +1294,19 @@ Cred inherits the chain rule from this tradition but drops the measure space
 entirely.
 
 \textbf{Conditional Events.}
-De Finetti~\cite{definetti1936} proposed that conditional events are
-three-valued: $A \mid B$ is true when $A \land B$, false when
-$\lnot A \land B$, and \emph{void} when $\lnot B$.
-The void value means conditioning on a false antecedent yields no truth value
-rather than vacuous truth---the same principle as Cred's unconstrained
-conditioning at evidence zero, applied in a discrete rather than graded
-setting.
-Calabrese~\cite{calabrese1987} formalized this as an algebra of ``Boolean
-fractions'' with three-valued indicator functions, providing an explicitly
-algebraic treatment.
-\'Egr\'e, Rossi, and Sprenger~\cite{egre2021} recently showed that
-de Finetti's three-valued conditional, combined with Kleene's strong
+De Finetti's three-valued conditional~\cite{definetti1936}---true when
+$A \land B$, false when $\lnot A \land B$, void when $\lnot B$---is
+Cred's unconstrained conditioning applied in a discrete setting
+(Section~\ref{sec:intro}).
+Calabrese~\cite{calabrese1987} formalized conditional events as ``Boolean
+fractions'' with three-valued indicator functions.
+\'Egr\'e, Rossi, and Sprenger~\cite{egre2021} showed that
+de Finetti's conditional, combined with Kleene's strong
 connectives, produces logics in which explosion fails at the semantic
 level---not via a consequence relation but via the truth table itself.
 Relevant logics (RM3, R, E) and paraconsistent logics (LP) block explosion
 at the \emph{consequence-relation} level: RM3 has $0 \to b = 1$ in its truth
-table but restricts which inferences are valid.
+table but restricts which inferences are valid~\cite{priest2008}.
 De Finetti's approach and Cred block it at the \emph{algebraic} level: the
 conditional is void or unconstrained when the antecedent fails, so the
 truth table itself never forces $0 \to b = 1$.
@@ -1378,52 +1515,62 @@ Toolchain: Lean 4.16.0 with Mathlib 4.16.0.
 \label{sec:conclusion}
 %=============================================================================
 
-Cred is probability without the measure: values in $[0,1]$, the complement, and the
-chain rule as the sole structural axiom.
-Every probability space satisfies these axioms; Cred drops the sigma-algebra
-and sigma-additivity.
-When evidence has credence zero, the chain rule is satisfied by any value,
-leaving the conditional unconstrained---de Finetti's void
-conditional~\cite{definetti1936} in a graded setting---avoiding ``from
-impossibility, anything follows'' by the same chain rule that probability
-uses, without the measure theory that would resolve it.
-
-The product and its De Morgan dual provide the natural algebra on $[0,1]$,
-shared with product fuzzy logic.
+Cred is probability without the measure: values in $[0,1]$, the complement,
+and the chain rule as the sole structural axiom.
+When evidence has credence zero, the chain rule is satisfied by any
+value---de Finetti's void conditional~\cite{definetti1936} in a graded
+setting---avoiding ``from impossibility, anything follows'' without the
+measure theory that would resolve it.
 The three-valued collapse establishes a surjective homomorphism to the Kleene
 lattice---the shared foundation of K$_3$, LP, and RM3---for the connective
-fragment $\{\negc, \conjc, \disjc\}$, and no analogous collapse exists for
-\L ukasiewicz, G\"odel, or classical targets.
-Conditioning, when instantiated as a binary arrow via the Kleene joint,
-recovers the product residuated implication for positive evidence; the sole
-divergence from product fuzzy logic is at evidence zero, where Cred is
-unconstrained rather than forced to~$1$.
-Applying the chain rule from both directions (Bayes' theorem) yields a
-Bayes-consistency criterion that the product residuated implication satisfies
-but that RM3's arrow fails (even on three values) and G\"odel's fails
-(on the continuum).
-The product residuated implication is copula-derived---it arises from
-conditioning under the Fr\'echet upper bound (maximum positive
-dependence)---and every symmetric copula yields a Bayes-consistent arrow,
-explaining why the non-copula RM3 and G\"odel arrows fail.
-The negation fixed point at $\tfrac{1}{2}$ provides a natural algebraic value
-for self-negating sentences.
-Standard t-norm fuzzy logics vary the t-norm and derive a fixed implication via
-residuation; Cred is orthogonal, fixing the product t-norm but parametrizing
-over all copula-derived arrows.
-Among the three basic continuous t-norms, the product is uniquely suited:
-it is the only one where the chain rule yields unique conditioning at
-positive evidence (the minimum and \L ukasiewicz t-norms both fail
-uniqueness), and it preserves the open interval $(0,1)$ under conjunction,
-enabling the Kleene collapse.
-The relationship is a two-way bridge: requiring Cred to commit to a single
-arrow via residuation recovers product logic; requiring a t-norm fuzzy logic
-to support chain-rule conditioning with unique solutions forces the product
-t-norm (more precisely, a strict t-norm isomorphic to the product).
+fragment $\{\negc, \conjc, \disjc\}$, with impossibility results for
+\L ukasiewicz, G\"odel, and classical targets.
+Conditioning, instantiated as a binary arrow via the Kleene joint, recovers
+the product residuated implication for positive evidence; at evidence zero,
+Cred is unconstrained rather than forced to~$1$.
+Bayes consistency (the chain rule applied from both directions) selects
+the product residuated implication and rejects RM3 (even on three values) and
+G\"odel (on the continuum); the copula framework explains why.
+Among continuous t-norms, the product is uniquely suited: it alone yields
+unique conditioning at positive evidence and preserves $(0,1)$ under
+conjunction, enabling the collapse.
 All results are machine-checked in Lean~4.
 
-Future work includes extending Cred to first-order with graded quantifiers and
-exploring connections to paraconsistent set theory.
+\medskip
+\textbf{What Cred provides and what it does not.}
+Cred provides the algebraic layer: a constraint system on $[0,1]$ that
+specifies how credences, their complements, and their conditionals must
+relate.
+It does not provide an interpretation function (mapping propositions to
+credences), a consequence relation (determining valid inference), or an
+update rule (prescribing belief revision).
+These are not deficiencies---they are the boundaries of the algebraic layer.
+Just as Boolean algebra underpins both classical propositional logic and
+digital circuit design without itself being either, Cred underpins both
+probability (via the chain rule) and the Kleene-based logics (via the
+collapse homomorphism) without being a logic or a probability space.
+
+Probability builds on Cred by adding a measure space and sigma-additivity,
+which determine the joint and resolve conditioning at zero via
+disintegration.
+Product logic builds on it by committing to residuation, which forces a
+specific arrow (including ex falso).
+K$_3$, LP, and RM3 build on the collapsed algebra by choosing designated
+values.
+Each adds exactly the structure that the algebra leaves open.
+
+\medskip
+\textbf{Future work.}
+Future work includes extending Cred to a first-order setting with graded
+quantifiers, exploring which consequence relations are compatible with the
+chain rule's unconstrained conditioning at zero, and investigating
+connections to paraconsistent set theory.
+
+\section*{Acknowledgements}
+
+The author thanks Graham Priest for correspondence that clarified the
+distinction between connectives and consequence relations in the context of
+an earlier approach to this problem.
 
 %=============================================================================
 % Bibliography
@@ -1589,6 +1736,11 @@ Popper, K.
 Priest, G.
 \newblock The logic of paradox.
 \newblock \emph{Journal of Philosophical Logic}, 8:219--241, 1979.
+
+\bibitem{priest2008}
+Priest, G.
+\newblock \emph{An Introduction to Non-Classical Logic: From If to Is}.
+\newblock Cambridge University Press, 2nd edition, 2008.
 
 \bibitem{ramsey1931}
 Ramsey, F.P.
