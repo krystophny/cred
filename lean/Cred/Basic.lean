@@ -1121,4 +1121,98 @@ theorem no_boolean_neg_retraction :
 
 end Credence
 
+/-! ## Bayes Consistency on [0,1]
+
+Formalizes the paper's pen-and-paper proofs: product residuated Bayes
+consistency, Gödel failure on the continuum, copula connection, and
+t-norm conditioning uniqueness.
+-/
+
+namespace Credence
+
+/-- Product residuated implication on [0,1]: min(b/a, 1) for a > 0, 1 for a = 0 -/
+noncomputable def prod_resid_real (a b : Credence) : ℝ :=
+  if a.val = 0 then 1 else min (b.val / a.val) 1
+
+/-- The induced joint of the product residuated equals min(a,b) -/
+theorem prod_resid_joint (a b : Credence) :
+    prod_resid_real a b * a.val = min a.val b.val := by
+  unfold prod_resid_real
+  by_cases ha : a.val = 0
+  · simp only [ha, ↓reduceIte, mul_zero, min_eq_left b.nonneg]
+  · simp only [ha, ↓reduceIte]
+    have ha_pos : 0 < a.val := lt_of_le_of_ne a.nonneg (Ne.symm ha)
+    by_cases hle : b.val ≤ a.val
+    · have hdiv : b.val / a.val ≤ 1 := (div_le_one ha_pos).mpr hle
+      rw [min_eq_left hdiv, min_eq_right hle]
+      field_simp
+    · push_neg at hle
+      have hdiv : 1 ≤ b.val / a.val := by
+        rw [le_div_iff₀ ha_pos, one_mul]; exact le_of_lt hle
+      rw [min_eq_right hdiv, one_mul]
+      exact (min_eq_left (le_of_lt hle)).symm
+
+/-- Product residuated is Bayes-consistent on [0,1] -/
+theorem prod_resid_bayes_consistent_real (a b : Credence) :
+    prod_resid_real a b * a.val = prod_resid_real b a * b.val := by
+  rw [prod_resid_joint, prod_resid_joint, min_comm]
+
+/-- Gödel implication on [0,1]: 1 if a ≤ b, else b -/
+noncomputable def godel_impl_real (a b : Credence) : ℝ :=
+  if a.val ≤ b.val then 1 else b.val
+
+/-- Gödel implication fails Bayes consistency on [0,1] -/
+theorem godel_not_bayes_consistent_real :
+    ∃ a b : Credence,
+      godel_impl_real a b * a.val ≠ godel_impl_real b a * b.val := by
+  refine ⟨⟨2 / 5, by norm_num, by norm_num⟩, ⟨3 / 5, by norm_num, by norm_num⟩, ?_⟩
+  simp only [godel_impl_real]
+  norm_num
+
+end Credence
+
+/-- Any symmetric function yields a Bayes-consistent arrow
+    when both marginals are positive (copula connection) -/
+theorem symmetric_bayes_consistent (C : ℝ → ℝ → ℝ)
+    (hsymm : ∀ x y, C x y = C y x)
+    (a b : Credence) (ha : a.val ≠ 0) (hb : b.val ≠ 0) :
+    C a.val b.val / a.val * a.val = C b.val a.val / b.val * b.val := by
+  have h1 : C a.val b.val / a.val * a.val = C a.val b.val := by field_simp [ha]
+  have h2 : C b.val a.val / b.val * b.val = C b.val a.val := by field_simp [hb]
+  rw [h1, h2]
+  exact hsymm a.val b.val
+
+/-- Symmetry + right-zero boundary gives left-zero (copula zero case) -/
+theorem copula_zero_left (C : ℝ → ℝ → ℝ)
+    (hsymm : ∀ x y, C x y = C y x) (hzero : ∀ x, C x 0 = 0)
+    (b : ℝ) : C 0 b = 0 := by
+  rw [hsymm, hzero]
+
+/-- Minimum t-norm fails unique conditioning -/
+theorem min_tnorm_not_unique :
+    ∃ e c₁ c₂ : Credence, 0 < e.val ∧ c₁ ≠ c₂ ∧
+      min c₁.val e.val = e.val ∧ min c₂.val e.val = e.val := by
+  refine ⟨Credence.half, Credence.half, 1, ?_, ?_, ?_, ?_⟩
+  · simp only [Credence.half_val]; norm_num
+  · intro h
+    have := congrArg Credence.val h
+    simp only [Credence.half_val, Credence.one_val] at this
+    norm_num at this
+  · exact min_self _
+  · simp only [Credence.one_val, Credence.half_val]
+    exact min_eq_right (by norm_num : (1 : ℝ) / 2 ≤ 1)
+
+/-- Łukasiewicz t-norm fails unique conditioning -/
+theorem luk_tnorm_not_unique :
+    ∃ e c₁ c₂ : Credence, 0 < e.val ∧ c₁ ≠ c₂ ∧
+      max (c₁.val + e.val - 1) 0 = 0 ∧ max (c₂.val + e.val - 1) 0 = 0 := by
+  refine ⟨Credence.half, 0, Credence.half, ?_, ?_, ?_, ?_⟩
+  · simp only [Credence.half_val]; norm_num
+  · intro h
+    have := congrArg Credence.val h
+    simp only [Credence.half_val, Credence.zero_val] at this
+    norm_num at this
+  · simp only [Credence.zero_val, Credence.half_val]; norm_num
+  · simp only [Credence.half_val]; norm_num
+
 end Cred

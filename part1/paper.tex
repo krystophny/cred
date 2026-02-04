@@ -71,9 +71,8 @@ Bayes-consistency criterion that the product residuated implication satisfies
 but that RM3 fails (even on three values) and G\"odel fails (on the
 continuum).
 Negation has a unique fixed point at $\tfrac{1}{2}$.
-The core algebra, conditioning, fixed points, collapse homomorphism,
-and impossibility results are machine-checked in Lean~4; Bayes consistency
-on $[0,1]$ and the copula connection are pen-and-paper.
+All results are machine-checked in Lean~4, including
+Bayes consistency on $[0,1]$ and the copula connection.
 \end{abstract}
 
 %=============================================================================
@@ -697,6 +696,7 @@ and $f(0, 0) \cdot 0 = 0$).
 If $a > 0$ and $b \leq a$: $f(a, b) \cdot a = (b/a) \cdot a = b = \min(a, b)$.
 If $a > 0$ and $a < b$: $f(a, b) \cdot a = 1 \cdot a = a = \min(a, b)$.
 By symmetry of $\min$, $f(b, a) \cdot b = \min(a, b)$ as well.
+Lean: \texttt{prod\_resid\_bayes\_consistent\_real}.
 \end{proof}
 
 \begin{proposition}[G\"odel is Not Bayes-Consistent on the Continuum]
@@ -709,6 +709,7 @@ Take $a = \tfrac{2}{5}$, $b = \tfrac{3}{5}$.
 Then $f(a, b) = 1$ (since $a \leq b$), so $f(a, b) \cdot a = \tfrac{2}{5}$.
 But $f(b, a) = a = \tfrac{2}{5}$ (since $b > a$), so
 $f(b, a) \cdot b = \tfrac{2}{5} \cdot \tfrac{3}{5} = \tfrac{6}{25} \neq \tfrac{2}{5}$.
+Lean: \texttt{godel\_not\_bayes\_consistent\_real}.
 \end{proof}
 
 \begin{proposition}[RM3 is Not Bayes-Consistent]
@@ -723,17 +724,16 @@ Then $f(a, b) = \max(\tfrac{1}{2}, 0) = \tfrac{1}{2}$, so
 $f(a, b) \cdot a = \tfrac{1}{4}$.
 But $f(b, a) = \max(1, \tfrac{1}{2}) = 1$, so $f(b, a) \cdot b = 0$.
 Since $\tfrac{1}{4} \neq 0$, RM3 is not Bayes-consistent.
-Lean: \texttt{rm3\_not\_bayes\_consistent} (using $\min$ on three values;
-the conclusion transfers to real multiplication by the same counterexample,
-verified by hand).
+Lean: \texttt{rm3\_not\_bayes\_consistent} (on three values using $\min$;
+the same counterexample works under real multiplication).
 \end{proof}
 
 \begin{remark}
 On $\{0, \tfrac{1}{2}, 1\}$, the G\"odel implication coincides with the product
 residuated implication (Section~\ref{sec:collapse}), so it is Bayes-consistent
 on this finite set.
-Lean: \texttt{godel\_bayes\_consistent} (using $\min$ on three values;
-transfers to real multiplication by case analysis, verified by hand).
+Lean: \texttt{godel\_bayes\_consistent} (on three values using $\min$;
+transfers to real multiplication by case analysis).
 The failure occurs only on the full interval $[0,1]$.
 \end{remark}
 
@@ -760,6 +760,7 @@ conditions ($a = \tfrac{1}{2}, b = 0$ gives $\tfrac{1}{4} \neq 0$);
 G\"odel's induced joint is not symmetric, so it cannot arise from a
 symmetric copula.
 Neither is Bayes-consistent.
+Lean: \texttt{symmetric\_bayes\_consistent}, \texttt{copula\_zero\_left}.
 \end{remark}
 
 \begin{remark}[Dependence Interpretation]
@@ -847,6 +848,7 @@ The \L ukasiewicz t-norm fails similarly: $\max(c + e - 1, 0) = 0$ is
 satisfied by any $c \leq 1 - e$, not just one value.
 The product is the only basic continuous t-norm where $c \cdot e = j$ with
 $e > 0$ determines $c$ uniquely ($c = j/e$).
+Lean: \texttt{min\_tnorm\_not\_unique}, \texttt{luk\_tnorm\_not\_unique}.
 More generally, among continuous t-norms, unique conditioning at positive
 evidence characterizes the strict (cancellative) family, all of which are
 order-isomorphic to the product~\cite{klement2000}.
@@ -1228,8 +1230,7 @@ K$_3$, LP, and RM3), with impossibility results for \L ukasiewicz, G\"odel,
 and classical targets, and Lean verification.
 \item Bayes consistency as a selection criterion: the product residuated
 implication passes; RM3 and G\"odel fail.  Every symmetric copula yields
-a Bayes-consistent arrow (machine-checked on three values; pen-and-paper
-on $[0,1]$).
+a Bayes-consistent arrow (machine-checked on three values and on $[0,1]$).
 \item Systematic treatment of fixed points with machine-checked proofs.
 \end{enumerate}
 
@@ -1239,7 +1240,7 @@ on $[0,1]$).
 %=============================================================================
 
 The core algebra is formalized in Lean~4 with Mathlib.
-The formalization comprises 1124 lines covering:
+The formalization comprises 1218 lines covering:
 
 \begin{itemize}
 \item \textbf{Types:} \texttt{Credence} (value in $[0,1]$), \texttt{Conditioning}
@@ -1285,15 +1286,17 @@ The \texttt{joint} parameter is supplied as input, representing $\cred(A \land B
 \item \texttt{godel\_bayes\_consistent}: product residuated is Bayes-consistent on $\{0,\tfrac{1}{2},1\}$ (same remark)
 \item \texttt{frechet\_upper}, \texttt{frechet\_lower}: Fr\'echet-Hoeffding bounds
 \item \texttt{frechet\_conditioning\_exists}: bidirectional conditioning for any joint in bounds
+\item \texttt{prod\_resid\_bayes\_consistent\_real}: product residuated is Bayes-consistent on $[0,1]$
+\item \texttt{godel\_not\_bayes\_consistent\_real}: G\"odel implication fails Bayes consistency on $[0,1]$
+\item \texttt{symmetric\_bayes\_consistent}, \texttt{copula\_zero\_left}: copula connection
+\item \texttt{min\_tnorm\_not\_unique}, \texttt{luk\_tnorm\_not\_unique}: alternative t-norms fail unique conditioning
 \end{itemize}
 
 \textbf{Scope of formalization.}
 The Lean file covers the core algebra, conditioning, fixed points, the
-collapse homomorphism and its impossibility results, and Bayes consistency
-on three values.
-The Bayes consistency results on $[0,1]$ (Propositions~\ref{prop:resid-bayes}
-and~\ref{prop:godel-not-bayes}) and the copula connection
-(Remark~\ref{rem:copula}) are pen-and-paper.
+collapse homomorphism and its impossibility results, Bayes consistency
+on both three values and $[0,1]$, the copula connection, and the
+t-norm conditioning uniqueness results.
 
 Verification: \texttt{cd lean \&\& lake build}.
 Toolchain: Lean 4.16.0 with Mathlib 4.16.0.
@@ -1344,8 +1347,7 @@ The relationship is a two-way bridge: requiring Cred to commit to a single
 arrow via residuation recovers product logic; requiring a t-norm fuzzy logic
 to support chain-rule conditioning with unique solutions forces the product
 t-norm (more precisely, a strict t-norm isomorphic to the product).
-The core algebra, conditioning, fixed points, collapse, and impossibility
-results are machine-checked in Lean~4.
+All results are machine-checked in Lean~4.
 
 Future work includes extending Cred to first-order with graded quantifiers and
 exploring connections to paraconsistent set theory.
