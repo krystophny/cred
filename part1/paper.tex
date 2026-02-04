@@ -924,7 +924,7 @@ leaving the conditional unconstrained).
 The induced joint $I_C(a,b) \cdot a = C(a,b)$ is symmetric.
 Grzegorzewski~\cite{grzegorzewski2013} computed three cases:
 the Fr\'echet upper bound $C(a,b) = \min(a,b)$ gives the product
-residuated (Goguen) implication; the independence copula $C(a,b) = ab$
+residuated (Goguen~\cite{goguen1969}) implication; the independence copula $C(a,b) = ab$
 gives the trivial arrow $b$; the Fr\'echet lower bound
 $C(a,b) = \max(a+b-1, 0)$ gives a third arrow.
 Among the standard logic implications (RM3, G\"odel, product residuated),
@@ -1019,7 +1019,7 @@ $[\max(a + b - 1, 0),\; \min(a, b)]$ is a valid joint credence, and
 any symmetric joint function taking values in this interval yields a
 Bayes-consistent arrow via the chain rule.
 The Fr\'echet upper bound $\min(a, b)$ yields the product residuated
-(Goguen) implication $\min(b/a, 1)$---the implication of H\'ajek's
+(Goguen~\cite{goguen1969}) implication $\min(b/a, 1)$---the implication of H\'ajek's
 product logic $\Pi$~\cite{hajek1998}.
 The independence copula $a \cdot b$ (Cred's $\conjc$) yields the trivial
 arrow $b$.
@@ -1407,6 +1407,10 @@ and $0 \to y = 1$); the residuated implication forces ex falso.
 Klement, Mesiar, and Pap~\cite{klement2000} gave a comprehensive treatment of
 triangular norms; the product t-norm, probabilistic sum, and standard complement
 form the product De Morgan triplet.
+Goguen~\cite{goguen1969} introduced the product t-norm as a conjunction for
+inexact concepts; Esteva et al.~\cite{esteva2000} showed that extending product
+logic with an involutive negation yields exactly the connective algebra that Cred
+adopts (product t-norm, probabilistic sum, standard complement).
 Cred shares this triplet and, when conditioning is instantiated with the Kleene
 joint $\min(a, b)$, \emph{recovers} the product residuated implication for
 evidence $> 0$.
@@ -1474,7 +1478,7 @@ evaluation game yield Kleene logic and nothing stronger.
 \textbf{Copulas and Fuzzy Implications.}
 Grzegorzewski~\cite{grzegorzewski2013} defined \emph{probabilistic
 implications} $I_C(a,b) = C(a,b)/a$ from a copula $C$ and computed that
-the Fr\'echet upper bound (min copula) yields the Goguen (product
+the Fr\'echet upper bound (min copula) yields the Goguen~\cite{goguen1969} (product
 residuated) implication.
 This is the copula-side construction; Cred arrives at the same arrow from
 the chain-rule side by setting joint $= \min(a,b)$.
@@ -1491,7 +1495,9 @@ Cred drops the measure, so disintegration does not apply; at evidence zero, the
 conditional is unconstrained rather than determined.
 
 \textbf{Cred's Contributions.}
-The product De Morgan triplet is standard; primitive conditioning is due to
+The product De Morgan triplet is standard~\cite{klement2000}; product logic
+with involutive negation was studied by Esteva et al.~\cite{esteva2000};
+primitive conditioning is due to
 R\'enyi and Popper; void conditionals at the algebraic level are due to
 de Finetti; the algebraic formalization of conditional events is due to
 Calabrese; the connection to relevant logic is van Fraassen's;
@@ -1752,6 +1758,11 @@ Dunn, J.M.
 Trivalent semantics and validity.
 \newblock \emph{Journal of Philosophical Logic}, 50:187--213, 2021.
 
+\bibitem{esteva2000}
+Esteva, F., Godo, L., H\'ajek, P., and Navara, M.
+\newblock Residuated fuzzy logics with an involutive negation.
+\newblock \emph{Archive for Mathematical Logic}, 39(2):103--124, 2000.
+
 \bibitem{fermuller2014}
 Ferm\"uller, C.G.
 \newblock Hintikka-style semantic games for fuzzy logics.
@@ -1764,6 +1775,11 @@ Fritz, T.
 \newblock A synthetic approach to Markov kernels, conditional independence
 and theorems on sufficient statistics.
 \newblock \emph{Advances in Mathematics}, 370, Article 107239, 2020.
+
+\bibitem{goguen1969}
+Goguen, J.A.
+\newblock The logic of inexact concepts.
+\newblock \emph{Synthese}, 19(3--4):325--373, 1969.
 
 \bibitem{godel1932}
 G\"odel, K.

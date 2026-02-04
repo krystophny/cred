@@ -58,17 +58,17 @@
 Part~1 established \emph{Cred} as a constraint algebra on $[0,1]$: values,
 complement, product conjunction, De~Morgan disjunction, and the chain rule
 for conditioning.
-It deliberately provides no interpretation function, no consequence relation,
-and no update rule.
-This paper adds three layers---\emph{valuations} (mapping propositions to
-credences), \emph{consequence relations} (determining valid inference), and
-\emph{update rules} (prescribing belief revision)---and extends to first
-order via \emph{graded predicates} with inf/sup quantifiers.
+This paper adds three layers---\emph{valuations} (assigning credences to
+propositions), \emph{consequence relations} (determining which inferences
+preserve credence), and \emph{update rules} (revising credences given new
+evidence)---and extends to first order via \emph{graded predicates} with
+inf/sup quantifiers.
 Different choices at each layer recover different systems: probability,
 product fuzzy logic, K$_3$, LP, RM3, and imprecise probability.
-We prove that explosion fails for all consequence relations compatible with
-unconstrained conditioning at zero, and that the Russell predicate yields
-credence~$\tfrac{1}{2}$ rather than a paradox.
+We prove that explosion (the classical principle that a contradiction
+entails every proposition) fails for all consequence relations compatible
+with unconstrained conditioning at zero, and that the Russell predicate
+yields credence~$\tfrac{1}{2}$ rather than a paradox.
 The main definitions and theorems are machine-checked in Lean~4.
 \end{abstract}
 
@@ -77,51 +77,81 @@ The main definitions and theorems are machine-checked in Lean~4.
 \label{sec:intro}
 %=============================================================================
 
-Part~1~\cite{part1} defines Cred as a constraint algebra: values in
-$[0,1]$, complement $\negc c = 1 - c$, product conjunction
+An algebra of credence values specifies how values relate to one
+another---how negation, conjunction, and conditioning interact on $[0,1]$.
+To reason with credences, three further capabilities are needed.
+First, an \emph{interpretation}: a way to assign credence values to
+propositions.
+In many-valued logic this is called a \emph{valuation}---a function from
+propositions to truth values~\cite{priest2008}; here the truth values are
+the full interval $[0,1]$.
+Second, a \emph{consequence relation}: a specification of which inferences
+are valid---when does accepting the premises (at some credence level)
+force acceptance of the conclusion~\cite{priest2008}?
+In classical logic, consequence has \emph{explosion} (ex falso quodlibet):
+from a proposition and its negation, any conclusion follows.
+Third, an \emph{update rule}: a prescription for revising all credences
+when new evidence arrives, generalizing Bayesian
+conditionalization~\cite{jeffrey1965}.
+
+Part~1~\cite{part1} provides the algebra: values in $[0,1]$, complement
+$\negc c = 1 - c$, product conjunction
 $c_1 \conjc c_2 = c_1 \cdot c_2$, De~Morgan disjunction
 $c_1 \disjc c_2 = \negc(\negc c_1 \conjc \negc c_2)$, and the chain rule
-$\condc{A}{B} \cdot \cred(B) = \cred(A \land B)$ as the sole structural
-axiom for conditioning.
-The algebra is deliberately uninterpreted: it says nothing about
-which propositions exist, which inferences are valid, or how beliefs
-change with evidence.
-
-The conclusion of Part~1 identifies three missing layers:
+$\condc{A}{B} \cdot \cred(B) = \cred(A \land B)$.
+This paper adds the three layers above:
 
 \begin{center}
 \small
 \begin{tabular}{lll}
 \toprule
-\textbf{Layer} & \textbf{Part~1 status} & \textbf{Part~2 contribution} \\
+\textbf{Layer} & \textbf{Mechanism} & \textbf{Section} \\
 \midrule
-Interpretation & None (algebra only) & Valuations (Section~\ref{sec:valuations}) \\
-Consequence relation & None & Designated-value and graded (Section~\ref{sec:consequence}) \\
-Update rule & None & Bayesian and Jeffrey (Section~\ref{sec:update}) \\
+Interpretation & Valuations (independent and joint-parametrized)
+  & Section~\ref{sec:valuations} \\
+Consequence & Designated-value (K$_3$, LP, RM3) and graded
+  & Section~\ref{sec:consequence} \\
+Update & Bayesian and Jeffrey conditionalization
+  & Section~\ref{sec:update} \\
 \bottomrule
 \end{tabular}
 \normalsize
 \end{center}
 
 \noindent
-Part~2 fills these gaps, one layer at a time, and then extends to first
-order via graded predicates (Section~\ref{sec:predicates}).
-Each layer adds exactly the structure that the algebra leaves open;
-different choices at each layer yield different systems.
+Each layer admits multiple instantiations, and different combinations
+recover different known systems.
+Independent valuations recover product fuzzy logic~\cite{hajek1998};
+joint-parametrized valuations recover probability-like behavior.
+Designated-value consequence yields K$_3$, LP, or RM3 depending on which
+truth values are accepted~\cite{priest2008}; graded consequence
+parametrizes validity by a threshold.
+Bayesian and Jeffrey update both derive from the chain rule.
+
+The paper then extends to first order via graded predicates
+(Section~\ref{sec:predicates})---functions from a domain to
+$[0,1]$, generalizing fuzzy set membership~\cite{zadeh1965}---with
+inf/sup quantifiers satisfying duality, and shows that unrestricted
+comprehension yields fixed points rather than paradoxes.
 
 \textbf{Contributions.}
 \begin{enumerate}[label=(\arabic*)]
 \item Cred valuations with complement preservation, including independent
-valuations (homomorphisms) and joint-parametrized valuations, with the
+valuations (homomorphisms for product fuzzy logic) and joint-parametrized
+valuations (where the joint is external data, as in probability), with the
 idempotence problem as a diagnostic for independence
 (Section~\ref{sec:valuations}).
-\item Designated-value consequence relations (K$_3$, LP, RM3) via the
-collapse, and graded consequence parametrized by threshold, with a
-proof that explosion fails for all compatible relations
+\item Consequence relations in two families: designated-value consequence
+(K$_3$, LP, RM3) via the three-valued collapse, and graded consequence
+parametrized by a threshold on $[0,1]$.
+Explosion fails for all consequence relations compatible with
+unconstrained conditioning at zero
 (Section~\ref{sec:consequence}).
 \item Bayesian and Jeffrey conditionalization as update rules on Cred
 valuations, with chain-rule preservation and zero-evidence
-underdetermination (Section~\ref{sec:update}).
+underdetermination connecting to imprecise
+probability~\cite{walley1991}
+(Section~\ref{sec:update}).
 \item Graded predicates with inf/sup quantifiers, quantifier duality,
 classical agreement for crisp predicates, and unrestricted comprehension
 yielding fixed points rather than paradoxes
@@ -134,8 +164,11 @@ yielding fixed points rather than paradoxes
 \label{sec:valuations}
 %=============================================================================
 
-A \emph{valuation} assigns credences to propositions, providing the
-interpretation layer that Part~1 deliberately omits.
+A \emph{valuation} assigns credences to propositions---it is the bridge
+between the propositional world and the algebraic world.
+In many-valued logic~\cite{priest2008}, a valuation maps propositions
+to a set of truth values; here the truth values are the full
+interval $[0,1]$.
 
 \begin{definition}[Complement-Preserving Valuation]
 \label{def:cp-valuation}
@@ -290,8 +323,13 @@ Lean: \texttt{CpValuation.constant\_half}.
 \label{sec:consequence}
 %=============================================================================
 
-A consequence relation determines which inferences are valid.
-Part~1 has none; this section adds three families.
+A \emph{consequence relation}~\cite{priest2008} specifies which inferences
+are valid: premises $A_1, \ldots, A_n$ \emph{entail} conclusion $B$ when
+every valuation that accepts the premises also accepts $B$.
+In classical logic, consequence has \emph{explosion} (ex falso quodlibet):
+a contradiction entails every proposition.
+This section defines consequence relations for Cred and shows that
+none of them has explosion.
 
 \subsection{Designated Values}
 
@@ -323,6 +361,11 @@ Lean: \texttt{threeValConsequence}.
 
 \subsection{K$_3$: Paracomplete}
 
+A logic is \emph{paracomplete} if it lacks some classically valid
+tautologies~\cite{priest2008}.
+K$_3$ (Kleene's strong three-valued logic~\cite{kleene1952}) designates
+only~$1$ and is maximally paracomplete: it has no tautologies at all.
+
 \begin{proposition}[K$_3$ Has No Tautologies]
 \label{prop:k3-no-taut}
 Under K$_3$ consequence, no formula is a tautology:
@@ -346,6 +389,11 @@ Lean: \texttt{k3\_excluded\_middle\_fails}.
 \end{proof}
 
 \subsection{LP: Paraconsistent}
+
+A logic is \emph{paraconsistent} if a contradiction does not entail
+every proposition---i.e., explosion fails~\cite{priest2008}.
+LP (the Logic of Paradox) designates $\{1, \tfrac{1}{2}\}$: both
+certainty and the intermediate value count as ``holding.''
 
 \begin{proposition}[LP: Excluded Middle Holds]
 \label{prop:lp-em}
@@ -451,11 +499,15 @@ Graded ($t \leq \tfrac{1}{2}$) & $\{c \geq t\}$ & Depends on $t$ & If $t \leq \t
 \label{sec:update}
 %=============================================================================
 
-Part~1's chain rule is a \emph{static} constraint:
-$\condc{A}{B} \cdot \cred(B) = \cred(A \land B)$.
-It relates three numbers at a single moment; it says nothing about
-what happens when new evidence arrives.
-An update rule prescribes how to revise an entire valuation.
+The chain rule $\condc{A}{B} \cdot \cred(B) = \cred(A \land B)$ constrains
+how three credences relate at a single moment.
+An \emph{update rule} applies this constraint dynamically, prescribing how
+an entire valuation changes when new evidence arrives.
+In probability, Bayesian conditionalization computes the posterior by
+dividing the joint by the evidence; Jeffrey
+conditionalization~\cite{jeffrey1965} generalizes this to uncertain
+evidence via a mixture formula.
+Both are instances of chain-rule-based update.
 
 \subsection{Bayesian Conditionalization}
 
@@ -586,6 +638,9 @@ The chain rule constrains what updates are coherent; it does not select one.
 
 The extension from propositional to first-order requires predicates
 varying over a domain and quantifiers aggregating over that domain.
+A graded predicate---a function $P : X \to [0,1]$---generalizes
+Zadeh's fuzzy set membership~\cite{zadeh1965}: $P(x)$ is the degree
+to which $x$ has property~$P$.
 
 \subsection{Graded Predicates}
 
@@ -714,47 +769,91 @@ $\tfrac{1}{2}$, the unique negation fixed point.
 \label{sec:related}
 %=============================================================================
 
-\textbf{Product Fuzzy Logic.}
+Part~2 asks: given the Cred algebra (values in $[0,1]$, complement,
+product conjunction, chain-rule conditioning), how does one build a
+reasoning system on top of it?
+A \emph{valuation} assigns credences to propositions---it is the
+interpretation layer that connects syntax to the algebra.
+A \emph{consequence relation} determines which inferences are valid given
+a class of valuations.
+An \emph{update rule} prescribes how a valuation changes when new evidence
+arrives.
+This section surveys the prior work that each layer draws on.
+
+\textbf{Product Fuzzy Logic and Valuations.}
+Goguen~\cite{goguen1969} introduced the product t-norm as a conjunction
+for inexact concepts.
 H\'ajek~\cite{hajek1998} developed product logic ($\Pi$) with the product
-t-norm and residuated implication.
-Cred valuations (independent case) are product fuzzy valuations;
-the difference is that Cred's joint-parametrized valuations allow the
-joint to be external data rather than being determined by the t-norm.
+t-norm and residuated implication; a product fuzzy valuation is a
+homomorphism from the propositional algebra to this t-norm algebra.
+Klement, Mesiar, and Pap~\cite{klement2000} gave a comprehensive treatment
+of triangular norms; the product t-norm, probabilistic sum, and standard
+complement form the product De Morgan triplet.
+Esteva et al.~\cite{esteva2000} showed that extending product logic with
+an involutive negation yields exactly this triplet.
+Independent Cred valuations (Section~\ref{sec:valuations}) are product fuzzy
+valuations; joint-parametrized valuations generalize them by supplying the
+joint as external data rather than deriving it from the t-norm.
+
+\textbf{Primitive Conditioning and Update.}
+R\'enyi~\cite{renyi1955} axiomatized conditional probability as primitive,
+with the chain rule as a defining constraint rather than a ratio definition.
+Popper~\cite{popper1959} independently argued that conditional probability
+is more fundamental than absolute probability.
+The update rules in Section~\ref{sec:update} apply the R\'enyi-Popper
+chain-rule constraint dynamically: Bayesian update solves the chain rule for
+the posterior, Jeffrey update mixes two such solutions for uncertain evidence.
+
+\textbf{Conditional Events and Consequence.}
+De Finetti~\cite{definetti1936} introduced the three-valued conditional:
+true when $A \land B$, false when $\lnot A \land B$, void when $\lnot B$.
+\'Egr\'e, Rossi, and Sprenger~\cite{egre2021} showed that de Finetti's
+conditional combined with Kleene's strong connectives produces logics in
+which explosion fails at the semantic level---via the truth table itself,
+not just the consequence relation.
+The no-explosion theorems in Section~\ref{sec:consequence} are the graded
+counterpart: explosion fails for every consequence relation compatible with
+unconstrained conditioning at zero.
+
+\textbf{Three-Valued Logics and the Collapse.}
+Kleene~\cite{kleene1952} introduced strong three-valued truth tables for
+$\{\neg, \land, \lor\}$---the algebra underlying K$_3$, LP, and RM3.
+Composing a Cred valuation with the collapse homomorphism yields a Kleene
+valuation; the choice of designated values then selects K$_3$, LP, or RM3
+consequence (Section~\ref{sec:consequence}).
 
 \textbf{Adams' Probability Logic.}
 Adams~\cite{adams1965,adams1998} showed that conditional probability
 propagates uncertainty through valid classical inferences: if all premises
 have probability $\geq 1 - \varepsilon$, then the conclusion has
 probability $\geq 1 - n\varepsilon$ (for $n$ premises).
-Cred's chain rule is compatible with Adams' bounds for any Cred valuation
-that happens to be a probability measure.
-Whether analogous bounds hold without additivity remains open.
+Whether analogous bounds hold for Cred valuations without additivity
+remains open.
 
 \textbf{Jeffrey Conditionalization.}
 Jeffrey~\cite{jeffrey1965,jeffrey1983} generalized Bayesian updating to
-uncertain evidence.
-The mixture formula $v'(A) = v(A|B) \cdot q + v(A|\negc B) \cdot (1-q)$
-requires both conditionals to be determined; Cred provides this when
-$v(B) > 0$ and $v(\negc B) > 0$ via the chain rule.
-Jeffrey's original motivation---that evidence rarely makes a proposition
-certain---aligns with Cred's emphasis on the full $[0,1]$ range.
+uncertain evidence via a mixture formula.
+Section~\ref{sec:update} implements Jeffrey update on Cred valuations:
+the mixture $v'(A) = v(A|B) \cdot q + v(A|\negc B) \cdot (1-q)$ is
+well-defined when both $v(B) > 0$ and $v(\negc B) > 0$.
 
 \textbf{Imprecise Probability.}
 Walley~\cite{walley1991} developed statistical reasoning with sets of
 probability measures rather than a single one.
 Levi~\cite{levi1980} argued that indeterminate credences are genuine
 epistemic states.
-Cred's zero-evidence underdetermination connects naturally: when conditioning
-at zero, the set of compatible posteriors is the full interval $[0,1]$,
-which is exactly an imprecise probability interval.
+When conditioning at zero, the set of compatible posteriors is the full
+interval $[0,1]$---exactly an imprecise probability interval---so
+zero-evidence underdetermination in the update layer connects directly to
+imprecise probability.
 
-\textbf{Paraconsistent Set Theory.}
+\textbf{Paraconsistent Set Theory and Graded Predicates.}
 Brady~\cite{brady2006} and Weber~\cite{weber2010} developed set theories
 with unrestricted comprehension, tolerating the Russell paradox via
 paraconsistency.
-Cred's approach is complementary: rather than tolerating contradiction
-at the logical level, the Russell predicate has a determinate numerical
-value ($\tfrac{1}{2}$) in the graded setting.
+Graded predicates (Section~\ref{sec:predicates}) offer a complementary
+approach: the Russell predicate has a determinate numerical value
+($\tfrac{1}{2}$) rather than a contradiction.
 
 \textbf{Relevant Logic.}
 Anderson and Belnap~\cite{anderson1975} developed relevant logics that
@@ -839,6 +938,11 @@ Toolchain: Lean 4.16.0 with Mathlib 4.16.0.
 
 Part~2 adds three layers to Cred's algebra, yielding a system that can
 interpret propositions, determine valid inferences, and revise beliefs.
+These layers instantiate known frameworks---product fuzzy
+valuations~\cite{hajek1998,esteva2000}, K$_3$/LP
+consequence~\cite{kleene1952}, Bayesian/Jeffrey
+update~\cite{jeffrey1965}---within the Cred algebraic substrate
+established in Part~1.
 
 \emph{Valuations} connect the propositional world to the algebraic world.
 Independent valuations make the product t-norm do double duty as both
@@ -904,6 +1008,28 @@ Brady, R.
 \newblock \emph{Universal Logic}.
 \newblock CSLI Lecture Notes, vol.~109. CSLI Publications, 2006.
 
+\bibitem{definetti1936}
+De Finetti, B.
+\newblock La logique de la probabilit\'e.
+\newblock In \emph{Actes du Congr\`es International de Philosophie Scientifique},
+IV:1--9. Hermann, Paris, 1936.
+
+\bibitem{egre2021}
+\'Egr\'e, P., Rossi, L., and Sprenger, J.
+\newblock De Finettian logics of indicative conditionals, Part~I:
+Trivalent semantics and validity.
+\newblock \emph{Journal of Philosophical Logic}, 50:187--213, 2021.
+
+\bibitem{esteva2000}
+Esteva, F., Godo, L., H\'ajek, P., and Navara, M.
+\newblock Residuated fuzzy logics with an involutive negation.
+\newblock \emph{Archive for Mathematical Logic}, 39(2):103--124, 2000.
+
+\bibitem{goguen1969}
+Goguen, J.A.
+\newblock The logic of inexact concepts.
+\newblock \emph{Synthese}, 19(3--4):325--373, 1969.
+
 \bibitem{hajek1998}
 H\'ajek, P.
 \newblock \emph{Metamathematics of Fuzzy Logic}.
@@ -920,6 +1046,16 @@ Jeffrey, R.C.
 \newblock In Earman, J., editor, \emph{Testing Scientific Theories},
 pages 133--156. University of Minnesota Press, 1983.
 
+\bibitem{kleene1952}
+Kleene, S.C.
+\newblock \emph{Introduction to Metamathematics}.
+\newblock North-Holland, Amsterdam, 1952.
+
+\bibitem{klement2000}
+Klement, E.P., Mesiar, R., and Pap, E.
+\newblock \emph{Triangular Norms}.
+\newblock Trends in Logic, vol.~8. Kluwer, 2000.
+
 \bibitem{levi1980}
 Levi, I.
 \newblock \emph{The Enterprise of Knowledge}.
@@ -930,6 +1066,22 @@ Anonymous.
 \newblock Cred: A credence algebra with primitive conditioning.
 \newblock Working paper, 2026.
 
+\bibitem{popper1959}
+Popper, K.R.
+\newblock \emph{The Logic of Scientific Discovery}.
+\newblock Hutchinson, London, 1959.
+
+\bibitem{priest2008}
+Priest, G.
+\newblock \emph{An Introduction to Non-Classical Logic: From If to Is}.
+\newblock Cambridge University Press, 2nd edition, 2008.
+
+\bibitem{renyi1955}
+R\'enyi, A.
+\newblock On a new axiomatic theory of probability.
+\newblock \emph{Acta Mathematica Academiae Scientiarum Hungaricae},
+6:285--335, 1955.
+
 \bibitem{walley1991}
 Walley, P.
 \newblock \emph{Statistical Reasoning with Imprecise Probabilities}.
@@ -939,6 +1091,11 @@ Walley, P.
 Weber, Z.
 \newblock Transfinite numbers in paraconsistent set theory.
 \newblock \emph{Review of Symbolic Logic}, 3(1):71--92, 2010.
+
+\bibitem{zadeh1965}
+Zadeh, L.A.
+\newblock Fuzzy sets.
+\newblock \emph{Information and Control}, 8:338--353, 1965.
 
 \end{thebibliography}
 
