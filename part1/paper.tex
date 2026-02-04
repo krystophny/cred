@@ -65,7 +65,8 @@ sigma-algebra nor additivity.
 We establish a surjective homomorphism from Cred to the three-valued Kleene
 lattice---the shared foundation of K$_3$, LP, and RM3---and show that no
 analogous homomorphism exists for the other standard three-valued algebras
-(\L ukasiewicz, G\"odel, or classical).
+(\L ukasiewicz and G\"odel), and that no negation-preserving
+quotient to the two-valued Boolean algebra exists.
 Applying the chain rule from both directions (Bayes' theorem) yields a
 Bayes-consistency criterion that the product residuated implication satisfies
 but that RM3 fails (even on three values) and G\"odel fails (on the
@@ -647,7 +648,7 @@ determined.}
 
 \smallskip
 RM3 and the product residuated agree when evidence $\in \{0, 1\}$ but differ at
-evidence $= \tfrac{1}{2}$: RM3 gives $\tfrac{1}{2} \to 0 = \tfrac{1}{2}$,
+evidence $= \tfrac{1}{2}$: for instance, RM3 gives $\tfrac{1}{2} \to 0 = \tfrac{1}{2}$,
 while the product residuated gives $0$.
 Cred conditioning (with Kleene joint) matches the product residuated for
 evidence $> 0$ and replaces the evidence $= 0$ row with~$*$.
@@ -746,8 +747,9 @@ $C(a,0) = C(0,b) = 0$, $C(a,1) = a$, $C(1,b) = b$, and the 2-increasing
 property~\cite{nelsen2006}.
 Every \emph{symmetric} copula ($C(a,b) = C(b,a)$) yields a Bayes-consistent
 arrow via $I_C(a,b) = C(a,b)/a$ for $a > 0$ (at $a = 0$ every copula
-gives $C(0,b) = 0$, so the ratio is undefined; Cred's chain-rule
-conditioning handles this case by leaving it unconstrained).
+gives $C(0,b) = 0$, so $I_C(0,b) = 0/0$ is undefined; Cred's chain
+rule $c \cdot 0 = 0$ is satisfied by any $c$, leaving the conditional
+unconstrained).
 The induced joint $I_C(a,b) \cdot a = C(a,b)$ is symmetric.
 Grzegorzewski~\cite{grzegorzewski2013} computed three cases:
 the Fr\'echet upper bound $C(a,b) = \min(a,b)$ gives the product
@@ -855,8 +857,8 @@ More generally, among continuous t-norms, unique conditioning at positive
 evidence characterizes the strict (cancellative) family, all of which are
 order-isomorphic to the product~\cite{klement2000}.
 The product t-norm also preserves the open interval $(0,1)$ under
-conjunction---the property that makes the Kleene collapse work---and its
-independence copula $ab$ sits naturally inside the copula framework.
+conjunction---the property that makes the Kleene collapse work---and the product $ab$ is the independence copula, sitting naturally
+inside the copula framework.
 
 The relationship to product logic $\Pi$ is a two-way bridge.
 If Cred commits to a single binary arrow via residuation (becoming a t-norm
@@ -919,7 +921,7 @@ different ways: embedding vs.\ quotient.
 The set $\{0, 1\} \subset [0,1]$ is closed under all Cred operations:
 if $c_1, c_2 \in \{0,1\}$, then $\negc c_1$, $c_1 \conjc c_2$, and
 $c_1 \disjc c_2$ are all in $\{0,1\}$ (the truth tables are exactly
-$\neg$, $\land$, $\lor$; see Section~\ref{sec:connections}).
+$\neg$, $\land$, $\lor$; see tables above).
 No quotient map is needed: if you start with only $0$s and $1$s, all
 operations keep you there.
 
@@ -1087,9 +1089,10 @@ ill-formed (division by zero).
 \noindent $^{**}$Unconstrained: the chain rule $c \cdot 0 = 0$ is well-formed
 and satisfied by every $c \in [0,1]$; no value is selected or excluded.
 
-\noindent $^\dagger$RM3 has $0 \to b = 1$ in its truth table, but only values
-$\{1, \tfrac{1}{2}\}$ are designated for valid inference, so explosion is blocked
-at the level of consequence rather than at the truth-table level.
+\noindent $^\dagger$RM3 has $0 \to b = 1$ in its truth table, but values
+$\{1, \tfrac{1}{2}\}$ are designated (as in LP), and RM3 additionally
+imposes a relevance condition on valid inferences, so explosion is
+blocked at the level of consequence rather than at the truth-table level.
 
 \smallskip
 The table makes the hierarchy explicit.
@@ -1288,7 +1291,7 @@ The \texttt{joint} parameter is supplied as input, representing $\cred(A \land B
 \item \texttt{godel\_impl}, \texttt{rm3\_impl}: implication tables with comparison theorems
 \item \texttt{rm3\_not\_bayes\_consistent}: RM3 fails Bayes consistency on three values
 \item \texttt{rm3\_not\_bayes\_consistent\_real}: RM3 fails Bayes consistency under real multiplication on $[0,1]$
-\item \texttt{godel\_bayes\_consistent}: product residuated is Bayes-consistent on $\{0,\tfrac{1}{2},1\}$
+\item \texttt{godel\_bayes\_consistent}: Bayes-consistent on $\{0,\tfrac{1}{2},1\}$ (applies to both G\"odel and product residuated via \texttt{godel\_impl\_eq\_prod\_resid})
 \item \texttt{frechet\_upper}, \texttt{frechet\_lower}: Fr\'echet-Hoeffding bounds
 \item \texttt{frechet\_conditioning\_exists}: bidirectional conditioning for any joint in bounds
 \item \texttt{prod\_resid\_bayes\_consistent\_real}: product residuated is Bayes-consistent on $[0,1]$
