@@ -43,7 +43,7 @@
 \newcommand{\Nat}{\mathbb{N}}
 
 \title{\textbf{Cred: A Credence Algebra with Primitive Conditioning}\\[0.5em]
-\large Formalization and Connections to Relevant Logic}
+\large Formalization and Connections to Many-Valued Logic}
 
 \author{Anonymous for blind review}
 \date{February 2026}
@@ -724,8 +724,8 @@ Then $f(a, b) = \max(\tfrac{1}{2}, 0) = \tfrac{1}{2}$, so
 $f(a, b) \cdot a = \tfrac{1}{4}$.
 But $f(b, a) = \max(1, \tfrac{1}{2}) = 1$, so $f(b, a) \cdot b = 0$.
 Since $\tfrac{1}{4} \neq 0$, RM3 is not Bayes-consistent.
-Lean: \texttt{rm3\_not\_bayes\_consistent} (on three values using $\min$;
-the same counterexample works under real multiplication).
+Lean: \texttt{rm3\_not\_bayes\_consistent} (three values),
+\texttt{rm3\_not\_bayes\_consistent\_real} (real multiplication on $[0,1]$).
 \end{proof}
 
 \begin{remark}
@@ -745,8 +745,10 @@ A copula is a function $C : [0,1]^2 \to [0,1]$ satisfying
 $C(a,0) = C(0,b) = 0$, $C(a,1) = a$, $C(1,b) = b$, and the 2-increasing
 property~\cite{nelsen2006}.
 Every \emph{symmetric} copula ($C(a,b) = C(b,a)$) yields a Bayes-consistent
-arrow via $I_C(a,b) = C(a,b)/a$, since the induced joint $I_C(a,b) \cdot a
-= C(a,b)$ is symmetric.
+arrow via $I_C(a,b) = C(a,b)/a$ for $a > 0$ (at $a = 0$ every copula
+gives $C(0,b) = 0$, so the ratio is undefined; Cred's chain-rule
+conditioning handles this case by leaving it unconstrained).
+The induced joint $I_C(a,b) \cdot a = C(a,b)$ is symmetric.
 Grzegorzewski~\cite{grzegorzewski2013} computed three cases:
 the Fr\'echet upper bound $C(a,b) = \min(a,b)$ gives the product
 residuated (Goguen) implication; the independence copula $C(a,b) = ab$
@@ -1021,9 +1023,11 @@ lattice~\cite{belnap1977,dunn1976}, via the inclusion
 $\{0, \tfrac{1}{2}, 1\} \hookrightarrow \{\mathbf{f}, \mathbf{b}, \mathbf{t}, \mathbf{n}\}$
 mapping $0 \mapsto \mathbf{f}$, $\tfrac{1}{2} \mapsto \mathbf{b}$, $1 \mapsto \mathbf{t}$.
 The Cred collapse therefore factors through the Belnap-Dunn algebra.
-A surjective homomorphism from Cred to the full four-valued algebra would need
-to reach $\mathbf{n}$ (``neither true nor false''), which appears to have no
-natural preimage in $[0,1]$.
+Belnap-Dunn negation has \emph{two} fixed points ($\mathbf{b}$ and
+$\mathbf{n}$), while Cred's complement has exactly one ($\tfrac{1}{2}$);
+the Kleene lattice also has exactly one ($\tfrac{1}{2}$), matching Cred.
+This fixed-point mismatch is the structural reason the three-valued
+Kleene target works while extending to four values is problematic.
 \end{remark}
 
 \subsection{Relationship to Probability}
@@ -1240,7 +1244,7 @@ a Bayes-consistent arrow (machine-checked on three values and on $[0,1]$).
 %=============================================================================
 
 The core algebra is formalized in Lean~4 with Mathlib.
-The formalization comprises 1218 lines covering:
+The formalization covers:
 
 \begin{itemize}
 \item \textbf{Types:} \texttt{Credence} (value in $[0,1]$), \texttt{Conditioning}
@@ -1282,8 +1286,9 @@ The \texttt{joint} parameter is supplied as input, representing $\cred(A \land B
 \item \texttt{no\_godel\_collapse}: no negation-preserving map to G\"odel algebra
 \item \texttt{no\_luk\_collapse}: no negation-and-conjunction-preserving map to \L ukasiewicz
 \item \texttt{godel\_impl}, \texttt{rm3\_impl}: implication tables with comparison theorems
-\item \texttt{rm3\_not\_bayes\_consistent}: RM3 fails Bayes consistency (using \texttt{ThreeVal.conj}${}= \min$; the equality/inequality conclusions hold under real multiplication as well, verified by case analysis)
-\item \texttt{godel\_bayes\_consistent}: product residuated is Bayes-consistent on $\{0,\tfrac{1}{2},1\}$ (same remark)
+\item \texttt{rm3\_not\_bayes\_consistent}: RM3 fails Bayes consistency on three values
+\item \texttt{rm3\_not\_bayes\_consistent\_real}: RM3 fails Bayes consistency under real multiplication on $[0,1]$
+\item \texttt{godel\_bayes\_consistent}: product residuated is Bayes-consistent on $\{0,\tfrac{1}{2},1\}$
 \item \texttt{frechet\_upper}, \texttt{frechet\_lower}: Fr\'echet-Hoeffding bounds
 \item \texttt{frechet\_conditioning\_exists}: bidirectional conditioning for any joint in bounds
 \item \texttt{prod\_resid\_bayes\_consistent\_real}: product residuated is Bayes-consistent on $[0,1]$

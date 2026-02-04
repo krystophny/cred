@@ -1215,4 +1215,16 @@ theorem luk_tnorm_not_unique :
   · simp only [Credence.zero_val, Credence.half_val]; norm_num
   · simp only [Credence.half_val]; norm_num
 
+/-- RM3 material conditional on [0,1]: max(1-a, b) -/
+noncomputable def rm3_impl_real (a b : Credence) : ℝ :=
+  max (1 - a.val) b.val
+
+/-- RM3 fails Bayes consistency under real multiplication on [0,1] -/
+theorem rm3_not_bayes_consistent_real :
+    ∃ a b : Credence,
+      rm3_impl_real a b * a.val ≠ rm3_impl_real b a * b.val := by
+  refine ⟨Credence.half, 0, ?_⟩
+  simp only [rm3_impl_real, Credence.half_val, Credence.zero_val]
+  norm_num
+
 end Cred
