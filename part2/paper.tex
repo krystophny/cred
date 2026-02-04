@@ -67,7 +67,7 @@ Different choices at each layer recover different systems: probability,
 product fuzzy logic, K$_3$, LP, RM3, and imprecise probability.
 We prove that explosion (the classical principle that a contradiction
 entails every proposition) fails for K$_3$, LP, and graded consequence
-at thresholds $t \leq \tfrac{1}{2}$, and that the Russell predicate
+at thresholds $0 < t \leq \tfrac{1}{2}$, and that the Russell predicate
 yields credence~$\tfrac{1}{2}$ rather than a paradox.
 The main definitions and theorems are machine-checked in Lean~4.
 \end{abstract}
@@ -298,8 +298,8 @@ Complement non-negativity is not part of the \texttt{JointValuation}
 definition; it must be supplied as an additional hypothesis, as in
 Part~1.
 
-When $v(B) > 0$, conditioning is uniquely determined:
-$v(A \mid B) = j(A, B) / v(B)$
+When $v(B) > 0$, the chain rule has a unique solution; we write
+$v(A \mid B) := j(A, B) / v(B)$ for this conditional credence
 (Lean: \texttt{JointValuation.conditioning}, via Part~1's
 \texttt{conditioning\_mk} for existence and
 \texttt{conditioning\_unique} for uniqueness).
@@ -367,7 +367,9 @@ every valuation that accepts the premises also accepts $B$.
 In classical logic, consequence has \emph{explosion} (ex falso quodlibet):
 a contradiction entails every proposition.
 This section defines consequence relations for Cred and shows that
-none of them has explosion.
+explosion fails for LP and graded consequence (non-vacuously), and
+that K$_3$ avoids explosion vacuously (no valuation makes both $A$
+and $\negc A$ K$_3$-designated, since $\negc 1 = 0 \notin \{1\}$).
 
 \subsection{Designated Values}
 
@@ -380,9 +382,9 @@ consequence relations, differing only in which values are
 K$_3$ designates $\{1\}$ (only certainty counts).
 LP designates $\{1, \tfrac{1}{2}\}$ (certainty and the
 intermediate value both count).
-RM3 designates $\{1, \tfrac{1}{2}\}$ with the additional requirement
-that premises and conclusion share a propositional
-variable~\cite{priest2008}.
+RM3 uses the same designation as LP ($\{1, \tfrac{1}{2}\}$) but
+restricts valid consequence to inferences where premises and
+conclusion share a propositional variable~\cite{priest2008}.
 Lean: \texttt{isDesignatedK3}, \texttt{isDesignatedLP}.
 (RM3 designation is not formalized; the relevance condition is
 syntactic.)
@@ -523,8 +525,9 @@ The consequence-level results (\texttt{lp\_no\_explosion},
 \texttt{graded\_no\_explosion}) use this ingredient to construct
 a separating valuation: one where both $A$ and $\negc A$ are
 designated but some $B$ is not.
-The classical consequence relation, which has explosion, is
-incompatible with unconstrained conditioning at zero.
+Classical consequence (two-valued designation on $\{0,1\}$) has
+explosion; it arises from a setting where conditioning at zero
+is resolved by the measure, not left unconstrained.
 \end{remark}
 
 \subsection{Comparison}
@@ -537,7 +540,7 @@ incompatible with unconstrained conditioning at zero.
   & \textbf{Excl.\ middle?} & \textbf{Explosion?} \\
 \midrule
 Classical & $\{1\}$ (two-valued) & Yes & Yes & Yes \\
-K$_3$ & $\{1\}$ & No & No & No \\
+K$_3$ & $\{1\}$ & No & No & No$^\S$ \\
 LP & $\{1, \tfrac{1}{2}\}$ & Yes & Yes & No \\
 RM3$^\dagger$ & $\{1, \tfrac{1}{2}\}$+relev. & Yes & Yes & No \\
 Graded ($t \leq \tfrac{1}{2}$) & $\{c \geq t\}$ & $^\ddagger$ & $^\ddagger$ & No \\
@@ -548,15 +551,18 @@ Graded ($t \leq \tfrac{1}{2}$) & $\{c \geq t\}$ & $^\ddagger$ & $^\ddagger$ & No
 
 \smallskip
 \noindent
+$^\S$\,K$_3$ avoids explosion vacuously: no valuation makes both $A$
+and $\negc A$ K$_3$-designated.\\
 $^\dagger$\,RM3 properties are well-known~\cite{priest2008}; they are not
 formalized in Lean.\\
 $^\ddagger$\,Tautologies and excluded middle for graded consequence depend
 on the threshold and are not formalized.
 At $t = 0$, every formula is a tautology; at $t > 0$, the
-constant-$0$ valuation falsifies every formula.
-Excluded middle holds whenever $t \leq \tfrac{3}{4}$, since
+constant-$0$ valuation assigns every formula value~$0 < t$,
+so no formula is a tautology.
+Excluded middle holds whenever $t \leq \tfrac{3}{4}$ (pen-and-paper):
 $v(A) \disjc \negc v(A) = 1 - v(A)(1 - v(A)) \geq \tfrac{3}{4}$
-for all $v(A) \in [0,1]$.
+for all $v(A) \in [0,1]$, since $v(A)(1 - v(A)) \leq \tfrac{1}{4}$.
 
 %=============================================================================
 \section{Update Rules}
@@ -629,6 +635,8 @@ v'(A) = v(A \mid B) \cdot q + v(A \mid \negc B) \cdot (1 - q).
 \]
 This is a weighted mixture of the conditional-on-$B$ and
 conditional-on-$\negc B$ valuations.
+Determining $v(A \mid B)$ and $v(A \mid \negc B)$ from a joint-parametrized
+valuation requires $v(B) > 0$ and $v(\negc B) > 0$, respectively.
 
 \begin{definition}[Jeffrey Update]
 \label{def:jeffrey-update}
@@ -843,8 +851,10 @@ Lean: \texttt{russell\_fixed\_point}.
 
 Russell's predicate $R = \{x : x \notin x\}$ applied to itself gives
 $R(R) = \negc R(R) = \tfrac{1}{2}$: the set half-contains itself.
-Unrestricted comprehension does not lead to paradox; it leads to
-fixed points.
+The algebraic core---$c = \negc c$ implies $c = \tfrac{1}{2}$---is
+formalized in Lean; the self-application mechanism (unrestricted
+comprehension producing the equation $R(R) = \negc R(R)$) requires
+set-theoretic infrastructure not formalized here.
 This connects Cred to paraconsistent set theory~\cite{brady2006,weber2010},
 where comprehension is retained and contradictions are tolerated.
 In Cred, the ``contradiction'' has a precise numerical value:
