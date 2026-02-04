@@ -1,154 +1,105 @@
 # Asymptotic Proofs
 
-## The Concept
+## Prerequisites
 
-An **asymptotic proof** of P is a sequence of evidence/derivation steps such that:
+This file assumes Part 1 (the constraint algebra) and Part 2 (valuations and update rules). It explores what "proof" means when credence is graded.
+
+## The concept
+
+A classical proof establishes that cred(P) = 1 exactly. An **asymptotic proof** is a sequence of updates such that:
+
 ```
-lim_{n→∞} cred_n(P) = 1
+lim_{n->inf} cred_n(P) = 1
 ```
 
-The credence approaches 1 but may never exactly reach it.
+The credence converges to 1 but may never exactly reach it.
 
-## Classical Proof vs Asymptotic Proof
+## How credence changes: the update mechanism
 
-| | Classical Proof | Asymptotic Proof |
+Part 2 defines update rules (Bayesian conditionalization, Jeffrey conditionalization) that prescribe how a valuation changes when new evidence arrives. Asymptotic proof requires specifying:
+
+1. A sequence of evidence events E_1, E_2, ...
+2. An update rule (from Part 2)
+3. A prior valuation v_0
+
+The sequence of posteriors v_1, v_2, ... determines whether cred converges to 1.
+
+Without an update rule, "credence increases" is not well-defined. The bare algebra (Part 1) provides no mechanism for credence change; it only constrains how credences relate at a single moment.
+
+## Classical proof vs. asymptotic proof
+
+| | Classical proof | Asymptotic proof |
 |--|-----------------|------------------|
-| Credence | Exactly 1 | Approaches 1 |
+| Credence | Exactly 1 | Converges to 1 |
 | Length | Finite | Potentially infinite |
-| Certainty | Absolute | Limit |
-| Status | "Proven" | "Asymptotically proven" |
+| Certainty | Absolute | In the limit |
+| Mechanism | Derivation from axioms | Sequence of updates |
 
 ## Examples
 
-### Example 1: Verification-Based
+### Probabilistic primality (well-defined)
 
-Goldbach's Conjecture: Every even n > 2 is sum of two primes.
-
-```
-Verify n = 4: ✓ (4 = 2+2)     cred increasing
-Verify n = 6: ✓ (6 = 3+3)     cred increasing
-Verify n = 8: ✓ (8 = 3+5)     cred increasing
-...
-Verify n = 10^18: ✓           cred very high
-...
-lim_{n→∞} cred_n = 1
-```
-
-Each verification increases credence. The key: we care about CONVERGENCE to 1, not crossing some arbitrary threshold.
-
-### Example 2: Probabilistic Primality
-
-Is N prime? Miller-Rabin test:
-```
-Round 1: Pass → cred(prime) ≥ 0.75
-Round 2: Pass → cred(prime) ≥ 0.9375
-Round k: Pass → cred(prime) ≥ 1 - (1/4)^k
-```
-
-As k → ∞, cred → 1. The key: this is CONVERGENCE to 1, not hitting an arbitrary threshold like 0.99.
-
-### Example 3: Consistency Proofs
-
-Is ZFC consistent?
-```
-Year 1: No contradiction found → cred ↑
-Year 10: Still no contradiction → cred ↑
-Year 100: Mathematics works → cred ↑↑
-...
-```
-
-We have asymptotic evidence for Con(ZFC), not proof.
-
-## Are Asymptotic Proofs "Real" Proofs?
-
-**Classical view**: No. Proof requires cred = 1 exactly.
-
-**Cred view**: Asymptotic proofs are a distinct category:
-- Stronger than "unproven" (cred > 0.5)
-- Weaker than "proven" (cred = 1)
-- Useful and meaningful
-
-## The Hierarchy
+Is N prime? Miller-Rabin test with update rule:
 
 ```
-cred = 1        Classical proof
-cred → 1        Asymptotic proof (converging to certainty)
-cred ∈ (0.5,1)  Partial evidence (degree of belief)
-cred = 0.5      Undecided (neutral prior)
-cred ∈ (0,0.5)  Partial counter-evidence
-cred → 0        Asymptotic refutation
-cred = 0        Classical refutation
+Prior: cred(prime) = 1/2  (uninformative)
+Round 1: Pass -> Bayesian update -> cred(prime) >= 3/4
+Round 2: Pass -> cred(prime) >= 15/16
+Round k: Pass -> cred(prime) >= 1 - (1/4)^k
 ```
 
-Note: Asymptotic proofs are defined by CONVERGENCE to 1, not by crossing an arbitrary threshold.
+This is well-defined because: (a) the prior is specified, (b) the update is Bayesian conditionalization, (c) convergence to 1 is provable.
 
-## Converging to 1
+### Exhaustive verification (well-defined for decidable properties)
 
-How can cred converge to 1?
+For decidable P(n), verify P(0), P(1), P(2), ...:
 
-**From below**: Each step increases cred
 ```
-cred_0 = 0.5
-cred_n = 1 - (1/2)^n
-lim cred_n = 1
+After verifying P(0)...P(N), all passing:
+cred(forall n. P(n)) increases toward 1
 ```
 
-**Monotonically**: Evidence only increases cred
+The update mechanism: each verification is a piece of evidence E_k = "P(k) holds." Bayesian conditionalization on E_k updates the credence of the universal claim. Convergence to 1 depends on the prior and the update rule.
+
+### Consistency of ZFC (not well-defined without more structure)
+
+"Each year without contradiction increases credence" is not a well-defined update because:
+- What counts as "evidence" for consistency?
+- What prior do we start from?
+- What update rule applies?
+
+Formalizing this requires specifying a theory of how mathematical practice provides evidence, which goes beyond Parts 1-2.
+
+## The hierarchy
+
 ```
-cred_0 ≤ cred_1 ≤ cred_2 ≤ ... → 1
+cred = 1        Classical proof (derivation from axioms)
+cred -> 1       Asymptotic proof (convergence under updates)
+cred in (0,1)   Partial evidence (not converging)
+cred = 0        Refutation
 ```
 
-**Non-monotonically**: Evidence can decrease cred, but limit is 1
+Asymptotic proof is defined by CONVERGENCE to 1, not by crossing an arbitrary threshold. Having cred = 0.999 is not a proof unless it is part of a sequence converging to 1.
+
+## Convergence patterns
+
+**Monotone from below** (e.g., probabilistic amplification):
+```
+cred_n = 1 - (1/4)^n -> 1
+```
+
+**Non-monotone** (evidence can decrease credence, but limit is 1):
 ```
 cred_n oscillates but converges to 1
 ```
 
-## Asymptotic Proof Techniques
+## Relationship to probabilistically checkable proofs
 
-### Exhaustive Verification (Infinite)
-For decidable P(n):
-```
-Verify P(0), P(1), P(2), ...
-If all pass: cred(∀n. P(n)) → 1
-```
+A PCP provides a classical proof that can be verified probabilistically (with bounded error). In Cred terms: a PCP gives an asymptotic proof with a known convergence rate. The connection is through the update rule: each random check is evidence that updates the credence.
 
-### Probabilistic Amplification
-Run randomized test k times:
-```
-Each pass multiplies error by constant < 1
-cred → 1 as k → ∞
-```
+## Open questions
 
-### Inductive Evidence
-```
-Base case works: cred ↑
-Inductive step works for k cases: cred ↑
-...
-```
-
-## When Asymptotic Proofs Suffice
-
-In practice, asymptotic proofs are often enough:
-- Cryptography: Miller-Rabin primality (cred ≈ 1 - 2^-100)
-- Physics: Experimental verification (cred ≈ 1 - ε)
-- Engineering: Testing (cred approaches 1 with more tests)
-
-The distinction matters philosophically, less so practically.
-
-## Formalizing Asymptotic Proof
-
-```
-AsymptoticProof(P) := ∃(cred_n)_{n∈ℕ}. lim_{n→∞} cred_n(P) = 1
-
-Where cred_n is "credence after n units of evidence"
-```
-
-This is a well-defined notion that sits between "proven" and "unproven."
-
-## Open Questions
-
-1. Can we characterize which statements have asymptotic proofs?
-2. Is "asymptotically provable" decidable?
-3. What's the relationship to probabilistically checkable proofs (PCPs)?
-4. Can classical proofs always be converted to asymptotic proofs? (Yes, trivially)
-5. Are there statements with asymptotic proofs but no classical proofs?
+1. Which statements have asymptotic proofs but not classical proofs?
+2. For decidable properties, does exhaustive verification always yield convergence? (Depends on the prior and update rule.)
+3. Can convergence rates be characterized in terms of the update rule?
+4. What is the relationship between asymptotic provability and probabilistic complexity classes (BPP, etc.)?

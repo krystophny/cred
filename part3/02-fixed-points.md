@@ -1,159 +1,115 @@
 # Fixed Points and Self-Reference
 
-## The Classical Problem
+## What Part 1 establishes
 
-Self-referential statements cause issues in binary logic:
-- Liar: "This statement is false" — self-negating, neither consistently true nor false
-- Russell: {x | x not in x} — self-negating membership, contradiction
+Part 1 proves that the negation equation c = ~c = 1 - c has a unique solution at c = 1/2 (Lean: `neg_fixed_point_unique`). This handles any self-negating statement: the liar sentence, Russell's predicate, Grelling-Nelson, etc.
 
-## The Cred Solution
+This file explores the broader landscape of self-referential fixed points.
 
-Self-NEGATING statements find fixed point credences via the negation operator.
+## Self-negation: the liar and Russell
 
-### The Liar Sentence
+### The liar sentence
 
-L = "This statement is false" = "L is false" = NOT L
+L = "This statement is false" imposes cred(L) = ~cred(L):
 
-In Cred:
 ```
-cred(L) = cred(NOT L) = 1 - cred(L)
-
-Let c = cred(L):
-c = 1 - c
-2c = 1
-c = 0.5
+c = 1 - c  =>  c = 1/2
 ```
 
-The liar sentence has credence **exactly 0.5**.
+Not a paradox. A fixed point of negation, with unique solution.
 
-Not a paradox. A fixed point of negation.
+### Russell's predicate
 
-### Russell's Predicate
+R = {x : x not in x} imposes R(R) = ~R(R):
 
-R = {x | x not in x}
-
-Is R in R?
 ```
-R(R) = NOT(R(R))
-
-Let c = cred(R in R):
-c = 1 - c
-c = 0.5
+c = 1 - c  =>  c = 1/2
 ```
 
-Russell's set has credence 0.5 of containing itself.
+Russell's predicate has credence 1/2 of containing itself. Unrestricted comprehension yields fixed points, not contradictions (Part 2, graded predicates).
 
-The predicate is self-negating, so it gets the negation fixed point.
+### Grelling-Nelson
 
-### Important: Godel Sentences are Different
+"heterological" = "does not describe itself." Self-negating, same equation, c = 1/2.
+
+## Godel sentences are NOT self-negating
 
 G = "G is not provable in system S"
 
-This is fundamentally different from the liar. "Not provable" is NOT "false."
+"Not provable" is NOT "false." The liar says L = NOT(L); Godel says G = NOT(Provable(G)). These are structurally different:
 
-- Liar: L means NOT L (self-negating: c = 1-c)
-- Godel: G means NOT(Provable(G)) (NOT self-negating)
+- Liar: c = 1 - c (forced to 1/2 by the algebra)
+- Godel: relates credence to provability (requires meta-theoretic principles beyond the algebra)
 
-If S is consistent, Godel showed G is TRUE (in standard models) but unprovable.
-Assigning cred(G) = 0.5 would be incorrect; G has a definite truth value.
+If S is consistent, G is TRUE (in standard models) but unprovable. Assigning cred(G) = 1/2 would be incorrect. See `03-undecidability.md` for the full treatment.
 
-**Cred handles self-negation. Godel's incompleteness concerns provability in formal systems and applies to Cred if extended to express arithmetic.**
+## Types of fixed points
 
-## The Fixed Point Theorem
-
-**Theorem**: For any continuous f : [0,1] → [0,1], there exists c ∈ [0,1] with f(c) = c.
-
-**Corollary**: For any self-referential statement S = φ(S) where φ is credence-continuous, there exists a fixed point credence.
-
-## Types of Fixed Points
-
-### Negation Fixed Point
+### Negation: c = ~c
 ```
-c = ~c = 1 - c → c = 0.5
-```
-Unique fixed point at 0.5.
-
-### Conjunction Fixed Point
-```
-c = c * c → c = c² → c ∈ {0, 1}
-```
-Fixed points at 0 and 1.
-
-### Disjunction Fixed Point
-```
-c = c + c - c² = 2c - c² → c² - c = 0 → c ∈ {0, 1}
-```
-Fixed points at 0 and 1.
-
-### Conditioning Fixed Point
-```
-c = (c | c)
-Conditioning depends on a *joint* parameter; it is not a unary operation `f(c)`.
-
-If you choose evidence `= c` and joint `= c²`, then the chain rule forces
-`(c | c) = c` when `c > 0`. This is a tautology about how you chose the joint,
-not a new fixed-point phenomenon.
-```
-So: “conditioning fixed points” is not a meaningful notion without fixing how joint values are supplied.
-
-## Stability of Fixed Points
-
-A fixed point c for f is **stable** if nearby values converge to it:
-```
-|f(c')| < |c' - c| for c' near c
+c = 1 - c  =>  c = 1/2   (unique)
 ```
 
-For c = ~c:
+### Product: c = c ⊗ c
 ```
-f(c) = 1 - c
-f'(c) = -1
-|f'(0.5)| = 1 (borderline stable)
+c = c^2  =>  c(c-1) = 0  =>  c in {0, 1}   (two fixed points)
 ```
 
-The negation fixed point at 0.5 is neutrally stable.
+This is Part 1's idempotence characterization: the product is idempotent only at the boundary values.
 
-## Self-Reference Zoo
-
-| Statement | Equation | Fixed Point |
-|-----------|----------|-------------|
-| Liar: "I am false" | c = 1-c | 0.5 (negation fixed point) |
-| Truth-teller: "I am true" | c = c | any c (trivial identity) |
-| "I imply myself" | c = cred(c -> c) = 1 | 1 |
-
-Note: Statements involving "provable" are NOT self-negating in the same way as the liar. Godel sentences have definite truth values in standard models.
-
-## Chains of Self-Reference
-
+### De Morgan dual: c = c ⊔ c
 ```
-A = "B is false"
-B = "A is false"
-
-cred(A) = 1 - cred(B)
-cred(B) = 1 - cred(A)
-
-Substituting: cred(A) = 1 - (1 - cred(A)) = cred(A)
-
-Any value works! But combined:
-cred(A) + cred(B) = 1
+c = 2c - c^2  =>  c^2 - c = 0  =>  c in {0, 1}
 ```
 
-Mutual reference creates constraint, not paradox.
+Same boundary fixed points, by De Morgan duality.
 
-## Self-Negating Paradoxes Resolved
+### Conditioning
 
-| Classical | Cred |
-|-----------|------|
-| Liar paradox | Negation fixed point at 0.5 |
-| Russell paradox | Negation fixed point at 0.5 |
-| Grelling-Nelson | Negation fixed point at 0.5 |
+Conditioning is ternary (Part 1): it relates condCred, evidence, and joint via the chain rule. There is no unary operation "c conditioned on c" without specifying the joint.
 
-Self-NEGATING paradoxes (where X = NOT X) have the unique solution cred = 0.5.
+If you set evidence = c and joint = c^2, the chain rule gives condCred = c (for c > 0). But this is a tautology about the choice of joint, not a fixed-point phenomenon.
 
-Note: Not all "paradoxes" are self-negating. Berry's paradox involves definability, not simple self-negation. Godel's theorem involves provability. These require more careful analysis.
+## The general fixed point theorem
 
-## Open Questions
+**Theorem** (Brouwer): every continuous f : [0,1] -> [0,1] has a fixed point.
 
-1. Are all self-referential fixed points at 0.5, or can others occur?
-2. What's the computational complexity of finding fixed points?
-3. Can we characterize which fixed points are "natural" vs "artificial"?
-4. How do fixed points interact with the collapse to Boolean?
+For self-referential statements of the form S = phi(S), where phi assigns a credence operation, the fixed point theorem guarantees a solution whenever phi is continuous. The negation fixed point at 1/2 is the simplest case.
+
+## Stability
+
+A fixed point c of f is:
+- **Stable** if |f'(c)| < 1 (nearby values converge to c under iteration)
+- **Unstable** if |f'(c)| > 1 (nearby values diverge)
+- **Neutrally stable** if |f'(c)| = 1
+
+For negation: f(c) = 1 - c, f'(c) = -1, |f'(1/2)| = 1. The negation fixed point is neutrally stable.
+
+For the product: f(c) = c^2, f'(c) = 2c. At c = 0: |f'(0)| = 0 (stable). At c = 1: |f'(1)| = 2 (unstable).
+
+## Chains of mutual reference
+
+```
+A = "B is false":  cred(A) = 1 - cred(B)
+B = "A is false":  cred(B) = 1 - cred(A)
+```
+
+Substituting: cred(A) = 1 - (1 - cred(A)) = cred(A). Any value works, but combined: cred(A) + cred(B) = 1. Mutual reference creates a constraint (anti-correlation), not a paradox.
+
+For longer chains (A says B is false, B says C is false, C says A is false): the system c1 = 1-c2, c2 = 1-c3, c3 = 1-c1 gives c1 = c3, c1 + c2 = 1, yielding a one-parameter family of solutions.
+
+## Self-reference zoo
+
+| Statement | Equation | Fixed points |
+|-----------|----------|--------------|
+| Liar: "I am false" | c = 1-c | 1/2 (unique) |
+| Truth-teller: "I am true" | c = c | any c in [0,1] (trivial) |
+| "I am half-true" | c = 1/2 | 1/2 (unique, trivially) |
+| "My product with myself is me" | c = c^2 | {0, 1} |
+
+## Open questions
+
+1. Beyond negation, which self-referential operators yield unique interior fixed points? (Product and disjunction only yield boundary fixed points.)
+2. For systems of n mutually referencing statements, what is the dimension of the solution set?
+3. How do fixed points interact with the collapse to the Kleene lattice? (The collapse maps 1/2 to 1/2, so the liar fixed point is preserved.)
+4. Lawvere's fixed point theorem generalizes diagonal arguments categorically. Does it apply to Cred's self-reference?

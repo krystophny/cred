@@ -1,151 +1,66 @@
 # Open Questions
 
-## Foundational Questions
+## Already settled by Parts 1-2
 
-### Q1: Is Cred Consistent?
-Can we derive cred(⊥) > 0 from the axioms?
+These questions from earlier drafts are now answered:
 
-Note: "Consistency" in Cred means cred(⊥) = 0, not just "no contradiction."
+- **"Does Cred have a model?"** — Yes. [0,1] with the product, complement, and chain rule IS the model. Part 1 defines Cred as this concrete algebra and Lean-checks it.
+- **"Is Cred consistent?"** — Cred is an algebra, not a formal theory. The algebra trivially has a model ([0,1] itself). Consistency becomes a question only when Cred is extended to a formal theory with axioms and a proof system.
+- **"Does Cred solve the liar paradox?"** — The liar sentence has credence 1/2 (Part 1, Lean: `liar_fixed_point`). Whether this counts as "solving" the paradox is philosophical, not mathematical.
+- **"What about Godel?"** — Godel sentences are not self-negating; they have definite truth values in standard models. Cred does not dissolve incompleteness. See `03-undecidability.md`.
 
-If Cred is inconsistent, cred(⊥) = ε > 0 for some ε, but the system doesn't explode (no ex falso). So inconsistency is bounded, not catastrophic.
+## Proof theory
 
-### Q2: What's the Relationship to ZFC?
-- Can ZFC be interpreted in Cred?
-- Can Cred be interpreted in ZFC?
-- Are they equiconsistent?
+1. **Sequent calculus for Cred.** What is a sound and complete proof system for Cred? What are the sequent rules? Does cut elimination hold?
 
-### Q3: Does Cred Have a Model?
-Is there a mathematical structure satisfying all Cred axioms?
+2. **Decidability.** Is validity (or satisfiability) in a Cred-based logic decidable? What complexity class?
 
-Candidate: [0,1] with product, complement, standard order, and conditioning via chain rule.
+3. **Proof-theoretic strength.** How does a Cred proof system compare in strength to classical logic, K3, LP, or product logic?
 
-### Q4: Is the Chain Rule Constraint Complete?
-Does the chain rule equation/constraint capture everything we want from conditioning?
+## Consequence relations
 
-Might need additional axioms:
-- (A | A) = 1? (when A > 0)
-- (A | B ∧ C) = ((A | C) | B)? (nested conditioning)
+4. **Compatibility with unconstrained conditioning.** Which consequence relations (beyond K3, LP, RM3) are compatible with the principle that impossible evidence provides no constraint? Part 2 poses this question; it remains open.
 
-## Logical Questions
+5. **Adams-type bounds without additivity.** Adams' probability logic uses sigma-additivity to propagate uncertainty. Can analogous bounds be proven for Cred valuations without additivity?
 
-### Q5: What's the Proof Theory?
-- What's a sequent calculus for Cred?
-- Cut elimination?
-- Normal forms?
+6. **Natural consequence relation on [0,1].** Is there a consequence relation directly on [0,1] credences (not factoring through the three-valued collapse) that is sound with respect to the algebra?
 
-### Q6: What's the Model Theory?
-- What are Cred models?
-- Completeness theorem?
-- Compactness?
+## Update rules and dynamics
 
-### Q7: What's the Computational Complexity?
-- Validity in Cred: decidable? What complexity class?
-- Satisfiability: decidable?
-- Computing credences: computable?
+7. **Coherence conditions for Cred updates.** Dutch book arguments constrain Bayesian updating in probability. What are the analogous coherence conditions for Cred update rules?
 
-### Q8: Relationship to Relevant Logic
-- Is Boolean Cred exactly a known relevant logic (R, E, RM)?
-- Or is it a new system?
-- What are the exact differences?
+8. **Update at zero evidence.** What should happen when you learn something you previously assigned credence zero? Probability uses disintegration. What is the Cred analogue?
 
-## Mathematical Questions
+## Self-reference and fixed points
 
-### Q9: Can All of Mathematics Be Done in Cred?
-- Arithmetic: Yes (cred 1 statements)
-- Analysis: Yes (limits work)
-- Set theory: Graded predicates instead of sets
-- Category theory: Should work
+9. **Fixed points beyond negation.** Which continuous self-referential operators f : [0,1] -> [0,1] yield unique interior fixed points? Negation does (c = 1/2). Product and De Morgan dual do not (boundary only).
 
-What, if anything, is lost?
+10. **Mutual reference.** For systems of n mutually referencing statements, what determines the dimension and structure of the solution set?
 
-### Q10: Are There New Theorems?
-Statements provable in Cred but not classically?
+11. **Lawvere's fixed point theorem.** Does Lawvere's categorical generalization of diagonal arguments apply to Cred's self-reference?
 
-Candidate: Statements about undecidability
-```
-"G has credence 0.5"  — provable in Cred, not expressible classically
-```
+## Connections to other systems
 
-### Q11: How Do Forcing and Large Cardinals Work?
-- Forcing changes Boolean models of ZFC
-- What does forcing do to credence models?
-- Do large cardinal axioms affect credences?
+12. **Relationship to relevant logic.** Part 1 shares the product De Morgan triplet with product fuzzy logic and collapses to the Kleene lattice (underlying K3/LP/RM3). What is the precise relationship to the relevant logics R, E, RM? Is a Cred-based system a known relevant logic or a new one?
 
-## Philosophical Questions
+13. **Paraconsistent set theory.** Brady and Weber developed mathematics on paraconsistent logic. How does Cred's graded predicate approach (fixed points instead of contradictions) compare?
 
-### Q12: What Is Truth in Cred?
-- Is cred = 1 "truth"?
-- Is cred > 0.5 "more true than false"?
-- Is there Platonic truth underlying credence?
+14. **Probabilistic programming.** Probabilistic programming languages use conditioning as a primitive (observe/condition). How does Cred's chain rule relate to these constructs?
 
-### Q13: Is Cred Objective or Subjective?
-- De Finetti: Probability is subjective (betting rates)
-- Classical logic: Truth is objective
-- Cred: ???
+15. **Higher-order quantification.** Part 2 defines first-order quantifiers as inf/sup. Second-order: inf/sup over predicates. Does this require restricting to measurable predicates, or does the algebraic approach avoid measure-theoretic issues?
 
-Possible answer: Cred is intersubjective — rational agents converge.
+## Implementation
 
-### Q14: Does Cred Solve the Liar Paradox?
-- Liar has cred = 0.5 — is this a solution or just a different problem?
-- Is cred = 0.5 meaningful or just a way to avoid the question?
+16. **Cred proof assistant.** Can a proof assistant be built that tracks credences through derivations? What would its type theory look like?
 
-## Technical Questions
+17. **Computational complexity of credence tracking.** In a Cred-based proof system, what is the cost of tracking credences through a derivation? Is it polynomial in proof length?
 
-### Q15: How to Handle Higher-Order Quantification?
-- First-order: inf/sup over domain
-- Second-order: inf/sup over predicates
-- Does this work for all predicates or just measurable ones?
+## Research priorities
 
-### Q16: What About Probability Measures?
-- Cred uses product (like probability)
-- But no marginalization (no general +)
-- Can we recover full probability theory?
+From most concrete to most speculative:
 
-### Q17: Can Cred Be Implemented?
-- Type checker for Cred?
-- Proof assistant?
-- What would it look like?
-
-## Connections to Other Fields
-
-### Q18: Quantum Logic?
-- Quantum logic rejects distributivity
-- Cred rejects ex falso
-- Any connection?
-
-### Q19: Paraconsistent Mathematics?
-- Brady, Weber: mathematics on relevant/paraconsistent logic
-- How does Cred relate?
-- Same or different?
-
-### Q20: Machine Learning?
-- ML deals with uncertainty, credences
-- Can Cred formalize ML reasoning?
-- Bayesian inference in Cred?
-
-## Priority Questions
-
-Most important for developing Cred:
-
-1. **Consistency** (Q1): Is the foundation sound?
-2. **Model** (Q3): Does a concrete model exist?
-3. **Completeness** (Q6): Can we prove completeness?
-4. **Implementation** (Q17): Can we build a proof assistant?
-5. **Relationship to relevant logic** (Q8): What's the exact connection?
-
-## Research Directions
-
-### Direction 1: Formalization
-Build a formal system (syntax, semantics, proof theory).
-
-### Direction 2: Metatheory
-Prove consistency, completeness, decidability results.
-
-### Direction 3: Applications
-Apply Cred to specific mathematical domains.
-
-### Direction 4: Implementation
-Build tools for reasoning in Cred.
-
-### Direction 5: Comparison
-Rigorous comparison with fuzzy logic, relevant logic, probability theory.
+1. Sequent calculus / proof system (builds directly on Parts 1-2)
+2. Relationship to relevant logic (comparison with known systems)
+3. Adams-type bounds without additivity (extends Part 2 consequence relations)
+4. Coherence conditions for updates (extends Part 2 update rules)
+5. Cred proof assistant (implementation, requires answers to 1-4)

@@ -39,11 +39,11 @@ When `cred(B)=0`, the equation becomes `x ⊗ 0 = 0`, which is satisfied by any 
 If we want to talk about “credence in CH given ZFC”, we need to define how proof-theoretic or model-theoretic information supplies constraints on credence assignments. For example, one could imagine a principle of the form:
 - if a theory `T` proves `P`, then `cred(P|T)=1`,
 
-but spelling this out requires (at least) a formal notion of what `T` is as “evidence”, and how joints like `cred(P ∧ T)` are supplied. None of that is in Part 1 yet.
+but spelling this out requires (at least) a formal notion of what `T` is as "evidence", and how joints like `cred(P ∧ T)` are supplied. Part 2 defines valuations and update rules, which provide part of this machinery, but the specific link between formal provability and credence constraints remains open.
 
 ## Practical Takeaway
 
-Part 1 gives a rigorous, Lean-checked algebra for manipulating credence values once they are assigned (and for understanding when conditioning is determined or underdetermined). It does not turn incompleteness results into specific numbers like `0.5`.
+Part 1 gives a rigorous, Lean-checked algebra for manipulating credence values once they are assigned (and for understanding when conditioning is determined or underdetermined). Part 2 adds valuations and update rules. Neither turns incompleteness results into specific numbers like `0.5`.
 
 ## Open Questions
 
