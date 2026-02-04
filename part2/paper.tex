@@ -66,8 +66,9 @@ inf/sup quantifiers.
 Different choices at each layer recover different systems: probability,
 product fuzzy logic, K$_3$, LP, RM3, and imprecise probability.
 We prove that explosion (the classical principle that a contradiction
-entails every proposition) fails for K$_3$, LP, and graded consequence
-at thresholds $0 < t \leq \tfrac{1}{2}$, and that the Russell predicate
+entails every proposition) fails non-vacuously for LP and graded
+consequence at thresholds $0 < t \leq \tfrac{1}{2}$, while K$_3$ avoids
+explosion vacuously, and that the Russell predicate
 yields credence~$\tfrac{1}{2}$ rather than a paradox.
 The main definitions and theorems are machine-checked in Lean~4.
 \end{abstract}
@@ -255,6 +256,8 @@ valuation equipped with a joint function
 $j : \alpha \times \alpha \to [0,1]$ satisfying
 $j(A, B) \leq v(A)$ and $j(A, B) \leq v(B)$ (marginal bounds).
 Lean: \texttt{JointValuation}.
+Symmetry ($j(A,B) = j(B,A)$) is not required; when modelling a
+commutative conjunction, one may additionally impose it.
 \end{definition}
 
 The joint function is external data---not computed from $v(A)$ and
@@ -266,12 +269,12 @@ Cred allows the same approach without requiring a measure.
 \begin{example}[Rain and Wet Street, Continued]
 \label{ex:rain-joint}
 Continuing Example~\ref{ex:rain}: with $v(R) = 0.7$, $v(W) = 0.9$,
-one might supply $j(R, W) = 0.65$ from data or domain knowledge.
-This gives $v(W \mid R) = j(R,W) / v(R) = 0.65 / 0.7 \approx 0.93$:
+one might supply $j(W, R) = 0.65$ from data or domain knowledge.
+This gives $v(W \mid R) = j(W,R) / v(R) = 0.65 / 0.7 \approx 0.93$:
 knowing it rained raises the credence of a wet street from $0.9$
 to $0.93$.
 The Fr\'echet bounds require
-$\max(0.7 + 0.9 - 1, 0) = 0.6 \leq j(R,W) \leq \min(0.7, 0.9) = 0.7$,
+$\max(0.7 + 0.9 - 1, 0) = 0.6 \leq j(W,R) \leq \min(0.7, 0.9) = 0.7$,
 and $0.65$ is within this interval.
 \end{example}
 
@@ -350,7 +353,8 @@ Cred (joint) & $[0,1]$ & External parameter & By choice \\
 \end{center}
 
 The constant valuation $v(A) = \tfrac{1}{2}$ for all $A$, with
-propositional negation as identity, is complement-preserving because
+the identity function as propositional negation ($\sigma(A) = A$ for
+all $A$), is complement-preserving because
 $\tfrac{1}{2} = 1 - \tfrac{1}{2}$ (the negation fixed point from Part~1).
 This is a degenerate example (every proposition equals its own negation),
 used as a technical witness---e.g., to show K$_3$ has no tautologies.
@@ -420,10 +424,12 @@ $\tfrac{1}{2}$, which is not K$_3$-designated.
 Lean: \texttt{k3\_no\_tautology}.
 \end{proof}
 
-\begin{proposition}[K$_3$: Excluded Middle Fails]
+\begin{proposition}[K$_3$: Excluded Middle Value Failure]
 \label{prop:k3-em}
 There exists a value $v$ such that $v \disjc \mathrm{neg}(v)$ is not
 K$_3$-designated.
+It follows from Proposition~\ref{prop:k3-no-taut} that excluded middle
+is not a K$_3$ tautology.
 \end{proposition}
 \begin{proof}
 At $v = \tfrac{1}{2}$: $\tfrac{1}{2} \disjc \tfrac{1}{2} = \tfrac{1}{2}$,
@@ -477,6 +483,9 @@ A_1, \ldots, A_n \models_t B \iff
 \forall v.\; (\forall i.\; v(A_i) \geq t) \Rightarrow v(B) \geq t.
 \]
 Lean: \texttt{gradedConsequence}.
+Here $v$ ranges over all functions $\alpha \to [0,1]$, not just
+complement-preserving valuations; this makes the no-explosion result
+(Theorem~\ref{thm:no-explosion}) stronger.
 \end{definition}
 
 \begin{proposition}[Graded at $t=1$ Is Strict]
@@ -525,9 +534,9 @@ The consequence-level results (\texttt{lp\_no\_explosion},
 \texttt{graded\_no\_explosion}) use this ingredient to construct
 a separating valuation: one where both $A$ and $\negc A$ are
 designated but some $B$ is not.
-Classical consequence (two-valued designation on $\{0,1\}$) has
-explosion; it arises from a setting where conditioning at zero
-is resolved by the measure, not left unconstrained.
+Informally, classical consequence (two-valued designation on
+$\{0,1\}$) has explosion; it arises from a setting where conditioning
+at zero is resolved by the measure, not left unconstrained.
 \end{remark}
 
 \subsection{Comparison}
@@ -540,7 +549,7 @@ is resolved by the measure, not left unconstrained.
   & \textbf{Excl.\ middle?} & \textbf{Explosion?} \\
 \midrule
 Classical & $\{1\}$ (two-valued) & Yes & Yes & Yes \\
-K$_3$ & $\{1\}$ & No & No & No$^\S$ \\
+K$_3$ & $\{1\}$ & No & No & Vacuous$^\S$ \\
 LP & $\{1, \tfrac{1}{2}\}$ & Yes & Yes & No \\
 RM3$^\dagger$ & $\{1, \tfrac{1}{2}\}$+relev. & Yes & Yes & No \\
 Graded ($t \leq \tfrac{1}{2}$) & $\{c \geq t\}$ & $^\ddagger$ & $^\ddagger$ & No \\
@@ -558,8 +567,8 @@ formalized in Lean.\\
 $^\ddagger$\,Tautologies and excluded middle for graded consequence depend
 on the threshold and are not formalized.
 At $t = 0$, every formula is a tautology; at $t > 0$, the
-constant-$0$ valuation assigns every formula value~$0 < t$,
-so no formula is a tautology.
+constant-$0$ valuation (which is not complement-preserving) assigns
+every formula value~$0 < t$, so no formula is a tautology.
 Excluded middle holds whenever $t \leq \tfrac{3}{4}$ (pen-and-paper):
 $v(A) \disjc \negc v(A) = 1 - v(A)(1 - v(A)) \geq \tfrac{3}{4}$
 for all $v(A) \in [0,1]$, since $v(A)(1 - v(A)) \leq \tfrac{1}{4}$.
@@ -598,10 +607,10 @@ propositionwise: $v'(A) \cdot v(B) = j(A, B)$ at every~$A$.
 \begin{example}[Rain and Wet Street: Update]
 \label{ex:rain-update}
 From Example~\ref{ex:rain-joint}: $v(R) = 0.7$, $v(W) = 0.9$,
-$j(R, W) = 0.65$.
+$j(W, R) = 0.65$.
 You observe that it rained ($B = R$).
 The Bayesian posterior for $W$ is
-$v'(W) = j(R,W) / v(R) = 0.65 / 0.7 \approx 0.93$:
+$v'(W) = j(W,R) / v(R) = 0.65 / 0.7 \approx 0.93$:
 your credence in a wet street rises from $0.9$ to $0.93$.
 \end{example}
 
@@ -656,14 +665,15 @@ The Jeffrey update satisfies $0 \leq v'(A) \leq 1$.
 \begin{proof}
 Since $c_B, c_{\negc B} \in [0,1]$ and $q \in [0,1]$, the convex
 combination stays in $[0,1]$.
-The bound is verified in the Lean definition's proof obligations.
+The bound is verified by the type constraints in the Lean definition
+of \texttt{jeffreyUpdate} (fields \texttt{nonneg} and \texttt{le\_one}).
 \end{proof}
 
-\begin{proposition}[Jeffrey Reduces to Bayesian]
+\begin{proposition}[Jeffrey at Extreme Evidence]
 \label{prop:jeffrey-bayesian}
-At $q = 1$, Jeffrey conditionalization reduces to the conditional
-on~$B$: $v'(A) = v(A \mid B)$.
-At $q = 0$, it gives $v'(A) = v(A \mid \negc B)$.
+At $q = 1$, the Jeffrey update returns~$c_B$.
+When $c_B = v(A \mid B)$, this is the Bayesian posterior.
+At $q = 0$, it returns~$c_{\negc B}$.
 Lean: \texttt{jeffreyUpdate\_certain}, \texttt{jeffreyUpdate\_zero}.
 \end{proposition}
 
@@ -805,10 +815,10 @@ identity; the credence-level reading follows by the definitions of
 \texttt{credInf} and \texttt{credSup}).
 \end{theorem}
 \begin{proof}
-For the $\leq$ direction: for each $x$, $\inf P \leq P(x)$, so
+For the $\geq$ direction: for each $x$, $\inf P \leq P(x)$, so
 $1 - P(x) \leq 1 - \inf P$.
 Taking the supremum gives $\sup(1 - P) \leq 1 - \inf P$.
-For the $\geq$ direction: for each $x$, $1 - P(x) \leq \sup(1 - P)$,
+For the $\leq$ direction: for each $x$, $1 - P(x) \leq \sup(1 - P)$,
 so $P(x) \geq 1 - \sup(1 - P)$ for all $x$,
 hence $\inf P \geq 1 - \sup(1 - P)$, i.e., $1 - \inf P \leq \sup(1 - P)$.
 \end{proof}
@@ -833,8 +843,12 @@ $P(x) = 1$ for all $x$ (by crispness), giving $\inf P = 1$, contradiction.
 Symmetric for (ii).
 \end{proof}
 
-Thus for crisp predicates, $\inf = \forall$ and $\sup = \exists$ in the
-classical sense: the graded quantifiers are genuine generalizations.
+These are the ``boundary witness'' cases of classical agreement.
+The complementary cases ($\inf P = 1$ iff $P(x) = 1$ for all $x$;
+$\sup P = 0$ iff $P(x) = 0$ for all $x$) hold by similar arguments
+but are not formalized.
+Together, they show that for crisp predicates, $\inf = \forall$ and
+$\sup = \exists$ in the classical sense.
 
 \subsection{Unrestricted Comprehension}
 
@@ -1021,8 +1035,14 @@ Lean~4 with Mathlib.
 The quantifier infrastructure uses wrapper functions (\texttt{credSup},
 \texttt{credInf}) around Mathlib's conditional supremum/infimum on
 $\Real$, with manual proofs that the results stay in $[0,1]$.
-Adams-type bounds (Section~\ref{sec:related}) are not formalized;
-they require additivity, which Cred does not assume.
+Results not formalized:
+RM3 properties (the relevance condition is syntactic);
+LP tautologies at the consequence level (only the value-level
+\texttt{lp\_excluded\_middle} is in Lean);
+graded excluded middle for $t \leq \tfrac{3}{4}$ and graded
+tautologies at $t = 0$ (pen-and-paper only);
+the complementary cases of classical agreement;
+Adams-type bounds (require additivity, which Cred does not assume).
 
 Verification: \texttt{cd lean \&\& lake build}.
 Toolchain: Lean 4.16.0 with Mathlib 4.16.0.
