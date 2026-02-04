@@ -648,8 +648,10 @@ determined.}
 
 \smallskip
 RM3 and the product residuated agree when evidence $\in \{0, 1\}$ but differ at
-evidence $= \tfrac{1}{2}$: for instance, RM3 gives $\tfrac{1}{2} \to 0 = \tfrac{1}{2}$,
-while the product residuated gives $0$.
+evidence $= \tfrac{1}{2}$: RM3 gives $\tfrac{1}{2} \to 0 = \tfrac{1}{2}$
+while the product residuated gives $0$, and RM3 gives
+$\tfrac{1}{2} \to \tfrac{1}{2} = \tfrac{1}{2}$ while the product residuated
+gives $1$.
 Cred conditioning (with Kleene joint) matches the product residuated for
 evidence $> 0$ and replaces the evidence $= 0$ row with~$*$.
 
@@ -733,8 +735,10 @@ Lean: \texttt{rm3\_not\_bayes\_consistent} (three values),
 On $\{0, \tfrac{1}{2}, 1\}$, the G\"odel implication coincides with the product
 residuated implication (Section~\ref{sec:collapse}), so it is Bayes-consistent
 on this finite set.
-Lean: \texttt{godel\_bayes\_consistent} (on three values using $\min$;
-transfers to real multiplication by case analysis).
+Lean: \texttt{godel\_bayes\_consistent} (three values using $\min$);
+Bayes consistency under real multiplication follows from
+\texttt{prod\_resid\_bayes\_consistent\_real} (which covers $[0,1]$) via
+\texttt{godel\_impl\_eq\_prod\_resid} (which establishes the coincidence).
 The failure occurs only on the full interval $[0,1]$.
 \end{remark}
 
