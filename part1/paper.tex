@@ -592,8 +592,9 @@ and the three logics (K$_3$, LP, RM3) that share it each define implication
 differently.
 
 \textbf{Conditioning is ternary, not binary.}
-Cred conditioning takes three inputs: evidence, joint, and the conclusion.
-The chain rule constrains the conclusion given the other two.
+Cred conditioning involves three quantities: evidence, joint, and the
+conditional credence.
+The chain rule constrains the conditional given the other two.
 For evidence $> 0$, the conditional is $\text{joint}/\text{evidence}$, which
 requires joint $\leq$ evidence.
 
@@ -835,8 +836,10 @@ Conversely, any joint in the Fr\'echet-Hoeffding interval admits
 conditioning structures in both directions.
 Case 1: both marginals positive---division gives the conditional
 (\texttt{frechet\_conditioning\_exists}).
-Case 2: at least one marginal is zero---then joint $= 0$ and any
-conditional satisfies the chain rule (\texttt{conditioning\_zero\_any}).
+Case 2: at least one marginal is zero---then joint $= 0$; the
+zero-evidence direction is unconstrained (\texttt{conditioning\_zero\_any})
+and the positive-evidence direction gives condCred $= 0$
+(\texttt{conditioning\_mk}).
 Lean: \texttt{frechet\_upper}, \texttt{frechet\_lower},
 \texttt{frechet\_conditioning\_exists}.
 \end{proof}
