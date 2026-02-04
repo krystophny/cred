@@ -66,8 +66,8 @@ inf/sup quantifiers.
 Different choices at each layer recover different systems: probability,
 product fuzzy logic, K$_3$, LP, RM3, and imprecise probability.
 We prove that explosion (the classical principle that a contradiction
-entails every proposition) fails for all consequence relations compatible
-with unconstrained conditioning at zero, and that the Russell predicate
+entails every proposition) fails for K$_3$, LP, and graded consequence
+at thresholds $t \leq \tfrac{1}{2}$, and that the Russell predicate
 yields credence~$\tfrac{1}{2}$ rather than a paradox.
 The main definitions and theorems are machine-checked in Lean~4.
 \end{abstract}
@@ -144,8 +144,8 @@ idempotence problem as a diagnostic for independence
 \item Consequence relations in two families: designated-value consequence
 (K$_3$, LP, RM3) via the three-valued collapse, and graded consequence
 parametrized by a threshold on $[0,1]$.
-Explosion fails for all consequence relations compatible with
-unconstrained conditioning at zero
+Explosion fails for K$_3$, LP, and graded consequence at
+$t \leq \tfrac{1}{2}$
 (Section~\ref{sec:consequence}).
 \item Bayesian and Jeffrey conditionalization as update rules on Cred
 valuations, with chain-rule preservation and zero-evidence
@@ -158,6 +158,14 @@ yielding fixed points rather than paradoxes
 (Section~\ref{sec:predicates}).
 \item Lean~4 formalization of the above (Section~\ref{sec:lean}).
 \end{enumerate}
+
+\textbf{Notation.}
+We use the notation of Part~1: $\negc$ for complement ($1-c$),
+$\conjc$ for product conjunction ($c_1 \cdot c_2$),
+$\disjc$ for De~Morgan disjunction, and
+$\condc{A}{B}$ for the conditional credence of $A$ given~$B$.
+New notation: $\models_D$ and $\models_t$ for semantic consequence under
+designation~$D$ or threshold~$t$.
 
 %=============================================================================
 \section{Valuations}
@@ -234,7 +242,7 @@ motivation for supplying joints externally.
 A \emph{joint-parametrized valuation} is a complement-preserving
 valuation equipped with a joint function
 $j : \alpha \times \alpha \to [0,1]$ satisfying
-$j(A, B) \leq v(A)$ and $j(A, B) \leq v(B)$ (the Fr\'echet upper bound).
+$j(A, B) \leq v(A)$ and $j(A, B) \leq v(B)$ (marginal bounds).
 Lean: \texttt{JointValuation}.
 \end{definition}
 
@@ -263,10 +271,15 @@ Direct application of Part~1's Fr\'echet bounds
 joint function.
 \end{proof}
 
+Complement non-negativity is not part of the \texttt{JointValuation}
+definition; it must be supplied as an additional hypothesis, as in
+Part~1.
+
 When $v(B) > 0$, conditioning is uniquely determined:
 $v(A \mid B) = j(A, B) / v(B)$
 (Lean: \texttt{JointValuation.conditioning}, via Part~1's
-\texttt{conditioning\_mk}).
+\texttt{conditioning\_mk} for existence and
+\texttt{conditioning\_unique} for uniqueness).
 
 \subsection{Collapse Composition}
 
@@ -316,6 +329,8 @@ Cred (joint) & $[0,1]$ & External parameter & By choice \\
 The constant valuation $v(A) = \tfrac{1}{2}$ for all $A$, with
 propositional negation as identity, is complement-preserving because
 $\tfrac{1}{2} = 1 - \tfrac{1}{2}$ (the negation fixed point from Part~1).
+This is a degenerate example (every proposition equals its own negation),
+used as a technical witness---e.g., to show K$_3$ has no tautologies.
 Lean: \texttt{CpValuation.constant\_half}.
 
 %=============================================================================
@@ -342,9 +357,12 @@ consequence relations, differing only in which values are
 K$_3$ designates $\{1\}$ (only certainty counts).
 LP designates $\{1, \tfrac{1}{2}\}$ (certainty and the
 intermediate value both count).
-RM3 designates $\{1, \tfrac{1}{2}\}$ with an additional relevance
-condition on inferences.
+RM3 designates $\{1, \tfrac{1}{2}\}$ with the additional requirement
+that premises and conclusion share a propositional
+variable~\cite{priest2008}.
 Lean: \texttt{isDesignatedK3}, \texttt{isDesignatedLP}.
+(RM3 designation is not formalized; the relevance condition is
+syntactic.)
 \end{definition}
 
 \begin{definition}[Three-Valued Consequence]
@@ -353,7 +371,7 @@ Premises $A_1, \ldots, A_n$ entail conclusion $B$ under designation
 $D$ when every three-valued valuation $v$ satisfying
 $v(A_i) \in D$ for all $i$ also satisfies $v(B) \in D$:
 \[
-A_1, \ldots, A_n \vdash_D B \iff
+A_1, \ldots, A_n \models_D B \iff
 \forall v.\;(\forall i.\; D(v(A_i))) \Rightarrow D(v(B)).
 \]
 Lean: \texttt{threeValConsequence}.
@@ -369,7 +387,7 @@ only~$1$ and is maximally paracomplete: it has no tautologies at all.
 \begin{proposition}[K$_3$ Has No Tautologies]
 \label{prop:k3-no-taut}
 Under K$_3$ consequence, no formula is a tautology:
-$\not\vdash_{\mathrm{K}_3} A$ for any $A$.
+$\not\models_{\mathrm{K}_3} A$ for any $A$.
 \end{proposition}
 \begin{proof}
 The constant-$\tfrac{1}{2}$ valuation assigns every formula the value
@@ -430,7 +448,7 @@ For a threshold $t \in [0,1]$, \emph{graded consequence} holds when
 every valuation making all premises $\geq t$ also makes the conclusion
 $\geq t$:
 \[
-A_1, \ldots, A_n \vdash_t B \iff
+A_1, \ldots, A_n \models_t B \iff
 \forall v.\; (\forall i.\; v(A_i) \geq t) \Rightarrow v(B) \geq t.
 \]
 Lean: \texttt{gradedConsequence}.
@@ -448,13 +466,11 @@ Lean: \texttt{graded\_at\_one\_is\_strict}.
 The key structural result: Cred's unconstrained conditioning at zero
 forces explosion to fail.
 
-\begin{theorem}[No Explosion at $\tfrac{1}{2}$]
+\begin{theorem}[No Explosion]
 \label{thm:no-explosion}
-There exists a valuation $v : \{A, B\} \to [0,1]$ with $v(A) = \tfrac{1}{2}$,
-$\negc v(A) = \tfrac{1}{2}$, and $v(B) = 0$.
-In particular, for any threshold $0 < t \leq \tfrac{1}{2}$, graded
-consequence does not have explosion: there exist valuations where both
-$A$ and $\negc A$ are above threshold but some~$B$ is below.
+For any threshold $0 < t \leq \tfrac{1}{2}$, graded consequence at~$t$
+does not have explosion: there exists a valuation $v$ with
+$v(A) \geq t$, $\negc v(A) \geq t$, and $v(B) < t$.
 \end{theorem}
 \begin{proof}
 Set $v(A) = \tfrac{1}{2}$, $v(B) = 0$.
@@ -465,14 +481,16 @@ Lean: \texttt{no\_explosion\_at\_half}, \texttt{graded\_no\_explosion}.
 \end{proof}
 
 \begin{remark}[Algebraic Basis]
-The no-explosion theorem follows from Part~1's
+The algebraic ingredient is Part~1's
 \texttt{conditioning\_zero\_any}: when evidence has credence~$0$, the
-chain rule $c \cdot 0 = 0$ is satisfied by any $c \in [0,1]$.
-No value is forced, so no conclusion is forced
-(Lean: \texttt{unconstrained\_blocks\_explosion}).
-This is the algebraic basis for why K$_3$, LP, and RM3---all of which
-avoid explosion---are the natural consequence relations for Cred.
-Classical logic, which has explosion, is incompatible.
+chain rule $c \cdot 0 = 0$ is satisfied by any $c \in [0,1]$
+(re-exported as \texttt{unconstrained\_blocks\_explosion}).
+The consequence-level results (\texttt{lp\_no\_explosion},
+\texttt{graded\_no\_explosion}) use this ingredient to construct
+a separating valuation: one where both $A$ and $\negc A$ are
+designated but some $B$ is not.
+The classical consequence relation, which has explosion, is
+incompatible with unconstrained conditioning at zero.
 \end{remark}
 
 \subsection{Comparison}
@@ -487,12 +505,24 @@ Classical logic, which has explosion, is incompatible.
 Classical & $\{1\}$ (two-valued) & Yes & Yes & Yes \\
 K$_3$ & $\{1\}$ & No & No & No \\
 LP & $\{1, \tfrac{1}{2}\}$ & Yes & Yes & No \\
-RM3 & $\{1, \tfrac{1}{2}\}$+relev. & Yes & Yes & No \\
-Graded ($t \leq \tfrac{1}{2}$) & $\{c \geq t\}$ & Depends on $t$ & If $t \leq \tfrac{1}{2}$ & No \\
+RM3$^\dagger$ & $\{1, \tfrac{1}{2}\}$+relev. & Yes & Yes & No \\
+Graded ($t \leq \tfrac{1}{2}$) & $\{c \geq t\}$ & $^\ddagger$ & $^\ddagger$ & No \\
 \bottomrule
 \end{tabular}
 \normalsize
 \end{center}
+
+\smallskip
+\noindent
+$^\dagger$\,RM3 properties are well-known~\cite{priest2008}; they are not
+formalized in Lean.\\
+$^\ddagger$\,Tautologies and excluded middle for graded consequence depend
+on the threshold and are not formalized.
+At $t = 0$, every formula is a tautology; at $t > 0$, the
+constant-$0$ valuation falsifies every formula.
+Excluded middle holds whenever $t \leq \tfrac{3}{4}$, since
+$v(A) \disjc \negc v(A) = 1 - v(A)(1 - v(A)) \geq \tfrac{3}{4}$
+for all $v(A) \in [0,1]$.
 
 %=============================================================================
 \section{Update Rules}
@@ -523,12 +553,12 @@ Lean: \texttt{bayesianUpdate}, \texttt{bayesianUpdateValuation}.
 \end{definition}
 
 The Bayesian update is the conditioning structure from Part~1 applied
-propositionwise: $v'(A) \conjc v(B) = j(A, B)$ at every~$A$.
+propositionwise: $v'(A) \cdot v(B) = j(A, B)$ at every~$A$.
 
 \begin{proposition}[Chain-Rule Preservation]
 \label{prop:chain-rule-preservation}
 The Bayesian posterior satisfies the chain rule by construction:
-$v'(A) \conjc v(B) = j(A, B)$.
+$v'(A) \cdot v(B) = j(A, B)$.
 Lean: \texttt{bayesianUpdate\_chain\_rule},
 \texttt{bayesianUpdateValuation\_chain\_rule}.
 \end{proposition}
@@ -559,8 +589,8 @@ conditional-on-$\negc B$ valuations.
 \begin{definition}[Jeffrey Update]
 \label{def:jeffrey-update}
 Given conditional credences $c_B = v(A \mid B)$ and
-$c_{\negc B} = v(A \mid \negc B)$, and a new evidence credence $q$,
-the Jeffrey update is
+$c_{\negc B} = v(A \mid \negc B)$ in $[0,1]$, and a new evidence
+credence $q \in [0,1]$, the Jeffrey update is
 \[
 v'(A) = c_B \cdot q + c_{\negc B} \cdot (1 - q).
 \]
@@ -579,8 +609,8 @@ The bound is verified in the Lean definition's proof obligations.
 
 \begin{proposition}[Jeffrey Reduces to Bayesian]
 \label{prop:jeffrey-bayesian}
-At $q = 1$, Jeffrey conditionalization reduces to the Bayesian case:
-$v'(A) = v(A \mid B)$.
+At $q = 1$, Jeffrey conditionalization reduces to the conditional
+on~$B$: $v'(A) = v(A \mid B)$.
 At $q = 0$, it gives $v'(A) = v(A \mid \negc B)$.
 Lean: \texttt{jeffreyUpdate\_certain}, \texttt{jeffreyUpdate\_zero}.
 \end{proposition}
@@ -589,16 +619,19 @@ Lean: \texttt{jeffreyUpdate\_certain}, \texttt{jeffreyUpdate\_zero}.
 
 When $v(B) = 0$, the chain rule $\condc{A}{B} \cdot 0 = 0$ is satisfied
 by any conditional (Part~1, \texttt{conditioning\_zero\_any}).
-Both Bayesian and Jeffrey conditionalization are therefore
-\emph{underdetermined} at zero evidence: the update mechanism provides no
-unique posterior.
+The conditional $v(A \mid B)$ is therefore underdetermined, and since both
+Bayesian and Jeffrey update take this conditional as input, neither
+produces a unique posterior at zero evidence.
 
 \begin{proposition}[Underdetermination]
 \label{prop:underdetermination}
 For any credence $c$, there exists a conditioning structure with
 evidence~$0$ and conditional~$c$.
+That is, the conditional input to Bayesian and Jeffrey update is
+unconstrained when evidence is zero.
 Lean: \texttt{bayesian\_underdetermined\_at\_zero},
-\texttt{jeffrey\_underdetermined\_at\_zero}.
+\texttt{jeffrey\_underdetermined\_at\_zero} (both re-export
+\texttt{conditioning\_zero\_any}).
 \end{proposition}
 
 This connects Cred to \emph{imprecise probability}~\cite{walley1991}:
@@ -618,7 +651,7 @@ epistemic state, not a failure of the formalism.
   \textbf{Requirements beyond Cred} & \textbf{Zero evidence?} \\
 \midrule
 Bayesian & $B$ certain & Full joints, $v(B) > 0$ & Underdetermined \\
-Jeffrey & $B$ has credence $q$ & Full joints, $v(B) > 0$, $v(\negc B) > 0$ & Underdetermined \\
+Jeffrey & $B$ has credence $q$ & Full joints, $v(B) > 0$, $v(\negc B) > 0^\star$ & Underdetermined \\
 Disintegration & $B$ certain & Measure space & Resolved \\
 \bottomrule
 \end{tabular}
@@ -627,9 +660,13 @@ Disintegration & $B$ certain & Measure space & Resolved \\
 
 \smallskip
 \noindent
-The pattern: Cred provides the algebraic substrate for all update rules.
-None is forced; each requires additional structure.
+$^\star$\,$v(\negc B) > 0$ is needed to determine the conditional input
+$v(A \mid \negc B)$, not for the Jeffrey formula itself.
+
+\smallskip
+\noindent
 The chain rule constrains what updates are coherent; it does not select one.
+Each update rule requires additional structure beyond the algebra.
 
 %=============================================================================
 \section{Graded Predicates and Quantifiers}
@@ -648,14 +685,15 @@ to which $x$ has property~$P$.
 \label{def:graded-predicate}
 A \emph{graded predicate} over a domain $X$ is a function
 $P : X \to [0,1]$.
-The value $P(x)$ is the credence that $x$ has property~$P$.
+The value $P(x)$ is the degree to which $x$ satisfies~$P$.
 Lean: \texttt{GradedPredicate}.
 \end{definition}
 
 Crisp predicates (range $\subseteq \{0, 1\}$) are the special case
 corresponding to classical sets.
 
-The Cred operations extend pointwise:
+The Cred operations extend pointwise (expanding the De~Morgan
+definition for disjunction):
 \begin{align*}
 (\negc P)(x) &= 1 - P(x) &\text{(complement)} \\
 (P \conjc Q)(x) &= P(x) \cdot Q(x) &\text{(conjunction)} \\
@@ -676,9 +714,11 @@ For graded predicates $P$, $Q$, $R$:
 \item $\negc(P \conjc Q) = \negc P \disjc \negc Q$ and
       $\negc(P \disjc Q) = \negc P \conjc \negc Q$ (De~Morgan).
 \end{enumerate}
-Lean: \texttt{GradedPredicate.neg\_neg}, \texttt{conj\_comm},
-\texttt{conj\_assoc}, \texttt{disj\_comm}, \texttt{disj\_assoc},
-\texttt{de\_morgan\_conj}, \texttt{de\_morgan\_disj}.
+Lean: \texttt{GradedPredicate.neg\_neg}, \texttt{GradedPredicate.conj\_comm},
+\texttt{GradedPredicate.conj\_assoc}, \texttt{GradedPredicate.disj\_comm},
+\texttt{GradedPredicate.disj\_assoc},
+\texttt{GradedPredicate.de\_morgan\_conj},
+\texttt{GradedPredicate.de\_morgan\_disj}.
 \end{proposition}
 \begin{proof}
 Each law follows from the corresponding Part~1 law applied at every point.
@@ -705,10 +745,12 @@ by any instance (Lean: \texttt{le\_exists}).
 \begin{theorem}[Quantifier Duality]
 \label{thm:quantifier-duality}
 \[
-\negc(\forall x.\; P(x)) = \exists x.\; \negc P(x),
+1 - \inf_x P(x) = \sup_x (1 - P(x)).
 \]
-i.e., $1 - \inf_x P(x) = \sup_x (1 - P(x))$.
-Lean: \texttt{quantifier\_duality\_val}.
+Informally: $\negc(\forall x.\; P(x)) = \exists x.\; \negc P(x)$.
+Lean: \texttt{quantifier\_duality\_val} (formalizes the real-valued
+identity; the credence-level reading follows by the definitions of
+\texttt{credInf} and \texttt{credSup}).
 \end{theorem}
 \begin{proof}
 For the $\leq$ direction: for each $x$, $\inf P \leq P(x)$, so
@@ -828,7 +870,7 @@ propagates uncertainty through valid classical inferences: if all premises
 have probability $\geq 1 - \varepsilon$, then the conclusion has
 probability $\geq 1 - n\varepsilon$ (for $n$ premises).
 Whether analogous bounds hold for Cred valuations without additivity
-remains open.
+is an open problem (see Section~\ref{sec:conclusion}).
 
 \textbf{Jeffrey Conditionalization.}
 Jeffrey~\cite{jeffrey1965,jeffrey1983} generalized Bayesian updating to
@@ -925,8 +967,8 @@ Lean~4 with Mathlib.
 The quantifier infrastructure uses wrapper functions (\texttt{credSup},
 \texttt{credInf}) around Mathlib's conditional supremum/infimum on
 $\Real$, with manual proofs that the results stay in $[0,1]$.
-Adams-type bounds and the copula-based update analysis are pen-and-paper
-(they require additivity or copula structure that Cred does not assume).
+Adams-type bounds (Section~\ref{sec:related}) are not formalized;
+they require additivity, which Cred does not assume.
 
 Verification: \texttt{cd lean \&\& lake build}.
 Toolchain: Lean 4.16.0 with Mathlib 4.16.0.
@@ -973,14 +1015,14 @@ than paradoxes.
 \textbf{What Part~2 provides and what it does not.}
 Part~2 provides interpretation, consequence, and update.
 It does not provide a proof theory (deductive calculus with rules of
-inference), asymptotic convergence (proofs as processes approaching
-credence~$1$), or self-hosting (building mathematics on Cred foundations).
+inference) or self-hosting (building mathematics on Cred foundations).
 These remain for Part~3.
 
 \medskip
 \textbf{Future work.}
-Proof theory for Cred, graded mathematics, self-hosting/metareasoning,
-and connections to probabilistic programming.
+Proof theory for Cred, Adams-type uncertainty bounds without additivity,
+graded mathematics, self-hosting/metareasoning, and connections to
+probabilistic programming.
 
 %=============================================================================
 % Bibliography
