@@ -889,6 +889,9 @@ But $f(b, a) = \max(1, \tfrac{1}{2}) = 1$, so $f(b, a) \cdot b = 0$.
 Since $\tfrac{1}{4} \neq 0$, RM3 is not Bayes-consistent.
 Lean: \texttt{rm3\_not\_bayes\_consistent\_real} (real multiplication on $[0,1]$,
 directly backing Definition~\ref{def:bayes}).
+Note: $\max(\negc a, b)$ on $[0,1]$ is the natural real-valued extension of the
+three-valued Kleene material conditional, not a standard named implication on
+the continuum.
 \end{proof}
 
 \begin{remark}
@@ -954,11 +957,12 @@ the joint is bounded above:
 \[
 \cred(A \land B) \;\leq\; \min(\cred(A),\; \cred(B)).
 \]
-If additionally the complement cell is non-negative---$1 - \cred(A) - \cred(B) + \cred(A \land B) \geq 0$
-(the other three cells of the $2 \times 2$ table are automatically
-non-negative: the joint is non-negative, and the upper bound just
-established gives $\cred(A) - \cred(A \land B) \geq 0$ and
-$\cred(B) - \cred(A \land B) \geq 0$)---then
+If additionally
+\[
+1 - \cred(A) - \cred(B) + \cred(A \land B) \;\geq\; 0
+\qquad\text{(complement non-negativity)}
+\]
+then
 \[
 \max(\cred(A) + \cred(B) - 1,\; 0) \;\leq\; \cred(A \land B).
 \]
@@ -975,6 +979,13 @@ $1 - \cred(A) - \cred(B) + \cred(A \land B) \geq 0$ rearranges to
 $\cred(A \land B) \geq \cred(A) + \cred(B) - 1$.
 Lean: \texttt{frechet\_upper}, \texttt{frechet\_lower}.
 \end{proof}
+
+Complement non-negativity is the only additional assumption needed for the
+lower bound: the other three cells of the $2 \times 2$ table are
+automatically non-negative (the joint is non-negative by definition, and
+the upper bound gives
+$\cred(A) - \cred(A \land B) \geq 0$ and
+$\cred(B) - \cred(A \land B) \geq 0$).
 
 \begin{corollary}[Tightness of the Fr\'echet-Hoeffding Bounds]
 \label{cor:frechet-tight}
@@ -1535,6 +1546,7 @@ The \texttt{joint} parameter is supplied as input, representing $\cred(A \land B
 \item \texttt{liar\_fixed\_point}: $\negc \tfrac{1}{2} = \tfrac{1}{2}$
 \item \texttt{neg\_fixed\_point\_unique}: $\tfrac{1}{2}$ is the unique negation fixed point
 \item \texttt{collapse\_neg}, \texttt{collapse\_conj}, \texttt{collapse\_disj}: homomorphism proofs
+\item \texttt{collapse\_surjective}: surjectivity of the collapse
 \item \texttt{conj\_disj\_not\_distrib}: non-distributivity counterexample
 \item \texttt{conj\_idempotent\_iff}: idempotence only at $\{0,1\}$
 \item \texttt{boolean\_neg\_closed}, \texttt{boolean\_conj\_closed},

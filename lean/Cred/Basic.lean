@@ -985,6 +985,15 @@ theorem collapse_disj (c₁ c₂ : Credence) :
             collapse_interior (c₁ ⊔ c₂) hdisj_ne_zero hdisj_ne_one
           simp only [hcoll1, hcoll2, hcoll_disj, ThreeVal.disj_half_half]
 
+/-- Collapse is surjective: every three-valued element has a preimage -/
+theorem collapse_surjective : ∀ v : ThreeVal,
+    ∃ c : Credence, collapse c = v := by
+  intro v
+  cases v with
+  | zero => exact ⟨0, collapse_zero⟩
+  | half => exact ⟨Credence.half, collapse_half⟩
+  | one => exact ⟨1, collapse_one⟩
+
 /-! ## Uniqueness of the Kleene Target
 
 No analogous collapse homomorphism exists for Gödel or Łukasiewicz algebras.
