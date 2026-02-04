@@ -386,12 +386,12 @@ In classical logic, consequence has \emph{explosion} (ex falso quodlibet):
 a contradiction entails every proposition.
 This section defines consequence relations for Cred and shows that
 explosion fails non-vacuously for LP and graded consequence, while
-K$_3$ has explosion only vacuously: for each three-valued
-value~$v$, at least one of $v$ and $\mathrm{neg}(v)$ is not in
-$\{1\}$ ($\mathrm{neg}(0) = 1$ but $0 \notin \{1\}$;
-$\mathrm{neg}(\tfrac{1}{2}) = \tfrac{1}{2} \notin \{1\}$;
-$\mathrm{neg}(1) = 0 \notin \{1\}$), so the premise of explosion
-is never satisfied.
+K$_3$ has explosion only vacuously: for no three-valued value~$v$
+are both $v$ and $\mathrm{neg}(v)$ in $\{1\}$
+(if $v = 1$ then $\mathrm{neg}(v) = 0$;
+if $v = 0$ then $v \notin \{1\}$;
+if $v = \tfrac{1}{2}$ then $v \notin \{1\}$),
+so the premise of explosion is never satisfied.
 
 \subsection{Designated Values}
 
@@ -504,7 +504,7 @@ every valuation making all premises $\geq t$ also makes the conclusion
 $\geq t$:
 \[
 A_1, \ldots, A_n \models_t B \iff
-\forall v.\; (\forall i.\; v(A_i) \geq t) \Rightarrow v(B) \geq t.
+\forall v \colon \alpha \to [0,1].\; (\forall i.\; v(A_i) \geq t) \Rightarrow v(B) \geq t.
 \]
 Lean: \texttt{gradedConsequence}.
 Here $v$ ranges over all functions $\alpha \to [0,1]$, not just
@@ -827,7 +827,8 @@ For graded predicates $P$, $Q$, $R$:
 \begin{enumerate}[label=(\roman*)]
 \item $\negc\negc P = P$ (double negation),
 \item $P \conjc Q = Q \conjc P$ and $P \disjc Q = Q \disjc P$ (commutativity),
-\item $(P \conjc Q) \conjc R = P \conjc (Q \conjc R)$ (associativity),
+\item $(P \conjc Q) \conjc R = P \conjc (Q \conjc R)$ and
+      $(P \disjc Q) \disjc R = P \disjc (Q \disjc R)$ (associativity),
 \item $\negc(P \conjc Q) = \negc P \disjc \negc Q$ and
       $\negc(P \disjc Q) = \negc P \conjc \negc Q$ (De~Morgan).
 \end{enumerate}
