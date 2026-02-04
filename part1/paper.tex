@@ -583,7 +583,7 @@ $\Pi$-logic~\cite{hajek1998}.
 
 \begin{center}
 \begin{tabular}{c|ccc}
-\multicolumn{4}{c}{\textbf{RM3}: $\max(\negc a, b)$} \\
+\multicolumn{4}{c}{\textbf{RM3} (material): $\max(\negc a, b)$} \\
 & 0 & $\tfrac{1}{2}$ & 1 \\
 \hline
 0 & 1 & 1 & 1 \\
@@ -680,7 +680,8 @@ $f(b, a) \cdot b = \tfrac{2}{5} \cdot \tfrac{3}{5} = \tfrac{6}{25} \neq \tfrac{2
 
 \begin{proposition}[RM3 is Not Bayes-Consistent]
 \label{prop:rm3-not-bayes}
-The RM3 implication $\max(\negc a, b)$ fails Bayes consistency even on
+The RM3 material conditional $\max(\negc a, b)$---the Kleene-lattice
+analogue of material implication---fails Bayes consistency even on
 $\{0, \tfrac{1}{2}, 1\}$.
 \end{proposition}
 \begin{proof}
@@ -761,10 +762,11 @@ Lower bound: the complement cell
 $1 - \cred(A) - \cred(B) + \cred(A \land B) \geq 0$ rearranges to
 $\cred(A \land B) \geq \cred(A) + \cred(B) - 1$.
 Conversely, any joint in the Fr\'echet-Hoeffding interval admits
-conditioning structures in both directions: by division when marginals
-are positive (\texttt{frechet\_conditioning\_exists}), and by
-\texttt{conditioning\_zero\_any} when a marginal is zero (forcing
-joint $= 0$).
+conditioning structures in both directions.
+Case 1: both marginals positive---division gives the conditional
+(\texttt{frechet\_conditioning\_exists}).
+Case 2: a marginal is zero---then joint $= 0$ and any conditional
+satisfies the chain rule (\texttt{conditioning\_zero\_any}).
 Lean: \texttt{frechet\_upper}, \texttt{frechet\_lower},
 \texttt{frechet\_conditioning\_exists}.
 \end{proof}
@@ -915,8 +917,9 @@ Lean: \texttt{no\_luk\_collapse}, \texttt{luk\_conj\_half\_half}.
 
 The pattern: the negation fixed point at $\tfrac{1}{2}$ propagates constraints
 that only the Kleene lattice can absorb.
-Classical logic and G\"odel logic fail because they lack a negation fixed point.
-\L ukasiewicz logic has the same negation, but its conjunction
+Classical logic and G\"odel logic fail on negation alone (they lack a fixed
+point).
+\L ukasiewicz logic preserves negation, but its conjunction
 $\mathrm{conj}_{\text{\L}}(\tfrac{1}{2}, \tfrac{1}{2}) = 0$ disagrees with the
 Kleene value $\min(\tfrac{1}{2}, \tfrac{1}{2}) = \tfrac{1}{2}$: the
 self-conjunction of the fixed point must equal the fixed point, and only the
