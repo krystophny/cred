@@ -95,7 +95,11 @@ R\'enyi~\cite{renyi1955,renyi1970} and Popper~\cite{popper1959} proposed an
 alternative: treat conditioning as \emph{primitive}, governed by the chain rule
 $P(A \mid B) \cdot P(B) = P(A \land B)$ without invoking division in the
 definition.
-Van Fraassen~\cite{vanfraassen1983} showed that this primitive approach
+De Finetti~\cite{definetti1936} proposed that a conditional event $A \mid B$
+is three-valued: true when $A \land B$, false when $\lnot A \land B$, and
+\emph{void} when $\lnot B$---conditioning on a false antecedent yields no
+truth value rather than vacuous truth.
+Van Fraassen~\cite{vanfraassen1983} showed that the primitive approach
 connects naturally to relevant logic: both avoid forcing ``from impossibility,
 anything follows.''
 
@@ -121,8 +125,8 @@ Probability avoids this not by weakening the t-norm but by using a different
 mechanism altogether: the chain rule $P(A \mid B) \cdot P(B) = P(A \land B)$ is
 a multiplicative constraint, not a residuation.
 When $P(B) = 0$, the constraint becomes $c \cdot 0 = 0$, satisfied by any $c$;
-the conditional is undefined (or, in R\'enyi's primitive approach,
-unconstrained) rather than forced to~$1$.
+the conditional is undefined (or, in de Finetti's three-valued
+approach~\cite{definetti1936}, \emph{void}) rather than forced to~$1$.
 
 Both traditions share the same carrier ($[0,1]$) and the same complement
 ($1 - c$).
@@ -375,6 +379,15 @@ The constraint-based definition means division is derived (as the unique solutio
 when evidence $> 0$) rather than primitive; at zero, no division is needed.
 To obtain ``from impossibility, anything follows,'' one must add an axiom
 $\cred(A \mid 0) = 1$; it does not follow from conditioning alone.
+
+De Finetti's three-valued conditional~\cite{definetti1936} captures the same
+principle in a discrete setting: when the conditioning event does not obtain,
+the conditional is void rather than vacuously true.
+In Cred's graded setting, ``void'' becomes ``any value in $[0,1]$ satisfies
+the chain rule,'' reflecting the path-dependence of the ratio
+$\text{joint}/\text{evidence}$ as both approach zero: the limit depends on the
+rate at which the joint decays relative to the evidence, and no single value
+is canonical.
 
 \subsection{Existence and Uniqueness}
 
@@ -1125,6 +1138,28 @@ Van Fraassen~\cite{vanfraassen1976} extended the Popper-R\'enyi approach.
 Cred inherits the chain rule from this tradition but drops the measure space
 entirely.
 
+\textbf{Conditional Events.}
+De Finetti~\cite{definetti1936} proposed that conditional events are
+three-valued: $A \mid B$ is true when $A \land B$, false when
+$\lnot A \land B$, and \emph{void} when $\lnot B$.
+The void value means conditioning on a false antecedent yields no truth value
+rather than vacuous truth---the same principle as Cred's unconstrained
+conditioning at evidence zero, applied in a discrete rather than graded
+setting.
+Calabrese~\cite{calabrese1987} formalized this as an algebra of ``Boolean
+fractions'' with three-valued indicator functions, providing an explicitly
+algebraic treatment.
+\'Egr\'e, Rossi, and Sprenger~\cite{egre2021} recently showed that
+de Finetti's three-valued conditional, combined with Kleene's strong
+connectives, produces logics in which explosion fails at the semantic
+level---not via a consequence relation but via the truth table itself.
+Relevant logics (RM3, R, E) and paraconsistent logics (LP) block explosion
+at the \emph{consequence-relation} level: RM3 has $0 \to b = 1$ in its truth
+table but restricts which inferences are valid.
+De Finetti's approach and Cred block it at the \emph{algebraic} level: the
+conditional is void or unconstrained when the antecedent fails, so the
+truth table itself never forces $0 \to b = 1$.
+
 \textbf{Probability and Relevant Logic.}
 Van Fraassen~\cite{vanfraassen1983} showed that conditional probability functions
 can model relevant logic's consequence relation, connecting probabilistic and
@@ -1226,7 +1261,9 @@ conditional is unconstrained rather than determined.
 
 \textbf{Cred's Contributions.}
 The product De Morgan triplet is standard; primitive conditioning is due to
-R\'enyi and Popper; the connection to relevant logic is van Fraassen's;
+R\'enyi and Popper; void conditionals at the algebraic level are due to
+de Finetti; the algebraic formalization of conditional events is due to
+Calabrese; the connection to relevant logic is van Fraassen's;
 the chain rule constraint in a fuzzy setting appears in H\'ajek et al.;
 copula-derived implications are due to Grzegorzewski.
 Given this prior art, Cred contributes:
@@ -1234,8 +1271,11 @@ Given this prior art, Cred contributes:
 \item Identifying the chain rule as the sole structural axiom needed beyond
 $[0,1]$ and complement---a weakening of probability that retains conditioning
 while dropping the measure.
-\item Adopting chain-rule conditioning as a design choice (not a workaround),
-replacing residuated implication in the product De Morgan triplet.
+\item Chain-rule conditioning in the product De Morgan triplet, continuing
+de Finetti's void-conditional tradition~\cite{definetti1936} in a graded
+setting.
+H\'ajek et al.~\cite{hajek1995} used the chain rule constraint as a
+technical device; Cred adopts it as the defining structural axiom.
 \item The explicit collapse homomorphism to the Kleene lattice (underlying
 K$_3$, LP, and RM3), with impossibility results for \L ukasiewicz, G\"odel,
 and classical targets, and Lean verification.
@@ -1323,9 +1363,10 @@ chain rule as the sole structural axiom.
 Every probability space satisfies these axioms; Cred drops the sigma-algebra
 and sigma-additivity.
 When evidence has credence zero, the chain rule is satisfied by any value,
-leaving the conditional unconstrained---avoiding ``from impossibility, anything
-follows'' by the same chain rule that probability uses, without the measure
-theory that would resolve it.
+leaving the conditional unconstrained---de Finetti's void
+conditional~\cite{definetti1936} in a graded setting---avoiding ``from
+impossibility, anything follows'' by the same chain rule that probability
+uses, without the measure theory that would resolve it.
 
 The product and its De Morgan dual provide the natural algebra on $[0,1]$,
 shared with product fuzzy logic.
@@ -1396,6 +1437,11 @@ Brady, R.
 \newblock \emph{Universal Logic}.
 \newblock CSLI Lecture Notes, vol.~109. CSLI Publications, 2006.
 
+\bibitem{calabrese1987}
+Calabrese, P.G.
+\newblock An algebraic synthesis of the foundations of logic and probability.
+\newblock \emph{Information Sciences}, 42:187--237, 1987.
+
 \bibitem{chang1997}
 Chang, J.T. and Pollard, D.
 \newblock Conditioning as disintegration.
@@ -1411,6 +1457,12 @@ da Costa, N.C.A.
 \newblock On the theory of inconsistent formal systems.
 \newblock \emph{Notre Dame Journal of Formal Logic}, 15(4):497--510, 1974.
 
+\bibitem{definetti1936}
+de Finetti, B.
+\newblock La logique de la probabilit\'e.
+\newblock In \emph{Actes du Congr\`es International de Philosophie Scientifique},
+vol.~IV, pages 1--9. Hermann, 1936.
+
 \bibitem{definetti1937}
 de Finetti, B.
 \newblock La pr\'evision: ses lois logiques, ses sources subjectives.
@@ -1420,6 +1472,12 @@ de Finetti, B.
 Dunn, J.M.
 \newblock Intuitive semantics for first-degree entailments and coupled trees.
 \newblock \emph{Philosophical Studies}, 29:149--168, 1976.
+
+\bibitem{egre2021}
+\'Egr\'e, P., Rossi, L., and Sprenger, J.
+\newblock De Finettian logics of indicative conditionals, Part~I:
+Trivalent semantics and validity.
+\newblock \emph{Journal of Philosophical Logic}, 50:187--213, 2021.
 
 \bibitem{fermuller2014}
 Ferm\"uller, C.G.
