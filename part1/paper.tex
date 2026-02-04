@@ -68,9 +68,9 @@ analogous homomorphism exists for the other standard three-valued algebras
 (\L ukasiewicz and G\"odel), and that no negation-preserving
 quotient to the two-valued Boolean algebra exists.
 Applying the chain rule from both directions (Bayes' theorem) yields a
-Bayes-consistency criterion that the product residuated implication satisfies
-but that RM3 fails (even on three values) and G\"odel fails (on the
-continuum).
+Bayes-consistency criterion: the product residuated implication is
+Bayes-consistent, but RM3 fails (even on three values) and G\"odel
+fails (on the continuum).
 Negation has a unique fixed point at $\tfrac{1}{2}$.
 All results are machine-checked in Lean~4, including
 Bayes consistency on $[0,1]$ and the copula symmetry argument.
@@ -144,8 +144,9 @@ When the t-norm is the algebraic product, they also share the same
 conjunction---the \emph{product De Morgan triplet}: the product t-norm, the
 probabilistic sum $c_1 + c_2 - c_1 c_2$, and the standard
 complement~\cite{klement2000}.
-The sole point of divergence is the arrow: residuation (forcing
-$0 \to y = 1$) vs.\ chain-rule conditioning (unconstrained at zero).
+Within the product De Morgan triplet, the sole point of divergence is the
+arrow: residuation (forcing $0 \to y = 1$) vs.\ chain-rule conditioning
+(unconstrained at zero).
 
 A concrete example makes the divergence vivid.
 Under the material conditional, ``if the moon is made of cheese, then my
@@ -223,6 +224,7 @@ Section~\ref{sec:algebra} defines the credence algebra.
 Section~\ref{sec:conditioning} develops primitive conditioning.
 Section~\ref{sec:fixed-points} treats fixed points.
 Section~\ref{sec:connections} relates Cred to other systems.
+Section~\ref{sec:related} surveys related work.
 Section~\ref{sec:lean} describes the Lean formalization.
 
 %=============================================================================
@@ -253,8 +255,8 @@ The \emph{product} of $c_1$ and $c_2$ is $c_1 \conjc c_2 = c_1 \cdot c_2$.
 
 The product is multiplication on $[0,1]$---the same operation that appears in the
 chain rule (Section~\ref{sec:conditioning}).
-It equals the joint probability $P(A \land B)$ when $A$ and $B$ are independent,
-hence the alternative name \emph{independence product}.
+It equals the joint probability $P(A \land B)$ when $A$ and $B$ are independent;
+we therefore call it the \emph{independence product}.
 For dependent propositions, the joint credence must be supplied as an external
 parameter; $\conjc$ does not claim to compute the joint of arbitrary propositions.
 
@@ -317,8 +319,9 @@ Lean: \texttt{neg\_neg}, \texttt{neg\_zero}, \texttt{neg\_one},
 The structure $([0,1], \conjc, \disjc, \negc, 0, 1)$ consists of two dual
 commutative monoids ($([0,1], \conjc, 1)$ and $([0,1], \disjc, 0)$) connected
 by an order-reversing involution $\negc$ satisfying De Morgan's laws.
-It is not a De Morgan algebra in the lattice-theoretic sense, since
-$\conjc$ is not idempotent (see below).
+It is not a De Morgan algebra in the lattice-theoretic sense: in particular,
+$\conjc$ is not idempotent (see below), and distributivity fails
+(Theorem~\ref{thm:nondistrib}).
 Throughout this paper, ``Cred'' refers to this concrete algebra on
 $[0,1]$---a carrier, three operations, and the chain rule.
 It is not a logic: there is no consequence relation, no designated truth
@@ -330,7 +333,7 @@ Those require additional structure (Section~\ref{sec:conclusion}).
 Unlike the two-element Boolean algebra $\{0,1\}$, the credence algebra is neither
 idempotent nor distributive.
 
-\begin{theorem}[Non-Idempotence]
+\begin{theorem}[Idempotence Characterization]
 \label{thm:idempotence}
 $c \conjc c = c$ if and only if $c \in \{0, 1\}$.
 \end{theorem}
@@ -361,8 +364,11 @@ Counterexample at $c_1 = c_2 = c_3 = \tfrac{1}{2}$:
 Lean: \texttt{conj\_disj\_not\_distrib}.
 \end{proof}
 
-This failure of distributivity distinguishes Cred from Boolean algebra and is
-essential for modeling uncertainty.
+Absorption likewise fails: $c \conjc (c \disjc d) \neq c$ in general
+(e.g., $\tfrac{1}{2} \conjc (\tfrac{1}{2} \disjc \tfrac{1}{2}) =
+\tfrac{1}{2} \cdot \tfrac{3}{4} = \tfrac{3}{8} \neq \tfrac{1}{2}$).
+These failures of distributivity and absorption distinguish Cred from
+Boolean algebra and from De Morgan lattices.
 
 %=============================================================================
 \section{Primitive Conditioning}
@@ -555,8 +561,8 @@ $1 - c = c$ implies $c = \tfrac{1}{2}$.
 Lean: \texttt{neg\_fixed\_point\_unique}.
 \end{proof}
 
-If a self-negating sentence $L$ satisfies $L \leftrightarrow \neg L$, requiring
-$\cred(L) = \negc \cred(L)$ gives $\cred(L) = \tfrac{1}{2}$.
+If one models a self-negating sentence $L$ by requiring
+$\cred(L) = \negc \cred(L)$, the unique solution is $\cred(L) = \tfrac{1}{2}$.
 This provides a natural algebraic value for such sentences.
 
 \begin{remark}[Scope]
@@ -635,7 +641,11 @@ Lean: \texttt{collapse\_neg}, \texttt{collapse\_conj}, \texttt{collapse\_disj}.
 \end{proof}
 
 The three-valued algebra $(\{0, \tfrac{1}{2}, 1\}, \min, \max, 1{-}c)$ is the
-\emph{Kleene lattice}---the three-element De Morgan chain~\cite{kleene1952}.
+\emph{Kleene lattice}: the three-element totally ordered set with
+$\mathrm{conj} = \min$, $\mathrm{disj} = \max$, and involution
+$\mathrm{neg}(c) = 1 - c$~\cite{kleene1952}.
+It is a De Morgan lattice (conjunction is idempotent, distributive, and
+absorptive on three elements).
 This algebra underlies three well-known logics that share the same truth tables for
 negation, conjunction, and disjunction:
 strong Kleene logic K$_3$~\cite{kleene1952},
@@ -729,7 +739,7 @@ and conclusion $b$ (columns), in contrast to the (evidence, joint) table above.
 
 \begin{center}
 \begin{tabular}{c|ccc}
-\multicolumn{4}{c}{\textbf{RM3} (material): $\max(\negc a, b)$} \\
+\multicolumn{4}{c}{\textbf{Material (Kleene)}: $\max(\negc a, b)$} \\
 & 0 & $\tfrac{1}{2}$ & 1 \\
 \hline
 0 & 1 & 1 & 1 \\
@@ -796,9 +806,12 @@ Applying the chain rule from both directions gives Bayes' theorem:
 \]
 \begin{definition}[Bayes Consistency]
 \label{def:bayes}
-A binary arrow $f : [0,1]^2 \to [0,1]$ used as conditioning is
+A binary arrow $f : [0,1]^2 \to [0,1]$ is
 \emph{Bayes-consistent} when the joint it induces is symmetric:
 $f(a, b) \cdot a = f(b, a) \cdot b$ for all $a, b$.
+Here $a$ is the evidence (first argument), $b$ the conclusion, and
+$f(a,b) \cdot a$ is the induced joint---the product of the conditional
+$f(a,b)$ and the evidence $a$.
 \end{definition}
 
 \begin{proposition}[Product Residuated is Bayes-Consistent]
@@ -866,10 +879,10 @@ A copula is a function $C : [0,1]^2 \to [0,1]$ satisfying
 $C(a,0) = C(0,b) = 0$, $C(a,1) = a$, $C(1,b) = b$, and the 2-increasing
 property~\cite{nelsen2006}.
 Every \emph{symmetric} copula ($C(a,b) = C(b,a)$) yields a Bayes-consistent
-arrow via $I_C(a,b) = C(a,b)/a$ for $a > 0$ (at $a = 0$ every copula
-gives $C(0,b) = 0$, so $I_C(0,b) = 0/0$ is undefined; Cred's chain
-rule $c \cdot 0 = 0$ is satisfied by any $c$, leaving the conditional
-unconstrained).
+arrow for positive arguments via $I_C(a,b) = C(a,b)/a$ for $a > 0$
+(at $a = 0$ every copula gives $C(0,b) = 0$, so $I_C(0,b) = 0/0$ is
+undefined; Cred's chain rule $c \cdot 0 = 0$ is satisfied by any $c$,
+leaving the conditional unconstrained).
 The induced joint $I_C(a,b) \cdot a = C(a,b)$ is symmetric.
 Grzegorzewski~\cite{grzegorzewski2013} computed three cases:
 the Fr\'echet upper bound $C(a,b) = \min(a,b)$ gives the product
@@ -883,7 +896,10 @@ RM3's induced joint $\max(\negc a, b) \cdot a$ violates copula boundary
 conditions ($a = \tfrac{1}{2}, b = 0$ gives $\tfrac{1}{4} \neq 0$);
 G\"odel's induced joint is not symmetric, so it cannot arise from a
 symmetric copula.
-Neither is Bayes-consistent.
+Neither is Bayes-consistent.%
+\footnote{Lawvere~\cite{lawvere1973} showed that residuation generalizes
+directed distance in enriched categories; this principle applies to the
+product residuated via the additive generator $-\log x$~\cite{klement2000}.}
 Lean: \texttt{symmetric\_bayes\_consistent}, \texttt{copula\_zero\_left}.
 \end{remark}
 
@@ -929,13 +945,17 @@ $\cred(A \land B) \geq \cred(A) + \cred(B) - 1$.
 Conversely, any joint in the Fr\'echet-Hoeffding interval admits
 conditioning structures in both directions.
 Case 1: both marginals positive---division gives the conditional
-(\texttt{frechet\_conditioning\_exists}).
-Case 2: at least one marginal is zero---then joint $= 0$; the
-zero-evidence direction is unconstrained (\texttt{conditioning\_zero\_any})
-and the positive-evidence direction gives condCred $= 0$
-(\texttt{conditioning\_mk}).
-Lean: \texttt{frechet\_upper}, \texttt{frechet\_lower},
-\texttt{frechet\_conditioning\_exists}.
+(Lean: \texttt{frechet\_conditioning\_exists}).
+Case 2: exactly one marginal is zero (say $\cred(A) = 0$, $\cred(B) > 0$)---%
+then joint $= 0$; conditioning given $B$ gives condCred $= 0$
+(\texttt{conditioning\_mk}), and conditioning given $A = 0$ is
+unconstrained (\texttt{conditioning\_zero\_any}).
+Case 3: both marginals zero---then joint $= 0$; both directions are
+unconstrained (\texttt{conditioning\_zero\_any} applied twice).
+Lean (bounds): \texttt{frechet\_upper}, \texttt{frechet\_lower}.
+Lean (existence, Case 1): \texttt{frechet\_conditioning\_exists}.
+Cases 2--3 follow from \texttt{conditioning\_zero\_any} and
+\texttt{conditioning\_mk} individually.
 \end{proof}
 
 \begin{remark}[Freedom of the Joint]
@@ -1278,7 +1298,10 @@ The relationship is: \emph{same connective algebra, different arrow}.
 Product fuzzy logic commits to the residuated arrow (including $0 \to y = 1$);
 Cred leaves the joint free and the evidence-zero row unconstrained.
 
-\subsection{Related Work}
+%=============================================================================
+\section{Related Work}
+\label{sec:related}
+%=============================================================================
 
 Cred sits in a web of prior work.
 The hierarchy---Cred as a weakening of probability, distinct from product fuzzy
@@ -1399,9 +1422,6 @@ The Bayes consistency criterion---that $f(a,b) \cdot a = f(b,a) \cdot b$,
 equivalently that the induced joint is symmetric---and its use to
 \emph{diagnose} why RM3 and G\"odel arrows fail (they are not
 copula-derived) appears to be new.
-Lawvere~\cite{lawvere1973} showed that residuation generalizes directed
-distance in enriched categories; this principle applies to the product
-residuated via the additive generator $-\log x$~\cite{klement2000}.
 
 \textbf{Measure-Theoretic Conditioning.}
 In measure theory, conditioning on null sets uses disintegration~\cite{chang1997},
@@ -1506,6 +1526,23 @@ on both three values and $[0,1]$, the copula symmetry argument, and the
 t-norm conditioning uniqueness results.
 The file also contains auxiliary results (spread/certainty of credences)
 not discussed in this paper.
+The converse of Proposition~\ref{prop:frechet} (existence of conditioning
+for any joint in the Fr\'echet-Hoeffding interval) is formalized for the
+both-marginals-positive case (\texttt{frechet\_conditioning\_exists});
+the zero-marginal cases follow from \texttt{conditioning\_zero\_any}
+and \texttt{conditioning\_mk} individually but are not wrapped in a
+single combined theorem.
+
+\textbf{Formalization notes.}
+The collapse homomorphism proofs require careful case analysis
+(nine cases for conjunction and disjunction) to show that boundary
+values map correctly and that the open interval $(0,1)$ is preserved.
+The \L ukasiewicz impossibility proof uses Lean's \texttt{Real.sqrt} to
+construct an intermediate credence $c = 1/\!\sqrt{2}$ satisfying
+$c \conjc c = \tfrac{1}{2}$---a witness that does not appear in
+the three-valued set.
+The three-valued comparisons (RM3 vs.\ G\"odel vs.\ Cred) use Lean's
+\texttt{decide} tactic for exhaustive checking of finite truth tables.
 
 Verification: \texttt{cd lean \&\& lake build}.
 Toolchain: Lean 4.16.0 with Mathlib 4.16.0.
