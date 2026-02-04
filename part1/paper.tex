@@ -66,9 +66,9 @@ We establish a surjective homomorphism from Cred to the three-valued Kleene
 algebra---the shared foundation of K$_3$, LP, and RM3---and prove this collapse
 target is unique: no analogous homomorphism exists for \L ukasiewicz, G\"odel,
 or classical algebras.
-Applying the chain rule from both directions (Bayes' theorem) selects the
-product residuated implication as the unique Bayes-consistent arrow among the
-standard logic implications (RM3, G\"odel, product residuated).
+Applying the chain rule from both directions (Bayes' theorem) yields a
+Bayes-consistency criterion that the product residuated implication satisfies
+but that the RM3 and G\"odel implications fail.
 Negation has a unique fixed point at $\tfrac{1}{2}$.
 All core results are machine-checked in Lean~4.
 \end{abstract}
@@ -122,12 +122,12 @@ unconstrained at zero).
 \item A weakening of probability that retains the chain rule as primitive
 conditioning, where division is derived (unique when evidence $> 0$) and
 conditioning is unconstrained at evidence zero (Section~\ref{sec:conditioning}).
-\item A surjective homomorphism from Cred to the Kleene algebra (underlying
+\item A surjective homomorphism from Cred to the Kleene lattice (underlying
 K$_3$, LP, and RM3) for $\{\negc, \conjc, \disjc\}$, with impossibility results
 for alternative targets and machine-checked proof (Section~\ref{sec:connections}).
-\item Bayes consistency---the chain rule applied from both directions---selects
-the product residuated implication as the unique standard Bayes-consistent
-binary arrow; Bayes-consistent arrows are exactly the copula-derived arrows
+\item Bayes consistency---the chain rule applied from both directions---as a
+selection criterion: the product residuated implication passes; RM3 and
+G\"odel fail.  Every copula yields a Bayes-consistent arrow
 (Section~\ref{sec:connections}).
 \item Fixed-point analysis: $\tfrac{1}{2}$ is the unique fixed point of negation
 (Section~\ref{sec:fixed-points}).
@@ -187,7 +187,7 @@ conjunction is the product t-norm, disjunction its dual t-conorm (the
 ``probabilistic sum''), and negation the standard
 complement~\cite{klement2000,hajek1998}.
 These operations are truth-functional---determined entirely by the operand
-values---which is what makes the collapse homomorphism to the Kleene algebra
+values---which is what makes the collapse homomorphism to the Kleene lattice
 possible (Section~\ref{sec:connections}).
 
 \begin{remark}[Credence vs.\ Probability]
@@ -235,7 +235,7 @@ by an order-reversing involution $\negc$ satisfying De Morgan's laws.
 This is the \emph{product De Morgan triplet}~\cite{klement2000}: a t-norm,
 its dual t-conorm, and the standard complement.
 It is not a De Morgan algebra in the lattice-theoretic sense, since
-$\conjc$ is neither idempotent nor absorptive (see below).
+$\conjc$ is not idempotent (see below).
 
 \subsection{Non-Idempotence and Non-Distributivity}
 
@@ -295,14 +295,18 @@ In propositional notation: $\condc{A}{B} \conjc \cred(B) = \cred(A \land B)$.
 
 The \texttt{joint} parameter represents $\cred(A \land B)$ and is supplied
 as input---it is not computed from marginal credences.
-This parametric design parallels how Boolean algebra defines operations on
-truth values without specifying which propositions have which values.
+This differs from R\'enyi--Popper conditioning, where $P(A \mid B)$ is a
+two-argument function: here conditioning is a three-parameter constraint
+(joint, evidence, conditional) related by the chain rule.
+When $\cred(B) > 0$, the constraint uniquely determines the conditional
+from joint and evidence, recovering the two-argument function as a
+derived concept.
 
 \subsection{Boundary Behavior}
 
 \textbf{Evidence = 1.}
-The chain rule gives $\cred(A \mid 1) \conjc 1 = \cred(A \land B)$,
-so $\cred(A \mid 1) = \cred(A \land B)$.
+When $\cred(B) = 1$, the chain rule gives
+$\cred(A \mid B) \conjc 1 = \text{joint}$, so $\cred(A \mid B) = \text{joint}$.
 Conditioning on certainty returns the joint credence.
 
 \textbf{Evidence = 0.}
@@ -489,7 +493,7 @@ Lean: \texttt{collapse\_neg}, \texttt{collapse\_conj}, \texttt{collapse\_disj}.
 \end{proof}
 
 The three-valued algebra $(\{0, \tfrac{1}{2}, 1\}, \min, \max, 1{-}c)$ is the
-\emph{Kleene algebra}---the three-element De Morgan chain~\cite{kleene1952}.
+\emph{Kleene lattice}---the three-element De Morgan chain~\cite{kleene1952}.
 This algebra underlies three well-known logics that share the same truth tables for
 negation, conjunction, and disjunction:
 strong Kleene logic K$_3$~\cite{kleene1952},
@@ -531,7 +535,7 @@ $\tfrac{1}{2}$ & $\tfrac{1}{2}$ & $\tfrac{1}{2}$ & 1 \\
 
 \textbf{Scope of the collapse.}
 The homomorphism of Theorem~\ref{thm:collapse} covers $\{\negc, \conjc, \disjc\}$.
-Implication is a separate question: the Kleene algebra has no canonical arrow,
+Implication is a separate question: the Kleene lattice has no canonical arrow,
 and the three logics (K$_3$, LP, RM3) that share it each define implication
 differently.
 
@@ -584,7 +588,7 @@ $\tfrac{1}{2}$ & $\tfrac{1}{2}$ & $\tfrac{1}{2}$ & 1 \\
 \end{tabular}
 \quad
 \begin{tabular}{c|ccc}
-\multicolumn{4}{c}{\textbf{G\"odel/Resid.}: $\min(b/a, 1)$} \\
+\multicolumn{4}{c}{\textbf{Prod.\ resid.}: $\min(b/a, 1)$} \\
 & 0 & $\tfrac{1}{2}$ & 1 \\
 \hline
 0 & 1 & 1 & 1 \\
@@ -606,11 +610,11 @@ $\tfrac{1}{2}$ & 0 & 1 & 1 \\
 determined.}
 
 \smallskip
-RM3 and G\"odel/residuated agree when evidence $\in \{0, 1\}$ but differ at
+RM3 and the product residuated agree when evidence $\in \{0, 1\}$ but differ at
 evidence $= \tfrac{1}{2}$: RM3 gives $\tfrac{1}{2} \to 0 = \tfrac{1}{2}$,
-while G\"odel/residuated gives $0$.
-Cred conditioning (with Kleene joint) matches G\"odel/residuated for evidence
-$> 0$ and replaces the evidence $= 0$ row with~$*$.
+while the product residuated gives $0$.
+Cred conditioning (with Kleene joint) matches the product residuated for
+evidence $> 0$ and replaces the evidence $= 0$ row with~$*$.
 
 Lean: \texttt{godel\_impl}, \texttt{godel\_impl\_ne\_rm3\_impl},
 \texttt{cred\_no\_ex\_falso\_godel}.
@@ -728,10 +732,11 @@ the joint is bounded above:
 \[
 \cred(A \land B) \;\leq\; \min(\cred(A),\; \cred(B)).
 \]
-If additionally all four cells $\cred(A \land B)$,
+If additionally the four cells of the $2 \times 2$ table---$\cred(A \land B)$,
 $\cred(A) - \cred(A \land B)$,
 $\cred(B) - \cred(A \land B)$, and
-$1 - \cred(A) - \cred(B) + \cred(A \land B)$ are non-negative, then
+$1 - \cred(A) - \cred(B) + \cred(A \land B)$---are all non-negative
+(the standard condition for a valid joint distribution), then
 \[
 \max(\cred(A) + \cred(B) - 1,\; 0) \;\leq\; \cred(A \land B).
 \]
@@ -810,7 +815,7 @@ $\cred(A \mid 0) = 1$.
 \subsection{Subalgebra vs.\ Quotient}
 \label{sec:scope}
 
-Cred relates to classical logic and to the Kleene algebra in structurally
+Cred relates to classical logic and to the Kleene lattice in structurally
 different ways: embedding vs.\ quotient.
 
 \textbf{Boolean subalgebra.}
@@ -893,17 +898,17 @@ Lean: \texttt{no\_luk\_collapse}, \texttt{luk\_conj\_half\_half}.
 \end{proof}
 
 The pattern: the negation fixed point at $\tfrac{1}{2}$ propagates constraints
-that only the Kleene algebra can absorb.
+that only the Kleene lattice can absorb.
 Classical logic and G\"odel logic fail because they lack a negation fixed point.
 \L ukasiewicz logic has the same negation, but its conjunction
 $\mathrm{conj}_{\text{\L}}(\tfrac{1}{2}, \tfrac{1}{2}) = 0$ disagrees with the
 Kleene value $\min(\tfrac{1}{2}, \tfrac{1}{2}) = \tfrac{1}{2}$: the
 self-conjunction of the fixed point must equal the fixed point, and only the
-Kleene algebra satisfies this.
+Kleene lattice satisfies this.
 
 \begin{remark}[Belnap-Dunn Four-Valued Logic]
 \label{rem:fde}
-The Kleene algebra embeds as a subalgebra of the Belnap-Dunn four-valued
+The Kleene lattice embeds as a subalgebra of the Belnap-Dunn four-valued
 lattice~\cite{belnap1977,dunn1976}, via the inclusion
 $\{0, \tfrac{1}{2}, 1\} \hookrightarrow \{\mathbf{f}, \mathbf{b}, \mathbf{t}, \mathbf{n}\}$
 mapping $0 \mapsto \mathbf{f}$, $\tfrac{1}{2} \mapsto \mathbf{b}$, $1 \mapsto \mathbf{t}$.
@@ -953,7 +958,7 @@ undefined (as in standard probability) or resolved (as via disintegration).
 \toprule
 \textbf{System} & \textbf{Core axioms} & \textbf{Adds on top} & \textbf{At evidence $= 0$} \\
 \midrule
-\textbf{Cred} & $[0,1]$ + complement + chain rule & --- & Unconstrained \\
+\textbf{Cred} & $[0,1]$ + complement + chain rule & --- & Unconstrained$^{**}$ \\
 Probability & Cred's axioms & Measure + $\sigma$-additivity & Undefined$^*$ \\
 Product fuzzy ($\Pi$) & $[0,1]$ + product t-norm + residuated impl. & Deductive calculus & $0 \to y = 1$ \\
 Classical logic & $\{0,1\}$ + Boolean ops + material impl. & --- & $0 \to y = 1$ \\
@@ -964,8 +969,11 @@ RM3 & $\{0,\tfrac{1}{2},1\}$ + De Morgan ops + $\max$ impl. & Designated values 
 \end{center}
 
 \smallskip
-\noindent $^*$Undefined: the expression is ill-formed (division by zero).
-Unconstrained: the expression is well-formed but any value satisfies it.
+\noindent $^*$Undefined: the expression $P(A \mid B) = P(A \land B)/P(B)$ is
+ill-formed (division by zero).
+
+\noindent $^{**}$Unconstrained: the chain rule $c \cdot 0 = 0$ is well-formed
+and satisfied by every $c \in [0,1]$; no value is selected or excluded.
 
 \noindent $^\dagger$RM3 has $0 \to b = 1$ in its truth table, but only values
 $\{1, \tfrac{1}{2}\}$ are designated for valid inference, so explosion is blocked
@@ -974,7 +982,7 @@ at the level of consequence rather than at the truth-table level.
 \smallskip
 The table makes the hierarchy explicit.
 Probability is a special case of Cred (same chain rule, additional structure).
-Cred's algebra $\{\negc, \conjc, \disjc\}$ collapses to the Kleene algebra
+Cred's algebra $\{\negc, \conjc, \disjc\}$ collapses to the Kleene lattice
 shared by K$_3$, LP, and RM3.
 Cred's conditioning, when instantiated as a binary arrow via the Kleene joint,
 gives the product residuated implication for evidence $> 0$---distinct from
@@ -1058,7 +1066,7 @@ Priest~\cite{priest1979} introduced the Logic of Paradox (LP).
 Brady~\cite{brady2006} and Weber~\cite{weber2010} developed paraconsistent set
 theory with unrestricted comprehension.
 The collapse homomorphism (Section~\ref{sec:collapse}) connects Cred to the
-Kleene algebra~\cite{kleene1952} that underlies K$_3$, LP, and RM3.
+Kleene lattice~\cite{kleene1952} that underlies K$_3$, LP, and RM3.
 These three logics share the same truth tables for $\{\negc, \conjc, \disjc\}$;
 the collapse is to this shared algebra, not to any one logic's consequence relation.
 
@@ -1070,7 +1078,7 @@ Belnap~\cite{belnap1977} introduced a four-valued logic for reasoning with
 incomplete and contradictory information.
 Zadeh~\cite{zadeh1965} introduced fuzzy sets with $[0,1]$ membership degrees.
 Section~\ref{sec:scope} shows that no analogous collapse exists for
-\L ukasiewicz, G\"odel, or classical algebras, making the Kleene algebra the
+\L ukasiewicz, G\"odel, or classical algebras, making the Kleene lattice the
 unique natural three-valued quotient of Cred.
 
 \textbf{Copulas and Fuzzy Implications.}
@@ -1107,14 +1115,13 @@ $[0,1]$ and complement---a weakening of probability that retains conditioning
 while dropping the measure.
 \item Adopting chain-rule conditioning as a design choice (not a workaround),
 replacing residuated implication in the product De Morgan triplet.
-\item The explicit collapse homomorphism to the Kleene algebra (underlying
+\item The explicit collapse homomorphism to the Kleene lattice (underlying
 K$_3$, LP, and RM3), with impossibility results for \L ukasiewicz, G\"odel,
 and classical targets, and Lean verification.
-\item Bayes consistency as a selection criterion: the chain rule applied from
-both directions selects the product residuated implication as the unique
-Bayes-consistent arrow among RM3, G\"odel, and product residuated
-implications, with every copula yielding a Bayes-consistent arrow
-(machine-checked on three values; pen-and-paper on $[0,1]$).
+\item Bayes consistency as a selection criterion: the product residuated
+implication passes; RM3 and G\"odel fail.  Every copula yields a
+Bayes-consistent arrow (machine-checked on three values; pen-and-paper
+on $[0,1]$).
 \item Systematic treatment of fixed points with machine-checked proofs.
 \end{enumerate}
 
@@ -1172,6 +1179,14 @@ The \texttt{joint} parameter is supplied as input, representing $\cred(A \land B
 \item \texttt{frechet\_conditioning\_exists}: bidirectional conditioning for any joint in bounds
 \end{itemize}
 
+\textbf{Scope of formalization.}
+The Lean file covers the core algebra, conditioning, fixed points, the
+collapse homomorphism and its impossibility results, and Bayes consistency
+on three values.
+The Bayes consistency results on $[0,1]$ (Propositions~\ref{prop:resid-bayes}
+and~\ref{prop:godel-not-bayes}) and the copula connection
+(Remark~\ref{rem:copula}) are pen-and-paper.
+
 Verification: \texttt{cd lean \&\& lake build}.
 Toolchain: Lean 4.16.0 with Mathlib 4.16.0.
 
@@ -1192,22 +1207,21 @@ theory that would resolve it.
 The product and its De Morgan dual provide the natural algebra on $[0,1]$,
 shared with product fuzzy logic.
 The three-valued collapse establishes a surjective homomorphism to the Kleene
-algebra---the shared foundation of K$_3$, LP, and RM3---for the connective
+lattice---the shared foundation of K$_3$, LP, and RM3---for the connective
 fragment $\{\negc, \conjc, \disjc\}$, and no analogous collapse exists for
 \L ukasiewicz, G\"odel, or classical targets.
 Conditioning, when instantiated as a binary arrow via the Kleene joint,
 recovers the product residuated implication for positive evidence; the sole
 divergence from product fuzzy logic is at evidence zero, where Cred is
 unconstrained rather than forced to~$1$.
-Applying the chain rule from both directions (Bayes' theorem) selects the
-product residuated implication as the unique Bayes-consistent arrow among
-the standard logic implications (RM3, G\"odel, product residuated):
-RM3's arrow fails even on three values, and G\"odel's fails on the
-continuum.
+Applying the chain rule from both directions (Bayes' theorem) yields a
+Bayes-consistency criterion that the product residuated implication satisfies
+but that RM3's arrow fails (even on three values) and G\"odel's fails
+(on the continuum).
 The product residuated implication is copula-derived---it arises from
 conditioning under the Fr\'echet upper bound (maximum positive
-dependence)---and Bayes consistency is equivalent to copula-derivability,
-explaining why non-copula arrows fail.
+dependence)---and every copula yields a Bayes-consistent arrow, explaining
+why the non-copula RM3 and G\"odel arrows fail.
 The negation fixed point at $\tfrac{1}{2}$ provides a natural algebraic value
 for self-negating sentences.
 All core results are machine-checked in Lean~4.
