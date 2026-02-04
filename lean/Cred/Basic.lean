@@ -837,7 +837,7 @@ end Credence
 
 The collapse function maps the continuous [0,1] credence algebra to the discrete
 three-valued algebra. This section proves that collapse is a homomorphism for
-negation, conjunction, and disjunction (Theorem 5.1 in the paper).
+negation, conjunction, and disjunction (Collapse Homomorphism theorem in the paper).
 
 Key insight: The operations on ThreeVal are defined as min/max on {0, 1/2, 1},
 which exactly matches what happens when Cred operations are applied to these

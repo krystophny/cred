@@ -835,8 +835,8 @@ Conversely, any joint in the Fr\'echet-Hoeffding interval admits
 conditioning structures in both directions.
 Case 1: both marginals positive---division gives the conditional
 (\texttt{frechet\_conditioning\_exists}).
-Case 2: a marginal is zero---then joint $= 0$ and any conditional
-satisfies the chain rule (\texttt{conditioning\_zero\_any}).
+Case 2: at least one marginal is zero---then joint $= 0$ and any
+conditional satisfies the chain rule (\texttt{conditioning\_zero\_any}).
 Lean: \texttt{frechet\_upper}, \texttt{frechet\_lower},
 \texttt{frechet\_conditioning\_exists}.
 \end{proof}
@@ -845,7 +845,8 @@ Lean: \texttt{frechet\_upper}, \texttt{frechet\_lower},
 \label{rem:freedom}
 Cred leaves the joint free: any value in the Fr\'echet-Hoeffding interval
 $[\max(a + b - 1, 0),\; \min(a, b)]$ is a valid joint credence, and
-chain-rule conditioning produces a Bayes-consistent arrow for each choice.
+any symmetric joint function taking values in this interval yields a
+Bayes-consistent arrow via the chain rule.
 The Fr\'echet upper bound $\min(a, b)$ yields the product residuated
 (Goguen) implication $\min(b/a, 1)$---the implication of H\'ajek's
 product logic $\Pi$~\cite{hajek1998}.
@@ -1117,7 +1118,7 @@ ill-formed (division by zero).
 and satisfied by every $c \in [0,1]$; no value is selected or excluded.
 
 \noindent $^\dagger$RM3 has $0 \to b = 1$ in its truth table, but values
-$\{1, \tfrac{1}{2}\}$ are designated (as in LP), and RM3 additionally
+$\{1, \tfrac{1}{2}\}$ are designated (as in LP); RM3 additionally
 imposes a relevance condition on valid inferences, so explosion is
 blocked at the level of consequence rather than at the truth-table level.
 
