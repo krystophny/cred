@@ -1269,4 +1269,215 @@ theorem min_nontrivial_conditioning :
   · simp only [Credence.quarter_val, Credence.half_val]
     norm_num
 
+/-! ## Uniqueness of Min Copula
+
+The following theorems prove that the min copula is the UNIQUE function satisfying
+symmetry (Bayes consistency), idempotence, boundary conditions, and the 2-increasing
+property of copulas.
+
+This answers the question: "Is there a family of copulas between independence and
+max-dependence that satisfies all our requirements?" The answer is NO - min is unique.
+-/
+
+/-- The 2-increasing property for a joint function.
+    For any rectangle [a₁,a₂] × [b₁,b₂], the "volume" is non-negative:
+    j(a₂,b₂) - j(a₂,b₁) - j(a₁,b₂) + j(a₁,b₁) ≥ 0 -/
+def TwoIncreasing (j : ℝ → ℝ → ℝ) : Prop :=
+  ∀ a₁ a₂ b₁ b₂ : ℝ, a₁ ≤ a₂ → b₁ ≤ b₂ →
+    j a₂ b₂ - j a₂ b₁ - j a₁ b₂ + j a₁ b₁ ≥ 0
+
+/-- Key lemma: If j is symmetric, idempotent, has zero boundary, and is 2-increasing,
+    then j(a,b) ≥ min(a,b) for all a,b ∈ [0,1]. -/
+theorem symmetric_idempotent_2incr_ge_min (j : ℝ → ℝ → ℝ)
+    (hsymm : ∀ a b, j a b = j b a)
+    (hidemp : ∀ a, j a a = a)
+    (hzero : ∀ b, j 0 b = 0)
+    (h2incr : TwoIncreasing j)
+    (a b : ℝ) (ha : 0 ≤ a) (hb : 0 ≤ b) :
+    min a b ≤ j a b := by
+  wlog hab : a ≤ b generalizing a b
+  · push_neg at hab
+    rw [hsymm, min_comm]
+    exact this b a hb ha (le_of_lt hab)
+  -- Now a ≤ b, so min a b = a
+  rw [min_eq_left hab]
+  -- Apply 2-increasing to rectangle [0,a] × [a,b]
+  have h := h2incr 0 a a b (by linarith) hab
+  -- j(a,b) - j(a,a) - j(0,b) + j(0,a) ≥ 0
+  simp only [hidemp, hzero] at h
+  -- j(a,b) - a - 0 + 0 ≥ 0
+  linarith
+
+/-- Main uniqueness theorem: If j is symmetric, idempotent, has zero boundary,
+    is bounded above by min, and is 2-increasing, then j = min.
+    This proves min is the UNIQUE copula-like function with these properties. -/
+theorem min_copula_unique (j : ℝ → ℝ → ℝ)
+    (hsymm : ∀ a b, j a b = j b a)
+    (hidemp : ∀ a, j a a = a)
+    (hzero : ∀ b, j 0 b = 0)
+    (hupper : ∀ a b, j a b ≤ min a b)
+    (h2incr : TwoIncreasing j)
+    (a b : ℝ) (ha : 0 ≤ a) (hb : 0 ≤ b) :
+    j a b = min a b := by
+  apply le_antisymm
+  · exact hupper a b
+  · exact symmetric_idempotent_2incr_ge_min j hsymm hidemp hzero h2incr a b ha hb
+
+/-- Helper: The Fréchet upper bound follows from copula axioms -/
+theorem copula_frechet_upper (j : ℝ → ℝ → ℝ)
+    (hzero_left : ∀ b, j 0 b = 0)
+    (hzero_right : ∀ a, j a 0 = 0)
+    (hone_left : ∀ b, 0 ≤ b → b ≤ 1 → j 1 b = b)
+    (hone_right : ∀ a, 0 ≤ a → a ≤ 1 → j a 1 = a)
+    (h2incr : TwoIncreasing j)
+    (a b : ℝ) (ha : 0 ≤ a) (ha' : a ≤ 1) (hb : 0 ≤ b) (hb' : b ≤ 1) :
+    j a b ≤ min a b := by
+  apply le_min
+  · -- j(a,b) ≤ a: use 2-increasing on [0,a] × [b,1]
+    have h := h2incr 0 a b 1 ha hb'
+    simp only [hone_right a ha ha', hzero_left, hzero_right] at h
+    linarith
+  · -- j(a,b) ≤ b: use 2-increasing on [a,1] × [0,b]
+    have h := h2incr a 1 0 b ha' hb
+    simp only [hone_left b hb hb', hzero_right] at h
+    linarith
+
+/-- Corollary: No intermediate copula between independence and max-dependence
+    can satisfy both idempotence and the copula axioms.
+    Specifically, if j(a,a) = a and j is a valid copula, then j = min.
+    Independence (product) fails idempotence; other copulas fail to equal min. -/
+theorem no_intermediate_idempotent_copula (j : ℝ → ℝ → ℝ)
+    (hsymm : ∀ a b, j a b = j b a)
+    (hidemp : ∀ a, j a a = a)
+    (hzero_left : ∀ b, j 0 b = 0)
+    (hzero_right : ∀ a, j a 0 = 0)
+    (hone_left : ∀ b, 0 ≤ b → b ≤ 1 → j 1 b = b)
+    (hone_right : ∀ a, 0 ≤ a → a ≤ 1 → j a 1 = a)
+    (h2incr : TwoIncreasing j)
+    (a b : ℝ) (ha : 0 ≤ a) (ha' : a ≤ 1) (hb : 0 ≤ b) (hb' : b ≤ 1) :
+    j a b = min a b := by
+  have hupper := copula_frechet_upper j hzero_left hzero_right hone_left hone_right h2incr a b ha ha' hb hb'
+  apply le_antisymm hupper
+  exact symmetric_idempotent_2incr_ge_min j hsymm hidemp hzero_left h2incr a b ha hb
+
+/-! ## Mixed Dependence Structures
+
+Can we mix dependence structures - e.g., use independence for some pairs and
+max-dependence for others? This would mean the joint function j depends not
+just on the marginal VALUES but also on WHICH propositions are involved.
+
+Theorem: If we allow different j for different pairs, we lose truth-functionality.
+The joint becomes a function j : Prop × Prop → ℝ (not just ℝ × ℝ → ℝ).
+This is exactly the probability-style approach where P(A∧B) depends on
+the specific events A and B, not just P(A) and P(B).
+
+The following theorem shows that if we want the SAME j for all pairs
+(truth-functionality), then Bayes consistency + idempotence forces j = min.
+-/
+
+/-- If we require the same joint function for all proposition pairs
+    (truth-functionality), and require Bayes consistency and idempotence,
+    then the joint must be min (max positive dependence).
+
+    Relaxing to different joints for different pairs gives probability-style
+    reasoning but loses truth-functionality. -/
+theorem truth_functional_forces_min :
+    ∀ j : ℝ → ℝ → ℝ,
+      (∀ a b, j a b = j b a) →  -- Bayes consistency
+      (∀ a, j a a = a) →        -- Idempotence
+      (∀ b, j 0 b = 0) →        -- Zero boundary
+      (∀ a b, j a b ≤ min a b) → -- Fréchet upper
+      TwoIncreasing j →          -- Copula property
+      ∀ a b, 0 ≤ a → 0 ≤ b → j a b = min a b :=
+  fun j hsymm hidemp hzero hupper h2incr a b ha hb =>
+    min_copula_unique j hsymm hidemp hzero hupper h2incr a b ha hb
+
+/-! ## World Partitioning: Independence Between Worlds
+
+We now analyze the possibility of partitioning propositions into "worlds"
+with different dependence structures. Key results:
+
+1. Independence (product) WITHIN a world forces credences to {0,1} (classical logic)
+2. Independence BETWEEN worlds is consistent but trivializes cross-world inference
+3. Max-dependence (min) within worlds with any copula between worlds is consistent
+-/
+
+/-- Independence within a world forces classical credences.
+    If j(a,a) = a² (product/independence), then a = a² implies a ∈ {0,1}.
+    This proves: independence WITHIN a world collapses credences to boolean. -/
+theorem independence_within_forces_classical (a : ℝ) (_ha : 0 ≤ a) (_ha' : a ≤ 1)
+    (hidemp_prod : a * a = a) :
+    a = 0 ∨ a = 1 := by
+  have h : a * (a - 1) = 0 := by linarith [hidemp_prod]
+  rcases mul_eq_zero.mp h with ha0 | ha1
+  · left; exact ha0
+  · right; linarith
+
+/-- Corollary: Product copula idempotence only at extremes.
+    The product j(a,a) = a·a equals a only when a ∈ {0,1}. -/
+theorem product_idempotent_iff_classical (a : ℝ) (ha : 0 ≤ a) (ha' : a ≤ 1) :
+    a * a = a ↔ a = 0 ∨ a = 1 := by
+  constructor
+  · exact independence_within_forces_classical a ha ha'
+  · intro h
+    rcases h with rfl | rfl <;> ring
+
+/-- Cross-world independence trivializes conditioning.
+    If j(a,b) = a·b (product), then cred(A|B) = cred(A) for b ≠ 0.
+    Evidence from another world has no effect. -/
+theorem cross_world_independence_trivial (a b : ℝ) (hb : b ≠ 0) :
+    (a * b) / b = a := by
+  field_simp
+
+/-- Max-dependence within world is forced by idempotence + copula axioms.
+    This is just a restatement connecting to the world-partitioning interpretation. -/
+theorem within_world_max_dependence_forced (j : ℝ → ℝ → ℝ)
+    (hsymm : ∀ a b, j a b = j b a)
+    (hidemp : ∀ a, j a a = a)
+    (hzero : ∀ b, j 0 b = 0)
+    (hupper : ∀ a b, j a b ≤ min a b)
+    (h2incr : TwoIncreasing j) :
+    ∀ a b, 0 ≤ a → 0 ≤ b → j a b = min a b :=
+  min_copula_unique j hsymm hidemp hzero hupper h2incr
+
+/-! ## Probability as Foundation of Mathematics
+
+Can probability serve as the foundation for mathematical reasoning?
+The key issue is how to consistently assign joint probabilities.
+
+1. Standard probability: P(A∧B) depends on the SPECIFIC propositions A, B
+   (not just P(A) and P(B)). This is exactly what truth-functionality forbids.
+
+2. To use probability for math, we'd need consistent joint assignments.
+   For mathematical propositions, we expect:
+   - P(A|A) = 1 (tautological self-implication)
+   - P(A∧A) = P(A) (idempotence of conjunction)
+   - The second forces product copula out: P(A)² = P(A) only at {0,1}
+
+3. If we want credences strictly between 0 and 1 for mathematical propositions,
+   we MUST use max-dependence (min copula) within the mathematical world.
+
+4. The Fréchet bounds provide the only consistent framework:
+   - Upper bound: j(a,b) ≤ min(a,b)
+   - Lower bound: j(a,b) ≥ max(0, a+b-1)
+   - With idempotence, upper bound is tight: j(a,b) = min(a,b)
+-/
+
+/-- Probability-style reasoning requires abandoning truth-functionality.
+    If we want j to vary based on proposition pairs (not just values),
+    then j is a function on Prop × Prop, not ℝ × ℝ.
+
+    This theorem shows that ANY truth-functional approach with idempotence
+    must use min, regardless of attempts at partitioning. -/
+theorem truth_functional_idempotent_implies_max_dependence :
+    ∀ j : ℝ → ℝ → ℝ,
+      (∀ a, j a a = a) →              -- Idempotence (mathematical world requirement)
+      (∀ a b, j a b ≤ min a b) →      -- Fréchet upper bound
+      (∀ b, j 0 b = 0) →              -- Zero boundary
+      (∀ a b, j a b = j b a) →        -- Symmetry
+      TwoIncreasing j →                -- Copula property
+      ∀ a b, 0 ≤ a → 0 ≤ b → j a b = min a b :=
+  fun j hidemp hupper hzero hsymm h2incr a b ha hb =>
+    min_copula_unique j hsymm hidemp hzero hupper h2incr a b ha hb
+
 end Cred
