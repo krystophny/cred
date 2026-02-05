@@ -1,15 +1,15 @@
-# Part 3: Positioning Relative to Many-Valued Traditions
+# Part 3: Applications and Future Directions
 
-Part 1 establishes the constraint algebra. Part 2 adds interpretation, consequence relations, and update rules. Part 3 positions Cred relative to the existing literature on many-valued logic, primitive conditional probability, and fixed-point semantics.
+Part 1 establishes the constraint algebra. Part 2 adds interpretation, consequence relations, and update rules. Part 3 positions the credence algebra relative to existing literature on many-valued logic, primitive conditional probability, and fixed-point semantics.
 
 ## Files
 
-- `paper.tex` — publication-quality paper (Lean-backed)
-- `paper-sketch.tex` — original literature map + roadmap (reference)
+- `paper.tex` — publication-quality paper (merged from original paper + literature sketch)
+- `paper-sketch.tex` — original literature map + roadmap (superseded by `paper.tex`)
 - `01-asymptotic-proofs.md` — Proofs approaching certainty (cred -> 1)
 - `02-fixed-points.md` — Self-reference and paradox dissolution
 - `03-undecidability.md` — Incompleteness and underdetermination (distinct from the 1/2 fixed point)
-- `04-proof-patterns.md` — Proof patterns enabled by Cred
+- `04-proof-patterns.md` — Proof patterns enabled by the credence algebra
 - `05-open-questions.md` — Research directions including self-hosting
 - `06-graded-mathematics.md` — Building mathematics (arithmetic, analysis, set theory) on graded foundations
 
@@ -25,11 +25,11 @@ The following topics were originally in Part 2 but belong here because they requ
 
 - **Graded proofs**: what it means to "prove" something when truth is graded (convergence to credence 1 vs. partial evidence). Covered in `01-asymptotic-proofs.md`.
 - **Graded mathematics**: building arithmetic, analysis, and set theory on graded predicates. Covered in `06-graded-mathematics.md`.
-- **Self-hosting**: using Cred to reason about Cred itself, enabled by self-reference handling. Related material in `02-fixed-points.md` and `05-open-questions.md`.
+- **Self-hosting**: using the credence algebra to reason about the credence algebra itself, enabled by self-reference handling. Related material in `02-fixed-points.md` and `05-open-questions.md`.
 
 ## Key distinctions
 
-1. **Self-negation vs. incompleteness**: the liar sentence (c = ~c, forced to 1/2) is algebraic. Godel incompleteness (unprovable ≠ false) is proof-theoretic. Cred handles the first; the second applies to any system strong enough to encode arithmetic. See `03-undecidability.md`.
+1. **Self-negation vs. incompleteness**: the liar sentence (c = ~c, forced to 1/2) is algebraic. Godel incompleteness (unprovable ≠ false) is proof-theoretic. The credence algebra handles the first; the second applies to any system strong enough to encode arithmetic. See `03-undecidability.md`.
 
 2. **Unconstrained vs. undecidable**: "unconstrained" in Part 1 means the chain rule imposes no constraint when evidence is zero. "Undecidable" means a formal system neither proves nor refutes. These are different notions. See `03-undecidability.md`.
 

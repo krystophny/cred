@@ -1,4 +1,4 @@
-% Cred Part 2: From Algebra to Reasoning
+% Part 2: Two Views of Credence Reasoning
 % Publication-quality paper
 %
 % References to Lean formalization:
@@ -20,7 +20,7 @@
     citecolor=blue,
     urlcolor=blue,
     pdfauthor={Anonymous},
-    pdftitle={Cred Part 2: From Algebra to Reasoning}
+    pdftitle={Two Views of Credence Reasoning: Probability-Style and Logic-Style Interpretations}
 }
 \usepackage{cleveref}
 \usepackage[margin=1in]{geometry}
@@ -36,7 +36,6 @@
 
 % Custom commands (same as Part 1)
 \newcommand{\cred}{\mathsf{cred}}
-\newcommand{\Cred}{\mathsf{Cred}}
 \newcommand{\negc}{\mathord{\sim}}
 \newcommand{\conjc}{\otimes}
 \newcommand{\disjc}{\sqcup}
@@ -44,7 +43,7 @@
 \newcommand{\Real}{\mathbb{R}}
 \newcommand{\Nat}{\mathbb{N}}
 
-\title{\textbf{Cred Part~2: Two Views of Credence Reasoning}\\[0.5em]
+\title{\textbf{Two Views of Credence Reasoning}\\[0.5em]
 \large Probability-Style and Logic-Style Interpretations}
 
 \author{Anonymous for blind review}
@@ -55,22 +54,12 @@
 \maketitle
 
 \begin{abstract}
-Part~1 established \emph{Cred} as a constraint algebra on $[0,1]$: values,
-complement, the product operation, and the chain rule for conditioning.
-The key design choice: the joint credence $\cred(A \land B)$ is an
-\emph{external parameter}, not fixed by the algebra.
-This makes Cred compatible with both probability and many-valued logic.
+Part~1 established a constraint algebra on $[0,1]$ with the chain rule
+as sole structural axiom for conditioning, and proved that the minimum
+conjunction is the unique truth-functional joint satisfying Bayes
+consistency, non-triviality, and idempotence.
 %
-Part~1's central finding is that maximum positive dependence---the joint
-$\min(\cred(A), \cred(B))$---is the \emph{unique} fixed formula satisfying
-all requirements for proper reasoning \emph{under the Part~1 hypotheses}:
-truth-functionality (a fixed joint $j(a,b)$), Bayes consistency (symmetry of
-the induced joint), copula-style regularity (2-increasing / Fr\'echet upper
-bound), non-trivial conditioning (evidence matters), and idempotence.
-Independence ($\cred(A) \cdot \cred(B)$) gives \emph{trivial} conditioning
-where evidence has no effect; other choices fail Bayes consistency.
-%
-This paper develops both interpretations of Cred.
+This paper develops both interpretations of the algebra.
 The \emph{probability-style view} supplies joints from empirical data:
 credences propagate via Bayesian and Jeffrey conditionalization,
 uncertainty remains graded, and zero-evidence underdetermination connects
@@ -105,27 +94,21 @@ The former asks ``Is this valid to conclude?''; the latter asks
 
 \subsection*{Key results from Part~1}
 
-Part~1~\cite{part1} introduced \emph{Cred}, a constraint algebra on $[0,1]$
-with the chain rule $\condc{A}{B} \conjc \cred(B) = \cred(A \land B)$ as its
-sole structural axiom for conditioning.
-The key design choice: the joint credence $\cred(A \land B)$ is an
-\emph{external parameter}, not fixed by the algebra.
-When $\cred(B) = 0$, the chain rule is satisfied by any value---conditioning
-is unconstrained, avoiding explosion.
+Part~1~\cite{part1} introduced the credence algebra, a constraint algebra on
+$[0,1]$ with the chain rule
+$\condc{A}{B} \conjc \cred(B) = \cred(A \land B)$ as its sole structural
+axiom for conditioning; the joint credence $\cred(A \land B)$ is an external
+parameter, and when $\cred(B) = 0$ the chain rule is satisfied by any
+value---conditioning is unconstrained, avoiding explosion.
+The central finding is that the minimum joint is unique among
+truth-functional formulas satisfying Bayes consistency, non-trivial
+conditioning, and idempotence (\texttt{min\_copula\_unique}), with a
+surjective homomorphism to the Kleene lattice $\{0, \tfrac{1}{2}, 1\}$.
 
-Part~1's central finding is that maximum positive dependence---the joint
-$\min(\cred(A), \cred(B))$---is the \emph{unique} fixed formula satisfying
-truth-functionality, Bayes consistency, non-trivial conditioning, and
-idempotence (Part~1, \texttt{min\_copula\_unique}).
-Independence gives trivial conditioning; RM3 and G\"odel fail Bayes consistency.
-Part~1 also established: a surjective homomorphism from Cred to the Kleene
-lattice $\{0, \tfrac{1}{2}, 1\}$; and the unique negation fixed point at
-$\tfrac{1}{2}$.
+\subsection*{This paper: two views}
 
-\subsection*{This paper: two views of Cred}
-
-This paper asks: how do we \emph{use} Cred's algebra for reasoning?
-The answer is that Cred admits two complementary interpretations---one
+This paper asks: how do we \emph{use} the algebra for reasoning?
+The answer is that it admits two complementary interpretations---one
 probability-style, one logic-style---and the choice depends on what question
 you are asking:
 
@@ -189,9 +172,9 @@ than a paradox.
 
 \textbf{Contributions.}
 \begin{enumerate}[label=(\arabic*)]
-\item The two-views framing: Cred can be interpreted probability-style
-(credences propagate, uncertainty remains graded) or logic-style
-(collapse to discrete values, validity via designation).
+\item The two-views framing: the credence algebra can be interpreted
+probability-style (credences propagate, uncertainty remains graded) or
+logic-style (collapse to discrete values, validity via designation).
 The views are complementary, with the collapse as the bridge
 (Section~\ref{sec:comparison}).
 \item Probability-style reasoning: joint-parametrized valuations,
@@ -223,7 +206,7 @@ For graded predicates: $\cred(\forall x.\; P(x)) = \inf_x P(x)$ and
 $\cred(\exists x.\; P(x)) = \sup_x P(x)$.
 As in Part~1, roman-font names ($\mathrm{neg}$, $\mathrm{conj}$,
 $\mathrm{disj}$) denote the three-valued (Kleene) operations;
-$\negc$, $\conjc$, $\disjc$ denote Cred's $[0,1]$ operations.
+$\negc$, $\conjc$, $\disjc$ denote the $[0,1]$ operations.
 
 %=============================================================================
 \section{Valuations}
@@ -277,7 +260,7 @@ Lean: \texttt{IndepValuation}.
 \end{definition}
 
 An independent valuation is a homomorphism from the propositional algebra
-to the Cred algebra for all three connectives
+to the credence algebra for all three connectives
 (Lean: \texttt{indep\_is\_conj\_homomorphism}).
 The product $v(A) \cdot v(B)$ treats propositions as probabilistically
 independent---the joint equals the product of marginals.
@@ -366,11 +349,12 @@ Part~1's \texttt{min\_copula\_unique} proves that idempotence plus the
 
 Independent valuations assume a fixed dependence structure (none).
 The general case supplies the joint as external data---this is how
-probability works, and it is also how Cred can instantiate different
+probability works, and it is also how the algebra can instantiate different
 logical systems.
 
 \textbf{Key insight.}
-By parameterizing the joint, Cred becomes a \emph{superset} of both traditions:
+By parameterizing the joint, the credence algebra becomes a \emph{superset}
+of both traditions:
 \begin{itemize}[nosep]
 \item Setting $j(A,B) = v(A) \cdot v(B)$ gives independence (probability-like,
   but trivial conditioning).
@@ -407,7 +391,7 @@ requires complement non-negativity as an additional hypothesis
 
 This is how probability works: the joint $P(A \land B)$ is determined
 by the measure, not by the marginals alone.
-Cred allows the same approach without requiring a measure.
+The algebra allows the same approach without requiring a measure.
 
 \begin{example}[Rain and Wet Street, Continued]
 \label{ex:rain-joint}
@@ -430,19 +414,13 @@ separately from \texttt{conditioning\_unique}).
 \subsection{Stochastic Independence Between Domains}
 \label{subsec:independence}
 
-Can we partition propositions into domains with different dependence
-structures?
-Part~1 (\S6.3) shows that independence within a domain forces classical
-$\{0,1\}$ credences (unless idempotence is abandoned), and independence
-between domains trivializes cross-domain inference.
-The unique meeting point extends: any domain with meaningful intermediate
-credences and idempotence must use maximum dependence internally
-(Part~1: \texttt{independence\_within\_forces\_classical},
-\texttt{cross\_world\_independence\_trivial}).
+Part~1 (\S7) shows that independence within a domain forces classical
+$\{0,1\}$ credences, and independence between domains trivializes
+cross-domain inference.
 
 \subsection{Collapse Composition}
 
-Composing a Cred valuation with Part~1's collapse homomorphism yields a
+Composing a valuation with Part~1's collapse homomorphism yields a
 three-valued (Kleene) valuation.
 
 \begin{proposition}[Collapse Preserves Connectives]
@@ -463,8 +441,8 @@ axiom and then applying Part~1's collapse homomorphism theorem
 (\texttt{collapse\_neg}, \texttt{collapse\_conj}, \texttt{collapse\_disj}).
 \end{proof}
 
-This is the mechanism by which Cred connects to K$_3$, LP, and RM3:
-the collapse maps any Cred valuation to a Kleene valuation, and
+This is the mechanism by which the credence algebra connects to K$_3$, LP,
+and RM3: the collapse maps any valuation to a Kleene valuation, and
 the choice of designated values then determines the consequence relation.
 
 \subsection{Comparison}
@@ -478,9 +456,9 @@ the choice of designated values then determines the consequence relation.
 Classical logic & $\{0, 1\}$ & $\min$ & Yes & Yes & Material \\
 Probability & $[0,1]$ & Measure & Yes & Yes & Bayes (non-trivial) \\
 Product fuzzy & $[0,1]$ & Product & No & Yes & Trivial ($a$) \\
-Cred (indep.) & $[0,1]$ & Product & No & Yes & Trivial ($a$) \\
-\textbf{Cred (Kleene)} & $[0,1]$ & $\min$ & Yes & Yes & \textbf{Non-trivial} \\
-Cred (joint) & $[0,1]$ & External & By choice & Yes & Chain rule \\
+Credence alg.\ (indep.) & $[0,1]$ & Product & No & Yes & Trivial ($a$) \\
+\textbf{Credence alg.\ (Kleene)} & $[0,1]$ & $\min$ & Yes & Yes & \textbf{Non-trivial} \\
+Credence alg.\ (joint) & $[0,1]$ & External & By choice & Yes & Chain rule \\
 G\"odel fuzzy & $[0,1]$ & $\min$ & Yes & No & Not Bayes-cons.\ \\
 \L ukasiewicz & $[0,1]$ & $\max(a{+}b{-}1,0)$ & No & No & Not Bayes-cons.\ \\
 \bottomrule
@@ -494,19 +472,6 @@ dependence ($\min$) yields a truth-functional joint that is simultaneously
 idempotent, Bayes-consistent, and non-trivial.
 Independence (product) is Bayes-consistent but trivial; G\"odel and
 \L ukasiewicz are truth-functional but not Bayes-consistent.
-
-The constant valuation $v(A) = \tfrac{1}{2}$ for all $A$, with
-the identity function as propositional negation ($\sigma(A) = A$ for
-all $A$), is complement-preserving because
-$\tfrac{1}{2} = 1 - \tfrac{1}{2}$ (the negation fixed point from Part~1).
-This is a degenerate example (every proposition equals its own negation),
-used as a technical witness.
-Its collapse to three values gives a constant-$\tfrac{1}{2}$
-three-valued valuation.
-(The K$_3$ no-tautology proof constructs the constant-$\tfrac{1}{2}$
-function directly at the three-valued level, without using the
-collapse.)
-Lean: \texttt{CpValuation.constant\_half}.
 
 %=============================================================================
 \section{Consequence Relations (Logic-Style View)}
@@ -652,14 +617,14 @@ Lean: \texttt{graded\_at\_one\_is\_strict}.
 
 \subsection{No-Explosion Theorem}
 
-The key structural result: Cred's unconstrained conditioning at zero
+The key structural result: unconstrained conditioning at zero
 forces explosion to fail.
 
 \begin{example}[Explosion Fails]
 \label{ex:no-explosion}
 In classical logic, if both ``it rained'' and ``it did not rain'' hold,
 then every proposition follows---including ``the moon is made of cheese.''
-In Cred at threshold $t = 0.3$: set $v(R) = 0.5$, so
+In the credence algebra at threshold $t = 0.3$: set $v(R) = 0.5$, so
 $\negc v(R) = 0.5$; both exceed $0.3$.
 But $v(\text{moon-cheese}) = 0$, which is below $0.3$.
 The contradiction in $R$ does not force acceptance of an unrelated
@@ -930,7 +895,7 @@ Lean: \texttt{bayesian\_underdetermined\_at\_zero},
 \texttt{conditioning\_zero\_any}).
 \end{proposition}
 
-This connects Cred to \emph{imprecise probability}~\cite{walley1991}:
+This connects to \emph{imprecise probability}~\cite{walley1991}:
 when conditioning at zero is underdetermined, the honest response
 is to report the full interval $[0,1]$ as the set of compatible
 posteriors, rather than selecting a single value.
@@ -944,7 +909,7 @@ epistemic state, not a failure of the formalism.
 \begin{tabular}{llll}
 \toprule
 \textbf{Update rule} & \textbf{Evidence type} &
-  \textbf{Requirements beyond Cred} & \textbf{Zero evidence?} \\
+  \textbf{Requirements beyond the algebra} & \textbf{Zero evidence?} \\
 \midrule
 Bayesian & $B$ certain & Full joints, $v(B) > 0$ & Underdetermined \\
 Jeffrey & $B$ has credence $q$ & Full joints, $v(B) > 0$, $v(\negc B) > 0^\star$ & Underdetermined \\
@@ -988,7 +953,7 @@ Lean: \texttt{GradedPredicate}.
 Crisp predicates (range $\subseteq \{0, 1\}$) are the special case
 corresponding to classical sets.
 
-The Cred operations extend pointwise (expanding the De~Morgan
+The operations extend pointwise (expanding the De~Morgan
 definition for disjunction):
 \begin{align*}
 (\negc P)(x) &= 1 - P(x) &\text{(complement)} \\
@@ -1112,51 +1077,17 @@ The algebraic core---$c = \negc c$ implies $c = \tfrac{1}{2}$---is
 formalized in Lean; the self-application mechanism (unrestricted
 comprehension producing the equation $R(R) = \negc R(R)$) requires
 set-theoretic infrastructure not formalized here.
-This connects Cred to paraconsistent set theory~\cite{brady2006,weber2010},
+This connects to paraconsistent set theory~\cite{brady2006,weber2010},
 where comprehension is retained and contradictions are tolerated.
-In Cred, the ``contradiction'' has a precise numerical value:
-$\tfrac{1}{2}$, the unique negation fixed point.
+In the credence algebra, the ``contradiction'' has a precise numerical
+value: $\tfrac{1}{2}$, the unique negation fixed point.
 
-The relationship between Cred and t-norm fuzzy logics (G\"odel, product,
-\L ukasiewicz) is developed in Part~1, \S6.
+The relationship to t-norm fuzzy logics (G\"odel, product,
+\L ukasiewicz) is developed in Part~1, \S7.
 The key result: the product t-norm is the unique continuous t-norm compatible
 with chain-rule conditioning (unique solution when evidence is positive), and
-when the joint is set to the minimum (maximum positive dependence), Cred
+when the joint is set to the minimum (maximum positive dependence), the algebra
 coincides with Kleene valuations---the foundation of K$_3$, LP, and RM3.
-
-%=============================================================================
-\section{Related Work}
-\label{sec:related}
-%=============================================================================
-
-For related work on the core algebra, primitive conditioning, t-norm fuzzy
-logics, and copulas, see Part~1, \S7.
-
-\textbf{Adams' Probability Logic.}
-Adams~\cite{adams1965,adams1998} showed that conditional probability
-propagates uncertainty through valid classical inferences: if all premises
-have probability $\geq 1 - \varepsilon$, then the conclusion has
-probability $\geq 1 - n\varepsilon$ (for $n$ premises).
-Whether analogous bounds hold for Cred valuations without additivity
-is an open problem.
-
-\textbf{Jeffrey Conditionalization.}
-Jeffrey~\cite{jeffrey1965,jeffrey1983} generalized Bayesian updating to
-uncertain evidence via a mixture formula.
-Section~\ref{sec:update} implements Jeffrey update on Cred valuations.
-
-\textbf{Imprecise Probability.}
-Walley~\cite{walley1991} developed statistical reasoning with sets of
-probability measures rather than a single one.
-Levi~\cite{levi1980} argued that indeterminate credences are genuine
-epistemic states.
-Zero-evidence underdetermination connects directly to imprecise probability.
-
-\textbf{Paraconsistent Set Theory.}
-Brady~\cite{brady2006} and Weber~\cite{weber2010} developed set theories
-with unrestricted comprehension.
-Graded predicates (Section~\ref{sec:predicates}) offer a complementary
-approach: the Russell predicate yields $\tfrac{1}{2}$.
 
 %=============================================================================
 \section{Lean Formalization}
@@ -1180,11 +1111,11 @@ All are machine-checked in Lean~4 with Mathlib 4.16.0.
 Verification: \texttt{cd lean \&\& lake build}.
 
 %=============================================================================
-\section{Conclusion}
+\section{Discussion and Conclusion}
 \label{sec:conclusion}
 %=============================================================================
 
-Part~2 developed two complementary views of Cred:
+Part~2 developed two complementary views of the credence algebra:
 probability-style (chain rule as inference, Bayesian/Jeffrey update,
 zero-evidence underdetermination) and logic-style (collapse to Kleene lattice,
 designated-value consequence).
@@ -1192,6 +1123,29 @@ Explosion fails non-vacuously for LP and graded consequence at
 $t \leq \tfrac{1}{2}$.
 Graded predicates extend to first order with quantifier duality;
 unrestricted comprehension yields $\tfrac{1}{2}$ rather than paradoxes.
+
+\textbf{Related work.}
+For related work on the core algebra, primitive conditioning, t-norm fuzzy
+logics, and copulas, see Part~1, \S7.
+Adams~\cite{adams1965,adams1998} showed that conditional probability
+propagates uncertainty through valid classical inferences: if all premises
+have probability $\geq 1 - \varepsilon$, then the conclusion has
+probability $\geq 1 - n\varepsilon$ (for $n$ premises).
+Whether analogous bounds hold for credence-algebra valuations without
+additivity is an open problem.
+Jeffrey~\cite{jeffrey1965,jeffrey1983} generalized Bayesian updating to
+uncertain evidence via a mixture formula;
+Section~\ref{sec:update} implements Jeffrey update on credence-algebra
+valuations.
+Walley~\cite{walley1991} developed statistical reasoning with sets of
+probability measures rather than a single one, and
+Levi~\cite{levi1980} argued that indeterminate credences are genuine
+epistemic states; zero-evidence underdetermination connects directly to
+imprecise probability.
+Brady~\cite{brady2006} and Weber~\cite{weber2010} developed set theories
+with unrestricted comprehension; graded predicates
+(Section~\ref{sec:predicates}) offer a complementary approach where the
+Russell predicate yields $\tfrac{1}{2}$.
 
 \textbf{What Part~2 does not provide.}
 Proof theory and self-hosting remain for Part~3.
@@ -1314,7 +1268,7 @@ Nelsen, R.B.
 
 \bibitem{part1}
 Anonymous.
-\newblock Cred: A credence algebra with primitive conditioning.
+\newblock The unique intersection of probability and many-valued logic.
 \newblock Working paper, 2026.
 
 \bibitem{popper1959}

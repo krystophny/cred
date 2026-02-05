@@ -72,307 +72,53 @@ Proofs are machine-checked in Lean~4.
 \label{sec:intro}
 %=============================================================================
 
-A \emph{credence} is a real number in $[0,1]$ representing degree of belief---the
-standard representation in formal epistemology~\cite{ramsey1931,definetti1937,jaynes2003}.
-The value $0$ represents impossibility, $1$ represents certainty, and intermediate
-values represent partial confidence.
+A \emph{credence} is a real number in $[0,1]$ representing degree of belief~\cite{ramsey1931,definetti1937,jaynes2003}.
+Probability theory builds on credences by adding a sigma-algebra, a measure, and sigma-additivity.
+Conditional probability is derived via division: $P(A \mid B) = P(A \land B)/P(B)$ when $P(B) > 0$; when $P(B) = 0$, the ratio is undefined.
+R\'enyi~\cite{renyi1955} and Popper~\cite{popper1959} proposed an alternative: treat conditioning as \emph{primitive}, governed by the chain rule $P(A \mid B) \cdot P(B) = P(A \land B)$ without invoking division.
 
-Probability theory builds on credences by introducing a sigma-algebra of events,
-a measure, and sigma-additivity.
-Conditional probability is then derived via division:
-$P(A \mid B) = P(A \land B)/P(B)$ when $P(B) > 0$; when $P(B) = 0$, the ratio
-is undefined.
-R\'enyi~\cite{renyi1955,renyi1970} and Popper~\cite{popper1959} proposed an
-alternative: treat conditioning as \emph{primitive}, governed by the chain rule
-$P(A \mid B) \cdot P(B) = P(A \land B)$ without invoking division in the
-definition.
-De Finetti~\cite{definetti1936} proposed that a conditional event $A \mid B$
-is three-valued: true when $A \land B$, false when $\lnot A \land B$, and
-\emph{void} when $\lnot B$---conditioning on a false antecedent yields no
-truth value rather than vacuous truth.
-Van Fraassen~\cite{vanfraassen1983} showed that the primitive approach
-connects naturally to relevant logic: both avoid forcing ``from impossibility,
-anything follows.''
+The credence algebra takes this further.
+Drop the measure entirely; keep only values in $[0,1]$, the complement $\negc c = 1 - c$, and the chain rule $\cred(A \mid B) \cdot \cred(B) = \cred(A \land B)$ as the sole structural axiom for conditioning.
+This is strictly weaker than probability: every probability space satisfies these axioms, but the algebra requires neither a sigma-algebra nor additivity.
+The conjunction is the product t-norm, the disjunction its De Morgan dual (the probabilistic sum), and together with complement they form the \emph{product De Morgan triplet}~\cite{klement2000,hajek1998}.
 
-\emph{The Dutch Book argument.}
-The foundational justification for why credences should satisfy probabilistic
-constraints comes from Ramsey~\cite{ramsey1931} and de
-Finetti~\cite{definetti1937}: if your credences do not satisfy certain
-coherence constraints, a bookie can construct a combination of bets that
-\emph{you} consider fair (by your own credences) but that guarantees you a
-net loss~\cite{vineberg2016}.
-At a minimum, Dutch Book coherence motivates two constraints:
-(1)~\emph{complement coherence} (normalization) $\cred(A) + \cred(\negc A) = 1$,
-and (2)~\emph{multiplicative coherence} $\cred(A \mid B) \cdot \cred(B) =
-\cred(A \land B)$---the chain rule.
-Standard probability adds further \emph{additivity} assumptions (finite or
-countable) over disjunctions once an event algebra is fixed.
-The algebra keeps (1) as its value-level negation law and adopts (2) as the sole
-structural axiom for conditioning, but it does not assume additivity over
-disjunctions; this is what allows non-probabilistic, non-additive credence
-assignments while retaining the chain-rule link between conditionals and
-joints.
+The key design choice concerns conditioning at evidence zero.
+In t-norm fuzzy logic, each conjunction determines a unique implication via \emph{residuation}: $a \to b = \sup\{c : a \otimes c \leq b\}$.
+Since $0 \otimes c = 0 \leq b$ for all $c$ and $b$, every residuated implication forces $0 \to b = 1$---\emph{ex falso quodlibet} is built in~\cite{hajek1998}.
+The chain rule avoids this: $c \cdot 0 = 0$ is satisfied by \emph{any} value of $c$, so conditioning on impossible evidence is unconstrained.
+A concrete example: ``if the moon is made of cheese, then my birthday is tomorrow'' is vacuously true under material implication, but the chain rule imposes no constraint when the antecedent has credence zero.
+This echoes de Finetti's three-valued conditional~\cite{definetti1936}, where conditioning on a false antecedent yields \emph{void} rather than vacuous truth.
 
-The following background on t-norms and residuation is well known in fuzzy
-logic but essential for understanding why The algebra's chain-rule approach differs
-from residuation.
-
-Fuzzy logic takes a different route to $[0,1]$-valued reasoning.
-Rather than starting from probability's chain rule, it generalizes Boolean
-conjunction via \emph{triangular norms} (t-norms): commutative, associative,
-monotone binary operations on $[0,1]$ with identity
-$1$~\cite{klement2000,hajek1998}.
-The three basic continuous t-norms are the minimum (G\"odel), the algebraic
-product, and the \L ukasiewicz t-norm $\max(a + b - 1, 0)$.
-Each t-norm determines a unique implication via \emph{residuation}:
-$a \to b = \sup\{c \in [0,1] : a \otimes c \leq b\}$,
-the largest value making conjunction ``work'' in the sense that
-$a \otimes (a \to b) \leq b$ (the residuation inequality)~\cite{hajek1998}.
-This coupling is fundamental: in every t-norm logic, the arrow is not a free
-parameter but is forced by the choice of conjunction.
-
-The coupling has a uniform consequence at zero: since $0 \otimes c = 0 \leq b$
-for all $c$ and $b$, the residuum gives $0 \to b = 1$ for every
-t-norm---\emph{ex falso quodlibet} is built into the
-framework~\cite{hajek1998}.
-Probability avoids this not by weakening the t-norm but by using a different
-mechanism altogether: the chain rule $P(A \mid B) \cdot P(B) = P(A \land B)$ is
-a multiplicative constraint, not a residuation.
-When $P(B) = 0$, the constraint becomes $c \cdot 0 = 0$, satisfied by any $c$;
-the conditional is undefined (or, in de Finetti's three-valued
-approach~\cite{definetti1936}, \emph{void}) rather than forced to~$1$.
-
-Both traditions share the same carrier ($[0,1]$) and the same complement
-($1 - c$).
-When the t-norm is the algebraic product, they also share the same
-conjunction---the \emph{product De Morgan triplet}: the product t-norm, the
-probabilistic sum $c_1 + c_2 - c_1 c_2$, and the standard
-complement~\cite{klement2000}.
-Within the product De Morgan triplet, the sole point of divergence is the
-arrow: residuation (forcing $0 \to y = 1$) vs.\ chain-rule conditioning
-(unconstrained at zero).
-
-A concrete example makes the divergence vivid.
-Under the material conditional, ``if the moon is made of cheese, then my
-birthday is on any date you choose'' is true---$\lnot a \lor b$ holds
-vacuously when $a$ is false---yet sounds absurd as a claim about reality.
-Two responses are available: read the conditional literally (it says ``the
-moon is not made of cheese, or my birthday is on that date,'' which is
-perfectly true) or change the formalism so that a false antecedent yields no
-definite value rather than automatic truth.
-De Finetti's void conditional takes the second path.
-A further subtlety: explosion is a property of the consequence relation,
-not the conditional connective---even a logic whose conditional is void at
-false antecedents can have explosion at the consequence-relation
-level~\cite{priest2008}.
-The credence algebra sidesteps this: as a pure algebra with no consequence relation, it
-replaces ``forced to~$1$'' with ``unconstrained by the chain rule.''
-
-The credence algebra makes this divergence the defining design choice.
-Drop the measure entirely; keep only values in $[0,1]$, the complement
-$\negc c = 1 - c$, and the chain rule
-$\cred(A \mid B) \cdot \cred(B) = \cred(A \land B)$ as the sole structural
-axiom for conditioning.
-This is strictly weaker than probability: every probability space satisfies
-these axioms, but the algebra requires neither a sigma-algebra nor additivity.
-When $\cred(B) = 0$, the chain rule becomes $\cred(A \mid B) \cdot 0 = 0$,
-satisfied by \emph{any} value of $\cred(A \mid B)$: the conditional is
-unconstrained.
-Division emerges as the unique solution when evidence is positive; at zero,
-no division is needed.
-The credence algebra thus inherits the product De Morgan triplet from fuzzy logic and the
-chain rule from probability, replacing residuation's ex falso with the chain
-rule's unconstrained conditioning at zero.
-
-\textbf{Contributions.}
+\textbf{Main results.}
 \begin{enumerate}[label=(\arabic*)]
-\item A weakening of probability that retains the chain rule as primitive
-conditioning and shares the product De Morgan triplet with product fuzzy logic,
-replacing residuation with chain-rule conditioning.
-Division is derived (unique when evidence $> 0$); conditioning is unconstrained
-at evidence zero (Section~\ref{sec:conditioning}).
-\item Path dependence at zero evidence: the conditional's limit as evidence
-$b \to 0$ depends on the ratio $a/b$, not on $b$ alone---the same structure as
-the Borel--Kolmogorov paradox.
-Ex falso is therefore not forced by the algebra
-(Section~\ref{sec:path-dependence}).
-\item A surjective homomorphism from the credence algebra to the Kleene lattice (underlying
-K$_3$, LP, and RM3) for $\{\negc, \conjc, \disjc\}$, with impossibility results
-for alternative targets and machine-checked proof (Section~\ref{sec:connections}).
-\item Bayes consistency---the chain rule applied from both directions---as a
-selection criterion: the product residuated implication passes; RM3 and
-G\"odel fail.  Every symmetric copula yields a Bayes-consistent arrow
-(Section~\ref{sec:connections}).
-\item Fixed-point analysis: $\tfrac{1}{2}$ is the unique fixed point of negation
-(Section~\ref{sec:fixed-points}).
-\item Lean~4 formalization of the core algebra (Appendix~\ref{app:lean}).
-\item Part~2~\cite{part2} extends the algebra to reasoning: valuations,
-consequence relations (K$_3$, LP, graded), update rules, and graded predicates.
+\item \textbf{Uniqueness of min} (Theorem~\ref{thm:uniqueness-main}):
+  Among truth-functional conjunctions on $[0,1]$, only $\min(a,b)$ satisfies Bayes consistency, non-trivial conditioning, and idempotence.
+  This forces the Kleene conjunction used in K$_3$, LP, and RM3.
+\item \textbf{Path dependence at zero} (Theorem~\ref{thm:path-dependence}):
+  The conditional's limit as evidence $\to 0$ depends on the ratio of joint to evidence---the same structure as the Borel--Kolmogorov paradox.
+  Ex falso requires an added convention.
+\item \textbf{Collapse to Kleene} (Theorem~\ref{thm:collapse}):
+  A surjective homomorphism from the credence algebra to the Kleene lattice exists for $\{\negc, \conjc, \disjc\}$; no analogous collapse exists for G\"odel, \L ukasiewicz, or classical logic.
+\item \textbf{Bayes consistency} as selection criterion: the product residuated implication passes; RM3 and G\"odel fail (Section~\ref{sec:relationships}).
+\item \textbf{Lean formalization}: Proofs are machine-checked in Lean~4 (Appendix~\ref{app:lean}).
 \end{enumerate}
 
-\textbf{Scope and limitations.}
-We call this a \emph{constraint algebra} on $[0,1]$: it specifies how
-credence values must relate to each other (through the product, complement,
-and chain rule) but provides no further structure.
-(``Constraint algebra'' is informal usage, not a reference to a standard
-algebraic variety.)
-In particular:
-\begin{itemize}
-\item It has no \emph{interpretation}: it does not map propositions to credences.
-\item It has no \emph{consequence relation}: it cannot express ``$A$ entails $B$.''
-\item It has no \emph{update rule}: when new evidence arrives, the algebra does not prescribe how to revise credences.
-\end{itemize}
-These are not oversights---they are by design.
-Just as Boolean algebra is the algebraic foundation for propositional logic
-(which adds a valuation and a consequence relation), and $[0,1]$ arithmetic
-is the foundation for probability theory (which adds a measure space and
-sigma-additivity), the credence algebra provides the algebraic layer that multiple
-higher-level systems can build on.
-
-\textbf{Two levels of use.}
-The algebra operates at two granularities.
-Collapsed to four statuses (true/false/both/void), it provides a
-paraconsistent proof theory sufficient for handling contradiction and
-undefinedness.
-On the full $[0,1]$ continuum, it provides quantitative epistemics:
-continuous ordering of propositions by strength, metric structure, and
-Bayesian-style inference.
-The min-copula constrains \emph{structure} (all propositions nested under a
-single latent parameter), not \emph{expressiveness}---the continuum remains
-measure-theoretically rich, like real analysis on a line.
-Four values suffice for a ``logic of statuses''; the continuum is needed for
-a ``mathematics of uncertainty.''
-
-Staying algebraic is what allows the collapse homomorphism to connect the credence algebra
-simultaneously to K$_3$, LP, and RM3---three logics that share the same
-algebra but differ in their consequence relations.
-
-\textbf{Two philosophical traditions.}
-Values in $[0,1]$ have been interpreted in two fundamentally different ways.
-Dubois and Prade~\cite{dubois2001} identified the key distinction:
-\emph{degrees of truth} are compositional, while \emph{degrees of belief}
-are not.
-This distinction is the source of much confusion between many-valued logic
-and probability theory.
-
-The \emph{probability tradition} interprets values as \emph{degrees of
-belief}---an agent's confidence in a
-proposition~\cite{ramsey1931,definetti1937,jeffrey1965}.
-Credences are subjective: they represent what an agent believes, not an
-objective feature of the world.
-The core inference mechanism is conditionalization: given evidence,
-credences update via Bayes' rule.
-Crucially, degrees of belief are \emph{not compositional}: $P(A \land B)$
-cannot be computed from $P(A)$ and $P(B)$ alone---it depends on the
-stochastic dependence between $A$ and $B$~\cite{adams1998,sep-logic-probability}.
-As Panti~\cite{panti1995} put it: ``Probabilistic interpretations are
-ruled out [in truth-functional systems] because we may know that the
-probabilities of events $A$ and $B$ are both $\tfrac{1}{2}$, without being
-able to compute the probability of $(A \land B)$ in the absence of
-information about the stochastic dependence of $A$ and $B$.''
-Reichenbach~\cite{reichenbach1949} attempted to build a compositional
-probability logic, but Nagel noted that Reichenbach's system fails to be
-truly extensional~\cite{sep-reichenbach}.
-Adams~\cite{adams1965,adams1998} took a different approach: rather than
-forcing compositionality, he treated conditionals as having
-\emph{assertability conditions} tied to conditional probabilities.
-Lewis~\cite{lewis1976} proved that treating conditionals as propositions
-whose probability equals the conditional probability leads to triviality.
-
-The \emph{logic tradition} interprets values as \emph{degrees of truth}---an
-objective feature of propositions, independent of any
-agent~\cite{lukasiewicz1920,kleene1952,zadeh1965}.
-\L ukasiewicz introduced three-valued logic to handle future contingents
-and modal possibility; Kleene developed three-valued truth tables for
-partial recursive functions; Zadeh generalized to continuous ``fuzzy''
-membership.
-The defining feature is \emph{compositionality} (truth-functionality):
-the truth value of a compound is determined by the truth values of its
-components via fixed algebraic operations (min, max, product,
-etc.)~\cite{hajek1998,klement2000}.
-Consequence relations determine validity: an inference is valid when every
-valuation making premises designated also makes the conclusion designated.
-%
-H\'ajek~\cite{hajek1998} characterized the distinction succinctly: fuzzy
-logic uses degrees of truth as a mathematical model of \emph{vagueness},
-while probability is a mathematical model of \emph{ignorance}.
-Dubois and Prade's example~\cite{dubois2001}: when a bottle is half full,
-the degree of truth of ``the bottle is full'' is $0.5$ (the predicate
-``full'' is graded); but when a bottle is either completely full or empty
-and we don't know which, the degree of belief is $0.5$ (our knowledge is
-incomplete).
-Edgington~\cite{edgington1997} developed ``verities'' (degrees of closeness
-to clear truth) to handle vagueness without conflating it with uncertainty.
-
-\emph{Logical matrices.}
-The logic tradition organizes its semantics via \emph{logical matrices}.
-A logical matrix $\langle \mathbf{A}, D \rangle$ consists of an algebra
-$\mathbf{A}$ of truth values together with a set $D \subseteq \mathbf{A}$
-of \emph{designated} values~\cite{gottwald2001}.
-Connectives are interpreted as algebraic operations on $\mathbf{A}$;
-a valuation assigns truth values to atoms and extends compositionally
-to all formulas; an inference is valid when every valuation making all
-premises designated also makes the conclusion designated.
-The same algebra (e.g., the Kleene lattice $\{0, \tfrac{1}{2}, 1\}$) can
-underlie multiple logics (K$_3$, LP, RM3) that differ only in which values
-are designated.
-%
-In contrast, a probability space $(\Omega, \mathcal{F}, P)$ defines the
-measure $P$ directly on events via the Kolmogorov axioms~\cite{kolmogorov1933}.
-The joint $P(A \land B)$ is not computed from marginals; it is determined
-by the underlying measure, which encodes dependence information.
-Knowing $P(A) = 0.6$ and $P(B) = 0.7$ tells you only that
-$P(A \land B) \in [\max(0, 0.3), 0.6]$---the Fr\'echet-Hoeffding bounds---not
-a unique value.
-The traditions have historically developed in parallel, with occasional
-bridge attempts: Carnap's logical probability~\cite{carnap1950} sought
-objective constraints on prior credences; H\'ajek, Godo, and
-Esteva~\cite{hajek1995} reinterpreted probability values as fuzzy truth
-values; de Finetti's three-valued conditional~\cite{definetti1936}
-introduced void as a third status when the antecedent fails.
-Shafer~\cite{shafer1976} and Walley~\cite{walley1991} generalized beyond
-point-valued probability to belief functions and imprecise probability,
-and Shafer explicitly argued that multiple uncertainty representations
-are necessary for different domains.
-
-\emph{The credence algebra is designed to be compatible with both traditions.}
-By staying at the algebraic layer---values, operations, and the chain
-rule constraint---the algebra takes no position on whether values represent
-degrees of belief or degrees of truth.
-The algebra exists prior to interpretation, like the logic tradition;
-but the chain rule encodes the same constraint that probability uses for
-conditioning.
-The key mechanism is that the joint credence $\cred(A \land B)$ is an
-\emph{external parameter}: it can be supplied as a fixed formula
-(truth-functional) or as empirical data (probability-style).
-
-\emph{The unique meeting point.}
-A central finding (Theorem~\ref{thm:uniqueness-main}) is that only one
-choice of joint formula---maximum positive dependence,
-$\cred(A \land B) = \min(\cred(A), \cred(B))$---satisfies all the
-requirements for proper reasoning: truth-functionality, Bayes consistency,
-non-trivial conditioning, and idempotence.
-This explains why K$_3$, LP, and RM3 all use the Kleene conjunction: it is
-the unique point where the logic and probability traditions meet.
-Part~2~\cite{part2} develops both interpretations in detail.
+\textbf{Scope.}
+The credence algebra is a constraint algebra on $[0,1]$: it specifies how credence values must relate through the product, complement, and chain rule.
+It has no interpretation (no map from propositions to credences), no consequence relation, and no update rule---like Boolean algebra before propositional logic adds valuations, or $[0,1]$ arithmetic before probability adds a measure space.
+Part~2~\cite{part2} extends the algebra to valuations, consequence relations, and update rules.
 
 \textbf{Outline.}
-Section~\ref{sec:algebra} defines the credence algebra.
-Section~\ref{sec:uniqueness} proves the uniqueness theorem (Main Result~1).
-Section~\ref{sec:conditioning} develops primitive conditioning and proves
-path dependence (Main Result~2).
-Section~\ref{sec:fixed-points} treats fixed points and self-reference.
-Section~\ref{sec:connections} relates the algebra to existing frameworks.
+Section~\ref{sec:algebra} defines the algebra.
+Section~\ref{sec:uniqueness} proves uniqueness of min (Main Result~1).
+Section~\ref{sec:conditioning} develops primitive conditioning and path dependence (Main Result~2).
+Section~\ref{sec:fixed-points} treats fixed points.
+Section~\ref{sec:collapse} establishes the collapse to the Kleene lattice.
+Section~\ref{sec:relationships} relates the algebra to existing frameworks.
 Section~\ref{sec:conclusion} concludes.
-Appendix~\ref{app:prelim} provides formal preliminaries (t-norms, copulas).
-Appendix~\ref{app:logic-tables} contains detailed logic comparison tables.
+Appendix~\ref{app:prelim} provides formal preliminaries.
+Appendix~\ref{app:extended} contains extended comparisons.
 Appendix~\ref{app:lean} describes the Lean formalization.
-
-%=============================================================================
-% PRELIMINARIES MOVED TO APPENDIX A
-% See \ref{app:prelim} for formal definitions of t-norms, copulas, and
-% fuzzy logic concepts.
-%=============================================================================
 
 %=============================================================================
 \section{The Credence Algebra}
@@ -420,7 +166,7 @@ The joint credence of two propositions depends on their dependence structure:
 \item Under maximum negative dependence: $\cred(A \land B) = \max(\cred(A) + \cred(B) - 1, 0)$
   (Fr\'echet lower bound---the \L ukasiewicz t-norm).
 \end{itemize}
-The algebra does not commit to any particular dependence structure.
+The credence algebra does not commit to any particular dependence structure.
 The joint credence $\cred(A \land B)$ is an \emph{external parameter} that can
 take any value in the Fr\'echet-Hoeffding interval
 $[\max(\cred(A) + \cred(B) - 1, 0),\; \min(\cred(A), \cred(B))]$.
@@ -445,21 +191,21 @@ conjunction is the product t-norm, disjunction its dual t-conorm (the
 complement~\cite{klement2000,hajek1998}.
 These operations are truth-functional---determined entirely by the operand
 values---which is what makes the collapse homomorphism to the Kleene lattice
-possible (Section~\ref{sec:connections}).
+possible (Section~\ref{sec:collapse}).
 
 \begin{remark}[Credence vs.\ Probability]
 \label{rem:not-probability}
-The algebra's core consists of three ingredients: values in $[0,1]$, the complement
+The credence algebra's core consists of three ingredients: values in $[0,1]$, the complement
 $\negc c = 1 - c$, and the chain rule for conditioning.
 Probability adds a sigma-algebra, a measure, and sigma-additivity; every
-probability space therefore satisfies The algebra's axioms, making probability a
+probability space therefore satisfies the credence algebra's axioms, making probability a
 special case.
 In probability, the joint $P(A \land B)$ is determined by the measure---not
 by the product of marginals (unless events are independent).
-The algebra makes no such determination: $c_1 \conjc c_2$ is multiplication on
+The credence algebra makes no such determination: $c_1 \conjc c_2$ is multiplication on
 $[0,1]$, not a claim about the actual joint of arbitrary propositions.
 The actual joint is an external input to conditioning.
-The algebra's disjunction $c_1 \disjc c_2 = c_1 + c_2 - c_1 c_2$ is the De Morgan
+The credence algebra's disjunction $c_1 \disjc c_2 = c_1 + c_2 - c_1 c_2$ is the De Morgan
 dual of the product; probability's inclusion-exclusion
 $P(A \lor B) = P(A) + P(B) - P(A \land B)$ uses the actual joint instead.
 \end{remark}
@@ -841,57 +587,16 @@ does not select a unique limit at zero; it selects an angle-dependent family
 of limits.
 \end{remark}
 
-This gives a clean algebraic fork:
-\begin{description}[nosep]
-\item[Option A: Keep underdetermined.]
-  The conditional at evidence $= 0$ is not assigned a single value; it remains
-  constrained only to $[0,1]$.  Ex falso does not follow.
-\item[Option B: Totalize to~$1$.]
-  Declare $\cred(A \mid 0) = 1$.  This recovers ex-falso-flavored behavior but
-  is a \emph{convention}, not entailed by the algebra.
-  This totalization is used in probability logics~\cite{adams1965} and has been
-  recognized as problematic in product-fuzzy encodings~\cite{hajek1998}.
-\end{description}
-We take Option~A: the conditional at zero is void (unconstrained).
-The min-copula encourages Option~B for the common path ``fixed $a > 0$, $b \to 0$''
-(which drives the limit to~$1$), but it does \emph{not} justify a unique extension
-because the limit varies with the ratio $a/b$.
+The chain rule permits any value at evidence zero (Option~A: keep underdetermined, ex falso does not follow) or one can declare $\cred(A \mid 0) = 1$ (Option~B: totalize, recovering ex falso as a convention).
+We take Option~A.
 
 \subsection{De Finetti's Void}
 
 De Finetti's three-valued conditional~\cite{definetti1936} captures the same
 principle in a discrete setting: when the conditioning event does not obtain,
 the conditional is void rather than vacuously true.
-In The algebra's graded setting, ``void'' becomes ``any value in $[0,1]$ satisfies
+In the credence algebra's graded setting, ``void'' becomes ``any value in $[0,1]$ satisfies
 the chain rule.''
-
-\begin{remark}[Void as an Extra Value]
-\label{rem:void-value}
-The unconstrained status at evidence zero is not merely the absence of a
-result---it is a genuine extra value in the output of conditioning, exactly
-de Finetti's void~\cite{definetti1936}.
-On the Boolean restriction $\{0, 1\}$, conditioning produces outputs in
-$\{0, 1, {*}\}$---three values, recovering de Finetti's original three-valued
-conditional.
-On the collapsed Kleene algebra $\{0, \tfrac{1}{2}, 1\}$, conditioning
-produces outputs in $\{0, \tfrac{1}{2}, 1, {*}\}$---four values
-(evidence $= 0$ gives $*$; evidence $= \tfrac{1}{2}$ with
-joint $\in \{0, \tfrac{1}{2}\}$ gives condCred $\in \{0, 1\}$;
-evidence $= 1$ with joint $\in \{0, \tfrac{1}{2}, 1\}$ gives
-condCred $\in \{0, \tfrac{1}{2}, 1\}$).
-On the full interval $[0,1]$, conditioning produces outputs in
-$[0,1] \cup \{{*}\}$.
-In the finite cases, the connective algebra has $n$ values and the full
-system with conditioning has $n + 1$; on $[0,1]$, conditioning adjoins a
-single extra output.
-Void can be viewed as the uniform extra that The algebra's chain rule
-introduces at evidence zero.
-K$_3$, LP, and RM3 all resolve this extra value by committing to a definite
-implication (each has $0 \to b = 1$ in its truth table); product logic does
-the same via residuation.
-The algebra leaves the void unresolved---the choice of how to fill it in is
-deferred to whatever system is built on top (Section~\ref{sec:connections}).
-\end{remark}
 
 \subsection{Existence and Uniqueness}
 
@@ -926,7 +631,7 @@ The defining constraint uses only multiplication.
 Division appears in the existence proof as a construction technique, not in the
 definition itself---it is derived, not primitive.
 Probability satisfies the same chain rule: $P(A \mid B) \cdot P(B) = P(A \land B)$.
-The algebra's conditioning is not new machinery---it is probability's chain rule without
+The credence algebra's conditioning is not new machinery---it is probability's chain rule without
 the surrounding measure theory.
 
 \subsection{Worked Example}
@@ -984,16 +689,13 @@ The extensive literature on semantic paradoxes offers multiple approaches:
 Kripke's groundedness~\cite{kripke1975} assigns no truth value to the liar at
 minimal fixed points; Priest's dialetheism~\cite{priest1979} treats it as both
 true and false.
-The algebra's $\tfrac{1}{2}$ is simply the unique fixed point of complement on $[0,1]$.
+The credence algebra's $\tfrac{1}{2}$ is simply the unique fixed point of complement on $[0,1]$.
 \end{remark}
 
 %=============================================================================
-\section{Connections to Other Systems}
-\label{sec:connections}
-%=============================================================================
-
-\subsection{Three-Valued Collapse}
+\section{Collapse to the Kleene Lattice}
 \label{sec:collapse}
+%=============================================================================
 
 Define the collapse function:
 \[
@@ -1019,7 +721,7 @@ where the three-valued operations are $\mathrm{neg}(c) = 1-c$,
 $\mathrm{conj} = \min$, $\mathrm{disj} = \max$.
 (The roman-font names $\mathrm{neg}$, $\mathrm{conj}$, $\mathrm{disj}$
 denote the target algebra's operations; $\negc$, $\conjc$, $\disjc$
-denote The algebra's. Both negations are $1 - c$, but the notational distinction
+denote the credence algebra's. Both negations are $1 - c$, but the notational distinction
 tracks source vs.\ target.)
 \end{theorem}
 \begin{proof}
@@ -1103,57 +805,101 @@ $\tfrac{1}{2}$ & $\tfrac{1}{2}$ & $\tfrac{1}{2}$ & 1 \\
 \end{tabular}
 \end{center}
 
-\subsubsection*{Conditioning and Implication}
+\subsection{Impossibility Results}
 
-\textbf{Scope of the collapse.}
+No analogous collapse exists for the other standard three-valued algebras.
+
+% Lean: no_boolean_neg_retraction
+\begin{proposition}[No Collapse to Classical Logic]
+\label{prop:no-classical}
+There is no function $\varphi : [0,1] \to \{0,1\}$ preserving negation:
+$\varphi(1-c) = 1 - \varphi(c)$ for all $c$.
+\end{proposition}
+\begin{proof}
+At $c = \tfrac{1}{2}$: $\varphi(\tfrac{1}{2}) = 1 - \varphi(\tfrac{1}{2})$,
+so $\varphi(\tfrac{1}{2}) = \tfrac{1}{2} \notin \{0, 1\}$.
+Lean: \texttt{no\_boolean\_neg\_retraction}.
+\end{proof}
+
+% Lean: no_godel_collapse, godel_neg_no_fixed_point
+\begin{proposition}[No Collapse to G\"odel Logic]
+\label{prop:no-godel}
+Let $\mathrm{neg}_G$ denote G\"odel negation on $\{0, \tfrac{1}{2}, 1\}$:
+$\mathrm{neg}_G(0) = 1$ and $\mathrm{neg}_G(c) = 0$ for $c > 0$~\cite{godel1932}.
+There is no function $\varphi : [0,1] \to \{0, \tfrac{1}{2}, 1\}$ such that
+$\varphi(1-c) = \mathrm{neg}_G(\varphi(c))$ for all $c$.
+\end{proposition}
+\begin{proof}
+G\"odel negation has no fixed point:
+$\mathrm{neg}_G(0) = 1 \neq 0$,
+$\mathrm{neg}_G(\tfrac{1}{2}) = 0 \neq \tfrac{1}{2}$,
+$\mathrm{neg}_G(1) = 0 \neq 1$.
+But $\varphi(\tfrac{1}{2}) = \varphi(1 - \tfrac{1}{2}) = \mathrm{neg}_G(\varphi(\tfrac{1}{2}))$
+requires $\varphi(\tfrac{1}{2})$ to be a fixed point.
+Lean: \texttt{no\_godel\_collapse}, \texttt{godel\_neg\_no\_fixed\_point}.
+\end{proof}
+
+% Lean: no_luk_collapse, luk_conj_half_half
+\begin{proposition}[No Collapse to \L ukasiewicz Logic]
+\label{prop:no-luk}
+Let $\mathrm{conj}_{\text{\L}} (a, b) = \max(a + b - 1,\; 0)$ be the \L ukasiewicz
+conjunction on $\{0, \tfrac{1}{2}, 1\}$~\cite{lukasiewicz1920}.
+There is no function $\varphi : [0,1] \to \{0, \tfrac{1}{2}, 1\}$ preserving both
+negation ($\varphi(1-c) = 1-\varphi(c)$) and conjunction
+($\varphi(c_1 \cdot c_2) = \mathrm{conj}_{\text{\L}}(\varphi(c_1), \varphi(c_2))$).
+\end{proposition}
+\begin{proof}
+Negation preservation at $c = \tfrac{1}{2}$:
+$\varphi(\tfrac{1}{2}) = \varphi(1 - \tfrac{1}{2}) = 1 - \varphi(\tfrac{1}{2})$,
+so $\varphi(\tfrac{1}{2}) = \tfrac{1}{2}$.
+Pick $c = \sqrt{1/2}$; since $0 < \sqrt{1/2} < 1$, we have $c \in (0,1)$,
+and $c \conjc c = c^2 = \tfrac{1}{2}$.
+Conjunction preservation gives
+$\varphi(\tfrac{1}{2}) = \mathrm{conj}_{\text{\L}}(\varphi(c), \varphi(c))$.
+Since $\varphi(c) \in \{0, \tfrac{1}{2}, 1\}$:
+\[
+\mathrm{conj}_{\text{\L}}(0,0) = 0,\quad
+\mathrm{conj}_{\text{\L}}(\tfrac{1}{2},\tfrac{1}{2}) = 0,\quad
+\mathrm{conj}_{\text{\L}}(1,1) = 1
+\]
+None equals $\tfrac{1}{2} = \varphi(\tfrac{1}{2})$.
+Lean: \texttt{no\_luk\_collapse}, \texttt{luk\_conj\_half\_half}.
+\end{proof}
+
+The pattern: the negation fixed point at $\tfrac{1}{2}$ propagates constraints
+that only the Kleene lattice can absorb.
+Classical logic and G\"odel logic fail on negation alone (they lack a fixed
+point).
+\L ukasiewicz logic preserves negation, but its conjunction
+$\mathrm{conj}_{\text{\L}}(\tfrac{1}{2}, \tfrac{1}{2}) = 0$ disagrees with the
+Kleene value $\min(\tfrac{1}{2}, \tfrac{1}{2}) = \tfrac{1}{2}$: the
+self-conjunction of the fixed point must equal the fixed point, and only the
+Kleene lattice satisfies this.
+See Appendix~\ref{app:extended} for the Belnap-Dunn comparison.
+
+%=============================================================================
+\section{Relationship to Existing Frameworks}
+\label{sec:relationships}
+%=============================================================================
+
+\subsection{Conditioning and Implication}
+
 The homomorphism of Theorem~\ref{thm:collapse} covers $\{\negc, \conjc, \disjc\}$.
 Implication is a separate question: the Kleene lattice has no canonical arrow,
 and the three logics (K$_3$, LP, RM3) that share it each define implication
 differently.
 
-\textbf{Conditioning is ternary, not binary.}
 Chain-rule conditioning involves three quantities: evidence, joint, and the
 conditional credence.
-The chain rule constrains the conditional given the other two.
 For evidence $> 0$, the conditional is $\text{joint}/\text{evidence}$, which
 requires joint $\leq$ evidence.
-
-\begin{center}
-\begin{tabular}{cc|c}
-\textit{evidence} & \textit{joint} & $\cred(A \mid B)$ \\
-\hline
-0 & 0 & $*$ \\
-$\tfrac{1}{2}$ & 0 & 0 \\
-$\tfrac{1}{2}$ & $\tfrac{1}{4}$ & $\tfrac{1}{2}$ \\
-$\tfrac{1}{2}$ & $\tfrac{1}{2}$ & 1 \\
-1 & 0 & 0 \\
-1 & $\tfrac{1}{2}$ & $\tfrac{1}{2}$ \\
-1 & 1 & 1
-\end{tabular}
-\end{center}
-{\footnotesize $*$ = unconstrained (any value satisfies chain rule).
-Only entries with joint $\leq$ evidence are valid.
-Note: This table treats the joint as a \emph{free parameter}, not computed from a
-copula; for the Kleene joint $\min(a,b)$, see the tables below.}
-
-\medskip
-\textbf{Conditioning as a binary arrow.}
-To compare with standard implications, fix the joint to the Kleene conjunction
+To compare with standard binary implications, fix the joint to the Kleene conjunction
 $\min(a, b)$.
 For evidence $a > 0$, the chain rule gives
-$\text{cond}(a, b) = \text{joint}/a = \min(a, b)/a$.
-If $b \leq a$ this is $b/a$; if $b > a$ this is $a/a = 1$.
-In both cases:
-\[
-\text{cond}(a, b) \;=\; \min(b/a,\; 1)
-\]
-This is exactly the \emph{product residuated implication} of H\'ajek's
+$\text{cond}(a, b) = \min(a, b)/a = \min(b/a,\; 1)$---exactly the \emph{product residuated implication} of H\'ajek's
 $\Pi$-logic~\cite{hajek1998}.
 
 \textbf{Three-way comparison on $\{0, \tfrac{1}{2}, 1\}$.}
-The tables below fix the joint to the Kleene conjunction $\min(a,b)$ and
-display the resulting binary arrow $f(a,b)$ indexed by evidence $a$ (rows)
-and conclusion $b$ (columns), in contrast to the (evidence, joint) table above.
 
 \begin{center}
 \begin{tabular}{c|ccc}
@@ -1196,41 +942,11 @@ to any one logic's consequence relation.}
 \footnotetext{On $\{0, \tfrac{1}{2}, 1\}$, the product residuated implication
 $\min(b/a, 1)$ coincides with the G\"odel implication.
 Lean: \texttt{godel\_impl\_eq\_prod\_resid}.}
-\smallskip
-The Kleene material conditional and the product residuated agree when
-evidence $\in \{0, 1\}$ but differ at both interior entries of the
-evidence $= \tfrac{1}{2}$ row:
-$\tfrac{1}{2} \to 0$ is $\tfrac{1}{2}$ (Kleene material) vs.\ $0$
-(product residuated), and
-$\tfrac{1}{2} \to \tfrac{1}{2}$ is $\tfrac{1}{2}$ (Kleene material)
-vs.\ $1$ (product residuated).
-Chain-rule conditioning (with Kleene joint) matches the product residuated for
-evidence $> 0$ and replaces the evidence $= 0$ row with~$*$.
 
 Lean: \texttt{rm3\_impl}, \texttt{godel\_impl},
 \texttt{godel\_impl\_ne\_rm3\_impl}, \texttt{cred\_no\_ex\_falso\_godel}.
 
-\textbf{G\"odel coincidence.}
-On the finite set $\{0, \tfrac{1}{2}, 1\}$, the product residuated implication
-$\min(b/a, 1)$ and the G\"odel implication coincide (both have the same
-truth table above; Lean: \texttt{godel\_impl\_eq\_prod\_resid}).
-The coincidence is specific to $\{0, \tfrac{1}{2}, 1\}$: evaluating
-the real-valued functions at inputs from
-$\{0, \tfrac{1}{3}, \tfrac{2}{3}, 1\}$, for instance, the two
-implications already differ (at $a = \tfrac{2}{3}, b = \tfrac{1}{3}$:
-product residuated gives $\min(\tfrac{1}{2}, 1) = \tfrac{1}{2}$,
-G\"odel gives $b = \tfrac{1}{3}$).
-On $[0,1]$ they diverge: G\"odel implication is $1$ when $a \leq b$ and $b$
-otherwise, while the product residuated implication is $\min(b/a, 1)$.
-
-\textbf{Full $[0,1]$ structure.}
-On $[0,1]$, conditioning is parametric in the joint---a family of arrows
-indexed by the joint credence, not one specific binary arrow.
-The product residuated implication is the specific instantiation with
-joint $= \min(a, b)$ (the Kleene conjunction).
-Product fuzzy logic commits to this choice; the credence algebra leaves the joint free.
-
-\subsubsection*{Bayes Consistency}
+\subsection{Bayes Consistency}
 
 Applying the chain rule from both directions gives Bayes' theorem:
 \[
@@ -1241,17 +957,13 @@ Applying the chain rule from both directions gives Bayes' theorem:
 A binary arrow $f : [0,1]^2 \to [0,1]$ is
 \emph{Bayes-consistent} when the joint it induces is symmetric:
 $f(a, b) \cdot a = f(b, a) \cdot b$ for all $a, b \in [0,1]$.
-Here $a$ is the evidence (first argument), $b$ the conclusion, and
-$f(a,b) \cdot a$ is the induced joint---the product of the conditional
-$f(a,b)$ and the evidence $a$.
 \end{definition}
 
 % Lean: prod_resid_bayes_consistent_real
 \begin{proposition}[Product Residuated is Bayes-Consistent]
 \label{prop:resid-bayes}
 The product residuated implication $f(a, b) = \min(b/a,\; 1)$ (with
-the standard convention $f(0, b) = 1$, i.e.\ ex falso---the convention that
-The algebra's chain-rule conditioning replaces with ``unconstrained'') is
+the standard convention $f(0, b) = 1$) is
 Bayes-consistent: $f(a, b) \cdot a = \min(a, b) = f(b, a) \cdot b$.
 \end{proposition}
 \begin{proof}
@@ -1260,7 +972,6 @@ $f(b, 0) \cdot b = 0$ (since $f(b, 0) = \min(0/b, 1) = 0$ for $b > 0$,
 and $f(0, 0) \cdot 0 = 0$).
 If $a > 0$ and $b \leq a$: $f(a, b) \cdot a = (b/a) \cdot a = b = \min(a, b)$.
 If $a > 0$ and $a < b$: $f(a, b) \cdot a = 1 \cdot a = a = \min(a, b)$.
-By symmetry of $\min$, $f(b, a) \cdot b = \min(a, b)$ as well.
 Lean: \texttt{prod\_resid\_bayes\_consistent\_real}.
 \end{proof}
 
@@ -1281,10 +992,8 @@ Lean: \texttt{godel\_not\_bayes\_consistent\_real}.
 % Lean: rm3_not_bayes_consistent_real
 \begin{proposition}[RM3 is Not Bayes-Consistent]
 \label{prop:rm3-not-bayes}
-The Kleene material conditional $\max(\negc a, b)$---the three-valued
-analogue of material implication, used in RM3, LP, and K$_3$---fails
-Bayes consistency even on
-$\{0, \tfrac{1}{2}, 1\}$.
+The Kleene material conditional $\max(\negc a, b)$ fails
+Bayes consistency even on $\{0, \tfrac{1}{2}, 1\}$.
 \end{proposition}
 \begin{proof}
 Take $a = \tfrac{1}{2}$, $b = 0$.
@@ -1292,106 +1001,8 @@ Then $f(a, b) = \max(\tfrac{1}{2}, 0) = \tfrac{1}{2}$, so
 $f(a, b) \cdot a = \tfrac{1}{4}$.
 But $f(b, a) = \max(1, \tfrac{1}{2}) = 1$, so $f(b, a) \cdot b = 0$.
 Since $\tfrac{1}{4} \neq 0$, RM3 is not Bayes-consistent.
-Lean: \texttt{rm3\_not\_bayes\_consistent\_real} (real multiplication on $[0,1]$,
-directly backing Definition~\ref{def:bayes}).
-Note: $\max(\negc a, b)$ on $[0,1]$ is the natural real-valued extension of the
-three-valued Kleene material conditional, not a standard named implication on
-the continuum.
+Lean: \texttt{rm3\_not\_bayes\_consistent\_real}.
 \end{proof}
-
-\begin{remark}
-On $\{0, \tfrac{1}{2}, 1\}$, the G\"odel implication coincides with the product
-residuated implication (Section~\ref{sec:collapse}), so it is Bayes-consistent
-on this finite set.
-Bayes consistency under real multiplication (Definition~\ref{def:bayes})
-follows from \texttt{prod\_resid\_bayes\_consistent\_real} (which covers $[0,1]$)
-restricted to $\{0, \tfrac{1}{2}, 1\}$ via
-\texttt{godel\_impl\_eq\_prod\_resid} (which establishes the coincidence).
-The failure occurs only on the full interval $[0,1]$.
-\end{remark}
-
-\begin{remark}[Copula Connection]
-\label{rem:copula}
-A binary arrow $f$ is Bayes-consistent if and only if the induced joint
-$J(a,b) = f(a,b) \cdot a$ is symmetric.
-A copula is a function $C : [0,1]^2 \to [0,1]$ satisfying
-$C(a,0) = C(0,b) = 0$, $C(a,1) = a$, $C(1,b) = b$, and the 2-increasing
-property~\cite{nelsen2006}.
-Every \emph{symmetric} copula ($C(a,b) = C(b,a)$) yields a Bayes-consistent
-arrow for positive arguments via $I_C(a,b) = C(a,b)/a$ for $a > 0$
-(at $a = 0$ every copula gives $C(0,b) = 0$, so $I_C(0,b) = 0/0$ is
-undefined; The algebra's chain rule $c \cdot 0 = 0$ is satisfied by any $c$,
-leaving the conditional unconstrained).
-The induced joint $I_C(a,b) \cdot a = C(a,b)$ is symmetric.
-Grzegorzewski~\cite{grzegorzewski2013} computed three cases:
-the Fr\'echet upper bound $C(a,b) = \min(a,b)$ gives the product
-residuated (Goguen~\cite{goguen1969}) implication; the independence copula $C(a,b) = ab$
-gives the trivial arrow $b$; the Fr\'echet lower bound
-$C(a,b) = \max(a+b-1, 0)$ gives a third arrow.
-Among the standard logic implications (RM3, G\"odel, product residuated),
-only the product residuated is copula-derived (from the Fr\'echet upper
-bound).
-RM3's induced joint $\max(\negc a, b) \cdot a$ violates copula boundary
-conditions ($a = \tfrac{1}{2}, b = 0$ gives $\tfrac{1}{4} \neq 0$);
-G\"odel's induced joint is not symmetric, so it cannot arise from a
-symmetric copula.
-Neither is Bayes-consistent.%
-\footnote{Lawvere~\cite{lawvere1973} showed that residuation generalizes
-directed distance in enriched categories; this principle applies to the
-product residuated via the additive generator $-\log x$~\cite{klement2000}.}
-Lean: \texttt{symmetric\_bayes\_consistent}, \texttt{copula\_zero\_left}.
-\end{remark}
-
-% Lean: min_bayes_consistent, prod_trivial_conditioning, min_nontrivial_conditioning,
-%       truth_functional_forces_min
-\begin{theorem}[Maximum Dependence is the Unique Meeting Point]
-\label{thm:max-dependence}
-Among all fixed joint functions $j(a,b)$ taking values in the Fr\'echet-Hoeffding
-interval, only maximum positive dependence $j(a,b) = \min(a,b)$ satisfies
-\emph{all four} requirements for proper reasoning:
-\begin{enumerate}[label=(\roman*),nosep]
-\item \textbf{Truth-functional}: $j(a,b)$ is a fixed function of $a$ and $b$.
-\item \textbf{Bayes-consistent}: conditioning satisfies
-  $\cred(A \mid B) \cdot \cred(B) = \cred(B \mid A) \cdot \cred(A)$.
-\item \textbf{Non-trivial}: $\cred(A \mid B) \neq \cred(A)$ in general---evidence
-  affects conclusions.
-\item \textbf{Idempotent}: $j(a,a) = a$, so $\cred(A \land A) = \cred(A)$.
-\end{enumerate}
-\end{theorem}
-\begin{proof}
-(i)~By definition, $\min(a,b)$ is a function of $a$ and $b$ alone.
-(ii)~The induced joint is $\min(a,b)$, which is symmetric;
-  Bayes consistency follows from Proposition~\ref{prop:resid-bayes}.
-(iii)~Conditioning gives $\cred(A \mid B) = \min(a,b)/b = \min(a/b, 1)$,
-  which differs from $a$ when $a > b$.
-(iv)~$\min(a,a) = a$.
-
-For comparison:
-\begin{itemize}[nosep]
-\item \emph{Independence} $j(a,b) = ab$: satisfies (i), (ii), (iv$'$: non-idempotent),
-  but \emph{fails} (iii)---conditioning gives $ab/b = a$, so evidence has no effect.
-\item \emph{RM3}: fails (ii) (Proposition~\ref{prop:rm3-not-bayes}).
-\item \emph{G\"odel on $[0,1]$}: fails (ii) (Proposition~\ref{prop:godel-not-bayes}).
-\item \emph{\L ukasiewicz} $j(a,b) = \max(a+b-1,0)$: satisfies (i),
-  but the induced arrow is not the same as the residuated implication from the
-  \L ukasiewicz t-norm.
-\end{itemize}
-Lean: \texttt{min\_bayes\_consistent}, \texttt{prod\_trivial\_conditioning},
-\texttt{min\_nontrivial\_conditioning}.
-\end{proof}
-
-\begin{remark}[Philosophical Consequence: Maximum Dependence is Required]
-\label{rem:max-dep-philosophy}
-In probabilistic language, the minimum joint corresponds to \emph{maximum
-positive dependence}---the Fr\'echet upper bound of the copula family.
-This is an extreme case: any two propositions are treated as maximally
-correlated, yet this assumption is \emph{mathematically forced} by the
-four requirements.
-Relaxing any one requirement opens alternatives (independence if we drop
-non-triviality or idempotence; G\"odel or \L ukasiewicz if we drop Bayes
-consistency; probability-style external joints if we drop truth-functionality),
-but the minimum is the unique point where all four meet.
-\end{remark}
 
 \begin{center}
 \small
@@ -1415,469 +1026,20 @@ External joints (probability-style) satisfy all except truth-functionality.}
 \label{tab:joint-comparison}
 \end{center}
 
-% Lean: frechet_upper, frechet_lower, frechet_conditioning_exists
-\begin{proposition}[Fr\'echet-Hoeffding Bounds]
-\label{prop:frechet}
-If the chain rule holds in both directions---$\condc{A}{B} \cdot \cred(B)
-= \cred(A \land B)$ and $\condc{B}{A} \cdot \cred(A) = \cred(A \land B)$---then
-the joint is bounded above:
-\[
-\cred(A \land B) \;\leq\; \min(\cred(A),\; \cred(B)).
-\]
-If additionally
-\[
-1 - \cred(A) - \cred(B) + \cred(A \land B) \;\geq\; 0
-\qquad\text{(complement non-negativity)}
-\]
-then
-\[
-\max(\cred(A) + \cred(B) - 1,\; 0) \;\leq\; \cred(A \land B).
-\]
-Together: the joint lies in the Fr\'echet-Hoeffding
-interval~\cite{nelsen2006}.
-\end{proposition}
-\begin{proof}
-Upper bound: each conditioning structure forces
-$\text{joint} \leq \text{evidence}$ (since $\text{condCred} \leq 1$).
-Applying this from both directions gives
-$\cred(A \land B) \leq \cred(A)$ and $\cred(A \land B) \leq \cred(B)$.
-Lower bound: the complement cell
-$1 - \cred(A) - \cred(B) + \cred(A \land B) \geq 0$ rearranges to
-$\cred(A \land B) \geq \cred(A) + \cred(B) - 1$.
-Lean: \texttt{frechet\_upper}, \texttt{frechet\_lower}.
-\end{proof}
-
-Complement non-negativity is not a consequence of the chain rule; it is
-an additional assumption motivated by probability's requirement for a valid
-joint distribution.
-The chain rule alone yields only the upper bound.
-The other three cells of the $2 \times 2$ table are automatically
-non-negative: the joint is non-negative by definition, and the upper bound
-gives $\cred(A) - \cred(A \land B) \geq 0$ and
-$\cred(B) - \cred(A \land B) \geq 0$.
-
-\begin{corollary}[Tightness of the Fr\'echet-Hoeffding Bounds]
-\label{cor:frechet-tight}
-Conversely, any joint in the Fr\'echet-Hoeffding interval admits
-conditioning structures in both directions.
-\end{corollary}
-\begin{proof}
-Case 1: both marginals positive---division gives the conditional
-(Lean: \texttt{frechet\_conditioning\_exists}).
-Case 2: exactly one marginal is zero (say $\cred(A) = 0$, $\cred(B) > 0$).
-The Fr\'echet-Hoeffding interval degenerates to $\{0\}$ (since
-$0 \leq \text{joint} \leq \min(0, \cred(B)) = 0$), so joint $= 0$.
-Conditioning given $B$: condCred $= 0/\cred(B) = 0$
-(\texttt{conditioning\_mk}).
-Conditioning given $A = 0$: unconstrained
-(\texttt{conditioning\_zero\_any}).
-Case 3: both marginals zero---then joint $= 0$; both directions are
-unconstrained (\texttt{conditioning\_zero\_any} applied twice).
-\end{proof}
-
-\begin{remark}[Freedom of the Joint]
-\label{rem:freedom}
-The algebra leaves the joint free: any value in the Fr\'echet-Hoeffding interval
-$[\max(a + b - 1, 0),\; \min(a, b)]$ is a valid joint credence, and
-any symmetric joint function taking values in this interval yields a
-Bayes-consistent arrow via the chain rule.
-The Fr\'echet upper bound $\min(a, b)$ yields the product residuated
-(Goguen~\cite{goguen1969}) implication $\min(b/a, 1)$---the implication of H\'ajek's
-product logic $\Pi$~\cite{hajek1998}.
-The independence copula $a \cdot b$ (The algebra's $\conjc$) yields the trivial
-arrow $b$.
-The Fr\'echet lower bound $\max(a + b - 1, 0)$ yields a third arrow.
-Fixing a specific copula (dependence structure) selects a specific arrow;
-The algebra's parametric conditioning encompasses all of them.
-\end{remark}
-
-\begin{remark}[Relationship to T-Norm Fuzzy Logics]
-\label{rem:tnorm}
-As discussed in the introduction, t-norm fuzzy logics couple the arrow to the
-t-norm via residuation: each t-norm determines a unique implication.
-The credence algebra is orthogonal: it fixes the t-norm (product) but varies the arrow via the
-joint parameter.
-Every copula-derived arrow---including the product residuated (Fr\'echet upper
-bound), the trivial arrow (independence copula), and the Fr\'echet lower-bound
-arrow---is an instantiation of The algebra's parametric conditioning.
-In this sense the credence algebra is more general than any single t-norm logic in the
-implication dimension, while being committed to the product t-norm for the
-connective algebra.
-
-The product t-norm is distinguished among the three basic continuous t-norms
-for this role.
-The minimum (G\"odel) t-norm fails unique conditioning: $\min(c, e) = j$
-with $j = e$ is satisfied by any $c \geq e$, not just one value.
-The \L ukasiewicz t-norm fails similarly: $\max(c + e - 1, 0) = 0$ is
-satisfied by any $c \leq 1 - e$, not just one value.
-The product is the only basic continuous t-norm where $c \cdot e = j$ with
-$e > 0$ determines $c$ uniquely ($c = j/e$).
-Lean: \texttt{min\_tnorm\_not\_unique}, \texttt{luk\_tnorm\_not\_unique}.
-More generally, among continuous t-norms, unique conditioning at positive
-evidence characterizes the strict family (continuous and strictly monotone;
-equivalently, cancellative and continuous), all of which are
-order-isomorphic to the product~\cite[Theorem~5.1]{klement2000}.
-The product t-norm also preserves the open interval $(0,1)$ under
-conjunction---the property that makes the Kleene collapse work---and the
-product $ab$ is the independence copula.
-
-The relationship to product logic $\Pi$ is a two-way bridge.
-If the algebra commits to a single binary arrow via residuation (becoming a t-norm
-fuzzy logic), the product t-norm forces the Fr\'echet upper bound, recovering
-exactly H\'ajek's product logic $\Pi$~\cite{hajek1998}.
-Conversely, if a t-norm fuzzy logic is required to support chain-rule
-conditioning with unique solutions, the product t-norm is forced (by the
-cancellation argument above).
-Product logic and the credence algebra are thus two views of the same algebraic
-structure: product logic is the committed view (one specific arrow, ex falso
-at evidence zero), the credence algebra is the parametric view (a family of arrows indexed
-by the joint, unconstrained at evidence zero).
-They coincide for positive evidence when the joint is set to the
-Fr\'echet upper bound.
-\end{remark}
-
-\subsection{Boolean Restriction}
-
-Restricting the algebra to $\{0, 1\}$, the operations $\{\negc, \conjc, \disjc\}$ become:
-\begin{center}
-\begin{tabular}{c|c}
-$c$ & $\negc c$ \\
-\hline
-0 & 1 \\
-1 & 0
-\end{tabular}
-\qquad
-\begin{tabular}{c|cc}
-$\conjc$ & 0 & 1 \\
-\hline
-0 & 0 & 0 \\
-1 & 0 & 1
-\end{tabular}
-\qquad
-\begin{tabular}{c|cc}
-$\disjc$ & 0 & 1 \\
-\hline
-0 & 0 & 1 \\
-1 & 1 & 1
-\end{tabular}
-\end{center}
-These are exactly the two-element Boolean algebra operations $(\neg, \land, \lor)$.
-
-On $\{0, 1\}$ with evidence $> 0$, conditioning with Kleene joint matches the
-classical material implication: both give $1 \to 0 = 0$ and $1 \to 1 = 1$.
-Indeed, all three arrows---material, G\"odel, and product residuated---coincide
-on Boolean values when evidence $> 0$.
-At evidence $= 0$, material implication gives $0 \to b = 1$; chain-rule conditioning
-is unconstrained.
-To recover classical logic from the Boolean restriction, one must \emph{add} the axiom
-$\cred(A \mid 0) = 1$.
-
-\subsection{Subalgebra vs.\ Quotient}
-\label{sec:scope}
-
-The credence algebra relates to classical logic and to the Kleene lattice in structurally
-different ways: embedding vs.\ quotient.
-
-\textbf{Boolean subalgebra.}
-The set $\{0, 1\} \subset [0,1]$ is closed under all the algebra's operations:
-if $c_1, c_2 \in \{0,1\}$, then $\negc c_1$, $c_1 \conjc c_2$, and
-$c_1 \disjc c_2$ are all in $\{0,1\}$ (the truth tables are exactly
-$\neg$, $\land$, $\lor$; see tables above).
-No quotient map is needed: if you start with only $0$s and $1$s, all
-operations keep you there.
-
-% Lean: no_boolean_neg_retraction
-\begin{proposition}[No Collapse to Classical Logic]
-\label{prop:no-classical}
-There is no function $\varphi : [0,1] \to \{0,1\}$ preserving negation:
-$\varphi(1-c) = 1 - \varphi(c)$ for all $c$.
-\end{proposition}
-\begin{proof}
-At $c = \tfrac{1}{2}$: $\varphi(\tfrac{1}{2}) = 1 - \varphi(\tfrac{1}{2})$,
-so $\varphi(\tfrac{1}{2}) = \tfrac{1}{2} \notin \{0, 1\}$.
-Lean: \texttt{no\_boolean\_neg\_retraction}.
-\end{proof}
-
-The result is stronger than ``no retraction'': no negation-preserving map
-$[0,1] \to \{0,1\}$ exists at all, because the fixed point at $\tfrac{1}{2}$
-has no image in $\{0,1\}$.
-The Boolean algebra embeds into the credence algebra as a subalgebra, but there is no
-surjection back.
-
-\textbf{Kleene quotient.}
-The set $\{0, \tfrac{1}{2}, 1\}$ is \emph{not} closed under the algebra's operations:
-$\tfrac{1}{2} \conjc \tfrac{1}{2} = \tfrac{1}{4} \notin \{0, \tfrac{1}{2}, 1\}$.
-Intermediate values interact to produce other intermediate values, so the
-three-valued algebra cannot live inside the credence algebra as a subalgebra.
-The collapse homomorphism (Theorem~\ref{thm:collapse}) is the necessary
-quotient: it maps the entire open interval $(0,1)$ to $\tfrac{1}{2}$,
-absorbing the products that leave $\{0, \tfrac{1}{2}, 1\}$.
-
-\textbf{Uniqueness of the Kleene target.}
-No analogous quotient exists for the other standard three-valued algebras.
-
-% Lean: no_godel_collapse, godel_neg_no_fixed_point
-\begin{proposition}[No Collapse to G\"odel Logic]
-\label{prop:no-godel}
-Let $\mathrm{neg}_G$ denote G\"odel negation on $\{0, \tfrac{1}{2}, 1\}$:
-$\mathrm{neg}_G(0) = 1$ and $\mathrm{neg}_G(c) = 0$ for $c > 0$~\cite{godel1932}.
-There is no function $\varphi : [0,1] \to \{0, \tfrac{1}{2}, 1\}$ such that
-$\varphi(1-c) = \mathrm{neg}_G(\varphi(c))$ for all $c$.
-\end{proposition}
-\begin{proof}
-G\"odel negation has no fixed point:
-$\mathrm{neg}_G(0) = 1 \neq 0$,
-$\mathrm{neg}_G(\tfrac{1}{2}) = 0 \neq \tfrac{1}{2}$,
-$\mathrm{neg}_G(1) = 0 \neq 1$.
-But $\varphi(\tfrac{1}{2}) = \varphi(1 - \tfrac{1}{2}) = \mathrm{neg}_G(\varphi(\tfrac{1}{2}))$
-requires $\varphi(\tfrac{1}{2})$ to be a fixed point.
-Lean: \texttt{no\_godel\_collapse}, \texttt{godel\_neg\_no\_fixed\_point}.
-\end{proof}
-
-Note: G\"odel's three-valued logic~\cite{godel1932} contributes two distinct
-operations to this paper.
-Its \emph{negation} (strong negation: $\mathrm{neg}_G(0)=1$, $\mathrm{neg}_G(c)=0$
-for $c > 0$) blocks the collapse above because it lacks a fixed point.
-Its \emph{implication} ($1$ if $a \leq b$, else $b$) coincides with the product
-residuated on $\{0,\tfrac{1}{2},1\}$ (Section~\ref{sec:collapse}) and is used in
-the Bayes-consistency comparison.
-
-% Lean: no_luk_collapse, luk_conj_half_half
-\begin{proposition}[No Collapse to \L ukasiewicz Logic]
-\label{prop:no-luk}
-Let $\mathrm{conj}_{\text{\L}} (a, b) = \max(a + b - 1,\; 0)$ be the \L ukasiewicz
-conjunction on $\{0, \tfrac{1}{2}, 1\}$~\cite{lukasiewicz1920}.
-There is no function $\varphi : [0,1] \to \{0, \tfrac{1}{2}, 1\}$ preserving both
-negation ($\varphi(1-c) = 1-\varphi(c)$) and conjunction
-($\varphi(c_1 \cdot c_2) = \mathrm{conj}_{\text{\L}}(\varphi(c_1), \varphi(c_2))$).
-\end{proposition}
-\begin{proof}
-Negation preservation at $c = \tfrac{1}{2}$:
-$\varphi(\tfrac{1}{2}) = \varphi(1 - \tfrac{1}{2}) = 1 - \varphi(\tfrac{1}{2})$,
-so $\varphi(\tfrac{1}{2}) = \tfrac{1}{2}$.
-Pick $c = \sqrt{1/2}$; since $0 < \sqrt{1/2} < 1$, we have $c \in (0,1)$,
-and $c \conjc c = c^2 = \tfrac{1}{2}$.
-Conjunction preservation gives
-$\varphi(\tfrac{1}{2}) = \mathrm{conj}_{\text{\L}}(\varphi(c), \varphi(c))$.
-Since $\varphi(c) \in \{0, \tfrac{1}{2}, 1\}$:
-\[
-\mathrm{conj}_{\text{\L}}(0,0) = 0,\quad
-\mathrm{conj}_{\text{\L}}(\tfrac{1}{2},\tfrac{1}{2}) = 0,\quad
-\mathrm{conj}_{\text{\L}}(1,1) = 1
-\]
-None equals $\tfrac{1}{2} = \varphi(\tfrac{1}{2})$.
-Lean: \texttt{no\_luk\_collapse}, \texttt{luk\_conj\_half\_half}.
-\end{proof}
-
-The pattern: the negation fixed point at $\tfrac{1}{2}$ propagates constraints
-that only the Kleene lattice can absorb.
-Classical logic and G\"odel logic fail on negation alone (they lack a fixed
-point).
-\L ukasiewicz logic preserves negation, but its conjunction
-$\mathrm{conj}_{\text{\L}}(\tfrac{1}{2}, \tfrac{1}{2}) = 0$ disagrees with the
-Kleene value $\min(\tfrac{1}{2}, \tfrac{1}{2}) = \tfrac{1}{2}$: the
-self-conjunction of the fixed point must equal the fixed point, and only the
-Kleene lattice satisfies this.
-A related observation comes from game semantics:
-Ferm\"uller~\cite{fermuller2014} showed (Main Theorem) that straightforward
-generalizations of Hintikka's classical evaluation game to a many-valued
-setting do not lead beyond Kleene logic; stronger logics require introducing
-randomized moves.
-
-\begin{remark}[Distinction from Belnap-Dunn]
-\label{rem:fde}
-The algebra's four-status collapse (true/false/both/void) superficially resembles
-Belnap-Dunn's four values (T/F/B/N)~\cite{belnap1977,dunn1976}, but the
-systems differ in several fundamental ways.
-
-\emph{Continuum vs.\ discrete.}
-Belnap-Dunn is intrinsically four-valued; the credence algebra is fundamentally $[0,1]$ with
-four statuses as a coarsening.
-The continuum provides metric structure---$0.7$ is closer to $0.8$ than to
-$0.3$---unavailable in discrete systems.
-
-\emph{Void vs.\ Neither.}
-Belnap-Dunn's ``Neither'' (N) is a full-citizen value meaning ``no
-information from any source.''
-The algebra's ``void'' arises when conditioning on impossible evidence
-($\cred(B) = 0$): the chain rule $c \cdot 0 = 0$ is satisfied by any $c$,
-so the conditional is \emph{unconstrained}---outside the algebra, not a
-fourth value in it.
-This is closer to de Finetti's void conditional~\cite{definetti1936} than
-to Belnap-Dunn's information-theoretic N.
-
-\emph{Metric meaning of $\tfrac{1}{2}$.}
-In the credence algebra, $\tfrac{1}{2}$ is the arithmetic midpoint with specific
-significance: the unique negation fixed point
-(Theorem~\ref{thm:fixedunique}) and the credence at which $A$ and
-$\negc A$ coexist equally.
-In Belnap-Dunn, ``Both'' (B) is algebraically defined without distance
-semantics.
-
-\emph{Conditioning.}
-The credence algebra has primitive chain-rule conditioning; Belnap-Dunn has no native
-conditioning operation.
-
-\emph{Probabilistic interpretation.}
-The credence algebra has the comonotonicity/quantile semantics connecting to probability
-theory (Remark~\ref{rem:nested-events}); Belnap-Dunn is purely
-logical/information-theoretic.
-
-The Kleene lattice embeds in Belnap-Dunn's bilattice, and Belnap-Dunn
-negation has two fixed points (B and N) while The algebra's complement has one
-($\tfrac{1}{2}$), matching Kleene.
-The credence algebra and Belnap-Dunn address different concerns: it provides
-probabilistically-grounded reasoning with conditioning, while Belnap-Dunn
-handles incomplete and contradictory information without probabilistic
-semantics.
-\end{remark}
-
-\subsection{Probabilistic Interpretation of Maximum Dependence}
-\label{sec:prob-interp}
-
-Section~\ref{sec:uniqueness} established that the minimum conjunction is the
-unique truth-functional joint satisfying all reasoning requirements.
-Here we develop the probabilistic interpretation.
-
-\begin{remark}[Comonotonicity and Nested Events]
-\label{rem:nested-events}
-The minimum joint is the \emph{comonotonicity copula} in probability
-theory~\cite{dhaene2002,nelsen2006}: the extremal case of perfect positive
-dependence where all random variables are increasing functions of a single
-latent variable $U \sim \mathrm{Unif}[0,1]$.
-If $\cred(A) \leq \cred(B)$ and $j(A,B) = \min(\cred(A), \cred(B)) = \cred(A)$,
-then $A \subseteq B$ almost surely: events are \emph{nested} by probability.
-\end{remark}
-
-\begin{example}[Bayesian Inference Under Maximum Dependence]
-\label{ex:bayes-max-dep}
-Let $\cred(H) = 0.3$ (hypothesis) and $\cred(E) = 0.5$ (evidence).
-Under maximum dependence, $j(H,E) = \min(0.3, 0.5) = 0.3$.
-
-Bayes' theorem gives the posterior:
-\[
-\cred(H \mid E) = \frac{P(E \mid H) \cdot \cred(H)}{\cred(E)}
-= \frac{1 \cdot 0.3}{0.5} = 0.6.
-\]
-Observing $E$ raises $H$ from $0.3$ to $0.6$---genuine Bayesian updating.
-The contrapositive also works: $\cred(H \mid \lnot E) = 0$---if the evidence
-fails, the hypothesis is certainly false.
-\end{example}
-
-\subsection{Stochastic Independence Between Domains}
-\label{sec:independence}
-
-A natural question arises: can we partition propositions into \emph{domains}
-with different dependence structures---perhaps using independence (product)
-for empirical propositions and maximum dependence (minimum) for mathematical
-ones?
-The following results constrain such mixed approaches.
-
-% Lean: independence_within_forces_classical, product_idempotent_iff_classical
-\begin{proposition}[Independence Within Forces Classical]
-\label{prop:indep-classical}
-If a domain uses the independence copula ($j(a,b) = ab$) and requires
-idempotence ($j(a,a) = a$), then all credences in that domain collapse
-to $\{0,1\}$.
-\end{proposition}
-\begin{proof}
-Idempotence gives $a \cdot a = a$, so $a(a-1) = 0$, hence $a \in \{0,1\}$.
-Lean: \texttt{independence\_within\_forces\_classical},
-\texttt{product\_idempotent\_iff\_classical}.
-\end{proof}
-
-% Lean: cross_world_independence_trivial
-\begin{proposition}[Cross-Domain Independence Trivializes Inference]
-\label{prop:cross-trivial}
-If the joint between propositions from different domains is the product
-($j(A,B) = \cred(A) \cdot \cred(B)$ for $A$ in domain~1, $B$ in domain~2),
-then conditioning is trivial: $\cred(A \mid B) = \cred(A)$.
-Evidence from one domain has no effect on conclusions in the other.
-\end{proposition}
-\begin{proof}
-$\cred(A \mid B) = j(A,B)/\cred(B) = \cred(A) \cdot \cred(B)/\cred(B) = \cred(A)$.
-Lean: \texttt{cross\_world\_independence\_trivial}.
-\end{proof}
-
-\begin{remark}[The Dilemma of Domain Partitioning]
-These results create a dilemma for mixed dependence structures:
-\begin{itemize}[nosep]
-\item Using independence \emph{within} a domain forces credences to $\{0,1\}$
-  (classical logic), unless one abandons idempotence.
-\item Using independence \emph{between} domains makes cross-domain inference
-  vacuous---learning $B$ tells you nothing about $A$.
-\item Using maximum dependence (minimum) within each domain is consistent with
-  non-classical credences and yields non-trivial inference.
-\end{itemize}
-The unique meeting point of Section~\ref{sec:uniqueness} extends: for any
-domain where non-classical credences are meaningful and idempotence holds,
-maximum dependence is forced.
-Cross-domain dependence is a free parameter, but independence trivializes
-cross-domain reasoning while non-trivial cross-domain inference requires
-positive dependence.
-\end{remark}
-
 \subsection{Relationship to Probability}
 \label{sec:probability}
 
-As established in Section~\ref{sec:intro}, every probability space satisfies
-The algebra's axioms, making probability a special case.
-The relationship is not merely one of axiom inclusion: probability and logic
-differ in \emph{where the semantic layer enters}.
-
-In logic, the algebra is uninterpreted.
-Boolean algebra is a self-contained structure on $\{0,1\}$; a valuation
-$v : \text{Prop} \to \{0,1\}$ is a separate layer that maps propositions to
-truth values; a consequence relation is a third layer on top.
-The same pattern holds for the Kleene lattice: the algebra on
-$\{0, \tfrac{1}{2}, 1\}$ stands alone, and K$_3$, LP, and RM3 each add a
-valuation and then differ only in designated values.
-
-In probability, the algebra and semantics are fused from the start.
-The Kolmogorov axioms define $P$ as a function from events---elements of a
-sigma-algebra---to $[0,1]$.
-The chain rule $P(A \mid B) \cdot P(B) = P(A \land B)$ is simultaneously an
-algebraic identity on numbers and a semantic statement about the measure of
-events.
-Conditional probability $P(A \mid B)$ is not a free-standing algebraic
-operation: it is derived from the measure, and resolving it at zero
-(via disintegration) requires the full semantic apparatus.
-
+Every probability space satisfies the credence algebra's axioms, making probability a special case.
+In logic, the algebra is uninterpreted; a valuation and consequence relation are separate layers.
+In probability, algebra and semantics are fused: the Kolmogorov axioms define $P$ on events,
+and the chain rule is simultaneously algebraic and semantic.
 The credence algebra stays on the logic side of this divide
-(Remark~\ref{rem:algebraic-conditioning}).
-Its chain rule constrains three numbers---conditional, evidence, joint---with
-no reference to propositions or a measure.
-This is why the credence algebra can serve as an algebraic foundation for multiple systems:
-probability fuses the chain rule with a measure; product logic fuses it with
-residuation; K$_3$/LP/RM3 fuse the collapsed algebra with designated values.
-The credence algebra provides the unfused algebraic core.
+(Remark~\ref{rem:algebraic-conditioning}): its chain rule constrains three numbers
+with no reference to propositions or a measure.
 
-What probability adds:
-\begin{itemize}
-\item A sigma-algebra of events, providing structure for ``what can be measured.''
-\item A countably additive measure, determining the joint $P(A \land B)$ from
-the measure rather than requiring it as input.
-\item Sigma-additivity: $P(A \lor B) = P(A) + P(B)$ for disjoint events.
-\end{itemize}
-
-These additions buy concrete benefits.
-The joint is determined, not parameterized: $P(A \land B)$ is a consequence of
-the measure, so conditioning needs only $A$ and $B$, not the joint as a separate
-input.
-Disjunction uses the actual joint via inclusion-exclusion:
-$P(A \lor B) = P(A) + P(B) - P(A \land B)$.
-Conditioning at zero can sometimes be resolved through
-disintegration~\cite{chang1997}, yielding a specific (a.e.\ unique) value
-determined by the measure structure.
-
-What the algebra drops: no measure, no sigma-algebra, no additivity, no event
-structure, and no consequence relation or notion of valid inference.
-The product $c_1 \conjc c_2$ is multiplication, not a claim about the actual joint.
-Conditioning requires the joint as external input.
-At evidence zero, the algebra leaves the conditional unconstrained rather than
-undefined (as in standard probability) or resolved (as via disintegration).
-
-\subsection{Comparison Table}
+What probability adds: a sigma-algebra of events, a countably additive measure determining the joint $P(A \land B)$, and sigma-additivity.
+What the algebra drops: no measure, no sigma-algebra, no additivity, no event structure, no consequence relation.
+At evidence zero, probability is undefined; the credence algebra is unconstrained.
 
 \begin{center}
 \small
@@ -1894,35 +1056,13 @@ RM3 & Deductive system & $\{0,\tfrac{1}{2},1\}$ + De Morgan + $\max$ impl. & $0 
 \end{tabular}
 \normalsize
 \end{center}
-
 \smallskip
-\noindent $^*$Undefined: the expression $P(A \mid B) = P(A \land B)/P(B)$ is
-ill-formed (division by zero).
+\noindent {\footnotesize $^*$Undefined: $P(A \mid B) = P(A \land B)/P(B)$ is ill-formed. \quad
+$^{**}$Unconstrained: $c \cdot 0 = 0$ holds for every $c \in [0,1]$. \quad
+$^\dagger$RM3 has $0 \to b = 1$ in its truth table but blocks explosion at the consequence-relation level.}
 
-\noindent $^{**}$Unconstrained: the chain rule $c \cdot 0 = 0$ is well-formed
-and satisfied by every $c \in [0,1]$; no value is selected or excluded.
-
-\noindent $^\dagger$RM3 has $0 \to b = 1$ in its truth table, but values
-$\{1, \tfrac{1}{2}\}$ are designated (as in LP); RM3 additionally
-imposes a relevance condition on valid inferences, so explosion is
-blocked at the level of consequence rather than at the truth-table level.
-
-\smallskip
-The table makes the hierarchy explicit.
-Probability is a special case of the credence algebra (same chain rule, additional structure).
-The algebra's algebra $\{\negc, \conjc, \disjc\}$ collapses to the Kleene lattice
-shared by K$_3$, LP, and RM3.
-The algebra's conditioning, when instantiated as a binary arrow via the Kleene joint,
-gives the product residuated implication for evidence $> 0$---distinct from
-RM3's $\max(\negc a, b)$.
-The relationship is: \emph{same connective algebra, different arrow}.
-Product fuzzy logic commits to the residuated arrow (including $0 \to y = 1$);
-the credence algebra leaves the joint free and the evidence-zero row unconstrained.
-
-%=============================================================================
-\section{Related Work}
+\subsection{Related Work}
 \label{sec:related}
-%=============================================================================
 
 The credence algebra sits in a web of prior work.
 The hierarchy---the credence algebra as a weakening of probability, distinct from product fuzzy
@@ -1940,7 +1080,7 @@ entirely.
 \textbf{Conditional Events.}
 De Finetti's three-valued conditional~\cite{definetti1936}---true when
 $A \land B$, false when $\lnot A \land B$, void when $\lnot B$---is
-The algebra's unconstrained conditioning applied in a discrete setting
+the credence algebra's unconstrained conditioning applied in a discrete setting
 (Section~\ref{sec:intro}).
 Calabrese~\cite{calabrese1987} formalized conditional events as ``Boolean
 fractions'' with three-valued indicator functions.
@@ -2056,7 +1196,7 @@ Fritz~\cite{fritz2020} treats conditioning categorically via Markov categories.
 The credence algebra drops the measure, so disintegration does not apply; at evidence zero, the
 conditional is unconstrained rather than determined.
 
-\textbf{The algebra's Contributions.}
+\textbf{The credence algebra's contributions.}
 The product De Morgan triplet is standard~\cite{klement2000}; product logic
 with involutive negation was studied by Esteva et al.~\cite{esteva2000};
 primitive conditioning is due to
@@ -2101,7 +1241,7 @@ path-dependent, so ex falso requires a convention beyond the chain rule.
 Theorem~\ref{thm:collapse} provides a collapse to Kleene; Propositions
 \ref{prop:no-godel}--\ref{prop:no-luk} block alternatives.
 
-The algebra provides values and operations without fixing a consequence
+The credence algebra provides values and operations without fixing a consequence
 relation or update rule.
 Probability adds measure theory; product logic commits to residuation;
 K$_3$/LP/RM3 choose designated values.
@@ -2524,91 +1664,219 @@ coherence requires:
 \end{definition}
 
 %=============================================================================
-\section{Logic Comparison Tables}
-\label{app:logic-tables}
+\section{Extended Comparisons}
+\label{app:extended}
 %=============================================================================
 
-This appendix contains detailed comparison tables for the various logics
-and implications discussed in the paper.
+This appendix collects extended comparisons and supplementary results
+referenced in the main text.
 
-\textbf{Three-valued operations (Kleene lattice):}
+\subsection*{Void as an Extra Value}
+\label{rem:void-value}
 
-\begin{center}
-\begin{tabular}{c|c}
-$c$ & $\mathrm{neg}(c)$ \\
-\hline
-0 & 1 \\
-$\tfrac{1}{2}$ & $\tfrac{1}{2}$ \\
-1 & 0
-\end{tabular}
-\quad
-\begin{tabular}{c|ccc}
-$\mathrm{conj}$ & 0 & $\tfrac{1}{2}$ & 1 \\
-\hline
-0 & 0 & 0 & 0 \\
-$\tfrac{1}{2}$ & 0 & $\tfrac{1}{2}$ & $\tfrac{1}{2}$ \\
-1 & 0 & $\tfrac{1}{2}$ & 1
-\end{tabular}
-\quad
-\begin{tabular}{c|ccc}
-$\mathrm{disj}$ & 0 & $\tfrac{1}{2}$ & 1 \\
-\hline
-0 & 0 & $\tfrac{1}{2}$ & 1 \\
-$\tfrac{1}{2}$ & $\tfrac{1}{2}$ & $\tfrac{1}{2}$ & 1 \\
-1 & 1 & 1 & 1
-\end{tabular}
-\end{center}
+The unconstrained status at evidence zero is not merely the absence of a
+result---it is a genuine extra value in the output of conditioning, exactly
+de Finetti's void~\cite{definetti1936}.
+On the Boolean restriction $\{0, 1\}$, conditioning produces outputs in
+$\{0, 1, {*}\}$---three values, recovering de Finetti's original three-valued
+conditional.
+On the collapsed Kleene algebra $\{0, \tfrac{1}{2}, 1\}$, conditioning
+produces outputs in $\{0, \tfrac{1}{2}, 1, {*}\}$---four values
+(evidence $= 0$ gives $*$; evidence $= \tfrac{1}{2}$ with
+joint $\in \{0, \tfrac{1}{2}\}$ gives condCred $\in \{0, 1\}$;
+evidence $= 1$ with joint $\in \{0, \tfrac{1}{2}, 1\}$ gives
+condCred $\in \{0, \tfrac{1}{2}, 1\}$).
+On the full interval $[0,1]$, conditioning produces outputs in
+$[0,1] \cup \{{*}\}$.
+In the finite cases, the connective algebra has $n$ values and the full
+system with conditioning has $n + 1$; on $[0,1]$, conditioning adjoins a
+single extra output.
+K$_3$, LP, and RM3 all resolve this extra value by committing to a definite
+implication (each has $0 \to b = 1$ in its truth table); product logic does
+the same via residuation.
+The credence algebra leaves the void unresolved---the choice of how to fill it in is
+deferred to whatever system is built on top.
 
-\textbf{Implication comparison} (rows = evidence $a$, columns = conclusion $b$):
+\subsection*{Copula Connection}
+\label{rem:copula}
 
-\begin{center}
-\begin{tabular}{c|ccc}
-\multicolumn{4}{c}{\textbf{Kleene material}: $\max(\negc a, b)$} \\
-& 0 & $\tfrac{1}{2}$ & 1 \\
-\hline
-0 & 1 & 1 & 1 \\
-$\tfrac{1}{2}$ & $\tfrac{1}{2}$ & $\tfrac{1}{2}$ & 1 \\
-1 & 0 & $\tfrac{1}{2}$ & 1
-\end{tabular}
-\quad
-\begin{tabular}{c|ccc}
-\multicolumn{4}{c}{\textbf{Prod.\ resid.}: $\min(b/a, 1)$} \\
-& 0 & $\tfrac{1}{2}$ & 1 \\
-\hline
-0 & 1 & 1 & 1 \\
-$\tfrac{1}{2}$ & 0 & 1 & 1 \\
-1 & 0 & $\tfrac{1}{2}$ & 1
-\end{tabular}
-\quad
-\begin{tabular}{c|ccc}
-\multicolumn{4}{c}{\textbf{Chain-rule cond.}: joint $= \min(a,b)$} \\
-& 0 & $\tfrac{1}{2}$ & 1 \\
-\hline
-0 & $*$ & $*$ & $*$ \\
-$\tfrac{1}{2}$ & 0 & 1 & 1 \\
-1 & 0 & $\tfrac{1}{2}$ & 1
-\end{tabular}
-\end{center}
-{\footnotesize $*$ = unconstrained (any value satisfies the chain rule).}
+A binary arrow $f$ is Bayes-consistent if and only if the induced joint
+$J(a,b) = f(a,b) \cdot a$ is symmetric.
+Every \emph{symmetric} copula ($C(a,b) = C(b,a)$) yields a Bayes-consistent
+arrow for positive arguments via $I_C(a,b) = C(a,b)/a$ for $a > 0$
+(at $a = 0$ every copula gives $C(0,b) = 0$, so $I_C(0,b) = 0/0$ is
+undefined; the credence algebra's chain rule $c \cdot 0 = 0$ is satisfied by any $c$,
+leaving the conditional unconstrained)~\cite{nelsen2006}.
+Grzegorzewski~\cite{grzegorzewski2013} computed three cases:
+the Fr\'echet upper bound $C(a,b) = \min(a,b)$ gives the product
+residuated (Goguen~\cite{goguen1969}) implication; the independence copula $C(a,b) = ab$
+gives the trivial arrow $b$; the Fr\'echet lower bound
+$C(a,b) = \max(a+b-1, 0)$ gives a third arrow.
+Among the standard logic implications (RM3, G\"odel, product residuated),
+only the product residuated is copula-derived (from the Fr\'echet upper
+bound).
+Lean: \texttt{symmetric\_bayes\_consistent}, \texttt{copula\_zero\_left}.
 
-\textbf{Comparison of joint formulas:}
+\subsection*{Fr\'echet-Hoeffding Bounds}
 
-\begin{center}
-\small
-\begin{tabular}{lcccc}
-\toprule
-\textbf{Joint formula} & \textbf{Truth-func.} & \textbf{Bayes-cons.} & \textbf{Non-trivial} & \textbf{Idempotent} \\
-\midrule
-$\min(a,b)$ (max.\ pos.\ dep.) & \checkmark & \checkmark & \checkmark & \checkmark \\
-$a \cdot b$ (independence) & \checkmark & \checkmark & $\times$ & $\times$ \\
-$\max(a+b-1,0)$ (\L uk.) & \checkmark & \checkmark & \checkmark & $\times$ \\
-RM3 induced & --- & $\times$ & --- & --- \\
-G\"odel induced (on $[0,1]$) & --- & $\times$ & --- & --- \\
-External (probability) & $\times$ & \checkmark & \checkmark & \checkmark \\
-\bottomrule
-\end{tabular}
-\normalsize
-\end{center}
+% Lean: frechet_upper, frechet_lower, frechet_conditioning_exists
+\begin{proposition}[Fr\'echet-Hoeffding Bounds]
+\label{prop:frechet}
+If the chain rule holds in both directions---$\condc{A}{B} \cdot \cred(B)
+= \cred(A \land B)$ and $\condc{B}{A} \cdot \cred(A) = \cred(A \land B)$---then
+the joint is bounded:
+\[
+\max(\cred(A) + \cred(B) - 1,\; 0) \;\leq\; \cred(A \land B) \;\leq\; \min(\cred(A),\; \cred(B))
+\]
+(the lower bound requires the additional assumption
+$1 - \cred(A) - \cred(B) + \cred(A \land B) \geq 0$).
+Conversely, any joint in this interval admits conditioning structures in
+both directions.
+\end{proposition}
+\begin{proof}
+Upper bound: each conditioning structure forces
+$\text{joint} \leq \text{evidence}$ (since $\text{condCred} \leq 1$).
+Lower bound: the complement cell rearranges to
+$\cred(A \land B) \geq \cred(A) + \cred(B) - 1$.
+Tightness: for positive marginals, division gives the conditional; for zero
+marginals, the chain rule is unconstrained.
+Lean: \texttt{frechet\_upper}, \texttt{frechet\_lower},
+\texttt{frechet\_conditioning\_exists}.
+\end{proof}
+
+\subsection*{Freedom of the Joint}
+\label{rem:freedom}
+
+The credence algebra leaves the joint free: any value in the Fr\'echet-Hoeffding interval
+$[\max(a + b - 1, 0),\; \min(a, b)]$ is a valid joint credence, and
+any symmetric joint function taking values in this interval yields a
+Bayes-consistent arrow via the chain rule.
+The Fr\'echet upper bound $\min(a, b)$ yields the product residuated
+(Goguen~\cite{goguen1969}) implication $\min(b/a, 1)$---the implication of H\'ajek's
+product logic $\Pi$~\cite{hajek1998}.
+The independence copula $a \cdot b$ (the credence algebra's $\conjc$) yields the trivial
+arrow $b$.
+The Fr\'echet lower bound $\max(a + b - 1, 0)$ yields a third arrow.
+Fixing a specific copula (dependence structure) selects a specific arrow;
+the credence algebra's parametric conditioning encompasses all of them.
+
+\subsection*{Relationship to T-Norm Fuzzy Logics}
+\label{rem:tnorm}
+
+T-norm fuzzy logics couple the arrow to the t-norm via residuation: each
+t-norm determines a unique implication.
+The credence algebra is orthogonal: it fixes the t-norm (product) but varies the arrow via the
+joint parameter.
+The product t-norm is distinguished among the three basic continuous t-norms:
+the minimum (G\"odel) t-norm fails unique conditioning ($\min(c, e) = j$
+with $j = e$ is satisfied by any $c \geq e$);
+the \L ukasiewicz t-norm fails similarly ($\max(c + e - 1, 0) = 0$ is
+satisfied by any $c \leq 1 - e$).
+The product is the only basic continuous t-norm where $c \cdot e = j$ with
+$e > 0$ determines $c$ uniquely ($c = j/e$).
+Lean: \texttt{min\_tnorm\_not\_unique}, \texttt{luk\_tnorm\_not\_unique}.
+
+The relationship to product logic $\Pi$ is a two-way bridge.
+If the algebra commits to a single binary arrow via residuation, the product
+t-norm forces the Fr\'echet upper bound, recovering exactly H\'ajek's
+product logic $\Pi$~\cite{hajek1998}.
+Conversely, if a t-norm fuzzy logic is required to support chain-rule
+conditioning with unique solutions, the product t-norm is forced.
+Product logic and the credence algebra are two views of the same algebraic
+structure: product logic is the committed view (one specific arrow, ex falso
+at evidence zero), the credence algebra is the parametric view (a family of arrows indexed
+by the joint, unconstrained at evidence zero).
+
+\subsection*{Boolean Restriction and Subalgebra vs.\ Quotient}
+\label{sec:scope}
+
+Restricting the algebra to $\{0, 1\}$, the operations $\{\negc, \conjc, \disjc\}$
+are exactly the two-element Boolean algebra $(\neg, \land, \lor)$.
+On $\{0, 1\}$ with evidence $> 0$, conditioning with Kleene joint matches the
+classical material implication.
+At evidence $= 0$, material implication gives $0 \to b = 1$; chain-rule conditioning
+is unconstrained.
+
+The Boolean set $\{0, 1\}$ is a subalgebra (closed under all operations),
+but there is no negation-preserving surjection $[0,1] \to \{0,1\}$
+(Proposition~\ref{prop:no-classical}).
+Conversely, the Kleene set $\{0, \tfrac{1}{2}, 1\}$ is \emph{not} closed
+($\tfrac{1}{2} \conjc \tfrac{1}{2} = \tfrac{1}{4}$), so the three-valued
+algebra arises only as a quotient via the collapse homomorphism
+(Theorem~\ref{thm:collapse}).
+
+\subsection*{Distinction from Belnap-Dunn}
+\label{rem:fde}
+
+The credence algebra's four-status collapse (true/false/both/void) superficially resembles
+Belnap-Dunn's four values (T/F/B/N)~\cite{belnap1977,dunn1976}, but the
+systems differ fundamentally.
+Belnap-Dunn is intrinsically four-valued; the credence algebra is $[0,1]$ with
+four statuses as a coarsening.
+Belnap-Dunn's ``Neither'' (N) is a full-citizen value meaning ``no
+information''; the credence algebra's ``void'' arises when the chain rule
+$c \cdot 0 = 0$ is satisfied by any $c$---it is unconstrained, not a fourth value.
+In the credence algebra, $\tfrac{1}{2}$ is the unique negation fixed point
+(Theorem~\ref{thm:fixedunique}) with metric significance;
+in Belnap-Dunn, ``Both'' is algebraic without distance semantics.
+The credence algebra has primitive conditioning; Belnap-Dunn has none.
+The Kleene lattice embeds in Belnap-Dunn's bilattice, and Belnap-Dunn
+negation has two fixed points (B and N) while the credence algebra's complement has one
+($\tfrac{1}{2}$), matching Kleene.
+
+\subsection*{Probabilistic Interpretation of Maximum Dependence}
+\label{sec:prob-interp}
+
+\begin{remark}[Comonotonicity and Nested Events]
+\label{rem:nested-events}
+The minimum joint is the \emph{comonotonicity copula} in probability
+theory~\cite{dhaene2002,nelsen2006}: the extremal case of perfect positive
+dependence where all random variables are increasing functions of a single
+latent variable $U \sim \mathrm{Unif}[0,1]$.
+If $\cred(A) \leq \cred(B)$ and $j(A,B) = \min(\cred(A), \cred(B)) = \cred(A)$,
+then $A \subseteq B$ almost surely: events are \emph{nested} by probability.
+\end{remark}
+
+\begin{example}[Bayesian Inference Under Maximum Dependence]
+\label{ex:bayes-max-dep}
+Let $\cred(H) = 0.3$ (hypothesis) and $\cred(E) = 0.5$ (evidence).
+Under maximum dependence, $j(H,E) = \min(0.3, 0.5) = 0.3$.
+Bayes' theorem gives the posterior:
+$\cred(H \mid E) = (1 \cdot 0.3)/0.5 = 0.6$.
+Observing $E$ raises $H$ from $0.3$ to $0.6$---genuine Bayesian updating.
+\end{example}
+
+\subsection*{Stochastic Independence Between Domains}
+\label{sec:independence}
+
+% Lean: independence_within_forces_classical, product_idempotent_iff_classical
+\begin{proposition}[Independence Within Forces Classical]
+\label{prop:indep-classical}
+If a domain uses the independence copula ($j(a,b) = ab$) and requires
+idempotence ($j(a,a) = a$), then all credences in that domain collapse
+to $\{0,1\}$.
+\end{proposition}
+\begin{proof}
+$a^2 = a$ implies $a \in \{0,1\}$.
+Lean: \texttt{independence\_within\_forces\_classical},
+\texttt{product\_idempotent\_iff\_classical}.
+\end{proof}
+
+% Lean: cross_world_independence_trivial
+\begin{proposition}[Cross-Domain Independence Trivializes Inference]
+\label{prop:cross-trivial}
+If the joint between propositions from different domains is the product,
+then conditioning is trivial: $\cred(A \mid B) = \cred(A)$.
+\end{proposition}
+\begin{proof}
+$\cred(A \mid B) = \cred(A) \cdot \cred(B)/\cred(B) = \cred(A)$.
+Lean: \texttt{cross\_world\_independence\_trivial}.
+\end{proof}
+
+For any domain where non-classical credences are meaningful and idempotence
+holds, maximum dependence is forced.
+Cross-domain independence trivializes cross-domain reasoning; non-trivial
+cross-domain inference requires positive dependence.
 
 %=============================================================================
 \section{Lean Formalization}

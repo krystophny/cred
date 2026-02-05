@@ -1,5 +1,5 @@
+% The Unique Intersection of Probability and Many-Valued Logic
 % Part 3: Applications and Future Directions
-% Publication-quality paper
 %
 % References to Lean formalization: lean/Cred/Basic.lean
 
@@ -30,7 +30,6 @@
 \newtheorem{remark}[theorem]{Remark}
 
 \newcommand{\cred}{\mathsf{cred}}
-% \newcommand{\Cred}{\mathsf{Cred}} % removed: no branding
 \newcommand{\negc}{\mathord{\sim}}
 \newcommand{\conjc}{\otimes}
 \newcommand{\disjc}{\sqcup}
@@ -49,25 +48,16 @@
 \maketitle
 
 \begin{abstract}
-Parts~1--2 established the unique intersection of probability and many-valued
-logic: the minimum conjunction is the only truth-functional conjunction
-compatible with probabilistic marginalization that satisfies all reasoning
-requirements, and path dependence at evidence zero means ex falso is not
-forced by the algebra.
-Part~3 explores where these foundations can lead.
-
-We sketch four application areas: (1)~\textbf{Graded set theory}, where the
-$\tfrac{1}{2}$ fixed point naturally resolves Russell's paradox;
-(2)~\textbf{Graded type theory}, connecting to gradual typing and soft type
-systems; (3)~\textbf{Probabilistic programming}, where the chain rule as
-primitive conditioning aligns with PPL semantics; and (4)~\textbf{Future
-directions} including graded proof theory, modal extensions, and computational
-aspects.
-
-This paper is exploratory: it identifies promising directions rather than
-providing complete solutions.
-The goal is to show the range of applications enabled by the uniqueness and
-path-dependence results of Parts~1--2.
+Parts~1--2 established the credence algebra on $[0,1]$ with primitive
+conditioning.
+This paper develops three application areas:
+(1)~graded set theory, where the negation fixed point resolves Russell's
+paradox;
+(2)~evidence-zero conditioning, positioned relative to disintegration,
+imprecise probability, and conditional events;
+(3)~self-reference, contrasted with Kripke and revision-theoretic fixed points.
+We survey connections to Pavelka-style graded proof theory and outline open
+directions including modal extensions and categorical perspectives.
 \end{abstract}
 
 %=============================================================================
@@ -75,32 +65,54 @@ path-dependence results of Parts~1--2.
 \label{sec:intro}
 %=============================================================================
 
-Part~1 established that the minimum conjunction $\min(a,b)$ is the
-\emph{unique} truth-functional conjunction compatible with probabilistic
-marginalization that satisfies Bayes consistency, non-trivial conditioning,
-and idempotence.
-It also proved that the conditional's limit as evidence approaches zero is
-\emph{path-dependent}---ex falso is not forced by the algebra.
+Part~1~\cite{part1} proved two results about truth-functional conjunctions
+on $[0,1]$.
+First, $\min(a,b)$ is the unique conjunction satisfying Bayes consistency,
+non-trivial conditioning, and idempotence---this forces the product
+De~Morgan triplet (complement $1-c$, conjunction $\min$, disjunction $\max$).
+Second, the conditional's limit as evidence approaches zero is
+\emph{path-dependent}: ex falso is not forced by the algebra.
+Part~2~\cite{part2} built the reasoning layer: valuations, consequence
+relations, threshold semantics, and update rules on this foundation.
 
-Part~2 developed the reasoning layer: valuations, consequence relations, and
-update rules built on this foundation.
+Part~3 develops three application areas enabled by these results, and surveys
+two further directions.
 
-Part~3 asks: \emph{where can these foundations lead?}
-We explore four application areas, each sketched rather than fully developed.
-The goal is to show the range of applications enabled by the uniqueness and
-path-dependence results, and to identify promising directions for future work.
+\paragraph{Graded set theory.}
+The negation fixed point $c = \negc c \Rightarrow c = \tfrac{1}{2}$,
+proved in Part~1, gives a natural resolution of Russell's paradox:
+the Russell set has credence $\tfrac{1}{2}$ of containing itself.
+Section~\ref{sec:sets} develops graded comprehension and positions the
+algebra within the Takeuti--Titani tradition of many-valued set
+theory~\cite{takeuti1984}.
 
-\paragraph{Outline.}
-Section~\ref{sec:sets} explores graded set theory and Russell's paradox.
-Section~\ref{sec:types} connects to graded type theory.
-Section~\ref{sec:ppl} discusses probabilistic programming.
-Section~\ref{sec:future} surveys future directions.
+\paragraph{Evidence-zero conditioning.}
+The chain rule $\cred(A \mid B) \cdot \cred(B) = \cred(A \land B)$ is
+well-formed at $\cred(B) = 0$ and forces only the joint to be zero; it
+does not determine the conditional.
+Section~\ref{sec:zero} places this underdetermination in the context of
+primitive conditional probability (R\'enyi, Popper), conditional events
+(de~Finetti, Calabrese), disintegration (Chang--Pollard), imprecise
+probability (Walley), and probabilistic programming languages.
+
+\paragraph{Self-reference.}
+Section~\ref{sec:selfref} positions the Part~1 fixed point relative to
+Kripke's monotone fixed-point construction~\cite{kripke1975} and
+Gupta--Belnap revision theory~\cite{gupta1993}, clarifying that the
+algebraic fixed point is a base case rather than a wholesale solution to
+semantic paradox.
+
+\paragraph{Further directions.}
+Section~\ref{sec:proof} surveys connections to Pavelka-style graded proof
+theory~\cite{pavelka1979i}, distinguishing semantic threshold consequence
+(Part~2) from proof systems with provability degrees.
+Section~\ref{sec:open} outlines open directions: modal extensions,
+categorical perspectives, and computational aspects.
 
 \paragraph{Notation.}
 We write $\negc c$ for negation, $c_1 \conjc c_2$ for conjunction,
 $c_1 \disjc c_2$ for disjunction, and $\condc{A}{B}$ for the conditional
 credence of $A$ given $B$.
-The half value is $\tfrac12$.
 
 %=============================================================================
 \section{Graded Set Theory}
@@ -109,9 +121,9 @@ The half value is $\tfrac12$.
 
 The most immediate application of the $\tfrac{1}{2}$ fixed point is to set
 theory.
-Russell's paradox arises from the set $R = \{x : x \notin x\}$: asking whether
-$R \in R$ leads to contradiction in classical logic.
-In graded settings, the paradox resolves naturally.
+Russell's paradox arises from the set $R = \{x : x \notin x\}$: asking
+whether $R \in R$ leads to contradiction in classical logic.
+In a graded setting, the paradox resolves naturally.
 
 \subsection{Russell's Paradox Resolution}
 
@@ -134,7 +146,7 @@ In classical set theory, comprehension says: for any property $\phi(x)$,
 there exists a set $\{x : \phi(x)\}$.
 Unrestricted comprehension leads to Russell's paradox.
 
-In graded set theory~\cite{takeuti1984}, membership becomes graded:
+In graded set theory, membership becomes graded:
 $\cred(x \in A)$ takes values in $[0,1]$.
 The comprehension axiom becomes:
 \[
@@ -143,88 +155,117 @@ The comprehension axiom becomes:
 This does not require restriction to ``safe'' properties---the graded setting
 handles self-reference via fixed points rather than exclusion.
 
-\subsection{Open Questions}
+\subsection{The Takeuti--Titani Context}
 
-\begin{itemize}[nosep]
-\item What is the correct graded extensionality axiom?
-\item How do the standard set-theoretic axioms (pairing, union, power set,
-  infinity) translate?
-\item Can we develop a graded cumulative hierarchy?
-\end{itemize}
+There is a substantial tradition of ``many-valued mathematics'' in which
+set-theoretic foundations are valued in $[0,1]$ or other
+lattices~\cite{takeuti1984,zadeh1965}.
+Takeuti and Titani develop a many-valued set theory based on fuzzy logic and
+study standard set-theoretic issues---extensionality, comprehension, and the
+interpretation of membership---in that setting.
 
-These questions require further work.
-The main point is that the uniqueness result from Part~1---minimum conjunction
-as the only logic-compatible joint---provides a canonical choice for graded
-set membership operations.
-
-%=============================================================================
-\section{Graded Type Theory}
-\label{sec:types}
-%=============================================================================
-
-Type theory provides another application domain.
-The connection is through \emph{gradual typing}~\cite{siek2006}: type systems
-where some expressions have partial type information.
-
-\subsection{Connection to Gradual Typing}
-
-In gradual typing, the dynamic type $\mathsf{dyn}$ represents unknown type
-information.
-Type consistency allows interaction between statically and dynamically typed
-code.
-The question is: can we interpret type membership as graded?
-
-\begin{example}[Graded Type Membership]
-Let $\cred(e : T)$ represent the credence that expression $e$ has type $T$.
-Under the algebra from Part~1:
-\begin{itemize}[nosep]
-\item $\cred(e : T) = 1$: statically certain that $e$ has type $T$
-\item $\cred(e : T) = 0$: statically certain that $e$ does not have type $T$
-\item $\cred(e : T) = \tfrac{1}{2}$: maximally uncertain (gradual)
-\end{itemize}
-\end{example}
-
-\subsection{Type-Theoretic Self-Reference}
-
-Type-theoretic paradoxes parallel set-theoretic ones.
-The type $T = \{t : t \notin t\}$ (if constructible) would satisfy
-$T \in T \Leftrightarrow T \notin T$.
-In a graded type theory, this resolves as $\cred(T \in T) = \tfrac{1}{2}$.
-
-\subsection{Open Questions}
-
-\begin{itemize}[nosep]
-\item How does graded type membership interact with type inference?
-\item What is the correct graded subtyping relation?
-\item Can we formalize the connection to gradual typing precisely?
-\end{itemize}
+The uniqueness result from Part~1 provides a canonical choice for graded
+membership operations: the minimum conjunction $\min(a,b)$ is not merely one
+option among many t-norms, but the unique truth-functional conjunction
+compatible with probabilistic marginalization.
+This narrows the design space for graded set theory to a single algebraically
+forced choice of connectives, resolving an ambiguity that persists in the
+general fuzzy-set-theory literature where the choice of t-norm is typically
+a modelling decision~\cite{klement2000}.
 
 %=============================================================================
-\section{Probabilistic Programming}
-\label{sec:ppl}
+\section{Evidence Zero and Null Conditioning}
+\label{sec:zero}
 %=============================================================================
+
+The evidence-zero boundary is where the credence algebra's design choice---
+leaving the conditional underdetermined when $\cred(B) = 0$---makes contact
+with several established research programs.
+The chain rule is well-formed at evidence zero and forces only the joint to be
+zero; it does \emph{not} choose a specific conditional value.
+This is closely related to the classical ambiguity of ratios $j/a$ as
+$(j,a) \to (0,0)$: the limiting value depends on the relative rate at which
+$j$ decays compared to $a$, and no single value is canonical.
+
+\subsection{Primitive Conditional Probability}
+
+R\'enyi~\cite{renyi1955} and Popper~\cite{popper1959} develop axiom systems
+where conditional probability is primitive and the chain rule is central,
+rather than defining conditional probability as a ratio.
+Van~Fraassen develops and applies Popper-style approaches to the analysis of
+probabilities of conditionals and to the connection between probability and
+relevant logic~\cite{vanfraassen1976,vanfraassen1983}.
+
+The credence algebra's conditioning is directly aligned with these
+traditions: the chain rule $\condc{A}{B} \cdot \cred(B) = \cred(A \land B)$
+is taken as a primitive constraint rather than derived from division.
+The key difference is that the algebra makes underdetermination at evidence
+zero an explicit first-class feature, whereas R\'enyi and Popper impose
+additional structure (e.g., a family of conditional probability spaces) to
+resolve it.
+
+\subsection{Conditional Events}
+
+De~Finetti treats conditional events as three-valued (true/false/void) in a
+betting/coherence setting, providing an explicit semantics for the
+antecedent-false case that avoids vacuous truth~\cite{definetti1936,definetti1937}.
+Calabrese formalizes conditional events algebraically as Boolean fractions and
+analyzes their operations~\cite{calabrese1987}.
+The modern logic of indicative conditionals has revisited de~Finetti-style
+tables and their proof theory; see, e.g., the De~Finettian logics DF/TT and
+related systems studied by \'Egr\'e, Rossi, and Sprenger~\cite{egre2021}.
+
+More recently, the coherence-based literature develops conditional random
+quantities and operations on conditionals, including conjunction and iterated
+conditioning~\cite{gilio2014,gilio2013}.
+Coletti and Scozzafava provide a broad synthesis of probabilistic logic in a
+coherence setting and devote substantial attention to probability-zero events
+and conditionalization at the boundary case~\cite{coletti2002}.
+
+These works are especially relevant because they show how to reason coherently
+when antecedents have probability zero \emph{without} forcing a single
+truth-functional value, and because they explicitly separate:
+(i)~the algebra of values, (ii)~the event structure, and (iii)~the rules
+governing coherence and extension.
+
+\subsection{Disintegration and Categorical Conditioning}
+
+Standard measure theory uses regular conditional probabilities and
+disintegration to define conditional probabilities with null evidence, with
+uniqueness only up to almost-sure equivalence~\cite{chang1997}.
+Category-theoretic approaches (e.g., Markov categories) treat conditioning
+structurally rather than as division, making clear which parts come from
+additional structure beyond the chain rule itself~\cite{fritz2020}.
+
+The algebra's underdetermination at evidence zero corresponds precisely to
+the non-uniqueness in disintegration: both recognize that the chain rule alone
+does not select a canonical conditional when the evidence has measure zero.
+
+\subsection{Imprecise Probability}
+
+Imprecise probability develops a complementary view: at the boundary, one may
+return \emph{sets} or \emph{intervals} of admissible conditionals rather than
+a single number~\cite{walley1991,troffaes2014}.
+The algebra's evidence-zero underdetermination sits naturally with this
+perspective and suggests a set-valued update semantics as one viable
+formalization.
+
+\subsection{Probabilistic Programming}
 
 Probabilistic programming languages (PPLs) make conditioning a primitive
 operation.
-The algebra from Parts~1--2 aligns naturally with PPL semantics.
-
-\subsection{Conditioning as Primitive}
-
 In PPLs like Stan, PyMC, or Pyro, users write generative models and the
 language handles conditioning automatically.
 The chain rule $P(A \mid B) \cdot P(B) = P(A \land B)$ is the semantic
 backbone.
 
-The path-dependence result from Part~1 has implications for PPL semantics
-at measure-zero observations:
-\begin{itemize}[nosep]
-\item Continuous observations have probability zero.
-\item Standard conditioning uses densities, not probabilities.
-\item The algebra's underdetermination at zero corresponds to the need for
-  explicit density specifications.
-\end{itemize}
-
-\subsection{Underdetermination and Improper Priors}
+The path-dependence result from Part~1 has direct implications for PPL
+semantics at measure-zero observations:
+continuous observations have probability zero, and standard conditioning uses
+densities rather than probabilities.
+The algebra's underdetermination at zero corresponds to the need for explicit
+density specifications---one must choose a particular parameterization
+(Lebesgue density, counting measure, etc.) to pin down the conditional.
 
 Bayesian statistics sometimes uses improper priors (non-normalizable
 measures).
@@ -232,75 +273,225 @@ The algebra's treatment of evidence-zero conditioning---underdetermined
 rather than forced to any particular value---parallels this: there is no
 canonical posterior when the prior is improper.
 
-\subsection{Open Questions}
-
-\begin{itemize}[nosep]
-\item Can the algebra serve as a denotational semantics for PPLs?
-\item How does the uniqueness theorem constrain PPL design?
-\item What is the relationship to measure-theoretic conditioning
-  (disintegration)?
-\end{itemize}
-
 %=============================================================================
-\section{Future Directions}
-\label{sec:future}
+\section{Self-Reference in Context}
+\label{sec:selfref}
 %=============================================================================
 
-Beyond the application areas above, several directions merit investigation.
+The most visible self-reference result from Part~1 is the forced negation
+fixed point: $c = \negc c$ implies $c = \tfrac{1}{2}$.
+This is algebraic---it follows from the complement operation on $[0,1]$---and
+should be positioned relative to the established fixed-point traditions
+for truth and paradox.
 
-\subsection{Graded Proof Theory}
+\subsection{Kripke Fixed Points}
+
+Kripke's fixed-point theory of truth uses monotone operators and fixed points
+to give consistent semantics for truth predicates, building up a maximal
+consistent extension from an initial ``ground'' model~\cite{kripke1975}.
+The construction is proof-theoretic: it proceeds through transfinite stages,
+and the choice of evaluation scheme (strong Kleene, weak Kleene, or
+supervaluational) affects which sentences receive truth values at the fixed
+point.
+
+The credence algebra's fixed point is different in character: it is a single
+algebraic equation ($c = 1 - c$) with a unique solution, rather than an
+iterative construction.
+The Kripke fixed point assigns truth-value gaps to liar-like sentences; the
+credence algebra assigns the definite value $\tfrac{1}{2}$.
+
+\subsection{Revision Theory}
+
+Gupta--Belnap revision theory models truth as evolving under revisions:
+a revision operator maps one extension of the truth predicate to
+another, and the semantics is given by the long-run behavior of revision
+sequences~\cite{gupta1993}.
+This yields dynamical semantics for self-reference---truth values may
+oscillate, stabilize, or exhibit more complex patterns.
+
+The credence algebra's treatment of self-reference has no revision dynamics:
+the fixed point is immediate.
+This is appropriate for the algebraic base case (negation self-application)
+but does not address the richer phenomena that revision theory
+captures---iterated revision, mutual reference, and contingent
+stabilization.
+
+\subsection{Many-Valued Approaches}
+
+Many-valued logics have their own tradition of analyzing paradoxes and
+vagueness through graded truth values~\cite{bergmann2008}.
+The credence algebra connects to this tradition through its product
+De~Morgan structure and the collapse homomorphism to the Kleene lattice
+established in Part~1.
+
+\begin{remark}[Scope of the fixed point]
+Part~3 should treat the Part~1 fixed point as the \emph{base case}---the
+simplest instance of self-reference resolved by the algebraic structure.
+It is not a wholesale solution to semantic paradox, and the relationship to
+Kripke and revision-theoretic approaches is one of complementarity rather
+than replacement.
+\end{remark}
+
+%=============================================================================
+\section{Toward Graded Proof Theory}
+\label{sec:proof}
+%=============================================================================
 
 Part~2 provides consequence relations (threshold semantics), but no proof
-calculus with graded derivability in the Pavelka sense~\cite{pavelka1979i}.
-A graded proof theory would assign provability degrees to theorems,
-with completeness formulated in terms of these degrees.
+calculus with graded derivability.
+There is an important distinction between two notions of ``graded proof'':
 
-\begin{itemize}[nosep]
-\item What inference rules preserve graded provability?
-\item How does cut elimination work in a graded setting?
-\item What is the relationship between graded provability and credence?
-\end{itemize}
+\begin{enumerate}[label=(\alph*),nosep]
+\item A \emph{semantic threshold consequence relation}, as developed in
+Part~2, where $A \models_\alpha B$ means that every valuation assigning
+credence $\ge \alpha$ to $A$ also assigns credence $\ge \alpha$ to $B$.
+
+\item A \emph{proof system with provability degrees}, in the sense of
+Pavelka~\cite{pavelka1979i,pavelka1979ii,pavelka1979iii}, where theorems
+carry graded provability values and completeness is formulated in terms
+of these degrees.
+\end{enumerate}
+
+Part~2 addresses~(a).
+The question for Part~3 is whether the credence algebra supports a natural
+instance of~(b).
+
+\subsection{Pavelka-Style Graded Provability}
+
+Pavelka's 1979 series develops many-valued rules of inference, semantics via
+enriched residuated lattices, and semantic completeness for many-valued
+calculi~\cite{pavelka1979i,pavelka1979ii,pavelka1979iii}.
+The key idea is that a proof calculus assigns a \emph{degree of provability}
+$\|\varphi\|$ to each formula, and completeness requires
+$\|\varphi\| = \|\varphi\|^*$ where the right-hand side is the semantic truth
+degree.
+
+H\'ajek's metamathematics of fuzzy logic organizes the ``big three''
+continuous t-norm logics---\L ukasiewicz, G\"odel, and product---within the
+BL-algebra framework~\cite{hajek1998}.
+Product logic is a fully developed many-valued logic: it is $[0,1]$-valued,
+its implication is the product residuum (Goguen
+implication)~\cite{goguen1969}, and it validates a graded form of modus
+ponens via the adjointness relationship $a \conjc f(a,b) \le b$.
+
+The credence algebra's logic-style instantiation with joint
+$j(a,b) = \min(a,b)$ agrees with product logic \emph{for positive evidence}:
+for $a > 0$, the induced conditional $f(a,b) = \min(b/a, 1)$ is exactly the
+product residuum.
+The divergence is at the evidence-zero boundary: product logic sets
+$f(0,b) = 1$ (ex falso / vacuous truth), while the credence algebra treats
+evidence-zero conditioning as underdetermined by design.
+
+\subsection{Proof-Theoretic Targets}
+
+A graded proof theory for the credence algebra would need to:
+\begin{enumerate}[label=(\roman*),nosep]
+\item specify a minimal proof calculus for a chosen consequence relation
+(e.g., a threshold semantics on $[0,1]$ or a designated-values semantics
+after collapse to the Kleene lattice);
+\item prove soundness and, ideally, completeness with respect to the
+Part~2 semantics;
+\item clarify how cut elimination works in the graded setting.
+\end{enumerate}
+
+The algebraic semantics literature on residuated lattices and substructural
+logics provides the natural framework for this
+investigation~\cite{galatos2007,cintula2011}.
+
+%=============================================================================
+\section{Open Directions}
+\label{sec:open}
+%=============================================================================
+
+Beyond the application areas developed above, several directions merit
+investigation.
 
 \subsection{Modal Extensions}
 
-Modal logic (necessity, possibility) has natural graded analogues:
-\begin{itemize}[nosep]
-\item $\cred(\Box A)$: credence that $A$ is necessary
-\item $\cred(\Diamond A)$: credence that $A$ is possible
-\end{itemize}
-The S5 axiom $\Box A \to A$ becomes a constraint on how these credences relate.
+Modal logic (necessity, possibility) has natural graded analogues.
+One can consider $\cred(\Box A)$ (credence that $A$ is necessary) and
+$\cred(\Diamond A)$ (credence that $A$ is possible), with modal axioms
+becoming constraints on how these credences relate.
+The S5 axiom $\Box A \to A$, for instance, becomes the constraint
+$\cred(\Box A) \le \cred(A)$.
+The interaction between modality, conditioning, and the evidence-zero
+boundary is unexplored.
+
+\subsection{Categorical Perspectives}
+
+The categorical treatment of probability via Markov
+categories~\cite{fritz2020} provides structural perspectives on conditioning.
+The uniqueness theorem from Part~1 may have categorical characterizations:
+the minimum conjunction as a universal property, or the chain rule as a
+natural transformation.
+The connection between categorical conditioning (morphisms in a Markov
+category) and algebraic conditioning (the chain rule on $[0,1]$) deserves
+investigation.
 
 \subsection{Computational Aspects}
 
-\begin{itemize}[nosep]
-\item What is the complexity of reasoning in the graded algebra?
-\item Can credence values be computed efficiently?
-\item What approximation algorithms are available?
-\end{itemize}
+Questions of complexity and tractability arise naturally: what is the
+complexity of determining whether a credence assignment is consistent with a
+set of constraints?
+Can credence values be computed efficiently in specific fragments?
+The collapse homomorphism to the Kleene lattice (Part~1) suggests that
+finite approximations may be tractable even when the full $[0,1]$-valued
+problem is not.
 
-\subsection{Connections to Category Theory}
+\subsection{Graded Type Theory}
 
-The categorical treatment of probability (Markov categories~\cite{fritz2020})
-provides structural perspectives on conditioning.
-The uniqueness theorem from Part~1 may have categorical characterizations.
+The connection between graded set membership and type membership is
+suggestive but underdeveloped.
+Gradual typing~\cite{siek2006} uses a dynamic type to represent unknown type
+information, and type consistency mediates between statically and dynamically
+typed code.
+Whether graded type membership ($\cred(e : T) \in [0,1]$) can be given a
+rigorous semantics aligned with the credence algebra remains open.
 
 %=============================================================================
 \section{Conclusion}
 \label{sec:conclusion}
 %=============================================================================
 
-Part~1 established that the minimum conjunction is the unique truth-functional
-conjunction compatible with probabilistic marginalization, and that ex falso
-is not forced by the algebra.
-Part~2 built reasoning layers on this foundation.
-Part~3 has sketched where these results can lead: graded set theory, graded
-type theory, probabilistic programming, and various future directions.
+The literature map developed in this paper suggests a clean synthesis:
 
-The applications are exploratory rather than complete.
-The main message is that the uniqueness and path-dependence results from
-Parts~1--2 provide a canonical foundation with broad applicability.
-The algebra is not merely one choice among many---it is mathematically forced
-by basic requirements for reasoning with uncertainty.
+\begin{quote}
+The credence algebra isolates the chain rule as an algebraic constraint on
+conditioning and combines it with the product De~Morgan triplet on $[0,1]$;
+it is compatible with both (i)~truth-functional many-valued logics (when a
+fixed joint is chosen) and (ii)~coherence/probability-style semantics (when
+joints are supplied externally).
+Its distinguishing choice is to leave the evidence-zero boundary
+underdetermined by default, in line with conditional-event and
+imprecise-probability viewpoints, rather than forcing ex falso via
+residuation.
+\end{quote}
+
+This synthesis clarifies which parts of the framework are inherited
+(t-norm logic, primitive conditional probability, conditional
+events/coherence) and which parts are a deliberate stance (evidence-zero
+underdetermination as a first-class feature rather than an exception to be
+patched).
+
+\paragraph{Roadmap targets.}
+The concrete next steps for this program are:
+\begin{enumerate}[label=(\arabic*),nosep]
+\item \textbf{A graded proof theory layer:} specify a minimal proof calculus
+for a chosen consequence relation (e.g., a threshold semantics on $[0,1]$ or
+a designated-values semantics after collapse) and prove soundness with
+respect to the Part~2 semantics.
+\item \textbf{A null-evidence update semantics:} formalize at least one
+update mechanism that extends Part~2 updates to the evidence-zero boundary
+(likely set-valued/interval-valued), and relate it to coherence and imprecise
+probability.
+\item \textbf{A self-reference interface:} state precisely what the Part~1
+fixed-point result does and does not address, with explicit comparison to
+Kripke and revision-theoretic fixed points.
+\item \textbf{A graded-foundations worked example:} pick a concrete fragment
+(e.g., graded predicates over a finite domain, or a tiny graded set fragment)
+and work through extensionality/comprehension choices, using the many-valued
+set theory literature to avoid reinventing known pitfalls.
+\end{enumerate}
 
 %=============================================================================
 % Bibliography
@@ -308,15 +499,137 @@ by basic requirements for reasoning with uncertainty.
 
 \begin{thebibliography}{99}
 
+\bibitem{adams1975}
+Adams, E.W.
+\newblock \emph{The Logic of Conditionals}.
+\newblock Reidel, 1975.
+
+\bibitem{bergmann2008}
+Bergmann, M.
+\newblock \emph{An Introduction to Many-Valued and Fuzzy Logic}.
+\newblock Cambridge University Press, 2008.
+
+\bibitem{calabrese1987}
+Calabrese, P.
+\newblock An algebraic synthesis of the foundations of logic and probability.
+\newblock \emph{Information Sciences}, 42(2):187--237, 1987.
+
+\bibitem{chang1997}
+Chang, J.T. and Pollard, D.
+\newblock Conditioning as disintegration.
+\newblock \emph{Statistica Neerlandica}, 51(3):287--317, 1997.
+
+\bibitem{cintula2011}
+Cintula, P., H\'ajek, P., and Noguera, C., editors.
+\newblock \emph{Handbook of Mathematical Fuzzy Logic}, Vols.~1--2.
+\newblock College Publications, 2011.
+
+\bibitem{coletti2002}
+Coletti, G. and Scozzafava, R.
+\newblock \emph{Probabilistic Logic in a Coherent Setting}.
+\newblock Trends in Logic 15. Kluwer/Springer, 2002.
+
+\bibitem{definetti1936}
+de Finetti, B.
+\newblock La logique de la probabilit\'e.
+\newblock \emph{Actes du Congr\`es International de Philosophie Scientifique},
+4:31--39, 1936.
+
+\bibitem{definetti1937}
+de Finetti, B.
+\newblock \emph{La pr\'evision: ses lois logiques, ses sources subjectives}.
+\newblock Annales de l'Institut Henri Poincar\'e, 7(1):1--68, 1937.
+
+\bibitem{egre2021}
+\'Egr\'e, P., Rossi, L., and Sprenger, J.
+\newblock De Finettian logics of indicative conditionals {Part II}: Proof theory and algebraic semantics.
+\newblock \emph{Journal of Philosophical Logic}, 50:215--247, 2021.
+
 \bibitem{fritz2020}
 Fritz, T.
 \newblock A synthetic approach to {Markov} kernels, conditional independence and theorems on sufficient statistics.
 \newblock \emph{Advances in Mathematics}, 370:107239, 2020.
 
+\bibitem{galatos2007}
+Galatos, N., Jipsen, P., Kowalski, T., and Ono, H.
+\newblock \emph{Residuated Lattices: An Algebraic Glimpse at Substructural Logics}.
+\newblock Elsevier, 2007.
+
+\bibitem{gilio2013}
+Gilio, A. and Sanfilippo, G.
+\newblock Conjunction, disjunction and iterated conditioning of conditional events.
+\newblock In Kruse, R. et al., editors, \emph{Synergies of Soft Computing and Statistics},
+pages 399--407. Springer, 2013.
+
+\bibitem{gilio2014}
+Gilio, A. and Sanfilippo, G.
+\newblock Conditional random quantities and compounds of conditionals.
+\newblock \emph{Studia Logica}, 102(4):709--729, 2014.
+
+\bibitem{goguen1969}
+Goguen, J.A.
+\newblock The logic of inexact concepts.
+\newblock \emph{Synthese}, 19:325--373, 1969.
+
+\bibitem{gupta1993}
+Gupta, A. and Belnap, N.
+\newblock \emph{The Revision Theory of Truth}.
+\newblock MIT Press, 1993.
+
+\bibitem{hajek1998}
+H\'ajek, P.
+\newblock \emph{Metamathematics of Fuzzy Logic}.
+\newblock Kluwer, 1998.
+
+\bibitem{klement2000}
+Klement, E.P., Mesiar, R., and Pap, E.
+\newblock \emph{Triangular Norms}.
+\newblock Kluwer, 2000.
+
+\bibitem{kripke1975}
+Kripke, S.
+\newblock Outline of a theory of truth.
+\newblock \emph{Journal of Philosophy}, 72(19):690--716, 1975.
+
+\bibitem{lewis1976}
+Lewis, D.
+\newblock Probabilities of conditionals and conditional probabilities.
+\newblock \emph{Philosophical Review}, 85(3):297--315, 1976.
+
+\bibitem{part1}
+Anonymous.
+\newblock The unique intersection of probability and many-valued logic.
+\newblock Part~1: Core algebra, 2026.
+
+\bibitem{part2}
+Anonymous.
+\newblock The unique intersection of probability and many-valued logic.
+\newblock Part~2: Reasoning layer, 2026.
+
 \bibitem{pavelka1979i}
 Pavelka, J.
 \newblock On fuzzy logic {I}: Many-valued rules of inference.
 \newblock \emph{Zeitschrift f\"ur mathematische Logik und Grundlagen der Mathematik}, 25:45--52, 1979.
+
+\bibitem{pavelka1979ii}
+Pavelka, J.
+\newblock On fuzzy logic {II}: Enriched residuated lattices and semantics of propositional calculi.
+\newblock \emph{Zeitschrift f\"ur mathematische Logik und Grundlagen der Mathematik}, 25:119--134, 1979.
+
+\bibitem{pavelka1979iii}
+Pavelka, J.
+\newblock On fuzzy logic {III}: Semantical completeness of some many-valued propositional calculi.
+\newblock \emph{Zeitschrift f\"ur mathematische Logik und Grundlagen der Mathematik}, 25:447--464, 1979.
+
+\bibitem{popper1959}
+Popper, K.R.
+\newblock \emph{The Logic of Scientific Discovery}.
+\newblock Hutchinson, London, 1959.
+
+\bibitem{renyi1955}
+R\'enyi, A.
+\newblock On a new axiomatic theory of probability.
+\newblock \emph{Acta Mathematica Academiae Scientiarum Hungaricae}, 6:285--335, 1955.
 
 \bibitem{siek2006}
 Siek, J.G. and Taha, W.
@@ -327,6 +640,32 @@ Siek, J.G. and Taha, W.
 Takeuti, G. and Titani, S.
 \newblock Fuzzy logic and fuzzy set theory.
 \newblock \emph{Journal of Symbolic Logic}, 49(3):851--866, 1984.
+
+\bibitem{troffaes2014}
+Troffaes, M.C.M. and de Cooman, G.
+\newblock \emph{Lower Previsions}.
+\newblock Wiley, 2014.
+
+\bibitem{vanfraassen1976}
+van Fraassen, B.C.
+\newblock Probabilities of conditionals.
+\newblock In Harper, W.L. and Hooker, C.A., editors, \emph{Foundations of Probability Theory, Statistical Inference, and Statistical Theories of Science},
+Vol.~1, pages 261--308. Reidel, 1976.
+
+\bibitem{vanfraassen1983}
+van Fraassen, B.C.
+\newblock Gentlemen's wagers: Relevant logic and probability.
+\newblock \emph{Philosophical Studies}, 43:47--61, 1983.
+
+\bibitem{walley1991}
+Walley, P.
+\newblock \emph{Statistical Reasoning with Imprecise Probabilities}.
+\newblock Chapman and Hall, 1991.
+
+\bibitem{zadeh1965}
+Zadeh, L.A.
+\newblock Fuzzy sets.
+\newblock \emph{Information and Control}, 8:338--353, 1965.
 
 \end{thebibliography}
 
