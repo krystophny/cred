@@ -528,95 +528,29 @@ on posterior belief.  The philosophy is ``inference constrains'': evidence
 narrows possibilities; impossible evidence cannot narrow anything.
 
 %-----------------------------------------------------------------------------
-\subsection{Path Dependence: A Mathematical Argument Against Ex Falso}
+\subsection{Path Dependence and the Borel--Kolmogorov Connection}
 \label{sec:path}
 %-----------------------------------------------------------------------------
 
-The preceding sections establish that Cred \emph{allows} underdetermination at
-zero.  This section provides a stronger result: the mathematics \emph{actively
-argues against} forcing the conditional to~$1$.
+Part~1 establishes algebraically that the conditional's limit as evidence
+$b \to 0$ is \emph{path-dependent}: it varies with the ratio $a/b$
+(equivalently, the approach angle in polar coordinates), not with $b$ alone.
+This is not merely underdetermination---it is a structured family of limits
+depending on how the credences approach zero together.
 
-Consider the min-copula conditional for positive evidence:
-\[
-\cred(A \mid B) = \frac{\min(a, b)}{b} =
-\begin{cases}
-1 & \text{if } b < a, \\[4pt]
-a/b & \text{if } b \geq a,
-\end{cases}
-\]
-where $a = \cred(A)$ and $b = \cred(B)$.
-As $b \to 0$, the limit depends on \emph{how} $a$ and $b$ approach zero together:
+This path dependence has the same structure as the \emph{Borel--Kolmogorov
+paradox}~\cite{borel1909,kolmogorov1933} in measure theory: conditioning on
+a null event is not uniquely determined without specifying the limiting
+procedure.  Regular conditional probabilities are defined only almost
+surely---they may differ on null sets.  The algebraic path dependence in
+Cred is the same phenomenon: the chain rule does not select a unique limit
+at zero; it selects an angle-dependent family of limits.
 
-\begin{proposition}[Path-Dependent Limits]
-\label{prop:path}
-Let $a(b)$ be a path with $a(b) \to 0$ as $b \to 0$.  Then:
-\begin{enumerate}[label=\textup{(\roman*)},nosep]
-\item If $a$ is fixed with $a > 0$, then $\lim_{b \to 0} \min(a,b)/b = 1$.
-\item If $a(b) = \lambda b$ for some $\lambda \in (0,1]$, then
-  $\lim_{b \to 0} \min(a(b),b)/b = \lambda$.
-\item If $a(b) = b^\alpha$ for $\alpha > 1$, then
-  $\lim_{b \to 0} \min(a(b),b)/b = 0$.
-\end{enumerate}
-\end{proposition}
-
-\begin{proof}
-(i)~For small $b < a$, $\min(a,b) = b$, so $\min(a,b)/b = 1$.
-(ii)~For $\lambda \leq 1$, $\min(\lambda b, b) = \lambda b$, so the ratio is
-$\lambda$.
-(iii)~For $\alpha > 1$ and small $b$, $b^\alpha < b$, so $\min(b^\alpha, b)/b
-= b^{\alpha-1} \to 0$.
-\end{proof}
-
-The polar parametrization makes this vivid.  Set $a = r\cos\theta$ and
-$b = r\sin\theta$ with $r \downarrow 0$.  Then:
-\[
-\lim_{r \to 0} \frac{\min(a,b)}{b} =
-\begin{cases}
-1 & \theta < \pi/4 \quad\text{(i.e., } a > b\text{)}, \\[4pt]
-\cot\theta & \theta \geq \pi/4 \quad\text{(i.e., } a \leq b\text{)}.
-\end{cases}
-\]
-The limit is a \emph{piecewise function of the approach angle}, not a single
-value.  This is exactly the structure of the \emph{Borel--Kolmogorov
-paradox}~\cite{borel1909,kolmogorov1933}: conditioning on a null event is not
-uniquely determined without specifying the limiting procedure.
-
-\begin{remark}[Connection to Measure Theory]
-In standard measure theory, regular conditional probabilities are defined only
-\emph{almost surely}---they may differ on null sets.  The Borel--Kolmogorov
-paradox shows that the ``value'' of a conditional at a null event depends on
-the parametrization used to approach it.  The path dependence in
-\cref{prop:path} is the same phenomenon in algebraic form: the chain rule
-does not select a unique limit; it selects an angle-dependent family of limits.
-\end{remark}
-
-This gives a clean algebraic fork:
-
-\begin{description}[nosep]
-\item[Option A: Keep underdetermined.]
-  The conditional at $b = 0$ is not assigned a single value; it remains
-  constrained only to $[0,1]$.  Ex falso does not follow because the
-  conditional is not forced.
-
-\item[Option B: Totalize to~$1$.]
-  Declare $\cred(A \mid B) = 1$ when $\cred(B) = 0$.  This recovers
-  ex-falso-flavored behavior but is a \emph{convention}, not something
-  entailed by the continuous Bayes/copula calculus.  The convention is known
-  in probability logics~\cite{adams1975} and is recognized as problematic in
-  product-fuzzy encodings of conditional probability~\cite{hajek1998}.
-\end{description}
-
-The min-copula encourages Option~B for the common path ``fixed $a > 0$,
-$b \to 0$'' (which drives the limit to~$1$), but it does \emph{not} justify a
-unique extension at $b = 0$ because the limit varies with the ratio $a/b$.
-
-\begin{quote}
-\textbf{Conclusion.}  Even with the unique logic-compatible copula
-$j(a,b) = \min(a,b)$, the Bayes/ratio conditional has no canonical value at
-evidence $b = 0$: the extension is path-dependent.  Ex falso at the zero
-boundary is therefore not forced by the continuous copula+Bayes calculus;
-you only get it by adding a totalization convention.
-\end{quote}
+The totalization convention $\cred(A \mid 0) = 1$ (ex falso) is known in
+probability logics~\cite{adams1975} and has been recognized as problematic
+in product-fuzzy encodings of conditional probability~\cite{hajek1998}.
+Cred's path-dependence result shows this convention is not forced by the
+algebra---it must be added as an extra axiom.
 
 %-----------------------------------------------------------------------------
 \subsection{De Finetti's Void as Discrete Case}
