@@ -496,8 +496,8 @@ The following hold for all $c, c_1, c_2, c_3 \in [0,1]$:
 \end{enumerate}
 \end{theorem}
 \begin{proof}
-Routine verification.
-Lean: \texttt{neg\_neg}, \texttt{neg\_zero}, \texttt{neg\_one},
+Each property follows directly from the definitions.
+Lean verification: \texttt{neg\_neg}, \texttt{neg\_zero}, \texttt{neg\_one},
 \texttt{conj\_comm}, \texttt{conj\_assoc}, \texttt{conj\_one}, \texttt{conj\_zero},
 \texttt{disj\_comm}, \texttt{disj\_assoc}, \texttt{disj\_zero}, \texttt{disj\_one},
 \texttt{de\_morgan\_conj}, \texttt{de\_morgan\_disj}.
@@ -812,6 +812,9 @@ forcing it requires an additional totalization convention.
 The three cases show the limit takes \emph{every} value in $[0,1]$ depending
 on the path of approach.
 No single value is canonical.
+Lean: \texttt{path\_dep\_fixed\_a}, \texttt{path\_dep\_proportional},
+\texttt{path\_dep\_square}, \texttt{path\_dependence\_witness},
+\texttt{path\_any\_positive\_value}.
 \end{proof}
 
 The polar parametrization makes the structure vivid.
@@ -1123,7 +1126,9 @@ $\tfrac{1}{2}$ & $\tfrac{1}{2}$ & 1 \\
 \end{tabular}
 \end{center}
 {\footnotesize $*$ = unconstrained (any value satisfies chain rule).
-Only entries with joint $\leq$ evidence are valid.}
+Only entries with joint $\leq$ evidence are valid.
+Note: This table treats the joint as a \emph{free parameter}, not computed from a
+copula; for the Kleene joint $\min(a,b)$, see the tables below.}
 
 \medskip
 \textbf{Conditioning as a binary arrow.}
@@ -1155,7 +1160,7 @@ $\tfrac{1}{2}$ & $\tfrac{1}{2}$ & $\tfrac{1}{2}$ & 1 \\
 \end{tabular}
 \quad
 \begin{tabular}{c|ccc}
-\multicolumn{4}{c}{\textbf{Prod.\ resid.}: $\min(b/a, 1)$} \\
+\multicolumn{4}{c}{\textbf{Prod.\ resid.\ / G\"odel}\footnotemark: $\min(b/a, 1)$} \\
 & 0 & $\tfrac{1}{2}$ & 1 \\
 \hline
 0 & 1 & 1 & 1 \\
@@ -1182,6 +1187,9 @@ truth-functional arrow shared by K$_3$, LP, and
 RM3~\cite[Table~7.3.3]{priest2008}. We use the term ``Kleene material''
 to emphasize that it is a connective on the Kleene lattice, not specific
 to any one logic's consequence relation.}
+\footnotetext{On $\{0, \tfrac{1}{2}, 1\}$, the product residuated implication
+$\min(b/a, 1)$ coincides with the G\"odel implication.
+Lean: \texttt{godel\_impl\_eq\_prod\_resid}.}
 \smallskip
 The Kleene material conditional and the product residuated agree when
 evidence $\in \{0, 1\}$ but differ at both interior entries of the
@@ -2675,6 +2683,12 @@ collapse homomorphism.
 \item \texttt{no\_luk\_collapse}: no negation-and-conjunction-preserving map to \L ukasiewicz
 \item \texttt{rm3\_not\_bayes\_consistent\_real}: RM3 fails Bayes consistency
 \item \texttt{prod\_resid\_bayes\_consistent\_real}: product residuated is Bayes-consistent
+\item \texttt{path\_dep\_fixed\_a}: case (i) of path dependence ($a > b$ gives ratio~1)
+\item \texttt{path\_dep\_proportional}: case (ii) of path dependence ($a = rb$ gives ratio~$r$)
+\item \texttt{path\_dep\_square}: case (iii) of path dependence ($a = b^2$ gives ratio~$b \to 0$)
+\item \texttt{path\_dependence\_witness}: concrete witness of path-dependent limits
+\item \texttt{path\_any\_positive\_value}: any $r \in (0,1]$ achievable as conditional ratio
+\item \texttt{luk\_not\_idempotent}: \L ukasiewicz t-norm fails idempotence
 \end{itemize}
 
 Verification: \texttt{cd lean \&\& lake build}.

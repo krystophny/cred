@@ -1480,4 +1480,89 @@ theorem truth_functional_idempotent_implies_max_dependence :
   fun j hidemp hupper hzero hsymm h2incr a b ha hb =>
     min_copula_unique j hsymm hidemp hzero hupper h2incr a b ha hb
 
+/-! ## Path Dependence at Evidence Zero
+
+The ratio min(a,b)/b as b approaches zero depends on HOW a and b approach zero
+together. This section proves the three cases from Theorem 4.3 (Path Dependence):
+
+1. Fixed a > 0: For small b < a, min(a,b)/b = b/b = 1
+2. Proportional a = r*b: min(r*b, b)/b = r (for r in (0,1])
+3. Faster decay a = b²: min(b², b)/b = b → 0
+
+These show the limit is path-dependent: any value in [0,1] can be achieved.
+-/
+
+/-- Case 1: When a > b, the conditional min(a,b)/b = 1.
+    This represents the "fixed a" path where a stays positive as b → 0. -/
+theorem path_dep_fixed_a (a b : ℝ) (_ha : 0 < a) (hb : 0 < b) (hab : b < a) :
+    min a b / b = 1 := by
+  rw [min_eq_right (le_of_lt hab)]
+  field_simp
+
+/-- Case 2: When a = r*b for r ∈ (0,1], the conditional min(a,b)/b = r.
+    This represents the "proportional" path. -/
+theorem path_dep_proportional (b r : ℝ) (hb : 0 < b) (_hr_pos : 0 < r) (hr_le : r ≤ 1) :
+    min (r * b) b / b = r := by
+  have hle : r * b ≤ b := by nlinarith
+  rw [min_eq_left hle]
+  field_simp
+
+/-- Case 3: When a = b² for b ∈ (0,1), the conditional min(a,b)/b = b.
+    As b → 0, this ratio approaches 0, showing path dependence. -/
+theorem path_dep_square (b : ℝ) (hb_pos : 0 < b) (hb_lt : b < 1) :
+    min (b * b) b / b = b := by
+  have hsq_lt : b * b < b := by nlinarith
+  rw [min_eq_left (le_of_lt hsq_lt)]
+  have hb_ne : b ≠ 0 := ne_of_gt hb_pos
+  field_simp
+
+/-- Path dependence: different paths give different conditional values.
+    Here we show paths giving 1 and 1/2 coexist, proving the limit is not unique. -/
+theorem path_dependence_witness :
+    ∃ b : ℝ, 0 < b ∧ b < 1 ∧
+      (∃ a₁, min a₁ b / b = 1) ∧
+      (∃ a₂, min a₂ b / b = 1/2) := by
+  use 1/2
+  constructor
+  · norm_num
+  constructor
+  · norm_num
+  constructor
+  · use 1  -- a₁ = 1 > b = 1/2, so min(1, 1/2)/0.5 = 0.5/0.5 = 1
+    simp only [min_eq_right (by norm_num : (1:ℝ)/2 ≤ 1)]
+    norm_num
+  · use 1/4  -- a₂ = 1/4 < b = 1/2, so min(1/4, 1/2)/0.5 = 0.25/0.5 = 1/2
+    simp only [min_eq_left (by norm_num : (1:ℝ)/4 ≤ 1/2)]
+    norm_num
+
+/-- Any value in (0,1] can be achieved as the conditional ratio.
+    Given target r ∈ (0,1] and evidence b > 0, setting a = r*b gives min(a,b)/b = r. -/
+theorem path_any_positive_value (r b : ℝ) (hr_pos : 0 < r) (hr_le : r ≤ 1) (hb : 0 < b) :
+    ∃ a, 0 < a ∧ min a b / b = r := by
+  use r * b
+  constructor
+  · exact mul_pos hr_pos hb
+  · exact path_dep_proportional b r hb hr_pos hr_le
+
+/-- The value 0 can also be achieved by approaching via a faster-decaying path.
+    Specifically, for any b ∈ (0,1), setting a = b² gives min(a,b)/b = b → 0. -/
+theorem path_approaches_zero (b : ℝ) (hb_pos : 0 < b) (hb_lt : b < 1) :
+    min (b * b) b / b = b := by
+  have hsq_lt : b * b < b := by nlinarith
+  rw [min_eq_left (le_of_lt hsq_lt)]
+  have hb_ne : b ≠ 0 := ne_of_gt hb_pos
+  field_simp
+
+/-- Łukasiewicz t-norm fails idempotence: max(2a - 1, 0) ≠ a for a ∈ (1/2, 1).
+    This directly verifies the claim in the paper about Łukasiewicz. -/
+theorem luk_not_idempotent :
+    ∃ a : ℝ, 0 < a ∧ a < 1 ∧ max (2 * a - 1) 0 ≠ a := by
+  use 3/4
+  constructor
+  · norm_num
+  constructor
+  · norm_num
+  · simp only [max_eq_left (by norm_num : (0:ℝ) ≤ 2 * (3/4) - 1)]
+    norm_num
+
 end Cred
