@@ -784,8 +784,8 @@ For $b > 0$, the conditional is:
 \[
 \cred(A \mid B) = \frac{\min(a, b)}{b} =
 \begin{cases}
-1 & \text{if } b < a, \\[4pt]
-a/b & \text{if } b \geq a.
+a/b & \text{if } a \leq b, \\[4pt]
+1 & \text{if } a > b.
 \end{cases}
 \]
 As $b \to 0$, the limit depends on \emph{how} $a$ and $b$ approach zero together.
@@ -1382,7 +1382,7 @@ but the minimum is the unique point where all four meet.
 \midrule
 $\min(a,b)$ (max.\ pos.\ dep.) & \checkmark & \checkmark & \checkmark & \checkmark \\
 $a \cdot b$ (independence) & \checkmark & \checkmark & $\times$ & $\times$ \\
-$\max(a+b-1,0)$ (\L uk.) & \checkmark & --- & --- & $\times$ \\
+$\max(a+b-1,0)$ (\L uk.) & \checkmark & \checkmark & \checkmark & $\times$ \\
 RM3 induced & --- & $\times$ & --- & --- \\
 G\"odel induced (on $[0,1]$) & --- & $\times$ & --- & --- \\
 External (probability) & $\times$ & \checkmark & \checkmark & \checkmark \\
@@ -2621,7 +2621,7 @@ $\tfrac{1}{2}$ & 0 & 1 & 1 \\
 \midrule
 $\min(a,b)$ (max.\ pos.\ dep.) & \checkmark & \checkmark & \checkmark & \checkmark \\
 $a \cdot b$ (independence) & \checkmark & \checkmark & $\times$ & $\times$ \\
-$\max(a+b-1,0)$ (\L uk.) & \checkmark & --- & --- & $\times$ \\
+$\max(a+b-1,0)$ (\L uk.) & \checkmark & \checkmark & \checkmark & $\times$ \\
 RM3 induced & --- & $\times$ & --- & --- \\
 G\"odel induced (on $[0,1]$) & --- & $\times$ & --- & --- \\
 External (probability) & $\times$ & \checkmark & \checkmark & \checkmark \\
