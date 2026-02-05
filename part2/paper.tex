@@ -356,28 +356,8 @@ the minimum conjunction is not an arbitrary choice---it is \emph{forced}
 by the requirement that truth-functional composition be compatible with
 proper Bayesian inference.
 
-\textbf{The uniqueness argument.}
-Part~1's Theorem~\texttt{min\_copula\_unique} proves a stronger result:
-if a joint function $j(a,b)$ satisfies symmetry (Bayes consistency),
-idempotence ($j(a,a) = a$), zero boundary ($j(0,b) = 0$), the Fr\'echet upper
-bound ($j(a,b) \leq \min(a,b)$), and the 2-increasing property (a weak
-monotonicity condition satisfied by all copulas), then $j = \min$.
-The proof uses the 2-increasing property on the rectangle $[0,a] \times [a,b]$
-to derive $j(a,b) \geq a$; combined with the upper bound, this forces
-$j(a,b) = \min(a,b)$.
-This is not about ``choosing maximum dependence''---it is that idempotence for
-same-proposition conjunction, which is standard in both probability and logic,
-combined with truth-functionality, \emph{mathematically forces} the minimum.
-
-\textbf{The philosophical consequence.}
-In probabilistic language, $j(A,B) = \min(v(A), v(B))$ means treating all
-pairs of propositions as \emph{maximally positively correlated}.
-This is an extreme assumption: most real-world events have intermediate
-dependence.
-Yet this extreme assumption is mathematically forced if we want a single
-theory that is simultaneously compositional and Bayes-consistent.
-To weaken the assumption, one must either accept trivial conditioning
-(independence) or supply joints as external data (probability-style).
+Part~1's \texttt{min\_copula\_unique} proves that idempotence plus the
+2-increasing property mathematically forces $j = \min$---see Part~1 for details.
 
 \subsection{Joint-Parametrized Valuations (General Case)}
 \label{subsec:joint-param}
@@ -774,10 +754,6 @@ need not be complement-preserving.
 \label{sec:comparison}
 %=============================================================================
 
-Sections~\ref{sec:valuations}--\ref{sec:consequence} developed two ways
-to use Cred for reasoning.
-This section makes the comparison explicit.
-
 \begin{center}
 \small
 \begin{tabular}{lll}
@@ -795,47 +771,10 @@ Explosion & N/A (no binary validity) & Fails for LP, graded $t \leq \tfrac{1}{2}
 \normalsize
 \end{center}
 
-\textbf{Probability-style view.}
-The chain rule is the inference engine.
-Given a joint-parametrized valuation $v$ with joint function $j$,
-conditioning computes $v(A \mid B) = j(A,B) / v(B)$ when $v(B) > 0$.
-Update rules (Bayesian, Jeffrey) apply this computation across all
-propositions, revising an entire credence assignment when evidence arrives.
-Uncertainty remains graded: the output is always a number in $[0,1]$,
-never a binary verdict.
-When evidence has credence zero, the conditional is unconstrained by the
-chain rule; the honest response is an interval $[0,1]$ of compatible
-posteriors---connecting to imprecise probability~\cite{walley1991}.
-
-\textbf{Logic-style view.}
-The collapse homomorphism discretizes credences: $0$, $1$, or the open
-interval $(0,1) \mapsto \tfrac{1}{2}$.
-A consequence relation then determines validity via designated values.
-K$_3$ designates $\{1\}$ (paracomplete: no tautologies, excluded middle
-fails).
-LP designates $\{1, \tfrac{1}{2}\}$ (paraconsistent: explosion fails
-non-vacuously).
-Graded consequence at threshold $t$ designates $\{c : c \geq t\}$.
-The output is binary: an inference is valid or not.
-
-\textbf{The views are complementary.}
-Use probability-style when you need graded confidence---``I'm 73\%
-confident that $A$''---and want uncertainty to propagate through a
-chain of reasoning.
-Use logic-style when you need a final judgment---``Is $B$ a valid
-conclusion from $A$?''---and can tolerate discretizing continuous
-credences.
-The collapse homomorphism bridges the two: apply probability-style
-reasoning, then collapse to three values and check designation.
-
-\textbf{What each view cannot do.}
-Probability-style has no notion of validity: it outputs a credence, not
-a yes/no answer.
-To get a binary judgment, you must impose a threshold---which is exactly
-what logic-style does.
-Logic-style loses information: collapsing $0.51$ and $0.99$ both to the
-designated class erases their difference.
-The views trade off precision against decisiveness.
+\noindent
+The views are complementary: probability-style outputs graded confidence,
+logic-style outputs binary validity.
+The collapse homomorphism bridges them.
 
 %=============================================================================
 \section{Update Rules}
@@ -868,26 +807,8 @@ This is how the chain rule propagates credences forward through a
 reasoning chain.
 
 \textbf{Fr\'echet bounds constrain but do not determine.}
-The joint-parametrized valuation framework
-(Section~\ref{sec:valuations}) requires the joint as external input.
-The Fr\'echet-Hoeffding bounds
-$\max(v(A) + v(B) - 1, 0) \leq j(A,B) \leq \min(v(A), v(B))$ constrain
-which joints are coherent with the marginals, but do not select a
-unique joint.
-Different joints correspond to different dependence structures between
-propositions.
-
-\textbf{Comparison to probability theory.}
-Probability also uses the chain rule:
-$P(A \mid B) \cdot P(B) = P(A \land B)$.
-The difference is that probability has a measure that determines
-$P(A \land B)$ from the event structure, while Cred requires
-$j(A,B)$ as external input.
-What Cred can do that probability cannot: leave conditioning
-unconstrained at zero evidence.
-What probability can do that Cred cannot: use additivity to derive
-bounds (e.g., $P(A \lor B) = P(A) + P(B) - P(A \land B)$) that Cred
-does not support.
+The Fr\'echet-Hoeffding bounds (Part~1) constrain which joints are coherent
+with the marginals, but do not select a unique joint.
 
 \subsection{Bayesian Conditionalization}
 
@@ -1265,60 +1186,20 @@ Verification: \texttt{cd lean \&\& lake build}.
 \label{sec:conclusion}
 %=============================================================================
 
-Part~2 has shown that Cred admits two complementary views.
-
-\emph{The probability-style view} treats the chain rule as inference.
-Credences propagate through reasoning: given any two of (joint, evidence,
-conditional), the chain rule determines the third.
-Bayesian and Jeffrey conditionalization apply this constraint dynamically,
-revising entire credence assignments when evidence arrives.
-When evidence has credence zero, the conditional is unconstrained,
-yielding interval-valued posteriors that connect to imprecise
-probability~\cite{walley1991}.
-Uncertainty remains graded throughout---there is no final yes/no verdict.
-
-\emph{The logic-style view} collapses credences to discrete values and
-uses designated-value consequence.
-Part~1's collapse homomorphism maps $[0,1]$ to the Kleene lattice
-$\{0, \tfrac{1}{2}, 1\}$, the shared foundation of K$_3$, LP, and RM3.
-Designating $\{1\}$ gives K$_3$ (paracomplete); designating
-$\{1, \tfrac{1}{2}\}$ gives LP (paraconsistent).
+Part~2 developed two complementary views of Cred:
+probability-style (chain rule as inference, Bayesian/Jeffrey update,
+zero-evidence underdetermination) and logic-style (collapse to Kleene lattice,
+designated-value consequence).
 Explosion fails non-vacuously for LP and graded consequence at
-$t \leq \tfrac{1}{2}$; K$_3$ has explosion only vacuously.
+$t \leq \tfrac{1}{2}$.
+Graded predicates extend to first order with quantifier duality;
+unrestricted comprehension yields $\tfrac{1}{2}$ rather than paradoxes.
 
-The two views answer different questions.
-Probability-style asks ``how confident should I be?''---the output is a
-credence in $[0,1]$.
-Logic-style asks ``is this valid to conclude?''---the output is a binary
-judgment determined by the designation criterion.
-Neither view is ``correct''; they are complementary tools for different
-purposes.
-The collapse homomorphism is the bridge: it converts probability-style
-reasoning to logic-style judgments.
+\textbf{What Part~2 does not provide.}
+Proof theory and self-hosting remain for Part~3.
 
-\emph{The unique meeting point} (Part~1, Theorem~\texttt{min\_copula\_unique}):
-maximum positive dependence is the only fixed joint formula compatible with
-truth-functional, Bayes-consistent, non-trivial reasoning---explaining why
-K$_3$, LP, and RM3 use minimum conjunction.
-
-\emph{Graded predicates} extend to first order with inf/sup quantifiers
-satisfying duality and agreeing with classical quantifiers on crisp
-predicates.
-Unrestricted comprehension yields fixed points ($\tfrac{1}{2}$) rather
-than paradoxes.
-
-\medskip
-\textbf{What Part~2 provides and what it does not.}
-Part~2 provides the two-views framing, valuations, consequence relations,
-and update rules.
-It does not provide a proof theory (deductive calculus with rules of
-inference) or self-hosting (building mathematics on Cred foundations).
-These remain for Part~3.
-
-\medskip
 \textbf{Future work.}
-Proof theory for Cred, Adams-type uncertainty bounds without additivity,
-graded mathematics, self-hosting/metareasoning, and connections to
+Proof theory, Adams-type bounds without additivity, and connections to
 probabilistic programming.
 
 %=============================================================================

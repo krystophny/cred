@@ -1600,40 +1600,12 @@ randomized moves.
 
 \begin{remark}[Belnap-Dunn Four-Valued Logic]
 \label{rem:fde}
-The Kleene lattice embeds as a subalgebra of the Belnap-Dunn four-valued
-lattice~\cite{belnap1977,dunn1976}, via the inclusion
-$\{0, \tfrac{1}{2}, 1\} \hookrightarrow \{\mathbf{f}, \mathbf{b}, \mathbf{t}, \mathbf{n}\}$
-mapping $0 \mapsto \mathbf{f}$, $\tfrac{1}{2} \mapsto \mathbf{b}$, $1 \mapsto \mathbf{t}$.
-The Cred collapse therefore factors through the Belnap-Dunn algebra.
-Belnap-Dunn negation has \emph{two} fixed points ($\mathbf{b}$ and
-$\mathbf{n}$), while Cred's complement has exactly one ($\tfrac{1}{2}$);
-the Kleene lattice also has exactly one ($\tfrac{1}{2}$), matching Cred.
-This fixed-point mismatch is the structural reason the three-valued
-Kleene target works for the \emph{connective} algebra while extending to
-four values is problematic.
-
-However, including conditioning changes the picture.
-As noted in Remark~\ref{rem:void-value}, conditioning introduces a fourth
-output value---void ($*$)---that is not in the Kleene lattice.
-The four conditioning outputs $\{0, \tfrac{1}{2}, 1, {*}\}$ align naturally
-with the four Belnap-Dunn values via $0 \mapsto \mathbf{f}$,
-$\tfrac{1}{2} \mapsto \mathbf{b}$, $1 \mapsto \mathbf{t}$,
-${*} \mapsto \mathbf{n}$.
-The alignment is suggestive but not exact: de Finetti's void means
-``the antecedent does not obtain, so the question does not arise,''
-while Belnap's $\mathbf{n}$ means ``neither true nor false---no
-information is available.''
-The former is semantic (the conditioning event failed), the latter
-epistemic (no data either way); whether this conceptual gap can be
-bridged formally remains open.
-The connective algebra alone collapses to the three-valued Kleene sublattice;
-conditioning fills in the fourth value, suggesting that the full Cred
-system---connectives plus conditioning---has a natural four-valued
-structure.
-Making this a formal homomorphism claim would require specifying how void
-interacts with the connectives (as \'Egr\'e, Rossi, and
-Sprenger~\cite{egre2021} do for de Finetti's conditional); we leave this
-for future work.
+The Kleene lattice embeds in the Belnap-Dunn four-valued
+lattice~\cite{belnap1977,dunn1976}.
+Belnap-Dunn negation has two fixed points; Cred's complement has one
+($\tfrac{1}{2}$), matching Kleene.
+Including conditioning adds a fourth output (void), suggesting a connection
+to Belnap-Dunn; formalizing this is future work.
 \end{remark}
 
 \subsection{Uniqueness of Maximum Dependence}
