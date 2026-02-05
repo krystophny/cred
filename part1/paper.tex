@@ -114,10 +114,24 @@ Van Fraassen~\cite{vanfraassen1983} showed that the primitive approach
 connects naturally to relevant logic: both avoid forcing ``from impossibility,
 anything follows.''
 
-For readers more familiar with probability than with mathematical logic: the
-next two paragraphs describe how fuzzy logic generalizes Boolean conjunction to
-$[0,1]$, using operations called t-norms, and how this forces a specific
-behavior at zero that probability avoids.
+\emph{The Dutch Book argument.}
+The foundational justification for why credences should satisfy probabilistic
+constraints comes from Ramsey~\cite{ramsey1931} and de
+Finetti~\cite{definetti1937}: if your credences do not satisfy certain
+coherence constraints, a bookie can construct a combination of bets that
+\emph{you} consider fair (by your own credences) but that guarantees you a
+net loss~\cite{vineberg2016}.
+The Dutch Book argument establishes two requirements: (1)~\emph{additivity}:
+$\cred(A) + \cred(\negc A) = 1$, and (2)~\emph{multiplicative coherence}:
+$\cred(A \mid B) \cdot \cred(B) = \cred(A \land B)$---the chain rule.
+Cred adopts the second (the chain rule is the sole structural axiom for
+conditioning) but drops the first: additivity is not required.
+This means Cred inherits the Dutch Book's multiplicative constraint while
+allowing non-additive credences.
+
+The following background on t-norms and residuation is well known in fuzzy
+logic but essential for understanding why Cred's chain-rule approach differs
+from residuation.
 
 Fuzzy logic takes a different route to $[0,1]$-valued reasoning.
 Rather than starting from probability's chain rule, it generalizes Boolean
@@ -203,6 +217,8 @@ G\"odel fail.  Every symmetric copula yields a Bayes-consistent arrow
 \item Fixed-point analysis: $\tfrac{1}{2}$ is the unique fixed point of negation
 (Section~\ref{sec:fixed-points}).
 \item Lean~4 formalization of the core algebra (Section~\ref{sec:lean}).
+\item Part~2~\cite{part2} extends the algebra to reasoning: valuations,
+consequence relations (K$_3$, LP, graded), update rules, and graded predicates.
 \end{enumerate}
 
 \textbf{Scope and limitations.}
@@ -467,6 +483,22 @@ copulas model dependence in probability (the dependence structure varies).
 Cred uses the product for its algebraic chain-rule operation but allows
 the actual joint $\cred(A \land B)$ to be any value in the Fr\'echet bounds.
 \end{remark}
+
+\begin{definition}[Coherence / Dutch Book]
+\label{def:dutchbook}
+A credence assignment is \emph{coherent} if no combination of bets---each
+fair by the agent's own credences---guarantees a net loss.
+Ramsey~\cite{ramsey1931} and de Finetti~\cite{definetti1937} proved that
+coherence requires:
+\begin{enumerate}[label=(\roman*),nosep]
+\item \textbf{Additivity}: $\cred(A) + \cred(\negc A) = 1$
+\item \textbf{Multiplicative coherence (chain rule)}:
+  $\cred(A \mid B) \cdot \cred(B) = \cred(A \land B)$
+\end{enumerate}
+See Vineberg~\cite{vineberg2016} for a survey of Dutch Book arguments.
+Cred adopts the chain rule~(ii) as its sole structural axiom for conditioning
+but drops additivity~(i).
+\end{definition}
 
 %=============================================================================
 \section{The Credence Algebra}
@@ -1604,6 +1636,170 @@ Sprenger~\cite{egre2021} do for de Finetti's conditional); we leave this
 for future work.
 \end{remark}
 
+\subsection{Uniqueness of Maximum Dependence}
+\label{sec:uniqueness}
+
+Theorem~\ref{thm:max-dependence} established that $\min(a,b)$ is the unique
+truth-functional joint satisfying Bayes consistency, non-triviality, and
+idempotence.
+The proof relied on comparing alternatives; here we give a direct
+characterization showing \emph{why} the minimum is forced.
+
+\begin{theorem}[Min Copula Uniqueness]
+\label{thm:min-unique}
+Let $j : [0,1]^2 \to [0,1]$ satisfy:
+\begin{enumerate}[label=(\roman*),nosep]
+\item \textbf{Symmetry}: $j(a,b) = j(b,a)$ (Bayes consistency)
+\item \textbf{Idempotence}: $j(a,a) = a$
+\item \textbf{Zero boundary}: $j(0,b) = 0$
+\item \textbf{Fr\'echet upper bound}: $j(a,b) \leq \min(a,b)$
+\item \textbf{2-increasing}: for $a_1 \leq a_2$ and $b_1 \leq b_2$,
+  $j(a_2,b_2) - j(a_2,b_1) - j(a_1,b_2) + j(a_1,b_1) \geq 0$
+\end{enumerate}
+Then $j(a,b) = \min(a,b)$ for all $a,b \in [0,1]$.
+\end{theorem}
+\begin{proof}
+The upper bound gives $j(a,b) \leq \min(a,b)$.
+For the lower bound, assume $a \leq b$ (symmetry handles the other case).
+Apply 2-increasing to the rectangle $[0,a] \times [a,b]$:
+\[
+j(a,b) - j(a,a) - j(0,b) + j(0,a) \geq 0
+\]
+By idempotence $j(a,a) = a$, and by zero boundary $j(0,b) = j(0,a) = 0$,
+this simplifies to $j(a,b) \geq a = \min(a,b)$.
+Lean: \texttt{min\_copula\_unique}, \texttt{symmetric\_idempotent\_2incr\_ge\_min}.
+\end{proof}
+
+\begin{remark}[Philosophical Significance]
+This uniqueness theorem answers a natural objection to the maximum-dependence
+assumption: ``Why not use some intermediate copula between independence and
+max-dependence?''
+The answer is that \emph{idempotence forces the maximum}.
+The requirement $j(a,a) = a$ is not an exotic condition---it is standard in
+both probability ($P(A \land A) = P(A)$) and logic ($A \land A = A$).
+Yet combined with truth-functionality and the 2-increasing property (a weak
+monotonicity condition satisfied by all copulas), idempotence mathematically
+\emph{forces} $j = \min$.
+The minimum is not a choice among many; it is the unique survivor of the
+constraints.
+\end{remark}
+
+\begin{remark}[Probabilistic Interpretation: Nested Events]
+\label{rem:nested-events}
+The minimum joint has a clean probabilistic interpretation.
+If $\cred(A) \leq \cred(B)$ and $j(A,B) = \min(\cred(A), \cred(B)) = \cred(A)$,
+then $P(A \land B) = P(A)$, which means $A \subseteq B$ almost surely:
+whenever $A$ occurs, $B$ also occurs.
+Under maximum dependence, events are \emph{nested} by probability---rarer
+events are contained in more common ones.
+This is a ``specificity ordering'': a specific claim (low probability)
+implies a general claim (high probability).
+\end{remark}
+
+\begin{remark}[Single Latent Variable Model]
+\label{rem:latent-variable}
+Equivalently, imagine a single unknown state $\theta$ drawn uniformly from $[0,1]$,
+representing ``how the world turned out.''
+Each proposition is a threshold: $A$ is true iff $\theta \leq \cred(A)$.
+Then $P(A) = \cred(A)$ and $P(A \land B) = P(\theta \leq \min(a,b)) = \min(a,b)$.
+All propositions depend on the \emph{same underlying reality}; lower-credence
+propositions require more ``favorable'' states.
+This is the probabilistic version of classical logic's ``one true world''---we
+are simply uncertain about which state $\theta$ obtains.
+\end{remark}
+
+\begin{example}[Bayesian Inference Under Maximum Dependence]
+\label{ex:bayes-max-dep}
+Let $\cred(H) = 0.3$ (hypothesis) and $\cred(E) = 0.5$ (evidence).
+Under maximum dependence, $j(H,E) = \min(0.3, 0.5) = 0.3$.
+
+The likelihood is $P(E \mid H) = j(H,E)/\cred(H) = 0.3/0.3 = 1$: the hypothesis
+\emph{perfectly predicts} the evidence (since $H \subseteq E$ in the nested model).
+
+Bayes' theorem gives the posterior:
+\[
+\cred(H \mid E) = \frac{P(E \mid H) \cdot \cred(H)}{\cred(E)}
+= \frac{1 \cdot 0.3}{0.5} = 0.6.
+\]
+Observing $E$ raises $H$ from $0.3$ to $0.6$---genuine Bayesian updating.
+
+More generally, under maximum dependence:
+\[
+\cred(H \mid E) = \begin{cases}
+\cred(H)/\cred(E) & \text{if } \cred(H) \leq \cred(E), \\
+1 & \text{if } \cred(H) > \cred(E).
+\end{cases}
+\]
+The first case is ratio updating; the second is certainty (rare evidence
+confirms common hypotheses).
+The contrapositive also works: since $H \subseteq E$, we have $\lnot E \subseteq \lnot H$,
+so $\cred(H \mid \lnot E) = 0$---if the evidence fails, the hypothesis is
+certainly false.
+\end{example}
+
+\begin{remark}[Why This Is the Meeting Point]
+\label{rem:meeting-point-bayes}
+The single latent variable model shows why maximum dependence is where
+probability and logic \emph{merge}.
+We get full Bayesian inference (Bayes' theorem holds exactly) together with
+logical structure (entailment, contrapositive, transitivity of nesting).
+Independence would mean separate latent variables for each proposition, making
+evidence irrelevant to conclusions (trivial conditioning).
+Maximum dependence is the unique dependence structure where compositional
+truth values coexist with proper probabilistic inference.
+\end{remark}
+
+\subsection{Stochastic Independence Between Domains}
+\label{sec:independence}
+
+A natural question arises: can we partition propositions into \emph{domains}
+with different dependence structures---perhaps using independence (product)
+for empirical propositions and maximum dependence (minimum) for mathematical
+ones?
+The following results constrain such mixed approaches.
+
+\begin{proposition}[Independence Within Forces Classical]
+\label{prop:indep-classical}
+If a domain uses the independence copula ($j(a,b) = ab$) and requires
+idempotence ($j(a,a) = a$), then all credences in that domain collapse
+to $\{0,1\}$.
+\end{proposition}
+\begin{proof}
+Idempotence gives $a \cdot a = a$, so $a(a-1) = 0$, hence $a \in \{0,1\}$.
+Lean: \texttt{independence\_within\_forces\_classical},
+\texttt{product\_idempotent\_iff\_classical}.
+\end{proof}
+
+\begin{proposition}[Cross-Domain Independence Trivializes Inference]
+\label{prop:cross-trivial}
+If the joint between propositions from different domains is the product
+($j(A,B) = \cred(A) \cdot \cred(B)$ for $A$ in domain~1, $B$ in domain~2),
+then conditioning is trivial: $\cred(A \mid B) = \cred(A)$.
+Evidence from one domain has no effect on conclusions in the other.
+\end{proposition}
+\begin{proof}
+$\cred(A \mid B) = j(A,B)/\cred(B) = \cred(A) \cdot \cred(B)/\cred(B) = \cred(A)$.
+Lean: \texttt{cross\_world\_independence\_trivial}.
+\end{proof}
+
+\begin{remark}[The Dilemma of Domain Partitioning]
+These results create a dilemma for mixed dependence structures:
+\begin{itemize}[nosep]
+\item Using independence \emph{within} a domain forces credences to $\{0,1\}$
+  (classical logic), unless one abandons idempotence.
+\item Using independence \emph{between} domains makes cross-domain inference
+  vacuous---learning $B$ tells you nothing about $A$.
+\item Using maximum dependence (minimum) within each domain is consistent with
+  non-classical credences and yields non-trivial inference.
+\end{itemize}
+The unique meeting point of Section~\ref{sec:uniqueness} extends: for any
+domain where non-classical credences are meaningful and idempotence holds,
+maximum dependence is forced.
+Cross-domain dependence is a free parameter, but independence trivializes
+cross-domain reasoning while non-trivial cross-domain inference requires
+positive dependence.
+\end{remark}
+
 \subsection{Relationship to Probability}
 \label{sec:probability}
 
@@ -2027,6 +2223,13 @@ values.
 Each adds exactly the structure that the algebra leaves open.
 
 \medskip
+\textbf{Part~2.}
+Part~2~\cite{part2} develops the reasoning layer: valuations (mapping
+propositions to credences), consequence relations (K$_3$, LP, graded
+thresholds), update rules (Bayesian and Jeffrey conditionalization),
+and graded predicates with inf/sup quantifiers.
+
+\medskip
 \textbf{Future work.}
 Future work includes extending Cred to a first-order setting with graded
 quantifiers, exploring which consequence relations are compatible with the
@@ -2305,6 +2508,11 @@ Shafer, G.
 \newblock \emph{A Mathematical Theory of Evidence}.
 \newblock Princeton University Press, 1976.
 
+\bibitem{sklar1959}
+Sklar, A.
+\newblock Fonctions de r\'epartition \`a $n$ dimensions et leurs marges.
+\newblock \emph{Publications de l'Institut de Statistique de l'Universit\'e de Paris}, 8:229--231, 1959.
+
 \bibitem{vanfraassen1976}
 van Fraassen, B.C.
 \newblock Probabilities of conditionals.
@@ -2316,6 +2524,13 @@ Science}, Vol.~1, pages 261--308. Reidel, 1976.
 van Fraassen, B.C.
 \newblock Gentlemen's wagers: Relevant logic and probability.
 \newblock \emph{Philosophical Studies}, 43:47--61, 1983.
+
+\bibitem{vineberg2016}
+Vineberg, S.
+\newblock Dutch Book arguments.
+\newblock In Zalta, E.N., editor, \emph{Stanford Encyclopedia of Philosophy}.
+\newblock Stanford University, Spring 2016.
+\newblock \url{https://plato.stanford.edu/entries/dutch-book/}.
 
 \bibitem{walley1991}
 Walley, P.
