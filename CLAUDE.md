@@ -1,10 +1,9 @@
 # CLAUDE.md
 
-## Current Focus: Part 1 (next milestone)
+## Current Focus: Part 1 (publication-ready)
 
-Ship a publication-quality `part1/paper.tex` that matches the machine-checked core algebra in `lean/Cred/Basic.lean`.
-
-Avoid scope creep into `part2/` (graded mathematics) and `part3/` (self-hosting / undecidability techniques) unless a Part 1 result needs a small cross-reference.
+Ship a publication-quality `part1/paper.tex` with machine-checked proofs.
+Remaining: fill the `sorry` in `lean/Cred/Congruence.lean` (`no_four_or_more_classes`).
 
 ## Build (match CI)
 
@@ -35,11 +34,16 @@ When `cred(B) = 0`: the equation imposes no constraint on `cred(A|B)` (any value
 
 Keep the separation clear: `⊗`/`⊔` are the core algebraic operations (product / De Morgan dual). Dependence is handled by supplying an explicit joint credence in `Cred.Credence.Conditioning` rather than treating `⊗` as a general rule for `cred(A ∧ B)`.
 
-## Repo Map (Part 1)
+## Repo Map
 
-- `lean/Cred/Basic.lean` — authoritative definitions + full proofs (core algebra, conditioning, fixed points, non-distributivity, and 3-valued collapse/RM3 comparison).
-- `part1/paper.tex` — publication paper (keep its named claims aligned with Lean; CI produces a PDF artifact).
-- `part1/*.md` — supporting notes for exposition/collapse tower (non-authoritative, but keep consistent with the paper).
+- `lean/Cred/Basic.lean` — core algebra, conditioning, fixed points, collapse, congruence building blocks, impossibility results, Bayes consistency, path dependence.
+- `lean/Cred/Valuation.lean` — valuations (CpValuation, IndepValuation, JointValuation).
+- `lean/Cred/Consequence.lean` — K3/LP/graded consequence, no-explosion theorems.
+- `lean/Cred/Update.lean` — Bayesian and Jeffrey conditionalization.
+- `lean/Cred/Predicate.lean` — graded predicates, quantifiers, Russell fixed point.
+- `lean/Cred/Congruence.lean` — congruence classification (singleton boundaries verified; `no_four_or_more_classes` has `sorry`).
+- `part1/paper.tex` — publication paper (12 sections + 2 appendices, ~1437 lines, 14 pages).
+- `part3/` — future work: graded proofs, self-hosting, undecidability.
 
 ## Key Results to Keep Green (Lean)
 
@@ -49,9 +53,18 @@ Core:
 - `Cred.Credence.liar_fixed_point`, `Cred.Credence.neg_fixed_point_unique` (0.5 fixed point and uniqueness)
 - `Cred.Credence.conj_disj_not_distrib` (⊗ does not distribute over ⊔)
 
-Collapse / comparisons (used in Part 1 exposition):
+Collapse / congruence:
 - `Cred.ThreeVal.rm3_ex_falso` (RM3 implication has explosion row)
 - `Cred.ThreeVal.cred_no_ex_falso` (Cred blocks ex falso via unconstrained conditioning)
+- `three_element_quotient_unique`, `zero_equiv_forces_trivial`, `no_boolean_neg_retraction`
+- `Cred.CredCongruence.singleton_zero`, `singleton_one` (boundary singletons)
+- `Cred.CredCongruence.no_four_or_more_classes` (has `sorry` — the n>=4 case)
+
+Consequence (from Consequence.lean):
+- `k3_no_tautology`, `lp_no_explosion`, `graded_no_explosion`
+
+Predicates (from Predicate.lean):
+- `quantifier_duality_val`, `russell_fixed_point`, `crisp_inf_zero_iff`
 
 ## Philosophy
 
