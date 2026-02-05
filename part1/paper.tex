@@ -17,7 +17,7 @@
     citecolor=blue,
     urlcolor=blue,
     pdfauthor={Anonymous},
-    pdftitle={The Unique Intersection of Probability and Many-Valued Logic}
+    pdftitle={The Product De Morgan Triplet, Primitive Conditioning, and the Kleene Collapse}
 }
 \usepackage{cleveref}
 \usepackage[margin=1in]{geometry}
@@ -44,7 +44,7 @@
 \newcommand{\Real}{\mathbb{R}}
 \newcommand{\Nat}{\mathbb{N}}
 
-\title{\textbf{The Unique Intersection of Probability and Many-Valued Logic}}
+\title{\textbf{The Product De Morgan Triplet, Primitive Conditioning,\\and the Kleene Collapse}}
 
 \author{Anonymous for blind review}
 \date{February 2026}
@@ -54,10 +54,11 @@
 \maketitle
 
 \begin{abstract}
-We prove two results about truth-functional conjunctions on $[0,1]$.
-First, $\min(a,b)$ is the unique conjunction satisfying Bayes consistency,
-non-trivial conditioning, and idempotence---this forces the Kleene conjunction
-used in K$_3$, LP, and RM3.
+We give machine-checked proofs of results connecting the product De Morgan
+triplet on $[0,1]$ to many-valued logic.
+First, $\min(a,b)$ is the unique symmetric, idempotent copula on $[0,1]$
+(a known result; we provide a self-contained Lean proof)---this forces the
+Kleene conjunction used in K$_3$, LP, and RM3.
 Second, the conditional's limit at evidence zero is path-dependent (like the
 Borel--Kolmogorov paradox), so ex falso requires an added convention.
 The framework uses credences in $[0,1]$, complement $1-c$, and the chain rule
@@ -77,8 +78,8 @@ Probability theory builds on credences by adding a sigma-algebra, a measure, and
 Conditional probability is derived via division: $P(A \mid B) = P(A \land B)/P(B)$ when $P(B) > 0$; when $P(B) = 0$, the ratio is undefined.
 R\'enyi~\cite{renyi1955} and Popper~\cite{popper1959} proposed an alternative: treat conditioning as \emph{primitive}, governed by the chain rule $P(A \mid B) \cdot P(B) = P(A \land B)$ without invoking division.
 
-The credence algebra takes this further.
-Drop the measure entirely; keep only values in $[0,1]$, the complement $\negc c = 1 - c$, and the chain rule $\cred(A \mid B) \cdot \cred(B) = \cred(A \land B)$ as the sole structural axiom for conditioning.
+The credence algebra applies the same idea without a measure space:
+keep only values in $[0,1]$, the complement $\negc c = 1 - c$, and the chain rule $\cred(A \mid B) \cdot \cred(B) = \cred(A \land B)$.
 This is strictly weaker than probability: every probability space satisfies these axioms, but the algebra requires neither a sigma-algebra nor additivity.
 The conjunction is the product t-norm, the disjunction its De Morgan dual (the probabilistic sum), and together with complement they form the \emph{product De Morgan triplet}~\cite{klement2000,hajek1998}.
 
@@ -92,13 +93,16 @@ This echoes de Finetti's three-valued conditional~\cite{definetti1936}, where co
 \textbf{Main results.}
 \begin{enumerate}[label=(\arabic*)]
 \item \textbf{Uniqueness of min} (Theorem~\ref{thm:uniqueness-main}):
-  Among truth-functional conjunctions on $[0,1]$, only $\min(a,b)$ satisfies Bayes consistency, non-trivial conditioning, and idempotence.
+  The min copula is the unique symmetric, idempotent copula on $[0,1]$
+  (a known result~\cite{nelsen2006}; we give a self-contained Lean-verified proof).
   This forces the Kleene conjunction used in K$_3$, LP, and RM3.
-\item \textbf{Path dependence at zero} (Theorem~\ref{thm:path-dependence}):
+\item \textbf{Path dependence at zero} (Proposition~\ref{thm:path-dependence}):
   The conditional's limit as evidence $\to 0$ depends on the ratio of joint to evidence---the same structure as the Borel--Kolmogorov paradox.
   Ex falso requires an added convention.
 \item \textbf{Collapse to Kleene} (Theorem~\ref{thm:collapse}):
-  A surjective homomorphism from the credence algebra to the Kleene lattice exists for $\{\negc, \conjc, \disjc\}$; no analogous collapse exists for G\"odel, \L ukasiewicz, or classical logic.
+  The quotient by $\{0\},(0,1),\{1\}$ is the Kleene lattice (routine);
+  no analogous collapse exists for G\"odel, \L ukasiewicz, or classical logic
+  (the impossibility results are the substantive content).
 \item \textbf{Bayes consistency} as selection criterion: the product residuated implication passes; RM3 and G\"odel fail (Section~\ref{sec:relationships}).
 \item \textbf{Lean formalization}: Proofs are machine-checked in Lean~4 (Appendix~\ref{app:lean}).
 \end{enumerate}
@@ -111,7 +115,7 @@ Part~2~\cite{part2} extends the algebra to valuations, consequence relations, an
 \textbf{Outline.}
 Section~\ref{sec:algebra} defines the algebra.
 Section~\ref{sec:uniqueness} proves uniqueness of min (Main Result~1).
-Section~\ref{sec:conditioning} develops primitive conditioning and path dependence (Main Result~2).
+Section~\ref{sec:conditioning} develops chain-rule conditioning and path dependence (Main Result~2).
 Section~\ref{sec:fixed-points} treats fixed points.
 Section~\ref{sec:collapse} establishes the collapse to the Kleene lattice.
 Section~\ref{sec:relationships} relates the algebra to existing frameworks.
@@ -212,9 +216,12 @@ $P(A \lor B) = P(A) + P(B) - P(A \land B)$ uses the actual joint instead.
 
 \subsection{Algebraic Properties}
 
+The following properties are standard for the product De Morgan
+triplet~\cite{klement2000}; we record them for the Lean dependency chain.
+
 % Lean: neg_neg, neg_zero, neg_one, conj_comm, conj_assoc, conj_one, conj_zero,
 %       disj_comm, disj_assoc, disj_zero, disj_one, de_morgan_conj, de_morgan_disj
-\begin{theorem}[Algebraic Properties]
+\begin{proposition}[Algebraic Properties]
 \label{thm:algebraic}
 The following hold for all $c, c_1, c_2, c_3 \in [0,1]$:
 \begin{enumerate}[label=(\alph*)]
@@ -226,10 +233,10 @@ The following hold for all $c, c_1, c_2, c_3 \in [0,1]$:
 \item $c \disjc 0 = c$, $c \disjc 1 = 1$ \hfill (identity, annihilator)
 \item $\negc(c_1 \conjc c_2) = \negc c_1 \disjc \negc c_2$, $\negc(c_1 \disjc c_2) = \negc c_1 \conjc \negc c_2$ \hfill (De Morgan)
 \end{enumerate}
-\end{theorem}
+\end{proposition}
 \begin{proof}
-Each property follows directly from the definitions.
-Lean verification: \texttt{neg\_neg}, \texttt{neg\_zero}, \texttt{neg\_one},
+Each property is immediate from the definitions (arithmetic on $[0,1]$).
+Lean: \texttt{neg\_neg}, \texttt{neg\_zero}, \texttt{neg\_one},
 \texttt{conj\_comm}, \texttt{conj\_assoc}, \texttt{conj\_one}, \texttt{conj\_zero},
 \texttt{disj\_comm}, \texttt{disj\_assoc}, \texttt{disj\_zero}, \texttt{disj\_one},
 \texttt{de\_morgan\_conj}, \texttt{de\_morgan\_disj}.
@@ -242,8 +249,8 @@ by an involution $\negc$ that reverses the natural order on $[0,1]$
 De Morgan's laws.
 It is not a De Morgan algebra in the lattice-theoretic sense: a De Morgan
 algebra requires a distributive lattice, whose meet and join are
-idempotent, but $\conjc$ is not idempotent (Theorem~\ref{thm:idempotence})
-and distributivity fails (Theorem~\ref{thm:nondistrib}).
+idempotent, but $\conjc$ is not idempotent (Lemma~\ref{thm:idempotence})
+and distributivity fails (Lemma~\ref{thm:nondistrib}).
 Throughout this paper, ``the credence algebra'' refers to this concrete algebra on
 $[0,1]$---a carrier, three operations, and the chain rule.
 It is not a logic: there is no consequence relation, no designated truth
@@ -256,13 +263,12 @@ Unlike the two-element Boolean algebra $\{0,1\}$, the credence algebra is neithe
 idempotent nor distributive.
 
 % Lean: conj_idempotent_iff
-\begin{theorem}[Idempotence Characterization]
+\begin{lemma}[Idempotence Characterization]
 \label{thm:idempotence}
 $c \conjc c = c$ if and only if $c \in \{0, 1\}$.
-\end{theorem}
+\end{lemma}
 \begin{proof}
 $c^2 = c$ iff $c(c-1) = 0$ iff $c \in \{0,1\}$.
-In particular, $\tfrac{1}{2} \conjc \tfrac{1}{2} = \tfrac{1}{4} \neq \tfrac{1}{2}$.
 Lean: \texttt{conj\_idempotent\_iff}.
 \end{proof}
 
@@ -271,10 +277,10 @@ of a proposition with credence $c$---not the credence of ``$A \land A$'' (which
 equals $\cred(A)$).
 
 % Lean: conj_disj_not_distrib
-\begin{theorem}[Non-Distributivity]
+\begin{lemma}[Non-Distributivity]
 \label{thm:nondistrib}
 The product does not distribute over disjunction.
-\end{theorem}
+\end{lemma}
 \begin{proof}
 Counterexample at $c_1 = c_2 = c_3 = \tfrac{1}{2}$:
 \begin{align*}
@@ -299,10 +305,11 @@ Boolean algebra and from De Morgan lattices.
 \label{sec:uniqueness}
 %=============================================================================
 
-This section establishes the first main result: the minimum conjunction
-$\min(a,b)$ is the \emph{unique} truth-functional joint compatible with
-probabilistic marginalization that satisfies basic requirements for reasoning.
-This is not a design choice---it is mathematically forced.
+The min copula is the unique symmetric, idempotent copula on
+$[0,1]$~\cite{nelsen2006}.
+This section gives a self-contained proof (machine-checked in Lean) and
+interprets the result: the minimum conjunction is the only truth-functional
+joint compatible with Bayesian conditioning that satisfies idempotence.
 
 \subsection{The Problem: Fixing the Joint}
 
@@ -334,49 +341,46 @@ We impose four natural requirements on a truth-functional joint:
 \item \textbf{Idempotent}: $j(a,a) = a$, so $\cred(A \land A) = \cred(A)$.
 \end{enumerate}
 
+\subsection{Ruling Out Named Alternatives}
+
+The two standard alternatives to $\min$ both fail:
+\begin{itemize}[nosep]
+\item \emph{Independence} $j(a,b) = ab$: conditioning gives $ab/b = a$, so
+  evidence has no effect (fails~iii); also $a^2 \neq a$ for
+  $a \notin \{0,1\}$ (fails~iv).
+  Lean: \texttt{prod\_trivial\_conditioning}.
+\item \emph{\L ukasiewicz} $j(a,b) = \max(a+b-1,0)$:
+  $\max(2a-1,0) \neq a$ for $a \in (0.5, 1)$ (fails~iv).
+  Lean: \texttt{luk\_not\_idempotent}.
+\end{itemize}
+These checks rule out specific candidates but do not constitute a uniqueness
+proof: infinitely many functions lie in the Fr\'echet-Hoeffding interval.
+The following theorem gives the complete argument.
+
 \subsection{Main Result: Uniqueness}
 
-% Lean: min_bayes_consistent, prod_trivial_conditioning, min_nontrivial_conditioning,
-%       truth_functional_forces_min, luk_not_idempotent
+That the min copula is the unique idempotent copula is known in the copula
+literature~\cite{nelsen2006}; we state the result here in the form used by the
+Lean formalization and include the proof for self-containedness.
+
+% Lean: min_copula_unique, symmetric_idempotent_2incr_ge_min,
+%       truth_functional_forces_min, min_bayes_consistent,
+%       min_nontrivial_conditioning
 \begin{theorem}[Uniqueness of Truth-Functional Conjunction]
 \label{thm:uniqueness-main}
-Among all fixed joint functions $j(a,b)$ taking values in the Fr\'echet-Hoeffding
-interval, \textbf{only} maximum positive dependence $j(a,b) = \min(a,b)$ satisfies
-all four requirements.
-\end{theorem}
-
-\begin{proof}
-We verify that $\min(a,b)$ satisfies all four, then show no other does.
-
-\emph{$\min$ satisfies all four:}
-(i)~$\min(a,b)$ is truth-functional by definition.
-(ii)~The induced joint is symmetric ($\min(a,b) = \min(b,a)$), so Bayes
-consistency holds.
-(iii)~Conditioning gives $\cred(A \mid B) = \min(a,b)/b = \min(a/b, 1)$,
-which differs from $a$ when $a > b$.
-(iv)~$\min(a,a) = a$.
-
-\emph{No other joint works:}
-\begin{itemize}[nosep]
-\item \emph{Independence} $j(a,b) = ab$: satisfies (i), (ii), but fails (iii)---conditioning
-  gives $ab/b = a$, so evidence has no effect---and fails (iv)---$a^2 \neq a$
-  for $a \notin \{0,1\}$.
-\item \emph{\L ukasiewicz} $j(a,b) = \max(a+b-1,0)$: satisfies (i), but fails
-  (iv)---$\max(2a-1,0) \neq a$ for $a \in (0.5, 1)$.
-\item Any $j(a,b) < \min(a,b)$: either fails (iv) (if $j(a,a) < a$) or fails
-  (ii) (if not symmetric).
-\end{itemize}
-Lean: \texttt{min\_bayes\_consistent}, \texttt{prod\_trivial\_conditioning},
-\texttt{min\_nontrivial\_conditioning}.
-\end{proof}
-
-% Lean: min_copula_unique, symmetric_idempotent_2incr_ge_min
-\begin{theorem}[Min-Copula Characterization]
 \label{thm:min-copula-unique}
-Let $j : [0,1]^2 \to [0,1]$ satisfy symmetry, idempotence ($j(a,a) = a$),
-zero boundary ($j(0,b) = 0$), the Fr\'echet upper bound ($j(a,b) \leq \min(a,b)$),
-and the 2-increasing property.
+Let $j : [0,1]^2 \to [0,1]$ satisfy:
+\begin{enumerate}[label=(\roman*),nosep]
+\item \textbf{Symmetry}: $j(a,b) = j(b,a)$.
+\item \textbf{Idempotence}: $j(a,a) = a$.
+\item \textbf{Zero boundary}: $j(0,b) = 0$.
+\item \textbf{Fr\'echet upper bound}: $j(a,b) \leq \min(a,b)$.
+\item \textbf{2-increasing}: $j(a_2,b_2) - j(a_2,b_1) - j(a_1,b_2) + j(a_1,b_1) \geq 0$
+  for $a_1 \leq a_2$, $b_1 \leq b_2$.
+\end{enumerate}
 Then $j(a,b) = \min(a,b)$ for all $a,b \in [0,1]$.
+Moreover, $\min$ is non-trivial: the induced conditional
+$\min(a,b)/b \neq a$ in general.
 \end{theorem}
 
 \begin{proof}
@@ -388,23 +392,26 @@ j(a,b) - j(a,a) - j(0,b) + j(0,a) \geq 0
 \]
 By idempotence $j(a,a) = a$, and by zero boundary $j(0,b) = j(0,a) = 0$,
 this simplifies to $j(a,b) \geq a = \min(a,b)$.
-Lean: \texttt{min\_copula\_unique}, \texttt{symmetric\_idempotent\_2incr\_ge\_min}.
+Lean: \texttt{min\_copula\_unique}, \texttt{truth\_functional\_forces\_min},
+\texttt{min\_nontrivial\_conditioning}.
 \end{proof}
+
+Conditions (i)--(v) are the defining properties of a symmetric copula that
+is idempotent.
+In the context of Section~\ref{sec:conditioning}, symmetry is Bayes
+consistency (the chain rule works from both directions), and the remaining
+conditions say $j$ is a copula.
+Any valid joint distribution satisfies the 2-increasing property and
+Fr\'echet bounds~\cite{nelsen2006}; idempotence ($\cred(A \land A) = \cred(A)$)
+and symmetry are the substantive requirements.
 
 \subsection{Interpretation}
 
-\begin{remark}[Why This Matters]
-The uniqueness theorem answers a fundamental question: \emph{Can probability
-and many-valued logic be unified?}
-The answer is yes, and the unification is \textbf{unique}.
-The minimum conjunction is not one choice among many---it is the only
-truth-functional conjunction compatible with probabilistic marginalization
-that supports proper reasoning.
-
-This explains a long-standing puzzle: why do K$_3$, LP, and RM3 all use the
-same conjunction (Kleene min)?
-The answer is that they \emph{must}---any other choice either makes evidence
-irrelevant (independence) or breaks idempotence (\L ukasiewicz).
+\begin{remark}[Consequence]
+K$_3$, LP, and RM3 all use $\min$ as conjunction.
+The uniqueness theorem shows this is forced: any other
+idempotent symmetric copula on $[0,1]$ is $\min$.
+Independence makes evidence irrelevant; \L ukasiewicz breaks idempotence.
 \end{remark}
 
 \begin{remark}[Comonotonicity]
@@ -418,7 +425,7 @@ the unique logic-compatible conjunction.
 \end{remark}
 
 %=============================================================================
-\section{Primitive Conditioning}
+\section{Conditioning via the Chain Rule}
 \label{sec:conditioning}
 %=============================================================================
 
@@ -437,7 +444,6 @@ In propositional notation: $\condc{A}{B} \conjc \cred(B) = \cred(A \land B)$.
 The \texttt{joint} parameter represents $\cred(A \land B)$ and is supplied
 as input---it is not computed from marginal credences.
 Note that a conditioning structure need not exist for all parameter values:
-as we show after Theorem~\ref{thm:uniqueness},
 $\text{joint} \leq \text{evidence}$ is necessary (since
 $\text{condCred} \leq 1$).
 This differs from R\'enyi--Popper conditioning, where $P(A \mid B)$ is a
@@ -447,22 +453,13 @@ When $\cred(B) > 0$, the constraint uniquely determines the conditional
 from joint and evidence, recovering the two-argument function as a
 derived concept.
 
-\begin{remark}[Algebraic vs.\ Interpreted Conditioning]
-\label{rem:algebraic-conditioning}
-The defining equation $\text{condCred} \conjc \text{evidence} = \text{joint}$
-is a constraint on three numbers in $[0,1]$.
-It mentions no propositions, no events, and no measure.
+The defining equation is a constraint on three numbers in $[0,1]$---it
+mentions no propositions, no events, and no measure.
 The propositional notation $\condc{A}{B} \conjc \cred(B) = \cred(A \land B)$
-is mnemonic---it suggests the intended application but is not part of the
-algebra.
-This is a deliberate design choice: in probability, the chain rule
-$P(A \mid B) \cdot P(B) = P(A \land B)$ is an interpreted statement that
-references events through the measure $P$; in the credence algebra, the same equation
-is an uninterpreted constraint on values.
-Keeping the algebra free of propositional content is what allows a single
-structure to underlie both probability (Section~\ref{sec:probability})
-and the Kleene-based logics (Section~\ref{sec:collapse}).
-\end{remark}
+is mnemonic.
+In probability the chain rule is an interpreted statement referencing events
+through the measure~$P$; here the same equation is an uninterpreted constraint
+on values.
 
 \subsection{Boundary Behavior}
 
@@ -476,44 +473,23 @@ The chain rule gives $\cred(A \mid 0) \conjc 0 = 0$.
 Since $c \conjc 0 = 0$ for all $c \in [0,1]$, this equation is satisfied by any value.
 The conditional is \emph{unconstrained}.
 
-% Lean: conditioning_zero_forces_joint_zero, conditioning_zero_any
-\begin{theorem}[Underdetermination at Zero]
-\label{thm:noexfalso}
-When evidence $= 0$:
-\begin{enumerate}[label=(\alph*)]
-\item If a conditioning structure exists, then joint $= 0$.
-\item For joint $= 0$, any $c \in [0,1]$ satisfies the chain rule.
-\end{enumerate}
-\end{theorem}
-\begin{proof}
-(a) If $\text{condCred} \conjc 0 = \text{joint}$, then $\text{joint} = 0$.
-(b) For any $c$, we have $c \conjc 0 = 0$, so the equation $c \conjc 0 = 0$ holds.
-Lean: \texttt{conditioning\_zero\_forces\_joint\_zero}, \texttt{conditioning\_zero\_any}.
-\end{proof}
-
-\begin{corollary}[No Forced Ex Falso]
-The chain rule does not force $\cred(A \mid 0) = 1$.
-\end{corollary}
-
-This is the central result: conditioning on impossible evidence is unconstrained
-by the chain rule.
-The constraint-based definition means division is derived (as the unique solution
-when evidence $> 0$) rather than primitive; at zero, no division is needed.
-The chain rule is consistent with $\cred(A \mid 0) = 1$ (since
-$1 \cdot 0 = 0$), but does not imply it; to obtain ``from
-impossibility, anything follows,'' one must add this as an extra axiom.
-More generally, the chain rule constrains how credence values relate but says
-nothing about which propositions receive which credences or what follows from
-what.
-These questions belong to a higher-level theory (probability, product logic,
-or a logic with designated values) built on top of the algebra.
+Since $c \cdot 0 = 0$ for every $c$ (the absorber property), any value
+satisfies the chain rule when evidence is zero; the conditional is
+unconstrained\label{thm:noexfalso}.
+In particular, the chain rule does not force $\cred(A \mid 0) = 1$: it is
+\emph{consistent} with ex falso (since $1 \cdot 0 = 0$) but does not
+\emph{entail} it.
+To obtain ``from impossibility, anything follows,'' one must add this as an
+extra axiom.
+(Lean: \texttt{conditioning\_zero\_forces\_joint\_zero},
+\texttt{conditioning\_zero\_any}.)
 
 \subsection{Path Dependence: Ex Falso Is Not Forced (Main Result 2)}
 \label{sec:path-dependence}
 
 The preceding result shows the chain rule \emph{allows} any value at zero evidence.
-The second main result: the mathematics \emph{actively argues against}
-forcing the conditional to~$1$.
+A stronger observation: the conditional's limit at zero evidence is
+path-dependent, so no single value is canonical.
 
 Consider the min-copula setting (the unique logic-compatible conjunction from
 Section~\ref{sec:uniqueness}) where $\text{joint} = \min(a, b)$ with
@@ -530,9 +506,9 @@ As $b \to 0$, the limit depends on \emph{how} $a$ and $b$ approach zero together
 
 % Lean: path_dep_fixed_a, path_dep_proportional, path_dep_square,
 %       path_dependence_witness, path_any_positive_value
-\begin{theorem}[Path Dependence at Evidence Zero]
+\begin{proposition}[Path Dependence at Evidence Zero]
 \label{thm:path-dependence}
-The limit of the conditional $\min(a,b)/b$ as $b \to 0$ is \textbf{path-dependent}:
+The limit of the conditional $\min(a,b)/b$ as $b \to 0$ is path-dependent:
 \begin{enumerate}[label=\textup{(\roman*)},nosep]
 \item If $a$ is fixed with $a > 0$, then $\lim_{b \to 0} \min(a,b)/b = 1$.
 \item If $a(b) = \lambda b$ for some $\lambda \in (0,1]$, then
@@ -540,9 +516,9 @@ The limit of the conditional $\min(a,b)/b$ as $b \to 0$ is \textbf{path-dependen
 \item If $a(b) = b^\alpha$ for $\alpha > 1$, then
   $\lim_{b \to 0} \min(a(b),b)/b = 0$.
 \end{enumerate}
-Consequently, ex falso ($0 \to c = 1$) is \textbf{not entailed} by the algebra;
-forcing it requires an additional totalization convention.
-\end{theorem}
+Consequently, ex falso ($0 \to c = 1$) is not entailed by the algebra;
+forcing it requires an additional convention.
+\end{proposition}
 
 \begin{proof}
 (i)~For small $b < a$, $\min(a,b) = b$, so the ratio is~$1$.
@@ -576,7 +552,7 @@ The limit is a \emph{piecewise function of the approach angle}, not a single val
 \end{figure}
 
 \begin{remark}[Connection to the Borel--Kolmogorov Paradox]
-Theorem~\ref{thm:path-dependence} has the same structure as the
+Proposition~\ref{thm:path-dependence} has the same structure as the
 \emph{Borel--Kolmogorov paradox}~\cite{borel1909,kolmogorov1933}: in measure
 theory, conditioning on a null event is not uniquely determined---the ``value''
 depends on the limiting procedure.
@@ -600,102 +576,64 @@ the chain rule.''
 
 \subsection{Existence and Uniqueness}
 
-% Lean: conditioning_mk
-\begin{theorem}[Existence]
-\label{thm:existence}
-If $\cred(B) > 0$ and $\cred(A \land B) \leq \cred(B)$, then there exists a
-conditioning structure with $\cred(A \mid B) = \cred(A \land B)/\cred(B)$.
-\end{theorem}
-\begin{proof}
-The value $\cred(A \land B)/\cred(B)$ lies in $[0,1]$ (by the hypotheses) and
-satisfies the chain rule.
-Lean: \texttt{conditioning\_mk}.
-\end{proof}
-
-% Lean: conditioning_unique
-\begin{theorem}[Uniqueness of Conditioning]
-\label{thm:uniqueness}
-If $\cred(B) > 0$, the conditional credence is uniquely determined.
-\end{theorem}
-\begin{proof}
-Suppose $c_1 \cdot e = c_2 \cdot e = j$ where $e = \cred(B) > 0$.
-Since $e > 0$ we may cancel: $c_1 = j/e = c_2$.
-Lean: \texttt{conditioning\_unique}.
-\end{proof}
-
-The condition $\cred(A \land B) \leq \cred(B)$ is both necessary and sufficient
-for existence when $\cred(B) > 0$: any conditioning structure forces
-$\text{joint} \leq \text{evidence}$ (since $\text{condCred} \leq 1$;
-Lean: \texttt{conditioning\_implies\_joint\_le\_evidence}).
-The defining constraint uses only multiplication.
-Division appears in the existence proof as a construction technique, not in the
-definition itself---it is derived, not primitive.
-Probability satisfies the same chain rule: $P(A \mid B) \cdot P(B) = P(A \land B)$.
-The credence algebra's conditioning is not new machinery---it is probability's chain rule without
-the surrounding measure theory.
-
-\subsection{Worked Example}
-
-\begin{example}
-\label{ex:conditioning}
-Suppose $\cred(B) = 0.6$ and $\cred(A \land B) = 0.4$.
-The joint credence is an input---it might come from empirical data, domain expertise,
-or a probability model.
-The chain rule gives:
-\[
-\cred(A \mid B) = \frac{0.4}{0.6} = \frac{2}{3}
-\]
-Verification: $\frac{2}{3} \cdot 0.6 = 0.4 = \cred(A \land B)$.
-
-If instead $\cred(B) = 0$, then necessarily $\cred(A \land B) = 0$, and any
-value $c \in [0,1]$ satisfies $c \cdot 0 = 0$.
-The conditional is unconstrained.
-\end{example}
+When $\cred(B) > 0$\label{thm:existence}\label{thm:uniqueness},
+the conditional is uniquely determined by division:
+$\cred(A \mid B) = \cred(A \land B) / \cred(B)$, which lies in $[0,1]$
+provided $\cred(A \land B) \leq \cred(B)$.
+This condition is both necessary and sufficient (since $\text{condCred} \leq 1$).
+(Lean: \texttt{conditioning\_mk}, \texttt{conditioning\_unique},
+\texttt{conditioning\_implies\_joint\_le\_evidence}.)
+The defining constraint uses only multiplication; division is derived.
+This is probability's chain rule $P(A \mid B) \cdot P(B) = P(A \land B)$
+without the surrounding measure theory.
 
 %=============================================================================
 \section{Fixed Points}
 \label{sec:fixed-points}
 %=============================================================================
 
+That complement on $[0,1]$ fixes $\tfrac{1}{2}$ is standard in many-valued
+logic~\cite{hajek1998,gottwald2001}.
+We record the facts here because the collapse results in
+Section~\ref{sec:collapse} depend on them explicitly, and the Lean
+formalization tracks the dependency.
+
 % Lean: liar_fixed_point
-\begin{theorem}[Negation Fixed Point]
+\begin{lemma}[Negation Fixed Point]
 \label{thm:liar}
 $\negc \tfrac{1}{2} = \tfrac{1}{2}$.
-\end{theorem}
+\end{lemma}
 \begin{proof}
 $1 - \tfrac{1}{2} = \tfrac{1}{2}$.
 Lean: \texttt{liar\_fixed\_point}.
 \end{proof}
 
 % Lean: neg_fixed_point_unique
-\begin{theorem}[Uniqueness of Fixed Point]
+\begin{lemma}[Uniqueness of Fixed Point]
 \label{thm:fixedunique}
 $\negc c = c$ if and only if $c = \tfrac{1}{2}$.
-\end{theorem}
+\end{lemma}
 \begin{proof}
 $1 - c = c$ implies $c = \tfrac{1}{2}$.
 Lean: \texttt{neg\_fixed\_point\_unique}.
 \end{proof}
 
-If one imposes the constraint $\cred(L) = \negc \cred(L)$ for a
-self-negating sentence $L$, the unique solution is $\cred(L) = \tfrac{1}{2}$.
-This provides a natural algebraic value for such sentences.
-
-\begin{remark}[Scope]
-This fixed-point result is algebraic, not philosophical.
-It does not resolve the liar paradox or address the strengthened liar
-(``This sentence is not true'').
-The extensive literature on semantic paradoxes offers multiple approaches:
-Kripke's groundedness~\cite{kripke1975} assigns no truth value to the liar at
-minimal fixed points; Priest's dialetheism~\cite{priest1979} treats it as both
-true and false.
-The credence algebra's $\tfrac{1}{2}$ is simply the unique fixed point of complement on $[0,1]$.
-\end{remark}
+If one imposes $\cred(L) = \negc \cred(L)$ for a self-negating sentence $L$,
+the unique solution is $\cred(L) = \tfrac{1}{2}$.
+This is an algebraic observation, not a resolution of the liar paradox;
+see Kripke~\cite{kripke1975} and Priest~\cite{priest1979} for semantic
+approaches.
 
 %=============================================================================
 \section{Collapse to the Kleene Lattice}
 \label{sec:collapse}
 %=============================================================================
+
+The partition $\{0\}, (0,1), \{1\}$ is a congruence on the product De Morgan
+triplet: $0$ is an absorber, $1$ is an identity, and both the product and
+probabilistic sum preserve the open interval $(0,1)$.
+The induced quotient is the Kleene lattice.
+We state the result explicitly for the Lean dependency chain.
 
 Define the collapse function:
 \[
@@ -1033,8 +971,8 @@ Every probability space satisfies the credence algebra's axioms, making probabil
 In logic, the algebra is uninterpreted; a valuation and consequence relation are separate layers.
 In probability, algebra and semantics are fused: the Kolmogorov axioms define $P$ on events,
 and the chain rule is simultaneously algebraic and semantic.
-The credence algebra stays on the logic side of this divide
-(Remark~\ref{rem:algebraic-conditioning}): its chain rule constrains three numbers
+The credence algebra stays on the logic side of this divide:
+its chain rule constrains three numbers
 with no reference to propositions or a measure.
 
 What probability adds: a sigma-algebra of events, a countably additive measure determining the joint $P(A \land B)$, and sigma-additivity.
@@ -1205,23 +1143,22 @@ de Finetti; the algebraic formalization of conditional events is due to
 Calabrese; the connection to relevant logic is van Fraassen's;
 the chain rule constraint in a fuzzy setting appears in H\'ajek et al.;
 copula-derived implications are due to Grzegorzewski.
-Given this prior art, the credence algebra contributes:
+Given this prior art, the present paper contributes:
 \begin{enumerate}[label=(\arabic*)]
-\item Identifying the chain rule as the sole structural axiom needed beyond
-$[0,1]$ and complement---a weakening of probability that retains conditioning
-while dropping the measure.
+\item A self-contained, machine-checked proof that the min copula is
+the unique symmetric, idempotent copula on $[0,1]$ (known from copula
+theory~\cite{nelsen2006}; the Lean proof makes the dependencies explicit).
 \item Chain-rule conditioning in the product De Morgan triplet, continuing
 de Finetti's void-conditional tradition~\cite{definetti1936} in a graded
 setting.
 H\'ajek et al.~\cite{hajek1995} used the chain rule constraint as a
-technical device; the algebra adopts it as the defining structural axiom.
-\item The explicit collapse homomorphism to the Kleene lattice (underlying
-K$_3$, LP, and RM3), with impossibility results for \L ukasiewicz, G\"odel,
-and classical targets, and Lean verification.
-\item Bayes consistency as a selection criterion: the product residuated
-implication passes; RM3 and G\"odel fail.  Every symmetric copula yields
-a Bayes-consistent arrow (machine-checked on three values and on $[0,1]$).
-\item Systematic treatment of fixed points with machine-checked proofs.
+technical device; this paper makes it the defining structural axiom.
+\item Impossibility results: no negation-preserving collapse to classical
+or G\"odel logic, no signature-preserving collapse to \L ukasiewicz logic.
+The positive collapse to Kleene is a routine quotient by
+$\{0\}, (0,1), \{1\}$; the impossibility results are the substantive content.
+\item Bayes consistency as a selection criterion for arrows: the product
+residuated implication passes; RM3 and G\"odel fail.
 \end{enumerate}
 
 %=============================================================================
@@ -1234,9 +1171,9 @@ a Bayes-consistent arrow (machine-checked on three values and on $[0,1]$).
 \label{sec:conclusion}
 %=============================================================================
 
-Theorem~\ref{thm:uniqueness-main} shows the min conjunction is forced by
-Bayes consistency, non-triviality, and idempotence.
-Theorem~\ref{thm:path-dependence} shows conditioning at evidence zero is
+Theorem~\ref{thm:uniqueness-main} shows the min conjunction is the unique
+symmetric, idempotent copula on $[0,1]$.
+Proposition~\ref{thm:path-dependence} shows conditioning at evidence zero is
 path-dependent, so ex falso requires a convention beyond the chain rule.
 Theorem~\ref{thm:collapse} provides a collapse to Kleene; Propositions
 \ref{prop:no-godel}--\ref{prop:no-luk} block alternatives.
@@ -1817,7 +1754,7 @@ Belnap-Dunn's ``Neither'' (N) is a full-citizen value meaning ``no
 information''; the credence algebra's ``void'' arises when the chain rule
 $c \cdot 0 = 0$ is satisfied by any $c$---it is unconstrained, not a fourth value.
 In the credence algebra, $\tfrac{1}{2}$ is the unique negation fixed point
-(Theorem~\ref{thm:fixedunique}) with metric significance;
+(Lemma~\ref{thm:fixedunique}) with metric significance;
 in Belnap-Dunn, ``Both'' is algebraic without distance semantics.
 The credence algebra has primitive conditioning; Belnap-Dunn has none.
 The Kleene lattice embeds in Belnap-Dunn's bilattice, and Belnap-Dunn
@@ -1849,29 +1786,14 @@ Observing $E$ raises $H$ from $0.3$ to $0.6$---genuine Bayesian updating.
 \subsection*{Stochastic Independence Between Domains}
 \label{sec:independence}
 
-% Lean: independence_within_forces_classical, product_idempotent_iff_classical
-\begin{proposition}[Independence Within Forces Classical]
-\label{prop:indep-classical}
 If a domain uses the independence copula ($j(a,b) = ab$) and requires
-idempotence ($j(a,a) = a$), then all credences in that domain collapse
-to $\{0,1\}$.
-\end{proposition}
-\begin{proof}
-$a^2 = a$ implies $a \in \{0,1\}$.
-Lean: \texttt{independence\_within\_forces\_classical},
-\texttt{product\_idempotent\_iff\_classical}.
-\end{proof}
+idempotence ($j(a,a) = a$), then $a^2 = a$ forces $a \in \{0,1\}$
+(Lemma~\ref{thm:idempotence}): all credences collapse to classical.
+Lean: \texttt{independence\_within\_forces\_classical}.
 
-% Lean: cross_world_independence_trivial
-\begin{proposition}[Cross-Domain Independence Trivializes Inference]
-\label{prop:cross-trivial}
-If the joint between propositions from different domains is the product,
-then conditioning is trivial: $\cred(A \mid B) = \cred(A)$.
-\end{proposition}
-\begin{proof}
-$\cred(A \mid B) = \cred(A) \cdot \cred(B)/\cred(B) = \cred(A)$.
+Similarly, if the joint between domains is the product, conditioning
+is trivial ($\cred(A \mid B) = ab/b = a$): evidence has no effect.
 Lean: \texttt{cross\_world\_independence\_trivial}.
-\end{proof}
 
 For any domain where non-classical credences are meaningful and idempotence
 holds, maximum dependence is forced.
