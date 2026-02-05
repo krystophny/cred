@@ -121,13 +121,17 @@ Finetti~\cite{definetti1937}: if your credences do not satisfy certain
 coherence constraints, a bookie can construct a combination of bets that
 \emph{you} consider fair (by your own credences) but that guarantees you a
 net loss~\cite{vineberg2016}.
-The Dutch Book argument establishes two requirements: (1)~\emph{additivity}:
-$\cred(A) + \cred(\negc A) = 1$, and (2)~\emph{multiplicative coherence}:
-$\cred(A \mid B) \cdot \cred(B) = \cred(A \land B)$---the chain rule.
-Cred adopts the second (the chain rule is the sole structural axiom for
-conditioning) but drops the first: additivity is not required.
-This means Cred inherits the Dutch Book's multiplicative constraint while
-allowing non-additive credences.
+At a minimum, Dutch Book coherence motivates two constraints:
+(1)~\emph{complement coherence} (normalization) $\cred(A) + \cred(\negc A) = 1$,
+and (2)~\emph{multiplicative coherence} $\cred(A \mid B) \cdot \cred(B) =
+\cred(A \land B)$---the chain rule.
+Standard probability adds further \emph{additivity} assumptions (finite or
+countable) over disjunctions once an event algebra is fixed.
+Cred keeps (1) as its value-level negation law and adopts (2) as the sole
+structural axiom for conditioning, but it does not assume additivity over
+disjunctions; this is what allows non-probabilistic, non-additive credence
+assignments while retaining the chain-rule link between conditionals and
+joints.
 
 The following background on t-norms and residuation is well known in fuzzy
 logic but essential for understanding why Cred's chain-rule approach differs
@@ -472,13 +476,16 @@ fair by the agent's own credences---guarantees a net loss.
 Ramsey~\cite{ramsey1931} and de Finetti~\cite{definetti1937} proved that
 coherence requires:
 \begin{enumerate}[label=(\roman*),nosep]
-\item \textbf{Additivity}: $\cred(A) + \cred(\negc A) = 1$
+\item \textbf{Complement coherence (normalization)}: $\cred(A) + \cred(\negc A) = 1$
 \item \textbf{Multiplicative coherence (chain rule)}:
   $\cred(A \mid B) \cdot \cred(B) = \cred(A \land B)$
 \end{enumerate}
 See Vineberg~\cite{vineberg2016} for a survey of Dutch Book arguments.
 Cred adopts the chain rule~(ii) as its sole structural axiom for conditioning
-but drops additivity~(i).
+and adopts complement coherence~(i) as its negation law.
+Unlike probability, Cred does not assume (finite or countable) additivity
+over disjunctions; that additional structure belongs to particular valuation
+choices built on top of the algebra.
 \end{definition}
 
 %=============================================================================
