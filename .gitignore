@@ -9,6 +9,7 @@
 *.bbl
 *.blg
 *.pdf
+!part1/figures/*.pdf
 
 # Lean build artifacts
 lean/.lake/

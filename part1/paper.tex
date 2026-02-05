@@ -23,6 +23,7 @@
 \usepackage[margin=1in]{geometry}
 \usepackage{tikz}
 \usetikzlibrary{arrows.meta,positioning,shapes}
+\usepackage{graphicx}
 
 % Theorem environments
 \newtheorem{theorem}{Theorem}[section]
@@ -765,7 +766,7 @@ or a logic with designated values) built on top of the algebra.
 \label{sec:path-dependence}
 
 The preceding result shows the chain rule \emph{allows} any value at zero evidence.
-We now prove the second main result: the mathematics \emph{actively argues against}
+The second main result: the mathematics \emph{actively argues against}
 forcing the conditional to~$1$.
 
 Consider the min-copula setting (the unique logic-compatible conjunction from
@@ -820,6 +821,13 @@ Set $a = r\cos\theta$ and $b = r\sin\theta$ with $r \downarrow 0$:
 \end{cases}
 \]
 The limit is a \emph{piecewise function of the approach angle}, not a single value.
+
+\begin{figure}[ht]
+\centering
+\includegraphics[width=\textwidth]{figures/path_dependence}
+\caption{Path dependence at evidence zero. \textbf{Left:} Conditional $\cred(A \mid B) = \min(a,b)/b$ near the origin; value depends on angle $\theta$, not radius $r$. \textbf{Right:} Limit as $r \to 0$: equals $1$ for $\theta < \pi/4$ and $\cot\theta$ for $\theta > \pi/4$.}
+\label{fig:path-dependence}
+\end{figure}
 
 \begin{remark}[Connection to the Borel--Kolmogorov Paradox]
 Theorem~\ref{thm:path-dependence} has the same structure as the
