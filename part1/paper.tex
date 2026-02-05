@@ -239,6 +239,21 @@ Just as Boolean algebra is the algebraic foundation for propositional logic
 is the foundation for probability theory (which adds a measure space and
 sigma-additivity), Cred provides the algebraic layer that multiple
 higher-level systems can build on.
+
+\textbf{Two levels of use.}
+Cred operates at two granularities.
+Collapsed to four statuses (true/false/both/void), it provides a
+paraconsistent proof theory sufficient for handling contradiction and
+undefinedness.
+On the full $[0,1]$ continuum, it provides quantitative epistemics:
+continuous ordering of propositions by strength, metric structure, and
+Bayesian-style inference.
+The min-copula constrains \emph{structure} (all propositions nested under a
+single latent parameter), not \emph{expressiveness}---the continuum remains
+measure-theoretically rich, like real analysis on a line.
+Four values suffice for a ``logic of statuses''; the continuum is needed for
+a ``mathematics of uncertainty.''
+
 Staying algebraic is what allows the collapse homomorphism to connect Cred
 simultaneously to K$_3$, LP, and RM3---three logics that share the same
 algebra but differ in their consequence relations.
@@ -342,49 +357,15 @@ The key mechanism is that the joint credence $\cred(A \land B)$ is an
 \emph{external parameter}: it can be supplied as a fixed formula
 (truth-functional) or as empirical data (probability-style).
 
-\emph{The unique meeting point: maximum positive dependence.}
-A central finding is that only one choice of joint formula satisfies
-\emph{all} the requirements for proper reasoning in both traditions:
-\[
-\cred(A \land B) = \min(\cred(A), \cred(B))
-\qquad\text{(Fr\'echet upper bound / maximum positive dependence)}
-\]
-This choice uniquely provides:
-\begin{enumerate}[label=(\roman*),nosep]
-\item \textbf{Truth-functionality}: the joint is a fixed function of the marginals.
-\item \textbf{Bayes consistency}: conditioning satisfies $\cred(A \mid B) \cdot \cred(B) = \cred(B \mid A) \cdot \cred(A)$.
-\item \textbf{Non-trivial conditioning}: evidence actually affects the conclusion
-  ($\cred(A \mid B) \neq \cred(A)$ in general).
-\item \textbf{Idempotence}: $\cred(A \land A) = \cred(A)$, as required for
-  propositional reasoning.
-\end{enumerate}
-No other fixed joint formula achieves all four:
-\begin{itemize}[nosep]
-\item \emph{Independence} ($\cred(A) \cdot \cred(B)$): truth-functional and
-  Bayes-consistent, but conditioning is \emph{trivial}---$\cred(A \mid B) = \cred(A)$,
-  so evidence has no effect.
-\item \emph{RM3 implication}: fails Bayes consistency (Section~\ref{sec:connections}).
-\item \emph{G\"odel implication}: fails Bayes consistency on $[0,1]$.
-\item \emph{\L ukasiewicz} ($\max(\cred(A) + \cred(B) - 1, 0)$): truth-functional,
-  but the induced conditioning is not residuated from the same t-norm.
-\end{itemize}
-The minimum (Fr\'echet upper bound) is therefore the \emph{canonical} joint
-for logic-style reasoning---this explains why the Kleene lattice uses
-$\min$ for conjunction, and why K$_3$, LP, and RM3 all share this choice.
-It is the unique point where the two traditions \emph{meet}: a fixed,
-truth-functional operation that also yields proper Bayesian conditioning.
-
-Part~2~\cite{part2} develops both interpretations in detail: the
-\emph{probability-style view} treats the chain rule as inference (credences
-propagate, update rules apply, zero-evidence underdetermination connects
-to imprecise probability); the \emph{logic-style view} uses the minimum
-joint and collapses to three values, determining validity via designated
-values (K$_3$, LP, graded thresholds).
-The two views are complementary, not competing: the collapse homomorphism
-is the bridge between them.
-Our broader goal is to understand where these traditions agree (the shared
-algebra), where they diverge (interpretation and consequence), and whether
-the divergence is fundamental or a matter of which questions one asks.
+\emph{The unique meeting point.}
+A central finding (Theorem~\ref{thm:max-dependence}) is that only one
+choice of joint formula---maximum positive dependence,
+$\cred(A \land B) = \min(\cred(A), \cred(B))$---satisfies all the
+requirements for proper reasoning: truth-functionality, Bayes consistency,
+non-trivial conditioning, and idempotence.
+This explains why K$_3$, LP, and RM3 all use the Kleene conjunction: it is
+the unique point where the logic and probability traditions meet.
+Part~2~\cite{part2} develops both interpretations in detail.
 
 \textbf{Outline.}
 Section~\ref{sec:prelim} provides formal definitions of key concepts.
@@ -1269,46 +1250,17 @@ Lean: \texttt{min\_bayes\_consistent}, \texttt{prod\_trivial\_conditioning},
 \texttt{min\_nontrivial\_conditioning}.
 \end{proof}
 
-\begin{remark}[Why Three-Valued Logic Uses Minimum]
-This theorem explains why K$_3$, LP, and RM3 all use the Kleene conjunction
-$\min(a,b)$: it is the \emph{unique} truth-functional operation that also yields
-proper Bayesian conditioning.
-The minimum is not an arbitrary choice---it is forced by the requirement that
-the logic tradition's truth-functional composition be compatible with the
-probability tradition's Bayes-consistent inference.
-\end{remark}
-
 \begin{remark}[Philosophical Consequence: Maximum Dependence is Required]
 \label{rem:max-dep-philosophy}
-In probabilistic language, the minimum joint $\cred(A \land B) = \min(\cred(A),
-\cred(B))$ corresponds to \emph{maximum positive dependence}---the Fr\'echet
-upper bound of the copula family.
-This is an extreme case: it means that any two propositions are treated as
-maximally correlated.
-In probability theory, most pairs of events have intermediate dependence;
-maximum positive dependence is rare.
-
-Yet this extreme assumption is \emph{mathematically forced} if we want
-truth-functional composition compatible with Bayesian inference.
-The consequence is striking: to have a single theory that is simultaneously
-(i)~compositional (truth-functional), (ii)~Bayes-consistent, (iii)~non-trivial,
-and (iv)~idempotent, one \emph{must} assume maximum correlation between all
-pairs of propositions.
-
-What if we relax the requirements?
-\begin{itemize}[nosep]
-\item \emph{Drop non-triviality}: independence ($a \cdot b$) becomes available,
-  but conditioning is trivial---evidence has no effect on conclusions.
-\item \emph{Drop Bayes consistency}: more t-norms (G\"odel, \L ukasiewicz)
-  become available, but the chain rule fails to work properly in both directions.
-\item \emph{Drop truth-functionality}: supply joints as external data
-  (probability-style), but lose compositionality.
-\item \emph{Drop idempotence}: independence again, with $A \land A \neq A$.
-\end{itemize}
-The minimum is the unique point where all four requirements meet.
-This explains, retrospectively, why the logic tradition settled on Kleene's
-minimum conjunction: it is the only choice that makes three-valued logic
-compatible with Bayesian reasoning.
+In probabilistic language, the minimum joint corresponds to \emph{maximum
+positive dependence}---the Fr\'echet upper bound of the copula family.
+This is an extreme case: any two propositions are treated as maximally
+correlated, yet this assumption is \emph{mathematically forced} by the
+four requirements.
+Relaxing any one requirement opens alternatives (independence if we drop
+non-triviality or idempotence; G\"odel or \L ukasiewicz if we drop Bayes
+consistency; probability-style external joints if we drop truth-functionality),
+but the minimum is the unique point where all four meet.
 \end{remark}
 
 \begin{center}
@@ -1598,14 +1550,50 @@ generalizations of Hintikka's classical evaluation game to a many-valued
 setting do not lead beyond Kleene logic; stronger logics require introducing
 randomized moves.
 
-\begin{remark}[Belnap-Dunn Four-Valued Logic]
+\begin{remark}[Distinction from Belnap-Dunn]
 \label{rem:fde}
-The Kleene lattice embeds in the Belnap-Dunn four-valued
-lattice~\cite{belnap1977,dunn1976}.
-Belnap-Dunn negation has two fixed points; Cred's complement has one
+Cred's four-status collapse (true/false/both/void) superficially resembles
+Belnap-Dunn's four values (T/F/B/N)~\cite{belnap1977,dunn1976}, but the
+systems differ in several fundamental ways.
+
+\emph{Continuum vs.\ discrete.}
+Belnap-Dunn is intrinsically four-valued; Cred is fundamentally $[0,1]$ with
+four statuses as a coarsening.
+The continuum provides metric structure---$0.7$ is closer to $0.8$ than to
+$0.3$---unavailable in discrete systems.
+
+\emph{Void vs.\ Neither.}
+Belnap-Dunn's ``Neither'' (N) is a full-citizen value meaning ``no
+information from any source.''
+Cred's ``void'' arises when conditioning on impossible evidence
+($\cred(B) = 0$): the chain rule $c \cdot 0 = 0$ is satisfied by any $c$,
+so the conditional is \emph{unconstrained}---outside the algebra, not a
+fourth value in it.
+This is closer to de Finetti's void conditional~\cite{definetti1936} than
+to Belnap-Dunn's information-theoretic N.
+
+\emph{Metric meaning of $\tfrac{1}{2}$.}
+In Cred, $\tfrac{1}{2}$ is the arithmetic midpoint with specific
+significance: the unique negation fixed point
+(Theorem~\ref{thm:fixedunique}) and the credence at which $A$ and
+$\negc A$ coexist equally.
+In Belnap-Dunn, ``Both'' (B) is algebraically defined without distance
+semantics.
+
+\emph{Conditioning.}
+Cred has primitive chain-rule conditioning; Belnap-Dunn has no native
+conditioning operation.
+
+\emph{Probabilistic interpretation.}
+Cred has the comonotonicity/quantile semantics connecting to probability
+theory (Remark~\ref{rem:nested-events}); Belnap-Dunn is purely
+logical/information-theoretic.
+
+The Kleene lattice embeds in Belnap-Dunn's bilattice, and Belnap-Dunn
+negation has two fixed points (B and N) while Cred's complement has one
 ($\tfrac{1}{2}$), matching Kleene.
-Including conditioning adds a fourth output (void), suggesting a connection
-to Belnap-Dunn; formalizing this is future work.
+Cred is thus not a rediscovery of Belnap-Dunn but a distinct system that
+shares four-valuedness only at the coarsest level.
 \end{remark}
 
 \subsection{Uniqueness of Maximum Dependence}
@@ -1642,42 +1630,42 @@ this simplifies to $j(a,b) \geq a = \min(a,b)$.
 Lean: \texttt{min\_copula\_unique}, \texttt{symmetric\_idempotent\_2incr\_ge\_min}.
 \end{proof}
 
-\begin{remark}[Philosophical Significance]
-This uniqueness theorem answers a natural objection to the maximum-dependence
-assumption: ``Why not use some intermediate copula between independence and
-max-dependence?''
+\begin{remark}[Idempotence Forces Min]
+This uniqueness theorem answers a natural objection: ``Why not use some
+intermediate copula?''
 The answer is that \emph{idempotence forces the maximum}.
-The requirement $j(a,a) = a$ is not an exotic condition---it is standard in
-both probability ($P(A \land A) = P(A)$) and logic ($A \land A = A$).
-Yet combined with truth-functionality and the 2-increasing property (a weak
-monotonicity condition satisfied by all copulas), idempotence mathematically
-\emph{forces} $j = \min$.
+The requirement $j(a,a) = a$ is standard in both probability and logic, yet
+combined with the 2-increasing property, it mathematically forces $j = \min$.
+This connects to a classical result in t-norm theory: the minimum (G\"odel)
+t-norm is the \emph{only} t-norm that is idempotent at all points---other
+t-norms (product, \L ukasiewicz) satisfy $T(a,a) = a$ only at
+$\{0,1\}$~\cite{klement2000}.
 The minimum is not a choice among many; it is the unique survivor of the
 constraints.
 \end{remark}
 
-\begin{remark}[Probabilistic Interpretation: Nested Events]
+\begin{remark}[Comonotonicity and Nested Events]
 \label{rem:nested-events}
-The minimum joint has a clean probabilistic interpretation.
+The minimum joint is the \emph{comonotonicity copula} in probability
+theory~\cite{dhaene2002,nelsen2006}: the extremal case of perfect positive
+dependence where all random variables are increasing functions of a single
+latent variable $U \sim \mathrm{Unif}[0,1]$.
 If $\cred(A) \leq \cred(B)$ and $j(A,B) = \min(\cred(A), \cred(B)) = \cred(A)$,
-then $P(A \land B) = P(A)$, which means $A \subseteq B$ almost surely:
-whenever $A$ occurs, $B$ also occurs.
-Under maximum dependence, events are \emph{nested} by probability---rarer
-events are contained in more common ones.
-This is a ``specificity ordering'': a specific claim (low probability)
-implies a general claim (high probability).
+then $A \subseteq B$ almost surely: events are \emph{nested} by probability.
+This is well-studied in actuarial science and risk theory, where comonotonicity
+represents the worst-case dependence for aggregate risk~\cite{dhaene2002}.
 \end{remark}
 
-\begin{remark}[Single Latent Variable Model]
+\begin{remark}[Quantile Representation]
 \label{rem:latent-variable}
-Equivalently, imagine a single unknown state $\theta$ drawn uniformly from $[0,1]$,
-representing ``how the world turned out.''
-Each proposition is a threshold: $A$ is true iff $\theta \leq \cred(A)$.
-Then $P(A) = \cred(A)$ and $P(A \land B) = P(\theta \leq \min(a,b)) = \min(a,b)$.
-All propositions depend on the \emph{same underlying reality}; lower-credence
-propositions require more ``favorable'' states.
-This is the probabilistic version of classical logic's ``one true world''---we
-are simply uncertain about which state $\theta$ obtains.
+The standard characterization of comonotonicity: a random vector $(X_1, \ldots,
+X_n)$ is comonotonic iff $(X_1, \ldots, X_n) \stackrel{d}{=} (F_{X_1}^{-1}(U),
+\ldots, F_{X_n}^{-1}(U))$ for $U \sim \mathrm{Unif}[0,1]$---all components are
+quantile transforms of the same latent variable~\cite{dhaene2002}.
+For threshold events $A = \{U \leq \cred(A)\}$, this gives
+$P(A \land B) = \min(\cred(A), \cred(B))$.
+The single-latent-variable model is thus not an ad hoc construction but the
+standard probabilistic interpretation of the Fr\'echet upper bound.
 \end{remark}
 
 \begin{example}[Bayesian Inference Under Maximum Dependence]
@@ -1719,6 +1707,26 @@ Independence would mean separate latent variables for each proposition, making
 evidence irrelevant to conclusions (trivial conditioning).
 Maximum dependence is the unique dependence structure where compositional
 truth values coexist with proper probabilistic inference.
+\end{remark}
+
+\begin{remark}[Convergence Across Fields]
+\label{rem:convergence}
+The minimum joint appears as the canonical structure in multiple independent
+traditions:
+\begin{itemize}[nosep]
+\item \emph{Copula theory}: the Fr\'echet upper bound / comonotonicity
+  copula~\cite{nelsen2006,dhaene2002}.
+\item \emph{T-norm theory}: the only idempotent t-norm is
+  $\min$~\cite{klement2000}; associative copulas are exactly
+  t-norms~\cite{klement2000}.
+\item \emph{Possibility theory}: necessity measures satisfy
+  $N(A \land B) = \min(N(A), N(B))$; possibility measures satisfy
+  $\Pi(A \lor B) = \max(\Pi(A), \Pi(B))$---the same min/max structure as the
+  Kleene lattice~\cite{dubois2001}.
+\end{itemize}
+The convergence is not coincidental: any framework requiring truth-functional
+composition, idempotence, and copula-regular joints is mathematically forced
+to the same structure.
 \end{remark}
 
 \subsection{Stochastic Independence Between Domains}
@@ -2146,53 +2154,44 @@ Toolchain: Lean 4.16.0 with Mathlib 4.16.0.
 Cred is probability without the measure: values in $[0,1]$, the complement,
 and the chain rule as the sole structural axiom for conditioning.
 The joint credence $\cred(A \land B)$ is an external parameter, making Cred
-compatible with both the logic tradition (supply a fixed formula) and the
-probability tradition (supply empirical data).
-
-\textbf{The central finding} is that maximum positive dependence---the joint
-$\min(\cred(A), \cred(B))$---is the \emph{unique meeting point} of these
-traditions.
-It is the only fixed joint formula that satisfies all four requirements:
-truth-functionality, Bayes consistency, non-trivial conditioning, and
-idempotence.
-Independence ($\cred(A) \cdot \cred(B)$) gives trivial conditioning where
-evidence has no effect.
-RM3 and G\"odel fail Bayes consistency.
-The minimum is therefore not an arbitrary choice for logic---it is
-\emph{forced} by requiring that truth-functional composition be compatible
-with proper Bayesian inference.
-This explains why K$_3$, LP, and RM3 all use the Kleene conjunction.
-
-The three-valued collapse establishes a surjective homomorphism to the Kleene
-lattice for the connective fragment $\{\negc, \conjc, \disjc\}$, with
-impossibility results for \L ukasiewicz, G\"odel, and classical targets.
+compatible with both the logic and probability traditions.
+Theorem~\ref{thm:max-dependence} establishes that maximum positive
+dependence ($\min$) is the unique fixed joint satisfying truth-functionality,
+Bayes consistency, non-triviality, and idempotence---explaining why
+K$_3$, LP, and RM3 all use the Kleene conjunction.
+The collapse homomorphism (Theorem~\ref{thm:collapse}) connects Cred to
+the Kleene lattice, with impossibility results for alternative targets.
 When evidence has credence zero, the chain rule is satisfied by any
-value---de Finetti's void conditional~\cite{definetti1936} in a graded
-setting---avoiding ``from impossibility, anything follows.''
+value---de Finetti's void conditional in a graded setting.
 The main results are machine-checked in Lean~4.
 
 \medskip
-\textbf{What Cred provides and what it does not.}
-Cred provides the algebraic layer: a constraint system on $[0,1]$ that
-specifies how credences, their complements, and their conditionals must
-relate.
-It does not provide an interpretation function (mapping propositions to
-credences), a consequence relation (determining valid inference), or an
-update rule (prescribing belief revision).
-These are not deficiencies---they are the boundaries of the algebraic layer.
-Just as Boolean algebra underpins both classical propositional logic and
-digital circuit design without itself being either, Cred underpins both
-probability (via the chain rule) and the Kleene-based logics (via the
-collapse homomorphism) without being a logic or a probability space.
-
-Probability builds on Cred by adding a measure space and sigma-additivity,
-which determine the joint and resolve conditioning at zero via
-disintegration.
-Product logic builds on it by committing to residuation, which forces a
-specific arrow (including ex falso).
-K$_3$, LP, and RM3 build on the collapsed algebra by choosing designated
-values.
+\textbf{Scope.}
+Cred provides the algebraic layer---values, operations, and the chain rule
+constraint---without interpretation, consequence relation, or update rule.
+Probability builds on Cred by adding a measure; product logic by committing
+to residuation; K$_3$/LP/RM3 by choosing designated values.
 Each adds exactly the structure that the algebra leaves open.
+
+\medskip
+\textbf{Two levels.}
+Cred serves two distinct purposes.
+Collapsed to four statuses---true ($1$), false ($0$), both/contradiction
+($\tfrac{1}{2}$), and void (unconstrained at evidence zero)---it provides a
+paraconsistent proof theory resembling Belnap-Dunn, sufficient for handling
+self-reference and undefinedness without explosion.
+On the full $[0,1]$ continuum, it provides quantitative epistemics: a
+continuous ordering of propositions by strength, metric structure on
+plausibility, and Bayesian-style inference under the comonotonic
+(single-latent-variable) model.
+The min-copula constrains \emph{structure}---all propositions are nested,
+with no independent evidence streams---but not \emph{expressiveness}: the
+continuum remains measure-theoretically rich.
+Four values suffice for a logic of statuses; the continuum is needed for a
+mathematics of uncertainty.
+Cred is thus ``probability as an extremal logic-compatible coupling''---not
+general Bayesian probability, but the unique dependence structure where
+compositional truth values coexist with proper probabilistic inference.
 
 \medskip
 \textbf{Part~2.}
@@ -2281,6 +2280,11 @@ vol.~IV, pages 1--9. Hermann, 1936.
 de Finetti, B.
 \newblock La pr\'evision: ses lois logiques, ses sources subjectives.
 \newblock \emph{Annales de l'Institut Henri Poincar\'e}, 7:1--68, 1937.
+
+\bibitem{dhaene2002}
+Dhaene, J., Denuit, M., Goovaerts, M.J., Kaas, R., and Vyncke, D.
+\newblock The concept of comonotonicity in actuarial science and finance: Theory.
+\newblock \emph{Insurance: Mathematics and Economics}, 31(1):3--33, 2002.
 
 \bibitem{dubois2001}
 Dubois, D. and Prade, H.
