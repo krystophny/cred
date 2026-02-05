@@ -53,34 +53,17 @@
 \maketitle
 
 \begin{abstract}
-Can probability and many-valued logic be unified?
-We prove they can, and the answer is \textbf{unique}.
-
-\textbf{Main Result 1 (Uniqueness).}
-Among all truth-functional conjunctions compatible with probabilistic
-marginalization, the minimum $\min(a,b)$ is the \emph{only} one satisfying
-Bayes consistency, non-trivial conditioning, and idempotence.
-This is not a design choice---it is mathematically forced.
-The minimum (Fr\'echet upper bound) explains why K$_3$, LP, and RM3 all use
-the Kleene conjunction: it is the unique meeting point of logic and probability.
-
-\textbf{Main Result 2 (Path Dependence).}
-As evidence $b \to 0$, the conditional's limit depends on the \emph{path}
-by which credences approach zero---the ratio $a/b$, not $b$ alone.
-This path dependence has the same structure as the Borel--Kolmogorov paradox.
-Consequence: ex falso ($0 \to c = 1$) is \emph{not} entailed by the algebra;
-forcing it requires an additional totalization convention.
-
-These results arise from a simple framework: credences in $[0,1]$, the
-complement $1-c$, and the chain rule
-$\cred(A \mid B) \cdot \cred(B) = \cred(A \land B)$ as the sole structural
-axiom for conditioning.
-When evidence is positive, division emerges as the unique solution; when
-evidence has credence zero, the constraint is satisfied by any value---the
-conditional is \emph{unconstrained}.
-We establish a surjective homomorphism to the Kleene lattice and prove no
-analogous homomorphism exists for \L ukasiewicz or G\"odel algebras.
-The main results are machine-checked in Lean~4.
+We prove two results about truth-functional conjunctions on $[0,1]$.
+First, $\min(a,b)$ is the unique conjunction satisfying Bayes consistency,
+non-trivial conditioning, and idempotence---this forces the Kleene conjunction
+used in K$_3$, LP, and RM3.
+Second, the conditional's limit at evidence zero is path-dependent (like the
+Borel--Kolmogorov paradox), so ex falso requires an added convention.
+The framework uses credences in $[0,1]$, complement $1-c$, and the chain rule
+$\cred(A \mid B) \cdot \cred(B) = \cred(A \land B)$.
+A collapse homomorphism to the Kleene lattice exists; none exists for
+G\"odel or \L ukasiewicz.
+Proofs are machine-checked in Lean~4.
 \end{abstract}
 
 %=============================================================================
@@ -2103,74 +2086,27 @@ a Bayes-consistent arrow (machine-checked on three values and on $[0,1]$).
 \label{sec:conclusion}
 %=============================================================================
 
-This paper establishes two main results about the relationship between
-probability and many-valued logic.
+Theorem~\ref{thm:uniqueness-main} shows the min conjunction is forced by
+Bayes consistency, non-triviality, and idempotence.
+Theorem~\ref{thm:path-dependence} shows conditioning at evidence zero is
+path-dependent, so ex falso requires a convention beyond the chain rule.
+Theorem~\ref{thm:collapse} provides a collapse to Kleene; Propositions
+\ref{prop:no-godel}--\ref{prop:no-luk} block alternatives.
 
-\textbf{Main Result 1 (Uniqueness, Theorem~\ref{thm:uniqueness-main}).}
-The minimum conjunction $\min(a,b)$ is the \emph{unique} truth-functional
-joint compatible with probabilistic marginalization that satisfies Bayes
-consistency, non-trivial conditioning, and idempotence.
-This explains why K$_3$, LP, and RM3 all use the Kleene conjunction: it is
-not a choice among alternatives but the unique meeting point of logic and
-probability.
+The algebra provides values and operations without fixing a consequence
+relation or update rule.
+Probability adds measure theory; product logic commits to residuation;
+K$_3$/LP/RM3 choose designated values.
 
-\textbf{Main Result 2 (Path Dependence, Theorem~\ref{thm:path-dependence}).}
-The conditional's limit as evidence approaches zero is \emph{path-dependent},
-varying with the ratio $a/b$ (equivalently, the approach angle in polar
-coordinates).
-This is the same structure as the Borel--Kolmogorov paradox.
-Ex falso ($0 \to c = 1$) is therefore \emph{not} forced by the algebra;
-obtaining it requires adding a totalization convention beyond what the
-chain rule entails.
+On the Kleene quotient, Cred handles self-reference and undefinedness
+without explosion.
+On $[0,1]$, it supports Bayesian inference under comonotonicity (nested
+events, single latent variable).
 
-The framework is simple: credences in $[0,1]$, the complement $1-c$, and the
-chain rule $\cred(A \mid B) \cdot \cred(B) = \cred(A \land B)$ as the sole
-structural axiom for conditioning.
-The collapse homomorphism (Theorem~\ref{thm:collapse}) connects this algebra
-to the Kleene lattice, with impossibility results for alternative targets.
-The main results are machine-checked in Lean~4 (Appendix~\ref{app:lean}).
-
-\medskip
-\textbf{Scope.}
-Cred provides the algebraic layer---values, operations, and the chain rule
-constraint---without interpretation, consequence relation, or update rule.
-Probability builds on Cred by adding a measure; product logic by committing
-to residuation; K$_3$/LP/RM3 by choosing designated values.
-Each adds exactly the structure that the algebra leaves open.
-
-\medskip
-\textbf{Two levels.}
-Cred serves two distinct purposes.
-Collapsed to four statuses---true ($1$), false ($0$), both/contradiction
-($\tfrac{1}{2}$), and void (unconstrained at evidence zero)---it provides a
-paraconsistent proof theory resembling Belnap-Dunn, sufficient for handling
-self-reference and undefinedness without explosion.
-On the full $[0,1]$ continuum, it provides quantitative epistemics: a
-continuous ordering of propositions by strength, metric structure on
-plausibility, and Bayesian-style inference under the comonotonic
-(single-latent-variable) model.
-The min-copula constrains \emph{structure}---all propositions are nested,
-with no independent evidence streams---but not \emph{expressiveness}: the
-continuum remains measure-theoretically rich.
-Four values suffice for a logic of statuses; the continuum is needed for a
-mathematics of uncertainty.
-Cred is thus ``probability as an extremal logic-compatible coupling''---not
-general Bayesian probability, but the unique dependence structure where
-compositional truth values coexist with proper probabilistic inference.
-
-\medskip
-\textbf{Part~2.}
-Part~2~\cite{part2} develops the reasoning layer: valuations (mapping
-propositions to credences), consequence relations (K$_3$, LP, graded
-thresholds), update rules (Bayesian and Jeffrey conditionalization),
-and graded predicates with inf/sup quantifiers.
-
-\medskip
-\textbf{Future work.}
-Future work includes extending Cred to a first-order setting with graded
-quantifiers, exploring which consequence relations are compatible with the
-chain rule's unconstrained conditioning at zero, and investigating
-connections to paraconsistent set theory.
+Part~2~\cite{part2} develops valuations, consequence relations, and update
+rules.
+Open problems: first-order extension, consequence relations compatible with
+unconstrained conditioning at zero, connections to paraconsistent set theory.
 
 \section*{Acknowledgements}
 
