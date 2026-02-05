@@ -1,0 +1,930 @@
+% Cred Part 3: Positioning Relative to Many-Valued Traditions
+% Publication-quality paper
+%
+% References to Lean formalization: lean/Cred/Basic.lean, lean/Cred/Update.lean,
+%                                   lean/Cred/Predicate.lean
+
+\documentclass[11pt,a4paper]{article}
+
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{mathtools}
+\usepackage{enumitem}
+\usepackage{booktabs}
+\usepackage{hyperref}
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue,
+    citecolor=blue,
+    urlcolor=blue,
+    pdfauthor={Anonymous},
+    pdftitle={Cred Part 3: Positioning Relative to Many-Valued Traditions}
+}
+\usepackage{cleveref}
+\usepackage[margin=1in]{geometry}
+
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{example}[theorem]{Example}
+\newtheorem{remark}[theorem]{Remark}
+
+\newcommand{\cred}{\mathsf{cred}}
+\newcommand{\Cred}{\mathsf{Cred}}
+\newcommand{\negc}{\mathord{\sim}}
+\newcommand{\conjc}{\otimes}
+\newcommand{\disjc}{\sqcup}
+\newcommand{\condc}[2]{({#1} \mid {#2})}
+\newcommand{\Real}{\mathbb{R}}
+\newcommand{\Nat}{\mathbb{N}}
+
+\title{\textbf{Cred Part~3: Positioning Relative to Many-Valued Traditions}}
+
+\author{Anonymous for blind review}
+\date{February 2026}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+Parts~1--2 established \emph{Cred} as a credence algebra on $[0,1]$ with
+primitive conditioning governed by the chain rule and showed how to build
+reasoning layers (valuations, consequence relations, updates) on this
+foundation.  Part~3 positions Cred relative to the existing literature on
+many-valued logic, primitive conditional probability, and fixed-point semantics.
+
+We identify three distinguishing features of Cred: (1)~the chain rule as the
+sole constraint on conditioning, with evidence-zero conditioning left
+underdetermined rather than forced to~$1$; (2)~the product De~Morgan triplet
+for algebraic operations, yielding a collapse homomorphism to the Kleene
+algebra but not to G\"odel or \L ukasiewicz; and (3)~negation fixed points at
+$\tfrac12$ that dissolve self-referential paradox without explosion.
+
+We show that Cred's conditioning diverges from both RM3 and product-residuated
+implication precisely at the evidence-zero boundary: residuation forces
+$0 \to b = 1$ (ex falso), while Cred's chain rule imposes no constraint.
+This positioning is consistent with de~Finetti's void conditional,
+Popper--R\'enyi primitive conditional probability, and the imprecise probability
+tradition's treatment of null events.
+
+All technical claims are machine-checked in Lean~4; we provide a table mapping
+theorems to their formal proofs.
+\end{abstract}
+
+%=============================================================================
+\section{Introduction}
+\label{sec:intro}
+%=============================================================================
+
+Part~1 presented the core algebra of Cred: credence values in $[0,1]$, the
+complement $\negc c = 1 - c$, the product conjunction $c_1 \conjc c_2 = c_1
+\cdot c_2$, the De~Morgan disjunction $c_1 \disjc c_2 = 1 - (1-c_1)(1-c_2)$,
+and primitive conditioning via the chain rule
+$\cred(A \mid B) \cdot \cred(B) = \cred(A \land B)$.
+The key design choice was treating the evidence-zero case as underdetermined:
+when $\cred(B) = 0$, the chain rule becomes $c \cdot 0 = 0$, satisfied by any
+$c$, so conditioning imposes no constraint.
+
+Part~2 added the reasoning layers: valuations that assign credences to
+propositions, consequence relations with various threshold semantics, Bayesian
+and Jeffrey update rules, and graded predicates with quantifiers as inf/sup.
+Together, Parts~1--2 provide a complete framework for graded reasoning.
+
+Part~3 addresses the question: \emph{how does Cred relate to existing
+traditions?}  The goal is twofold: to prevent reinventing known results under
+new names, and to clarify which aspects of Cred are inherited from prior work
+and which represent genuine design choices.
+
+We identify three main traditions that intersect with Cred:
+\begin{enumerate}[label=(\roman*),nosep]
+\item \textbf{Mathematical fuzzy logic}: the t-norm logics (product, G\"odel,
+  \L ukasiewicz) and their algebraic semantics (BL-algebras, residuated
+  lattices)~\cite{hajek1998,klement2000,galatos2007}.
+\item \textbf{Primitive conditional probability}: R\'enyi, Popper, and
+  van~Fraassen's approach where conditioning is primitive rather than defined
+  by division~\cite{renyi1955,popper1959,vanfraassen1976}.
+\item \textbf{Fixed-point semantics for self-reference}: Kripke's theory of
+  truth, Gupta--Belnap revision theory, and de~Finetti's three-valued
+  conditional events~\cite{kripke1975,gupta1993,definetti1936}.
+\end{enumerate}
+
+The main results of Part~3 are:
+\begin{itemize}[nosep]
+\item Cred's conditioning with the min-joint agrees with product-residuated
+  implication for positive evidence and diverges precisely at zero
+  (Sections~\ref{sec:product}--\ref{sec:zero}).
+\item The negation fixed point at $\tfrac12$ is algebraic (forced by
+  $c = \negc c$) and should be distinguished from proof-theoretic fixed points
+  (Section~\ref{sec:fixed}).
+\item No collapse homomorphism exists for G\"odel or \L ukasiewicz algebras,
+  making the Kleene target unique (Section~\ref{sec:product}).
+\item Cred's evidence-zero underdetermination aligns with de~Finetti's void,
+  measure-theoretic disintegration, and imprecise probability
+  (Section~\ref{sec:zero}).
+\end{itemize}
+
+\paragraph{Notation.}
+We write $\negc c$ for negation, $c_1 \conjc c_2$ for conjunction,
+$c_1 \disjc c_2$ for disjunction, and $\condc{A}{B}$ for the conditional
+credence of $A$ given $B$.  The half value is $\tfrac12$.
+
+%=============================================================================
+\section{Background: The Many-Valued Traditions}
+\label{sec:background}
+%=============================================================================
+
+This section reviews the relevant prior work.  The goal is to establish a
+common vocabulary and to identify the specific technical results that Cred
+builds on or departs from.
+
+%-----------------------------------------------------------------------------
+\subsection{Mathematical Fuzzy Logic}
+\label{sec:fuzzy}
+%-----------------------------------------------------------------------------
+
+H\'ajek's \emph{Metamathematics of Fuzzy Logic}~\cite{hajek1998} organizes the
+``big three'' continuous t-norm logics: \L ukasiewicz, G\"odel, and product.
+Each is determined by a \emph{triangular norm} (t-norm): a commutative,
+associative, monotone binary operation on $[0,1]$ with identity~$1$.
+
+\begin{definition}[T-norms]
+The three basic continuous t-norms are:
+\begin{align*}
+  \text{G\"odel (min):} \quad & a \land_G b = \min(a, b) \\
+  \text{Product:} \quad & a \cdot b \\
+  \text{\L ukasiewicz:} \quad & a \land_L b = \max(a + b - 1, 0)
+\end{align*}
+\end{definition}
+
+Each t-norm determines a unique \emph{residuated implication} via the adjunction:
+\[
+a \to b = \sup\{c \in [0,1] : a \otimes c \leq b\}.
+\]
+The product-residuated (Goguen) implication is:
+\[
+a \to_P b = \begin{cases} 1 & \text{if } a \leq b \\ b/a & \text{otherwise} \end{cases}
+= \min(b/a, 1) \text{ for } a > 0.
+\]
+Crucially, every residuated implication satisfies $0 \to b = 1$ for all $b$:
+since $0 \otimes c = 0 \leq b$ for all $c$, the supremum is~$1$.
+This is \emph{ex falso quodlibet} built into the residuation
+framework~\cite{hajek1998}.
+
+The algebraic semantics of t-norm logics uses \emph{BL-algebras} and their
+special cases (MV-algebras for \L ukasiewicz, product algebras,
+G\"odel algebras)~\cite{galatos2007,cintula2011}.
+
+\emph{Pavelka-style} fuzzy logic~\cite{pavelka1979i,pavelka1979ii,pavelka1979iii}
+introduces graded provability: theorems come with provability degrees, and
+completeness is formulated in terms of these degrees.
+This provides a baseline for any graded proof theory; whenever we discuss
+graded consequence, we should be explicit about whether we mean a semantic
+threshold relation (as in Part~2) or a graded proof system.
+
+%-----------------------------------------------------------------------------
+\subsection{Primitive Conditional Probability}
+\label{sec:primitive}
+%-----------------------------------------------------------------------------
+
+R\'enyi~\cite{renyi1955,renyi1970} proposed an alternative axiomatization of
+probability where the conditional probability $P(A \mid B)$ is primitive,
+governed by axioms including the chain rule
+$P(A \mid B) \cdot P(B \mid C) = P(A \land B \mid C)$.
+Popper~\cite{popper1959} developed a similar approach.
+In both systems, conditioning is not defined as a ratio $P(A \land B)/P(B)$
+but taken as primitive, with the ratio emerging as a theorem when $P(B) > 0$.
+
+Van~Fraassen~\cite{vanfraassen1976,vanfraassen1983} showed that the primitive
+approach connects naturally to relevant logic: both avoid the inference
+``from impossibility, anything follows.''  The key observation is that the
+chain rule $P(A \mid B) \cdot P(B) = P(A \land B)$ at $P(B) = 0$ becomes
+$c \cdot 0 = 0$, which is satisfied by any $c$---the conditional is undefined
+rather than forced to~$1$.
+
+%-----------------------------------------------------------------------------
+\subsection{Conditional Events and Coherence}
+\label{sec:coherence}
+%-----------------------------------------------------------------------------
+
+De~Finetti~\cite{definetti1936,definetti1937} proposed that a conditional event
+$A \mid B$ is three-valued:
+\begin{itemize}[nosep]
+\item \emph{true} when $A \land B$,
+\item \emph{false} when $\lnot A \land B$,
+\item \emph{void} when $\lnot B$.
+\end{itemize}
+The void case is not assigned a truth value; conditioning on a false antecedent
+yields no determinate value rather than vacuous truth.
+
+Calabrese~\cite{calabrese1987} formalized conditional events algebraically as
+``Boolean fractions.''
+\'Egr\'e, Rossi, and Sprenger~\cite{egre2021} develop the modern logic of
+indicative conditionals using de~Finetti tables, providing proof theory and
+algebraic semantics for systems (DF/TT) that avoid vacuous truth.
+
+The coherence tradition~\cite{gilio2013,gilio2014,coletti2002} extends this to
+conditional random quantities, developing conjunction and iterated conditioning
+operations while maintaining explicit treatment of probability-zero cases.
+
+%-----------------------------------------------------------------------------
+\subsection{Fixed-Point Semantics}
+\label{sec:kripke}
+%-----------------------------------------------------------------------------
+
+Kripke's theory of truth~\cite{kripke1975} uses monotone operators and
+fixed points to give consistent semantics for self-referential truth predicates.
+The construction yields a partial valuation where the liar sentence is
+undefined (has no truth value), rather than leading to contradiction.
+
+Gupta and Belnap's revision theory~\cite{gupta1993} models truth as evolving
+under revisions: starting from an arbitrary hypothesis about truth, one
+applies a revision operator repeatedly, and stable patterns emerge.
+This gives a dynamical semantics for self-reference.
+
+Many-valued approaches to paradox~\cite{bergmann2008} assign graded truth
+values to paradoxical sentences.  In a three-valued setting (e.g., K$_3$,
+LP, RM3), the liar sentence is assigned the middle value $\tfrac12$.
+This is related to but distinct from Cred's algebraic fixed point.
+
+%=============================================================================
+\section{Cred and Product Logic}
+\label{sec:product}
+%=============================================================================
+
+Cred's algebraic operations are the product De~Morgan triplet: product
+conjunction $c_1 \conjc c_2 = c_1 \cdot c_2$, probabilistic disjunction
+$c_1 \disjc c_2 = c_1 + c_2 - c_1 c_2$, and standard complement
+$\negc c = 1 - c$.  These are exactly the operations of product fuzzy
+logic~\cite{klement2000}.
+
+When one fixes the joint credence to be $\min(a, b)$ (the Fr\'echet upper
+bound, maximal positive dependence), the induced conditional for positive
+evidence is:
+\[
+\condc{b}{a} = \frac{\min(a, b)}{a} = \min(b/a, 1) \quad (a > 0).
+\]
+This is exactly the product-residuated implication.
+
+%-----------------------------------------------------------------------------
+\subsection{Agreement for Positive Evidence}
+\label{sec:agreement}
+%-----------------------------------------------------------------------------
+
+For positive evidence, Cred conditioning (with the min-joint) and
+product-residuated implication agree and are both Bayes-consistent.
+
+\begin{theorem}[Bayes Consistency]
+\label{thm:bayes}
+The product-residuated implication is Bayes-consistent:
+\[
+(a \to_P b) \cdot a = (b \to_P a) \cdot b = \min(a, b).
+\]
+\textup{[Lean: \texttt{prod\_resid\_bayes\_consistent\_real}]}
+\end{theorem}
+
+\begin{proof}
+By the formula for product residuation,
+$(a \to_P b) \cdot a = \min(b/a, 1) \cdot a = \min(b, a)$.
+By symmetry of min, $(b \to_P a) \cdot b = \min(a, b)$.
+\end{proof}
+
+\begin{remark}
+Not all implications are Bayes-consistent.  The RM3 material conditional
+$a \to_{RM3} b = \max(1-a, b)$ fails:
+\[
+(a \to_{RM3} b) \cdot a \neq (b \to_{RM3} a) \cdot b
+\]
+in general (counterexample: $a = \tfrac12$, $b = 0$).
+\textup{[Lean: \texttt{rm3\_not\_bayes\_consistent}]}
+\end{remark}
+
+%-----------------------------------------------------------------------------
+\subsection{Divergence at Zero}
+\label{sec:diverge}
+%-----------------------------------------------------------------------------
+
+The divergence between Cred and product logic occurs precisely at the
+evidence-zero boundary.
+
+\begin{theorem}[Cred Blocks Ex Falso]
+\label{thm:no-ex-falso}
+In Cred, conditioning on evidence with credence~$0$ is unconstrained: for any
+credence $c$, there exists a valid conditioning structure with
+$\condc{b}{0} = c$.
+\textup{[Lean: \texttt{cred\_no\_ex\_falso}, \texttt{conditioning\_zero\_any}]}
+\end{theorem}
+
+\begin{proof}
+The chain rule at zero evidence is $c \cdot 0 = 0$, which holds for any $c$.
+Thus any credence value satisfies the constraint.
+\end{proof}
+
+\begin{remark}
+Product-residuated implication gives $0 \to_P b = 1$ for all $b$; this is
+\emph{ex falso}.  Cred replaces this with ``unconstrained''---any value is
+consistent with the chain rule.  This is Cred's primary divergence from
+standard residuated logics.
+\end{remark}
+
+%-----------------------------------------------------------------------------
+\subsection{Why Kleene Collapse Works}
+\label{sec:collapse}
+%-----------------------------------------------------------------------------
+
+Part~1 proved that Cred admits a surjective homomorphism to the Kleene
+three-valued algebra (RM3 for $\{\negc, \conjc, \disjc\}$), but no analogous
+homomorphism exists for G\"odel or \L ukasiewicz algebras.
+
+\begin{theorem}[No G\"odel Collapse]
+\label{thm:no-godel}
+There is no function $\phi: [0,1] \to \{0, \tfrac12, 1\}$ that preserves
+G\"odel negation $\negc_G c = \begin{cases} 1 & c = 0 \\ 0 & c > 0 \end{cases}$.
+\textup{[Lean: \texttt{no\_godel\_collapse}]}
+\end{theorem}
+
+\begin{proof}
+G\"odel negation has no fixed point: $\negc_G 0 = 1 \neq 0$,
+$\negc_G \tfrac12 = 0 \neq \tfrac12$, $\negc_G 1 = 0 \neq 1$.
+But $\phi(\tfrac12)$ must satisfy $\phi(\negc \tfrac12) = \negc_G \phi(\tfrac12)$;
+since $\negc \tfrac12 = \tfrac12$ in Cred, this requires
+$\phi(\tfrac12) = \negc_G \phi(\tfrac12)$, a fixed point---contradiction.
+\end{proof}
+
+\begin{theorem}[No \L ukasiewicz Collapse]
+\label{thm:no-luk}
+There is no function $\phi: [0,1] \to \{0, \tfrac12, 1\}$ that preserves both
+standard negation and \L ukasiewicz conjunction
+$a \land_L b = \max(a + b - 1, 0)$.
+\textup{[Lean: \texttt{no\_luk\_collapse}]}
+\end{theorem}
+
+\begin{proof}
+Negation preservation forces $\phi(\tfrac12) = \tfrac12$ (since
+$\negc \tfrac12 = \tfrac12$).
+For \L ukasiewicz conjunction, $\tfrac12 \land_L \tfrac12 = 0$, so we need
+$\phi(\tfrac12 \land_L \tfrac12) = \phi(0) = 0$ and
+$\phi(\tfrac12) \land_L \phi(\tfrac12) = \tfrac12 \land_L \tfrac12 = 0$.
+But pick $c = \sqrt{\tfrac12}$; then $c \conjc c = \tfrac12$ (Cred product),
+so $\phi(c \conjc c) = \phi(\tfrac12) = \tfrac12$.
+Meanwhile $\phi(c) \land_L \phi(c) \in \{0, 1\}$ (since $v \land_L v$ for
+$v \in \{0, \tfrac12, 1\}$ is in $\{0, 1\}$, not $\tfrac12$)---contradiction.
+\end{proof}
+
+%=============================================================================
+\section{Self-Reference: Fixed Points Without Triviality}
+\label{sec:fixed}
+%=============================================================================
+
+Cred's most visible self-reference result is the negation fixed point.
+
+%-----------------------------------------------------------------------------
+\subsection{Negation Fixed Point}
+\label{sec:liar}
+%-----------------------------------------------------------------------------
+
+\begin{theorem}[Liar Fixed Point]
+\label{thm:liar}
+The equation $c = \negc c$ has exactly one solution: $c = \tfrac12$.
+\textup{[Lean: \texttt{liar\_fixed\_point}, \texttt{neg\_fixed\_point\_unique}]}
+\end{theorem}
+
+\begin{proof}
+If $c = \negc c = 1 - c$, then $2c = 1$, so $c = \tfrac12$.
+Conversely, $\negc \tfrac12 = 1 - \tfrac12 = \tfrac12$.
+\end{proof}
+
+This result is \emph{algebraic}: it follows directly from the negation
+operation on $[0,1]$ and does not require any construction involving truth
+predicates or diagonalization.
+
+%-----------------------------------------------------------------------------
+\subsection{Product Fixed Points}
+\label{sec:conj-fixed}
+%-----------------------------------------------------------------------------
+
+\begin{theorem}[Conjunction Idempotence]
+\label{thm:idemp}
+The equation $c \conjc c = c$ holds if and only if $c \in \{0, 1\}$.
+\textup{[Lean: \texttt{conj\_idempotent\_iff}]}
+\end{theorem}
+
+\begin{proof}
+$c^2 = c$ iff $c(c-1) = 0$ iff $c \in \{0, 1\}$.
+\end{proof}
+
+This shows that intermediate credences do \emph{not} satisfy Boolean
+idempotence.  The product conjunction distinguishes between ``partial
+confidence in $A$'' and ``partial confidence in $A \land A$'': these differ
+when $0 < \cred(A) < 1$.
+
+%-----------------------------------------------------------------------------
+\subsection{Russell Fixed Point}
+\label{sec:russell}
+%-----------------------------------------------------------------------------
+
+The Russell predicate $R(x) = \negc(x(x))$ applied to itself yields
+$R(R) = \negc(R(R))$, which is exactly the liar equation.
+
+\begin{theorem}[Russell Fixed Point]
+\label{thm:russell}
+If $c = \negc c$ (the Russell equation), then $c = \tfrac12$.
+\textup{[Lean: \texttt{russell\_fixed\_point}]}
+\end{theorem}
+
+This is a direct corollary of \cref{thm:liar}.
+
+%-----------------------------------------------------------------------------
+\subsection{Comparison to Kripke and Revision Theory}
+\label{sec:compare-fixed}
+%-----------------------------------------------------------------------------
+
+Cred's fixed-point result should be distinguished from the proof-theoretic
+fixed points in Kripke~\cite{kripke1975} and Gupta--Belnap~\cite{gupta1993}:
+
+\begin{itemize}[nosep]
+\item \textbf{Kripke}: constructs a partial valuation where the liar is
+  \emph{undefined} (has no truth value in the minimal fixed point).
+  The construction uses monotone operators on partial valuations.
+\item \textbf{Gupta--Belnap}: models truth as evolving under revision; the liar
+  cycles rather than settling to a single value.
+\item \textbf{Cred}: assigns the liar the definite value $\tfrac12$.
+  This is purely algebraic---no construction of truth predicates or
+  revision sequences is needed.
+\end{itemize}
+
+The three approaches are complementary.  Cred's algebraic result shows that
+\emph{if} one commits to $[0,1]$-valued credences with standard negation,
+\emph{then} self-referential negation is forced to~$\tfrac12$.
+Kripke and revision theory analyze what happens in proof-theoretic settings
+where truth predicates are constructed internally.
+
+%=============================================================================
+\section{The Evidence-Zero Boundary}
+\label{sec:zero}
+%=============================================================================
+
+The evidence-zero boundary is where Cred diverges most clearly from both
+classical probability (where $P(A \mid B)$ is undefined when $P(B) = 0$) and
+residuated logic (where $0 \to b = 1$).
+
+%-----------------------------------------------------------------------------
+\subsection{Probabilistic: Disintegration}
+\label{sec:disintegration}
+%-----------------------------------------------------------------------------
+
+Standard measure theory handles conditioning on null events via
+\emph{regular conditional probabilities} and \emph{disintegration}
+\cite{chang1997}.  Given a probability space and a sub-sigma-algebra,
+disintegration provides conditional probabilities that are unique only
+\emph{almost surely}---different choices agree on sets of measure~$1$ but
+may differ on null sets.
+
+The category-theoretic perspective (Markov categories~\cite{fritz2020})
+treats conditioning structurally: the conditional is characterized by a
+universal property rather than division, making explicit which uniqueness
+guarantees follow from the structure.
+
+%-----------------------------------------------------------------------------
+\subsection{Imprecise: Set-Valued Conditionals}
+\label{sec:imprecise}
+%-----------------------------------------------------------------------------
+
+The imprecise probability tradition~\cite{walley1991,troffaes2014} takes a
+different approach: when conditioning would be undefined or non-unique, return
+a \emph{set} or \emph{interval} of admissible values rather than a single
+number.  This makes explicit that the evidence does not fully determine the
+posterior.
+
+Cred's underdetermination at zero aligns naturally with this perspective:
+the chain rule constrains the conditional to the \emph{entire} interval
+$[0,1]$ when evidence has credence~$0$.
+
+%-----------------------------------------------------------------------------
+\subsection{Cred's Stance: Underdetermination as Design}
+\label{sec:underdetermination}
+%-----------------------------------------------------------------------------
+
+Cred makes evidence-zero underdetermination a \emph{first-class design
+feature} rather than an exception to be patched.
+
+\begin{theorem}[Bayesian Underdetermined at Zero]
+\label{thm:bayes-zero}
+When evidence has credence~$0$, Bayesian conditionalization is underdetermined:
+any credence value is consistent with the chain rule.
+\textup{[Lean: \texttt{bayesian\_underdetermined\_at\_zero}]}
+\end{theorem}
+
+\begin{theorem}[Jeffrey Underdetermined at Zero]
+\label{thm:jeffrey-zero}
+When evidence has credence~$0$, Jeffrey conditionalization depends on an
+underdetermined conditional and is therefore itself underdetermined.
+\textup{[Lean: \texttt{jeffrey\_underdetermined\_at\_zero}]}
+\end{theorem}
+
+This is intentional: impossible evidence (credence~$0$) provides no constraint
+on posterior belief.  The philosophy is ``inference constrains'': evidence
+narrows possibilities; impossible evidence cannot narrow anything.
+
+%-----------------------------------------------------------------------------
+\subsection{Path Dependence: A Mathematical Argument Against Ex Falso}
+\label{sec:path}
+%-----------------------------------------------------------------------------
+
+The preceding sections establish that Cred \emph{allows} underdetermination at
+zero.  This section provides a stronger result: the mathematics \emph{actively
+argues against} forcing the conditional to~$1$.
+
+Consider the min-copula conditional for positive evidence:
+\[
+\cred(A \mid B) = \frac{\min(a, b)}{b} =
+\begin{cases}
+1 & \text{if } b < a, \\[4pt]
+a/b & \text{if } b \geq a,
+\end{cases}
+\]
+where $a = \cred(A)$ and $b = \cred(B)$.
+As $b \to 0$, the limit depends on \emph{how} $a$ and $b$ approach zero together:
+
+\begin{proposition}[Path-Dependent Limits]
+\label{prop:path}
+Let $a(b)$ be a path with $a(b) \to 0$ as $b \to 0$.  Then:
+\begin{enumerate}[label=\textup{(\roman*)},nosep]
+\item If $a$ is fixed with $a > 0$, then $\lim_{b \to 0} \min(a,b)/b = 1$.
+\item If $a(b) = \lambda b$ for some $\lambda \in (0,1]$, then
+  $\lim_{b \to 0} \min(a(b),b)/b = \lambda$.
+\item If $a(b) = b^\alpha$ for $\alpha > 1$, then
+  $\lim_{b \to 0} \min(a(b),b)/b = 0$.
+\end{enumerate}
+\end{proposition}
+
+\begin{proof}
+(i)~For small $b < a$, $\min(a,b) = b$, so $\min(a,b)/b = 1$.
+(ii)~For $\lambda \leq 1$, $\min(\lambda b, b) = \lambda b$, so the ratio is
+$\lambda$.
+(iii)~For $\alpha > 1$ and small $b$, $b^\alpha < b$, so $\min(b^\alpha, b)/b
+= b^{\alpha-1} \to 0$.
+\end{proof}
+
+The polar parametrization makes this vivid.  Set $a = r\cos\theta$ and
+$b = r\sin\theta$ with $r \downarrow 0$.  Then:
+\[
+\lim_{r \to 0} \frac{\min(a,b)}{b} =
+\begin{cases}
+1 & \theta < \pi/4 \quad\text{(i.e., } a > b\text{)}, \\[4pt]
+\cot\theta & \theta \geq \pi/4 \quad\text{(i.e., } a \leq b\text{)}.
+\end{cases}
+\]
+The limit is a \emph{piecewise function of the approach angle}, not a single
+value.  This is exactly the structure of the \emph{Borel--Kolmogorov
+paradox}~\cite{borel1909,kolmogorov1933}: conditioning on a null event is not
+uniquely determined without specifying the limiting procedure.
+
+\begin{remark}[Connection to Measure Theory]
+In standard measure theory, regular conditional probabilities are defined only
+\emph{almost surely}---they may differ on null sets.  The Borel--Kolmogorov
+paradox shows that the ``value'' of a conditional at a null event depends on
+the parametrization used to approach it.  The path dependence in
+\cref{prop:path} is the same phenomenon in algebraic form: the chain rule
+does not select a unique limit; it selects an angle-dependent family of limits.
+\end{remark}
+
+This gives a clean algebraic fork:
+
+\begin{description}[nosep]
+\item[Option A: Keep underdetermined.]
+  The conditional at $b = 0$ is not assigned a single value; it remains
+  constrained only to $[0,1]$.  Ex falso does not follow because the
+  conditional is not forced.
+
+\item[Option B: Totalize to~$1$.]
+  Declare $\cred(A \mid B) = 1$ when $\cred(B) = 0$.  This recovers
+  ex-falso-flavored behavior but is a \emph{convention}, not something
+  entailed by the continuous Bayes/copula calculus.  The convention is known
+  in probability logics~\cite{adams1975} and is recognized as problematic in
+  product-fuzzy encodings of conditional probability~\cite{hajek1998}.
+\end{description}
+
+The min-copula encourages Option~B for the common path ``fixed $a > 0$,
+$b \to 0$'' (which drives the limit to~$1$), but it does \emph{not} justify a
+unique extension at $b = 0$ because the limit varies with the ratio $a/b$.
+
+\begin{quote}
+\textbf{Conclusion.}  Even with the unique logic-compatible copula
+$j(a,b) = \min(a,b)$, the Bayes/ratio conditional has no canonical value at
+evidence $b = 0$: the extension is path-dependent.  Ex falso at the zero
+boundary is therefore not forced by the continuous copula+Bayes calculus;
+you only get it by adding a totalization convention.
+\end{quote}
+
+%-----------------------------------------------------------------------------
+\subsection{De Finetti's Void as Discrete Case}
+\label{sec:void}
+%-----------------------------------------------------------------------------
+
+De~Finetti's three-valued conditional events~\cite{definetti1936} assign
+\emph{void} to $A \mid B$ when $B$ is false.  In the graded setting, this
+corresponds to evidence credence~$0$: when $\cred(B) = 0$, the conditional
+$\condc{A}{B}$ is not forced to any particular value.
+
+The \'Egr\'e--Rossi--Sprenger systems (DF/TT)~\cite{egre2021} formalize this
+in a proof-theoretic setting, providing rules that avoid vacuous truth.
+Cred's chain-rule approach achieves the same effect algebraically: there is
+no rule that forces the conditional to~$1$ when evidence is impossible.
+
+%=============================================================================
+\section{Synthesis and Non-Claims}
+\label{sec:synthesis}
+%=============================================================================
+
+%-----------------------------------------------------------------------------
+\subsection{What Cred Adds: The Synthesis Statement}
+\label{sec:what-adds}
+%-----------------------------------------------------------------------------
+
+The literature review suggests a clean synthesis:
+
+\begin{quote}
+\textbf{Synthesis.} Cred isolates the chain rule as the sole algebraic
+constraint on conditioning and combines it with the product De~Morgan triplet
+on $[0,1]$.  It is compatible with both (i)~truth-functional many-valued logics
+(when a fixed joint such as min is chosen) and (ii)~probability-style semantics
+(when joints are supplied from empirical data).  Its distinguishing choice is
+to leave the evidence-zero boundary underdetermined by default, in line with
+de~Finetti conditional events and imprecise probability, rather than forcing
+ex falso via residuation.
+\end{quote}
+
+The synthesis makes clear which parts of Cred are inherited:
+\begin{itemize}[nosep]
+\item The product De~Morgan triplet is standard in fuzzy logic~\cite{klement2000}.
+\item The chain rule as primitive comes from R\'enyi--Popper~\cite{renyi1955,popper1959}.
+\item The three-valued collapse is related to K$_3$/LP/RM3~\cite{priest2008}.
+\item The fixed-point treatment of self-reference is related to
+  Kripke~\cite{kripke1975}.
+\end{itemize}
+
+What Cred adds is the deliberate \emph{combination} of these elements with a
+specific stance on evidence-zero: underdetermination as a first-class feature.
+
+%-----------------------------------------------------------------------------
+\subsection{What Cred Does NOT Claim}
+\label{sec:non-claims}
+%-----------------------------------------------------------------------------
+
+To prevent overclaiming, we explicitly note what Cred does \emph{not} provide:
+
+\begin{enumerate}[label=(\arabic*),nosep]
+\item \textbf{A graded proof theory.}  Part~2 provides consequence relations
+  (threshold semantics), but no proof calculus with graded derivability in the
+  Pavelka sense.  This is future work.
+\item \textbf{A resolution of G\"odel incompleteness.}  The $\tfrac12$ fixed
+  point for the liar is \emph{algebraic}.  G\"odel incompleteness is
+  \emph{proof-theoretic} and applies to any sufficiently strong formal system,
+  including any formalization of Cred.
+\item \textbf{A complete foundation for mathematics.}  Cred is an algebra, not
+  a set theory.  Building graded set theory (comprehension, extensionality)
+  requires additional choices, as explored in~\cite{takeuti1984}.
+\item \textbf{A claim that residuated logics are wrong.}  Residuation is a
+  mathematically coherent and well-developed framework.  Cred simply makes a
+  different design choice at zero, suited to epistemic/probabilistic contexts
+  where ``from nothing, nothing follows'' is preferred to ``from nothing,
+  anything follows.''
+\end{enumerate}
+
+%-----------------------------------------------------------------------------
+\subsection{Open Directions}
+\label{sec:open}
+%-----------------------------------------------------------------------------
+
+Part~3 opens several directions for future work:
+
+\begin{itemize}[nosep]
+\item \textbf{Graded proof theory}: develop a proof calculus for Cred with
+  graded provability degrees, following the Pavelka
+  approach~\cite{pavelka1979i}.
+\item \textbf{Set-valued updates}: formalize update mechanisms that return
+  intervals when evidence has low credence, connecting to imprecise
+  probability~\cite{walley1991}.
+\item \textbf{Graded set theory}: work through comprehension and extensionality
+  in a Cred-valued setting, using the many-valued set theory literature
+  \cite{takeuti1984} as a guide.
+\item \textbf{Asymptotic proofs}: investigate what ``proof'' means when
+  credence approaches but never reaches~$1$.
+\end{itemize}
+
+%=============================================================================
+\section{Lean Formalization}
+\label{sec:lean}
+%=============================================================================
+
+The main results of Parts~1--3 are machine-checked in Lean~4 using mathlib.
+\Cref{tab:lean} maps the key theorems to their Lean identifiers.
+
+\begin{table}[h]
+\centering
+\caption{Lean formalization of key results}
+\label{tab:lean}
+\begin{tabular}{@{}lll@{}}
+\toprule
+\textbf{Result} & \textbf{Lean identifier} & \textbf{File} \\
+\midrule
+\multicolumn{3}{l}{\emph{Core algebra (Part 1)}} \\
+Negation fixed point & \texttt{liar\_fixed\_point} & Basic.lean \\
+Fixed point uniqueness & \texttt{neg\_fixed\_point\_unique} & Basic.lean \\
+Conjunction idempotence & \texttt{conj\_idempotent\_iff} & Basic.lean \\
+Non-distributivity & \texttt{conj\_disj\_not\_distrib} & Basic.lean \\
+\midrule
+\multicolumn{3}{l}{\emph{Conditioning (Part 1)}} \\
+Conditioning at zero & \texttt{conditioning\_zero\_any} & Basic.lean \\
+Zero forces joint zero & \texttt{conditioning\_zero\_forces\_joint\_zero} & Basic.lean \\
+Conditioning uniqueness & \texttt{conditioning\_unique} & Basic.lean \\
+\midrule
+\multicolumn{3}{l}{\emph{Comparison (Part 1)}} \\
+Cred blocks ex falso & \texttt{cred\_no\_ex\_falso} & Basic.lean \\
+RM3 has ex falso & \texttt{rm3\_ex\_falso} & Basic.lean \\
+Bayes consistency & \texttt{prod\_resid\_bayes\_consistent\_real} & Basic.lean \\
+RM3 not Bayes consistent & \texttt{rm3\_not\_bayes\_consistent} & Basic.lean \\
+No G\"odel collapse & \texttt{no\_godel\_collapse} & Basic.lean \\
+No \L ukasiewicz collapse & \texttt{no\_luk\_collapse} & Basic.lean \\
+\midrule
+\multicolumn{3}{l}{\emph{Updates (Part 2)}} \\
+Bayesian underdetermined & \texttt{bayesian\_underdetermined\_at\_zero} & Update.lean \\
+Jeffrey underdetermined & \texttt{jeffrey\_underdetermined\_at\_zero} & Update.lean \\
+\midrule
+\multicolumn{3}{l}{\emph{Predicates (Part 2)}} \\
+Russell fixed point & \texttt{russell\_fixed\_point} & Predicate.lean \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+%=============================================================================
+% Bibliography
+%=============================================================================
+
+\begin{thebibliography}{99}
+
+\bibitem{adams1975}
+Adams, E.W.
+\newblock \emph{The Logic of Conditionals}.
+\newblock Reidel, 1975.
+
+\bibitem{bergmann2008}
+Bergmann, M.
+\newblock \emph{An Introduction to Many-Valued and Fuzzy Logic}.
+\newblock Cambridge University Press, 2008.
+
+\bibitem{borel1909}
+Borel, \'E.
+\newblock \emph{\'El\'ements de la th\'eorie des probabilit\'es}.
+\newblock Hermann, Paris, 1909.
+
+\bibitem{calabrese1987}
+Calabrese, P.
+\newblock An algebraic synthesis of the foundations of logic and probability.
+\newblock \emph{Information Sciences}, 42(2):187--237, 1987.
+
+\bibitem{chang1997}
+Chang, J.T. and Pollard, D.
+\newblock Conditioning as disintegration.
+\newblock \emph{Statistica Neerlandica}, 51(3):287--317, 1997.
+
+\bibitem{cintula2011}
+Cintula, P., H\'ajek, P., and Noguera, C., editors.
+\newblock \emph{Handbook of Mathematical Fuzzy Logic}, Vols.~1--2.
+\newblock College Publications, 2011.
+
+\bibitem{coletti2002}
+Coletti, G. and Scozzafava, R.
+\newblock \emph{Probabilistic Logic in a Coherent Setting}.
+\newblock Trends in Logic 15. Kluwer/Springer, 2002.
+
+\bibitem{definetti1936}
+de Finetti, B.
+\newblock La logique de la probabilit\'e.
+\newblock \emph{Actes du Congr\`es International de Philosophie Scientifique},
+4:31--39, 1936.
+
+\bibitem{definetti1937}
+de Finetti, B.
+\newblock La pr\'evision: ses lois logiques, ses sources subjectives.
+\newblock \emph{Annales de l'Institut Henri Poincar\'e}, 7(1):1--68, 1937.
+
+\bibitem{egre2021}
+\'Egr\'e, P., Rossi, L., and Sprenger, J.
+\newblock De Finettian logics of indicative conditionals {Part II}: Proof theory and algebraic semantics.
+\newblock \emph{Journal of Philosophical Logic}, 50:215--247, 2021.
+
+\bibitem{fritz2020}
+Fritz, T.
+\newblock A synthetic approach to {Markov} kernels, conditional independence and theorems on sufficient statistics.
+\newblock \emph{Advances in Mathematics}, 370:107239, 2020.
+
+\bibitem{galatos2007}
+Galatos, N., Jipsen, P., Kowalski, T., and Ono, H.
+\newblock \emph{Residuated Lattices: An Algebraic Glimpse at Substructural Logics}.
+\newblock Elsevier, 2007.
+
+\bibitem{gilio2013}
+Gilio, A. and Sanfilippo, G.
+\newblock Conjunction, disjunction and iterated conditioning of conditional events.
+\newblock In Kruse, R. et al., editors, \emph{Synergies of Soft Computing and Statistics},
+pages 399--407. Springer, 2013.
+
+\bibitem{gilio2014}
+Gilio, A. and Sanfilippo, G.
+\newblock Conditional random quantities and compounds of conditionals.
+\newblock \emph{Studia Logica}, 102(4):709--729, 2014.
+
+\bibitem{gupta1993}
+Gupta, A. and Belnap, N.
+\newblock \emph{The Revision Theory of Truth}.
+\newblock MIT Press, 1993.
+
+\bibitem{hajek1998}
+H\'ajek, P.
+\newblock \emph{Metamathematics of Fuzzy Logic}.
+\newblock Kluwer, 1998.
+
+\bibitem{klement2000}
+Klement, E.P., Mesiar, R., and Pap, E.
+\newblock \emph{Triangular Norms}.
+\newblock Kluwer, 2000.
+
+\bibitem{kolmogorov1933}
+Kolmogorov, A.N.
+\newblock \emph{Grundbegriffe der Wahrscheinlichkeitsrechnung}.
+\newblock Springer, Berlin, 1933.
+\newblock English translation: \emph{Foundations of the Theory of Probability},
+Chelsea, 1950.
+
+\bibitem{kripke1975}
+Kripke, S.
+\newblock Outline of a theory of truth.
+\newblock \emph{Journal of Philosophy}, 72(19):690--716, 1975.
+
+\bibitem{pavelka1979i}
+Pavelka, J.
+\newblock On fuzzy logic {I}: Many-valued rules of inference.
+\newblock \emph{Zeitschrift f\"ur mathematische Logik und Grundlagen der Mathematik}, 25:45--52, 1979.
+
+\bibitem{pavelka1979ii}
+Pavelka, J.
+\newblock On fuzzy logic {II}: Enriched residuated lattices and semantics of propositional calculi.
+\newblock \emph{Zeitschrift f\"ur mathematische Logik und Grundlagen der Mathematik}, 25:119--134, 1979.
+
+\bibitem{pavelka1979iii}
+Pavelka, J.
+\newblock On fuzzy logic {III}: Semantical completeness of some many-valued propositional calculi.
+\newblock \emph{Zeitschrift f\"ur mathematische Logik und Grundlagen der Mathematik}, 25:447--464, 1979.
+
+\bibitem{popper1959}
+Popper, K.R.
+\newblock \emph{The Logic of Scientific Discovery}.
+\newblock Hutchinson, London, 1959.
+
+\bibitem{priest2008}
+Priest, G.
+\newblock \emph{An Introduction to Non-Classical Logic}.
+\newblock Cambridge University Press, 2nd edition, 2008.
+
+\bibitem{renyi1955}
+R\'enyi, A.
+\newblock On a new axiomatic theory of probability.
+\newblock \emph{Acta Mathematica Academiae Scientiarum Hungaricae}, 6:285--335, 1955.
+
+\bibitem{renyi1970}
+R\'enyi, A.
+\newblock \emph{Foundations of Probability}.
+\newblock Holden-Day, 1970.
+
+\bibitem{takeuti1984}
+Takeuti, G. and Titani, S.
+\newblock Fuzzy logic and fuzzy set theory.
+\newblock \emph{Journal of Symbolic Logic}, 49(3):851--866, 1984.
+
+\bibitem{troffaes2014}
+Troffaes, M.C.M. and de Cooman, G.
+\newblock \emph{Lower Previsions}.
+\newblock Wiley, 2014.
+
+\bibitem{vanfraassen1976}
+van Fraassen, B.C.
+\newblock Probabilities of conditionals.
+\newblock In Harper, W.L. and Hooker, C.A., editors, \emph{Foundations of Probability Theory, Statistical Inference, and Statistical Theories of Science},
+Vol.~1, pages 261--308. Reidel, 1976.
+
+\bibitem{vanfraassen1983}
+van Fraassen, B.C.
+\newblock Gentlemen's wagers: Relevant logic and probability.
+\newblock \emph{Philosophical Studies}, 43:47--61, 1983.
+
+\bibitem{walley1991}
+Walley, P.
+\newblock \emph{Statistical Reasoning with Imprecise Probabilities}.
+\newblock Chapman and Hall, 1991.
+
+\end{thebibliography}
+
+\end{document}

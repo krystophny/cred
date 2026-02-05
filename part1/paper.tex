@@ -63,6 +63,14 @@ When evidence is positive, division emerges as the unique solution; when evidenc
 has credence zero, the constraint is satisfied by any value---the conditional is
 \emph{unconstrained}, and no division is needed.
 %
+A key result shows this underdetermination is not merely permitted but
+\emph{mathematically forced}: as evidence $b \to 0$, the conditional's limit
+depends on the \emph{path} by which credences approach zero (the ratio $a/b$),
+not on $b$ alone.
+This path dependence---the same structure as the Borel--Kolmogorov paradox---means
+ex falso ($0 \to c = 1$) is not entailed by the algebra; forcing it requires an
+additional totalization convention.
+%
 The joint credence $\cred(A \land B)$ is an \emph{external parameter}, not
 fixed by the algebra.
 This makes Cred compatible with both the probability and logic traditions:
@@ -211,6 +219,11 @@ conditioning and shares the product De Morgan triplet with product fuzzy logic,
 replacing residuation with chain-rule conditioning.
 Division is derived (unique when evidence $> 0$); conditioning is unconstrained
 at evidence zero (Section~\ref{sec:conditioning}).
+\item Path dependence at zero evidence: the conditional's limit as evidence
+$b \to 0$ depends on the ratio $a/b$, not on $b$ alone---the same structure as
+the Borel--Kolmogorov paradox.
+Ex falso is therefore not forced by the algebra
+(Section~\ref{sec:path-dependence}).
 \item A surjective homomorphism from Cred to the Kleene lattice (underlying
 K$_3$, LP, and RM3) for $\{\negc, \conjc, \disjc\}$, with impossibility results
 for alternative targets and machine-checked proof (Section~\ref{sec:connections}).
@@ -748,14 +761,91 @@ what.
 These questions belong to a higher-level theory (probability, product logic,
 or a logic with designated values) built on top of the algebra.
 
+\subsection{Path Dependence: Why Ex Falso Is Not Forced}
+\label{sec:path-dependence}
+
+The preceding result shows the chain rule \emph{allows} any value at zero evidence.
+We now show something stronger: the mathematics \emph{actively argues against}
+forcing the conditional to~$1$.
+
+Consider the min-copula setting where $\text{joint} = \min(a, b)$ with
+$a = \cred(A)$ and $b = \cred(B)$.
+For $b > 0$, the conditional is:
+\[
+\cred(A \mid B) = \frac{\min(a, b)}{b} =
+\begin{cases}
+1 & \text{if } b < a, \\[4pt]
+a/b & \text{if } b \geq a.
+\end{cases}
+\]
+As $b \to 0$, the limit depends on \emph{how} $a$ and $b$ approach zero together.
+
+\begin{proposition}[Path-Dependent Limits]
+\label{prop:path-dependence}
+Let $a(b)$ be a path with $a(b) \to 0$ as $b \to 0$.  Then:
+\begin{enumerate}[label=\textup{(\roman*)},nosep]
+\item If $a$ is fixed with $a > 0$, then $\lim_{b \to 0} \min(a,b)/b = 1$.
+\item If $a(b) = \lambda b$ for some $\lambda \in (0,1]$, then
+  $\lim_{b \to 0} \min(a(b),b)/b = \lambda$.
+\item If $a(b) = b^\alpha$ for $\alpha > 1$, then
+  $\lim_{b \to 0} \min(a(b),b)/b = 0$.
+\end{enumerate}
+\end{proposition}
+
+\begin{proof}
+(i)~For small $b < a$, $\min(a,b) = b$, so the ratio is~$1$.
+(ii)~$\min(\lambda b, b) = \lambda b$, so the ratio is~$\lambda$.
+(iii)~For small $b$, $b^\alpha < b$, so $\min(b^\alpha, b)/b = b^{\alpha-1} \to 0$.
+\end{proof}
+
+The polar parametrization makes the structure vivid.
+Set $a = r\cos\theta$ and $b = r\sin\theta$ with $r \downarrow 0$:
+\[
+\lim_{r \to 0} \frac{\min(a,b)}{b} =
+\begin{cases}
+1 & \theta < \pi/4 \quad\text{(i.e., } a > b\text{)}, \\[4pt]
+\cot\theta & \theta \geq \pi/4 \quad\text{(i.e., } a \leq b\text{)}.
+\end{cases}
+\]
+The limit is a \emph{piecewise function of the approach angle}, not a single value.
+
+This is exactly the structure of the \emph{Borel--Kolmogorov paradox}
+\cite{borel1909,kolmogorov1933}: in measure theory, conditioning on a null event
+is not uniquely determined---the ``value'' depends on the limiting procedure.
+Regular conditional probabilities are defined only almost surely and may differ
+on null sets.
+Proposition~\ref{prop:path-dependence} is the same phenomenon in algebraic form:
+the chain rule does not select a unique limit at zero; it selects an
+angle-dependent family of limits.
+
+This gives a clean algebraic fork:
+\begin{description}[nosep]
+\item[Option A: Keep underdetermined.]
+  The conditional at evidence $= 0$ is not assigned a single value; it remains
+  constrained only to $[0,1]$.  Ex falso does not follow.
+\item[Option B: Totalize to~$1$.]
+  Declare $\cred(A \mid 0) = 1$.  This recovers ex-falso-flavored behavior but
+  is a \emph{convention}, not entailed by the Bayes/copula calculus.
+\end{description}
+Cred takes Option~A: the conditional at zero is void (unconstrained).
+The min-copula encourages Option~B for the common path ``fixed $a > 0$, $b \to 0$''
+(which drives the limit to~$1$), but it does \emph{not} justify a unique extension
+because the limit varies with the ratio $a/b$.
+
+\begin{quote}
+\textbf{Key point.}  Even with the unique logic-compatible copula $\min(a,b)$,
+the conditional has no canonical value at evidence zero: the extension is
+path-dependent.  Ex falso is therefore not forced by the continuous
+copula+Bayes calculus; obtaining it requires adding a totalization convention.
+\end{quote}
+
+\subsection{De Finetti's Void}
+
 De Finetti's three-valued conditional~\cite{definetti1936} captures the same
 principle in a discrete setting: when the conditioning event does not obtain,
 the conditional is void rather than vacuously true.
 In Cred's graded setting, ``void'' becomes ``any value in $[0,1]$ satisfies
-the chain rule,'' reflecting the path-dependence of the ratio
-$\text{joint}/\text{evidence}$ as both approach zero: the limit depends on the
-rate at which the joint decays relative to the evidence, and no single value
-is canonical.
+the chain rule.''
 
 \begin{remark}[Void as an Extra Value]
 \label{rem:void-value}
@@ -2169,8 +2259,18 @@ Bayes consistency, non-triviality, and idempotence---explaining why
 K$_3$, LP, and RM3 all use the Kleene conjunction.
 The collapse homomorphism (Theorem~\ref{thm:collapse}) connects Cred to
 the Kleene lattice, with impossibility results for alternative targets.
+
 When evidence has credence zero, the chain rule is satisfied by any
 value---de Finetti's void conditional in a graded setting.
+Proposition~\ref{prop:path-dependence} strengthens this: the conditional's
+limit as evidence approaches zero is \emph{path-dependent}, varying with
+the ratio $a/b$ (equivalently, the approach angle in polar coordinates).
+This is the same structure as the Borel--Kolmogorov paradox in measure
+theory: the ``value'' of a conditional at a null event depends on the
+limiting procedure.
+Ex falso ($0 \to c = 1$) is therefore not forced by the Bayes/copula
+calculus; obtaining it requires adding a totalization convention beyond
+what the chain rule entails.
 The main results are machine-checked in Lean~4.
 
 \medskip
@@ -2247,6 +2347,11 @@ Belnap, N.D.
 \newblock A useful four-valued logic.
 \newblock In Dunn, J.M. and Epstein, G., editors, \emph{Modern Uses of
 Multiple-Valued Logic}, pages 5--37. Reidel, 1977.
+
+\bibitem{borel1909}
+Borel, \'E.
+\newblock \emph{\'El\'ements de la th\'eorie des probabilit\'es}.
+\newblock Hermann, Paris, 1909.
 
 \bibitem{brady2006}
 Brady, R.

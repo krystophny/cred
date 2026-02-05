@@ -1,16 +1,23 @@
-# Part 3: Graded Proofs, Self-Reference, and Metatheory
+# Part 3: Positioning Relative to Many-Valued Traditions
 
-Part 1 establishes the constraint algebra. Part 2 adds interpretation, consequence relations, and update rules. Part 3 goes further: graded proofs, self-reference, undecidability, and building mathematics on Cred.
+Part 1 establishes the constraint algebra. Part 2 adds interpretation, consequence relations, and update rules. Part 3 positions Cred relative to the existing literature on many-valued logic, primitive conditional probability, and fixed-point semantics.
 
 ## Files
 
-- `paper-sketch.tex` — literature map + synthesis for Part 3 (working draft)
+- `paper.tex` — publication-quality paper (Lean-backed)
+- `paper-sketch.tex` — original literature map + roadmap (reference)
 - `01-asymptotic-proofs.md` — Proofs approaching certainty (cred -> 1)
 - `02-fixed-points.md` — Self-reference and paradox dissolution
 - `03-undecidability.md` — Incompleteness and underdetermination (distinct from the 1/2 fixed point)
 - `04-proof-patterns.md` — Proof patterns enabled by Cred
 - `05-open-questions.md` — Research directions including self-hosting
 - `06-graded-mathematics.md` — Building mathematics (arithmetic, analysis, set theory) on graded foundations
+
+## Build
+
+```bash
+cd part3 && latexmk -pdf -interaction=nonstopmode -halt-on-error paper.tex
+```
 
 ## Deferred from Part 2
 
