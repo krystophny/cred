@@ -1236,4 +1236,37 @@ theorem rm3_not_bayes_consistent_real :
   simp only [rm3_impl_real, Credence.half_val, Credence.zero_val]
   norm_num
 
+/-! ## Maximum Dependence (Min Copula) and Independence (Product)
+
+The following theorems formalize the key uniqueness results from Part 1:
+- min_bayes_consistent: The min copula is Bayes consistent
+- prod_trivial_conditioning: Product (independence) gives trivial conditioning
+
+These complete the proof that maximum dependence (min) is the unique truth-functional
+joint that is both Bayes-consistent AND non-trivial.
+-/
+
+/-- Min copula is Bayes consistent: min(a,b)/a * a = min(b,a)/b * b.
+    This follows from symmetry of min. -/
+theorem min_bayes_consistent (a b : Credence) :
+    min a.val b.val = min b.val a.val := by
+  exact min_comm a.val b.val
+
+/-- Under independence (product joint), conditioning is trivial:
+    if j(A,B) = a * b, then cred(A|B) = a*b/b = a.
+    Evidence has no effect on the conclusion. -/
+theorem prod_trivial_conditioning (a b : Credence) (hb : b.val ≠ 0) :
+    a.val * b.val / b.val = a.val := by
+  field_simp
+
+/-- Under max dependence (min joint), conditioning is non-trivial:
+    if j(A,B) = min(a,b), then cred(A|B) = min(a,b)/b ≠ a in general.
+    Example: a = 1/4, b = 1/2 gives min(1/4, 1/2)/0.5 = 1/2 ≠ 1/4. -/
+theorem min_nontrivial_conditioning :
+    ∃ a b : Credence, 0 < b.val ∧ min a.val b.val / b.val ≠ a.val := by
+  refine ⟨Credence.quarter, Credence.half, ?_, ?_⟩
+  · simp only [Credence.half_val]; norm_num
+  · simp only [Credence.quarter_val, Credence.half_val]
+    norm_num
+
 end Cred

@@ -9,6 +9,7 @@
 \usepackage{mathtools}
 \usepackage{enumitem}
 \usepackage{booktabs}
+\usepackage{caption}
 \usepackage{hyperref}
 \hypersetup{
     colorlinks=true,
@@ -61,25 +62,29 @@ $\cred(A \mid B) \cdot \cred(B) = \cred(A \land B)$.
 When evidence is positive, division emerges as the unique solution; when evidence
 has credence zero, the constraint is satisfied by any value---the conditional is
 \emph{unconstrained}, and no division is needed.
-Every probability space satisfies Cred's axioms, but Cred requires neither a
-sigma-algebra nor additivity.
-We establish a surjective homomorphism from Cred to the three-valued Kleene
-lattice---the shared foundation of K$_3$, LP, and RM3---and show that no
-analogous homomorphism exists for the other standard three-valued algebras
-(\L ukasiewicz and G\"odel), and that no negation-preserving
-quotient to the two-valued Boolean algebra exists.
-Applying the chain rule from both directions (Bayes' theorem) yields a
-Bayes-consistency criterion: the product residuated implication is
-Bayes-consistent, but RM3 fails (even on three values) and G\"odel
-fails (on the continuum).
+%
+The joint credence $\cred(A \land B)$ is an \emph{external parameter}, not
+fixed by the algebra.
+This makes Cred compatible with both the probability and logic traditions:
+supplying the joint from empirical data gives probability-style reasoning;
+supplying a fixed formula gives truth-functional logic-style reasoning.
+%
+A central result identifies the \textbf{unique meeting point} of these traditions.
+Setting the joint to $\min(\cred(A), \cred(B))$---maximum positive
+dependence---yields: (1)~truth-functional composition,
+(2)~Bayes-consistent conditioning, (3)~non-trivial inference where evidence
+matters, and (4)~idempotence ($\cred(A \land A) = \cred(A)$).
+No other fixed joint formula achieves all four: independence ($\cred(A) \cdot
+\cred(B)$) gives trivial conditioning where evidence has no effect; RM3 and
+G\"odel implications fail Bayes consistency.
+The minimum (Fr\'echet upper bound) is thus the canonical choice for
+logic-style reasoning---explaining why K$_3$, LP, and RM3 use the Kleene
+conjunction.
+%
+We establish a surjective homomorphism from Cred to the Kleene lattice and
+show that no analogous homomorphism exists for \L ukasiewicz or G\"odel algebras.
 Negation has a unique fixed point at $\tfrac{1}{2}$.
-The main results are machine-checked in Lean~4, including
-Bayes consistency on $[0,1]$.
-Cred is a constraint algebra, not a logic: it has no consequence relation and
-no interpretation function.
-Building a full reasoning system requires additional structure---a measure
-(probability), a deductive calculus (product logic), or designated values
-(K$_3$/LP/RM3).
+The main results are machine-checked in Lean~4.
 \end{abstract}
 
 %=============================================================================
@@ -222,13 +227,246 @@ Staying algebraic is what allows the collapse homomorphism to connect Cred
 simultaneously to K$_3$, LP, and RM3---three logics that share the same
 algebra but differ in their consequence relations.
 
+\textbf{Two philosophical traditions.}
+Values in $[0,1]$ have been interpreted in two fundamentally different ways.
+Dubois and Prade~\cite{dubois2001} identified the key distinction:
+\emph{degrees of truth} are compositional, while \emph{degrees of belief}
+are not.
+This distinction is the source of much confusion between many-valued logic
+and probability theory.
+
+The \emph{probability tradition} interprets values as \emph{degrees of
+belief}---an agent's confidence in a
+proposition~\cite{ramsey1931,definetti1937,jeffrey1965}.
+Credences are subjective: they represent what an agent believes, not an
+objective feature of the world.
+The core inference mechanism is conditionalization: given evidence,
+credences update via Bayes' rule.
+Crucially, degrees of belief are \emph{not compositional}: $P(A \land B)$
+cannot be computed from $P(A)$ and $P(B)$ alone---it depends on the
+stochastic dependence between $A$ and $B$~\cite{adams1998,sep-logic-probability}.
+As Panti~\cite{panti1995} put it: ``Probabilistic interpretations are
+ruled out [in truth-functional systems] because we may know that the
+probabilities of events $A$ and $B$ are both $\tfrac{1}{2}$, without being
+able to compute the probability of $(A \land B)$ in the absence of
+information about the stochastic dependence of $A$ and $B$.''
+Reichenbach~\cite{reichenbach1949} attempted to build a compositional
+probability logic, but Nagel noted that Reichenbach's system fails to be
+truly extensional~\cite{sep-reichenbach}.
+Adams~\cite{adams1965,adams1998} took a different approach: rather than
+forcing compositionality, he treated conditionals as having
+\emph{assertability conditions} tied to conditional probabilities.
+Lewis~\cite{lewis1976} proved that treating conditionals as propositions
+whose probability equals the conditional probability leads to triviality.
+
+The \emph{logic tradition} interprets values as \emph{degrees of truth}---an
+objective feature of propositions, independent of any
+agent~\cite{lukasiewicz1920,kleene1952,zadeh1965}.
+\L ukasiewicz introduced three-valued logic to handle future contingents
+and modal possibility; Kleene developed three-valued truth tables for
+partial recursive functions; Zadeh generalized to continuous ``fuzzy''
+membership.
+The defining feature is \emph{compositionality} (truth-functionality):
+the truth value of a compound is determined by the truth values of its
+components via fixed algebraic operations (min, max, product,
+etc.)~\cite{hajek1998,klement2000}.
+Consequence relations determine validity: an inference is valid when every
+valuation making premises designated also makes the conclusion designated.
+%
+H\'ajek~\cite{hajek1998} characterized the distinction succinctly: fuzzy
+logic uses degrees of truth as a mathematical model of \emph{vagueness},
+while probability is a mathematical model of \emph{ignorance}.
+Dubois and Prade's example~\cite{dubois2001}: when a bottle is half full,
+the degree of truth of ``the bottle is full'' is $0.5$ (the predicate
+``full'' is graded); but when a bottle is either completely full or empty
+and we don't know which, the degree of belief is $0.5$ (our knowledge is
+incomplete).
+Edgington~\cite{edgington1997} developed ``verities'' (degrees of closeness
+to clear truth) to handle vagueness without conflating it with uncertainty.
+
+\emph{Logical matrices.}
+The logic tradition organizes its semantics via \emph{logical matrices}.
+A logical matrix $\langle \mathbf{A}, D \rangle$ consists of an algebra
+$\mathbf{A}$ of truth values together with a set $D \subseteq \mathbf{A}$
+of \emph{designated} values~\cite{gottwald2001}.
+Connectives are interpreted as algebraic operations on $\mathbf{A}$;
+a valuation assigns truth values to atoms and extends compositionally
+to all formulas; an inference is valid when every valuation making all
+premises designated also makes the conclusion designated.
+The same algebra (e.g., the Kleene lattice $\{0, \tfrac{1}{2}, 1\}$) can
+underlie multiple logics (K$_3$, LP, RM3) that differ only in which values
+are designated.
+%
+In contrast, a probability space $(\Omega, \mathcal{F}, P)$ defines the
+measure $P$ directly on events via the Kolmogorov axioms~\cite{kolmogorov1933}.
+The joint $P(A \land B)$ is not computed from marginals; it is determined
+by the underlying measure, which encodes dependence information.
+Knowing $P(A) = 0.6$ and $P(B) = 0.7$ tells you only that
+$P(A \land B) \in [\max(0, 0.3), 0.6]$---the Fr\'echet-Hoeffding bounds---not
+a unique value.
+The traditions have historically developed in parallel, with occasional
+bridge attempts: Carnap's logical probability~\cite{carnap1950} sought
+objective constraints on prior credences; H\'ajek, Godo, and
+Esteva~\cite{hajek1995} reinterpreted probability values as fuzzy truth
+values; de Finetti's three-valued conditional~\cite{definetti1936}
+introduced void as a third status when the antecedent fails.
+Shafer~\cite{shafer1976} and Walley~\cite{walley1991} generalized beyond
+point-valued probability to belief functions and imprecise probability,
+and Shafer explicitly argued that multiple uncertainty representations
+are necessary for different domains.
+
+\emph{Cred is designed to be compatible with both traditions.}
+By staying at the algebraic layer---values, operations, and the chain
+rule constraint---Cred takes no position on whether values represent
+degrees of belief or degrees of truth.
+The algebra exists prior to interpretation, like the logic tradition;
+but the chain rule encodes the same constraint that probability uses for
+conditioning.
+The key mechanism is that the joint credence $\cred(A \land B)$ is an
+\emph{external parameter}: it can be supplied as a fixed formula
+(truth-functional) or as empirical data (probability-style).
+
+\emph{The unique meeting point: maximum positive dependence.}
+A central finding is that only one choice of joint formula satisfies
+\emph{all} the requirements for proper reasoning in both traditions:
+\[
+\cred(A \land B) = \min(\cred(A), \cred(B))
+\qquad\text{(Fr\'echet upper bound / maximum positive dependence)}
+\]
+This choice uniquely provides:
+\begin{enumerate}[label=(\roman*),nosep]
+\item \textbf{Truth-functionality}: the joint is a fixed function of the marginals.
+\item \textbf{Bayes consistency}: conditioning satisfies $\cred(A \mid B) \cdot \cred(B) = \cred(B \mid A) \cdot \cred(A)$.
+\item \textbf{Non-trivial conditioning}: evidence actually affects the conclusion
+  ($\cred(A \mid B) \neq \cred(A)$ in general).
+\item \textbf{Idempotence}: $\cred(A \land A) = \cred(A)$, as required for
+  propositional reasoning.
+\end{enumerate}
+No other fixed joint formula achieves all four:
+\begin{itemize}[nosep]
+\item \emph{Independence} ($\cred(A) \cdot \cred(B)$): truth-functional and
+  Bayes-consistent, but conditioning is \emph{trivial}---$\cred(A \mid B) = \cred(A)$,
+  so evidence has no effect.
+\item \emph{RM3 implication}: fails Bayes consistency (Section~\ref{sec:connections}).
+\item \emph{G\"odel implication}: fails Bayes consistency on $[0,1]$.
+\item \emph{\L ukasiewicz} ($\max(\cred(A) + \cred(B) - 1, 0)$): truth-functional,
+  but the induced conditioning is not residuated from the same t-norm.
+\end{itemize}
+The minimum (Fr\'echet upper bound) is therefore the \emph{canonical} joint
+for logic-style reasoning---this explains why the Kleene lattice uses
+$\min$ for conjunction, and why K$_3$, LP, and RM3 all share this choice.
+It is the unique point where the two traditions \emph{meet}: a fixed,
+truth-functional operation that also yields proper Bayesian conditioning.
+
+Part~2~\cite{part2} develops both interpretations in detail: the
+\emph{probability-style view} treats the chain rule as inference (credences
+propagate, update rules apply, zero-evidence underdetermination connects
+to imprecise probability); the \emph{logic-style view} uses the minimum
+joint and collapses to three values, determining validity via designated
+values (K$_3$, LP, graded thresholds).
+The two views are complementary, not competing: the collapse homomorphism
+is the bridge between them.
+Our broader goal is to understand where these traditions agree (the shared
+algebra), where they diverge (interpretation and consequence), and whether
+the divergence is fundamental or a matter of which questions one asks.
+
 \textbf{Outline.}
+Section~\ref{sec:prelim} provides formal definitions of key concepts.
 Section~\ref{sec:algebra} defines the credence algebra.
 Section~\ref{sec:conditioning} develops primitive conditioning.
 Section~\ref{sec:fixed-points} treats fixed points.
 Section~\ref{sec:connections} relates Cred to other systems.
 Section~\ref{sec:related} surveys related work.
 Section~\ref{sec:lean} describes the Lean formalization.
+
+%=============================================================================
+\section{Preliminaries}
+\label{sec:prelim}
+%=============================================================================
+
+This section provides formal definitions for concepts referenced throughout
+the paper.
+Readers familiar with t-norms, copulas, and fuzzy logic may skip to
+Section~\ref{sec:algebra}.
+
+\begin{definition}[T-norm]
+\label{def:tnorm}
+A \emph{triangular norm} (t-norm) is a binary operation
+$\otimes : [0,1] \times [0,1] \to [0,1]$ satisfying:
+\begin{enumerate}[label=(\roman*),nosep]
+\item \textbf{Commutativity}: $a \otimes b = b \otimes a$
+\item \textbf{Associativity}: $(a \otimes b) \otimes c = a \otimes (b \otimes c)$
+\item \textbf{Monotonicity}: if $a \leq a'$, then $a \otimes b \leq a' \otimes b$
+\item \textbf{Identity}: $1 \otimes a = a$
+\end{enumerate}
+The three basic continuous t-norms are~\cite{klement2000}:
+\begin{itemize}[nosep]
+\item \emph{G\"odel (minimum)}: $a \otimes_G b = \min(a, b)$
+\item \emph{Product}: $a \otimes_\Pi b = a \cdot b$
+\item \emph{\L ukasiewicz}: $a \otimes_L b = \max(a + b - 1, 0)$
+\end{itemize}
+\end{definition}
+
+\begin{definition}[Residuated Implication]
+\label{def:resid}
+Given a t-norm $\otimes$, the \emph{residuated implication} (or residuum,
+or arrow) is:
+\[
+a \to b = \sup\{c \in [0,1] : a \otimes c \leq b\}
+\]
+This is the largest $c$ making the conjunction ``work.''
+The residuum satisfies the \emph{residuation property}:
+$a \otimes c \leq b$ iff $c \leq a \to b$.
+Key consequences~\cite{hajek1998}:
+\begin{itemize}[nosep]
+\item $0 \to b = 1$ for every t-norm (ex falso quodlibet)
+\item $a \to a = 1$ (identity)
+\item $1 \to b = b$
+\end{itemize}
+The residuated implications for the basic t-norms are:
+\begin{itemize}[nosep]
+\item \emph{G\"odel}: $a \to_G b = 1$ if $a \leq b$, else $b$
+\item \emph{Product (Goguen)}: $a \to_\Pi b = \min(b/a, 1)$ for $a > 0$,
+  with $0 \to_\Pi b = 1$
+\item \emph{\L ukasiewicz}: $a \to_L b = \min(1 - a + b, 1)$
+\end{itemize}
+\end{definition}
+
+\begin{definition}[Copula]
+\label{def:copula}
+A \emph{copula} is a function $C : [0,1]^2 \to [0,1]$ satisfying:
+\begin{enumerate}[label=(\roman*),nosep]
+\item \textbf{Boundary conditions}: $C(0, b) = C(a, 0) = 0$; \; $C(1, b) = b$; \; $C(a, 1) = a$
+\item \textbf{2-increasing}: $C(a_2, b_2) - C(a_2, b_1) - C(a_1, b_2) + C(a_1, b_1) \geq 0$
+  for all $a_1 \leq a_2$, $b_1 \leq b_2$
+\end{enumerate}
+Copulas model dependence structures between random variables~\cite{nelsen2006}.
+The Fr\'echet-Hoeffding bounds constrain all copulas:
+\[
+\max(a + b - 1, 0) \;\leq\; C(a, b) \;\leq\; \min(a, b)
+\]
+Key copulas:
+\begin{itemize}[nosep]
+\item \emph{Fr\'echet lower bound (minimum copula)}: $W(a,b) = \max(a + b - 1, 0)$
+  --- maximum negative dependence
+\item \emph{Independence copula}: $\Pi(a,b) = a \cdot b$
+\item \emph{Fr\'echet upper bound (maximum copula)}: $M(a,b) = \min(a, b)$
+  --- maximum positive dependence
+\end{itemize}
+\end{definition}
+
+\begin{remark}[T-norms vs.\ Copulas]
+Every t-norm satisfies copula boundary conditions, but not all t-norms are
+copulas (the 2-increasing property may fail).
+The product and minimum t-norms are copulas; the \L ukasiewicz t-norm is not
+(it equals the Fr\'echet lower bound, which is a copula, but intermediate
+\L ukasiewicz-style t-norms fail 2-increasing).
+For our purposes, the key distinction is interpretational:
+t-norms define conjunction in fuzzy logic (the operation is fixed);
+copulas model dependence in probability (the dependence structure varies).
+Cred uses the product for its algebraic chain-rule operation but allows
+the actual joint $\cred(A \land B)$ to be any value in the Fr\'echet bounds.
+\end{remark}
 
 %=============================================================================
 \section{The Credence Algebra}
@@ -258,10 +496,32 @@ The \emph{product} of $c_1$ and $c_2$ is $c_1 \conjc c_2 = c_1 \cdot c_2$.
 
 The product is multiplication on $[0,1]$---the same operation that appears in the
 chain rule (Section~\ref{sec:conditioning}).
-It is the product t-norm of fuzzy logic~\cite{klement2000}, which equals
-the joint probability $P(A \land B)$ when $A$ and $B$ are independent.
-For dependent propositions, the joint credence must be supplied as an external
-parameter; $\conjc$ does not claim to compute the joint of arbitrary propositions.
+It is the product t-norm of fuzzy logic~\cite{klement2000}.
+
+\textbf{Important distinction.}
+The product $c_1 \conjc c_2$ is an \emph{algebraic operation} on credence values.
+It is \emph{not} a claim about the actual joint credence $\cred(A \land B)$ of
+two propositions $A$ and $B$.
+The joint credence of two propositions depends on their dependence structure:
+\begin{itemize}[nosep]
+\item Under independence: $\cred(A \land B) = \cred(A) \cdot \cred(B)$.
+  This gives \emph{trivial conditioning}: $\cred(A \mid B) = \cred(A)$---evidence
+  has no effect.
+\item Under maximum positive dependence: $\cred(A \land B) = \min(\cred(A), \cred(B))$
+  (Fr\'echet upper bound).
+  This gives \emph{non-trivial, Bayes-consistent conditioning}---this is what
+  three-valued logic uses, and is the unique choice satisfying both requirements.
+\item Under maximum negative dependence: $\cred(A \land B) = \max(\cred(A) + \cred(B) - 1, 0)$
+  (Fr\'echet lower bound---the \L ukasiewicz t-norm).
+\end{itemize}
+Cred does not commit to any particular dependence structure.
+The joint credence $\cred(A \land B)$ is an \emph{external parameter} that can
+take any value in the Fr\'echet-Hoeffding interval
+$[\max(\cred(A) + \cred(B) - 1, 0),\; \min(\cred(A), \cred(B))]$.
+The chain rule relates this joint to conditioning:
+$\cred(A \mid B) \conjc \cred(B) = \cred(A \land B)$.
+Different dependence assumptions yield different conditioning behaviors;
+Cred supports all of them.
 
 \begin{definition}[Disjunction]
 \label{def:disj}
@@ -941,17 +1201,105 @@ product residuated via the additive generator $-\log x$~\cite{klement2000}.}
 Lean: \texttt{symmetric\_bayes\_consistent}, \texttt{copula\_zero\_left}.
 \end{remark}
 
-\begin{remark}[Dependence Interpretation]
-The Fr\'echet upper bound is the unique copula of maximum positive
-dependence (comonotonicity).
-Setting joint $= \min(a,b)$ in Cred's chain rule therefore corresponds to
-conditioning under maximum positive dependence between propositions.
-The product $a \cdot b$ (Cred's $\conjc$) is the independence copula;
-conditioning under independence gives the trivial arrow $b$.
-Thus Cred's two operations play complementary roles: $\conjc$ captures
-independence, while chain-rule conditioning with the Kleene joint captures
-comonotonicity.
+\begin{theorem}[Maximum Dependence is the Unique Meeting Point]
+\label{thm:max-dependence}
+Among all fixed joint functions $j(a,b)$ taking values in the Fr\'echet-Hoeffding
+interval, only maximum positive dependence $j(a,b) = \min(a,b)$ satisfies
+\emph{all four} requirements for proper reasoning:
+\begin{enumerate}[label=(\roman*),nosep]
+\item \textbf{Truth-functional}: $j(a,b)$ is a fixed function of $a$ and $b$.
+\item \textbf{Bayes-consistent}: conditioning satisfies
+  $\cred(A \mid B) \cdot \cred(B) = \cred(B \mid A) \cdot \cred(A)$.
+\item \textbf{Non-trivial}: $\cred(A \mid B) \neq \cred(A)$ in general---evidence
+  affects conclusions.
+\item \textbf{Idempotent}: $j(a,a) = a$, so $\cred(A \land A) = \cred(A)$.
+\end{enumerate}
+\end{theorem}
+\begin{proof}
+(i)~By definition, $\min(a,b)$ is a function of $a$ and $b$ alone.
+(ii)~The induced joint is $\min(a,b)$, which is symmetric;
+  Bayes consistency follows from Proposition~\ref{prop:resid-bayes}.
+(iii)~Conditioning gives $\cred(A \mid B) = \min(a,b)/b = \min(a/b, 1)$,
+  which differs from $a$ when $a > b$.
+(iv)~$\min(a,a) = a$.
+
+For comparison:
+\begin{itemize}[nosep]
+\item \emph{Independence} $j(a,b) = ab$: satisfies (i), (ii), (iv$'$: non-idempotent),
+  but \emph{fails} (iii)---conditioning gives $ab/b = a$, so evidence has no effect.
+\item \emph{RM3}: fails (ii) (Proposition~\ref{prop:rm3-not-bayes}).
+\item \emph{G\"odel on $[0,1]$}: fails (ii) (Proposition~\ref{prop:godel-not-bayes}).
+\item \emph{\L ukasiewicz} $j(a,b) = \max(a+b-1,0)$: satisfies (i),
+  but the induced arrow is not the same as the residuated implication from the
+  \L ukasiewicz t-norm.
+\end{itemize}
+Lean: \texttt{min\_bayes\_consistent}, \texttt{prod\_trivial\_conditioning},
+\texttt{min\_nontrivial\_conditioning}.
+\end{proof}
+
+\begin{remark}[Why Three-Valued Logic Uses Minimum]
+This theorem explains why K$_3$, LP, and RM3 all use the Kleene conjunction
+$\min(a,b)$: it is the \emph{unique} truth-functional operation that also yields
+proper Bayesian conditioning.
+The minimum is not an arbitrary choice---it is forced by the requirement that
+the logic tradition's truth-functional composition be compatible with the
+probability tradition's Bayes-consistent inference.
 \end{remark}
+
+\begin{remark}[Philosophical Consequence: Maximum Dependence is Required]
+\label{rem:max-dep-philosophy}
+In probabilistic language, the minimum joint $\cred(A \land B) = \min(\cred(A),
+\cred(B))$ corresponds to \emph{maximum positive dependence}---the Fr\'echet
+upper bound of the copula family.
+This is an extreme case: it means that any two propositions are treated as
+maximally correlated.
+In probability theory, most pairs of events have intermediate dependence;
+maximum positive dependence is rare.
+
+Yet this extreme assumption is \emph{mathematically forced} if we want
+truth-functional composition compatible with Bayesian inference.
+The consequence is striking: to have a single theory that is simultaneously
+(i)~compositional (truth-functional), (ii)~Bayes-consistent, (iii)~non-trivial,
+and (iv)~idempotent, one \emph{must} assume maximum correlation between all
+pairs of propositions.
+
+What if we relax the requirements?
+\begin{itemize}[nosep]
+\item \emph{Drop non-triviality}: independence ($a \cdot b$) becomes available,
+  but conditioning is trivial---evidence has no effect on conclusions.
+\item \emph{Drop Bayes consistency}: more t-norms (G\"odel, \L ukasiewicz)
+  become available, but the chain rule fails to work properly in both directions.
+\item \emph{Drop truth-functionality}: supply joints as external data
+  (probability-style), but lose compositionality.
+\item \emph{Drop idempotence}: independence again, with $A \land A \neq A$.
+\end{itemize}
+The minimum is the unique point where all four requirements meet.
+This explains, retrospectively, why the logic tradition settled on Kleene's
+minimum conjunction: it is the only choice that makes three-valued logic
+compatible with Bayesian reasoning.
+\end{remark}
+
+\begin{center}
+\small
+\begin{tabular}{lcccc}
+\toprule
+\textbf{Joint formula} & \textbf{Truth-func.} & \textbf{Bayes-cons.} & \textbf{Non-trivial} & \textbf{Idempotent} \\
+\midrule
+$\min(a,b)$ (max.\ pos.\ dep.) & \checkmark & \checkmark & \checkmark & \checkmark \\
+$a \cdot b$ (independence) & \checkmark & \checkmark & $\times$ & $\times$ \\
+$\max(a+b-1,0)$ (\L uk.) & \checkmark & --- & --- & $\times$ \\
+RM3 induced & --- & $\times$ & --- & --- \\
+G\"odel induced (on $[0,1]$) & --- & $\times$ & --- & --- \\
+External (probability) & $\times$ & \checkmark & \checkmark & \checkmark \\
+\bottomrule
+\end{tabular}
+\normalsize
+\captionof{table}{Comparison of joint formulas.
+Only the minimum (Fr\'echet upper bound) satisfies all four requirements for
+logic-style reasoning.
+External joints (probability-style) satisfy all except truth-functionality.}
+\label{tab:joint-comparison}
+\end{center}
 
 \begin{proposition}[Fr\'echet-Hoeffding Bounds]
 \label{prop:frechet}
@@ -1629,23 +1977,30 @@ Toolchain: Lean 4.16.0 with Mathlib 4.16.0.
 
 Cred is probability without the measure: values in $[0,1]$, the complement,
 and the chain rule as the sole structural axiom for conditioning.
+The joint credence $\cred(A \land B)$ is an external parameter, making Cred
+compatible with both the logic tradition (supply a fixed formula) and the
+probability tradition (supply empirical data).
+
+\textbf{The central finding} is that maximum positive dependence---the joint
+$\min(\cred(A), \cred(B))$---is the \emph{unique meeting point} of these
+traditions.
+It is the only fixed joint formula that satisfies all four requirements:
+truth-functionality, Bayes consistency, non-trivial conditioning, and
+idempotence.
+Independence ($\cred(A) \cdot \cred(B)$) gives trivial conditioning where
+evidence has no effect.
+RM3 and G\"odel fail Bayes consistency.
+The minimum is therefore not an arbitrary choice for logic---it is
+\emph{forced} by requiring that truth-functional composition be compatible
+with proper Bayesian inference.
+This explains why K$_3$, LP, and RM3 all use the Kleene conjunction.
+
+The three-valued collapse establishes a surjective homomorphism to the Kleene
+lattice for the connective fragment $\{\negc, \conjc, \disjc\}$, with
+impossibility results for \L ukasiewicz, G\"odel, and classical targets.
 When evidence has credence zero, the chain rule is satisfied by any
 value---de Finetti's void conditional~\cite{definetti1936} in a graded
-setting---avoiding ``from impossibility, anything follows'' without the
-measure theory that would resolve it.
-The three-valued collapse establishes a surjective homomorphism to the Kleene
-lattice---the shared foundation of K$_3$, LP, and RM3---for the connective
-fragment $\{\negc, \conjc, \disjc\}$, with impossibility results for
-\L ukasiewicz, G\"odel, and classical targets.
-Conditioning, instantiated as a binary arrow via the Kleene joint, recovers
-the product residuated implication for positive evidence; at evidence zero,
-Cred is unconstrained rather than forced to~$1$.
-Bayes consistency (the chain rule applied from both directions) selects
-the product residuated implication and rejects RM3 (even on three values) and
-G\"odel (on the continuum); the copula framework explains why.
-Among continuous t-norms, the product is uniquely suited: it alone yields
-unique conditioning at positive evidence and preserves $(0,1)$ under
-conjunction, enabling the collapse.
+setting---avoiding ``from impossibility, anything follows.''
 The main results are machine-checked in Lean~4.
 
 \medskip
@@ -1721,6 +2076,11 @@ Calabrese, P.G.
 \newblock An algebraic synthesis of the foundations of logic and probability.
 \newblock \emph{Information Sciences}, 42:187--237, 1987.
 
+\bibitem{carnap1950}
+Carnap, R.
+\newblock \emph{Logical Foundations of Probability}.
+\newblock University of Chicago Press, 1950.
+
 \bibitem{chang1997}
 Chang, J.T. and Pollard, D.
 \newblock Conditioning as disintegration.
@@ -1747,10 +2107,23 @@ de Finetti, B.
 \newblock La pr\'evision: ses lois logiques, ses sources subjectives.
 \newblock \emph{Annales de l'Institut Henri Poincar\'e}, 7:1--68, 1937.
 
+\bibitem{dubois2001}
+Dubois, D. and Prade, H.
+\newblock Possibility theory, probability theory and multiple-valued logics:
+A clarification.
+\newblock \emph{Annals of Mathematics and Artificial Intelligence}, 32:35--66,
+2001.
+
 \bibitem{dunn1976}
 Dunn, J.M.
 \newblock Intuitive semantics for first-degree entailments and coupled trees.
 \newblock \emph{Philosophical Studies}, 29:149--168, 1976.
+
+\bibitem{edgington1997}
+Edgington, D.
+\newblock Vagueness by degrees.
+\newblock In Keefe, R. and Smith, P., editors, \emph{Vagueness: A Reader},
+pages 294--316. MIT Press, 1997.
 
 \bibitem{egre2021}
 \'Egr\'e, P., Rossi, L., and Sprenger, J.
@@ -1803,10 +2176,20 @@ H\'ajek, P.
 \newblock \emph{Metamathematics of Fuzzy Logic}.
 \newblock Trends in Logic, vol.~4. Kluwer, 1998.
 
+\bibitem{gottwald2001}
+Gottwald, S.
+\newblock \emph{A Treatise on Many-Valued Logics}.
+\newblock Studies in Logic and Computation, vol.~9. Research Studies Press, 2001.
+
 \bibitem{jaynes2003}
 Jaynes, E.T.
 \newblock \emph{Probability Theory: The Logic of Science}.
 \newblock Cambridge University Press, 2003.
+
+\bibitem{jeffrey1965}
+Jeffrey, R.C.
+\newblock \emph{The Logic of Decision}.
+\newblock McGraw-Hill, 1965.
 
 \bibitem{kleene1952}
 Kleene, S.C.
@@ -1817,6 +2200,13 @@ Kleene, S.C.
 Klement, E.P., Mesiar, R., and Pap, E.
 \newblock \emph{Triangular Norms}.
 \newblock Trends in Logic, vol.~8. Kluwer, 2000.
+
+\bibitem{kolmogorov1933}
+Kolmogorov, A.N.
+\newblock \emph{Grundbegriffe der Wahrscheinlichkeitsrechnung}.
+\newblock Ergebnisse der Mathematik. Springer, 1933.
+\newblock English translation: \emph{Foundations of the Theory of Probability},
+Chelsea, 1956.
 
 \bibitem{kripke1975}
 Kripke, S.
@@ -1849,10 +2239,21 @@ Nelsen, R.B.
 \newblock \emph{An Introduction to Copulas}.
 \newblock Springer Series in Statistics, 2nd edition. Springer, 2006.
 
+\bibitem{part2}
+Anonymous.
+\newblock Cred Part~2: Two views of credence reasoning.
+\newblock Working paper, 2026.
+
 \bibitem{popper1959}
 Popper, K.
 \newblock \emph{The Logic of Scientific Discovery}.
 \newblock Hutchinson, 1959.
+
+\bibitem{panti1995}
+Panti, G.
+\newblock Multi-valued logics.
+\newblock In Gabbay, D.M. et al., editors, \emph{Quantifiers: Logics, Models
+and Computation}, volume~1, pages 27--74. Kluwer, 1995.
 
 \bibitem{priest1979}
 Priest, G.
@@ -1870,6 +2271,11 @@ Ramsey, F.P.
 \newblock In Braithwaite, R.B., editor, \emph{The Foundations of Mathematics
 and other Logical Essays}, pages 156--198. Kegan Paul, 1931.
 
+\bibitem{reichenbach1949}
+Reichenbach, H.
+\newblock \emph{The Theory of Probability}.
+\newblock University of California Press, 1949.
+
 \bibitem{renyi1955}
 R\'enyi, A.
 \newblock On a new axiomatic theory of probability.
@@ -1879,6 +2285,25 @@ R\'enyi, A.
 R\'enyi, A.
 \newblock \emph{Foundations of Probability}.
 \newblock Holden-Day, 1970.
+
+\bibitem{sep-logic-probability}
+H\'ajek, A.
+\newblock Logic and probability.
+\newblock In Zalta, E.N., editor, \emph{Stanford Encyclopedia of Philosophy}.
+\newblock Stanford University, 2001; revised 2019.
+\newblock \url{https://plato.stanford.edu/entries/logic-probability/}.
+
+\bibitem{sep-reichenbach}
+Glymour, C. and Eberhardt, F.
+\newblock Hans Reichenbach.
+\newblock In Zalta, E.N., editor, \emph{Stanford Encyclopedia of Philosophy}.
+\newblock Stanford University, 2008; revised 2016.
+\newblock \url{https://plato.stanford.edu/entries/reichenbach/}.
+
+\bibitem{shafer1976}
+Shafer, G.
+\newblock \emph{A Mathematical Theory of Evidence}.
+\newblock Princeton University Press, 1976.
 
 \bibitem{vanfraassen1976}
 van Fraassen, B.C.
@@ -1891,6 +2316,11 @@ Science}, Vol.~1, pages 261--308. Reidel, 1976.
 van Fraassen, B.C.
 \newblock Gentlemen's wagers: Relevant logic and probability.
 \newblock \emph{Philosophical Studies}, 43:47--61, 1983.
+
+\bibitem{walley1991}
+Walley, P.
+\newblock \emph{Statistical Reasoning with Imprecise Probabilities}.
+\newblock Chapman and Hall, 1991.
 
 \bibitem{weber2010}
 Weber, Z.

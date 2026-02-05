@@ -44,8 +44,8 @@
 \newcommand{\Real}{\mathbb{R}}
 \newcommand{\Nat}{\mathbb{N}}
 
-\title{\textbf{Cred Part~2: From Algebra to Reasoning}\\[0.5em]
-\large Valuations, Consequence, Update, and Graded Predicates}
+\title{\textbf{Cred Part~2: Two Views of Credence Reasoning}\\[0.5em]
+\large Probability-Style and Logic-Style Interpretations}
 
 \author{Anonymous for blind review}
 \date{February 2026}
@@ -56,21 +56,37 @@
 
 \begin{abstract}
 Part~1 established \emph{Cred} as a constraint algebra on $[0,1]$: values,
-complement, product conjunction, De~Morgan disjunction, and the chain rule
-for conditioning.
-This paper adds three layers---\emph{valuations} (assigning credences to
-propositions), \emph{consequence relations} (determining which inferences
-preserve credence), and \emph{update rules} (revising credences given new
-evidence)---and extends to first order via \emph{graded predicates} with
-inf/sup quantifiers.
-Different choices at each layer recover different systems: probability,
-product fuzzy logic, K$_3$, LP, and RM3; zero-evidence
-underdetermination connects to imprecise probability.
-We prove that explosion (the classical principle that a contradiction
-entails every proposition) fails non-vacuously for LP and for graded
-consequence at thresholds $0 < t \leq \tfrac{1}{2}$
-(K$_3$ has explosion only vacuously, a standard result), and that the
-Russell predicate yields credence~$\tfrac{1}{2}$ rather than a paradox.
+complement, the product operation, and the chain rule for conditioning.
+The key design choice: the joint credence $\cred(A \land B)$ is an
+\emph{external parameter}, not fixed by the algebra.
+This makes Cred compatible with both probability and many-valued logic.
+%
+Part~1's central finding is that maximum positive dependence---the joint
+$\min(\cred(A), \cred(B))$---is the \emph{unique} fixed formula satisfying
+all requirements for proper reasoning: truth-functionality, Bayes
+consistency, non-trivial conditioning (evidence matters), and idempotence.
+Independence ($\cred(A) \cdot \cred(B)$) gives \emph{trivial} conditioning
+where evidence has no effect; other choices fail Bayes consistency.
+%
+This paper develops both interpretations of Cred.
+The \emph{probability-style view} supplies joints from empirical data:
+credences propagate via Bayesian and Jeffrey conditionalization,
+uncertainty remains graded, and zero-evidence underdetermination connects
+to imprecise probability.
+The \emph{logic-style view} uses the minimum joint (maximum dependence) and
+collapses to three values; designated-value consequence gives K$_3$
+(designating $\{1\}$), LP (designating $\{1, \tfrac{1}{2}\}$), or graded
+thresholds.
+The minimum is not arbitrary---it is \emph{forced} by requiring truth-functional
+composition compatible with proper Bayesian inference.
+%
+Explosion fails non-vacuously for LP and for graded consequence at
+thresholds $0 < t \leq \tfrac{1}{2}$; K$_3$ has explosion only vacuously.
+The two views are complementary: probability-style answers ``how confident
+should I be?''; logic-style answers ``is this valid to conclude?''
+We extend to first order via graded predicates with inf/sup quantifiers,
+showing that the Russell predicate yields credence~$\tfrac{1}{2}$ rather
+than a paradox.
 The main definitions and theorems are machine-checked in Lean~4.
 \end{abstract}
 
@@ -79,83 +95,184 @@ The main definitions and theorems are machine-checked in Lean~4.
 \label{sec:intro}
 %=============================================================================
 
-An algebra of credence values specifies how values relate to one
-another---how negation, conjunction, and conditioning interact on $[0,1]$.
-To reason with credences, three further capabilities are needed.
-First, an \emph{interpretation}: a way to assign credence values to
-propositions.
-In many-valued logic this is called a \emph{valuation}---a function from
-propositions to truth values~\cite{priest2008}; here the truth values are
-the full interval $[0,1]$.
-Second, a \emph{consequence relation}: a specification of which inferences
-are valid---when does accepting the premises (at some credence level)
-force acceptance of the conclusion~\cite{priest2008}?
-In classical logic, consequence has \emph{explosion} (ex falso quodlibet):
-from a proposition and its negation, any conclusion follows.
-Third, an \emph{update rule}: a prescription for revising all credences
-when new evidence arrives, generalizing Bayesian
-conditionalization~\cite{jeffrey1965}.
+\subsection*{Two philosophical traditions}
 
-Part~1~\cite{part1} provides the algebra: values in $[0,1]$, complement
-$\negc c = 1 - c$, product conjunction
-$c_1 \conjc c_2 = c_1 \cdot c_2$, De~Morgan disjunction
-$c_1 \disjc c_2 = \negc(\negc c_1 \conjc \negc c_2)$, and the chain rule
-$\condc{A}{B} \cdot \cred(B) = \cred(A \land B)$.
-This paper adds the three layers above:
+Values in $[0,1]$ have been interpreted in two fundamentally different ways.
+Dubois and Prade~\cite{dubois2001} identified the key distinction:
+\emph{degrees of truth} are compositional, while \emph{degrees of belief}
+are not.
+
+The \emph{probability tradition} treats values as \emph{degrees of belief}---an
+agent's confidence in a proposition~\cite{ramsey1931,definetti1937}.
+Crucially, degrees of belief are \emph{not compositional}: $P(A \land B)$
+cannot be computed from $P(A)$ and $P(B)$ alone because it depends on
+the stochastic dependence between $A$ and $B$.
+Dubois and Prade's example: when a bottle is either completely full or empty
+and we don't know which, the degree of belief that it is full is $0.5$
+(our knowledge is incomplete).
+
+The \emph{logic tradition} treats values as \emph{degrees of truth}---an
+objective feature of propositions~\cite{lukasiewicz1920,kleene1952,zadeh1965}.
+The defining feature is \emph{compositionality} (truth-functionality):
+compound values are computed from component values via fixed algebraic
+operations.
+Dubois and Prade's example: when a bottle is half full, the degree of truth
+of ``the bottle is full'' is $0.5$ (the predicate ``full'' is graded).
+Many-valued logic uses \emph{logical matrices} $\langle \mathbf{A}, D
+\rangle$---an algebra of truth values together with designated
+values---to define validity~\cite{gottwald2001}.
+
+The two traditions ask different questions: ``How confident should I be?''
+versus ``Is this valid to conclude?''
+
+\subsection*{Cred: an algebra compatible with both traditions}
+
+Part~1~\cite{part1} introduced \emph{Cred}, a constraint algebra on $[0,1]$
+designed to be agnostic between these traditions.
+The primitives are:
+\begin{itemize}[nosep]
+\item \emph{Values} in $[0,1]$, with $0$ as impossibility and $1$ as certainty;
+\item \emph{Complement} $\negc c = 1 - c$;
+\item \emph{Product} $c_1 \conjc c_2 = c_1 \cdot c_2$ (an algebraic operation
+  used in the chain rule);
+\item \emph{Conditioning} via the \textbf{chain rule}:
+  $\condc{A}{B} \conjc \cred(B) = \cred(A \land B)$.
+\end{itemize}
+The chain rule is the same constraint used in probability theory, but Cred
+imposes no additivity or measure-theoretic structure.
+
+\textbf{The joint is external.}
+The product $\conjc$ is an algebraic operation on credence values---it is
+\emph{not} a claim about the actual joint credence $\cred(A \land B)$ of two
+propositions.
+The joint credence depends on the dependence structure between propositions:
+under independence, the joint is the product of marginals;
+under maximum positive dependence (as in three-valued logic), it is the minimum;
+under maximum negative dependence, it is the \L ukasiewicz t-norm.
+Cred does not commit to any particular dependence structure---the joint is an
+\emph{external parameter} that can take any value in the Fr\'echet-Hoeffding
+bounds.
+This is what makes Cred a \emph{superset} of both the probability and logic
+traditions: it can instantiate either by supplying the appropriate joint.
+
+When $\cred(B) = 0$, the chain rule places \emph{no constraint} on
+$\condc{A}{B}$---any value satisfies the equation.
+This is the key design choice: impossible evidence provides no information,
+avoiding the explosion that would arise from treating $0$ as privileged.
+
+\textbf{The unique meeting point: maximum positive dependence.}
+Part~1's central finding is that only one choice of joint formula satisfies
+\emph{all} the requirements for proper reasoning in both traditions:
+the minimum $\cred(A \land B) = \min(\cred(A), \cred(B))$ (maximum positive
+dependence, Fr\'echet upper bound).
+This choice uniquely provides:
+\begin{enumerate}[label=(\roman*),nosep]
+\item \textbf{Truth-functionality}: the joint is a fixed function of the marginals.
+\item \textbf{Bayes consistency}: conditioning satisfies Bayes' theorem.
+\item \textbf{Non-trivial conditioning}: evidence affects conclusions.
+\item \textbf{Idempotence}: $\cred(A \land A) = \cred(A)$.
+\end{enumerate}
+No other fixed formula achieves all four:
+\emph{independence} ($\cred(A) \cdot \cred(B)$) gives \emph{trivial}
+conditioning where evidence has no effect ($\cred(A \mid B) = \cred(A)$);
+RM3 and G\"odel implications fail Bayes consistency.
+The minimum is therefore the \emph{canonical} joint for logic-style
+reasoning---this is why K$_3$, LP, and RM3 all use the Kleene conjunction.
+It is the unique point where truth-functional composition meets proper
+Bayesian inference.
+
+Part~1 also established:
+\begin{itemize}[nosep]
+\item The self-referential equation $c = \negc c$ has a unique fixed point
+  $c = \tfrac{1}{2}$, defusing the liar paradox;
+\item A \emph{collapse homomorphism} maps $[0,1]$ to the Kleene lattice
+  $\{0, \tfrac{1}{2}, 1\}$, connecting Cred to three-valued logics (K$_3$, LP,
+  RM3);
+\item Cred's conditioning avoids explosion: even when $\cred(A) > 0$ and
+  $\cred(\negc A) > 0$, arbitrary conclusions do not follow.
+\end{itemize}
+
+\subsection*{This paper: two views of Cred}
+
+This paper asks: how do we \emph{use} Cred's algebra for reasoning?
+The answer is that Cred admits two complementary interpretations---one
+probability-style, one logic-style---and the choice depends on what question
+you are asking:
+
+\begin{description}
+\item[Probability-style view.]
+The chain rule \emph{is} inference.
+Credences propagate through reasoning: given any two of (joint, evidence,
+conditional), the chain rule determines the third.
+Uncertainty remains graded---there is no final yes/no verdict.
+Update rules (Bayesian and Jeffrey conditionalization) revise entire
+credence assignments when evidence arrives.
+When evidence has credence zero, the conditional is unconstrained,
+yielding interval-valued posteriors that connect to imprecise
+probability~\cite{walley1991}.
+
+\item[Logic-style view.]
+Fix the joint to the minimum (maximum positive dependence)---the unique
+truth-functional choice with non-trivial Bayes-consistent conditioning.
+Collapse credences to discrete values via Part~1's homomorphism to the
+Kleene lattice $\{0, \tfrac{1}{2}, 1\}$.
+Designating $\{1\}$ gives K$_3$ (paracomplete); designating
+$\{1, \tfrac{1}{2}\}$ gives LP (paraconsistent).
+Graded consequence on $[0,1]$ parametrizes validity by a threshold~$t$:
+an inference is valid when every valuation making premises $\geq t$
+also makes the conclusion $\geq t$.
+\end{description}
+
+\noindent
+The two views answer different questions.
+Probability-style asks ``how confident should I be?''---the output is a
+credence in $[0,1]$.
+Logic-style asks ``is this valid to conclude?''---the output is yes or no,
+determined by whether the credence meets the designation criterion.
+Neither view is ``correct''; they are complementary tools for different
+purposes.
+The collapse homomorphism is the bridge: it converts probability-style
+reasoning to logic-style judgments.
 
 \begin{center}
 \small
 \begin{tabular}{lll}
 \toprule
-\textbf{Layer} & \textbf{Mechanism} & \textbf{Section} \\
+\textbf{View} & \textbf{Core mechanism} & \textbf{Section} \\
 \midrule
-Interpretation & Valuations (independent and joint-parametrized)
-  & Section~\ref{sec:valuations} \\
-Consequence & Designated-value (K$_3$, LP, RM3) and graded
-  & Section~\ref{sec:consequence} \\
-Update & Bayesian and Jeffrey conditionalization
-  & Section~\ref{sec:update} \\
+Probability-style & Chain rule / update rules & Sections~\ref{sec:valuations}, \ref{sec:update} \\
+Logic-style & Collapse / designated values & Section~\ref{sec:consequence} \\
+Comparison & Two views contrasted & Section~\ref{sec:comparison} \\
 \bottomrule
 \end{tabular}
 \normalsize
 \end{center}
 
 \noindent
-Each layer admits multiple instantiations, and different combinations
-recover different known systems.
-Independent valuations recover product fuzzy logic~\cite{hajek1998};
-joint-parametrized valuations recover probability-like behavior.
-Designated-value consequence yields K$_3$, LP, or RM3 depending on which
-truth values are accepted~\cite{priest2008}; graded consequence
-parametrizes validity by a threshold.
-Bayesian and Jeffrey update both derive from the chain rule.
-
-The paper then extends to first order via graded predicates
-(Section~\ref{sec:predicates})---functions from a domain to
-$[0,1]$, generalizing fuzzy set membership~\cite{zadeh1965}---with
-inf/sup quantifiers satisfying duality, and shows that the
-self-referential equation $c = \negc c$ (as would arise from
-unrestricted comprehension) yields a fixed point ($\tfrac{1}{2}$)
-rather than a paradox.
+The paper also extends to first order via graded predicates
+(Section~\ref{sec:predicates})---functions from a domain to $[0,1]$,
+generalizing fuzzy set membership~\cite{zadeh1965}---with inf/sup
+quantifiers satisfying duality.
+The self-referential equation $c = \negc c$ (as would arise from
+unrestricted comprehension) yields a fixed point ($\tfrac{1}{2}$) rather
+than a paradox.
 
 \textbf{Contributions.}
 \begin{enumerate}[label=(\arabic*)]
-\item Cred valuations with complement preservation, including independent
-valuations (homomorphisms for product fuzzy logic) and joint-parametrized
-valuations (where the joint is external data, as in probability), with the
-idempotence problem as a diagnostic for independence
-(Section~\ref{sec:valuations}).
-\item Consequence relations in two families: designated-value consequence
-(K$_3$, LP, RM3) via the three-valued collapse, and graded consequence
-parametrized by a threshold on $[0,1]$.
+\item The two-views framing: Cred can be interpreted probability-style
+(credences propagate, uncertainty remains graded) or logic-style
+(collapse to discrete values, validity via designation).
+The views are complementary, with the collapse as the bridge
+(Section~\ref{sec:comparison}).
+\item Probability-style reasoning: joint-parametrized valuations,
+Bayesian/Jeffrey update, Fr\'echet bounds constraining but not determining
+the joint, and zero-evidence underdetermination connecting to imprecise
+probability (Sections~\ref{sec:valuations}, \ref{sec:update}).
+\item Logic-style reasoning: designated-value consequence (K$_3$, LP) via
+the three-valued collapse, and graded consequence on $[0,1]$.
 Explosion fails non-vacuously for LP and graded consequence at
 $0 < t \leq \tfrac{1}{2}$; K$_3$ has explosion only vacuously
 (Section~\ref{sec:consequence}).
-\item Bayesian and Jeffrey conditionalization as update rules on Cred
-valuations, with chain-rule preservation and zero-evidence
-underdetermination connecting to imprecise
-probability~\cite{walley1991}
-(Section~\ref{sec:update}).
 \item Graded predicates with inf/sup quantifiers, quantifier duality,
 classical agreement for crisp predicates, and unrestricted comprehension
 yielding fixed points rather than paradoxes
@@ -206,15 +323,22 @@ where needed.
 
 Complement preservation is the minimal constraint connecting the
 propositional negation to the algebraic complement.
-Beyond this, two natural choices arise for how $v$ handles conjunction.
 
-\subsection{Independent Valuations}
+\subsection{Independent Valuations (Trivial Conditioning)}
+\label{subsec:independent}
+
+The simplest valuation computes the joint as the product of marginals---this
+corresponds to assuming all propositions are probabilistically independent.
+\textbf{Warning}: this makes conditioning trivial, so evidence has no effect
+on conclusions.
+Independent valuations are a degenerate case, not suitable for interesting
+reasoning.
 
 \begin{definition}[Independent Valuation]
 \label{def:indep-valuation}
-An \emph{independent valuation} is a complement-preserving valuation
-equipped with propositional conjunction $\wedge$ and disjunction $\vee$
-such that
+An \emph{independent valuation} is a
+complement-preserving valuation equipped with propositional conjunction
+$\wedge$ and disjunction $\vee$ such that
 \[
 v(A \wedge B) = v(A) \conjc v(B), \qquad
 v(A \vee B) = v(A) \disjc v(B).
@@ -225,21 +349,28 @@ Lean: \texttt{IndepValuation}.
 An independent valuation is a homomorphism from the propositional algebra
 to the Cred algebra for all three connectives
 (Lean: \texttt{indep\_is\_conj\_homomorphism}).
-This is the natural choice for product fuzzy logic, where conjunction
-\emph{is} the product t-norm.
+The product $v(A) \cdot v(B)$ treats propositions as probabilistically
+independent---the joint equals the product of marginals.
+
+\textbf{Independence makes conditioning trivial.}
+Under independence, $v(A \mid B) = v(A)$---evidence has no effect.
+This is because the joint $v(A \land B) = v(A) \cdot v(B)$ factors:
+$v(A \mid B) = v(A) \cdot v(B) / v(B) = v(A)$.
+This is a degenerate case: no information flows from evidence to conclusion.
+For interesting reasoning, we need dependence between propositions.
 
 \begin{example}[Rain and Wet Street]
 \label{ex:rain}
 Let $R$ = ``it rained'' and $W$ = ``the street is wet,'' with
 $v(R) = 0.7$ and $v(W) = 0.9$.
-An independent valuation gives
+A product-copula valuation gives
 $v(R \wedge W) = 0.7 \times 0.9 = 0.63$---the product treats $R$ and $W$
 as independent evidence.
 But rain causes wet streets, so in practice one expects
 $v(R \wedge W) > 0.63$.
 \end{example}
 
-\begin{proposition}[Idempotence Problem]
+\begin{proposition}[Non-Idempotence]
 \label{prop:idempotence}
 Under an independent valuation, $v(A \wedge A) = v(A)^2 \neq v(A)$
 whenever $v(A) \notin \{0, 1\}$.
@@ -247,21 +378,88 @@ In particular, if $v(A) = \tfrac{1}{2}$, then
 $v(A \wedge A) = \tfrac{1}{4} \neq \tfrac{1}{2}$.
 \end{proposition}
 \begin{proof}
-From Definition~\ref{def:indep-valuation}:
 $v(A \wedge A) = v(A) \conjc v(A) = v(A)^2$.
 Part~1's idempotence characterization (Lean: \texttt{conj\_idempotent\_iff})
-shows $c \conjc c = c$ iff $c \in \{0, 1\}$, giving the general claim.
-The specific case $v(A) = \tfrac{1}{2}$ is
-\texttt{IndepValuation.conj\_not\_idempotent}.
+shows $c \conjc c = c$ iff $c \in \{0, 1\}$.
+Lean: \texttt{IndepValuation.conj\_not\_idempotent}.
 \end{proof}
 
-This is not a defect but a diagnostic: an independent valuation treats
-$A$ and $A$ as independent evidence, so $A \wedge A$ is ``weaker''
-than~$A$.
-Real propositions are not independent of themselves---this is the
-motivation for supplying joints externally.
+This is not a defect but a feature: the product treats two occurrences
+of $A$ as independent evidence, so $A \wedge A$ is ``weaker'' than~$A$.
+Real propositions are not independent of themselves---this motivates
+the alternatives below.
 
-\subsection{Joint-Parametrized Valuations}
+\subsection{Kleene Valuations (Logic-Style Canonical Choice)}
+\label{subsec:kleene}
+
+Part~1's uniqueness theorem identifies the \emph{only} truth-functional
+joint that yields Bayes-consistent, non-trivial conditioning:
+the minimum $j(A,B) = \min(v(A), v(B))$ (maximum positive dependence).
+
+\begin{definition}[Kleene Valuation]
+\label{def:kleene-valuation}
+A \emph{Kleene valuation} is a complement-preserving valuation with
+$v(A \wedge B) = \min(v(A), v(B))$ and
+$v(A \vee B) = \max(v(A), v(B))$.
+\end{definition}
+
+\begin{proposition}[Kleene Valuations are the Logic-Style Canonical Choice]
+\label{prop:kleene-canonical}
+Among all truth-functional joint formulas:
+\begin{enumerate}[label=(\roman*),nosep]
+\item The minimum is \emph{idempotent}: $v(A \wedge A) = \min(v(A), v(A)) = v(A)$.
+\item Conditioning is \emph{non-trivial}: $v(A \mid B) = \min(v(A), v(B))/v(B)
+  = \min(v(A)/v(B), 1) \neq v(A)$ in general.
+\item The system is \emph{Bayes-consistent}: the induced joint is symmetric,
+  so the chain rule holds in both directions.
+\end{enumerate}
+No other fixed formula achieves all three.
+\end{proposition}
+\begin{proof}
+(i) and (ii) are immediate from the definitions.
+(iii) follows from Part~1's Proposition~5.8.
+Part~1's Theorem~5.11 (uniqueness) shows no other fixed formula satisfies
+all four requirements (truth-functionality, Bayes consistency, non-triviality,
+idempotence).
+\end{proof}
+
+This is why K$_3$, LP, and RM3 all use the Kleene lattice operations:
+the minimum conjunction is not an arbitrary choice---it is \emph{forced}
+by the requirement that truth-functional composition be compatible with
+proper Bayesian inference.
+
+\textbf{The philosophical consequence.}
+In probabilistic language, $j(A,B) = \min(v(A), v(B))$ means treating all
+pairs of propositions as \emph{maximally positively correlated}.
+This is an extreme assumption: most real-world events have intermediate
+dependence.
+Yet this extreme assumption is mathematically forced if we want a single
+theory that is simultaneously compositional and Bayes-consistent.
+To weaken the assumption, one must either accept trivial conditioning
+(independence) or supply joints as external data (probability-style).
+
+\subsection{Joint-Parametrized Valuations (General Case)}
+\label{subsec:joint-param}
+
+Independent valuations assume a fixed dependence structure (none).
+The general case supplies the joint as external data---this is how
+probability works, and it is also how Cred can instantiate different
+logical systems.
+
+\textbf{Key insight.}
+By parameterizing the joint, Cred becomes a \emph{superset} of both traditions:
+\begin{itemize}[nosep]
+\item Setting $j(A,B) = v(A) \cdot v(B)$ gives independence (probability-like,
+  but trivial conditioning).
+\item Setting $j(A,B) = \min(v(A), v(B))$ gives maximum positive dependence
+  (this is the Kleene conjunction used by K$_3$, LP, and RM3).
+\item Setting $j(A,B) = \max(v(A) + v(B) - 1, 0)$ gives maximum negative
+  dependence (the \L ukasiewicz t-norm).
+\item Supplying an arbitrary joint from empirical data or domain knowledge
+  gives full probability-style reasoning.
+\end{itemize}
+The joint-parametrized framework unifies these: the dependence structure
+is a \emph{choice}, not a commitment.
 
 \begin{definition}[Joint-Parametrized Valuation]
 \label{def:joint-valuation}
@@ -274,10 +472,18 @@ Symmetry ($j(A,B) = j(B,A)$) is not required; when modelling a
 commutative conjunction, one may additionally impose symmetry.
 \end{definition}
 
-The joint function is external data---not computed from $v(A)$ and
-$v(B)$ alone.
+Unlike copula-based valuations, the joint $j(A,B)$ is not determined by
+the marginals $v(A)$ and $v(B)$---it can be any value in the
+Fr\'echet-Hoeffding interval (Part~1, Proposition~5.10):
+\[
+\max(v(A) + v(B) - 1, 0) \;\leq\; j(A, B) \;\leq\; \min(v(A), v(B)).
+\]
+The upper bound follows from the marginal-bound axioms; the lower bound
+requires complement non-negativity as an additional hypothesis
+(Lean: \texttt{joint\_frechet\_upper}, \texttt{joint\_frechet\_lower}).
+
 This is how probability works: the joint $P(A \land B)$ is determined
-by the measure, not by the marginals.
+by the measure, not by the marginals alone.
 Cred allows the same approach without requiring a measure.
 
 \begin{example}[Rain and Wet Street, Continued]
@@ -292,31 +498,6 @@ $\max(0.7 + 0.9 - 1, 0) = 0.6 \leq j(W,R) \leq \min(0.7, 0.9) = 0.7$,
 and $0.65$ is within this interval.
 \end{example}
 
-\begin{proposition}[Fr\'echet Bounds on Valuations]
-\label{prop:frechet-valuations}
-For any joint-parametrized valuation:
-\[
-j(A, B) \leq \min(v(A), v(B)).
-\]
-If additionally $1 - v(A) - v(B) + j(A, B) \geq 0$ (complement
-non-negativity), then
-\[
-\max(v(A) + v(B) - 1, 0) \leq j(A, B).
-\]
-Lean: \texttt{joint\_frechet\_upper}, \texttt{joint\_frechet\_lower}
-(the $\max(\cdot, 0)$ form combines the Lean bound
-$v(A) + v(B) - 1 \leq j(A,B)$ with non-negativity of credences).
-\end{proposition}
-\begin{proof}
-The upper bound follows from the two marginal-bound axioms of
-\texttt{JointValuation}; the lower bound is immediate from the
-complement non-negativity hypothesis by arithmetic.
-\end{proof}
-
-Complement non-negativity is not part of the \texttt{JointValuation}
-definition; it must be supplied as an additional hypothesis, as in
-Part~1.
-
 When $v(B) > 0$, the chain rule has a unique solution; we write
 $v(A \mid B) = j(A, B) / v(B)$ for the conditional credence
 (Lean: \texttt{JointValuation.conditioning}, which constructs the
@@ -330,7 +511,7 @@ three-valued (Kleene) valuation.
 
 \begin{proposition}[Collapse Preserves Connectives]
 \label{prop:collapse-val}
-Let $v$ be an independent valuation and $\kappa = \mathrm{collapse} \circ v$.
+Let $v$ be a product-copula valuation and $\kappa = \mathrm{collapse} \circ v$.
 Then $\kappa$ preserves negation, conjunction, and disjunction:
 \begin{align*}
 \kappa(\sigma(A)) &= \mathrm{neg}(\kappa(A)), \\
@@ -354,19 +535,29 @@ the choice of designated values then determines the consequence relation.
 
 \begin{center}
 \small
-\begin{tabular}{llll}
+\begin{tabular}{llllll}
 \toprule
-\textbf{System} & \textbf{Target} & \textbf{Joint} & \textbf{Idempotent?} \\
+\textbf{System} & \textbf{Target} & \textbf{Joint} & \textbf{Idemp.?} & \textbf{Bayes?} & \textbf{Conditioning} \\
 \midrule
-Classical logic & $\{0, 1\}$ & $\min(v(A), v(B))$ & Yes \\
-Probability & $[0,1]$ & Measure-determined & Yes ($P(A \land A) = P(A)$) \\
-Product fuzzy & $[0,1]$ & Product (independence) & No ($v(A)^2 \neq v(A)$) \\
-Cred (indep.) & $[0,1]$ & Product & No \\
-Cred (joint) & $[0,1]$ & External parameter & By choice \\
+Classical logic & $\{0, 1\}$ & $\min$ & Yes & Yes & Material \\
+Probability & $[0,1]$ & Measure & Yes & Yes & Bayes (non-trivial) \\
+Product fuzzy & $[0,1]$ & Product & No & Yes & Trivial ($a$) \\
+Cred (indep.) & $[0,1]$ & Product & No & Yes & Trivial ($a$) \\
+\textbf{Cred (Kleene)} & $[0,1]$ & $\min$ & Yes & Yes & \textbf{Non-trivial} \\
+Cred (joint) & $[0,1]$ & External & By choice & Yes & Chain rule \\
+G\"odel fuzzy & $[0,1]$ & $\min$ & Yes & No & Not Bayes-cons.\ \\
+\L ukasiewicz & $[0,1]$ & $\max(a{+}b{-}1,0)$ & No & No & Not Bayes-cons.\ \\
 \bottomrule
 \end{tabular}
 \normalsize
 \end{center}
+
+\noindent
+The table highlights the \emph{unique meeting point}: only maximum positive
+dependence ($\min$) yields a truth-functional joint that is simultaneously
+idempotent, Bayes-consistent, and non-trivial.
+Independence (product) is Bayes-consistent but trivial; G\"odel and
+\L ukasiewicz are truth-functional but not Bayes-consistent.
 
 The constant valuation $v(A) = \tfrac{1}{2}$ for all $A$, with
 the identity function as propositional negation ($\sigma(A) = A$ for
@@ -382,23 +573,18 @@ collapse.)
 Lean: \texttt{CpValuation.constant\_half}.
 
 %=============================================================================
-\section{Consequence Relations}
+\section{Consequence Relations (Logic-Style View)}
 \label{sec:consequence}
 %=============================================================================
 
+This section develops the logic-style view: collapse credences to discrete
+values and determine validity via designated values.
 A \emph{consequence relation}~\cite{priest2008} specifies which inferences
-are valid: premises $A_1, \ldots, A_n$ \emph{entail} conclusion $B$ when
-every valuation that accepts the premises also accepts $B$.
-In classical logic, consequence has \emph{explosion} (ex falso quodlibet):
-a contradiction entails every proposition.
-This section defines consequence relations for Cred and shows that
-explosion fails non-vacuously for LP and graded consequence, while
-K$_3$ has explosion only vacuously: for no three-valued value~$c$
-are both $c$ and $\mathrm{neg}(c)$ in $\{1\}$
-(if $c = 1$ then $\mathrm{neg}(c) = 0$;
-if $c = 0$ then $c \notin \{1\}$;
-if $c = \tfrac{1}{2}$ then $c \notin \{1\}$),
-so the premise of explosion is never satisfied.
+are valid: premises entail conclusion $B$ when every valuation
+accepting the premises also accepts $B$.
+The key result is that explosion (from a contradiction, anything follows)
+fails non-vacuously for LP and graded consequence at
+$t \leq \tfrac{1}{2}$, while K$_3$ has explosion only vacuously.
 
 \subsection{Designated Values}
 
@@ -630,19 +816,124 @@ This does not extend to unrestricted graded consequence, where $v$
 need not be complement-preserving.
 
 %=============================================================================
+\section{Comparing the Two Views}
+\label{sec:comparison}
+%=============================================================================
+
+Sections~\ref{sec:valuations}--\ref{sec:consequence} developed two ways
+to use Cred for reasoning.
+This section makes the comparison explicit.
+
+\begin{center}
+\small
+\begin{tabular}{lll}
+\toprule
+\textbf{Aspect} & \textbf{Probability-style} & \textbf{Logic-style} \\
+\midrule
+Output of inference & Credence in $[0,1]$ & Yes/no (designated or not) \\
+Uncertainty & Propagates through reasoning & Collapses at final judgment \\
+What it answers & ``How confident should I be?'' & ``Is this valid to conclude?'' \\
+Core mechanism & Chain rule / update & Designated-value checking \\
+At zero evidence & Underdetermined (interval) & N/A (collapse applies before) \\
+Explosion & N/A (no binary validity) & Fails for LP, graded $t \leq \tfrac{1}{2}$ \\
+\bottomrule
+\end{tabular}
+\normalsize
+\end{center}
+
+\textbf{Probability-style view.}
+The chain rule is the inference engine.
+Given a joint-parametrized valuation $v$ with joint function $j$,
+conditioning computes $v(A \mid B) = j(A,B) / v(B)$ when $v(B) > 0$.
+Update rules (Bayesian, Jeffrey) apply this computation across all
+propositions, revising an entire credence assignment when evidence arrives.
+Uncertainty remains graded: the output is always a number in $[0,1]$,
+never a binary verdict.
+When evidence has credence zero, the conditional is unconstrained by the
+chain rule; the honest response is an interval $[0,1]$ of compatible
+posteriors---connecting to imprecise probability~\cite{walley1991}.
+
+\textbf{Logic-style view.}
+The collapse homomorphism discretizes credences: $0$, $1$, or the open
+interval $(0,1) \mapsto \tfrac{1}{2}$.
+A consequence relation then determines validity via designated values.
+K$_3$ designates $\{1\}$ (paracomplete: no tautologies, excluded middle
+fails).
+LP designates $\{1, \tfrac{1}{2}\}$ (paraconsistent: explosion fails
+non-vacuously).
+Graded consequence at threshold $t$ designates $\{c : c \geq t\}$.
+The output is binary: an inference is valid or not.
+
+\textbf{The views are complementary.}
+Use probability-style when you need graded confidence---``I'm 73\%
+confident that $A$''---and want uncertainty to propagate through a
+chain of reasoning.
+Use logic-style when you need a final judgment---``Is $B$ a valid
+conclusion from $A$?''---and can tolerate discretizing continuous
+credences.
+The collapse homomorphism bridges the two: apply probability-style
+reasoning, then collapse to three values and check designation.
+
+\textbf{What each view cannot do.}
+Probability-style has no notion of validity: it outputs a credence, not
+a yes/no answer.
+To get a binary judgment, you must impose a threshold---which is exactly
+what logic-style does.
+Logic-style loses information: collapsing $0.51$ and $0.99$ both to the
+designated class erases their difference.
+The views trade off precision against decisiveness.
+
+%=============================================================================
 \section{Update Rules}
 \label{sec:update}
 %=============================================================================
 
-The chain rule $\condc{A}{B} \cdot \cred(B) = \cred(A \land B)$ constrains
-how three credences relate at a single moment.
-An \emph{update rule} applies this constraint dynamically, prescribing how
-an entire valuation changes when new evidence arrives.
-In probability, Bayesian conditionalization computes the posterior by
-dividing the joint by the evidence; Jeffrey
-conditionalization~\cite{jeffrey1965} generalizes this to uncertain
-evidence via a mixture formula.
-Both are instances of chain-rule-based update.
+This section develops the probability-style view in detail.
+The chain rule is the inference engine: it constrains how credences
+relate, and update rules apply this constraint dynamically.
+
+\subsection{The Chain Rule as Inference}
+
+The chain rule $\condc{A}{B} \cdot \cred(B) = \cred(A \land B)$ relates
+three quantities: the conditional credence, the evidence credence, and
+the joint credence.
+Given any two, the third is determined (when evidence is positive) or
+constrained (when evidence is zero).
+This is Bayesian-style inference without requiring additivity or a
+measure space.
+
+\textbf{From evidence and joint to conditional.}
+Given $v(B) > 0$ and $j(A,B) = v(A \land B)$, the chain rule gives
+$v(A \mid B) = j(A,B) / v(B)$.
+This is how conditioning works: evidence and joint determine the
+conditional.
+
+\textbf{From conditional and evidence to joint.}
+If we know $v(A \mid B)$ and $v(B)$, then $j(A,B) = v(A \mid B) \cdot v(B)$.
+This is how the chain rule propagates credences forward through a
+reasoning chain.
+
+\textbf{Fr\'echet bounds constrain but do not determine.}
+The joint-parametrized valuation framework
+(Section~\ref{sec:valuations}) requires the joint as external input.
+The Fr\'echet-Hoeffding bounds
+$\max(v(A) + v(B) - 1, 0) \leq j(A,B) \leq \min(v(A), v(B))$ constrain
+which joints are coherent with the marginals, but do not select a
+unique joint.
+Different joints correspond to different dependence structures between
+propositions.
+
+\textbf{Comparison to probability theory.}
+Probability also uses the chain rule:
+$P(A \mid B) \cdot P(B) = P(A \land B)$.
+The difference is that probability has a measure that determines
+$P(A \land B)$ from the event structure, while Cred requires
+$j(A,B)$ as external input.
+What Cred can do that probability cannot: leave conditioning
+unconstrained at zero evidence.
+What probability can do that Cred cannot: use additivity to derive
+bounds (e.g., $P(A \lor B) = P(A) + P(B) - P(A \land B)$) that Cred
+does not support.
 
 \subsection{Bayesian Conditionalization}
 
@@ -950,6 +1241,91 @@ In Cred, the ``contradiction'' has a precise numerical value:
 $\tfrac{1}{2}$, the unique negation fixed point.
 
 %=============================================================================
+\section{Comparison to Fuzzy Logics}
+\label{sec:fuzzy}
+%=============================================================================
+
+Cred shares the $[0,1]$ carrier with fuzzy logic but differs fundamentally
+in its treatment of conjunction and implication.
+This section explains the relationship and identifies where Cred fits in
+the landscape of many-valued logics.
+
+\textbf{Key distinction: fixed vs.\ parametric joints.}
+T-norm fuzzy logics~\cite{hajek1998,klement2000} \emph{fix} a t-norm
+(binary operation on $[0,1]$) as conjunction.
+Each t-norm determines a unique residuated implication via the adjunction
+$a \otimes c \leq b \Leftrightarrow c \leq a \to b$.
+The three basic continuous t-norms are G\"odel (min), product, and
+\L ukasiewicz (bounded sum).
+
+Cred takes a different approach: it uses the \emph{product} for the
+algebraic chain-rule operation but leaves the \emph{actual joint}
+$\cred(A \land B)$ as an external parameter.
+When you fix the joint to a specific formula, you recover a t-norm-like
+system:
+\begin{itemize}[nosep]
+\item $j(a,b) = a \cdot b$ (product): independence, trivial conditioning
+\item $j(a,b) = \min(a,b)$: maximum positive dependence, non-trivial
+  Bayes-consistent conditioning
+\item $j(a,b) = \max(a+b-1,0)$: maximum negative dependence
+\end{itemize}
+Part~1's uniqueness theorem shows that \emph{only the minimum} yields
+a truth-functional joint that is simultaneously idempotent, Bayes-consistent,
+and non-trivial.
+This is why Cred with the minimum joint coincides with Kleene valuations
+(the foundation of K$_3$, LP, RM3).
+
+\textbf{G\"odel logic.}
+G\"odel logic~\cite{godel1932,hajek1998} uses the minimum t-norm:
+$a \land_G b = \min(a, b)$.
+The residuated implication is $a \to_G b = 1$ if $a \leq b$, else $b$.
+Conjunction is idempotent ($a \land_G a = a$), which Cred's product is not.
+G\"odel's arrow is not Bayes-consistent on $[0,1]$
+(Part~1, Proposition~5.6).
+
+\textbf{Product logic ($\Pi$).}
+Product logic~\cite{goguen1969,hajek1998} uses the product t-norm:
+$a \land_\Pi b = a \cdot b$---the same as Cred's $\conjc$.
+The residuated implication is $a \to_\Pi b = \min(b/a, 1)$ for $a > 0$,
+with $0 \to_\Pi b = 1$ (ex falso).
+This is the closest fuzzy logic to Cred: same conjunction, same implication
+for positive evidence.
+The sole difference is at evidence zero: product logic forces
+$0 \to b = 1$; Cred leaves the conditional unconstrained.
+In Part~1's language, product logic commits to the Fr\'echet upper bound
+for the joint and fills in the evidence-zero row with ex falso.
+
+\textbf{\L ukasiewicz logic.}
+\L ukasiewicz logic~\cite{lukasiewicz1920,hajek1998} uses the bounded
+sum t-norm: $a \land_L b = \max(a + b - 1, 0)$.
+The residuated implication is $a \to_L b = \min(1 - a + b, 1)$.
+Neither matches Cred: the conjunction differs (bounded sum vs.\ product),
+and as Part~1 showed, no collapse homomorphism exists to \L ukasiewicz's
+three-valued algebra because $\tfrac{1}{2} \land_L \tfrac{1}{2} = 0$
+while Cred needs the self-conjunction of the fixed point to equal the
+fixed point.
+
+\textbf{Summary: Cred's position in the landscape.}
+Among the three basic t-norms, the \emph{product} is the unique choice
+compatible with Cred's chain-rule conditioning (unique solution when
+evidence is positive):
+the minimum t-norm fails unique conditioning (Part~1, \texttt{min\_tnorm\_not\_unique});
+the \L ukasiewicz t-norm also fails unique conditioning (Part~1, \texttt{luk\_tnorm\_not\_unique}).
+
+However, Cred is \emph{not} product logic: it uses the product for the
+chain-rule algebraic operation but allows the \emph{actual joint}
+$\cred(A \land B)$ to vary.
+When the joint is set to the \emph{minimum} (maximum positive dependence),
+Cred yields Bayes-consistent, non-trivial, idempotent reasoning---the
+unique meeting point of the logic and probability traditions.
+This is why K$_3$, LP, and RM3 use minimum conjunction: it is \emph{forced}
+by requiring truth-functional composition compatible with Bayesian inference.
+
+Cred can thus be viewed as a generalization of product fuzzy logic:
+same chain-rule constraint, but the joint is parametric rather than fixed,
+and evidence-zero conditioning is unconstrained rather than forcing ex falso.
+
+%=============================================================================
 \section{Related Work}
 \label{sec:related}
 %=============================================================================
@@ -1124,34 +1500,52 @@ introduced.
 \label{sec:conclusion}
 %=============================================================================
 
-Part~2 adds three layers to Cred's algebra, yielding a system that can
-interpret propositions, determine valid inferences, and revise beliefs.
-These layers instantiate known frameworks---product fuzzy
-valuations~\cite{hajek1998,esteva2000}, K$_3$/LP
-consequence~\cite{kleene1952}, Bayesian/Jeffrey
-update~\cite{jeffrey1965}---within the Cred algebraic substrate
-established in Part~1.
+Part~2 has shown that Cred admits two complementary views.
 
-\emph{Valuations} connect the propositional world to the algebraic world.
-Independent valuations make the product t-norm do double duty as both
-algebraic and semantic conjunction, at the cost of idempotence failure.
-Joint-parametrized valuations supply the joint externally, recovering
-probability-like behavior without requiring a measure.
-Collapse composition maps any Cred valuation to a Kleene valuation.
+\emph{The probability-style view} treats the chain rule as inference.
+Credences propagate through reasoning: given any two of (joint, evidence,
+conditional), the chain rule determines the third.
+Bayesian and Jeffrey conditionalization apply this constraint dynamically,
+revising entire credence assignments when evidence arrives.
+When evidence has credence zero, the conditional is unconstrained,
+yielding interval-valued posteriors that connect to imprecise
+probability~\cite{walley1991}.
+Uncertainty remains graded throughout---there is no final yes/no verdict.
 
-\emph{Consequence relations} come in two families: designated-value
-consequence (K$_3$, LP, RM3) via the collapse, and graded consequence
-parametrized by a threshold.
-Explosion fails non-vacuously for LP and graded consequence;
-K$_3$ has explosion only vacuously (no contradiction is
-K$_3$-designatable).
-Unconstrained conditioning at zero is the algebraic property that
-distinguishes Cred from systems with ex falso.
+\emph{The logic-style view} collapses credences to discrete values and
+uses designated-value consequence.
+Part~1's collapse homomorphism maps $[0,1]$ to the Kleene lattice
+$\{0, \tfrac{1}{2}, 1\}$, the shared foundation of K$_3$, LP, and RM3.
+Designating $\{1\}$ gives K$_3$ (paracomplete); designating
+$\{1, \tfrac{1}{2}\}$ gives LP (paraconsistent).
+Explosion fails non-vacuously for LP and graded consequence at
+$t \leq \tfrac{1}{2}$; K$_3$ has explosion only vacuously.
 
-\emph{Update rules} apply the chain rule dynamically.
-Bayesian and Jeffrey conditionalization are both available when evidence
-has positive credence; at zero evidence, both are underdetermined,
-connecting Cred to imprecise probability.
+The two views answer different questions.
+Probability-style asks ``how confident should I be?''---the output is a
+credence in $[0,1]$.
+Logic-style asks ``is this valid to conclude?''---the output is a binary
+judgment determined by the designation criterion.
+Neither view is ``correct''; they are complementary tools for different
+purposes.
+The collapse homomorphism is the bridge: it converts probability-style
+reasoning to logic-style judgments.
+
+\emph{The unique meeting point.}
+Part~1's central finding is that maximum positive dependence---the joint
+$\cred(A \land B) = \min(\cred(A), \cred(B))$---is the \emph{unique} fixed
+formula satisfying all requirements for logic-style reasoning:
+truth-functionality, Bayes consistency, non-trivial conditioning, and
+idempotence.
+Independence (the product) gives trivial conditioning where evidence has no
+effect; G\"odel and \L ukasiewicz implications fail Bayes consistency.
+The minimum is the canonical joint for logic-style valuations.
+This explains, retrospectively, why K$_3$, LP, and RM3 all use Kleene's
+minimum conjunction: it is \emph{forced} by requiring truth-functional
+composition compatible with Bayesian inference.
+The philosophical consequence is striking: to have a single compositional
+theory where evidence matters, one must assume maximum positive dependence
+between all pairs of propositions.
 
 \emph{Graded predicates} extend to first order with inf/sup quantifiers
 satisfying duality and agreeing with classical quantifiers on crisp
@@ -1161,7 +1555,8 @@ than paradoxes.
 
 \medskip
 \textbf{What Part~2 provides and what it does not.}
-Part~2 provides interpretation, consequence, and update.
+Part~2 provides the two-views framing, valuations, consequence relations,
+and update rules.
 It does not provide a proof theory (deductive calculus with rules of
 inference) or self-hosting (building mathematics on Cred foundations).
 These remain for Part~3.
@@ -1204,6 +1599,18 @@ De Finetti, B.
 \newblock In \emph{Actes du Congr\`es International de Philosophie Scientifique},
 IV:1--9. Hermann, Paris, 1936.
 
+\bibitem{definetti1937}
+De Finetti, B.
+\newblock La pr\'evision: ses lois logiques, ses sources subjectives.
+\newblock \emph{Annales de l'Institut Henri Poincar\'e}, 7(1):1--68, 1937.
+
+\bibitem{dubois2001}
+Dubois, D. and Prade, H.
+\newblock Possibility theory, probability theory and multiple-valued logics:
+A clarification.
+\newblock \emph{Annals of Mathematics and Artificial Intelligence}, 32:35--66,
+2001.
+
 \bibitem{egre2021}
 \'Egr\'e, P., Rossi, L., and Sprenger, J.
 \newblock De Finettian logics of indicative conditionals, Part~I:
@@ -1219,6 +1626,17 @@ Esteva, F., Godo, L., H\'ajek, P., and Navara, M.
 Goguen, J.A.
 \newblock The logic of inexact concepts.
 \newblock \emph{Synthese}, 19(3--4):325--373, 1969.
+
+\bibitem{godel1932}
+G\"odel, K.
+\newblock Zum intuitionistischen Aussagenkalk\"ul.
+\newblock \emph{Anzeiger der Akademie der Wissenschaften in Wien},
+69:65--66, 1932.
+
+\bibitem{gottwald2001}
+Gottwald, S.
+\newblock \emph{A Treatise on Many-Valued Logics}.
+\newblock Studies in Logic and Computation, vol.~9. Research Studies Press, 2001.
 
 \bibitem{hajek1998}
 H\'ajek, P.
@@ -1251,6 +1669,11 @@ Levi, I.
 \newblock \emph{The Enterprise of Knowledge}.
 \newblock MIT Press, 1980.
 
+\bibitem{lukasiewicz1920}
+\L ukasiewicz, J.
+\newblock O logice tr\'ojwarto\'sciowej.
+\newblock \emph{Ruch Filozoficzny}, 5:170--171, 1920.
+
 \bibitem{part1}
 Anonymous.
 \newblock Cred: A credence algebra with primitive conditioning.
@@ -1271,6 +1694,12 @@ R\'enyi, A.
 \newblock On a new axiomatic theory of probability.
 \newblock \emph{Acta Mathematica Academiae Scientiarum Hungaricae},
 6:285--335, 1955.
+
+\bibitem{ramsey1931}
+Ramsey, F.P.
+\newblock Truth and probability.
+\newblock In Braithwaite, R.B., editor, \emph{The Foundations of Mathematics
+and Other Logical Essays}, pages 156--198. Routledge and Kegan Paul, 1931.
 
 \bibitem{walley1991}
 Walley, P.
