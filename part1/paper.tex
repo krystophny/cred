@@ -1,4 +1,4 @@
-% Cred: A Credence Algebra with Primitive Conditioning
+% The Unique Intersection of Probability and Many-Valued Logic
 % Publication-quality paper
 %
 % References to Lean formalization: lean/Cred/Basic.lean
@@ -17,7 +17,7 @@
     citecolor=blue,
     urlcolor=blue,
     pdfauthor={Anonymous},
-    pdftitle={Cred: A Credence Algebra with Primitive Conditioning}
+    pdftitle={The Unique Intersection of Probability and Many-Valued Logic}
 }
 \usepackage{cleveref}
 \usepackage[margin=1in]{geometry}
@@ -43,8 +43,7 @@
 \newcommand{\Real}{\mathbb{R}}
 \newcommand{\Nat}{\mathbb{N}}
 
-\title{\textbf{Cred: A Credence Algebra with Primitive Conditioning}\\[0.5em]
-\large Formalization and Connections to Many-Valued Logic}
+\title{\textbf{The Unique Intersection of Probability and Many-Valued Logic}}
 
 \author{Anonymous for blind review}
 \date{February 2026}
@@ -54,44 +53,33 @@
 \maketitle
 
 \begin{abstract}
-We present \emph{Cred}, a generalization of the numerical structure of
-probability that retains values in $[0,1]$ and the complement but drops
-the measure space and sigma-additivity.
-The sole structural axiom for conditioning is the chain rule:
-$\cred(A \mid B) \cdot \cred(B) = \cred(A \land B)$.
-When evidence is positive, division emerges as the unique solution; when evidence
-has credence zero, the constraint is satisfied by any value---the conditional is
-\emph{unconstrained}, and no division is needed.
-%
-A key result shows this underdetermination is not merely permitted but
-\emph{mathematically forced}: as evidence $b \to 0$, the conditional's limit
-depends on the \emph{path} by which credences approach zero (the ratio $a/b$),
-not on $b$ alone.
-This path dependence---the same structure as the Borel--Kolmogorov paradox---means
-ex falso ($0 \to c = 1$) is not entailed by the algebra; forcing it requires an
-additional totalization convention.
-%
-The joint credence $\cred(A \land B)$ is an \emph{external parameter}, not
-fixed by the algebra.
-This makes Cred compatible with both the probability and logic traditions:
-supplying the joint from empirical data gives probability-style reasoning;
-supplying a fixed formula gives truth-functional logic-style reasoning.
-%
-A central result identifies the \textbf{unique meeting point} of these traditions.
-Setting the joint to $\min(\cred(A), \cred(B))$---maximum positive
-dependence---yields: (1)~truth-functional composition,
-(2)~Bayes-consistent conditioning, (3)~non-trivial inference where evidence
-matters, and (4)~idempotence ($\cred(A \land A) = \cred(A)$).
-No other fixed joint formula achieves all four: independence ($\cred(A) \cdot
-\cred(B)$) gives trivial conditioning where evidence has no effect; RM3 and
-G\"odel implications fail Bayes consistency.
-The minimum (Fr\'echet upper bound) is thus the canonical choice for
-logic-style reasoning---explaining why K$_3$, LP, and RM3 use the Kleene
-conjunction.
-%
-We establish a surjective homomorphism from Cred to the Kleene lattice and
-show that no analogous homomorphism exists for \L ukasiewicz or G\"odel algebras.
-Negation has a unique fixed point at $\tfrac{1}{2}$.
+Can probability and many-valued logic be unified?
+We prove they can, and the answer is \textbf{unique}.
+
+\textbf{Main Result 1 (Uniqueness).}
+Among all truth-functional conjunctions compatible with probabilistic
+marginalization, the minimum $\min(a,b)$ is the \emph{only} one satisfying
+Bayes consistency, non-trivial conditioning, and idempotence.
+This is not a design choice---it is mathematically forced.
+The minimum (Fr\'echet upper bound) explains why K$_3$, LP, and RM3 all use
+the Kleene conjunction: it is the unique meeting point of logic and probability.
+
+\textbf{Main Result 2 (Path Dependence).}
+As evidence $b \to 0$, the conditional's limit depends on the \emph{path}
+by which credences approach zero---the ratio $a/b$, not $b$ alone.
+This path dependence has the same structure as the Borel--Kolmogorov paradox.
+Consequence: ex falso ($0 \to c = 1$) is \emph{not} entailed by the algebra;
+forcing it requires an additional totalization convention.
+
+These results arise from a simple framework: credences in $[0,1]$, the
+complement $1-c$, and the chain rule
+$\cred(A \mid B) \cdot \cred(B) = \cred(A \land B)$ as the sole structural
+axiom for conditioning.
+When evidence is positive, division emerges as the unique solution; when
+evidence has credence zero, the constraint is satisfied by any value---the
+conditional is \emph{unconstrained}.
+We establish a surjective homomorphism to the Kleene lattice and prove no
+analogous homomorphism exists for \L ukasiewicz or G\"odel algebras.
 The main results are machine-checked in Lean~4.
 \end{abstract}
 
@@ -233,7 +221,7 @@ G\"odel fail.  Every symmetric copula yields a Bayes-consistent arrow
 (Section~\ref{sec:connections}).
 \item Fixed-point analysis: $\tfrac{1}{2}$ is the unique fixed point of negation
 (Section~\ref{sec:fixed-points}).
-\item Lean~4 formalization of the core algebra (Section~\ref{sec:lean}).
+\item Lean~4 formalization of the core algebra (Appendix~\ref{app:lean}).
 \item Part~2~\cite{part2} extends the algebra to reasoning: valuations,
 consequence relations (K$_3$, LP, graded), update rules, and graded predicates.
 \end{enumerate}
@@ -375,7 +363,7 @@ The key mechanism is that the joint credence $\cred(A \land B)$ is an
 (truth-functional) or as empirical data (probability-style).
 
 \emph{The unique meeting point.}
-A central finding (Theorem~\ref{thm:max-dependence}) is that only one
+A central finding (Theorem~\ref{thm:uniqueness-main}) is that only one
 choice of joint formula---maximum positive dependence,
 $\cred(A \land B) = \min(\cred(A), \cred(B))$---satisfies all the
 requirements for proper reasoning: truth-functionality, Bayes consistency,
@@ -385,121 +373,22 @@ the unique point where the logic and probability traditions meet.
 Part~2~\cite{part2} develops both interpretations in detail.
 
 \textbf{Outline.}
-Section~\ref{sec:prelim} provides formal definitions of key concepts.
 Section~\ref{sec:algebra} defines the credence algebra.
-Section~\ref{sec:conditioning} develops primitive conditioning.
-Section~\ref{sec:fixed-points} treats fixed points.
-Section~\ref{sec:connections} relates Cred to other systems.
-Section~\ref{sec:related} surveys related work.
-Section~\ref{sec:lean} describes the Lean formalization.
+Section~\ref{sec:uniqueness} proves the uniqueness theorem (Main Result~1).
+Section~\ref{sec:conditioning} develops primitive conditioning and proves
+path dependence (Main Result~2).
+Section~\ref{sec:fixed-points} treats fixed points and self-reference.
+Section~\ref{sec:connections} relates the algebra to existing frameworks.
+Section~\ref{sec:conclusion} concludes.
+Appendix~\ref{app:prelim} provides formal preliminaries (t-norms, copulas).
+Appendix~\ref{app:logic-tables} contains detailed logic comparison tables.
+Appendix~\ref{app:lean} describes the Lean formalization.
 
 %=============================================================================
-\section{Preliminaries}
-\label{sec:prelim}
+% PRELIMINARIES MOVED TO APPENDIX A
+% See \ref{app:prelim} for formal definitions of t-norms, copulas, and
+% fuzzy logic concepts.
 %=============================================================================
-
-This section provides formal definitions for concepts referenced throughout
-the paper.
-Readers familiar with t-norms, copulas, and fuzzy logic may skip to
-Section~\ref{sec:algebra}.
-
-\begin{definition}[T-norm]
-\label{def:tnorm}
-A \emph{triangular norm} (t-norm) is a binary operation
-$\otimes : [0,1] \times [0,1] \to [0,1]$ satisfying:
-\begin{enumerate}[label=(\roman*),nosep]
-\item \textbf{Commutativity}: $a \otimes b = b \otimes a$
-\item \textbf{Associativity}: $(a \otimes b) \otimes c = a \otimes (b \otimes c)$
-\item \textbf{Monotonicity}: if $a \leq a'$, then $a \otimes b \leq a' \otimes b$
-\item \textbf{Identity}: $1 \otimes a = a$
-\end{enumerate}
-The three basic continuous t-norms are~\cite{klement2000}:
-\begin{itemize}[nosep]
-\item \emph{G\"odel (minimum)}: $a \otimes_G b = \min(a, b)$
-\item \emph{Product}: $a \otimes_\Pi b = a \cdot b$
-\item \emph{\L ukasiewicz}: $a \otimes_L b = \max(a + b - 1, 0)$
-\end{itemize}
-\end{definition}
-
-\begin{definition}[Residuated Implication]
-\label{def:resid}
-Given a t-norm $\otimes$, the \emph{residuated implication} (or residuum,
-or arrow) is:
-\[
-a \to b = \sup\{c \in [0,1] : a \otimes c \leq b\}
-\]
-This is the largest $c$ making the conjunction ``work.''
-The residuum satisfies the \emph{residuation property}:
-$a \otimes c \leq b$ iff $c \leq a \to b$.
-Key consequences~\cite{hajek1998}:
-\begin{itemize}[nosep]
-\item $0 \to b = 1$ for every t-norm (ex falso quodlibet)
-\item $a \to a = 1$ (identity)
-\item $1 \to b = b$
-\end{itemize}
-The residuated implications for the basic t-norms are:
-\begin{itemize}[nosep]
-\item \emph{G\"odel}: $a \to_G b = 1$ if $a \leq b$, else $b$
-\item \emph{Product (Goguen)}: $a \to_\Pi b = \min(b/a, 1)$ for $a > 0$,
-  with $0 \to_\Pi b = 1$
-\item \emph{\L ukasiewicz}: $a \to_L b = \min(1 - a + b, 1)$
-\end{itemize}
-\end{definition}
-
-\begin{definition}[Copula]
-\label{def:copula}
-A \emph{copula} is a function $C : [0,1]^2 \to [0,1]$ satisfying:
-\begin{enumerate}[label=(\roman*),nosep]
-\item \textbf{Boundary conditions}: $C(0, b) = C(a, 0) = 0$; \; $C(1, b) = b$; \; $C(a, 1) = a$
-\item \textbf{2-increasing}: $C(a_2, b_2) - C(a_2, b_1) - C(a_1, b_2) + C(a_1, b_1) \geq 0$
-  for all $a_1 \leq a_2$, $b_1 \leq b_2$
-\end{enumerate}
-Copulas model dependence structures between random variables~\cite{nelsen2006}.
-The Fr\'echet-Hoeffding bounds constrain all copulas:
-\[
-\max(a + b - 1, 0) \;\leq\; C(a, b) \;\leq\; \min(a, b)
-\]
-Key copulas:
-\begin{itemize}[nosep]
-\item \emph{Fr\'echet lower bound (minimum copula)}: $W(a,b) = \max(a + b - 1, 0)$
-  --- maximum negative dependence
-\item \emph{Independence copula}: $\Pi(a,b) = a \cdot b$
-\item \emph{Fr\'echet upper bound (maximum copula)}: $M(a,b) = \min(a, b)$
-  --- maximum positive dependence
-\end{itemize}
-\end{definition}
-
-\begin{remark}[T-norms vs.\ Copulas]
-Every t-norm satisfies copula boundary conditions, but not all t-norms are
-copulas (the 2-increasing property may fail).
-The product and minimum t-norms are copulas; the \L ukasiewicz t-norm is not
-(it equals the Fr\'echet lower bound, which is a copula, but intermediate
-\L ukasiewicz-style t-norms fail 2-increasing).
-For our purposes, the key distinction is interpretational:
-t-norms define conjunction in fuzzy logic (the operation is fixed);
-copulas model dependence in probability (the dependence structure varies).
-Cred uses the product for its algebraic chain-rule operation but allows
-the actual joint $\cred(A \land B)$ to be any value in the Fr\'echet bounds.
-\end{remark}
-
-\begin{definition}[Coherence / Dutch Book]
-\label{def:dutchbook}
-A credence assignment is \emph{coherent} if no combination of bets---each
-fair by the agent's own credences---guarantees a net loss.
-Ramsey~\cite{ramsey1931} and de Finetti~\cite{definetti1937} proved that
-coherence requires:
-\begin{enumerate}[label=(\roman*),nosep]
-\item \textbf{Complement coherence (normalization)}: $\cred(A) + \cred(\negc A) = 1$
-\item \textbf{Multiplicative coherence (chain rule)}:
-  $\cred(A \mid B) \cdot \cred(B) = \cred(A \land B)$
-\end{enumerate}
-See Vineberg~\cite{vineberg2016} for a survey of Dutch Book arguments.
-Cred adopts the chain rule~(ii) as its sole structural axiom for conditioning
-and adopts complement coherence~(i) as its negation law.
-Unlike probability, Cred does not assume (finite or countable) additivity
-over disjunctions; that additional structure belongs to particular valuation
-choices built on top of the algebra.
-\end{definition}
 
 %=============================================================================
 \section{The Credence Algebra}
@@ -672,6 +561,126 @@ These failures of distributivity and absorption distinguish Cred from
 Boolean algebra and from De Morgan lattices.
 
 %=============================================================================
+\section{The Uniqueness Theorem}
+\label{sec:uniqueness}
+%=============================================================================
+
+This section establishes the first main result: the minimum conjunction
+$\min(a,b)$ is the \emph{unique} truth-functional joint compatible with
+probabilistic marginalization that satisfies basic requirements for reasoning.
+This is not a design choice---it is mathematically forced.
+
+\subsection{The Problem: Fixing the Joint}
+
+The product $c_1 \conjc c_2 = c_1 \cdot c_2$ is an algebraic operation on
+credence values.
+But what is the \emph{actual} joint credence $\cred(A \land B)$ of two
+propositions?
+In probability, the joint depends on the dependence structure between events.
+In logic, we want a truth-functional answer: $\cred(A \land B)$ should depend
+only on $\cred(A)$ and $\cred(B)$.
+
+The Fr\'echet-Hoeffding bounds constrain any valid joint:
+\[
+\max(\cred(A) + \cred(B) - 1, 0) \;\leq\; \cred(A \land B) \;\leq\; \min(\cred(A), \cred(B))
+\]
+The question is: which fixed formula $j(a,b)$ should we choose?
+
+\subsection{Requirements for Reasoning}
+
+We impose four natural requirements on a truth-functional joint:
+
+\begin{enumerate}[label=(\roman*),nosep]
+\item \textbf{Truth-functional}: $j(a,b)$ is a fixed function of $a$ and $b$ alone.
+\item \textbf{Bayes-consistent}: The induced conditioning satisfies
+  $\cred(A \mid B) \cdot \cred(B) = \cred(B \mid A) \cdot \cred(A)$---the
+  chain rule works from both directions.
+\item \textbf{Non-trivial}: Evidence matters: $\cred(A \mid B) \neq \cred(A)$
+  in general.
+\item \textbf{Idempotent}: $j(a,a) = a$, so $\cred(A \land A) = \cred(A)$.
+\end{enumerate}
+
+\subsection{Main Result: Uniqueness}
+
+\begin{theorem}[Uniqueness of Truth-Functional Conjunction]
+\label{thm:uniqueness-main}
+Among all fixed joint functions $j(a,b)$ taking values in the Fr\'echet-Hoeffding
+interval, \textbf{only} maximum positive dependence $j(a,b) = \min(a,b)$ satisfies
+all four requirements.
+\end{theorem}
+
+\begin{proof}
+We verify that $\min(a,b)$ satisfies all four, then show no other does.
+
+\emph{$\min$ satisfies all four:}
+(i)~$\min(a,b)$ is truth-functional by definition.
+(ii)~The induced joint is symmetric ($\min(a,b) = \min(b,a)$), so Bayes
+consistency holds.
+(iii)~Conditioning gives $\cred(A \mid B) = \min(a,b)/b = \min(a/b, 1)$,
+which differs from $a$ when $a > b$.
+(iv)~$\min(a,a) = a$.
+
+\emph{No other joint works:}
+\begin{itemize}[nosep]
+\item \emph{Independence} $j(a,b) = ab$: satisfies (i), (ii), but fails (iii)---conditioning
+  gives $ab/b = a$, so evidence has no effect---and fails (iv)---$a^2 \neq a$
+  for $a \notin \{0,1\}$.
+\item \emph{\L ukasiewicz} $j(a,b) = \max(a+b-1,0)$: satisfies (i), but fails
+  (iv)---$\max(2a-1,0) \neq a$ for $a \in (0.5, 1)$.
+\item Any $j(a,b) < \min(a,b)$: either fails (iv) (if $j(a,a) < a$) or fails
+  (ii) (if not symmetric).
+\end{itemize}
+Lean: \texttt{min\_bayes\_consistent}, \texttt{prod\_trivial\_conditioning},
+\texttt{min\_nontrivial\_conditioning}.
+\end{proof}
+
+\begin{theorem}[Min-Copula Characterization]
+\label{thm:min-copula-unique}
+Let $j : [0,1]^2 \to [0,1]$ satisfy symmetry, idempotence ($j(a,a) = a$),
+zero boundary ($j(0,b) = 0$), the Fr\'echet upper bound ($j(a,b) \leq \min(a,b)$),
+and the 2-increasing property.
+Then $j(a,b) = \min(a,b)$ for all $a,b \in [0,1]$.
+\end{theorem}
+
+\begin{proof}
+The upper bound gives $j(a,b) \leq \min(a,b)$.
+For the lower bound, assume $a \leq b$ (symmetry handles the other case).
+Apply 2-increasing to the rectangle $[0,a] \times [a,b]$:
+\[
+j(a,b) - j(a,a) - j(0,b) + j(0,a) \geq 0
+\]
+By idempotence $j(a,a) = a$, and by zero boundary $j(0,b) = j(0,a) = 0$,
+this simplifies to $j(a,b) \geq a = \min(a,b)$.
+Lean: \texttt{min\_copula\_unique}, \texttt{symmetric\_idempotent\_2incr\_ge\_min}.
+\end{proof}
+
+\subsection{Interpretation}
+
+\begin{remark}[Why This Matters]
+The uniqueness theorem answers a fundamental question: \emph{Can probability
+and many-valued logic be unified?}
+The answer is yes, and the unification is \textbf{unique}.
+The minimum conjunction is not one choice among many---it is the only
+truth-functional conjunction compatible with probabilistic marginalization
+that supports proper reasoning.
+
+This explains a long-standing puzzle: why do K$_3$, LP, and RM3 all use the
+same conjunction (Kleene min)?
+The answer is that they \emph{must}---any other choice either makes evidence
+irrelevant (independence) or breaks idempotence (\L ukasiewicz).
+\end{remark}
+
+\begin{remark}[Comonotonicity]
+In probability theory, the minimum joint is the \emph{comonotonicity copula}:
+the extremal case where all random variables are increasing functions of a
+single latent variable $U \sim \mathrm{Unif}[0,1]$~\cite{dhaene2002,nelsen2006}.
+If $\cred(A) \leq \cred(B)$ and $j(A,B) = \min(\cred(A), \cred(B)) = \cred(A)$,
+then $A \subseteq B$ almost surely---events are \emph{nested} by probability.
+The single latent variable model is thus the probabilistic interpretation of
+the unique logic-compatible conjunction.
+\end{remark}
+
+%=============================================================================
 \section{Primitive Conditioning}
 \label{sec:conditioning}
 %=============================================================================
@@ -761,14 +770,15 @@ what.
 These questions belong to a higher-level theory (probability, product logic,
 or a logic with designated values) built on top of the algebra.
 
-\subsection{Path Dependence: Why Ex Falso Is Not Forced}
+\subsection{Path Dependence: Ex Falso Is Not Forced (Main Result 2)}
 \label{sec:path-dependence}
 
 The preceding result shows the chain rule \emph{allows} any value at zero evidence.
-We now show something stronger: the mathematics \emph{actively argues against}
+We now prove the second main result: the mathematics \emph{actively argues against}
 forcing the conditional to~$1$.
 
-Consider the min-copula setting where $\text{joint} = \min(a, b)$ with
+Consider the min-copula setting (the unique logic-compatible conjunction from
+Section~\ref{sec:uniqueness}) where $\text{joint} = \min(a, b)$ with
 $a = \cred(A)$ and $b = \cred(B)$.
 For $b > 0$, the conditional is:
 \[
@@ -780,9 +790,9 @@ a/b & \text{if } b \geq a.
 \]
 As $b \to 0$, the limit depends on \emph{how} $a$ and $b$ approach zero together.
 
-\begin{proposition}[Path-Dependent Limits]
-\label{prop:path-dependence}
-Let $a(b)$ be a path with $a(b) \to 0$ as $b \to 0$.  Then:
+\begin{theorem}[Path Dependence at Evidence Zero]
+\label{thm:path-dependence}
+The limit of the conditional $\min(a,b)/b$ as $b \to 0$ is \textbf{path-dependent}:
 \begin{enumerate}[label=\textup{(\roman*)},nosep]
 \item If $a$ is fixed with $a > 0$, then $\lim_{b \to 0} \min(a,b)/b = 1$.
 \item If $a(b) = \lambda b$ for some $\lambda \in (0,1]$, then
@@ -790,12 +800,18 @@ Let $a(b)$ be a path with $a(b) \to 0$ as $b \to 0$.  Then:
 \item If $a(b) = b^\alpha$ for $\alpha > 1$, then
   $\lim_{b \to 0} \min(a(b),b)/b = 0$.
 \end{enumerate}
-\end{proposition}
+Consequently, ex falso ($0 \to c = 1$) is \textbf{not entailed} by the algebra;
+forcing it requires an additional totalization convention.
+\end{theorem}
 
 \begin{proof}
 (i)~For small $b < a$, $\min(a,b) = b$, so the ratio is~$1$.
 (ii)~$\min(\lambda b, b) = \lambda b$, so the ratio is~$\lambda$.
 (iii)~For small $b$, $b^\alpha < b$, so $\min(b^\alpha, b)/b = b^{\alpha-1} \to 0$.
+
+The three cases show the limit takes \emph{every} value in $[0,1]$ depending
+on the path of approach.
+No single value is canonical.
 \end{proof}
 
 The polar parametrization makes the structure vivid.
@@ -809,14 +825,17 @@ Set $a = r\cos\theta$ and $b = r\sin\theta$ with $r \downarrow 0$:
 \]
 The limit is a \emph{piecewise function of the approach angle}, not a single value.
 
-This is exactly the structure of the \emph{Borel--Kolmogorov paradox}
-\cite{borel1909,kolmogorov1933}: in measure theory, conditioning on a null event
-is not uniquely determined---the ``value'' depends on the limiting procedure.
+\begin{remark}[Connection to the Borel--Kolmogorov Paradox]
+Theorem~\ref{thm:path-dependence} has the same structure as the
+\emph{Borel--Kolmogorov paradox}~\cite{borel1909,kolmogorov1933}: in measure
+theory, conditioning on a null event is not uniquely determined---the ``value''
+depends on the limiting procedure.
 Regular conditional probabilities are defined only almost surely and may differ
 on null sets.
-Proposition~\ref{prop:path-dependence} is the same phenomenon in algebraic form:
-the chain rule does not select a unique limit at zero; it selects an
-angle-dependent family of limits.
+The path dependence is the same phenomenon in algebraic form: the chain rule
+does not select a unique limit at zero; it selects an angle-dependent family
+of limits.
+\end{remark}
 
 This gives a clean algebraic fork:
 \begin{description}[nosep]
@@ -825,21 +844,14 @@ This gives a clean algebraic fork:
   constrained only to $[0,1]$.  Ex falso does not follow.
 \item[Option B: Totalize to~$1$.]
   Declare $\cred(A \mid 0) = 1$.  This recovers ex-falso-flavored behavior but
-  is a \emph{convention}, not entailed by the Bayes/copula calculus.
+  is a \emph{convention}, not entailed by the algebra.
   This totalization is used in probability logics~\cite{adams1965} and has been
   recognized as problematic in product-fuzzy encodings~\cite{hajek1998}.
 \end{description}
-Cred takes Option~A: the conditional at zero is void (unconstrained).
+We take Option~A: the conditional at zero is void (unconstrained).
 The min-copula encourages Option~B for the common path ``fixed $a > 0$, $b \to 0$''
 (which drives the limit to~$1$), but it does \emph{not} justify a unique extension
 because the limit varies with the ratio $a/b$.
-
-\begin{quote}
-\textbf{Key point.}  Even with the unique logic-compatible copula $\min(a,b)$,
-the conditional has no canonical value at evidence zero: the extension is
-path-dependent.  Ex falso is therefore not forced by the continuous
-copula+Bayes calculus; obtaining it requires adding a totalization convention.
-\end{quote}
 
 \subsection{De Finetti's Void}
 
@@ -1695,53 +1707,12 @@ Cred is thus not a rediscovery of Belnap-Dunn but a distinct system that
 shares four-valuedness only at the coarsest level.
 \end{remark}
 
-\subsection{Uniqueness of Maximum Dependence}
-\label{sec:uniqueness}
+\subsection{Probabilistic Interpretation of Maximum Dependence}
+\label{sec:prob-interp}
 
-Theorem~\ref{thm:max-dependence} established that $\min(a,b)$ is the unique
-truth-functional joint satisfying Bayes consistency, non-triviality, and
-idempotence.
-The proof relied on comparing alternatives; here we give a direct
-characterization showing \emph{why} the minimum is forced.
-
-\begin{theorem}[Min Copula Uniqueness]
-\label{thm:min-unique}
-Let $j : [0,1]^2 \to [0,1]$ satisfy:
-\begin{enumerate}[label=(\roman*),nosep]
-\item \textbf{Symmetry}: $j(a,b) = j(b,a)$ (Bayes consistency)
-\item \textbf{Idempotence}: $j(a,a) = a$
-\item \textbf{Zero boundary}: $j(0,b) = 0$
-\item \textbf{Fr\'echet upper bound}: $j(a,b) \leq \min(a,b)$
-\item \textbf{2-increasing}: for $a_1 \leq a_2$ and $b_1 \leq b_2$,
-  $j(a_2,b_2) - j(a_2,b_1) - j(a_1,b_2) + j(a_1,b_1) \geq 0$
-\end{enumerate}
-Then $j(a,b) = \min(a,b)$ for all $a,b \in [0,1]$.
-\end{theorem}
-\begin{proof}
-The upper bound gives $j(a,b) \leq \min(a,b)$.
-For the lower bound, assume $a \leq b$ (symmetry handles the other case).
-Apply 2-increasing to the rectangle $[0,a] \times [a,b]$:
-\[
-j(a,b) - j(a,a) - j(0,b) + j(0,a) \geq 0
-\]
-By idempotence $j(a,a) = a$, and by zero boundary $j(0,b) = j(0,a) = 0$,
-this simplifies to $j(a,b) \geq a = \min(a,b)$.
-Lean: \texttt{min\_copula\_unique}, \texttt{symmetric\_idempotent\_2incr\_ge\_min}.
-\end{proof}
-
-\begin{remark}[Idempotence Forces Min]
-This uniqueness theorem answers a natural objection: ``Why not use some
-intermediate copula?''
-The answer is that \emph{idempotence forces the maximum}.
-The requirement $j(a,a) = a$ is standard in both probability and logic, yet
-combined with the 2-increasing property, it mathematically forces $j = \min$.
-This connects to a classical result in t-norm theory: the minimum (G\"odel)
-t-norm is the \emph{only} t-norm that is idempotent at all points---other
-t-norms (product, \L ukasiewicz) satisfy $T(a,a) = a$ only at
-$\{0,1\}$~\cite{klement2000}.
-The minimum is not a choice among many; it is the unique survivor of the
-constraints.
-\end{remark}
+Section~\ref{sec:uniqueness} established that the minimum conjunction is the
+unique truth-functional joint satisfying all reasoning requirements.
+Here we develop the probabilistic interpretation.
 
 \begin{remark}[Comonotonicity and Nested Events]
 \label{rem:nested-events}
@@ -1751,20 +1722,6 @@ dependence where all random variables are increasing functions of a single
 latent variable $U \sim \mathrm{Unif}[0,1]$.
 If $\cred(A) \leq \cred(B)$ and $j(A,B) = \min(\cred(A), \cred(B)) = \cred(A)$,
 then $A \subseteq B$ almost surely: events are \emph{nested} by probability.
-This is well-studied in actuarial science and risk theory, where comonotonicity
-represents the worst-case dependence for aggregate risk~\cite{dhaene2002}.
-\end{remark}
-
-\begin{remark}[Quantile Representation]
-\label{rem:latent-variable}
-The standard characterization of comonotonicity: a random vector $(X_1, \ldots,
-X_n)$ is comonotonic iff $(X_1, \ldots, X_n) \stackrel{d}{=} (F_{X_1}^{-1}(U),
-\ldots, F_{X_n}^{-1}(U))$ for $U \sim \mathrm{Unif}[0,1]$---all components are
-quantile transforms of the same latent variable~\cite{dhaene2002}.
-For threshold events $A = \{U \leq \cred(A)\}$, this gives
-$P(A \land B) = \min(\cred(A), \cred(B))$.
-The single-latent-variable model is thus not an ad hoc construction but the
-standard probabilistic interpretation of the Fr\'echet upper bound.
 \end{remark}
 
 \begin{example}[Bayesian Inference Under Maximum Dependence]
@@ -1772,61 +1729,15 @@ standard probabilistic interpretation of the Fr\'echet upper bound.
 Let $\cred(H) = 0.3$ (hypothesis) and $\cred(E) = 0.5$ (evidence).
 Under maximum dependence, $j(H,E) = \min(0.3, 0.5) = 0.3$.
 
-The likelihood is $P(E \mid H) = j(H,E)/\cred(H) = 0.3/0.3 = 1$: the hypothesis
-\emph{perfectly predicts} the evidence (since $H \subseteq E$ in the nested model).
-
 Bayes' theorem gives the posterior:
 \[
 \cred(H \mid E) = \frac{P(E \mid H) \cdot \cred(H)}{\cred(E)}
 = \frac{1 \cdot 0.3}{0.5} = 0.6.
 \]
 Observing $E$ raises $H$ from $0.3$ to $0.6$---genuine Bayesian updating.
-
-More generally, under maximum dependence:
-\[
-\cred(H \mid E) = \begin{cases}
-\cred(H)/\cred(E) & \text{if } \cred(H) \leq \cred(E), \\
-1 & \text{if } \cred(H) > \cred(E).
-\end{cases}
-\]
-The first case is ratio updating; the second is certainty (rare evidence
-confirms common hypotheses).
-The contrapositive also works: since $H \subseteq E$, we have $\lnot E \subseteq \lnot H$,
-so $\cred(H \mid \lnot E) = 0$---if the evidence fails, the hypothesis is
-certainly false.
+The contrapositive also works: $\cred(H \mid \lnot E) = 0$---if the evidence
+fails, the hypothesis is certainly false.
 \end{example}
-
-\begin{remark}[Why This Is the Meeting Point]
-\label{rem:meeting-point-bayes}
-The single latent variable model shows why maximum dependence is where
-probability and logic \emph{merge}.
-We get full Bayesian inference (Bayes' theorem holds exactly) together with
-logical structure (entailment, contrapositive, transitivity of nesting).
-Independence would mean separate latent variables for each proposition, making
-evidence irrelevant to conclusions (trivial conditioning).
-Maximum dependence is the unique dependence structure where compositional
-truth values coexist with proper probabilistic inference.
-\end{remark}
-
-\begin{remark}[Convergence Across Fields]
-\label{rem:convergence}
-The minimum joint appears as the canonical structure in multiple independent
-traditions:
-\begin{itemize}[nosep]
-\item \emph{Copula theory}: the Fr\'echet upper bound / comonotonicity
-  copula~\cite{nelsen2006,dhaene2002}.
-\item \emph{T-norm theory}: the only idempotent t-norm is
-  $\min$~\cite{klement2000}; associative copulas are exactly
-  t-norms~\cite{klement2000}.
-\item \emph{Possibility theory}: necessity measures satisfy
-  $N(A \land B) = \min(N(A), N(B))$; possibility measures satisfy
-  $\Pi(A \lor B) = \max(\Pi(A), \Pi(B))$---the same min/max structure as the
-  Kleene lattice~\cite{dubois2001}.
-\end{itemize}
-The convergence is not coincidental: any framework requiring truth-functional
-composition, idempotence, and copula-regular joints is mathematically forced
-to the same structure.
-\end{remark}
 
 \subsection{Stochastic Independence Between Domains}
 \label{sec:independence}
@@ -2147,133 +2058,41 @@ a Bayes-consistent arrow (machine-checked on three values and on $[0,1]$).
 \end{enumerate}
 
 %=============================================================================
-\section{Lean Formalization}
-\label{sec:lean}
+% Lean section moved to Appendix C
+% See \ref{app:lean} for details
 %=============================================================================
-
-The core algebra is formalized in Lean~4 with Mathlib.
-The formalization covers:
-
-\begin{itemize}
-\item \textbf{Types:} \texttt{Credence} (value in $[0,1]$), \texttt{Conditioning}
-(packaging conditional with chain rule proof), \texttt{ThreeVal} (three-valued type).
-\item \textbf{Operations:} \texttt{neg}, \texttt{conj}, \texttt{disj},
-\texttt{collapse}.
-\item \textbf{Theorems:} Algebraic properties, conditioning behavior, fixed points,
-collapse homomorphism.
-\end{itemize}
-
-\textbf{Key definitions} (rendered from Lean Unicode):
-
-\medskip
-\noindent
-\texttt{structure Credence where}\\
-\null\quad \texttt{val :}~$\Real$\\
-\null\quad \texttt{nonneg : 0}~$\leq$~\texttt{val}\\
-\null\quad \texttt{le\_one : val}~$\leq$~\texttt{1}
-
-\medskip
-\noindent
-\texttt{structure Conditioning (joint evidence : Credence) where}\\
-\null\quad \texttt{condCred : Credence}\\
-\null\quad \texttt{chainRule : condCred}~$\otimes$~\texttt{evidence = joint}
-
-\medskip
-The chain rule uses $\otimes$ (multiplication on credence values).
-The \texttt{joint} parameter is supplied as input, representing $\cred(A \land B)$.
-
-\textbf{Key theorems:}
-\begin{itemize}
-\item \texttt{conditioning\_zero\_any}: any credence satisfies chain rule when evidence $= 0$
-\item \texttt{conditioning\_unique}: uniqueness when evidence $> 0$
-\item \texttt{liar\_fixed\_point}: $\negc \tfrac{1}{2} = \tfrac{1}{2}$
-\item \texttt{neg\_fixed\_point\_unique}: $\tfrac{1}{2}$ is the unique negation fixed point
-\item \texttt{collapse\_neg}, \texttt{collapse\_conj}, \texttt{collapse\_disj}: homomorphism proofs
-\item \texttt{collapse\_surjective}: surjectivity of the collapse
-\item \texttt{conj\_disj\_not\_distrib}: non-distributivity counterexample
-\item \texttt{conj\_idempotent\_iff}: idempotence only at $\{0,1\}$
-\item \texttt{boolean\_neg\_closed}, \texttt{boolean\_conj\_closed},
-\texttt{boolean\_disj\_closed}: $\{0,1\}$ is a subalgebra
-\item \texttt{three\_val\_conj\_not\_closed}: $\{0,\tfrac{1}{2},1\}$ is not a subalgebra
-\item \texttt{no\_boolean\_neg\_retraction}: no negation-preserving map $[0,1] \to \{0,1\}$
-\item \texttt{no\_godel\_collapse}: no negation-preserving map to G\"odel algebra
-\item \texttt{no\_luk\_collapse}: no negation-and-conjunction-preserving map to \L ukasiewicz
-\item \texttt{godel\_impl}, \texttt{rm3\_impl}: implication tables with comparison theorems
-\item \texttt{rm3\_not\_bayes\_consistent}: RM3 fails Bayes consistency on three values
-\item \texttt{rm3\_not\_bayes\_consistent\_real}: RM3 fails Bayes consistency under real multiplication on $[0,1]$
-\item \texttt{godel\_bayes\_consistent}: Bayes-consistent on $\{0,\tfrac{1}{2},1\}$ (applies to both G\"odel and product residuated via \texttt{godel\_impl\_eq\_prod\_resid})
-\item \texttt{frechet\_upper}, \texttt{frechet\_lower}: Fr\'echet-Hoeffding bounds
-\item \texttt{frechet\_conditioning\_exists}: bidirectional conditioning for any joint in bounds
-\item \texttt{prod\_resid\_bayes\_consistent\_real}: product residuated is Bayes-consistent on $[0,1]$
-\item \texttt{godel\_not\_bayes\_consistent\_real}: G\"odel implication fails Bayes consistency on $[0,1]$
-\item \texttt{symmetric\_bayes\_consistent}, \texttt{copula\_zero\_left}: copula connection
-\item \texttt{min\_tnorm\_not\_unique}, \texttt{luk\_tnorm\_not\_unique}: alternative t-norms fail unique conditioning
-\end{itemize}
-
-\textbf{Scope of formalization.}
-The Lean file covers the core algebra, conditioning, fixed points, the
-collapse homomorphism and its impossibility results, Bayes consistency
-on both three values and $[0,1]$, the copula symmetry argument, and the
-t-norm conditioning uniqueness results.
-The file also contains auxiliary results (spread/certainty of credences)
-not discussed in this paper.
-The copula-specific claims in Remark~\ref{rem:copula} (boundary violation
-for RM3, non-symmetry for G\"odel, Grzegorzewski's characterizations)
-are pen-and-paper; the formalized results are the symmetric-implies-Bayes-consistent
-theorem and the Bayes-consistency failures for RM3 and G\"odel on $[0,1]$.
-The converse of Proposition~\ref{prop:frechet} (existence of conditioning
-for any joint in the Fr\'echet-Hoeffding interval) is formalized for the
-both-marginals-positive case (\texttt{frechet\_conditioning\_exists});
-the zero-marginal cases follow from \texttt{conditioning\_zero\_any}
-and \texttt{conditioning\_mk} individually but are not wrapped in a
-single combined theorem.
-
-\textbf{Formalization notes.}
-The collapse homomorphism proofs require careful case analysis
-(five cases each for conjunction and disjunction, covering the
-$\{0, (0{,}1), 1\}^2$ grid) to show that boundary values map correctly
-and that the open interval $(0,1)$ is preserved.
-The \L ukasiewicz impossibility proof uses Lean's \texttt{Real.sqrt} to
-construct an intermediate credence $c = \sqrt{1/2}$ satisfying
-$c \conjc c = \tfrac{1}{2}$---a witness that does not appear in
-the three-valued set.
-The three-valued comparisons (RM3 vs.\ G\"odel vs.\ Cred) use Lean's
-\texttt{decide} tactic for exhaustive checking of finite truth tables.
-The Lean identifier \texttt{rm3\_impl} refers to the Kleene material
-conditional; the name reflects the RM3 tradition from which the table
-originates.
-
-Verification: \texttt{cd lean \&\& lake build}.
-Toolchain: Lean 4.16.0 with Mathlib 4.16.0.
 
 %=============================================================================
 \section{Conclusion}
 \label{sec:conclusion}
 %=============================================================================
 
-Cred is probability without the measure: values in $[0,1]$, the complement,
-and the chain rule as the sole structural axiom for conditioning.
-The joint credence $\cred(A \land B)$ is an external parameter, making Cred
-compatible with both the logic and probability traditions.
-Theorem~\ref{thm:max-dependence} establishes that maximum positive
-dependence ($\min$) is the unique fixed joint satisfying truth-functionality,
-Bayes consistency, non-triviality, and idempotence---explaining why
-K$_3$, LP, and RM3 all use the Kleene conjunction.
-The collapse homomorphism (Theorem~\ref{thm:collapse}) connects Cred to
-the Kleene lattice, with impossibility results for alternative targets.
+This paper establishes two main results about the relationship between
+probability and many-valued logic.
 
-When evidence has credence zero, the chain rule is satisfied by any
-value---de Finetti's void conditional in a graded setting.
-Proposition~\ref{prop:path-dependence} strengthens this: the conditional's
-limit as evidence approaches zero is \emph{path-dependent}, varying with
-the ratio $a/b$ (equivalently, the approach angle in polar coordinates).
-This is the same structure as the Borel--Kolmogorov paradox in measure
-theory: the ``value'' of a conditional at a null event depends on the
-limiting procedure.
-Ex falso ($0 \to c = 1$) is therefore not forced by the Bayes/copula
-calculus; obtaining it requires adding a totalization convention beyond
-what the chain rule entails.
-The main results are machine-checked in Lean~4.
+\textbf{Main Result 1 (Uniqueness, Theorem~\ref{thm:uniqueness-main}).}
+The minimum conjunction $\min(a,b)$ is the \emph{unique} truth-functional
+joint compatible with probabilistic marginalization that satisfies Bayes
+consistency, non-trivial conditioning, and idempotence.
+This explains why K$_3$, LP, and RM3 all use the Kleene conjunction: it is
+not a choice among alternatives but the unique meeting point of logic and
+probability.
+
+\textbf{Main Result 2 (Path Dependence, Theorem~\ref{thm:path-dependence}).}
+The conditional's limit as evidence approaches zero is \emph{path-dependent},
+varying with the ratio $a/b$ (equivalently, the approach angle in polar
+coordinates).
+This is the same structure as the Borel--Kolmogorov paradox.
+Ex falso ($0 \to c = 1$) is therefore \emph{not} forced by the algebra;
+obtaining it requires adding a totalization convention beyond what the
+chain rule entails.
+
+The framework is simple: credences in $[0,1]$, the complement $1-c$, and the
+chain rule $\cred(A \mid B) \cdot \cred(B) = \cred(A \land B)$ as the sole
+structural axiom for conditioning.
+The collapse homomorphism (Theorem~\ref{thm:collapse}) connects this algebra
+to the Kleene lattice, with impossibility results for alternative targets.
+The main results are machine-checked in Lean~4 (Appendix~\ref{app:lean}).
 
 \medskip
 \textbf{Scope.}
@@ -2639,5 +2458,226 @@ Zadeh, L.A.
 \newblock \emph{Information and Control}, 8:338--353, 1965.
 
 \end{thebibliography}
+
+%=============================================================================
+% APPENDICES
+%=============================================================================
+\appendix
+
+%=============================================================================
+\section{Preliminaries: T-Norms, Copulas, and Coherence}
+\label{app:prelim}
+%=============================================================================
+
+This appendix provides formal definitions for concepts referenced in the main text.
+
+\begin{definition}[T-norm]
+\label{def:tnorm}
+A \emph{triangular norm} (t-norm) is a binary operation
+$\otimes : [0,1] \times [0,1] \to [0,1]$ satisfying:
+\begin{enumerate}[label=(\roman*),nosep]
+\item \textbf{Commutativity}: $a \otimes b = b \otimes a$
+\item \textbf{Associativity}: $(a \otimes b) \otimes c = a \otimes (b \otimes c)$
+\item \textbf{Monotonicity}: if $a \leq a'$, then $a \otimes b \leq a' \otimes b$
+\item \textbf{Identity}: $1 \otimes a = a$
+\end{enumerate}
+The three basic continuous t-norms are~\cite{klement2000}:
+\begin{itemize}[nosep]
+\item \emph{G\"odel (minimum)}: $a \otimes_G b = \min(a, b)$
+\item \emph{Product}: $a \otimes_\Pi b = a \cdot b$
+\item \emph{\L ukasiewicz}: $a \otimes_L b = \max(a + b - 1, 0)$
+\end{itemize}
+\end{definition}
+
+\begin{definition}[Residuated Implication]
+\label{def:resid}
+Given a t-norm $\otimes$, the \emph{residuated implication} is:
+\[
+a \to b = \sup\{c \in [0,1] : a \otimes c \leq b\}
+\]
+Key consequences~\cite{hajek1998}:
+\begin{itemize}[nosep]
+\item $0 \to b = 1$ for every t-norm (ex falso quodlibet)
+\item $a \to a = 1$ (identity)
+\item $1 \to b = b$
+\end{itemize}
+The residuated implications for the basic t-norms are:
+\begin{itemize}[nosep]
+\item \emph{G\"odel}: $a \to_G b = 1$ if $a \leq b$, else $b$
+\item \emph{Product (Goguen)}: $a \to_\Pi b = \min(b/a, 1)$ for $a > 0$,
+  with $0 \to_\Pi b = 1$
+\item \emph{\L ukasiewicz}: $a \to_L b = \min(1 - a + b, 1)$
+\end{itemize}
+\end{definition}
+
+\begin{definition}[Copula]
+\label{def:copula}
+A \emph{copula} is a function $C : [0,1]^2 \to [0,1]$ satisfying:
+\begin{enumerate}[label=(\roman*),nosep]
+\item \textbf{Boundary conditions}: $C(0, b) = C(a, 0) = 0$; \; $C(1, b) = b$; \; $C(a, 1) = a$
+\item \textbf{2-increasing}: $C(a_2, b_2) - C(a_2, b_1) - C(a_1, b_2) + C(a_1, b_1) \geq 0$
+  for all $a_1 \leq a_2$, $b_1 \leq b_2$
+\end{enumerate}
+Copulas model dependence structures between random variables~\cite{nelsen2006}.
+The Fr\'echet-Hoeffding bounds constrain all copulas:
+\[
+\max(a + b - 1, 0) \;\leq\; C(a, b) \;\leq\; \min(a, b)
+\]
+Key copulas:
+\begin{itemize}[nosep]
+\item \emph{Fr\'echet lower bound}: $W(a,b) = \max(a + b - 1, 0)$ (maximum negative dependence)
+\item \emph{Independence copula}: $\Pi(a,b) = a \cdot b$
+\item \emph{Fr\'echet upper bound}: $M(a,b) = \min(a, b)$ (maximum positive dependence)
+\end{itemize}
+\end{definition}
+
+\begin{definition}[Coherence / Dutch Book]
+\label{def:dutchbook}
+A credence assignment is \emph{coherent} if no combination of bets---each
+fair by the agent's own credences---guarantees a net loss.
+Ramsey~\cite{ramsey1931} and de Finetti~\cite{definetti1937} proved that
+coherence requires:
+\begin{enumerate}[label=(\roman*),nosep]
+\item \textbf{Complement coherence}: $\cred(A) + \cred(\negc A) = 1$
+\item \textbf{Multiplicative coherence}: $\cred(A \mid B) \cdot \cred(B) = \cred(A \land B)$
+\end{enumerate}
+\end{definition}
+
+%=============================================================================
+\section{Logic Comparison Tables}
+\label{app:logic-tables}
+%=============================================================================
+
+This appendix contains detailed comparison tables for the various logics
+and implications discussed in the paper.
+
+\textbf{Three-valued operations (Kleene lattice):}
+
+\begin{center}
+\begin{tabular}{c|c}
+$c$ & $\mathrm{neg}(c)$ \\
+\hline
+0 & 1 \\
+$\tfrac{1}{2}$ & $\tfrac{1}{2}$ \\
+1 & 0
+\end{tabular}
+\quad
+\begin{tabular}{c|ccc}
+$\mathrm{conj}$ & 0 & $\tfrac{1}{2}$ & 1 \\
+\hline
+0 & 0 & 0 & 0 \\
+$\tfrac{1}{2}$ & 0 & $\tfrac{1}{2}$ & $\tfrac{1}{2}$ \\
+1 & 0 & $\tfrac{1}{2}$ & 1
+\end{tabular}
+\quad
+\begin{tabular}{c|ccc}
+$\mathrm{disj}$ & 0 & $\tfrac{1}{2}$ & 1 \\
+\hline
+0 & 0 & $\tfrac{1}{2}$ & 1 \\
+$\tfrac{1}{2}$ & $\tfrac{1}{2}$ & $\tfrac{1}{2}$ & 1 \\
+1 & 1 & 1 & 1
+\end{tabular}
+\end{center}
+
+\textbf{Implication comparison} (rows = evidence $a$, columns = conclusion $b$):
+
+\begin{center}
+\begin{tabular}{c|ccc}
+\multicolumn{4}{c}{\textbf{Kleene material}: $\max(\negc a, b)$} \\
+& 0 & $\tfrac{1}{2}$ & 1 \\
+\hline
+0 & 1 & 1 & 1 \\
+$\tfrac{1}{2}$ & $\tfrac{1}{2}$ & $\tfrac{1}{2}$ & 1 \\
+1 & 0 & $\tfrac{1}{2}$ & 1
+\end{tabular}
+\quad
+\begin{tabular}{c|ccc}
+\multicolumn{4}{c}{\textbf{Prod.\ resid.}: $\min(b/a, 1)$} \\
+& 0 & $\tfrac{1}{2}$ & 1 \\
+\hline
+0 & 1 & 1 & 1 \\
+$\tfrac{1}{2}$ & 0 & 1 & 1 \\
+1 & 0 & $\tfrac{1}{2}$ & 1
+\end{tabular}
+\quad
+\begin{tabular}{c|ccc}
+\multicolumn{4}{c}{\textbf{Chain-rule cond.}: joint $= \min(a,b)$} \\
+& 0 & $\tfrac{1}{2}$ & 1 \\
+\hline
+0 & $*$ & $*$ & $*$ \\
+$\tfrac{1}{2}$ & 0 & 1 & 1 \\
+1 & 0 & $\tfrac{1}{2}$ & 1
+\end{tabular}
+\end{center}
+{\footnotesize $*$ = unconstrained (any value satisfies the chain rule).}
+
+\textbf{Comparison of joint formulas:}
+
+\begin{center}
+\small
+\begin{tabular}{lcccc}
+\toprule
+\textbf{Joint formula} & \textbf{Truth-func.} & \textbf{Bayes-cons.} & \textbf{Non-trivial} & \textbf{Idempotent} \\
+\midrule
+$\min(a,b)$ (max.\ pos.\ dep.) & \checkmark & \checkmark & \checkmark & \checkmark \\
+$a \cdot b$ (independence) & \checkmark & \checkmark & $\times$ & $\times$ \\
+$\max(a+b-1,0)$ (\L uk.) & \checkmark & --- & --- & $\times$ \\
+RM3 induced & --- & $\times$ & --- & --- \\
+G\"odel induced (on $[0,1]$) & --- & $\times$ & --- & --- \\
+External (probability) & $\times$ & \checkmark & \checkmark & \checkmark \\
+\bottomrule
+\end{tabular}
+\normalsize
+\end{center}
+
+%=============================================================================
+\section{Lean Formalization}
+\label{app:lean}
+%=============================================================================
+
+The core algebra is formalized in Lean~4 with Mathlib.
+The formalization covers:
+
+\begin{itemize}
+\item \textbf{Types:} \texttt{Credence} (value in $[0,1]$), \texttt{Conditioning}
+(packaging conditional with chain rule proof), \texttt{ThreeVal} (three-valued type).
+\item \textbf{Operations:} \texttt{neg}, \texttt{conj}, \texttt{disj},
+\texttt{collapse}.
+\item \textbf{Theorems:} Algebraic properties, conditioning behavior, fixed points,
+collapse homomorphism.
+\end{itemize}
+
+\textbf{Key definitions} (rendered from Lean Unicode):
+
+\medskip
+\noindent
+\texttt{structure Credence where}\\
+\null\quad \texttt{val :}~$\Real$\\
+\null\quad \texttt{nonneg : 0}~$\leq$~\texttt{val}\\
+\null\quad \texttt{le\_one : val}~$\leq$~\texttt{1}
+
+\medskip
+\noindent
+\texttt{structure Conditioning (joint evidence : Credence) where}\\
+\null\quad \texttt{condCred : Credence}\\
+\null\quad \texttt{chainRule : condCred}~$\otimes$~\texttt{evidence = joint}
+
+\medskip
+\textbf{Key theorems:}
+\begin{itemize}
+\item \texttt{conditioning\_zero\_any}: any credence satisfies chain rule when evidence $= 0$
+\item \texttt{conditioning\_unique}: uniqueness when evidence $> 0$
+\item \texttt{liar\_fixed\_point}: $\negc \tfrac{1}{2} = \tfrac{1}{2}$
+\item \texttt{neg\_fixed\_point\_unique}: $\tfrac{1}{2}$ is the unique negation fixed point
+\item \texttt{collapse\_neg}, \texttt{collapse\_conj}, \texttt{collapse\_disj}: homomorphism proofs
+\item \texttt{min\_copula\_unique}: uniqueness of min-copula under constraints
+\item \texttt{no\_godel\_collapse}: no negation-preserving map to G\"odel algebra
+\item \texttt{no\_luk\_collapse}: no negation-and-conjunction-preserving map to \L ukasiewicz
+\item \texttt{rm3\_not\_bayes\_consistent\_real}: RM3 fails Bayes consistency
+\item \texttt{prod\_resid\_bayes\_consistent\_real}: product residuated is Bayes-consistent
+\end{itemize}
+
+Verification: \texttt{cd lean \&\& lake build}.
+Toolchain: Lean 4.16.0 with Mathlib 4.16.0.
 
 \end{document}
