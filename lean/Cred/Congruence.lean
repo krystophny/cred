@@ -185,36 +185,70 @@ theorem interior_products_approach_zero (a c eps : ℝ)
 
 /-- The n >= 4 impossibility: no non-trivial congruence has 4 or more classes.
 
-    The paper argument (Section 7, part 4):
-    With singletons {0} and {1} and >= 2 interior classes, pick a in the class of
-    1/2 with 0 < a < 1. By finite_class_cycle, a^i ~ a^{i+p} for some i, p.
-    By rel_along_period, a^i ~ a^{i+kp} for all k, and these approach 0.
-    For c in another interior class, c * a^{i+kp} also approach 0 while
-    remaining in a fixed quotient class. Since that class contains positive
-    elements arbitrarily close to 0 yet {0} is a singleton, the quotient
-    structure forces total collapse via zero_equiv_forces_trivial, contradicting
-    non-triviality.
-
-    The algebraic closure (connecting accumulation near 0 to R 0 eps) is deferred.
-    Parts (1)-(3) are fully verified; this is the only sorry in the file. -/
+    Scaling-trick proof: Pick a = 1/2. Pigeonhole gives i < j with
+    classify(a^i) = classify(a^j). Since both a^i, a^j are in [0,1],
+    the converse hypothesis hquot yields R.rel (a^i) (a^j).
+    Write a^j = a^i * a^p where p = j - i > 0.
+    Multiply both sides by (a^i)^{-1} using conj_compat (which operates
+    on all of ℝ, not just [0,1]) to get R.rel 1 (a^p).
+    Apply neg_compat to get R.rel 0 (1 - a^p).
+    Since 0 < a^p < 1 we have 0 < 1 - a^p, so singleton_zero forces
+    1 - a^p = 0, i.e. a^p = 1 — contradicting 0 < a < 1. -/
 theorem no_four_or_more_classes (R : CredCongruence) (hnt : R.NonTrivial)
-    (nclasses : ℕ) (hn : 4 ≤ nclasses)
+    (nclasses : ℕ) (_hn : 4 ≤ nclasses)
     (classify : ℝ → Fin nclasses)
-    (hcompat : ∀ a b, R.rel a b → classify a = classify b)
-    (hsurj : Function.Surjective classify)
-    (hclass_zero : ∀ x, 0 ≤ x → x ≤ 1 → classify x = classify 0 → x = 0)
-    (hclass_one : ∀ x, 0 ≤ x → x ≤ 1 → classify x = classify 1 → x = 1) :
+    (_hcompat : ∀ a b, R.rel a b → classify a = classify b)
+    (hquot : ∀ a b, 0 ≤ a → a ≤ 1 → 0 ≤ b → b ≤ 1 →
+      classify a = classify b → R.rel a b)
+    (_hsurj : Function.Surjective classify)
+    (_hclass_zero : ∀ x, 0 ≤ x → x ≤ 1 → classify x = classify 0 → x = 0)
+    (_hclass_one : ∀ x, 0 ≤ x → x ≤ 1 → classify x = classify 1 → x = 1) :
     False := by
-  sorry
+  set a : ℝ := 1 / 2
+  have ha_pos : (0 : ℝ) < a := by norm_num
+  have ha_lt : a < 1 := by norm_num
+  have ha_nn : (0 : ℝ) ≤ a := le_of_lt ha_pos
+  have ha_le : a ≤ 1 := le_of_lt ha_lt
+  obtain ⟨i, j, hij, _, hclass⟩ := finite_class_cycle nclasses classify a
+  have hp_pos : 0 < j - i := Nat.sub_pos_of_lt hij
+  set p := j - i
+  have hj_eq : j = i + p := (Nat.add_sub_cancel' (le_of_lt hij)).symm
+  rw [hj_eq] at hclass
+  have hai_pos : (0 : ℝ) < a ^ i := pow_pos ha_pos i
+  have hai_nn : (0 : ℝ) ≤ a ^ i := le_of_lt hai_pos
+  have hai_le : a ^ i ≤ 1 := pow_le_one₀ ha_nn ha_le
+  have haj_nn : (0 : ℝ) ≤ a ^ (i + p) := pow_nonneg ha_nn (i + p)
+  have haj_le : a ^ (i + p) ≤ 1 := pow_le_one₀ ha_nn ha_le
+  have hrel : R.rel (a ^ i) (a ^ (i + p)) :=
+    hquot _ _ hai_nn hai_le haj_nn haj_le hclass
+  have hrewrite : a ^ (i + p) = a ^ i * a ^ p := by rw [pow_add]
+  rw [hrewrite] at hrel
+  have hai_inv_pos : (0 : ℝ) < (a ^ i)⁻¹ := inv_pos.mpr hai_pos
+  have hscale_raw : R.rel ((a ^ i)⁻¹ * (a ^ i)) ((a ^ i)⁻¹ * (a ^ i * a ^ p)) :=
+    R.conj_compat _ _ _ _ (R.refl (a ^ i)⁻¹) hrel
+  have hleft : (a ^ i)⁻¹ * a ^ i = 1 := inv_mul_cancel₀ (ne_of_gt hai_pos)
+  have hright : (a ^ i)⁻¹ * (a ^ i * a ^ p) = a ^ p := by
+    rw [← mul_assoc, inv_mul_cancel₀ (ne_of_gt hai_pos), one_mul]
+  rw [hleft, hright] at hscale_raw
+  have hrel_neg : R.rel 0 (1 - a ^ p) := by
+    have h := R.neg_compat 1 (a ^ p) hscale_raw; rwa [sub_self] at h
+  have hap_pos : (0 : ℝ) < a ^ p := pow_pos ha_pos p
+  have hp_ne : p ≠ 0 := Nat.not_eq_zero_of_lt hp_pos
+  have hap_lt : a ^ p < 1 := pow_lt_one₀ ha_pos.le ha_lt hp_ne
+  have hap_comp_pos : (0 : ℝ) < 1 - a ^ p := by linarith
+  have hap_comp_le : 1 - a ^ p ≤ 1 := by linarith [hap_pos]
+  have := singleton_zero R hnt (1 - a ^ p) (le_of_lt hap_comp_pos) hap_comp_le hrel_neg
+  linarith
 
 /-! ## Main Classification Theorem -/
 
 /-- Complete congruence classification (Theorem 7 of the paper).
     In any non-trivial congruence on ([0,1], neg, conj):
-    - {0} and {1} are singletons (fully verified)
-    - No 2-element quotient preserving negation exists (fully verified)
-    - Any 3-element quotient is the Kleene lattice (fully verified)
-    - No quotient with 4+ classes exists (pending: no_four_or_more_classes) -/
+    - {0} and {1} are singletons (singleton_zero, singleton_one)
+    - No 2-element quotient preserving negation exists (no_two_element_quotient)
+    - Any 3-element quotient is the Kleene lattice (unique_three_element_quotient)
+    - No quotient with 4+ classes exists (no_four_or_more_classes)
+    All four parts are fully verified. -/
 theorem finite_congruence_classification
     (R : CredCongruence) (hnt : R.NonTrivial) :
     (∀ x : ℝ, 0 ≤ x → x ≤ 1 → R.rel 0 x → x = 0) ∧

@@ -3,7 +3,7 @@
 ## Current Focus: Part 1 (publication-ready)
 
 Ship a publication-quality `part1/paper.tex` with machine-checked proofs.
-Remaining: fill the `sorry` in `lean/Cred/Congruence.lean` (`no_four_or_more_classes`).
+All Lean proofs fully verified (zero sorry). Paper and formalization are publication-ready.
 
 ## Build (match CI)
 
@@ -41,7 +41,7 @@ Keep the separation clear: `⊗`/`⊔` are the core algebraic operations (produc
 - `lean/Cred/Consequence.lean` — K3/LP/graded consequence, no-explosion theorems.
 - `lean/Cred/Update.lean` — Bayesian and Jeffrey conditionalization.
 - `lean/Cred/Predicate.lean` — graded predicates, quantifiers, Russell fixed point.
-- `lean/Cred/Congruence.lean` — congruence classification (singleton boundaries verified; `no_four_or_more_classes` has `sorry`).
+- `lean/Cred/Congruence.lean` — congruence classification (all four parts fully verified).
 - `part1/paper.tex` — publication paper (12 sections + 2 appendices, ~1437 lines, 14 pages).
 - `part3/` — future work: graded proofs, self-hosting, undecidability.
 
@@ -58,7 +58,7 @@ Collapse / congruence:
 - `Cred.ThreeVal.cred_no_ex_falso` (Cred blocks ex falso via unconstrained conditioning)
 - `three_element_quotient_unique`, `zero_equiv_forces_trivial`, `no_boolean_neg_retraction`
 - `Cred.CredCongruence.singleton_zero`, `singleton_one` (boundary singletons)
-- `Cred.CredCongruence.no_four_or_more_classes` (has `sorry` — the n>=4 case)
+- `Cred.CredCongruence.no_four_or_more_classes` (scaling trick, fully verified)
 
 Consequence (from Consequence.lean):
 - `k3_no_tautology`, `lp_no_explosion`, `graded_no_explosion`

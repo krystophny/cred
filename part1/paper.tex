@@ -711,32 +711,27 @@ $[0,1] \to \{0,1\}$.
 Theorem~\ref{thm:quotient-unique}.
 
 \textbf{(4) No quotient with $n \geq 4$ classes exists.}
-Suppose $\sim$ has $n \geq 4$ classes with singletons $\{0\}$, $\{1\}$
-(by~(1)) and at least two interior classes.
-The class $C_m$ containing $\tfrac{1}{2}$ is negation-invariant
-(Lemma~\ref{thm:fixedunique}).
-For any $a \in C_m$ with $0 < a < 1$, the sequence $a, a^2, a^3, \ldots$
-lies entirely in interior classes (each $a^k > 0$) and converges to $0$.
-Since $a^{k+1} = a^k \conjc a$ and $a \sim a$, all iterates are in $C_m$.
-
-For any other interior class $C'$ and $c \in C'$, the products
-$c \cdot a^k \to 0$ while remaining positive.
-The class of $c \cdot a^k$ is $[C'] \conjc [C_m]$ in the quotient,
-so this class contains elements arbitrarily close to $0$.
-But any class containing elements arbitrarily close to $0$ would, via
-Proposition~\ref{thm:zero-collapse}, force total collapse ---
-contradicting non-triviality.
-Therefore $C_m$ is the only interior class.
+Pick $a = \tfrac{1}{2}$.
+By the pigeonhole principle on $n$ classes, there exist $0 \leq i < j \leq n$
+with $a^i \sim a^j$.
+Write $a^j = a^i \cdot a^p$ where $p = j - i \geq 1$.
+Since the congruence is compatible with multiplication (on all of~$\mathbb{R}$,
+not just $[0,1]$), multiplying both sides by $(a^i)^{-1}$ yields
+$1 \sim a^p$.
+Applying negation compatibility gives $0 \sim 1 - a^p$.
+But $0 < a^p < 1$, so $1 - a^p > 0$, contradicting~(1).
 \end{proof}
 
-\begin{remark}[Lean verification status]
-Parts (1)--(3) are fully Lean-verified in \texttt{Cred/Congruence.lean}:
+\begin{remark}[Lean verification]
+All four parts are fully Lean-verified in \texttt{Cred/Congruence.lean}:
 \texttt{singleton\_zero}, \texttt{singleton\_one},
 \texttt{no\_two\_element\_quotient},
-\texttt{unique\_three\_element\_quotient}.
-Part~(4) states the key lemmas (\texttt{rel\_along\_period},
-\texttt{interior\_products\_approach\_zero}, \texttt{finite\_class\_cycle})
-with the final step deferred (\texttt{no\_four\_or\_more\_classes}).
+\texttt{unique\_three\_element\_quotient},
+\texttt{no\_four\_or\_more\_classes}.
+The scaling trick in part~(4) uses the $\mathbb{R}$-algebra structure
+of the congruence (multiplication by $(a^i)^{-1} > 1$), which is
+available because \texttt{CredCongruence.conj\_compat} operates on all
+of~$\mathbb{R}$.
 \end{remark}
 
 \begin{remark}[Comparison with MV-algebras]
