@@ -4,6 +4,7 @@ Part 1 establishes the constraint algebra. Part 2 adds interpretation, consequen
 
 ## Files
 
+- `paper-sketch.tex` — literature map + synthesis for Part 3 (working draft)
 - `01-asymptotic-proofs.md` — Proofs approaching certainty (cred -> 1)
 - `02-fixed-points.md` — Self-reference and paradox dissolution
 - `03-undecidability.md` — Incompleteness and underdetermination (distinct from the 1/2 fixed point)

@@ -1,66 +1,98 @@
-# Open Questions
+# Open Questions (Part 3 Roadmap)
 
-## Already settled by Parts 1-2
+Part 3 is where we stop re-stating Parts 1--2 and instead decide what *extra*
+structure to add, what theorems to target, and how to position Cred relative to
+existing traditions (mathematical fuzzy logic, coherence/conditional events,
+imprecise probability, and fixed-point semantics for truth).
 
-These questions from earlier drafts are now answered:
+For a literature map and synthesis statement, see `paper-sketch.tex`.
 
-- **"Does Cred have a model?"** — Yes. [0,1] with the product, complement, and chain rule IS the model. Part 1 defines Cred as this concrete algebra and Lean-checks it.
-- **"Is Cred consistent?"** — Cred is an algebra, not a formal theory. The algebra trivially has a model ([0,1] itself). Consistency becomes a question only when Cred is extended to a formal theory with axioms and a proof system.
-- **"Does Cred solve the liar paradox?"** — The liar sentence has credence 1/2 (Part 1, Lean: `liar_fixed_point`). Whether this counts as "solving" the paradox is philosophical, not mathematical.
-- **"What about Godel?"** — Godel sentences are not self-negating; they have definite truth values in standard models. Cred does not dissolve incompleteness. See `03-undecidability.md`.
+## Baselines (things to not reinvent)
 
-## Proof theory
+1. **Mathematical fuzzy logic / product logic.** If we fix the joint to the
+   Fréchet upper bound `min(a,b)`, Cred's conditioning matches the
+   product-residuated (Goguen) implication for positive evidence. This puts the
+   logic-style view directly adjacent to product logic and BL/MTL families
+   (Hájek, Klement--Mesiar--Pap; Handbook; residuated lattices).
 
-1. **Sequent calculus for Cred.** What is a sound and complete proof system for Cred? What are the sequent rules? Does cut elimination hold?
+2. **Conditional probability as primitive + conditional events.** Rényi/Popper
+   conditioning, de Finetti's void conditional, Calabrese Boolean fractions, and
+   coherence-based conditional random quantities already treat the antecedent-false
+   case as non-classical (void/underdetermined) rather than vacuously true.
 
-2. **Decidability.** Is validity (or satisfiability) in a Cred-based logic decidable? What complexity class?
+3. **Null-event conditioning + imprecise probability.** Measure-theoretic
+   disintegration gives conditionals determined only up to almost-sure equivalence;
+   imprecise probability often returns sets/intervals of admissible conditionals
+   at the boundary rather than a single value.
 
-3. **Proof-theoretic strength.** How does a Cred proof system compare in strength to classical logic, K3, LP, or product logic?
+4. **Fixed-point semantics for truth.** Kripke fixed points and revision theory
+   already provide mature frameworks for self-reference. Cred's `c = 1-c` fixed
+   point is a clean algebraic base case, not a replacement for that literature.
 
-## Consequence relations
+## Proof theory (graded consequence vs graded provability)
 
-4. **Compatibility with unconstrained conditioning.** Which consequence relations (beyond K3, LP, RM3) are compatible with the principle that impossible evidence provides no constraint? Part 2 poses this question; it remains open.
+1. **Pick a proof target.** Are we aiming for (a) a threshold semantics on
+   `[0,1]` (Part 2 style), (b) a designated-values system after collapse (K3/LP),
+   or (c) Pavelka-style graded provability? These lead to different calculi and
+   different completeness statements.
 
-5. **Adams-type bounds without additivity.** Adams' probability logic uses sigma-additivity to propagate uncertainty. Can analogous bounds be proven for Cred valuations without additivity?
+2. **Soundness/completeness.** For whichever target is chosen, can we state a
+   soundness theorem against the Part 2 semantics, and a completeness theorem
+   that does not silently smuggle in ex falso via the `0 -> b = 1` convention?
 
-6. **Natural consequence relation on [0,1].** Is there a consequence relation directly on [0,1] credences (not factoring through the three-valued collapse) that is sound with respect to the algebra?
+3. **Cut elimination / admissibility.** If a sequent or hypersequent calculus is
+   used, do we get a clean normalization property (cut elimination), and what
+   meta-theorems survive in the graded setting?
 
-## Update rules and dynamics
+## Zero evidence and dynamics
 
-7. **Coherence conditions for Cred updates.** Dutch book arguments constrain Bayesian updating in probability. What are the analogous coherence conditions for Cred update rules?
+4. **Update at zero evidence.** What is the Cred analogue of disintegration or
+   regular extension? The Cred stance is underdetermination at `cred(B)=0`; Part 3
+   should decide whether to (a) keep it set-valued/interval-valued, (b) add a
+   selection principle (a coherence criterion), or (c) supply additional structure
+   (measure, Markov-kernel semantics, probabilistic program semantics).
 
-8. **Update at zero evidence.** What should happen when you learn something you previously assigned credence zero? Probability uses disintegration. What is the Cred analogue?
+5. **Coherence conditions for updates.** Dutch book arguments constrain Bayesian
+   updating in probability. What are the analogous coherence constraints for Cred
+   update rules (Bayesian/Jeffrey-style for positive evidence plus a boundary rule)?
 
-## Self-reference and fixed points
+6. **Asymptotic proof.** When does a specified update process force `cred_n(P) -> 1`?
+   Which convergence rates are provable from the update axioms alone?
 
-9. **Fixed points beyond negation.** Which continuous self-referential operators f : [0,1] -> [0,1] yield unique interior fixed points? Negation does (c = 1/2). Product and De Morgan dual do not (boundary only).
+## Self-reference
 
-10. **Mutual reference.** For systems of n mutually referencing statements, what determines the dimension and structure of the solution set?
+7. **Beyond the liar.** Which operator families `phi : [0,1] -> [0,1]` are
+   natural in Cred-style semantics and yield (i) unique interior fixed points,
+   (ii) multiple fixed points, or (iii) no fixed points?
 
-11. **Lawvere's fixed point theorem.** Does Lawvere's categorical generalization of diagonal arguments apply to Cred's self-reference?
+8. **Mutual reference systems.** For finite systems of mutually referring
+   statements, characterize the solution sets and stability under iteration.
 
-## Connections to other systems
+9. **Interface to truth semantics.** Make explicit which self-reference results
+   are purely algebraic (Part 1 style) and which require proof-theoretic or
+   semantic machinery (Kripke/revision).
 
-12. **Relationship to relevant logic.** Part 1 shares the product De Morgan triplet with product fuzzy logic and collapses to the Kleene lattice (underlying K3/LP/RM3). What is the precise relationship to the relevant logics R, E, RM? Is a Cred-based system a known relevant logic or a new one?
+## Graded foundations
 
-13. **Paraconsistent set theory.** Brady and Weber developed mathematics on paraconsistent logic. How does Cred's graded predicate approach (fixed points instead of contradictions) compare?
+10. **Graded extensionality and comprehension.** If sets are predicates into
+    `[0,1]`, what are the right analogues of extensionality and comprehension?
+    Use many-valued set theory as a constraint on what is plausible.
 
-14. **Probabilistic programming.** Probabilistic programming languages use conditioning as a primitive (observe/condition). How does Cred's chain rule relate to these constructs?
+11. **Crisp subtheories.** Identify and formalize the crisp fragments (where all
+    credences are `0/1`) and prove they recover the intended classical theorems.
 
-15. **Higher-order quantification.** Part 2 defines first-order quantifiers as inf/sup. Second-order: inf/sup over predicates. Does this require restricting to measurable predicates, or does the algebraic approach avoid measure-theoretic issues?
+## Connections and implementation
 
-## Implementation
+12. **Relationship to relevant logic.** With `min` as the joint, the induced
+    arrow matches product residuation for positive evidence, while the collapse
+    maps the connective algebra to the Kleene lattice. What is the cleanest way
+    to express the relationship to RM3/R/E without conflating arrows, collapses,
+    and consequence relations?
 
-16. **Cred proof assistant.** Can a proof assistant be built that tracks credences through derivations? What would its type theory look like?
+13. **Probabilistic programming semantics.** Can the chain rule be made the core
+    equational law of an `observe`/conditioning primitive while preserving the
+    evidence-zero underdetermination?
 
-17. **Computational complexity of credence tracking.** In a Cred-based proof system, what is the cost of tracking credences through a derivation? Is it polynomial in proof length?
-
-## Research priorities
-
-From most concrete to most speculative:
-
-1. Sequent calculus / proof system (builds directly on Parts 1-2)
-2. Relationship to relevant logic (comparison with known systems)
-3. Adams-type bounds without additivity (extends Part 2 consequence relations)
-4. Coherence conditions for updates (extends Part 2 update rules)
-5. Cred proof assistant (implementation, requires answers to 1-4)
+14. **Tooling.** Once a proof target is fixed, a Cred-aware assistant becomes an
+    engineering task rather than a research question. Until then, treat it as
+    downstream.

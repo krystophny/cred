@@ -27,6 +27,22 @@ cred(2 + 2 = 5) = 0
 
 The product t-norm restricted to {0,1} is min (Boolean AND). The De Morgan dual restricted to {0,1} is max (Boolean OR). The complement restricted to {0,1} is classical negation. Classical mathematics is a subalgebra.
 
+## Existing many-valued mathematics (baseline literature)
+
+The idea of doing mathematics with truth values in `[0,1]` is not new. There is
+a large literature on fuzzy sets, many-valued logics, and many-valued
+mathematics:
+
+- **Mathematical fuzzy logic** (including product logic) develops `[0,1]`-valued
+  semantics and proof systems for t-norm logics.
+- **Many-valued set theory** studies set-theoretic foundations with graded truth
+  values and examines standard issues like extensionality and comprehension in
+  that setting.
+
+This matters for Part 3: building on Cred should be positioned as a synthesis
+and extension of these traditions, not as the first attempt to do graded
+foundations.
+
 ## What changes
 
 ### Conjectures have credences
@@ -64,6 +80,25 @@ Part 2 defines graded predicates P : X -> [0,1]. In a graded foundation:
 - Unrestricted comprehension yields fixed points, not paradoxes (Russell's predicate has self-membership credence 1/2)
 
 Whether this yields a useful foundation for mathematics depends on which additional principles are adopted (Part 2, consequence relations and quantifiers).
+
+## What Cred adds to the foundations picture
+
+Many fuzzy foundations frameworks are truth-functional: once you fix a t-norm
+and its residuated implication, the arrow is forced (and typically includes the
+`0 -> b = 1` convention).
+
+Cred's stance is different:
+
+- The chain rule is a primitive constraint relating conditionals, evidence, and
+  joints.
+- Joints are external parameters unless you choose to fix them truth-functionally.
+- At zero evidence, conditioning is intentionally underdetermined unless further
+  structure is added (measure/disintegration, coherence selection, or
+  set-valued/interval-valued semantics).
+
+So the foundational question in Cred is not just which `[0,1]`-valued logic to
+adopt, but which additional structure to add for joints and for boundary-case
+conditioning.
 
 ## Open questions
 
