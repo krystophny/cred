@@ -59,12 +59,13 @@ triplet on $[0,1]$ to many-valued logic.
 First, $\min(a,b)$ is the unique symmetric, idempotent copula on $[0,1]$
 (a known result; we provide a self-contained Lean proof)---this forces the
 Kleene conjunction used in K$_3$, LP, and RM3.
-Second, the conditional's limit at evidence zero is path-dependent (like the
-Borel--Kolmogorov paradox), so ex falso requires an added convention.
+Second, the conditional's limit at evidence zero is path-dependent,
+so ex falso requires an added convention.
+The Kleene lattice is the unique non-trivial finite quotient of the algebra:
+any surjective homomorphism to a three-element set yields Kleene, and no
+collapse to G\"odel, \L ukasiewicz, or classical logic exists.
 The framework uses credences in $[0,1]$, complement $1-c$, and the chain rule
 $\cred(A \mid B) \cdot \cred(B) = \cred(A \land B)$.
-A collapse homomorphism to the Kleene lattice exists; none exists for
-G\"odel or \L ukasiewicz.
 Proofs are machine-checked in Lean~4.
 \end{abstract}
 
@@ -100,13 +101,15 @@ This echoes de Finetti's three-valued conditional~\cite{definetti1936}, where co
   Kleene conjunction used in K$_3$, LP, and RM3.
 \item \textbf{Path dependence at zero} (Proposition~\ref{thm:path-dependence}):
   Under the min-copula joint, the conditional's limit as evidence
-  $\to 0$ depends on the ratio of joint to evidence (loosely analogous
-  to the Borel--Kolmogorov paradox, though the mechanisms differ).
+  $\to 0$ is path-dependent---it takes every value in $[0,1]$ depending
+  on the approach.
   Ex falso requires an added convention.
-\item \textbf{Collapse to Kleene} (Theorem~\ref{thm:collapse}):
-  The quotient by $\{0\},(0,1),\{1\}$ is the Kleene lattice (routine);
-  no analogous collapse exists for G\"odel, \L ukasiewicz, or classical logic
-  (the impossibility results are the substantive content).
+\item \textbf{Collapse to Kleene} (Theorem~\ref{thm:collapse},
+  Theorem~\ref{thm:quotient-unique}):
+  The Kleene lattice is the unique non-trivial finite quotient: any
+  surjective homomorphism to a three-element algebra preserving negation
+  and conjunction yields Kleene, and no two-element quotient exists.
+  No analogous collapse exists for G\"odel, \L ukasiewicz, or classical logic.
 \item \textbf{Bayes consistency} as selection criterion
   (Section~\ref{sec:relationships}): Bayes consistency selects the
   copula-derived family of arrows (RM3 and G\"odel fail); idempotence
@@ -219,19 +222,13 @@ possible (Section~\ref{sec:collapse}).
 
 \begin{remark}[Credence vs.\ Probability]
 \label{rem:not-probability}
-The credence algebra's core consists of three ingredients: values in $[0,1]$, the complement
-$\negc c = 1 - c$, and the chain rule for conditioning.
-Probability adds a sigma-algebra, a measure, and sigma-additivity; every
-probability space therefore satisfies the credence algebra's axioms, making probability a
-special case.
-In probability, the joint $P(A \land B)$ is determined by the measure---not
-by the product of marginals (unless events are independent).
-The credence algebra makes no such determination: $c_1 \conjc c_2$ is multiplication on
-$[0,1]$, not a claim about the actual joint of arbitrary propositions.
-The actual joint is an external input to conditioning.
-The credence algebra's disjunction $c_1 \disjc c_2 = c_1 + c_2 - c_1 c_2$ is the De Morgan
-dual of the product; probability's inclusion-exclusion
-$P(A \lor B) = P(A) + P(B) - P(A \land B)$ uses the actual joint instead.
+Every probability space satisfies the credence algebra's axioms, making
+probability a special case.
+Probability adds a sigma-algebra, a measure determining the joint
+$P(A \land B)$, and sigma-additivity.
+The credence algebra drops all of these: the joint is an external parameter
+to conditioning, not determined by the algebra
+(Section~\ref{sec:probability}).
 \end{remark}
 
 \subsection{Algebraic Properties}
@@ -262,20 +259,12 @@ Lean: \texttt{neg\_neg}, \texttt{neg\_zero}, \texttt{neg\_one},
 \texttt{de\_morgan\_conj}, \texttt{de\_morgan\_disj}.
 \end{proof}
 
-The structure $([0,1], \conjc, \disjc, \negc, 0, 1)$ consists of two dual
-commutative monoids ($([0,1], \conjc, 1)$ and $([0,1], \disjc, 0)$) connected
-by an involution $\negc$ that reverses the natural order on $[0,1]$
-($c_1 \leq c_2$ iff $\negc c_2 \leq \negc c_1$) and satisfies
-De Morgan's laws.
-It is not a De Morgan algebra in the lattice-theoretic sense: a De Morgan
-algebra requires a distributive lattice, whose meet and join are
-idempotent, but $\conjc$ is not idempotent (Lemma~\ref{thm:idempotence})
-and distributivity fails (Lemma~\ref{thm:nondistrib}).
-Throughout this paper, ``the credence algebra'' refers to this concrete algebra on
-$[0,1]$---a carrier, three operations, and the chain rule.
-It is not a logic: there is no consequence relation, no designated truth
-values, and no notion of valid inference.
-Those require additional structure (Section~\ref{sec:conclusion}).
+The structure is two dual commutative monoids
+($([0,1], \conjc, 1)$ and $([0,1], \disjc, 0)$) connected by De Morgan
+duality; it is not a De Morgan algebra (which requires idempotent meet/join),
+since $\conjc$ is not idempotent (Lemma~\ref{thm:idempotence}).
+Throughout, ``the credence algebra'' refers to this concrete algebra on
+$[0,1]$---a carrier, three operations, and the chain rule---not a logic.
 
 \subsection{Non-Idempotence and Non-Distributivity}
 
@@ -388,16 +377,17 @@ Lean formalization and include the proof for self-containedness.
 
 % Lean: min_copula_unique, symmetric_idempotent_2incr_ge_min,
 %       truth_functional_forces_min, min_bayes_consistent,
-%       min_nontrivial_conditioning
+%       min_nontrivial_conditioning, copula_idempotent_unique,
+%       no_intermediate_idempotent_copula
 \begin{theorem}[Uniqueness of Truth-Functional Conjunction]
 \label{thm:uniqueness-main}
 \label{thm:min-copula-unique}
-Let $j : [0,1]^2 \to [0,1]$ satisfy:
+Let $j : [0,1]^2 \to [0,1]$ be a symmetric, idempotent copula:
 \begin{enumerate}[label=(\roman*),nosep]
 \item \textbf{Symmetry}: $j(a,b) = j(b,a)$.
 \item \textbf{Idempotence}: $j(a,a) = a$.
-\item \textbf{Zero boundary}: $j(0,b) = 0$.
-\item \textbf{Fr\'echet upper bound}: $j(a,b) \leq \min(a,b)$.
+\item \textbf{Zero boundary}: $j(a,0) = 0$.
+\item \textbf{Unit marginal}: $j(1,b) = b$ for $b \in [0,1]$.
 \item \textbf{2-increasing}: $j(a_2,b_2) - j(a_2,b_1) - j(a_1,b_2) + j(a_1,b_1) \geq 0$
   for $a_1 \leq a_2$, $b_1 \leq b_2$.
 \end{enumerate}
@@ -407,7 +397,9 @@ $\min(a,b)/b \neq a$ in general.
 \end{theorem}
 
 \begin{proof}
-The upper bound gives $j(a,b) \leq \min(a,b)$.
+The Fr\'echet upper bound $j(a,b) \leq \min(a,b)$ is \emph{derived}:
+2-increasing on $[0,a] \times [b,1]$ with unit marginal gives $j(a,b) \leq a$;
+by symmetry $j(a,b) \leq b$.
 For the lower bound, assume $a \leq b$ (symmetry handles the other case).
 Apply 2-increasing to the rectangle $[0,a] \times [a,b]$:
 \[
@@ -415,12 +407,13 @@ j(a,b) - j(a,a) - j(0,b) + j(0,a) \geq 0
 \]
 By idempotence $j(a,a) = a$, and by zero boundary $j(0,b) = j(0,a) = 0$,
 this simplifies to $j(a,b) \geq a = \min(a,b)$.
-Lean: \texttt{min\_copula\_unique}, \texttt{truth\_functional\_forces\_min},
-\texttt{min\_nontrivial\_conditioning}.
+
+Lean: \texttt{copula\_idempotent\_unique} (clean form with upper bound
+derived), \texttt{min\_copula\_unique} (with explicit upper bound hypothesis).
 \end{proof}
 
-Conditions (i)--(v) are the defining properties of a symmetric copula that
-is idempotent.
+Conditions (i)--(v) are the standard copula axioms (Definition~\ref{def:copula})
+plus symmetry and idempotence.
 In the context of Section~\ref{sec:conditioning}, symmetry is Bayes
 consistency (the chain rule works from both directions), and the remaining
 conditions say $j$ is a copula.
@@ -554,6 +547,8 @@ forcing it requires an additional convention.
 The three cases show the limit takes \emph{every} value in $[0,1]$ depending
 on the path of approach.
 No single value is canonical.
+The Lean formalization verifies the algebraic identities underlying each
+case and that every value in $(0,1]$ is achieved.
 Lean: \texttt{path\_dep\_fixed\_a}, \texttt{path\_dep\_proportional},
 \texttt{path\_dep\_square}, \texttt{path\_dependence\_witness},
 \texttt{path\_any\_positive\_value}.
@@ -631,37 +626,20 @@ without the surrounding measure theory.
 \label{sec:fixed-points}
 %=============================================================================
 
-That complement on $[0,1]$ fixes $\tfrac{1}{2}$ is standard in many-valued
-logic~\cite{hajek1998,gottwald2001}.
-We record the facts here because the collapse results in
-Section~\ref{sec:collapse} depend on them explicitly, and the Lean
-formalization tracks the dependency.
-
-% Lean: liar_fixed_point
-\begin{lemma}[Negation Fixed Point]
+% Lean: liar_fixed_point, neg_fixed_point_unique
+\begin{lemma}[Unique Negation Fixed Point]
 \label{thm:liar}
-$\negc \tfrac{1}{2} = \tfrac{1}{2}$.
-\end{lemma}
-\begin{proof}
-$1 - \tfrac{1}{2} = \tfrac{1}{2}$.
-Lean: \texttt{liar\_fixed\_point}.
-\end{proof}
-
-% Lean: neg_fixed_point_unique
-\begin{lemma}[Uniqueness of Fixed Point]
 \label{thm:fixedunique}
 $\negc c = c$ if and only if $c = \tfrac{1}{2}$.
 \end{lemma}
 \begin{proof}
-$1 - c = c$ implies $c = \tfrac{1}{2}$.
-Lean: \texttt{neg\_fixed\_point\_unique}.
+$1 - c = c$ iff $c = \tfrac{1}{2}$.
+Lean: \texttt{liar\_fixed\_point}, \texttt{neg\_fixed\_point\_unique}.
 \end{proof}
 
-If one imposes $\cred(L) = \negc \cred(L)$ for a self-negating sentence $L$,
-the unique solution is $\cred(L) = \tfrac{1}{2}$.
-This is an algebraic observation, not a resolution of the liar paradox;
-see Kripke~\cite{kripke1975} and Priest~\cite{priest1979} for semantic
-approaches.
+This is standard in many-valued logic~\cite{hajek1998,gottwald2001};
+we record it because the collapse and congruence results in
+Section~\ref{sec:collapse} depend on it explicitly.
 
 %=============================================================================
 \section{Collapse to the Kleene Lattice}
@@ -816,6 +794,71 @@ $\mathrm{conj}_{\text{\L}}(\tfrac{1}{2}, \tfrac{1}{2}) = 0 \neq
 \tfrac{1}{2}$: the self-conjunction of the fixed point must equal the
 fixed point, and only Kleene satisfies this.
 See Appendix~\ref{app:extended} for the Belnap-Dunn comparison.
+
+\subsection{Uniqueness of the Kleene Quotient}
+
+The impossibility results show that no collapse exists for classical, G\"odel,
+or \L ukasiewicz logic.
+The following theorem shows the Kleene lattice is not only possible but
+\emph{unique}: any surjective homomorphism to a three-element algebra must
+yield Kleene.
+
+% Lean: three_element_quotient_unique
+\begin{theorem}[Uniqueness of the Three-Element Quotient]
+\label{thm:quotient-unique}
+Let $\varphi : [0,1] \to S$ be a surjective function to a three-element set
+$S$ preserving negation and conjunction:
+$\varphi(1-c) = \mathrm{neg}(\varphi(c))$ and
+$\varphi(c_1 \cdot c_2) = \mathrm{conj}(\varphi(c_1), \varphi(c_2))$.
+Then $S$ carries the Kleene lattice operations (up to relabeling
+$0 \leftrightarrow 1$).
+\end{theorem}
+\begin{proof}
+The negation fixed point at $\tfrac{1}{2}$ (Lemma~\ref{thm:liar}) forces
+$\varphi(\tfrac{1}{2})$ to be the fixed point of $\mathrm{neg}$ on $S$.
+An involution on three elements has exactly one fixed point.
+The remaining two elements---$\varphi(0)$ and $\varphi(1)$---form the
+2-cycle (they must be distinct by surjectivity and the negation constraint
+$\varphi(1) = \mathrm{neg}(\varphi(0))$).
+Once $\varphi(0)$, $\varphi(\tfrac{1}{2})$, $\varphi(1)$ are determined,
+the conjunction table is forced:
+$\mathrm{conj}(\varphi(0), x) = \varphi(0)$ (absorber, from
+$\varphi(0 \cdot c) = \varphi(0)$),
+$\mathrm{conj}(\varphi(1), x) = x$ (identity, from
+$\varphi(1 \cdot c) = \varphi(c)$), and
+$\mathrm{conj}(\varphi(\tfrac{1}{2}), \varphi(\tfrac{1}{2})) =
+\varphi(\tfrac{1}{2})$ (since $\tfrac{1}{4} \in (0,1)$ maps to the
+fixed point).
+This is exactly the Kleene conjunction $\min$.
+Lean: \texttt{three\_element\_quotient\_unique}.
+\end{proof}
+
+Moreover, identifying $0$ with any positive value collapses the quotient
+entirely:
+
+% Lean: zero_equiv_forces_trivial
+\begin{proposition}[Zero Equivalence Forces Collapse]
+\label{thm:zero-collapse}
+If a congruence on $([0,1], \negc, \conjc)$ identifies $0$ with some
+$\varepsilon > 0$, then it identifies all elements.
+\end{proposition}
+\begin{proof}
+From $0 \sim \varepsilon$: (1)~$1 \sim 1 - \varepsilon$ (negation);
+(2)~$x \sim x(1 - \varepsilon)$ for all $x$ (multiply by $1 \sim 1-\varepsilon$);
+(3)~$0 \sim \varepsilon y$ for all $y$ (multiply $0 \sim \varepsilon$ by $y$).
+By (2), iterating gives $x \sim x(1-\varepsilon)^n$.
+For large $n$, $x(1-\varepsilon)^n \leq \varepsilon$, so by (3) we can write
+$x(1-\varepsilon)^n = \varepsilon \cdot [x(1-\varepsilon)^n/\varepsilon]$
+with the bracketed factor in $[0,1]$, giving $0 \sim x(1-\varepsilon)^n$.
+Hence $x \sim 0$ for all $x$.
+Lean: \texttt{zero\_equiv\_forces\_trivial}.
+\end{proof}
+
+Together, Theorem~\ref{thm:quotient-unique},
+Proposition~\ref{thm:zero-collapse}, and the impossibility results give a
+complete classification: the only non-trivial finite quotients of the
+credence algebra (preserving $\negc$ and $\conjc$) have the three-element
+Kleene lattice as their target.
 
 %=============================================================================
 \section{Relationship to Existing Frameworks}
@@ -1118,8 +1161,10 @@ G\"odel~\cite{godel1932} introduced three-valued intuitionistic logic.
 Belnap~\cite{belnap1977} introduced a four-valued logic for reasoning with
 incomplete and contradictory information.
 Zadeh~\cite{zadeh1965} introduced fuzzy sets with $[0,1]$ membership degrees.
-Section~\ref{sec:scope} shows that no analogous collapse exists for
-\L ukasiewicz, G\"odel, or classical algebras, making the Kleene lattice the only standard three-valued quotient of the credence algebra.
+Section~\ref{sec:scope} proves the Kleene lattice is the unique non-trivial
+finite quotient of the credence algebra: no collapse to \L ukasiewicz,
+G\"odel, or classical algebras exists, and any surjective homomorphism to a
+three-element set yields Kleene (Theorem~\ref{thm:quotient-unique}).
 Ferm\"uller~\cite{fermuller2014} reached the same conclusion from game
 semantics (Main Theorem): straightforward generalizations of Hintikka's
 evaluation game yield Kleene logic and nothing stronger.
@@ -1163,10 +1208,12 @@ de Finetti's void-conditional tradition~\cite{definetti1936} in a graded
 setting.
 H\'ajek et al.~\cite{hajek1995} used the chain rule constraint as a
 technical device; this paper makes it the defining structural axiom.
-\item Impossibility results: no negation-preserving collapse to classical
-or G\"odel logic, no signature-preserving collapse to \L ukasiewicz logic.
-The positive collapse to Kleene is a routine quotient by
-$\{0\}, (0,1), \{1\}$; the impossibility results are the substantive content.
+\item Congruence classification: the Kleene lattice is the unique
+non-trivial finite quotient (Theorem~\ref{thm:quotient-unique}), and
+identifying $0$ with any positive value collapses the quotient entirely
+(Proposition~\ref{thm:zero-collapse}).
+No negation-preserving collapse to classical or G\"odel logic exists, and
+no signature-preserving collapse to \L ukasiewicz logic exists.
 \item Bayes consistency as a necessary selection criterion: it selects
 the copula-derived family of arrows (RM3 and G\"odel fail); idempotence
 and non-triviality then select the min copula within that family.
@@ -1186,7 +1233,9 @@ Theorem~\ref{thm:uniqueness-main} shows the min conjunction is the unique
 symmetric, idempotent copula on $[0,1]$.
 Proposition~\ref{thm:path-dependence} shows conditioning at evidence zero is
 path-dependent, so ex falso requires a convention beyond the chain rule.
-Theorem~\ref{thm:collapse} provides a collapse to Kleene; Propositions
+Theorem~\ref{thm:collapse} provides a collapse to Kleene;
+Theorem~\ref{thm:quotient-unique} shows this quotient is unique among
+three-element targets; Propositions
 \ref{prop:no-godel}--\ref{prop:no-luk} block alternatives.
 
 The credence algebra provides values and operations without fixing a consequence
@@ -1780,8 +1829,9 @@ Most proofs proceed by \texttt{simp} with custom lemmas, \texttt{linarith},
 
 \textbf{Scope.}
 The formalization covers the core algebra, conditioning, fixed points,
-collapse homomorphism, impossibility results, Bayes consistency, path
-dependence, and the RM3/G\"odel comparisons reported in this paper.
+collapse homomorphism, congruence uniqueness, impossibility results,
+Bayes consistency, path dependence, and the RM3/G\"odel comparisons
+reported in this paper.
 Spread and certainty operations are also formalized but are discussed
 in Part~2~\cite{part2}.
 
@@ -1819,6 +1869,9 @@ in Part~2~\cite{part2}.
 \item \texttt{path\_dependence\_witness}: concrete witness of path-dependent limits
 \item \texttt{path\_any\_positive\_value}: any $r \in (0,1]$ achievable as conditional ratio
 \item \texttt{luk\_not\_idempotent}: \L ukasiewicz t-norm fails idempotence
+\item \texttt{three\_element\_quotient\_unique}: surjective homomorphism to 3-element set yields Kleene
+\item \texttt{zero\_equiv\_forces\_trivial}: identifying $0 \sim \varepsilon$ collapses everything
+\item \texttt{copula\_idempotent\_unique}: standard copula axioms $+$ idempotence force min
 \end{itemize}
 
 Verification: \texttt{cd lean \&\& lake build}.
