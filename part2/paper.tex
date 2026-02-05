@@ -169,7 +169,14 @@ $\conjc$ for product conjunction ($c_1 \cdot c_2$),
 $\disjc$ for De~Morgan disjunction, and
 $\condc{A}{B}$ for the conditional credence of $A$ given~$B$.
 New notation: $\models_D$ and $\models_t$ for semantic consequence under
-designation~$D$ or threshold~$t$.
+designation~$D$ or threshold~$t$; specific instances include
+$\models_{\mathrm{K}_3}$ (K$_3$ consequence, designating~$\{1\}$) and
+$\models_{\mathrm{LP}}$ (LP consequence, designating~$\{1, \tfrac{1}{2}\}$).
+For graded predicates: $\cred(\forall x.\; P(x)) = \inf_x P(x)$ and
+$\cred(\exists x.\; P(x)) = \sup_x P(x)$.
+As in Part~1, roman-font names ($\mathrm{neg}$, $\mathrm{conj}$,
+$\mathrm{disj}$) denote the three-valued (Kleene) operations;
+$\negc$, $\conjc$, $\disjc$ denote Cred's $[0,1]$ operations.
 
 %=============================================================================
 \section{Valuations}
@@ -386,11 +393,11 @@ In classical logic, consequence has \emph{explosion} (ex falso quodlibet):
 a contradiction entails every proposition.
 This section defines consequence relations for Cred and shows that
 explosion fails non-vacuously for LP and graded consequence, while
-K$_3$ has explosion only vacuously: for no three-valued value~$v$
-are both $v$ and $\mathrm{neg}(v)$ in $\{1\}$
-(if $v = 1$ then $\mathrm{neg}(v) = 0$;
-if $v = 0$ then $v \notin \{1\}$;
-if $v = \tfrac{1}{2}$ then $v \notin \{1\}$),
+K$_3$ has explosion only vacuously: for no three-valued value~$c$
+are both $c$ and $\mathrm{neg}(c)$ in $\{1\}$
+(if $c = 1$ then $\mathrm{neg}(c) = 0$;
+if $c = 0$ then $c \notin \{1\}$;
+if $c = \tfrac{1}{2}$ then $c \notin \{1\}$),
 so the premise of explosion is never satisfied.
 
 \subsection{Designated Values}
@@ -449,13 +456,13 @@ Lean: \texttt{k3\_no\_tautology}.
 
 \begin{proposition}[K$_3$: Excluded Middle Fails]
 \label{prop:k3-em}
-There exists a value $v$ such that $v \disjc \mathrm{neg}(v)$ is not
+There exists a value $c$ such that $\mathrm{disj}(c, \mathrm{neg}(c))$ is not
 K$_3$-designated.
 It follows from Proposition~\ref{prop:k3-no-taut} that excluded middle
 is not a K$_3$ tautology.
 \end{proposition}
 \begin{proof}
-At $v = \tfrac{1}{2}$: $\tfrac{1}{2} \disjc \tfrac{1}{2} = \tfrac{1}{2}$,
+At $c = \tfrac{1}{2}$: $\mathrm{disj}(\tfrac{1}{2}, \tfrac{1}{2}) = \max(\tfrac{1}{2}, \tfrac{1}{2}) = \tfrac{1}{2}$,
 which is not in $\{1\}$.
 Lean: \texttt{k3\_excluded\_middle\_fails}.
 \end{proof}
@@ -469,12 +476,12 @@ certainty and the intermediate value count as ``holding.''
 
 \begin{proposition}[LP: Excluded Middle Holds]
 \label{prop:lp-em}
-For every three-valued value $v$, $v \disjc \mathrm{neg}(v)$ is
+For every three-valued value $c$, $\mathrm{disj}(c, \mathrm{neg}(c))$ is
 LP-designated.
 \end{proposition}
 \begin{proof}
-Case analysis: $0 \disjc 1 = 1$; $\tfrac{1}{2} \disjc \tfrac{1}{2} =
-\tfrac{1}{2}$; $1 \disjc 0 = 1$.
+Case analysis: $\mathrm{disj}(0, 1) = 1$; $\mathrm{disj}(\tfrac{1}{2}, \tfrac{1}{2}) =
+\tfrac{1}{2}$; $\mathrm{disj}(1, 0) = 1$.
 All are in $\{1, \tfrac{1}{2}\}$.
 Lean: \texttt{lp\_excluded\_middle}.
 \end{proof}
@@ -698,9 +705,13 @@ v'(A) = v(A \mid B) \cdot q + v(A \mid \negc B) \cdot (1 - q).
 \]
 This is a weighted mixture of the conditional-on-$B$ and
 conditional-on-$\negc B$ valuations.
-Determining $v(A \mid B)$ and $v(A \mid \negc B)$ from a joint-parametrized
+Determining $v(A \mid B)$ and $v(A \mid \sigma(B))$ from a joint-parametrized
 valuation requires $v(B) > 0$ and $v(\sigma(B)) > 0$ (i.e.,
 $v(B) < 1$, by complement preservation), respectively.
+Here $v(A \mid B) = j(A, B) / v(B)$ as defined in
+Section~\ref{sec:valuations}.
+(We write $\negc B$ for $\sigma(B)$ when the propositional reading is
+clear from context.)
 
 \begin{definition}[Jeffrey Update]
 \label{def:jeffrey-update}
@@ -868,7 +879,10 @@ For $P$ over a nonempty domain:
 \[
 1 - \inf_x P(x) = \sup_x (1 - P(x)).
 \]
-Informally: $\negc(\forall x.\; P(x)) = \exists x.\; \negc P(x)$.
+Equivalently, in credence notation:
+$\negc\cred(\forall x.\; P(x)) = \cred(\exists x.\; \negc P(x))$,
+where $\negc$ on the left is complement of a value and $\negc P$ on the
+right is pointwise predicate negation (Definition~\ref{def:graded-predicate}).
 Lean: \texttt{quantifier\_duality\_val} (formalizes the real-valued
 identity; the credence-level reading follows by the definitions of
 \texttt{credInf} and \texttt{credSup}).
