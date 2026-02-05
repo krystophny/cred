@@ -482,6 +482,8 @@ $P(A \lor B) = P(A) + P(B) - P(A \land B)$ uses the actual joint instead.
 
 \subsection{Algebraic Properties}
 
+% Lean: neg_neg, neg_zero, neg_one, conj_comm, conj_assoc, conj_one, conj_zero,
+%       disj_comm, disj_assoc, disj_zero, disj_one, de_morgan_conj, de_morgan_disj
 \begin{theorem}[Algebraic Properties]
 \label{thm:algebraic}
 The following hold for all $c, c_1, c_2, c_3 \in [0,1]$:
@@ -523,6 +525,7 @@ Those require additional structure (Section~\ref{sec:conclusion}).
 Unlike the two-element Boolean algebra $\{0,1\}$, the credence algebra is neither
 idempotent nor distributive.
 
+% Lean: conj_idempotent_iff
 \begin{theorem}[Idempotence Characterization]
 \label{thm:idempotence}
 $c \conjc c = c$ if and only if $c \in \{0, 1\}$.
@@ -537,6 +540,7 @@ The product $c \conjc c = c^2$ is the credence of two \emph{independent} copies
 of a proposition with credence $c$---not the credence of ``$A \land A$'' (which
 equals $\cred(A)$).
 
+% Lean: conj_disj_not_distrib
 \begin{theorem}[Non-Distributivity]
 \label{thm:nondistrib}
 The product does not distribute over disjunction.
@@ -602,6 +606,8 @@ We impose four natural requirements on a truth-functional joint:
 
 \subsection{Main Result: Uniqueness}
 
+% Lean: min_bayes_consistent, prod_trivial_conditioning, min_nontrivial_conditioning,
+%       truth_functional_forces_min, luk_not_idempotent
 \begin{theorem}[Uniqueness of Truth-Functional Conjunction]
 \label{thm:uniqueness-main}
 Among all fixed joint functions $j(a,b)$ taking values in the Fr\'echet-Hoeffding
@@ -634,6 +640,7 @@ Lean: \texttt{min\_bayes\_consistent}, \texttt{prod\_trivial\_conditioning},
 \texttt{min\_nontrivial\_conditioning}.
 \end{proof}
 
+% Lean: min_copula_unique, symmetric_idempotent_2incr_ge_min
 \begin{theorem}[Min-Copula Characterization]
 \label{thm:min-copula-unique}
 Let $j : [0,1]^2 \to [0,1]$ satisfy symmetry, idempotence ($j(a,a) = a$),
@@ -739,6 +746,7 @@ The chain rule gives $\cred(A \mid 0) \conjc 0 = 0$.
 Since $c \conjc 0 = 0$ for all $c \in [0,1]$, this equation is satisfied by any value.
 The conditional is \emph{unconstrained}.
 
+% Lean: conditioning_zero_forces_joint_zero, conditioning_zero_any
 \begin{theorem}[Underdetermination at Zero]
 \label{thm:noexfalso}
 When evidence $= 0$:
@@ -790,6 +798,8 @@ a/b & \text{if } a \leq b, \\[4pt]
 \]
 As $b \to 0$, the limit depends on \emph{how} $a$ and $b$ approach zero together.
 
+% Lean: path_dep_fixed_a, path_dep_proportional, path_dep_square,
+%       path_dependence_witness, path_any_positive_value
 \begin{theorem}[Path Dependence at Evidence Zero]
 \label{thm:path-dependence}
 The limit of the conditional $\min(a,b)/b$ as $b \to 0$ is \textbf{path-dependent}:
@@ -894,6 +904,7 @@ deferred to whatever system is built on top (Section~\ref{sec:connections}).
 
 \subsection{Existence and Uniqueness}
 
+% Lean: conditioning_mk
 \begin{theorem}[Existence]
 \label{thm:existence}
 If $\cred(B) > 0$ and $\cred(A \land B) \leq \cred(B)$, then there exists a
@@ -905,6 +916,7 @@ satisfies the chain rule.
 Lean: \texttt{conditioning\_mk}.
 \end{proof}
 
+% Lean: conditioning_unique
 \begin{theorem}[Uniqueness of Conditioning]
 \label{thm:uniqueness}
 If $\cred(B) > 0$, the conditional credence is uniquely determined.
@@ -949,6 +961,7 @@ The conditional is unconstrained.
 \label{sec:fixed-points}
 %=============================================================================
 
+% Lean: liar_fixed_point
 \begin{theorem}[Negation Fixed Point]
 \label{thm:liar}
 $\negc \tfrac{1}{2} = \tfrac{1}{2}$.
@@ -958,6 +971,7 @@ $1 - \tfrac{1}{2} = \tfrac{1}{2}$.
 Lean: \texttt{liar\_fixed\_point}.
 \end{proof}
 
+% Lean: neg_fixed_point_unique
 \begin{theorem}[Uniqueness of Fixed Point]
 \label{thm:fixedunique}
 $\negc c = c$ if and only if $c = \tfrac{1}{2}$.
@@ -999,6 +1013,7 @@ Define the collapse function:
 \end{cases}
 \]
 
+% Lean: collapse_neg, collapse_conj, collapse_disj, collapse_surjective
 \begin{theorem}[Collapse Homomorphism]
 \label{thm:collapse}
 The collapse is a surjective homomorphism of the algebraic signature
@@ -1240,6 +1255,7 @@ $f(a,b) \cdot a$ is the induced joint---the product of the conditional
 $f(a,b)$ and the evidence $a$.
 \end{definition}
 
+% Lean: prod_resid_bayes_consistent_real
 \begin{proposition}[Product Residuated is Bayes-Consistent]
 \label{prop:resid-bayes}
 The product residuated implication $f(a, b) = \min(b/a,\; 1)$ (with
@@ -1257,6 +1273,7 @@ By symmetry of $\min$, $f(b, a) \cdot b = \min(a, b)$ as well.
 Lean: \texttt{prod\_resid\_bayes\_consistent\_real}.
 \end{proof}
 
+% Lean: godel_not_bayes_consistent_real
 \begin{proposition}[G\"odel is Not Bayes-Consistent on the Continuum]
 \label{prop:godel-not-bayes}
 The G\"odel implication ($f(a,b) = 1$ if $a \leq b$, else $b$) fails
@@ -1270,6 +1287,7 @@ $f(b, a) \cdot b = \tfrac{2}{5} \cdot \tfrac{3}{5} = \tfrac{6}{25} \neq \tfrac{2
 Lean: \texttt{godel\_not\_bayes\_consistent\_real}.
 \end{proof}
 
+% Lean: rm3_not_bayes_consistent_real
 \begin{proposition}[RM3 is Not Bayes-Consistent]
 \label{prop:rm3-not-bayes}
 The Kleene material conditional $\max(\negc a, b)$---the three-valued
@@ -1333,6 +1351,8 @@ product residuated via the additive generator $-\log x$~\cite{klement2000}.}
 Lean: \texttt{symmetric\_bayes\_consistent}, \texttt{copula\_zero\_left}.
 \end{remark}
 
+% Lean: min_bayes_consistent, prod_trivial_conditioning, min_nontrivial_conditioning,
+%       truth_functional_forces_min
 \begin{theorem}[Maximum Dependence is the Unique Meeting Point]
 \label{thm:max-dependence}
 Among all fixed joint functions $j(a,b)$ taking values in the Fr\'echet-Hoeffding
@@ -1404,6 +1424,7 @@ External joints (probability-style) satisfy all except truth-functionality.}
 \label{tab:joint-comparison}
 \end{center}
 
+% Lean: frechet_upper, frechet_lower, frechet_conditioning_exists
 \begin{proposition}[Fr\'echet-Hoeffding Bounds]
 \label{prop:frechet}
 If the chain rule holds in both directions---$\condc{A}{B} \cdot \cred(B)
@@ -1574,6 +1595,7 @@ $\neg$, $\land$, $\lor$; see tables above).
 No quotient map is needed: if you start with only $0$s and $1$s, all
 operations keep you there.
 
+% Lean: no_boolean_neg_retraction
 \begin{proposition}[No Collapse to Classical Logic]
 \label{prop:no-classical}
 There is no function $\varphi : [0,1] \to \{0,1\}$ preserving negation:
@@ -1603,6 +1625,7 @@ absorbing the products that leave $\{0, \tfrac{1}{2}, 1\}$.
 \textbf{Uniqueness of the Kleene target.}
 No analogous quotient exists for the other standard three-valued algebras.
 
+% Lean: no_godel_collapse, godel_neg_no_fixed_point
 \begin{proposition}[No Collapse to G\"odel Logic]
 \label{prop:no-godel}
 Let $\mathrm{neg}_G$ denote G\"odel negation on $\{0, \tfrac{1}{2}, 1\}$:
@@ -1628,6 +1651,7 @@ Its \emph{implication} ($1$ if $a \leq b$, else $b$) coincides with the product
 residuated on $\{0,\tfrac{1}{2},1\}$ (Section~\ref{sec:collapse}) and is used in
 the Bayes-consistency comparison.
 
+% Lean: no_luk_collapse, luk_conj_half_half
 \begin{proposition}[No Collapse to \L ukasiewicz Logic]
 \label{prop:no-luk}
 Let $\mathrm{conj}_{\text{\L}} (a, b) = \max(a + b - 1,\; 0)$ be the \L ukasiewicz
@@ -1758,6 +1782,7 @@ for empirical propositions and maximum dependence (minimum) for mathematical
 ones?
 The following results constrain such mixed approaches.
 
+% Lean: independence_within_forces_classical, product_idempotent_iff_classical
 \begin{proposition}[Independence Within Forces Classical]
 \label{prop:indep-classical}
 If a domain uses the independence copula ($j(a,b) = ab$) and requires
@@ -1770,6 +1795,7 @@ Lean: \texttt{independence\_within\_forces\_classical},
 \texttt{product\_idempotent\_iff\_classical}.
 \end{proof}
 
+% Lean: cross_world_independence_trivial
 \begin{proposition}[Cross-Domain Independence Trivializes Inference]
 \label{prop:cross-trivial}
 If the joint between propositions from different domains is the product

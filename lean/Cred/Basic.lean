@@ -2,6 +2,36 @@
   Cred: A Foundation for Graded Mathematics
 
   This formalizes the credence algebra and its core properties.
+
+  PAPER CROSS-REFERENCES (part1/paper.tex):
+  -----------------------------------------
+  thm:algebraic        → neg_neg, neg_zero, neg_one, conj_comm, conj_assoc, conj_one,
+                         conj_zero, disj_comm, disj_assoc, disj_zero, disj_one,
+                         de_morgan_conj, de_morgan_disj
+  thm:idempotence      → conj_idempotent_iff
+  thm:nondistrib       → conj_disj_not_distrib
+  thm:uniqueness-main  → min_bayes_consistent, prod_trivial_conditioning,
+                         min_nontrivial_conditioning, truth_functional_forces_min, luk_not_idempotent
+  thm:min-copula-unique → min_copula_unique, symmetric_idempotent_2incr_ge_min
+  thm:noexfalso        → conditioning_zero_forces_joint_zero, conditioning_zero_any
+  thm:path-dependence  → path_dep_fixed_a, path_dep_proportional, path_dep_square,
+                         path_dependence_witness, path_any_positive_value
+  thm:existence        → conditioning_mk
+  thm:uniqueness       → conditioning_unique
+  thm:liar             → liar_fixed_point
+  thm:fixedunique      → neg_fixed_point_unique
+  thm:collapse         → collapse_neg, collapse_conj, collapse_disj, collapse_surjective
+  prop:resid-bayes     → prod_resid_bayes_consistent_real
+  prop:godel-not-bayes → godel_not_bayes_consistent_real
+  prop:rm3-not-bayes   → rm3_not_bayes_consistent_real
+  thm:max-dependence   → min_bayes_consistent, prod_trivial_conditioning,
+                         min_nontrivial_conditioning, truth_functional_forces_min
+  prop:frechet         → frechet_upper, frechet_lower, frechet_conditioning_exists
+  prop:no-classical    → no_boolean_neg_retraction
+  prop:no-godel        → no_godel_collapse, godel_neg_no_fixed_point
+  prop:no-luk          → no_luk_collapse, luk_conj_half_half
+  prop:indep-classical → independence_within_forces_classical, product_idempotent_iff_classical
+  prop:cross-trivial   → cross_world_independence_trivial
   Credences are values in [0,1] with:
   - Independence product (multiplication on values): c₁ ⊗ c₂ = c₁.val * c₂.val.
     Under a probabilistic interpretation this equals cred(A ∧ B) only when A and B
