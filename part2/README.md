@@ -19,10 +19,6 @@ Part 2 adds these three layers, one at a time, and extends to first-order.
 
 ## Notes
 
-- `01-valuations.md` — Interpretation: mapping propositions to credences
-- `02-consequence-relations.md` — Consequence: when does A entail B?
-- `03-update-rules.md` — Update: how beliefs change with new evidence
-- `04-graded-predicates.md` — Predicates, quantifiers, and first-order extension
 - `05-open-questions.md` — Research directions for Part 2
 
 ## Relationship to Part 1

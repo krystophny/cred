@@ -7,7 +7,7 @@ Part 1 establishes the constraint algebra. Part 2 adds interpretation, consequen
 - `01-asymptotic-proofs.md` — Proofs approaching certainty (cred -> 1)
 - `02-fixed-points.md` — Self-reference and paradox dissolution
 - `03-undecidability.md` — Incompleteness and underdetermination (distinct from the 1/2 fixed point)
-- `04-new-techniques.md` — Proof techniques unique to Cred
+- `04-proof-patterns.md` — Proof patterns enabled by Cred
 - `05-open-questions.md` — Research directions including self-hosting
 - `06-graded-mathematics.md` — Building mathematics (arithmetic, analysis, set theory) on graded foundations
 

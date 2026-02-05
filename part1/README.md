@@ -31,11 +31,7 @@ When B = 0: (A | 0) is unconstrained. No ex falso.
 
 ## Files
 
-- `01-credence-algebra.md` — The algebraic structure
-- `02-conditioning.md` — Chain rule vs division (Rényi's insight)
-- `03-three-valued.md` — {0, ½, 1} collapse → RM3-like logic
-- `04-boolean-relevant.md` — {0, 1} collapse → Relevant logic
-- `05-classical.md` — Adding ex falso → Classical (not recommended)
+- `paper.tex` — publication paper (authoritative exposition for Part 1)
 
 ## The Collapse Tower (Limiting Cases)
 

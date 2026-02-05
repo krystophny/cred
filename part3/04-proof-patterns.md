@@ -60,7 +60,7 @@ This gives credence bounds on joints from marginals alone, without requiring a f
 
 ### Asymptotic proof (from Part 2/3)
 
-Show that credence converges to 1 under a specified sequence of updates (see `01-asymptotic-proofs.md`). This is a genuinely new proof pattern: it produces certainty in the limit rather than in finite steps.
+Show that credence converges to 1 under a specified sequence of updates (see `01-asymptotic-proofs.md`). This pattern produces certainty in the limit rather than in finite steps.
 
 ### Robust proof
 

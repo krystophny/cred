@@ -60,8 +60,8 @@ Cred      RM3-like    Relevant     (ex falso appears)
 ## Repo Layout
 
 - `lean/` — Lean 4 formalization (authoritative for Part 1 and Part 2 definitions/theorems)
-- `part1/` — paper + Part 1 notes (primitives and collapse connections)
-- `part2/` — paper + Part 2 notes (valuations, consequence, update, graded predicates)
+- `part1/` — Part 1 paper (core algebra)
+- `part2/` — Part 2 paper (reasoning layers) + open questions
 - `part3/` — roadmap: new proof techniques, undecidability, self-hosting
 
 ## Build
