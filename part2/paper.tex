@@ -1,7 +1,7 @@
-% Extending the Bridge: Conditioning and Update between Probability
-% and Many-Valued Logic
+% The Product De Morgan Triplet: Chain-Rule Conditioning as a Bridge
+% between Probability and Many-Valued Logic
 %
-% Part 2 of the product De Morgan triplet series.
+% Self-contained paper.
 % Lean formalization: lean/Cred/{Basic,Congruence,Consequence,
 %   Valuation,Update,Predicate,CondBridge}.lean
 
@@ -20,7 +20,8 @@
     citecolor=blue,
     urlcolor=blue,
     pdfauthor={Anonymous},
-    pdftitle={Extending the Bridge: Conditioning and Update between Probability and Many-Valued Logic}
+    pdftitle={The Product De Morgan Triplet: Chain-Rule Conditioning
+      as a Bridge between Probability and Many-Valued Logic}
 }
 \usepackage{cleveref}
 \usepackage[margin=1in]{geometry}
@@ -46,8 +47,9 @@
 \newcommand{\Real}{\mathbb{R}}
 \newcommand{\Nat}{\mathbb{N}}
 
-\title{Extending the Bridge: Conditioning and Update\\
-between Probability and Many-Valued Logic}
+\title{The Product De Morgan Triplet:\\
+Chain-Rule Conditioning as a Bridge between\\
+Probability and Many-Valued Logic}
 
 \author{Anonymous for blind review}
 \date{February 2026}
@@ -57,26 +59,33 @@ between Probability and Many-Valued Logic}
 \maketitle
 
 \begin{abstract}
-Part~1 of this series established a bridge between continuous
-$[0,1]$ reasoning and three-valued logic:
-the product De Morgan triplet collapses to the Kleene lattice
-$\{0, \tfrac{1}{2}, 1\}$, and LP/K$_3$ consequence is equivalent
-to positivity/certainty consequence on $[0,1]$, at the level of
-propositional formulas.
-This paper asks whether the bridge extends to conditioning.
-We prove that it does not: no truth-functional function
-$f : \{0, \tfrac{1}{2}, 1\}^2 \to \{0, \tfrac{1}{2}, 1\}$
-can satisfy $\mathrm{collapse}(\min(a,b)/b) = f(\mathrm{collapse}(b),
-\mathrm{collapse}(a))$ for all $a, b$ with $b > 0$
---- a constructive Lewis triviality result for the product
-De Morgan triplet.
+Probability theory and many-valued logic share the same core algebra
+on $[0,1]$: the product De Morgan triplet (product conjunction,
+probabilistic-sum disjunction, standard complement).
+They diverge on the conditional.
+Probability divides and is undefined at zero; product residuation
+forces ex falso at zero; chain-rule conditioning
+($\condc{A}{B} \conjc \cred(B) = \cred(A \land B)$)
+leaves the conditional unconstrained at zero.
+This paper develops chain-rule conditioning as a bridge
+between the two traditions.
+We show that the triplet collapses to the Kleene lattice
+$\{0, \tfrac{1}{2}, 1\}$ via a unique three-element quotient,
+and establish a formula-level bridge: LP consequence on the
+lattice is equivalent to positivity consequence on $[0,1]$,
+and K$_3$ consequence to certainty consequence.
+A two-level congruence classification separates
+$[0,1]$-multiplication (where the Kleene quotient exists and is
+unique) from $\Real$-multiplication (where no nontrivial finite
+quotient exists at all).
+The bridge does \emph{not} extend to conditioning: no
+truth-functional function on the lattice can reproduce the
+min-copula conditional --- a constructive Lewis triviality result
+witnessed by two explicit pairs.
 We characterize the boundary conditions under which the bridge
-does hold (evidence certain, conclusion impossible or certain, or
-conclusion at least as credible as evidence), and show that
-Bayesian update inherits the bridge under these conditions.
-Zero evidence ties the paper together: the algebraic fact
-$c \cdot 0 = 0$ simultaneously forces underdetermined posteriors,
-paraconsistent explosion failure, and conditional bridge failure.
+does hold, show that Bayesian update inherits it, and prove
+a zero-evidence duality tying underdetermination, paraconsistency,
+and bridge failure to the single algebraic fact $c \cdot 0 = 0$.
 All results are machine-checked in Lean~4 with Mathlib
 (3581 lines across seven modules, zero \texttt{sorry}).
 \end{abstract}
@@ -90,161 +99,855 @@ You believe it will rain with credence $0.8$.
 You see the street is wet with credence $0.9$.
 What is your conditional credence in rain given wet streets?
 
-In Part~1 we studied the product De Morgan triplet on $[0,1]$ ---
-product conjunction ($c_1 \conjc c_2 = c_1 \cdot c_2$),
+A probabilist computes $\cred(\text{rain} \mid \text{wet})
+= \cred(\text{rain} \land \text{wet}) / \cred(\text{wet})$.
+Under maximal positive dependence (where the joint is
+$\min(0.8, 0.9) = 0.8$), this gives $0.8 / 0.9 = 8/9$.
+The computation requires division, and at $\cred(\text{wet}) = 0$
+the conditional is undefined.
+
+A many-valued logician working in H\'ajek's Product
+Logic~\cite{hajek1998} uses the residuated implication:
+$a \to b = \sup\{c : a \cdot c \leq b\}$.
+When $a > 0$ and the joint is the minimum, this yields the same
+$\min(b/a,\, 1)$; but at $a = 0$, the supremum is $1$
+--- ex falso quodlibet is built into every residuated
+implication~\cite{hajek1998,esteva2001,cintula2011}.
+
+Both traditions share the same core algebra on $[0,1]$: the
+\emph{product De Morgan triplet}~\cite{klement2000}.
+Product conjunction ($c_1 \conjc c_2 = c_1 \cdot c_2$),
 probabilistic-sum disjunction
 ($c_1 \disjc c_2 = c_1 + c_2 - c_1 c_2$), and standard complement
-($\negc c = 1 - c$) --- and showed that the triplet collapses to
-the Kleene lattice $\{0, \tfrac{1}{2}, 1\}$ via a surjective
-homomorphism.
-The main result of Part~1 was the \emph{bridge theorem}: LP
-consequence on $\{0, \tfrac{1}{2}, 1\}$ is equivalent to positivity
-consequence on $[0,1]$, and K$_3$ consequence is equivalent to
-certainty consequence, both at the level of propositional formulas
-built from negation, conjunction, and disjunction.
+($\negc c = 1 - c$) are common to both.
+They differ \emph{only} in the conditional: probability uses division
+(undefined at zero), Product Logic uses residuation (ex falso at zero).
 
-Part~1 noted, but did not pursue, a fundamental limitation: the
-bridge covers connectives $(\negc, \conjc, \disjc)$, not
-conditioning.
-This paper takes up that question directly.
+Chain-rule conditioning offers a third answer.
+The chain rule
+$\condc{A}{B} \conjc \cred(B) = \cred(A \land B)$
+is the defining constraint.
+When $\cred(B) > 0$, the conditional is uniquely determined:
+$\condc{A}{B} = \cred(A \land B) / \cred(B)$ --- the same
+as Bayesian conditioning.
+When $\cred(B) = 0$, the equation $c \cdot 0 = 0$ holds for
+\emph{every} $c \in [0,1]$: the conditional is unconstrained.
+Impossible evidence provides no constraint.
+This echoes R\'enyi's~\cite{renyi1955} and
+Popper's~\cite{popper1959} primitive-conditioning approach to
+probability, and de Finetti's~\cite{definetti1936} three-valued
+conditional (where conditioning on a false antecedent is \emph{void}
+rather than vacuously true).
+Chain-rule conditioning achieves a similar effect without adding
+a connexive axiom~\cite{egre2021}: it simply leaves
+$\cred(A \mid 0)$ unconstrained.
 
-\textbf{The question.}
-The collapse homomorphism preserves negation, conjunction, and
-disjunction.
-Does it also preserve conditioning?
-More precisely: if we compute the min-copula conditional
-$\min(a,b)/b$ on $[0,1]$ and then collapse, do we get the same
-answer as first collapsing and then computing the G\"odel
-conditional on $\{0, \tfrac{1}{2}, 1\}$?
-
-In our running example:
-$\cred(\text{rain}) = 0.8$, $\cred(\text{wet}) = 0.9$,
-so $\cred(\text{rain} \mid \text{wet}) = \min(0.8, 0.9)/0.9
-= 0.8/0.9 = 8/9$.
-Since $8/9 \in (0,1)$, it collapses to $\tfrac{1}{2}$.
-But the G\"odel conditional on the collapsed values is
-$\text{g\"odel}(\tfrac{1}{2}, \tfrac{1}{2}) = 1 \neq \tfrac{1}{2}$.
-The bridge is already broken.
+The resulting structure sits at a crossroads.
+On one side, it connects to Bayesian probability: at positive
+evidence, chain-rule conditioning \emph{is} Bayes's rule.
+On the other, it collapses to the Kleene
+lattice~\cite{kleene1952} $\{0, \tfrac{1}{2}, 1\}$ via a surjective
+homomorphism, recovering the shared truth tables of
+K$_3$~\cite{kleene1952},
+LP~\cite{asenjo1966,priest1979},
+and RM3~\cite{anderson1975,meyer1972}.
+The ``bridge'' has two senses: the collapse homomorphism connects
+three-valued logic to $[0,1]$; chain-rule conditioning connects
+Bayesian reasoning to the same algebra.
+This paper studies both senses and their interaction.
 
 \textbf{Main results.}
 \begin{enumerate}[nosep]
-\item \textbf{Propositional bridge} (Section~\ref{sec:bridge}):
-  We recall the bridge theorem from Part~1 and state the
-  formula-level results we need: collapse commutes with evaluation,
-  LP $\leftrightarrow$ positivity, K$_3$ $\leftrightarrow$ certainty.
-  These cover the connective language.
+\item \textbf{Formula-level bridge} (Section~\ref{sec:bridge};
+  new, machine-verified):
+  the collapse commutes with propositional evaluation;
+  LP consequence on $\{0, \tfrac{1}{2}, 1\}$ is equivalent to
+  positivity consequence on $[0,1]$, and K$_3$ to certainty
+  consequence.
+\item \textbf{Algebraic fixed points and Kleene collapse}
+  (Section~\ref{sec:triplet}; known~\cite{kleene1952,hajek1998,gottwald2001},
+  newly verified):
+  the product De Morgan triplet collapses to the Kleene lattice;
+  \textbf{uniqueness of the three-element quotient} (new).
+\item \textbf{Congruence classification}
+  (Section~\ref{sec:congruence}; new):
+  under $[0,1]$-multiplication, the Kleene lattice is the unique
+  nontrivial three-element quotient and boundary classes are
+  singletons; under $\Real$-multiplication, no nontrivial
+  finite quotient exists at all.
 \item \textbf{Conditional bridge impossibility}
-  (Section~\ref{sec:cond-bridge}):
-  No truth-functional conditional bridge exists
-  (Theorem~\ref{thm:no-cond-bridge}); the bridge holds exactly at
-  boundary cases
-  (Theorem~\ref{thm:boundary}); the bridge fails for
-  all interior pairs with $a < b$
-  (Theorem~\ref{thm:interior-fail}).
-  This is a constructive Lewis triviality result: the impossibility
-  is witnessed by two explicit pairs, not by a measure-theoretic
-  argument.
-\item \textbf{Update bridge}
-  (Section~\ref{sec:update}):
-  Bayesian update inherits the conditional bridge under the boundary
-  conditions of Theorem~\ref{thm:boundary}
-  (Theorem~\ref{thm:update-bridge}); qualitative update on
-  $\{0, \tfrac{1}{2}, 1\}$ via G\"odel implication
-  provides the discrete counterpart.
+  (Section~\ref{sec:cond-bridge}; new):
+  no truth-functional function on $\{0, \tfrac{1}{2}, 1\}$
+  can reproduce the min-copula conditional under collapse
+  --- a constructive Lewis triviality, witnessed by two
+  explicit pairs.
+\item \textbf{Update bridge and boundary characterization}
+  (Section~\ref{sec:update}; new):
+  the conditional bridge holds at boundaries
+  (evidence certain, conclusion at a boundary, or conclusion at
+  least as credible as evidence);
+  Bayesian update inherits the bridge under these conditions.
 \item \textbf{Zero-evidence duality}
-  (Section~\ref{sec:update}):
-  The algebraic fact $c \cdot 0 = 0$ has three equivalent
-  manifestations: underdetermined posteriors, LP explosion failure,
-  and conditional bridge failure
-  (Theorem~\ref{thm:zero-duality}).
+  (Section~\ref{sec:update}; new):
+  the identity $c \cdot 0 = 0$ simultaneously forces
+  underdetermined posteriors, LP explosion failure, and
+  conditional bridge failure.
 \end{enumerate}
 
+\textbf{Relationship to Product Logic.}
+The closest relative of the product De Morgan triplet in the
+fuzzy-logic literature is H\'ajek's Product Logic
+($\Pi$-logic)~\cite{hajek1998}, further developed by
+Esteva and Godo~\cite{esteva2000,esteva2001} and surveyed
+in~\cite{cintula2011}.
+Product Logic uses the same t-norm but a different companion
+operation: residuation ($a \to b = \sup\{c : a \cdot c \leq b\}$)
+instead of the involutive complement.
+Residuation links conjunction and implication so tightly that the
+product algebra on $[0,1]$ is \emph{simple} (no nontrivial
+congruences)~\cite{agliano2003}.
+Replacing residuation with the involutive complement loosens this
+constraint: the Kleene partition survives precisely because the
+De Morgan reduct no longer forces $0 \to b = 1$.
+The two systems agree on all positive-evidence conditioning;
+they differ only at evidence zero.
+
 \textbf{Literature positioning.}
-Lewis~\cite{lewis1976} showed that identifying $P(A \mid B)$ with
-the probability of a conditional proposition forces triviality;
-Halpern~\cite{halpern2003} analyzed the scope of Lewis's conditions.
-Our impossibility theorem (Theorem~\ref{thm:no-cond-bridge}) is a
-different kind of triviality: it shows the collapse homomorphism
+The product De Morgan triplet combines well-studied components:
+the product t-norm~\cite{klement2000,goguen1969},
+the standard complement~\cite{bergmann2008},
+and the probabilistic sum (De Morgan dual).
+The Kleene lattice and its logics are
+classical~\cite{kleene1952,asenjo1966,priest1979,priest2008,avron1991}.
+The collapse homomorphism to three-valued logic is observed in
+Ferm\"uller's game semantics~\cite{fermuller2014}.
+Primitive conditioning has precedents in
+R\'enyi~\cite{renyi1955}, Popper~\cite{popper1959},
+de Finetti~\cite{definetti1936,definetti1937},
+and \'Egr\'e--Rossi--Sprenger~\cite{egre2021}.
+Algebraic approaches to probability appear in
+Calabrese~\cite{calabrese1987} and
+Coletti--Scozzafava~\cite{coletti2002};
+conditional events in
+Gilio--Sanfilippo~\cite{gilio2013,gilio2014}.
+Adams~\cite{adams1975} developed a probabilistic logic of
+conditionals; van Fraassen~\cite{vanfraassen1976,vanfraassen1983}
+studied the interplay of probability and conditionals.
+Lewis~\cite{lewis1976} showed that identifying conditional
+probability with the probability of a conditional proposition
+forces triviality; Halpern~\cite{halpern2003} analyzed Lewis's
+conditions in detail.
+Our impossibility theorem (Section~\ref{sec:cond-bridge})
+is a different kind of triviality: the collapse homomorphism
 cannot extend to conditioning, even without treating conditionals
 as propositions.
-Adams~\cite{adams1975} developed a probabilistic logic of
-conditionals; H\'ajek~\cite{hajek1998} and
-Esteva--Godo~\cite{esteva2000,esteva2001} developed Product Logic
-with residuated implication (forcing ex falso);
-\'Egr\'e, Rossi, and Sprenger~\cite{egre2021} developed
-de Finetti's conditional algebraically.
-Chain-rule conditioning~\cite{renyi1955,popper1959} avoids both
-division (probability) and residuation (logic), leaving the
-conditional unconstrained at zero evidence.
+Pavelka~\cite{pavelka1979i} introduced graded inference
+in many-valued logic;
+B\v{e}hounek and Cintula~\cite{behounek2006} developed
+degree-preserving consequence.
+Suszko~\cite{suszko1977} argued that every Tarskian consequence
+relation is two-valued at the level of consequence (though not
+necessarily at the level of truth values);
+Malinowski~\cite{malinowski1993} and
+Font--Jansana--Pigozzi~\cite{font2003} developed this theme in
+abstract algebraic logic.
+MV-algebras~\cite{mundici2011,cignoli2000} and the
+Flaminio--Montagna~\cite{flaminio2009} probabilistic extension
+provide the \L ukasiewicz counterpart.
+Belnap~\cite{belnap1977} and Dunn~\cite{dunn1976} developed FDE;
+Fitting~\cite{fitting1991,fitting2006} connected bilattices to
+logic programming.
+Cox~\cite{cox1961} and Jaynes~\cite{jaynes2003} showed that
+consistent plausible reasoning must be isomorphic to probability;
+Gaines~\cite{gaines1978} unified fuzzy and probabilistic
+uncertainty.
+Copulas are surveyed in Nelsen~\cite{nelsen2006}; comonotonicity
+in Dhaene et~al.~\cite{dhaene2002};
+imprecise probability in Walley~\cite{walley1991} and
+Levi~\cite{levi1980}.
+
+\emph{The novelty of this paper lies in the synthesis and
+formalization, not in any single deep theorem.}
+The product De Morgan triplet, the Kleene collapse, chain-rule
+conditioning, and many-valued consequence are all individually
+known.
+What is new is the precise bridge theorem connecting LP/K$_3$
+consequence to positivity/certainty consequence at the formula level;
+the congruence classification separating $[0,1]$-multiplication
+from $\Real$-multiplication;
+and the impossibility theorem showing the bridge cannot extend to
+conditioning --- a constructive Lewis triviality for the collapse
+that does not rely on measure-theoretic machinery.
 
 \textbf{Note on formalization.}
-All results marked with ``Lean:'' are machine-checked in Lean~4 with
-Mathlib (Appendix~\ref{app:lean}).
+All results marked with ``Lean:'' are machine-checked in Lean~4
+with Mathlib (Appendix~\ref{app:lean}).
 
 \textbf{Section guide.}
-Section~\ref{sec:setup}: setup and notation from Part~1.
-Section~\ref{sec:bridge}: the propositional bridge (warmup).
-Section~\ref{sec:cond-bridge}: the conditional bridge (centerpiece).
-Section~\ref{sec:update}: update through the bridge.
+Section~\ref{sec:triplet}: the product De Morgan triplet and
+min-copula uniqueness.
+Section~\ref{sec:conditioning}: chain-rule conditioning.
+Section~\ref{sec:collapse}: the Kleene collapse and congruence
+classification.
+Section~\ref{sec:bridge}: the propositional bridge.
+Section~\ref{sec:cond-bridge}: the conditional bridge impossibility.
+Section~\ref{sec:update}: update through the bridge and
+zero-evidence duality.
+Section~\ref{sec:graded}: graded consequence.
 Section~\ref{sec:conclusion}: conclusion and open problems.
+Appendix~\ref{app:prelim}: standard definitions.
+Appendix~\ref{app:lean}: Lean formalization.
+Appendix~\ref{app:proofs}: deferred proofs.
 
 %=============================================================================
-\section{Setup}
-\label{sec:setup}
+\section{The Product De Morgan Triplet}
+\label{sec:triplet}
 %=============================================================================
 
-We work with the product De Morgan triplet on $[0,1]$ as defined in
-Part~1.
-This section recalls the ingredients we need; all proofs are in
-Part~1 or in the Lean formalization.
+This section defines the concrete structure: the product De Morgan
+triplet on $[0,1]$~\cite{klement2000,hajek1998,esteva2000}.
+This is not an axiomatic class of algebras: all properties follow
+from arithmetic on $[0,1]$.
+Goguen~\cite{goguen1969} used the product t-norm as the conjunction
+in his logic of inexact concepts;
+the triple $(\conjc, \disjc, \negc)$ is standard in fuzzy
+logic~\cite{bergmann2008,cintula2011}.
 
-\subsection{The Product De Morgan Triplet}
+\subsection{Primitive Operations}
 
+\begin{definition}[Credence]
+\label{def:credence}
 A \emph{credence} is a value $c \in [0,1]$.
-The operations are:
-negation $\negc c = 1 - c$,
-conjunction $c_1 \conjc c_2 = c_1 \cdot c_2$ (the product t-norm),
-and disjunction $c_1 \disjc c_2 = c_1 + c_2 - c_1 c_2$ (the
-De Morgan dual).
-The algebraic properties --- involution, commutativity, associativity,
-De Morgan laws --- hold by arithmetic on $[0,1]$ (Part~1, Section~2).
+\end{definition}
 
 \begin{example}[Running Example: Rain and Wet Streets]
 \label{ex:rain}
 Throughout this paper:
 $\cred(\text{rain}) = 0.8$ and $\cred(\text{wet}) = 0.9$.
-Then $\cred(\text{no rain}) = 0.2$ and
-$\cred(\text{rain}) \conjc \cred(\text{wet}) = 0.72$.
 \end{example}
 
-\subsection{Chain-Rule Conditioning}
+\begin{definition}[Negation, Conjunction, Disjunction]
+\label{def:operations}
+The \emph{negation} is $\negc c = 1 - c$.
+The \emph{conjunction} is $c_1 \conjc c_2 = c_1 \cdot c_2$
+(the product t-norm).
+The \emph{disjunction} is the De Morgan dual:
+$c_1 \disjc c_2 = \negc(\negc c_1 \conjc \negc c_2)
+  = c_1 + c_2 - c_1 c_2$
+(the probabilistic sum).
+The triple $(\conjc, \disjc, \negc)$ is the
+\emph{product De Morgan triplet}~\cite{klement2000,hajek1998}.
+\end{definition}
 
-The conditional satisfies the chain rule:
-$\condc{A}{B} \conjc \cred(B) = \cred(A \land B)$.
-When $\cred(B) > 0$, the conditional is unique:
-$\condc{A}{B} = \cred(A \land B) / \cred(B)$.
-When $\cred(B) = 0$, the equation $c \cdot 0 = 0$ holds for all
-$c \in [0,1]$: the conditional is unconstrained
-(Lean: \texttt{conditioning\_zero\_any},
-\texttt{conditioning\_unique}).
-The joint $\cred(A \land B)$ is supplied as input, not computed from
-marginals; the conditional depends on the dependence structure.
+In the running example:
+$\negc \cred(\text{rain}) = 0.2$,
+$\cred(\text{rain}) \conjc \cred(\text{wet})
+= 0.8 \cdot 0.9 = 0.72$,
+$\cred(\text{rain}) \disjc \cred(\text{wet})
+= 0.8 + 0.9 - 0.72 = 0.98$.
 
-\subsection{Min-Copula Uniqueness}
+\begin{proposition}[Algebraic Properties]
+\label{prop:algebraic}
+For all $c, c_1, c_2, c_3 \in [0,1]$:
+\begin{enumerate}[label=(\alph*),nosep]
+\item $\negc\negc c = c$ \hfill (involution)
+\item $\negc 0 = 1$, $\negc 1 = 0$ \hfill (boundary)
+\item $c_1 \conjc c_2 = c_2 \conjc c_1$,
+  $(c_1 \conjc c_2) \conjc c_3 = c_1 \conjc (c_2 \conjc c_3)$
+  \hfill (comm., assoc.)
+\item $c \conjc 1 = c$, $c \conjc 0 = 0$ \hfill (identity,
+  annihilator)
+\item $c_1 \disjc c_2 = c_2 \disjc c_1$,
+  $(c_1 \disjc c_2) \disjc c_3 = c_1 \disjc (c_2 \disjc c_3)$
+  \hfill (comm., assoc.)
+\item $c \disjc 0 = c$, $c \disjc 1 = 1$ \hfill (identity,
+  annihilator)
+\item $\negc(c_1 \conjc c_2) = \negc c_1 \disjc \negc c_2$,
+  $\negc(c_1 \disjc c_2) = \negc c_1 \conjc \negc c_2$
+  \hfill (De Morgan)
+\end{enumerate}
+Lean: \texttt{neg\_neg}, \texttt{conj\_comm},
+\texttt{conj\_assoc}, \texttt{conj\_one}, \texttt{conj\_zero},
+\texttt{disj\_comm}, \texttt{disj\_assoc}, \texttt{disj\_zero},
+\texttt{disj\_one}, \texttt{de\_morgan\_conj},
+\texttt{de\_morgan\_disj}.
+\end{proposition}
 
-Among symmetric copulas on $[0,1]$, the minimum is the unique
-idempotent one: $C(a,b) = \min(a,b)$ is the only copula satisfying
-$C(a,a) = a$ for all $a$
-(Part~1, Theorem~2.7;
+\begin{proof}
+Arithmetic on $[0,1]$.
+\end{proof}
+
+The structure consists of two dual commutative monoids connected by
+De Morgan duality.
+It is not a De Morgan algebra because $\conjc$ is not idempotent
+($c^2 = c$ iff $c \in \{0,1\}$;
+Lean: \texttt{conj\_idempotent\_iff})
+and $\conjc$ does not distribute over $\disjc$
+(Lean: \texttt{conj\_disj\_not\_distrib}).
+
+\subsection{Why the Product?}
+
+The three basic continuous t-norms are G\"odel ($\min$), product
+($\cdot$), and \L ukasiewicz ($\max(a+b-1, 0)$).
+Why prefer the product?
+
+\emph{G\"odel} ($\min$) is idempotent: $\min(c,c) = c$.
+This makes it the weakest t-norm and gives it no ``dynamics'' ---
+repeated conjunction has no effect.
+As a model of belief combination, this is unrealistically static:
+combining two independent pieces of evidence should compound their
+uncertainty.
+
+\emph{\L ukasiewicz} ($\max(a+b-1, 0)$) destroys the
+$\tfrac{1}{2}$ fixed point of negation:
+$\max(\tfrac{1}{2} + \tfrac{1}{2} - 1, 0) = 0 \neq \tfrac{1}{2}$
+(Lean: \texttt{luk\_not\_idempotent}).
+In a system where $\tfrac{1}{2}$ represents maximal uncertainty
+and equals its own negation, the conjunction of maximal uncertainty
+with itself should remain uncertain, not collapse to impossibility.
+
+\emph{Product} ($\cdot$) occupies the middle ground.
+It is not idempotent ($c^2 \neq c$ for $c \in (0,1)$), so
+conjunction has dynamic content.
+It preserves the interior:
+$0 < c_1, c_2 < 1$ implies $0 < c_1 c_2 < 1$,
+so uncertain credences remain uncertain after conjunction.
+And it is the only basic continuous t-norm whose De Morgan
+dual ($c_1 + c_2 - c_1 c_2$) is the probabilistic sum ---
+the standard formula for the probability of a disjunction
+under independence~\cite{klement2000}.
+
+\begin{remark}[Product vs.\ Joint]
+\label{rem:product-vs-joint}
+The product $c_1 \conjc c_2$ is an algebraic operation on
+credence values, not a claim about the joint credence
+$\cred(A \land B)$ of two propositions.
+The joint depends on the dependence structure and lies in the
+Fr\'echet--Hoeffding interval
+$[\max(\cred(A) + \cred(B) - 1, 0),\; \min(\cred(A), \cred(B))]$:
+independence gives $\cred(A) \cdot \cred(B)$;
+maximum positive dependence gives $\min(\cred(A), \cred(B))$;
+maximum negative dependence gives
+$\max(\cred(A) + \cred(B) - 1, 0)$~\cite{nelsen2006}.
+\end{remark}
+
+\subsection{Comparison with Product Logic}
+
+The product De Morgan triplet and H\'ajek's Product Logic
+($\Pi$-logic)~\cite{hajek1998} share the product t-norm as
+conjunction.
+They differ in the companion operation.
+
+Product Logic uses \emph{residuation}:
+$a \to b = \sup\{c : a \cdot c \leq b\}$.
+For $a > 0$ this gives $\min(b/a,\, 1)$; for $a = 0$ the
+supremum is $1$ (ex falso).
+Residuation is uniquely determined by the t-norm and the adjunction
+property $a \cdot c \leq b$ iff $c \leq a \to b$, which
+makes Product Logic a BL-algebra with strong structural
+properties~\cite{hajek1998,galatos2007,agliano2003}.
+
+The product De Morgan triplet uses the \emph{involutive complement}
+$\negc c = 1 - c$ instead of residuation, together with the chain
+rule as its conditioning principle.
+When evidence is positive and the joint does not exceed
+the evidence, both systems yield the same conditional value
+$\cred(A \land B) / \cred(B)$.
+The systems diverge at evidence zero: residuation forces
+$0 \to b = 1$; chain-rule conditioning leaves
+$\cred(A \mid 0)$ unconstrained.
+This single difference propagates: the product BL-algebra on
+$[0,1]$ is simple (no nontrivial
+congruences)~\cite{agliano2003}, while the De Morgan reduct
+admits the Kleene partition
+(Section~\ref{sec:collapse}).
+Dropping residuation removes the constraint that forces simplicity.
+
+Esteva, Godo, H\'ajek, and
+Navara~\cite{esteva2000} studied product logic with involutive
+negation as a combined signature; they retain both residuation
+\emph{and} complement.
+Our structure is a further reduct: only complement and product,
+no residuation.
+This is the minimal signature in which chain-rule conditioning
+is expressible.
+
+\subsection{Relationship to Probability}
+
+Every probability space satisfies the chain rule and complement
+axioms.
+Probability adds a sigma-algebra, a countably additive measure,
+and sigma-additivity~\cite{jaynes2003,cox1961}.
+The product De Morgan triplet drops all of these: it works on
+bare values in $[0,1]$ with no measure-theoretic infrastructure.
+At evidence zero, probability is undefined;
+chain-rule conditioning is unconstrained.
+The triplet is thus \emph{weaker} than probability (fewer
+constraints) but \emph{compatible} with it (every probability
+assignment satisfies the triplet axioms).
+
+\subsection{Conjunction Selection: The Min Copula}
+\label{sec:min-copula}
+
+The product $c_1 \conjc c_2 = c_1 \cdot c_2$ is the algebraic
+conjunction on credences, but it does \emph{not} in general
+determine the joint credence $\cred(A \land B)$ from
+marginals.
+Which truth-functional joint should we use when computing
+conditionals?
+
+We impose four requirements:
+truth-functionality ($j(a,b)$ depends on $a$ and $b$ alone),
+Bayes consistency ($j(a,b)/a = j(b,a)/b$ when denominators
+are positive),
+non-trivial conditioning ($j(a,b)/b \neq a$ in general),
+and idempotence ($j(a,a) = a$).
+
+\begin{theorem}[Uniqueness of the Min Copula]
+\label{thm:min-copula-unique}
+Among symmetric copulas on $[0,1]$, the minimum
+$C(a,b) = \min(a,b)$ is the unique idempotent one.
+\end{theorem}
+
+\begin{proof}
+Let $C$ be a symmetric, idempotent copula.
+
+\emph{Upper bound.}
+The 2-increasing property on $[0,a] \times [b,1]$ with unit
+marginal gives
+$C(a,1) - C(a,b) - C(0,1) + C(0,b) \geq 0$, hence
+$a - C(a,b) \geq 0$, so $C(a,b) \leq a$.
+By symmetry $C(a,b) \leq b$, giving $C(a,b) \leq \min(a,b)$.
+
+\emph{Lower bound.}
+Assume $a \leq b$.
+Apply 2-increasing to $[0,a] \times [a,b]$:
+$C(a,b) - C(a,a) - C(0,b) + C(0,a) \geq 0$.
+By idempotence $C(a,a) = a$; by groundedness $C(0,b) = 0$
+and $C(0,a) = 0$; hence $C(a,b) \geq a = \min(a,b)$.
+
+Together: $C(a,b) = \min(a,b)$.
+
 Lean: \texttt{copula\_idempotent\_unique},
-\texttt{min\_copula\_unique}).
-When the joint is the min copula, the conditional for $b > 0$ is
-$\min(a,b)/b$: this equals $a/b$ when $a \leq b$, and $1$ when
-$a \geq b$.
+\texttt{min\_copula\_unique}.
+\end{proof}
+
+Idempotence is the logically essential property:
+$\cred(A \land A) = \cred(A)$.
+Any truth-functional joint that respects this tautology must be
+the minimum.
+The uniqueness theorem says there is no freedom in this choice:
+idempotence, together with the copula axioms (groundedness, unit
+marginals, 2-increasing), forces $\min$.
+
+\begin{remark}[The Min Copula as the Comonotonicity Copula]
+\label{rem:comonotonicity}
+The min copula is not an ad hoc construction.
+In probability theory, it is the
+\emph{comonotonicity copula}~\cite{dhaene2002,nelsen2006}:
+the extremal case of maximal positive dependence, where all
+random variables are increasing functions of a single latent
+variable.
+It is the \emph{upper} Fr\'echet--Hoeffding bound:
+$\min(a,b)$ is the largest possible joint for given marginals.
+The copula axioms (including 2-increasing) ensure that
+$\min$ is a valid joint distribution consistent with probability
+theory, not merely a logical convenience~\cite{nelsen2006}.
+\end{remark}
+
+The other Fr\'echet extreme, the product copula
+$C(a,b) = a \cdot b$ (independence), fails idempotence
+($a^2 \neq a$ for $a \in (0,1)$) and gives trivial conditioning
+($a \cdot b / b = a$; the conditional does not depend on the
+evidence; Lean: \texttt{prod\_trivial\_conditioning}).
+The \L ukasiewicz copula $C(a,b) = \max(a+b-1, 0)$ also fails
+idempotence
+(Lean: \texttt{luk\_not\_idempotent}).
+Only the minimum satisfies all four requirements among
+truth-functional formulas.
+
+\begin{center}
+\small
+\begin{tabular}{lcccc}
+\toprule
+\textbf{Joint formula} & \textbf{Truth-func.} & \textbf{Bayes-cons.}
+  & \textbf{Non-trivial} & \textbf{Idempotent} \\
+\midrule
+$\min(a,b)$ & \checkmark & \checkmark & \checkmark & \checkmark \\
+$a \cdot b$ (indep.) & \checkmark & \checkmark & $\times$ & $\times$ \\
+$\max(a{+}b{-}1,0)$ & \checkmark & \checkmark & \checkmark & $\times$ \\
+$\max(\negc a,b) \cdot a$ (RM3) & \checkmark & $\times$ & --- & --- \\
+\midrule
+External (prob.) & $\times$ & \checkmark & \checkmark & \checkmark \\
+\bottomrule
+\end{tabular}
+\normalsize
+\captionof{table}{Comparison of joint formulas.
+Only the minimum satisfies all four requirements among
+truth-functional formulas.
+Lean: \texttt{min\_copula\_unique},
+\texttt{prod\_trivial\_conditioning},
+\texttt{luk\_not\_idempotent},
+\texttt{rm3\_not\_bayes\_consistent\_real}.}
+\label{tab:joint-comparison}
+\end{center}
+
+%=============================================================================
+\section{Chain-Rule Conditioning}
+\label{sec:conditioning}
+%=============================================================================
+
+The product De Morgan triplet provides the connectives
+($\negc$, $\conjc$, $\disjc$).
+Conditioning is a separate structure, governed by the chain rule.
+
+\subsection{The Chain Rule}
+
+\begin{definition}[Conditioning Structure]
+\label{def:conditioning}
+A \emph{conditioning structure} for
+$(\mathrm{joint}, \mathrm{evidence}) \in [0,1]^2$
+consists of $\mathrm{condCred} \in [0,1]$ satisfying
+$\mathrm{condCred} \conjc \mathrm{evidence} = \mathrm{joint}$.
+In propositional notation:
+$\condc{A}{B} \conjc \cred(B) = \cred(A \land B)$.
+\end{definition}
+
+The joint is supplied as input, not computed from marginals.
+H\'ajek, Godo, and Esteva~\cite{hajek1995} used the chain-rule
+constraint as a technical device within fuzzy logic;
+here it is the defining constraint.
+Cox~\cite{cox1961} and Jaynes~\cite{jaynes2003} showed consistent
+plausible reasoning must be isomorphic to probability;
+chain-rule conditioning relaxes Cox's requirement that the
+conditional be a function of the arguments.
+
+In the running example, with the min-copula joint
+$\cred(\text{rain} \land \text{wet}) = \min(0.8, 0.9) = 0.8$:
+$\condc{\text{rain}}{\text{wet}} \cdot 0.9 = 0.8$,
+so $\condc{\text{rain}}{\text{wet}} = 8/9 \approx 0.889$.
+Rain is slightly more credible given wet streets than it was a priori.
+
+\subsection{Three Answers to Evidence Zero}
+
+The three traditions give three different answers when evidence
+has credence zero:
+
+\begin{center}
+\small
+\begin{tabular}{r|ccc}
+\multicolumn{4}{c}{\textbf{Chain rule with min-copula joint}} \\
+$\mathrm{ev.} \downarrow\;\; \mathrm{concl.}\to$
+  & 0 & $\tfrac{1}{2}$ & 1 \\
+\hline
+0 & $*$ & $*$ & $*$ \\
+$\tfrac{1}{2}$ & 0 & 1 & 1 \\
+1 & 0 & $\tfrac{1}{2}$ & 1
+\end{tabular}
+\quad
+\begin{tabular}{r|ccc}
+\multicolumn{4}{c}{\textbf{Prod.\ resid.}\textsuperscript{1}:
+  $\min(p/e, 1)$} \\
+$e \!\downarrow\;\; p\to$
+  & 0 & $\tfrac{1}{2}$ & 1 \\
+\hline
+0 & 1 & 1 & 1 \\
+$\tfrac{1}{2}$ & 0 & 1 & 1 \\
+1 & 0 & $\tfrac{1}{2}$ & 1
+\end{tabular}
+\quad
+\begin{tabular}{r|ccc}
+\multicolumn{4}{c}{\textbf{Kleene material}\textsuperscript{2}:
+  $\max(\negc e, p)$} \\
+$e \!\downarrow\;\; p\to$
+  & 0 & $\tfrac{1}{2}$ & 1 \\
+\hline
+0 & 1 & 1 & 1 \\
+$\tfrac{1}{2}$ & $\tfrac{1}{2}$ & $\tfrac{1}{2}$ & 1 \\
+1 & 0 & $\tfrac{1}{2}$ & 1
+\end{tabular}
+\normalsize
+\end{center}
+\smallskip
+\noindent
+{\footnotesize
+Rows = evidence, columns = conclusion.
+$*$ = unconstrained (any value in $[0,1]$ satisfies the chain rule).
+\textsuperscript{1}Coincides with G\"odel on
+$\{0, \tfrac{1}{2}, 1\}$
+(Lean: \texttt{godel\_impl\_eq\_prod\_resid}).
+\textsuperscript{2}Shared by K$_3$~\cite{kleene1952},
+LP~\cite{asenjo1966,priest1979},
+RM3~\cite{anderson1975,meyer1972}.}
+
+\medskip
+
+The tables agree on both positive-evidence rows.
+They differ only at evidence zero: the chain rule leaves the row
+unconstrained; residuation fills it with $1$ (ex falso);
+Kleene material also fills it with $1$ (from $\negc 0 = 1$).
+The chain rule's $*$-row is the algebraic expression of
+``impossible evidence provides no constraint.''
+
+\subsection{Existence and Uniqueness}
+
+\begin{proposition}[Existence and Uniqueness of Conditioning]
+\label{prop:conditioning}
+For $\mathrm{evidence} > 0$: a conditioning structure exists iff
+$\mathrm{joint} \leq \mathrm{evidence}$, and is then unique:
+$\mathrm{condCred} = \mathrm{joint} / \mathrm{evidence}$.
+For $\mathrm{evidence} = 0$: the constraint forces
+$\mathrm{joint} = 0$ but leaves $\mathrm{condCred}$ unconstrained
+--- every $c \in [0,1]$ satisfies $c \cdot 0 = 0$.
+
+Lean: \texttt{conditioning\_mk},
+\texttt{conditioning\_unique},
+\texttt{conditioning\_zero\_any}.
+\end{proposition}
+
+\begin{proof}
+Arithmetic on $[0,1]$: division when the denominator is positive;
+the annihilator property $c \cdot 0 = 0$ when it is not.
+\end{proof}
+
+\subsection{Path Dependence at Evidence Zero}
+
+The conditional $\min(a,b)/b$ for $b > 0$ is well-defined, but
+its limit as $b \to 0$ depends on \emph{how} $a$ and $b$ approach
+zero together.
+
+\begin{proposition}[Path Dependence]
+\label{prop:path-dep}
+Under the min-copula joint, $\lim_{b \to 0} \min(a,b)/b$ is
+path-dependent:
+\begin{itemize}[nosep]
+\item Fixed $a > 0$, $b \to 0$: limit $= 1$.
+\item $a = \lambda b$, $\lambda \in (0,1]$: limit $= \lambda$.
+\item $a = b^\alpha$, $\alpha > 1$: limit $= 0$.
+\end{itemize}
+Every value in $[0,1]$ is achieved.
+The singularity at the origin is essential, not removable.
+
+Lean: \texttt{path\_dep\_fixed\_a},
+\texttt{path\_dep\_proportional},
+\texttt{path\_dep\_square},
+\texttt{path\_any\_positive\_value}.
+\end{proposition}
+
+\begin{figure}[ht]
+\centering
+\includegraphics[width=\textwidth]{figures/path_dependence}
+\caption{Path dependence at evidence zero.
+\textbf{Left:} $\min(a,b)/b$ near the origin; value depends on
+angle $\theta$, not radius $r$.
+\textbf{Right:} Limit as $r \to 0$: $1$ for
+$\theta \leq \pi/4$ (since $a \geq b$ gives
+$\min(a,b)/b = 1$),
+$\cot\theta$ for $\theta > \pi/4$.
+The singularity is essential, not removable.}
+\label{fig:path-dependence}
+\end{figure}
+
+\subsection{Comparison with Primitive-Conditioning Frameworks}
+
+\begin{center}
+\small
+\begin{tabular}{lccccc}
+\toprule
+\textbf{Framework} & \textbf{Domain} & \textbf{At $\mathrm{ev.}=0$}
+  & \textbf{Ex falso?} & \textbf{Defined?} \\
+\midrule
+Probability~\cite{jaynes2003}
+  & measures & undefined & n/a & no \\
+Product resid.~\cite{hajek1998}
+  & $[0,1]$ & $= 1$ (sup) & yes & yes \\
+R\'enyi~\cite{renyi1955}
+  & measures & excluded & n/a & n/a \\
+Popper~\cite{popper1959}
+  & measures & axiomatized & forced & yes \\
+de Finetti~\cite{definetti1936}
+  & events & void & no & void \\
+Dubois--Prade~\cite{dubois1988}
+  & $[0,1]$ & $= 1$ & yes & yes \\
+Chain rule (this paper)
+  & $[0,1]$ & unconstrained & no & yes \\
+\bottomrule
+\end{tabular}
+\normalsize
+\captionof{table}{Primitive-conditioning frameworks.
+The chain rule is the only framework that is defined at evidence
+zero, works on bare $[0,1]$ values, and avoids ex falso.}
+\label{tab:conditioning-comparison}
+\end{center}
+
+\subsection{Lewis Triviality}
+
+\begin{remark}[Connection to Lewis Triviality]
+\label{rem:lewis-triviality}
+Lewis~\cite{lewis1976} showed that identifying $P(A \mid B)$ with
+the probability of a conditional proposition $A \to B$ in the same
+algebra forces the probability measure to be trivial.
+Van Fraassen~\cite{vanfraassen1976,vanfraassen1983} and
+Halpern~\cite{halpern2003} analyzed the scope of Lewis's
+conditions.
+Adams~\cite{adams1975} avoided Lewis's conclusion by treating
+conditionals as having ``assertability'' rather than truth value.
+Chain-rule conditioning avoids Lewis's conditions differently:
+the conditional is not a proposition in the algebra (it is a
+separate structure), so the triviality argument does not apply.
+The impossibility theorem we prove in Section~\ref{sec:cond-bridge}
+is a \emph{different} kind of triviality: the collapse homomorphism
+cannot extend to conditioning, even without treating conditionals
+as propositions.
+\end{remark}
+
+\subsection{Bayesian and Jeffrey Update}
+
+\begin{definition}[Bayesian Update]
+\label{def:bayesian}
+Given a joint credence $\cred(A \land B)$ and evidence
+$\cred(B) > 0$, the Bayesian posterior is
+$\cred'(A) = \cred(A \land B) / \cred(B)$.
+This satisfies the chain rule by construction:
+$\cred'(A) \conjc \cred(B) = \cred(A \land B)$.
+
+Lean: \texttt{bayesianUpdate\_chain\_rule},
+\texttt{bayesianUpdate\_unique}.
+\end{definition}
+
+In the running example, the Bayesian posterior under the min copula:
+$\cred'(\text{rain}) = \min(0.8, 0.9) / 0.9 = 8/9 \approx 0.889$.
+Rain was already likely; conditioning on wet streets (which are
+maximally positively dependent) makes it slightly more likely.
+
+\begin{definition}[Jeffrey Update]
+\label{def:jeffrey}
+Jeffrey conditionalization~\cite{jeffrey1965} handles uncertain
+evidence via a mixture:
+$\cred'(A) = \condc{A}{B} \cdot q
++ \condc{A}{\negc B} \cdot (1-q)$,
+where $q$ is the new credence for $B$.
+At $q = 1$ this reduces to Bayesian update; at $q = 0$ it
+conditions on $\negc B$
+(Lean: \texttt{jeffreyUpdate\_certain},
+\texttt{jeffreyUpdate\_zero}).
+\end{definition}
+
+\begin{proposition}[Zero-Evidence Underdetermination]
+\label{prop:zero-underdet}
+When evidence has credence $0$, any conditional
+$c \in [0,1]$ satisfies the chain rule.
+The set of consistent posteriors is the entire interval $[0,1]$
+--- the maximal imprecise
+posterior~\cite{walley1991,levi1980}.
+
+Lean: \texttt{conditioning\_zero\_any}.
+\end{proposition}
+
+%=============================================================================
+\section{The Kleene Collapse}
+\label{sec:collapse}
+%=============================================================================
+
+The product De Morgan triplet has three algebraically distinguished
+values: the conjunction-idempotent pair $\{0, 1\}$ and the negation
+fixed point $\tfrac{1}{2}$.
+These are not postulated, as in finite-valued logics, but derived
+from the continuous algebra on $[0,1]$.
+This section shows that the three values define a surjective
+homomorphism onto the Kleene lattice, classifies all finite
+congruences of the algebra, and explains why no other collapse is
+possible.
+
+\subsection{Algebraic Fixed Points}
+\label{sec:fixed-points}
+
+Self-conjunction strictly decreases interior credences:
+for $c \in (0,1)$,
+\begin{equation}
+  c \conjc c = c^2 < c.
+  \label{eq:self-conj}
+\end{equation}
+Non-idempotence is a feature, not a defect.
+Repeated uncertain evidence \emph{should} decrease joint credence:
+if you are $80\%$ sure it will rain and $80\%$ sure (independently)
+it will rain again, your joint credence in both is $64\%$, not $80\%$.
+Only impossibility ($0$) and certainty ($1$) satisfy $c^2 = c$
+(Lean: \texttt{conj\_idempotent\_iff}).
+
+Dually, self-disjunction strictly increases interior credences:
+$c \disjc c > c$ for $c \in (0,1)$
+(Lean: \texttt{self\_disj\_gt}).
+The power sequence $c^{n+1} < c^n$ is strictly decreasing for any
+interior $c$, with $c^n \to 0$: unrenewed evidence decays
+(Lean: \texttt{pow\_strictly\_decreasing}).
+
+The negation fixed point is unique: $\negc c = c$ if and only if
+$c = \tfrac{1}{2}$.
+Since $\negc c = 1 - c$, the equation $1 - c = c$ has the sole
+solution $c = \tfrac{1}{2}$~\cite{kripke1975}
+(Lean: \texttt{liar\_fixed\_point},
+\texttt{neg\_fixed\_point\_unique}).
+
+\begin{proposition}[Algebraic Fixed Points]
+\label{prop:equilibria}
+A credence $c \in [0,1]$ belongs to $\{0, \tfrac{1}{2}, 1\}$ if and
+only if $c^2 = c$ or $\negc c = c$.
+Lean: \texttt{equilibria\_characterization}.
+\end{proposition}
+
+The three values are \emph{derived} from the algebra: $0$ and $1$
+are the conjunction-idempotent fixed points, and $\tfrac{1}{2}$ is
+the negation fixed point.
+Finite-valued logics (K$_3$, LP, RM3) take $\{0, \tfrac{1}{2}, 1\}$
+as primitive; the continuous framework derives them.
+
+The following table compares the three basic continuous t-norms on
+$[0,1]$.
+Each t-norm shares the negation $\negc c = 1 - c$ and its unique
+fixed point $\tfrac{1}{2}$, but the conjunction behavior differs
+sharply.
+
+\begin{center}
+\small
+\begin{tabular}{lccccc}
+\toprule
+\textbf{T-norm} & \textbf{Self-conj} & \textbf{Non-idemp?}
+  & \textbf{$\negc$-fixed pt?} & $T(\tfrac{1}{2},\tfrac{1}{2})$
+  & \textbf{Exactly 3?} \\
+\midrule
+Product & $c^2 < c$ & Yes & $\tfrac{1}{2}$ & $\tfrac{1}{4}$
+  & Yes \\
+G\"odel & $\min(c,c) = c$ & No & $\tfrac{1}{2}$ & $\tfrac{1}{2}$
+  & No$^*$ \\
+\L ukasiewicz & $\max(2c{-}1,0)$ & Yes & $\tfrac{1}{2}$ & $0$
+  & No \\
+\bottomrule
+\end{tabular}
+\normalsize
+\end{center}
+\smallskip
+\noindent
+{\footnotesize $^*$G\"odel: every value in $[0,1]$ is
+conjunction-idempotent, so infinitely many fixed points exist.
+\L ukasiewicz:
+$T_{\text{\L}}(\tfrac{1}{2}, \tfrac{1}{2}) = 0 \neq \tfrac{1}{2}$,
+which destroys the negation fixed point under conjunction
+(Lean: \texttt{luk\_conj\_half\_half}).}
+
+\begin{remark}[Algebraic vs.\ Dynamical Fixed Points]
+\label{rem:algebraic-vs-dynamical}
+The results above are algebraic facts about the product De Morgan
+triplet, not claims about Bayesian convergence.
+Whether iterated Bayesian update drives $\cred_n(A) \to 0$,
+$\tfrac{1}{2}$, or $1$ depends on the stochastic model for the
+evidence sequence --- a question orthogonal to the algebraic structure.
+\end{remark}
 
 \subsection{The Collapse Homomorphism}
+\label{sec:collapse-hom}
 
-Define:
+Define the \emph{collapse}:
 \[
 \mathrm{collapse}(c) = \begin{cases}
 0 & \text{if } c = 0, \\
@@ -252,68 +955,240 @@ Define:
 1 & \text{if } c = 1.
 \end{cases}
 \]
+
+\begin{theorem}[Collapse Homomorphism]
+\label{thm:collapse}
 The collapse is a surjective homomorphism from
 $([0,1], \negc, \conjc, \disjc)$ to
-$(\{0, \tfrac{1}{2}, 1\}, \mathrm{neg}, \min, \max)$
-(Part~1;
+$(\{0, \tfrac{1}{2}, 1\}, \mathrm{neg}, \min, \max)$.
+\end{theorem}
+
+\begin{proof}
+Case analysis on the boundary/interior status of the arguments.
+Negation: $\mathrm{collapse}(0) = 0 \mapsto 1$, and if
+$0 < c < 1$ then $0 < 1 - c < 1$, so interior maps to interior.
+Conjunction: $0$ absorbs, $1$ is identity; if $0 < c_1, c_2 < 1$
+then $0 < c_1 c_2 < 1$.
+Disjunction follows by De Morgan duality.
 Lean: \texttt{collapse\_neg}, \texttt{collapse\_conj},
-\texttt{collapse\_disj}, \texttt{collapse\_surjective}).
-The target is the Kleene lattice~\cite{kleene1952}, underlying
+\texttt{collapse\_disj}, \texttt{collapse\_surjective}.
+\end{proof}
+
+The target is the \emph{Kleene lattice}~\cite{kleene1952}, the
+shared truth-table structure underlying
 K$_3$~\cite{kleene1952}, LP~\cite{asenjo1966,priest1979}, and
 RM3~\cite{anderson1975,meyer1972}.
+In the bilattice framework of Belnap~\cite{belnap1977} and
+Dunn~\cite{dunn1976}, this is the knowledge lattice of the three
+``told'' values; Fitting~\cite{fitting1991,fitting2006} developed
+bilattice semantics for logic programming in this setting.
 
-\subsection{The G\"odel Conditional on $\{0, \tfrac{1}{2}, 1\}$}
+\begin{remark}[Connection to Possibility Theory]
+\label{rem:possibility}
+The Kleene quotient's $\min/\max$ operations are the
+conjunction/disjunction of possibility
+theory~\cite{dubois1988}: the collapse maps the product
+De Morgan triplet to the possibility/necessity structure.
+This is not a coincidence: possibility theory's operations are
+precisely what remains when continuous credences are coarsened to
+the boundary/interior/boundary trichotomy.
+\end{remark}
 
-The product-residuated implication on $\{0, \tfrac{1}{2}, 1\}$ is
-$a \to b = \sup\{c : a \cdot c \leq b\}$, which coincides with
-the G\"odel implication on the three-element set
-(Lean: \texttt{godel\_impl\_eq\_prod\_resid}).
-Its table:
+\subsection{Uniqueness and Impossibility}
+\label{sec:impossibility}
+
+The Kleene lattice is the \emph{only} three-element quotient.
+No quotient to classical logic, G\"odel logic, or \L ukasiewicz
+logic is possible.
+
+\begin{proposition}[No Collapse to Classical Logic]
+\label{prop:no-classical}
+No $\varphi : [0,1] \to \{0, 1\}$ preserves negation.
+\end{proposition}
+
+\begin{proof}
+$\varphi(\tfrac{1}{2}) = 1 - \varphi(\tfrac{1}{2})$ has no solution
+in $\{0, 1\}$
+(Lean: \texttt{no\_boolean\_neg\_retraction}).
+\end{proof}
+
+\begin{proposition}[No Collapse to G\"odel or \L ukasiewicz]
+\label{prop:no-godel-luk}
+No surjective $\varphi : [0,1] \to \{0, \tfrac{1}{2}, 1\}$ preserves
+negation and G\"odel conjunction (which lacks a negation fixed point),
+nor negation and \L ukasiewicz conjunction (which satisfies
+$T_{\text{\L}}(\tfrac{1}{2}, \tfrac{1}{2}) = 0 \neq \tfrac{1}{2}$).
+Lean: \texttt{no\_godel\_collapse}, \texttt{no\_luk\_collapse}.
+\end{proposition}
+
+\begin{theorem}[Uniqueness of the Three-Element Quotient]
+\label{thm:quotient-unique}
+Any surjective $\varphi : [0,1] \to S$ with $|S| = 3$ that
+preserves negation and conjunction yields the Kleene lattice (up to
+relabeling).
+\end{theorem}
+
+\begin{proof}
+The negation fixed point $\tfrac{1}{2}$ maps to the unique
+negation fixed point of $S$.
+The remaining elements $\varphi(0)$, $\varphi(1)$ form the
+$2$-cycle.
+The conjunction table is forced:
+$\varphi(\tfrac{1}{2} \conjc \tfrac{1}{2})
+= \varphi(\tfrac{1}{4}) = \varphi(\tfrac{1}{2})$ since
+$\tfrac{1}{4} \in (0,1)$ maps to the interior class.
+This is Kleene $\min$
+(Lean: \texttt{three\_element\_quotient\_unique}).
+\end{proof}
+
+\subsection{Congruence Classification}
+\label{sec:congruence}
+
+The collapse is a congruence --- an equivalence relation compatible
+with the algebraic operations.
+How many such congruences exist?
+The answer depends on whether multiplication compatibility is
+required only for $[0,1]$-valued inputs or for all of $\Real$.
+
+A \emph{unit congruence} is an equivalence relation $\sim$ on
+$[0,1]$ satisfying: (i) $a \sim b$ implies $(1-a) \sim (1-b)$
+(negation compatibility), and (ii) $a \sim b$ and $c \sim d$, with
+$a,b,c,d \in [0,1]$, imply $ac \sim bd$ ($[0,1]$-multiplication
+compatibility).
+A \emph{real congruence} strengthens (ii) to unrestricted
+$\Real$-multiplication: $a \sim b$ and $c \sim d$ (for any
+$a,b,c,d \in \Real$) imply $ac \sim bd$.
+
+\begin{theorem}[Congruence Classification]
+\label{thm:congruence}
+Let $\sim$ be a congruence on $([0,1], \negc, \conjc)$.
+\begin{enumerate}[label=\textup{(\arabic*)}]
+\item \textbf{Singleton boundaries} (unit congruence):
+  if $0 \sim \varepsilon$ for any $\varepsilon > 0$, then $\sim$
+  is trivial; likewise for $\{1\}$ by negation duality.
+  Lean: \texttt{UnitCongruence.singleton\_zero},
+  \texttt{singleton\_one}.
+\item \textbf{No two-element quotient:}
+  no surjective homomorphism $[0,1] \to \{0,1\}$ preserves
+  negation (Proposition~\ref{prop:no-classical}).
+\item \textbf{Uniqueness at three elements:}
+  if the quotient has exactly $3$ classes, it is the Kleene lattice
+  $\{0, \tfrac{1}{2}, 1\}$
+  (Theorem~\ref{thm:quotient-unique}).
+  The Kleene partition is itself a verified unit congruence
+  (Lean: \texttt{kleeneCongruence},
+  \texttt{kleene\_nonTrivial}).
+\item \textbf{$\Real$-rigidity:}
+  under $\Real$-multiplication, no non-trivial finite quotient
+  exists.
+  Lean: \texttt{RealCongruence.no\_nontrivial\_finite\_quotient}.
+\end{enumerate}
+Whether a unit congruence with $4$ or more classes exists under
+$[0,1]$-multiplication alone is \textbf{open}.
+Proof in Appendix~\ref{app:proofs}.
+\end{theorem}
+
+The proof of (1) iterates the contraction $x \mapsto x(1-\varepsilon)$
+to drive any $x$ below $\varepsilon$, then uses
+$[0,1]$-multiplication to factor through $0 \sim \varepsilon$.
+The proof of (4) uses the pigeonhole principle on powers of
+$\tfrac{1}{2}$ to find two powers in the same class, then multiplies
+by the real inverse (which lies outside $[0,1]$) to derive
+$1 \sim \tfrac{1}{2}^p$, contradicting singleton boundaries.
+
+The $\Real$-rigidity proof relies on multiplicative inverses
+outside $[0,1]$.
+Under $[0,1]$-multiplication alone, the scaling trick fails because
+$[0,1]$ has no multiplicative inverses for elements in $(0,1)$:
+$a/x$ may leave the interval.
+This isolates \emph{$[0,1]$-cancellation} as the precise obstacle
+to resolving the four-or-more-class question.
+
+The following table places the product De Morgan triplet in
+the landscape of algebraic congruence theory.
+
 \begin{center}
 \small
-\begin{tabular}{r|ccc}
-$a \!\downarrow\;\; b\to$ & 0 & $\tfrac{1}{2}$ & 1 \\
-\hline
-0 & 1 & 1 & 1 \\
-$\tfrac{1}{2}$ & 0 & 1 & 1 \\
-1 & 0 & $\tfrac{1}{2}$ & 1
+\begin{tabular}{llll}
+\toprule
+\textbf{Signature} & \textbf{Mult.\ scope}
+  & \textbf{Finite congruences} & \textbf{Reference} \\
+\midrule
+MV: $(\max(a{+}b{-}1,0),\; 1{-}(\cdot))$
+  & $[0,1]$ & Infinitely many
+  & \cite{cignoli2000,mundici2011} \\
+BL (product): $({\cdot},\; {\to})$
+  & $[0,1]$ & None (simple)
+  & \cite{agliano2003} \\
+De Morgan: $({\cdot},\; 1{-}(\cdot))$
+  & $[0,1]$ & Kleene exists; $\geq\!4$ open
+  & Thm.~\ref{thm:congruence} \\
+De Morgan: $({\cdot},\; 1{-}(\cdot))$
+  & $\Real$ & None
+  & Thm.~\ref{thm:congruence} \\
+\bottomrule
 \end{tabular}
 \normalsize
 \end{center}
 \smallskip
 \noindent
-Lean: \texttt{godel\_impl},
-\texttt{godel\_impl\_zero\_zero} through
-\texttt{godel\_impl\_one\_one}.
-
-\subsection{Propositional Formulas}
-
-Propositional formulas over atoms $\alpha$ are built from variables,
-negation, conjunction, and disjunction.
-Given an assignment $v : \alpha \to [0,1]$, evaluation is recursive:
-$\llbracket \negc\varphi \rrbracket_v = \negc\llbracket\varphi\rrbracket_v$,
-$\llbracket \varphi \conjc \psi \rrbracket_v =
-\llbracket\varphi\rrbracket_v \conjc \llbracket\psi\rrbracket_v$,
-$\llbracket \varphi \disjc \psi \rrbracket_v =
-\llbracket\varphi\rrbracket_v \disjc \llbracket\psi\rrbracket_v$.
-Analogously for three-valued evaluation using Kleene connectives.
-Lean: \texttt{Formula}, \texttt{evalCred}, \texttt{evalThreeVal}.
+The product De Morgan triplet is a \emph{reduct} of the product
+BL-algebra: it drops the residuated implication and replaces it with
+the involutive complement.
+Dropping residuation removes the constraint $0 \to b = 1$ (ex falso)
+that forces simplicity in the BL
+case~\cite{agliano2003,galatos2007}, leaving room for the Kleene
+partition.
+In MV-algebras~\cite{cignoli2000,mundici2011}, Chang's completeness
+theorem gives a rich congruence lattice.
+The De Morgan reduct sits between: at least one non-trivial finite
+congruence exists (Kleene), but whether it is the only one remains
+unknown.
 
 %=============================================================================
 \section{The Propositional Bridge}
 \label{sec:bridge}
 %=============================================================================
 
-This section summarizes the bridge theorem from Part~1 at the level
-we need for the conditional bridge analysis.
-All proofs are in Part~1; the Lean formalizations are in
-\texttt{Cred/Consequence.lean}.
+The collapse homomorphism maps the continuous algebra to the Kleene
+lattice.
+This section shows that the mapping lifts from connectives to
+formulas, and that consequence relations on the two structures
+correspond exactly: LP consequence on $\{0, \tfrac{1}{2}, 1\}$ is
+positivity consequence on $[0,1]$, and K$_3$ consequence is
+certainty consequence.
+
+\subsection{Propositional Formulas and Evaluation}
+\label{sec:formulas}
+
+Propositional formulas over atoms $\alpha$ are built from variables,
+negation, conjunction, and disjunction.
+Given an assignment $v : \alpha \to [0,1]$, \emph{credence evaluation}
+is recursive:
+\[
+\llbracket \negc\varphi \rrbracket_v
+= \negc \llbracket\varphi\rrbracket_v, \qquad
+\llbracket \varphi \conjc \psi \rrbracket_v
+= \llbracket\varphi\rrbracket_v \conjc
+  \llbracket\psi\rrbracket_v, \qquad
+\llbracket \varphi \disjc \psi \rrbracket_v
+= \llbracket\varphi\rrbracket_v \disjc
+  \llbracket\psi\rrbracket_v.
+\]
+Three-valued evaluation uses Kleene connectives analogously:
+negation swaps $0$ and $1$ and fixes $\tfrac{1}{2}$; conjunction is
+$\min$; disjunction is $\max$
+(Lean: \texttt{Formula}, \texttt{evalCred}, \texttt{evalThreeVal}).
 
 \subsection{Collapse Commutes with Evaluation}
+\label{sec:collapse-eval}
 
-\begin{proposition}[Collapse-Evaluation Commutativity; Part~1]
+Because the collapse is a homomorphism on each connective, it
+commutes with any formula built from those connectives.
+
+\begin{proposition}[Collapse--Evaluation Commutativity]
 \label{prop:collapse-eval}
-For any $v : \alpha \to [0,1]$ and formula $\varphi$:
+For any assignment $v : \alpha \to [0,1]$ and formula $\varphi$:
 \[
 \mathrm{collapse}(\llbracket\varphi\rrbracket_v)
   = \llbracket\varphi\rrbracket_{\mathrm{collapse} \circ\, v}.
@@ -321,23 +1196,89 @@ For any $v : \alpha \to [0,1]$ and formula $\varphi$:
 Conversely, for any $w : \alpha \to \{0, \tfrac{1}{2}, 1\}$:
 \[
 \llbracket\varphi\rrbracket_w
-  = \mathrm{collapse}(\llbracket\varphi\rrbracket_{\mathrm{lift} \circ\, w}).
+  = \mathrm{collapse}(\llbracket\varphi\rrbracket_{\mathrm{lift}
+    \circ\, w}),
 \]
-Lean: \texttt{collapse\_eval\_eq}, \texttt{lift\_eval\_eq}.
+where $\mathrm{lift}$ maps $0 \mapsto 0$,
+$\tfrac{1}{2} \mapsto \tfrac{1}{2}$, $1 \mapsto 1$.
 \end{proposition}
 
-The commutativity reduces compound formulas to the atom case: the
-collapse is a homomorphism of connectives, so it commutes with any
-formula built from those connectives.
+\begin{proof}
+Structural induction on $\varphi$.
+The base case (atoms) is the definition of function composition.
+Each inductive case applies the corresponding homomorphism property
+($\mathrm{collapse} \circ \negc = \mathrm{neg} \circ
+\mathrm{collapse}$, etc.).
+The converse follows from $\mathrm{collapse} \circ \mathrm{lift}
+= \mathrm{id}$ on $\{0, \tfrac{1}{2}, 1\}$
+(Lean: \texttt{collapse\_eval\_eq}, \texttt{lift\_eval\_eq},
+\texttt{lift\_collapse\_id}).
+\end{proof}
 
-\subsection{Bridge Theorems}
+The commutativity reduces all formula-level questions to the
+atom-level collapse: one direction projects, the other lifts.
 
-\begin{theorem}[Formula-Level LP Bridge; Part~1]
-\label{thm:lp-formula-bridge}
-LP formula consequence
-$\Gamma \models_{\mathrm{LP}} \varphi$
-is equivalent to formula positivity consequence
-$\Gamma \models^+ \varphi$:
+\subsection{Consequence Relations}
+\label{sec:consequence}
+
+We define four consequence relations.
+On the continuous side:
+
+\begin{definition}[Positivity and Certainty Consequence]
+\label{def:pos-cert}
+\emph{Positivity consequence}
+$\Gamma \models^+ \varphi$: for every $v : \alpha \to [0,1]$,
+if $\llbracket\psi\rrbracket_v > 0$ for all $\psi \in \Gamma$,
+then $\llbracket\varphi\rrbracket_v > 0$.
+
+\emph{Certainty consequence}
+$\Gamma \models^1 \varphi$: for every $v : \alpha \to [0,1]$,
+if $\llbracket\psi\rrbracket_v = 1$ for all $\psi \in \Gamma$,
+then $\llbracket\varphi\rrbracket_v = 1$.
+\end{definition}
+
+On the three-valued side:
+
+\begin{definition}[Three-Valued Consequence]
+\label{def:three-val-cons}
+For a designated set $D \subseteq \{0, \tfrac{1}{2}, 1\}$,
+$\Gamma \models_D \varphi$: for every $w : \alpha \to \{0,
+\tfrac{1}{2}, 1\}$, if $\llbracket\psi\rrbracket_w \in D$ for all
+$\psi \in \Gamma$, then $\llbracket\varphi\rrbracket_w \in D$.
+LP designates $D = \{1, \tfrac{1}{2}\}$; K$_3$ designates
+$D = \{1\}$.
+\end{definition}
+
+All four relations quantify over \emph{all} assignments, not just
+homomorphisms or probability measures.
+
+\begin{proposition}[Structural Rules]
+\label{prop:structural}
+All four consequence relations satisfy reflexivity, monotonicity, and
+cut.
+Lean: \texttt{formulaLP\_reflexivity/monotonicity/cut},
+\texttt{formulaK3\_*}, \texttt{formulaPositivity\_*},
+\texttt{formulaCertainty\_*}.
+\end{proposition}
+
+\begin{proof}
+Reflexivity: the conclusion is among the premises.
+Monotonicity: adding premises restricts the set of admissible
+valuations.
+Cut: if $\Gamma \models \varphi$ and $\Gamma, \varphi \models \psi$,
+then every valuation satisfying $\Gamma$ also satisfies $\varphi$
+(by the first entailment) and hence $\psi$ (by the second).
+\end{proof}
+
+\subsection{The Bridge Theorems}
+\label{sec:bridge-thms}
+
+The collapse connects the four consequence relations in two
+equivalences.
+
+\begin{theorem}[LP Bridge]
+\label{thm:lp-bridge}
+LP consequence is equivalent to positivity consequence:
 \[
 \Gamma \models_{\mathrm{LP}} \varphi
 \quad \Longleftrightarrow \quad
@@ -346,12 +1287,38 @@ $\Gamma \models^+ \varphi$:
 Lean: \texttt{lp\_formula\_bridge}.
 \end{theorem}
 
-\begin{theorem}[Formula-Level K$_3$ Bridge; Part~1]
-\label{thm:k3-formula-bridge}
-K$_3$ formula consequence
-$\Gamma \models_{\mathrm{K}_3} \varphi$
-is equivalent to formula certainty consequence
-$\Gamma \models^1 \varphi$:
+\begin{proof}
+$(\Rightarrow)$
+Let $v : \alpha \to [0,1]$ with $\llbracket\psi\rrbracket_v > 0$
+for all $\psi \in \Gamma$.
+Set $w = \mathrm{collapse} \circ v$.
+By Proposition~\ref{prop:collapse-eval},
+$\llbracket\psi\rrbracket_w = \mathrm{collapse}(
+\llbracket\psi\rrbracket_v)$.
+A credence $c$ is positive if and only if $\mathrm{collapse}(c)
+\in \{1, \tfrac{1}{2}\}$ --- the LP designated set
+(Lean: \texttt{lp\_designated\_iff\_pos}).
+So each premise is LP-designated under $w$.
+By LP consequence, $\llbracket\varphi\rrbracket_w$ is
+LP-designated, hence $\llbracket\varphi\rrbracket_v > 0$.
+
+$(\Leftarrow)$
+Let $w : \alpha \to \{0, \tfrac{1}{2}, 1\}$ with each premise
+LP-designated.
+Set $v = \mathrm{lift} \circ w$.
+By the converse of Proposition~\ref{prop:collapse-eval},
+$\llbracket\psi\rrbracket_w = \mathrm{collapse}(
+\llbracket\psi\rrbracket_v)$.
+LP-designation under $w$ gives positivity under $v$
+(same bridge lemma).
+By positivity consequence, $\llbracket\varphi\rrbracket_v > 0$.
+Collapsing: $\llbracket\varphi\rrbracket_w =
+\mathrm{collapse}(\llbracket\varphi\rrbracket_v)$ is LP-designated.
+\end{proof}
+
+\begin{theorem}[K$_3$ Bridge]
+\label{thm:k3-bridge}
+K$_3$ consequence is equivalent to certainty consequence:
 \[
 \Gamma \models_{\mathrm{K}_3} \varphi
 \quad \Longleftrightarrow \quad
@@ -360,46 +1327,66 @@ $\Gamma \models^1 \varphi$:
 Lean: \texttt{k3\_formula\_bridge}.
 \end{theorem}
 
-\begin{corollary}[Finite Model Property; Part~1]
+\begin{proof}
+Identical structure to the LP bridge, replacing ``positive'' with
+``equal to $1$'' and the LP designated set with $\{1\}$
+(Lean: \texttt{k3\_designated\_iff\_one}).
+\end{proof}
+
+The proofs are symmetric in a precise sense: one direction collapses,
+the other lifts.
+The collapse does not merely project --- it \emph{reflects}:
+every three-valued counterexample lifts to a continuous one, and
+every continuous counterexample collapses to a three-valued one.
+An LP logician working with $\{0, \tfrac{1}{2}, 1\}$ is implicitly
+performing positivity reasoning on $[0,1]$; a K$_3$ logician is
+implicitly performing certainty reasoning.
+
+\subsection{Consequences of the Bridge}
+\label{sec:bridge-consequences}
+
+\begin{corollary}[Finite Model Property]
 \label{cor:finite-model}
 Positivity and certainty consequence on $[0,1]$ are decidable:
 non-consequence reduces to a counterexample in
 $\{0, \tfrac{1}{2}, 1\}^{|\alpha|}$.
 LP and K$_3$ consequence are
 coNP-complete~\cite{priest2008,avron1991}; the bridge transfers
-this to positivity and certainty consequence on $[0,1]$.
+this complexity to positivity and certainty consequence.
 \end{corollary}
 
-\subsection{Structural Rules}
+The bridge also transfers the paraconsistency and paracompleteness
+properties that distinguish LP and K$_3$.
 
-All consequence relations satisfy the standard Tarskian structural
-rules --- reflexivity, monotonicity, and cut --- because they
-quantify over all assignments; adding premises restricts the set of
-admissible valuations
-(Lean: \texttt{formulaLP\_reflexivity/monotonicity/cut},
-\texttt{formulaK3\_reflexivity/monotonicity/cut},
-\texttt{formulaPositivity\_reflexivity/monotonicity/cut},
-\texttt{formulaCertainty\_reflexivity/monotonicity/cut}).
-
-\subsection{Explosion Failure}
-\label{sec:explosion}
-
-\begin{example}[Explosion Failure via the Bridge]
+\begin{example}[Explosion Failure]
 \label{ex:explosion}
-Set $\cred(\text{rain}) = \tfrac{1}{2}$ (maximum uncertainty)
-and $\cred(\text{snow}) = 0$.
-The positivity witness:
-$v(\text{rain}) = \tfrac{1}{2} > 0$ and
-$\negc v(\text{rain}) = \tfrac{1}{2} > 0$, but
-$v(\text{snow}) = 0$.
-Contradictory evidence about rain does not force belief in snow.
+Set $\cred(\text{rain}) = \tfrac{1}{2}$ and
+$\cred(\text{snow}) = 0$.
+Both $\text{rain}$ and $\negc\text{rain}$ are positive
+($\tfrac{1}{2} > 0$ and $\negc\tfrac{1}{2} = \tfrac{1}{2} > 0$),
+but $\cred(\text{snow}) = 0$ --- contradictory evidence about rain
+does not force belief in snow.
 Via the bridge, the LP counterexample
 $w(\text{rain}) = \tfrac{1}{2}$, $w(\text{snow}) = 0$ refutes
 $\text{rain}, \negc\text{rain} \models_{\mathrm{LP}} \text{snow}$
 (Lean: \texttt{lp\_no\_explosion}).
 \end{example}
 
-The bridge covers negation, conjunction, and disjunction.
+\begin{example}[No Tautologies under K$_3$]
+\label{ex:no-tautologies}
+K$_3$ has no tautologies: the constant-$\tfrac{1}{2}$ valuation
+makes every formula non-designated (since $\tfrac{1}{2} \notin
+\{1\}$).
+Via the bridge, certainty consequence on $[0,1]$ has no tautologies
+either
+(Lean: \texttt{k3\_no\_tautology}).
+\end{example}
+
+\subsection{Transition}
+\label{sec:transition}
+
+The bridge covers negation, conjunction, and disjunction --- the
+propositional connectives of the product De Morgan triplet.
 Does it extend to conditioning?
 
 %=============================================================================
@@ -409,27 +1396,29 @@ Does it extend to conditioning?
 
 The propositional bridge transfers consequence between $[0,1]$ and
 $\{0, \tfrac{1}{2}, 1\}$ for formulas built from connectives.
-This section asks whether the same transfer works for conditioning:
-does $\mathrm{collapse}(\min(a,b)/b)$ equal a function of
-$\mathrm{collapse}(a)$ and $\mathrm{collapse}(b)$?
+This section asks whether the same transfer works for conditioning.
+The answer is no: no truth-functional conditional bridge exists.
+We characterize exactly when the bridge holds (at boundaries) and
+when it fails (everywhere else), and connect the failure to the
+role of dependence information lost by the collapse.
 
 \subsection{Min-Copula Conditioning on $[0,1]$ vs.\
 $\{0, \tfrac{1}{2}, 1\}$}
+\label{sec:min-copula-cond}
 
 Under the min copula, the conditional for $b > 0$ is
 $\min(a,b)/b$.
-On the Kleene lattice, the G\"odel implication (which coincides
-with the product-residuated implication;
-Lean: \texttt{godel\_impl\_eq\_prod\_resid}) is the natural
-candidate for a three-valued conditional.
-
-Three conditioning tables side by side, on
-$\{0, \tfrac{1}{2}, 1\}$:
+On the Kleene lattice, the natural candidate for a three-valued
+conditional is the G\"odel implication, which coincides with the
+product-residuated implication on $\{0, \tfrac{1}{2}, 1\}$
+(Lean: \texttt{godel\_impl\_eq\_prod\_resid}).
+Three conditioning tables, side by side:
 
 \begin{center}
 \small
 \begin{tabular}{r|ccc}
-\multicolumn{4}{c}{\textbf{Kleene material}\textsuperscript{1}: $\max(\negc e, p)$} \\
+\multicolumn{4}{c}{\textbf{Kleene material}\textsuperscript{1}:
+  $\max(\negc e, p)$} \\
 $e \!\downarrow\;\; p$ & 0 & $\tfrac{1}{2}$ & 1 \\
 \hline
 0 & 1 & 1 & 1 \\
@@ -438,7 +1427,8 @@ $\tfrac{1}{2}$ & $\tfrac{1}{2}$ & $\tfrac{1}{2}$ & 1 \\
 \end{tabular}
 \quad
 \begin{tabular}{r|ccc}
-\multicolumn{4}{c}{\textbf{Prod.\ resid.}\textsuperscript{2}: $\min(p/e, 1)$} \\
+\multicolumn{4}{c}{\textbf{Prod.\ resid.}\textsuperscript{2}:
+  $\min(p/e, 1)$} \\
 $e \!\downarrow\;\; p$ & 0 & $\tfrac{1}{2}$ & 1 \\
 \hline
 0 & 1 & 1 & 1 \\
@@ -447,7 +1437,7 @@ $\tfrac{1}{2}$ & 0 & 1 & 1 \\
 \end{tabular}
 \quad
 \begin{tabular}{r|ccc}
-\multicolumn{4}{c}{\textbf{Chain-rule with min-copula joint}} \\
+\multicolumn{4}{c}{\textbf{Chain-rule (min-copula)}} \\
 $e \!\downarrow\;\; p$ & 0 & $\tfrac{1}{2}$ & 1 \\
 \hline
 0 & $*$ & $*$ & $*$ \\
@@ -465,10 +1455,10 @@ LP~\cite{asenjo1966,priest1979}, RM3~\cite{anderson1975}.
 \textsuperscript{2}Coincides with G\"odel on $\{0, \tfrac{1}{2}, 1\}$
 (Lean: \texttt{godel\_impl\_eq\_prod\_resid}).}
 
-\begin{example}[Running Example: Bridge Failure]
+\begin{example}[Bridge Failure]
 \label{ex:bridge-failure}
 $\cred(\text{rain}) = 0.8$, $\cred(\text{wet}) = 0.9$.
-The min-copula conditional:
+Min-copula conditional:
 $\cred(\text{rain} \mid \text{wet})
 = \min(0.8, 0.9)/0.9 = 8/9 \approx 0.889$.
 Collapsing: $\mathrm{collapse}(8/9) = \tfrac{1}{2}$ (interior value).
@@ -480,8 +1470,9 @@ The two paths disagree: $\tfrac{1}{2} \neq 1$.
 \end{example}
 
 \subsection{Impossibility Theorem}
+\label{sec:impossibility-thm}
 
-\begin{theorem}[No Truth-Functional Conditional Bridge; new]
+\begin{theorem}[No Truth-Functional Conditional Bridge]
 \label{thm:no-cond-bridge}
 There is no function
 $f : \{0, \tfrac{1}{2}, 1\}^2 \to \{0, \tfrac{1}{2}, 1\}$
@@ -491,8 +1482,6 @@ satisfying
 = f(\mathrm{collapse}(b),\, \mathrm{collapse}(a))
 \]
 for all $a, b \in [0,1]$ with $b > 0$.
-
-\smallskip\noindent
 Lean: \texttt{no\_truthfunctional\_cond\_bridge}.
 \end{theorem}
 
@@ -500,15 +1489,15 @@ Lean: \texttt{no\_truthfunctional\_cond\_bridge}.
 Two witnesses force contradictory values for
 $f(\tfrac{1}{2}, \tfrac{1}{2})$.
 
-\emph{Witness 1:}
+\emph{Witness~1:}
 $a = 0.3$, $b = 0.7$.
 Both are interior, so
 $\mathrm{collapse}(a) = \mathrm{collapse}(b) = \tfrac{1}{2}$.
-The conditional is $\min(0.3, 0.7)/0.7 = 0.3/0.7 = 3/7 \in (0,1)$,
+The conditional is $\min(0.3, 0.7)/0.7 = 3/7 \in (0,1)$,
 so $\mathrm{collapse}(3/7) = \tfrac{1}{2}$.
 This forces $f(\tfrac{1}{2}, \tfrac{1}{2}) = \tfrac{1}{2}$.
 
-\emph{Witness 2:}
+\emph{Witness~2:}
 $a = 0.7$, $b = 0.3$.
 Again $\mathrm{collapse}(a) = \mathrm{collapse}(b) = \tfrac{1}{2}$.
 The conditional is $\min(0.7, 0.3)/0.3 = 0.3/0.3 = 1$,
@@ -518,34 +1507,33 @@ This forces $f(\tfrac{1}{2}, \tfrac{1}{2}) = 1$.
 Contradiction: $\tfrac{1}{2} \neq 1$.
 \end{proof}
 
-\begin{remark}[Constructive Lewis triviality]
+\begin{remark}[Constructive Lewis Triviality]
 \label{rem:lewis}
 Lewis~\cite{lewis1976} showed that identifying $P(A \mid B)$ with
-the probability of a conditional proposition $A \to B$ in the same
-algebra forces the probability measure to be trivial.
+the probability of a conditional proposition forces the probability
+measure to be trivial.
 Theorem~\ref{thm:no-cond-bridge} is a different kind of triviality:
 it shows the collapse homomorphism, which faithfully preserves
 connectives, \emph{cannot} extend to conditioning.
-The obstacle is not that conditionals are propositions (they are not,
-in our framework), but that the collapsed values lose the information
-needed to determine the conditional.
-Two pairs $(a, b)$ with the same collapsed image can have different
-conditional values because $\min(a,b)/b$ depends on the ratio, not
-the collapsed class.
+The obstacle is not that conditionals are propositions (they are not
+in our framework), but that the collapsed values lose the ratio
+information needed to determine the conditional.
+Two pairs $(a, b)$ with the same collapsed image can produce
+different conditional values because $\min(a,b)/b$ depends on the
+ratio, not the collapsed class.
 Lewis requires measure-theoretic machinery; our result is finitary
 (two explicit witnesses).
-See Halpern~\cite{halpern2003} for a detailed analysis of Lewis's
-conditions;
-Adams~\cite{adams1975} for a probabilistic logic of conditionals
-that avoids Lewis's assumptions differently.
+See Halpern~\cite{halpern2003} for Lewis's conditions;
+Adams~\cite{adams1975} for a probabilistic conditional logic that
+avoids Lewis's assumptions differently.
 \end{remark}
 
-\subsection{Characterization: When the Bridge Works}
+\subsection{Boundary Characterization}
+\label{sec:boundary}
 
-Although the conditional bridge fails in general, it holds at the
-boundaries.
+The conditional bridge fails in general but holds at the boundaries.
 
-\begin{theorem}[Boundary Characterization; new]
+\begin{theorem}[Boundary Characterization]
 \label{thm:boundary}
 For $a, b \in [0,1]$ with $b > 0$:
 \[
@@ -560,10 +1548,7 @@ whenever at least one of the following holds:
 \item $b = 1$ (evidence certain),
 \item $a \geq b$ (conclusion at least as credible as evidence).
 \end{enumerate}
-In all four cases, the min-copula conditional is either $0$ or $1$
-(a boundary value).
-
-\smallskip\noindent
+In all four cases, the min-copula conditional is either $0$ or $1$.
 Lean: \texttt{cond\_bridge\_boundary},
 \texttt{cond\_bridge\_at\_a\_zero},
 \texttt{cond\_bridge\_at\_a\_one},
@@ -572,51 +1557,39 @@ Lean: \texttt{cond\_bridge\_boundary},
 \end{theorem}
 
 \begin{proof}
-Case analysis.
-(i)~$a = 0$: $\min(0,b)/b = 0$; $\mathrm{collapse}(0) = 0$;
-$\mathrm{g\ddot{o}del}(\mathrm{collapse}(b), 0) = 0$ for
-$b > 0$.
+(i)~$a = 0$: $\min(0,b)/b = 0$;
+$\mathrm{g\ddot{o}del}(\mathrm{collapse}(b), 0) = 0$ for $b > 0$.
 (ii)~$a = 1$: $\min(1,b)/b = b/b = 1$;
-$\mathrm{g\ddot{o}del}(\mathrm{collapse}(b), 1) = 1$ for all
-$b$.
+$\mathrm{g\ddot{o}del}(\mathrm{collapse}(b), 1) = 1$.
 (iii)~$b = 1$: $\min(a,1)/1 = a$; collapsing commutes trivially.
-(iv)~$a \geq b$: $\min(a,b)/b = b/b = 1$;
-$\mathrm{collapse}(1) = 1$; and
+(iv)~$a \geq b$: $\min(a,b)/b = b/b = 1$; and
 $\mathrm{g\ddot{o}del}(\mathrm{collapse}(b),
 \mathrm{collapse}(a)) = 1$ when $a \geq b > 0$.
 \end{proof}
 
-\begin{example}[Running Example: When the Bridge Works]
+\begin{example}[When the Bridge Works]
 \label{ex:bridge-works}
-If $\cred(\text{rain}) = 0.95 > 0.9 = \cred(\text{wet})$, then
-$\min(0.95, 0.9)/0.9 = 1$ (case (iv): $a \geq b$).
-$\mathrm{collapse}(1) = 1 =
-\mathrm{g\ddot{o}del}(\tfrac{1}{2}, \tfrac{1}{2})$?
-No: $\mathrm{g\ddot{o}del}(\tfrac{1}{2}, \tfrac{1}{2}) = 1$,
-so in this case the bridge does hold.
-The boundary condition is that one path or the other forces a
-boundary conditional.
+If $\cred(\text{rain}) = 0.95 > 0.9 = \cred(\text{wet})$
+(case~(iv): $a \geq b$), then
+$\min(0.95, 0.9)/0.9 = 0.9/0.9 = 1$.
+Collapsing: $\mathrm{collapse}(1) = 1$.
+G\"odel: $\mathrm{g\ddot{o}del}(\tfrac{1}{2}, \tfrac{1}{2}) = 1$.
+Both paths agree.
+The boundary condition forces a boundary conditional, and at
+boundaries the collapse preserves everything.
 \end{example}
 
 \subsection{Interior Failure}
+\label{sec:interior-fail}
 
-The bridge fails precisely when both $a$ and $b$ are interior and
-$a < b$.
+The bridge fails precisely when the conditional is interior ---
+that is, when both $a$ and $b$ are interior and $a < b$.
 
-\begin{theorem}[Interior Bridge Failure; new]
+\begin{theorem}[Interior Bridge Failure]
 \label{thm:interior-fail}
-There exist $a, b \in (0,1)$ with $a < b$ such that
-\[
-\mathrm{collapse}\!\left(\frac{\min(a,b)}{b}\right)
-\neq \mathrm{g\ddot{o}del}(\mathrm{collapse}(b),\,
-\mathrm{collapse}(a)).
-\]
-More precisely: for any interior $a, b$ with $0 < a < b < 1$, the
-conditional $a/b$ is interior (strictly between $0$ and $1$), so
-$\mathrm{collapse}(a/b) = \tfrac{1}{2}$; but
+For any $a, b \in (0,1)$ with $a < b$, the conditional bridge fails:
+$a/b \in (0,1)$, so $\mathrm{collapse}(a/b) = \tfrac{1}{2}$, but
 $\mathrm{g\ddot{o}del}(\tfrac{1}{2}, \tfrac{1}{2}) = 1$.
-
-\smallskip\noindent
 Lean: \texttt{cond\_bridge\_fails\_interior},
 \texttt{minCopulaCond\_interior}.
 \end{theorem}
@@ -625,73 +1598,68 @@ Lean: \texttt{cond\_bridge\_fails\_interior},
 When $0 < a < b < 1$: $\min(a,b)/b = a/b$.
 Since $0 < a < b$, we have $0 < a/b < 1$, so
 $\mathrm{collapse}(a/b) = \tfrac{1}{2}$.
-Since $0 < a < 1$ and $0 < b < 1$, both collapse to
-$\tfrac{1}{2}$, and
-$\mathrm{g\ddot{o}del}(\tfrac{1}{2}, \tfrac{1}{2}) = 1
-\neq \tfrac{1}{2}$.
-The witness $a = 3/10$, $b = 7/10$ makes this concrete.
+Since $0 < a < 1$ and $0 < b < 1$, both collapse to $\tfrac{1}{2}$,
+and $\mathrm{g\ddot{o}del}(\tfrac{1}{2}, \tfrac{1}{2})
+= 1 \neq \tfrac{1}{2}$.
 \end{proof}
 
 The failure is systematic, not accidental.
 Whenever both the conclusion and evidence are uncertain (interior)
 and the conclusion is less credible than the evidence, the
 min-copula conditional is interior; but the G\"odel conditional on
-$\{0, \tfrac{1}{2}, 1\}$ maps $(\tfrac{1}{2}, \tfrac{1}{2})$ to $1$
-(certainty), losing the distinction between ``partially supports''
-and ``fully supports.''
+$\{0, \tfrac{1}{2}, 1\}$ maps $(\tfrac{1}{2}, \tfrac{1}{2})$ to
+$1$ (certainty), losing the distinction between ``partially
+supports'' and ``fully supports.''
 
 \subsection{Path Dependence}
 \label{sec:path-dep}
 
 The impossibility theorem has a topological manifestation.
-Under the min copula, the conditional $\min(a,b)/b$ as $b \to 0$ is
-path-dependent: the limit depends on \emph{how} $a$ and $b$ approach
-zero together.
-
-\begin{figure}[ht]
-\centering
-\includegraphics[width=\textwidth]{figures/path_dependence}
-\caption{Path dependence at evidence zero.
-\textbf{Left:} $\min(a,b)/b$ near the origin; value depends on angle
-$\theta$, not radius $r$.
-\textbf{Right:} Limit as $r \to 0$: $1$ for $\theta \leq \pi/4$
-(since $a \geq b$ gives $\min(a,b)/b = 1$),
-$\cot\theta$ for $\theta > \pi/4$.
-The singularity is essential, not removable.}
-\label{fig:path-dependence}
-\end{figure}
-
+Under the min copula, $\min(a,b)/b$ as $(a,b) \to (0,0)$ is
+path-dependent: the limit depends on the direction of approach.
 \begin{itemize}[nosep]
 \item Fixed $a > 0$, $b \to 0$: limit $= 1$.
 \item $a = \lambda b$, $\lambda \in (0,1]$: limit $= \lambda$.
 \item $a = b^\alpha$, $\alpha > 1$: limit $= 0$.
 \end{itemize}
-Every value in $[0,1]$ is achieved (Part~1; Lean:
-\texttt{path\_dep\_fixed\_a},
+Every value in $[0,1]$ is achieved
+(Lean: \texttt{path\_dep\_fixed\_a},
 \texttt{path\_dep\_proportional},
 \texttt{path\_dep\_square},
 \texttt{path\_any\_positive\_value}).
-The essential singularity at the origin means the collapse, which
-maps all of $(0,1)$ to $\tfrac{1}{2}$, cannot capture the
-approach-direction information that determines the conditional.
+The function $\min(a,b)/b$ has an essential singularity at the origin:
+the conditional value depends on the angle of approach, not the
+distance.
+The collapse, which maps all of $(0,1)$ to $\tfrac{1}{2}$, cannot
+capture this directional information.
+The singularity is essential, not removable --- no continuous
+extension to the origin exists.
 
 \subsection{The Role of Dependence}
+\label{sec:dependence}
 
-The min copula is only one joint; what about others?
+The min copula represents maximum positive dependence.
+What happens under other dependence structures?
 
-Under the \emph{independence copula} ($\cred(A \land B) = a \cdot b$),
-the conditional is $a \cdot b / b = a$ --- it does not depend on the
-evidence at all.
+Under the \emph{independence copula}
+($\cred(A \land B) = a \cdot b$), the conditional is
+$a \cdot b / b = a$ --- it does not depend on the evidence at all.
 The bridge trivially holds (collapsing $a$ gives the same answer
-either way), but the conditional is uninformative.
+either way), but the conditional is uninformative: learning $B$
+does not change your credence in $A$.
 
-For collapse($a$) = collapse($b$) = $\tfrac{1}{2}$ (both interior),
-the set of min-copula conditionals is $(0, 1]$ --- maximally
-underdetermined by the collapsed values
+For $\mathrm{collapse}(a) = \mathrm{collapse}(b) = \tfrac{1}{2}$
+(both interior), the set of min-copula conditionals is $(0, 1]$ ---
+maximally underdetermined by the collapsed values
 (Lean: \texttt{interior\_cond\_range}).
 This is the precise sense in which the collapse loses too much
-information: interior credences collapse to a single value, but
+information: interior credences are unified into a single class, but
 their ratios span almost the entire unit interval.
+The collapse preserves the qualitative status (possible, impossible,
+certain) but discards the quantitative relationships that
+conditioning requires.
+
+% === END OF MIDDLE === (sections 7-9 + appendices will follow)
 
 %=============================================================================
 \section{Update Through the Bridge}
@@ -705,17 +1673,17 @@ $\{0, \tfrac{1}{2}, 1\}$, and connects zero-evidence behavior
 across the probabilistic and logical perspectives.
 
 \subsection{Bayesian Update on $[0,1]$}
+\label{sec:bayesian}
 
-\begin{definition}[Bayesian Update; Part~1]
-\label{def:bayesian}
-Given a joint credence $\cred(A \land B)$ and evidence $\cred(B) > 0$,
-the Bayesian posterior is
+As defined in Section~\ref{sec:conditioning}, the chain rule
+$\condc{A}{B} \conjc \cred(B) = \cred(A \land B)$
+determines the conditional uniquely when $\cred(B) > 0$.
+The Bayesian posterior is this unique value:
 $\cred'(A) = \cred(A \land B) / \cred(B)$.
-This satisfies the chain rule by construction:
-$\cred'(A) \conjc \cred(B) = \cred(A \land B)$.
-Lean: \texttt{bayesianUpdate\_chain\_rule},
-\texttt{bayesianUpdate\_unique}.
-\end{definition}
+It satisfies the chain rule by construction:
+$\cred'(A) \conjc \cred(B) = \cred(A \land B)$
+(Lean: \texttt{bayesianUpdate\_chain\_rule},
+\texttt{bayesianUpdate\_unique}).
 
 \begin{example}[Running Example: Bayesian Update]
 \label{ex:bayesian}
@@ -729,7 +1697,7 @@ correlated) makes it slightly more likely, but not certain.
 
 \subsection{Qualitative Update on $\{0, \tfrac{1}{2}, 1\}$}
 
-\begin{definition}[Qualitative Update; new]
+\begin{definition}[Qualitative Update]
 \label{def:qual-update}
 For $e, p \in \{0, \tfrac{1}{2}, 1\}$, the \emph{qualitative
 update} is $\mathrm{qual}(e, p) = \mathrm{g\ddot{o}del}(e, p)$:
@@ -756,17 +1724,19 @@ Lean: \texttt{qualUpdate\_zero\_zero} through
 \texttt{qualUpdate\_one\_one}.
 
 The table has a natural reading.
-Certain evidence ($e = 1$) preserves the prior.
+Certain evidence ($e = 1$) preserves the prior: what you believed
+stays as it was.
 Intermediate evidence ($e = \tfrac{1}{2}$) maps uncertain
-conclusions to certainty (the G\"odel conditional's ``benefit of
-the doubt'' for compatible evidence).
-Zero evidence ($e = 0$) maps everything to $1$ --- the ex falso
+conclusions to certainty --- the G\"odel conditional's ``benefit of
+the doubt'' for compatible evidence --- while mapping impossibility
+($p = 0$) to impossibility.
+Zero evidence ($e = 0$) maps everything to $1$: this is the ex falso
 row of the G\"odel conditional, which the chain rule avoids by
 leaving the conditional unconstrained.
 
 \subsection{Update Bridge Theorem}
 
-\begin{theorem}[Update Bridge; new]
+\begin{theorem}[Update Bridge]
 \label{thm:update-bridge}
 Under boundary conditions (Theorem~\ref{thm:boundary}), collapsing
 after min-copula conditioning equals qualitative update after
@@ -791,7 +1761,7 @@ boundary characterization gives.
 
 \begin{example}[Running Example: Update Bridge]
 \label{ex:update-bridge}
-Case (iv) from Theorem~\ref{thm:boundary}: suppose instead that
+Case (iv) from Theorem~\ref{thm:boundary}: suppose
 $\cred(\text{rain}) = 0.95 > 0.9 = \cred(\text{wet})$.
 Then $\min(0.95, 0.9)/0.9 = 1$.
 On the left:
@@ -834,7 +1804,7 @@ Jeffrey bridge fails.
 The algebraic fact $c \cdot 0 = 0$ for all $c \in [0,1]$ is the
 common root of three phenomena.
 
-\begin{theorem}[Zero-Evidence Duality; new]
+\begin{theorem}[Zero-Evidence Duality]
 \label{thm:zero-duality}
 The following three statements are simultaneously consequences of
 the identity $c \conjc 0 = 0$:
@@ -914,52 +1884,178 @@ $^b$The witness $v(A) = \tfrac{1}{2}$, $v(B) = 0$ refutes explosion
 Lean: \texttt{lp\_no\_explosion}).}
 
 %=============================================================================
+\section{Graded Consequence}
+\label{sec:graded}
+%=============================================================================
+
+Graded consequence on $[0,1]$ generalizes the discrete consequence
+relations to a continuous threshold parameter
+$t \in (0,1]$: the premises $\Gamma$ entail conclusion $\varphi$ at
+threshold $t$ when every valuation $v$ making all premises satisfy
+$v(p) \geq t$ also satisfies $v(\varphi) \geq t$
+(Lean: \texttt{gradedConsequence}).
+At $t = 1$ this recovers certainty consequence; the bridge theorem
+(Theorem~\ref{thm:k3-bridge}) identifies it with K$_3$
+consequence.
+
+\subsection{Graded No-Explosion}
+
+\begin{theorem}[Sharp No-Explosion Threshold]
+\label{thm:graded-no-explosion}
+For $0 < t \leq \tfrac{1}{2}$:
+graded consequence is explosion-free.
+The witness $v(A) = \tfrac{1}{2}$, $v(B) = 0$ satisfies
+$v(A) \geq t$ and $\negc v(A) = \tfrac{1}{2} \geq t$, but
+$v(B) = 0 < t$.
+
+For $t > \tfrac{1}{2}$:
+explosion holds \emph{vacuously}.
+The premises $v(A) \geq t$ and $\negc v(A) = 1 - v(A) \geq t$
+together require $v(A) + (1 - v(A)) \geq 2t > 1$, but
+$v(A) + (1 - v(A)) = 1$.
+No valuation satisfies both premises, so explosion holds by
+empty quantification.
+
+The threshold $\tfrac{1}{2}$ is sharp: below it, the witness
+$v(A) = \tfrac{1}{2}$ defeats explosion; at and above it, the
+premises become unsatisfiable.
+
+\smallskip\noindent
+Lean: \texttt{graded\_no\_explosion},
+\texttt{graded\_explosion\_vacuous}.
+\end{theorem}
+
+\begin{proof}
+See Appendix~\ref{app:proofs} for the full argument.
+\end{proof}
+
+\subsection{Graded Excluded Middle}
+
+The disjunction $A \disjc \negc A$ on $[0,1]$ evaluates to
+$v(A) + (1 - v(A)) - v(A)(1 - v(A)) = 1 - v(A)(1-v(A))$.
+This achieves its minimum $\tfrac{3}{4}$ at $v(A) = \tfrac{1}{2}$
+(Lean: \texttt{certainty\_half},
+\texttt{certainty\_ge\_three\_quarters}).
+Excluded middle as a graded tautology therefore holds for
+$t \leq \tfrac{3}{4}$ and fails for $t > \tfrac{3}{4}$.
+
+\begin{center}
+\small
+\begin{tabular}{lcccc}
+\toprule
+\textbf{System} & \textbf{Designated} & \textbf{Tautologies?}
+  & \textbf{Excl.\ middle?} & \textbf{Explosion?} \\
+\midrule
+Graded ($t \leq \tfrac{1}{2}$) & $\{c \geq t\}$
+  & Some$^c$ & Yes$^c$ & No \\
+Graded ($\tfrac{1}{2} < t \leq \tfrac{3}{4}$) & $\{c \geq t\}$
+  & Some$^c$ & Yes$^c$ & Vacuously$^b$ \\
+Graded ($t > \tfrac{3}{4}$) & $\{c \geq t\}$
+  & No & No & Vacuously$^b$ \\
+\bottomrule
+\end{tabular}
+\normalsize
+\end{center}
+\smallskip
+\noindent
+{\footnotesize
+$^b$Premises jointly unsatisfiable for $t > \tfrac{1}{2}$.
+$^c$Excluded middle holds for $t \leq \tfrac{3}{4}$, since
+$A \disjc \negc A$ achieves minimum $\tfrac{3}{4}$.}
+
+%=============================================================================
 \section{Conclusion}
 \label{sec:conclusion}
 %=============================================================================
 
-Part~1 showed that the product De Morgan triplet on $[0,1]$
-collapses to the Kleene lattice via a surjective homomorphism,
-and that LP/K$_3$ consequence is equivalent to
-positivity/certainty consequence at the formula level.
-This paper asked whether the bridge extends to conditioning.
+The product De Morgan triplet on $[0,1]$ --- product conjunction,
+probabilistic-sum disjunction, standard complement --- admits a
+natural collapse to the Kleene lattice
+$\{0, \tfrac{1}{2}, 1\}$ via a surjective homomorphism.
+The paper develops two main threads.
 
-\textbf{The answer is no, in general.}
-No truth-functional function on $\{0, \tfrac{1}{2}, 1\}$ can
-serve as a conditional bridge
-(Theorem~\ref{thm:no-cond-bridge}).
-The impossibility is witnessed by two explicit pairs of interior
-credences --- a constructive Lewis triviality for the product
-De Morgan triplet.
-The bridge holds exactly at boundaries: when the evidence is
-certain, the conclusion is impossible or certain, or the conclusion
-is at least as credible as the evidence
-(Theorem~\ref{thm:boundary}).
-Bayesian update inherits the bridge under these conditions
-(Theorem~\ref{thm:update-bridge}).
+\textbf{Thread 1: Properties of the triplet and its collapse}
+(independent of conditioning).
+\begin{enumerate}[nosep]
+\item The bridge theorem: LP consequence on
+  $\{0, \tfrac{1}{2}, 1\}$ is equivalent to positivity consequence
+  on $[0,1]$; K$_3$ consequence is equivalent to certainty
+  consequence
+  (Theorems~\ref{thm:lp-bridge}
+  and~\ref{thm:k3-bridge}).
+\item The algebraic fixed points $\{0, \tfrac{1}{2}, 1\}$ are
+  derived from the algebra: $\tfrac{1}{2}$ is the unique
+  negation fixed point; $0$ and $1$ are the unique conjunction
+  absorber and identity.
+\item The Kleene collapse is the unique three-element quotient
+  preserving negation and conjunction.
+\item The congruence classification: under $[0,1]$-multiplication,
+  the Kleene lattice exists and is the unique three-element
+  quotient; under $\Real$-multiplication, no non-trivial finite
+  quotient exists at all (Appendix~\ref{app:proofs}).
+\item Graded consequence exhibits a sharp no-explosion threshold
+  at $\tfrac{1}{2}$
+  (Theorem~\ref{thm:graded-no-explosion}).
+\end{enumerate}
+
+\textbf{Thread 2: Conditioning} (the paper's main contributions).
+\begin{enumerate}[nosep,start=6]
+\item The conditional bridge impossibility: no truth-functional
+  function on $\{0, \tfrac{1}{2}, 1\}$ can serve as a conditional
+  bridge (Theorem~\ref{thm:no-cond-bridge}).
+  This is a constructive Lewis triviality for the product De Morgan
+  triplet, witnessed by two explicit pairs.
+\item The boundary characterization: the bridge holds exactly when
+  evidence is certain, conclusion is impossible or certain, or
+  conclusion is at least as credible as evidence
+  (Theorem~\ref{thm:boundary}).
+\item The update bridge: Bayesian update inherits the conditional
+  bridge under boundary conditions
+  (Theorem~\ref{thm:update-bridge}).
+\item Zero-evidence duality: the algebraic fact $c \cdot 0 = 0$
+  simultaneously forces underdetermined posteriors,
+  LP explosion failure, and conditional bridge failure
+  (Theorem~\ref{thm:zero-duality}).
+\end{enumerate}
 
 \textbf{The common root is $c \cdot 0 = 0$.}
-The algebraic identity that makes zero an annihilator for the
-product simultaneously forces underdetermined posteriors at zero
-evidence, provides the witness for LP explosion failure, and causes
-the conditional bridge to break
-(Theorem~\ref{thm:zero-duality}).
-The propositional bridge operates on the connectives
-$(\negc, \conjc, \disjc)$, which are preserved by the collapse.
-The conditional bridge fails because conditioning depends on ratios,
-and the collapse discards ratio information.
+The identity that makes zero an annihilator for the product
+simultaneously provides the paraconsistency witness
+($v(A) = \tfrac{1}{2}$ satisfies both $v(A) > 0$ and
+$\negc v(A) > 0$ without constraining $v(B)$),
+the vacuous posterior (any $c \in [0,1]$ satisfies
+$c \cdot 0 = 0$), and the bridge failure (collapse maps
+all of $(0,1)$ to $\tfrac{1}{2}$, discarding the ratio
+information that determines the conditional).
 
-\textbf{Graded consequence.}
-Graded consequence on $[0,1]$ with threshold $t$ exhibits a sharp
-no-explosion threshold at $\tfrac{1}{2}$: for $t \leq \tfrac{1}{2}$,
-the witness $v(A) = \tfrac{1}{2}$ defeats explosion; for
-$t > \tfrac{1}{2}$, explosion holds vacuously (the premises are
-unsatisfiable)
-(Lean: \texttt{graded\_no\_explosion},
-\texttt{graded\_explosion\_vacuous}).
+\textbf{Relationship to Product Logic.}
+The product De Morgan triplet shares the t-norm with
+H\'ajek's Product Logic~\cite{hajek1998} but replaces residuation
+with chain-rule conditioning.
+This single substitution has three consequences.
+First, it removes ex falso: residuation forces $0 \to b = 1$ for
+all $b$, while the chain rule leaves $\cred(A \mid 0)$
+unconstrained.
+Second, it enables the Kleene quotient: the product BL-algebra is
+simple (no non-trivial congruences~\cite{agliano2003}), but
+dropping residuation in favor of the involutive complement admits
+the Kleene partition.
+Third, it opens the bridge to three-valued logic: the collapse
+homomorphism recovers K$_3$/LP consequence via the bridge theorem.
+The cost is giving up truth-functionality of the conditional ---
+a cost that the impossibility theorem
+(Theorem~\ref{thm:no-cond-bridge}) shows is unavoidable.
 
 \textbf{Open problems.}
 \begin{enumerate}[nosep]
+\item \textbf{Four or more classes under $[0,1]$-multiplication.}
+  The Kleene lattice is the unique three-element quotient, but
+  whether four or more classes are possible under
+  $[0,1]$-multiplication remains open.
+  Any such quotient faces strong constraints: boundary classes
+  $\{0\}$ and $\{1\}$ must be singletons, and each interior class
+  must be dense near $0$ (since multiplication can shrink any
+  element arbitrarily close to $0$).
 \item \textbf{Non-truth-functional conditional bridge.}
   A conditional bridge with an explicit dependence indicator
   (e.g., a function
@@ -997,7 +2093,7 @@ Omitted for blind review.
 \bibliography{../cred}
 
 %=============================================================================
-% APPENDIX
+% APPENDICES
 %=============================================================================
 \appendix
 
@@ -1006,29 +2102,27 @@ Omitted for blind review.
 \label{app:prelim}
 %=============================================================================
 
-This appendix collects standard definitions; see Part~1 for full
-treatment.
+This appendix collects standard definitions used throughout the paper.
 
 \textbf{T-norms.}
-A \emph{t-norm} is a binary operation
+A \emph{triangular norm} (t-norm) is a binary operation
 $T : [0,1]^2 \to [0,1]$ that is commutative, associative,
 monotone, and satisfies $T(a, 1) = a$ for all
 $a$~\cite{klement2000}.
-The three basic continuous t-norms are product ($a \cdot b$),
-G\"odel ($\min(a,b)$), and \L ukasiewicz ($\max(a+b-1, 0)$).
+The three basic continuous t-norms are:
+product ($a \cdot b$),
+G\"odel ($\min(a,b)$), and
+\L ukasiewicz ($\max(a+b-1, 0)$).
 
 \textbf{Copulas.}
-A copula $C : [0,1]^2 \to [0,1]$ satisfies: grounded
-($C(a,0) = C(0,b) = 0$), unit marginals ($C(a,1) = a$, $C(1,b) = b$),
-and 2-increasing~\cite{nelsen2006}.
+A \emph{copula} is $C : [0,1]^2 \to [0,1]$ satisfying:
+grounded ($C(a,0) = C(0,b) = 0$), unit marginals
+($C(a,1) = a$, $C(1,b) = b$), and the 2-increasing
+property~\cite{nelsen2006}.
 The Fr\'echet-Hoeffding bounds apply:
 $\max(a+b-1, 0) \leq C(a,b) \leq \min(a,b)$.
-
-\textbf{Residuation.}
-Given a left-continuous t-norm $T$, the residuum is
-$a \to_T b = \sup\{c : T(a,c) \leq b\}$~\cite{hajek1998,galatos2007}.
-For the product: $a \to_P b = \min(b/a, 1)$ when $a > 0$, and
-$0 \to_P b = 1$ (ex falso).
+Comonotonicity corresponds to the upper bound $C(a,b) = \min(a,b)$;
+independence to the product $C(a,b) = a \cdot b$.
 
 \textbf{Coherence.}
 De Finetti~\cite{definetti1937} introduced coherence: an assignment
@@ -1036,6 +2130,12 @@ is coherent if no finite combination of bets yields a sure loss.
 The chain rule
 $\cred(A \mid B) \cdot \cred(B) = \cred(A \land B)$
 is necessary for coherence~\cite{coletti2002,gilio2014}.
+
+\textbf{Residuation.}
+Given a left-continuous t-norm $T$, the \emph{residuum} is
+$a \to_T b = \sup\{c : T(a,c) \leq b\}$~\cite{hajek1998,galatos2007}.
+For the product: $a \to_P b = \min(b/a, 1)$ when $a > 0$, and
+$0 \to_P b = 1$ (ex falso).
 
 %=============================================================================
 \section{Lean Formalization}
@@ -1067,28 +2167,36 @@ Mathlib), totaling 3581 lines with zero \texttt{sorry}:
   zero-evidence duality (353 lines).
 \end{itemize}
 
-\textbf{Key definitions (this paper):}
+\textbf{Key definitions:}
 \begin{center}
 \small
 \begin{tabular}{ll}
 \toprule
 \textbf{Concept} & \textbf{Lean name} \\
 \midrule
+Credence value & \texttt{Cred.Credence} \\
+Conditioning structure & \texttt{Cred.Credence.Conditioning} \\
+Three-valued collapse & \texttt{Cred.Credence.collapse} \\
+Unit congruence & \texttt{Cred.UnitCongruence} \\
+Real congruence & \texttt{Cred.RealCongruence} \\
+Kleene congruence & \texttt{Cred.kleeneCongruence} \\
+Propositional formula & \texttt{Cred.Formula} \\
+Credence evaluation & \texttt{Cred.evalCred} \\
+Three-valued evaluation & \texttt{Cred.evalThreeVal} \\
 Min-copula conditional & \texttt{Cred.minCopulaCond} \\
 Qualitative update & \texttt{Cred.qualitativeUpdate} \\
 G\"odel implication & \texttt{Cred.ThreeVal.godel\_impl} \\
 Product-residuated implication & \texttt{Cred.ThreeVal.prod\_resid\_impl} \\
-Propositional formula & \texttt{Cred.Formula} \\
-Credence evaluation & \texttt{Cred.evalCred} \\
-Three-valued evaluation & \texttt{Cred.evalThreeVal} \\
 Bayesian update & \texttt{Cred.bayesianUpdate} \\
 Jeffrey update & \texttt{Cred.jeffreyUpdate} \\
+Positivity consequence & \texttt{Cred.positivityConsequence} \\
+Certainty consequence & \texttt{Cred.certaintyConsequence} \\
 \bottomrule
 \end{tabular}
 \normalsize
 \end{center}
 
-\textbf{Key theorems (this paper):}
+\textbf{Key theorems:}
 \begin{center}
 \small
 \begin{tabular}{ll}
@@ -1097,9 +2205,9 @@ Jeffrey update & \texttt{Cred.jeffreyUpdate} \\
 \midrule
 Collapse-eval commutativity (Prop.~\ref{prop:collapse-eval})
   & \texttt{collapse\_eval\_eq}, \texttt{lift\_eval\_eq} \\
-LP formula bridge (Thm.~\ref{thm:lp-formula-bridge})
+LP formula bridge (Thm.~\ref{thm:lp-bridge})
   & \texttt{lp\_formula\_bridge} \\
-K$_3$ formula bridge (Thm.~\ref{thm:k3-formula-bridge})
+K$_3$ formula bridge (Thm.~\ref{thm:k3-bridge})
   & \texttt{k3\_formula\_bridge} \\
 No cond.\ bridge (Thm.~\ref{thm:no-cond-bridge})
   & \texttt{no\_truthfunctional\_cond\_bridge} \\
@@ -1109,26 +2217,44 @@ Interior failure (Thm.~\ref{thm:interior-fail})
   & \texttt{cond\_bridge\_fails\_interior} \\
 Interior conditional range
   & \texttt{interior\_cond\_range} \\
-Qualitative update table
-  & \texttt{qualUpdate\_*} \\
+Qualitative update (Def.~\ref{def:qual-update})
+  & \texttt{qualitativeUpdate}, \texttt{qualUpdate\_*} \\
 Update bridge (Thm.~\ref{thm:update-bridge})
   & \texttt{update\_bridge} \\
 Zero-evidence duality (Thm.~\ref{thm:zero-duality})
   & \texttt{zero\_evidence\_duality} \\
-Bayesian update (Def.~\ref{def:bayesian})
-  & \texttt{bayesianUpdate\_chain\_rule/unique} \\
-Jeffrey update
-  & \texttt{jeffreyUpdate\_certain/zero} \\
+Bayesian update chain rule
+  & \texttt{bayesianUpdate\_chain\_rule} \\
+Bayesian update uniqueness
+  & \texttt{bayesianUpdate\_unique} \\
+Jeffrey at $q=1$, $q=0$
+  & \texttt{jeffreyUpdate\_certain}, \texttt{jeffreyUpdate\_zero} \\
 LP no explosion (Ex.~\ref{ex:explosion})
   & \texttt{lp\_no\_explosion} \\
 K$_3$ no tautology
   & \texttt{k3\_no\_tautology} \\
-Graded no-explosion
+Graded no-explosion (Thm.~\ref{thm:graded-no-explosion})
   & \texttt{graded\_no\_explosion} \\
 Graded explosion vacuous
   & \texttt{graded\_explosion\_vacuous} \\
+Excluded middle $\geq \tfrac{3}{4}$
+  & \texttt{certainty\_ge\_three\_quarters} \\
+Singleton boundaries
+  & \texttt{UnitCongruence.singleton\_zero/one} \\
+$\Real$-impossibility
+  & \texttt{RealCongruence.no\_nontrivial\_finite\_quotient} \\
+Kleene partition verified
+  & \texttt{kleeneCongruence}, \texttt{kleene\_nonTrivial} \\
+Three-element uniqueness
+  & \texttt{three\_element\_quotient\_unique} \\
 G\"odel $=$ prod.\ resid.
   & \texttt{godel\_impl\_eq\_prod\_resid} \\
+Path dependence
+  & \texttt{path\_dep\_fixed\_a/proportional/square} \\
+Conditioning at zero
+  & \texttt{conditioning\_zero\_any} \\
+Conditioning uniqueness
+  & \texttt{conditioning\_unique} \\
 \bottomrule
 \end{tabular}
 \normalsize
@@ -1136,5 +2262,111 @@ G\"odel $=$ prod.\ resid.
 
 Verification: \texttt{cd lean \&\& lake build}.
 Toolchain: Lean 4.16.0 with Mathlib 4.16.0.
+
+%=============================================================================
+\section{Deferred Proofs}
+\label{app:proofs}
+%=============================================================================
+
+\subsection{Congruence Classification}
+
+The congruence classification operates at two levels depending on the
+scope of the multiplication compatibility hypothesis.
+The full proof appears below; the Lean formalization is in
+\texttt{Cred/Congruence.lean}.
+
+\begin{proof}[Proof of Theorem~\ref{thm:congruence}
+(Unit Congruence Classification)]
+
+\emph{(1) Singleton boundaries.}
+Suppose $0 \sim \varepsilon$ for some $\varepsilon > 0$.
+Negation compatibility gives $1 \sim 1 - \varepsilon$.
+For any $x \in [0,1]$, multiplication compatibility applied to the
+pairs $(x, x)$ and $(1, 1 - \varepsilon)$ (all in $[0,1]$) gives
+\[
+x = x \cdot 1 \;\sim\; x(1 - \varepsilon).
+\]
+Iterating: $x \sim x(1-\varepsilon)^n$ for all $n \in \Nat$.
+Since $0 < 1 - \varepsilon < 1$, the sequence
+$(1-\varepsilon)^n \to 0$, so for sufficiently large $n$ we have
+$x(1-\varepsilon)^n \leq \varepsilon$.
+Write $x(1-\varepsilon)^n = \varepsilon \cdot q$ where
+$q = x(1-\varepsilon)^n / \varepsilon \in [0,1]$.
+From $0 \sim \varepsilon$, multiplication compatibility with
+$(q, q)$ gives
+$0 = 0 \cdot q \;\sim\; \varepsilon \cdot q = x(1-\varepsilon)^n$.
+Transitivity then gives $x \sim 0$ for all $x \in [0,1]$:
+the congruence is trivial, contradicting non-triviality.
+
+For the class $\{1\}$: if $1 \sim y$ with $y < 1$, then
+negation gives $0 \sim 1 - y$ with $1 - y > 0$, reducing to
+the previous case.
+
+\emph{(2) No two-element quotient.}
+Any negation-preserving map $\varphi : [0,1] \to \{0,1\}$ must
+satisfy $\varphi(\tfrac{1}{2}) = 1 - \varphi(\tfrac{1}{2})$, which
+has no solution in $\{0,1\}$.
+
+\emph{(3) Uniqueness at three elements.}
+Let $\varphi : [0,1] \to S$ with $|S| = 3$ be a surjective
+homomorphism preserving negation and conjunction.
+The element $\varphi(\tfrac{1}{2})$ must be the unique negation
+fixed point of $S$.
+The remaining elements $\varphi(0)$ and $\varphi(1)$ form the
+2-cycle under negation.
+The conjunction table is then forced:
+$\varphi(0)$ absorbs ($0 \conjc c = 0$), $\varphi(1)$ is the
+identity ($1 \conjc c = c$), and
+$\varphi(\tfrac{1}{2}) \conjc \varphi(\tfrac{1}{2})
+= \varphi(\tfrac{1}{4}) = \varphi(\tfrac{1}{2})$
+since $\tfrac{1}{4} \in (0,1)$ maps to the interior class.
+This forces Kleene $\min$.
+
+\emph{(4) Existence.}
+The partition $\{0\}, (0,1), \{1\}$ is verified as a unit
+congruence (Lean: \texttt{kleeneCongruence}).
+\end{proof}
+
+\begin{proof}[Proof of the $\Real$-Multiplication Impossibility]
+Suppose a non-trivial real congruence $\sim$ admits a finite quotient
+with $n \geq 2$ classes on $[0,1]$.
+(The case $n = 2$ is ruled out by the no-two-element argument above.)
+
+For $n \geq 3$: set $a = \tfrac{1}{2}$.
+Among the $n + 1$ values $a^0 = 1, a^1, \ldots, a^n \in [0,1]$,
+pigeonhole on $n$ classes gives $0 \leq i < j \leq n$ with
+$a^i \sim a^j$.
+Write $a^j = a^i \cdot a^p$ where $p = j - i \geq 1$.
+Using $\Real$-multiplication compatibility, multiply both sides
+of $a^i \sim a^i \cdot a^p$ by $(a^i)^{-1}$:
+since $(a^i)^{-1} = 2^i > 1$ is a valid $\Real$-valued
+multiplier, we obtain
+\[
+1 = (a^i)^{-1} \cdot a^i \;\sim\; (a^i)^{-1} \cdot a^i \cdot a^p
+= a^p.
+\]
+Negation gives $0 \sim 1 - a^p$.
+Since $0 < a = \tfrac{1}{2} < 1$ and $p \geq 1$,
+we have $0 < a^p < 1$, hence $1 - a^p > 0$.
+This contradicts singleton boundaries (part~(1) above).
+\end{proof}
+
+\subsection{Sharp No-Explosion Threshold}
+
+\begin{proof}[Proof of Theorem~\ref{thm:graded-no-explosion}]
+For $0 < t \leq \tfrac{1}{2}$:
+set $v(A) = \tfrac{1}{2}$ and $v(B) = 0$.
+Then $v(A) = \tfrac{1}{2} \geq t$ and
+$\negc v(A) = 1 - \tfrac{1}{2} = \tfrac{1}{2} \geq t$,
+so both premises are satisfied.
+But $v(B) = 0 < t$, so the conclusion fails.
+Explosion is defeated.
+
+For $t > \tfrac{1}{2}$:
+suppose $v(A) \geq t$ and $\negc v(A) = 1 - v(A) \geq t$.
+Adding: $v(A) + (1 - v(A)) = 1 \geq 2t > 1$, a contradiction.
+No valuation satisfies both premises, so the entailment holds
+vacuously for any conclusion.
+\end{proof}
 
 \end{document}
