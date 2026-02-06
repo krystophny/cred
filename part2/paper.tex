@@ -131,7 +131,9 @@ When evidence is positive, it reduces to division (recovering
 Bayesian conditioning); when evidence is zero, the equation
 $c \cdot 0 = 0$ is satisfied by every $c \in [0,1]$, leaving the
 conditional unconstrained.
-The chain rule is the sole structural constraint beyond the triplet.
+The chain rule is the sole additional axiom beyond the triplet:
+we assume only $(\negc, \conjc, \disjc)$ on $[0,1]$ plus the
+chain-rule equation.
 
 \textbf{Main results.}
 We mark each result as \emph{known} (established in the literature,
@@ -475,7 +477,7 @@ where $\condc{A}{B}$ abbreviates the condCred component of the
 conditioning structure for joint $= \cred(A \land B)$ and
 evidence $= \cred(B)$.
 When evidence is positive, the conditioning structure is unique and
-$\condc{A}{B}$ is a number (Definition~\ref{thm:existence});
+$\condc{A}{B}$ is a number (Proposition~\ref{thm:existence});
 when evidence is zero, $\condc{A}{B}$ denotes any value in $[0,1]$
 satisfying the chain rule.
 \end{definition}
@@ -656,7 +658,8 @@ analysis.
 \caption{Path dependence at evidence zero.
 \textbf{Left:} $\min(a,b)/b$ near the origin; value depends on angle
 $\theta$, not radius $r$.
-\textbf{Right:} Limit as $r \to 0$: $1$ for $\theta < \pi/4$,
+\textbf{Right:} Limit as $r \to 0$: $1$ for $\theta \leq \pi/4$
+(since $a \geq b$ gives $\min(a,b)/b = 1$),
 $\cot\theta$ for $\theta > \pi/4$.
 The singularity is essential, not removable.}
 \label{fig:path-dependence}
@@ -911,8 +914,8 @@ Define the collapse:
 \end{cases}
 \]
 
-\begin{theorem}[Collapse Homomorphism; folklore~\cite{bergmann2008},
-verified here]
+\begin{theorem}[Collapse Homomorphism; elementary,
+cf.~\cite{bergmann2008}; verified here]
 \label{thm:collapse}
 The collapse is a surjective homomorphism from
 $([0,1], \negc, \conjc, \disjc)$ to
@@ -1065,8 +1068,10 @@ De Morgan: $({\cdot},\; 1{-}(\cdot))$
 \caption{Congruence landscape.
 The product De Morgan triplet sits between MV-algebras (many
 congruences) and product BL-algebras (none).
-The product BL-algebra $[0,1]$ with residuation has no non-trivial
-congruences~\cite{agliano2003}; replacing residuation with involutive
+The standard product BL-algebra $[0,1]$ with residuation is
+simple (no non-trivial congruences, finite or
+infinite)~\cite[Cor.~3.7]{agliano2003}; replacing residuation with
+involutive
 complement weakens the signature enough for the Kleene partition to
 survive as a congruence.}
 \label{tab:congruence}
@@ -1436,19 +1441,36 @@ to division and the bridge would hold trivially.
 Neither extension is pursued here; the bridge and conditioning are
 complementary contributions.
 
+\textbf{RM3 and the bridge.}
+The bridge theorem covers LP (designating $\{1, \tfrac{1}{2}\}$)
+and K$_3$ (designating $\{1\}$) but not RM3, which adds a
+relevance constraint to the LP designated
+set~\cite{anderson1975,meyer1972}.
+RM3 consequence is strictly stronger than LP consequence (it
+validates additional inferences via the material conditional
+$\max(\negc e, p)$), and an RM3 bridge would require extending
+the collapse to a language with implication --- blocked by the same
+conditioning limitation above.
+
 \textbf{Relationship to Suszko's thesis.}
 Suszko~\cite{suszko1977} argued that every Tarskian consequence
 relation is logically bivalent: the truth values reduce to
 ``designated'' and ``undesignated,'' regardless of the number of
 algebraic truth values~\cite{malinowski1993}.
-The bridge theorem is in the spirit of this observation --- it
-reduces LP and K$_3$ consequence to binary distinctions (positive
-vs.\ zero, certain vs.\ uncertain) on $[0,1]$.
-Suszko's thesis is about the abstract structure of consequence
-relations in general; the bridge theorem complements it by
-providing a concrete \emph{semantic} equivalence for two specific
-consequence relations: the same assignments, mediated by the collapse
-and lifting maps, witness consequence in both directions.
+The bridge theorem can be seen as a concrete semantic realization
+of the Suszko reduction for LP and K$_3$ over the product
+De Morgan triplet: both consequence relations reduce to binary
+distinctions (positive vs.\ zero, certain vs.\ uncertain) on
+$[0,1]$, instantiating the designated/undesignated partition that
+Suszko's thesis guarantees abstractly.
+What the bridge adds beyond the abstract guarantee is the
+specific mechanism: the collapse and lifting maps provide a
+constructive witness translation between $[0,1]$ counterexamples
+and $\{0, \tfrac{1}{2}, 1\}$ counterexamples, the formula-level
+commutativity (Proposition~\ref{prop:collapse-eval}) ensures this
+works for compound formulas, and the designated sets are
+characterized as exactly the two canonical partitions of
+$[0,1]$ (positivity and certainty).
 The bridge also connects to degree-preserving
 consequence~\cite{behounek2006}, where $\Gamma \models_t \varphi$
 holds iff every evaluation making all premises $\geq t$ also makes
@@ -1481,8 +1503,12 @@ In particular, positivity and certainty consequence on $[0,1]$ are
 decidable by exhaustive search over $3^{|\alpha|}$ assignments.
 Non-consequence reduces to finding a counterexample in
 $\{0, \tfrac{1}{2}, 1\}^{|\alpha|}$ (verifiable in polynomial time),
-placing consequence in coNP; coNP-hardness follows by reduction from
-classical validity.
+placing consequence in coNP.
+For coNP-hardness: every classical tautology is an LP tautology
+(restricting to $\{0, 1\} \subset \{0, \tfrac{1}{2}, 1\}$
+preserves designation), so classical validity reduces to LP
+consequence, and the bridge transfers this to positivity
+consequence.
 Lean: direct corollary of \texttt{lp\_formula\_bridge},
 \texttt{k3\_formula\_bridge}.
 \end{corollary}
@@ -1603,11 +1629,11 @@ Lean: \texttt{certainty\_ge\_three\_quarters}.
 \midrule
 Classical & $\{1\}$ (two-valued) & Yes & Yes & Yes \\
 K$_3$ & $\{1\}$ & No & No & Vacuously$^a$ \\
-LP & $\{1, \tfrac{1}{2}\}$ & Yes$^b$ & Yes$^b$ & No \\
+LP & $\{1, \tfrac{1}{2}\}$ & Yes & Yes & No \\
 Graded ($t \leq \tfrac{1}{2}$) & $\{c \geq t\}$
-  & Yes$^c$ & Yes$^c$ & No \\
+  & Yes$^b$ & Yes$^b$ & No \\
 Graded ($t > \tfrac{1}{2}$) & $\{c \geq t\}$
-  & Yes$^c$ & Yes$^c$ & Vacuously$^d$ \\
+  & Yes$^b$ & Yes$^b$ & Vacuously$^c$ \\
 \bottomrule
 \end{tabular}
 \normalsize
@@ -1617,11 +1643,10 @@ Graded ($t > \tfrac{1}{2}$) & $\{c \geq t\}$
 {\footnotesize
 $^a$No valuation makes both $v(A)$ and $\negc(v(A))$
 K$_3$-designated.
-$^b$Under homomorphic valuations.
-$^c$For all $t \leq \tfrac{3}{4}$:
+$^b$For all $t \leq \tfrac{3}{4}$:
 $v(A) \disjc \negc v(A) \geq \tfrac{3}{4} \geq t$, so
 excluded middle and the tautology $A \disjc \negc A$ hold.
-$^d$For $t > \tfrac{1}{2}$: no valuation makes both
+$^c$For $t > \tfrac{1}{2}$: no valuation makes both
 $v(A) \geq t$ and $\negc v(A) \geq t$
 (Proposition~\ref{prop:graded-sharp}).}
 
