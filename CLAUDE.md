@@ -41,8 +41,8 @@ Keep the separation clear: `⊗`/`⊔` are the core algebraic operations (produc
 - `lean/Cred/Consequence.lean` — K3/LP/graded consequence, no-explosion theorems.
 - `lean/Cred/Update.lean` — Bayesian and Jeffrey conditionalization.
 - `lean/Cred/Predicate.lean` — graded predicates, quantifiers, Russell fixed point.
-- `lean/Cred/Congruence.lean` — congruence classification (all four parts fully verified).
-- `part1/paper.tex` — congruence classification (7 sections + 2 appendices, 12 pages).
+- `lean/Cred/Congruence.lean` — two-level congruence classification (UnitCongruence, RealCongruence, Kleene witness).
+- `part1/paper.tex` — congruence classification (6 sections + conclusion + 2 appendices, 12 pages).
 - `part2/paper.tex` — valuations, update, consequence, predicates (4 sections + 1 appendix, 6 pages).
 - `part3/` — future work: graded proofs, self-hosting, undecidability.
 
@@ -58,8 +58,9 @@ Collapse / congruence:
 - `Cred.ThreeVal.rm3_ex_falso` (RM3 implication has explosion row)
 - `Cred.ThreeVal.cred_no_ex_falso` (Cred blocks ex falso via unconstrained conditioning)
 - `three_element_quotient_unique`, `zero_equiv_forces_trivial`, `no_boolean_neg_retraction`
-- `Cred.CredCongruence.singleton_zero`, `singleton_one` (boundary singletons)
-- `Cred.CredCongruence.no_four_or_more_classes` (scaling trick, fully verified)
+- `Cred.UnitCongruence.singleton_zero`, `singleton_one` (boundary singletons under [0,1]-mult)
+- `Cred.RealCongruence.no_nontrivial_finite_quotient` (scaling trick, no finite quotient under R-mult)
+- `Cred.kleeneCongruence` (Kleene partition as verified UnitCongruence)
 
 Consequence (from Consequence.lean):
 - `k3_no_tautology`, `lp_no_explosion`, `graded_no_explosion`
