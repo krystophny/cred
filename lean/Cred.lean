@@ -6,3 +6,4 @@ import Cred.Consequence
 import Cred.Update
 import Cred.Predicate
 import Cred.Congruence
+import Cred.CondBridge
