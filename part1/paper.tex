@@ -55,21 +55,23 @@
 \begin{abstract}
 We study the product De Morgan triplet on $[0,1]$ --- product conjunction,
 probabilistic-sum disjunction, standard complement --- equipped with
-chain-rule conditioning in the sense of R\'enyi and Popper.
-Our main result is a \emph{complete congruence classification}: for
-equivalence relations on $[0,1]$ compatible with $\mathbb{R}$-multiplication
-and negation, the partition $\{0\},(0,1),\{1\}$ is the \emph{only}
-non-trivial finite congruence --- no quotient with two, four, or more
-classes exists.
-The unique three-element quotient is the Kleene lattice, distinguishing
-the product De Morgan triplet from MV-algebras, which have infinitely
-many congruences.
-Whether this rigidity persists under the weaker hypothesis of
+chain-rule conditioning inspired by R\'enyi and Popper.
+Our main results are a \emph{congruence analysis} at two levels.
+Under $[0,1]$-multiplication:
+the Kleene lattice $\{0,\tfrac{1}{2},1\}$ with partition
+$\{0\},(0,1),\{1\}$ is the unique non-trivial three-element congruence;
+boundary classes are singletons; and no two-element quotient exists.
+Under the stronger hypothesis of $\mathbb{R}$-multiplication:
+no non-trivial finite congruence exists at all --- not even the Kleene
+quotient --- because multiplicative inverses outside $[0,1]$ collapse
+all identifications.
+Whether quotients with four or more classes exist under
 $[0,1]$-multiplication alone remains open.
-As context, we give Lean-verified proofs of known supporting facts:
-uniqueness of the min copula among symmetric idempotent copulas,
-path dependence of conditioning at evidence zero, and the collapse
-homomorphism to the Kleene lattice.
+The gap between these two results isolates $[0,1]$-cancellation as the
+key obstacle.
+As context, we give Lean-verified proofs of supporting facts:
+uniqueness of the min copula, path dependence of conditioning at zero,
+and the collapse homomorphism to the Kleene lattice.
 All proofs are machine-checked in Lean~4 with Mathlib.
 \end{abstract}
 
@@ -85,9 +87,10 @@ and sigma-additivity.
 Conditional probability is derived via division:
 $P(A \mid B) = P(A \land B)/P(B)$ when $P(B) > 0$; when $P(B) = 0$, the
 ratio is undefined.
-R\'enyi~\cite{renyi1955} and Popper~\cite{popper1959} proposed an
-alternative: treat conditioning as \emph{primitive}, governed by the chain
-rule $P(A \mid B) \cdot P(B) = P(A \land B)$ without invoking division.
+R\'enyi~\cite{renyi1955} and Popper~\cite{popper1959} proposed
+alternatives in measure-theoretic settings: treat conditioning as
+\emph{primitive}, governed by the chain rule
+$P(A \mid B) \cdot P(B) = P(A \land B)$ without invoking division.
 
 We apply the same idea without a measure space:
 keep only values in $[0,1]$, the complement $\negc c = 1 - c$, and the
@@ -126,21 +129,31 @@ Chain-rule conditioning motivates studying the product De Morgan triplet
 as a unit: it is the specific choice of companion operations
 (complement, product) that makes conditioning at zero unconstrained
 rather than forcing ex falso.
-The main contribution is showing that the collapse to the Kleene lattice
-is the \emph{unique} non-trivial finite quotient: a complete congruence
-classification (Theorem~\ref{thm:congruence-main}).
-The proof itself uses only product and negation; conditioning provides
+The main contribution is a congruence analysis at two levels:
+under $[0,1]$-multiplication, the Kleene lattice is the unique
+non-trivial three-element quotient
+(Theorem~\ref{thm:unit-classification});
+under $\mathbb{R}$-multiplication, no non-trivial finite quotient
+exists at all (Theorem~\ref{thm:real-impossibility}).
+The proof uses only product and negation; conditioning provides
 the \emph{reason to care} about this particular signature.
 
-\textbf{Main result.}
-The \emph{complete congruence classification}
-(Theorem~\ref{thm:congruence-main}):
-for equivalence relations on $[0,1]$ compatible with
-$\mathbb{R}$-multiplication and negation, the partition
-$\{0\},(0,1),\{1\}$ is the only non-trivial finite congruence.
-No quotient with two, four, or more classes exists.
-This distinguishes the product De Morgan triplet from MV-algebras,
-which have infinitely many congruences.
+\textbf{Main results.}
+A \emph{congruence analysis} at two levels
+(Theorems~\ref{thm:unit-classification}
+and~\ref{thm:real-impossibility}).
+Under $[0,1]$-multiplication compatibility:
+the Kleene lattice with partition $\{0\},(0,1),\{1\}$ is the unique
+non-trivial three-element congruence; boundary classes
+$\{0\}$ and $\{1\}$ are singletons; and no two-element quotient exists.
+Under $\mathbb{R}$-multiplication compatibility: no non-trivial finite
+congruence exists at all, because multiplicative inverses allow
+a scaling argument that collapses all identifications.
+Whether quotients with four or more classes exist under
+$[0,1]$-multiplication alone is an open question.
+The $[0,1]$-result distinguishes the product De Morgan triplet from
+MV-algebras (infinitely many congruences) and from BL-algebras
+(no congruences).
 
 \textbf{Supporting results} (known results, newly Lean-verified).
 \begin{enumerate}[label=(\arabic*)]
@@ -158,7 +171,8 @@ which have infinitely many congruences.
   we include it to make the ``no ex falso'' design choice explicit.
 \item \textbf{Collapse to Kleene} (Theorem~\ref{thm:collapse},
   Theorem~\ref{thm:quotient-unique}):
-  The Kleene lattice is the unique three-element quotient.
+  The Kleene lattice is the unique three-element quotient and is a
+  concrete unit congruence (existence witness).
 \item \textbf{Lean formalization} (Appendix~\ref{app:lean}):
   All results are machine-checked in Lean~4 with Mathlib.
 \end{enumerate}
@@ -170,7 +184,7 @@ Section~\ref{sec:conditioning} develops chain-rule conditioning and path
 dependence.
 Section~\ref{sec:fixed-points} treats fixed points.
 Section~\ref{sec:collapse} establishes the collapse to the Kleene lattice.
-Section~\ref{sec:congruence} gives the complete congruence classification.
+Section~\ref{sec:congruence} gives the congruence classification.
 Section~\ref{sec:conclusion} concludes.
 Appendix~\ref{app:prelim} provides formal preliminaries.
 Appendix~\ref{app:lean} describes the Lean formalization.
@@ -737,130 +751,202 @@ Lean: \texttt{zero\_equiv\_forces\_trivial}.
 \end{proof}
 
 %=============================================================================
-\section{Complete Congruence Classification}
+\section{Congruence Classification}
 \label{sec:congruence}
 %=============================================================================
 
-The results of Section~\ref{sec:collapse} combine into a complete
-classification.
+The results of Section~\ref{sec:collapse} combine into a congruence
+classification at two levels, depending on the scope of the
+multiplication compatibility hypothesis.
 
-\begin{theorem}[Complete Congruence Classification]
-\label{thm:congruence-main}
-Let $\sim$ be an equivalence relation on $\mathbb{R}$ that is compatible
-with multiplication ($a \sim b$ and $c \sim d$ imply $ac \sim bd$) and
-with negation ($a \sim b$ implies $1 - a \sim 1 - b$).
-If $\sim$ is non-trivial when restricted to $[0,1]$, then the only
-non-trivial finite quotient of $[0,1]$ is the three-element Kleene
-lattice with partition $\{0\},(0,1),\{1\}$.
+\subsection{Classification under $[0,1]$-Multiplication}
+
+A \emph{unit congruence} is an equivalence relation $\sim$ on $[0,1]$
+compatible with $[0,1]$-multiplication
+($a \sim b$ and $c \sim d$ with $a,b,c,d \in [0,1]$ imply $ac \sim bd$)
+and with negation ($a \sim b$ implies $1 - a \sim 1 - b$).
+This is the natural congruence notion for the product De Morgan triplet,
+since $[0,1]$ is closed under product and complement.
+
+\begin{theorem}[Unit Congruence Classification]
+\label{thm:unit-classification}
+Let $\sim$ be a non-trivial unit congruence on $[0,1]$.
+\begin{enumerate}[label=\textup{(\arabic*)}]
+\item $\{0\}$ and $\{1\}$ are singletons:
+  if $0 \sim \varepsilon$ for $\varepsilon > 0$, then $\sim$ is trivial.
+\item No quotient with exactly $2$ classes exists.
+\item Any quotient with exactly $3$ classes is the Kleene lattice
+  $\{0, \tfrac{1}{2}, 1\}$ with partition $\{0\},(0,1),\{1\}$.
+\end{enumerate}
+Moreover, the Kleene partition $\{0\},(0,1),\{1\}$ is itself a unit
+congruence (Theorem~\ref{thm:collapse}), so the three-element case
+is realized.
 \end{theorem}
 
-The hypothesis that $\sim$ is compatible with $\mathbb{R}$-multiplication
-(not just multiplication on $[0,1]$) is essential for part~(4): the
-scaling trick multiplies by $(a^i)^{-1} > 1$, which lies outside $[0,1]$.
-This hypothesis is natural for two reasons.
-First, the product t-norm on $[0,1]$ is the restriction of
-$\mathbb{R}$-multiplication; a congruence that respects the ambient
-field inherits the scaling and inversion structure that the proof
-requires.
-Second, $[0,1]$ is not closed under multiplicative inverses --- there is
-no internal operation that ``undoes'' multiplication by a value in $(0,1)$
---- so restricting to $[0,1]$-multiplication alone removes the algebraic
-leverage (cancellation, scaling) that distinguishes the product t-norm
-from, say, the minimum t-norm.
-The $\mathbb{R}$-compatibility hypothesis makes this leverage explicit.
+\begin{proof}
+(1)~From $0 \sim \varepsilon$:
+$1 \sim 1 - \varepsilon$ (negation);
+$x \sim x(1 - \varepsilon)$ for all $x \in [0,1]$ (multiply by
+$(x, x)$ and $(1, 1 - \varepsilon)$, both in $[0,1]$);
+iterate to get $x \sim x(1 - \varepsilon)^n \to 0$; then $x \sim 0$
+for all $x \in [0,1]$.
+By negation duality, the same holds for $\{1\}$.
+The proof uses only $[0,1]$-multiplication: every factor stays in
+$[0,1]$.
 
-Whether part~(4) holds under the weaker hypothesis of
-$[0,1]$-multiplication alone is an open question.
-A counterexample would require an equivalence relation on $[0,1]$
-compatible with multiplication and negation that has four or more finite
-classes but does not extend to a congruence on $(\mathbb{R}, \cdot)$.
-We know of no such example, but the proof technique above does not
-apply without inverses.
-The Lean formalization uses $\mathbb{R}$-multiplication explicitly
-(\texttt{CredCongruence.conj\_compat}).
+(2)~Proposition~\ref{prop:no-classical}: no negation-preserving
+surjection $[0,1] \to \{0,1\}$.
+
+(3)~Theorem~\ref{thm:quotient-unique}: any surjective homomorphism
+to a three-element set preserving negation and $[0,1]$-conjunction
+yields the Kleene lattice.
+\end{proof}
+
+\begin{remark}
+Whether a quotient with $n \geq 4$ classes exists under
+$[0,1]$-multiplication alone is \textbf{open}.
+The collapse homomorphism (Theorem~\ref{thm:collapse}) shows the
+three-element Kleene quotient exists;
+Theorem~\ref{thm:unit-classification} shows it is the unique
+three-element one; but we have no proof that four or more classes
+are impossible without invoking multiplicative inverses outside $[0,1]$.
+See Section~\ref{sec:open} for discussion.
+\end{remark}
+
+\subsection{Rigidity under $\mathbb{R}$-Multiplication}
+\label{sec:real-rigidity}
+
+A \emph{real congruence} extends compatibility to all of
+$\mathbb{R}$: $a \sim b$ and $c \sim d$ (for any $a,b,c,d \in \mathbb{R}$)
+imply $ac \sim bd$.
+Every real congruence restricts to a unit congruence, so the
+results of Theorem~\ref{thm:unit-classification} apply.
+The additional leverage of multiplicative inverses yields a stronger
+conclusion.
+
+\begin{theorem}[$\mathbb{R}$-Multiplication Impossibility]
+\label{thm:real-impossibility}
+Let $\sim$ be a non-trivial real congruence.
+Then $[0,1]$ admits no finite quotient with $n \geq 2$ classes.
+In particular, the Kleene partition $\{0\},(0,1),\{1\}$ is \emph{not}
+a real congruence.
+\end{theorem}
 
 \begin{proof}
-We establish four facts.
-
-\textbf{(1) $\{0\}$ and $\{1\}$ are singletons.}
-If $0 \sim \varepsilon$ for $\varepsilon > 0$,
-Proposition~\ref{thm:zero-collapse} collapses everything.
-By negation duality, the same holds for $\{1\}$.
-
-\textbf{(2) No 2-element quotient exists.}
-Proposition~\ref{prop:no-classical}: no negation-preserving surjection
-$[0,1] \to \{0,1\}$.
-
-\textbf{(3) Any 3-element quotient is Kleene.}
-Theorem~\ref{thm:quotient-unique}.
-
-\textbf{(4) No quotient with $n \geq 4$ classes exists.}
-Pick $a = \tfrac{1}{2}$.
-By the pigeonhole principle on $n$ classes, there exist $0 \leq i < j \leq n$
-with $a^i \sim a^j$.
+The case $n = 2$ is Proposition~\ref{prop:no-classical}.
+For $n \geq 3$:
+pick $a = \tfrac{1}{2}$.
+Among the $n + 1$ values $a^0, a^1, \ldots, a^n \in [0,1]$, the
+pigeonhole principle on $n$ classes gives $0 \leq i < j \leq n$ with
+$a^i \sim a^j$.
 Write $a^j = a^i \cdot a^p$ where $p = j - i \geq 1$.
-Multiplying both sides by $(a^i)^{-1}$ (using $\mathbb{R}$-multiplication
-compatibility) yields $1 \sim a^p$.
-Applying negation compatibility gives $0 \sim 1 - a^p$.
-But $0 < a^p < 1$, so $1 - a^p > 0$, contradicting~(1).
+Multiplying by $(a^i)^{-1} > 1$ (using $\mathbb{R}$-compatibility)
+yields $1 \sim a^p$.
+Negation gives $0 \sim 1 - a^p$.
+Since $0 < a^p < 1$, we have $1 - a^p > 0$, contradicting
+singleton boundaries (Theorem~\ref{thm:unit-classification}(1)).
+
+For the Kleene partition specifically: $0.5 \sim 0.3$ (both interior)
+and $2 \sim 2$ (reflexivity) give $1.0 \sim 0.6$ by
+$\mathbb{R}$-multiplication, contradicting $\{1\}$ as a singleton.
 \end{proof}
 
 \begin{remark}[Lean verification]
-All four parts are fully Lean-verified in \texttt{Cred/Congruence.lean}:
-\texttt{singleton\_zero}, \texttt{singleton\_one},
+\label{rem:lean-congruence}
+The unit-congruence results are verified with \texttt{UnitCongruence}
+in \texttt{Cred/Congruence.lean}:
+\texttt{singleton\_zero}, \texttt{singleton\_one}.
+The $\mathbb{R}$-impossibility uses \texttt{RealCongruence}:
+\texttt{no\_nontrivial\_finite\_quotient}.
+The Kleene partition is a verified unit congruence:
+\texttt{kleene\_congruence}.
+Re-exports from \texttt{Basic.lean}:
 \texttt{no\_two\_element\_quotient},
-\texttt{unique\_three\_element\_quotient},
-\texttt{no\_four\_or\_more\_classes}.
+\texttt{unique\_three\_element\_quotient}.
 \end{remark}
 
-\begin{remark}[Comparison with MV-algebras and BL-algebras]
+\subsection{The Open Question}
+\label{sec:open}
+
+Under $[0,1]$-multiplication, we know:
+the Kleene quotient exists (Theorem~\ref{thm:collapse}),
+is the unique three-element quotient
+(Theorem~\ref{thm:unit-classification}), and boundary classes are
+singletons.
+What we do not know is whether a unit congruence with four or more
+finite classes can exist.
+
+\begin{quote}
+\textbf{Open question.}
+Does there exist an equivalence relation on $[0,1]$, compatible with
+$[0,1]$-multiplication and negation, that has four or more finite
+classes?
+\end{quote}
+
+A counterexample would be an equivalence that identifies some but not
+all interior points, while keeping $\{0\}$ and $\{1\}$ as singletons
+and respecting $[0,1]$-products.
+Such a relation cannot extend to a congruence on
+$(\mathbb{R}, \cdot)$ (Theorem~\ref{thm:real-impossibility}), so it
+must ``use'' the boundary of $[0,1]$ in an essential way.
+The scaling trick fails because $[0,1]$ has no multiplicative inverses
+for elements in $(0,1)$: there is no $[0,1]$-valued operation that
+``undoes'' multiplication by $\tfrac{1}{2}$.
+This isolates \emph{$[0,1]$-cancellation} as the key obstacle.
+
+\subsection{Comparison with MV-Algebras and BL-Algebras}
+
+\begin{remark}
 \label{rem:mv-comparison}
-The congruence structure of $[0,1]$ varies sharply with the choice of
-signature, as summarized below.
+The congruence structure of $[0,1]$ varies sharply with signature.
 
 \smallskip
 \begin{center}
 \small
-\begin{tabular}{lll}
+\begin{tabular}{llll}
 \toprule
-\textbf{Signature} & \textbf{Congruences on $[0,1]$} & \textbf{Reference} \\
+\textbf{Signature} & \textbf{Mult.\ scope}
+  & \textbf{Finite congruences} & \textbf{Reference} \\
 \midrule
-MV: $(\max(a{+}b{-}1,0),\; 1{-}(\cdot))$ & Infinitely many
+MV: $(\max(a{+}b{-}1,0),\; 1{-}(\cdot))$
+  & $[0,1]$ & Infinitely many
   & \cite{cignoli2000,mundici2011} \\
-BL (product): $({\cdot},\; {\to})$ & Simple (none)
+BL (product): $({\cdot},\; {\to})$
+  & $[0,1]$ & None (simple)
   & \cite{hajek1998,agliano2003} \\
-De Morgan: $({\cdot},\; 1{-}(\cdot))$ & Exactly one finite
-  & Theorem~\ref{thm:congruence-main} \\
+De Morgan: $({\cdot},\; 1{-}(\cdot))$
+  & $[0,1]$ & Kleene exists; $\geq\!4$ open
+  & Thm.~\ref{thm:unit-classification} \\
+De Morgan: $({\cdot},\; 1{-}(\cdot))$
+  & $\mathbb{R}$ & None
+  & Thm.~\ref{thm:real-impossibility} \\
 \bottomrule
 \end{tabular}
 \normalsize
 \end{center}
 \smallskip
 
-In MV-algebras~\cite{cignoli2000,mundici2011}, Chang's completeness
-theorem gives a rich congruence lattice: every MV-algebra is a subdirect
-product of totally ordered ones, and the standard MV-algebra on $[0,1]$
-has infinitely many congruences (one for each rational).
-In BL-algebras~\cite{hajek1998,agliano2003} (the algebraic semantics of
-Basic Logic), the standard product algebra $[0,1]_\Pi$ is
-\emph{simple}: it has no non-trivial BL-congruences at all.
-The residuated implication $a \to b = \sup\{c : a \cdot c \leq b\}$
-is so constraining that no quotient survives.
+The product De Morgan triplet $({\cdot},\, 1{-}(\cdot))$ is a
+\emph{reduct} of the product BL-algebra: it drops the residuated
+implication $a \to b = \sup\{c : a \cdot c \leq b\}$ and replaces it
+with the involutive complement.
+Every BL-congruence is a fortiori a De Morgan congruence, but not
+conversely: the Kleene quotient survives in the De Morgan reduct
+precisely because dropping residuation removes the constraint
+$0 \to b = 1$ (ex falso) that forces simplicity in the BL
+case~\cite{hajek1998,agliano2003,galatos2007}.
 
-Our signature --- $({\cdot},\, 1{-}(\cdot))$ --- sits between these
-extremes.
-Replacing residuation with complement removes enough structure to allow
-one non-trivial finite congruence (the Kleene quotient) but not more.
-The complement's involutivity ($\negc\negc c = c$) forces the
-three-element structure via the negation fixed point at $\tfrac{1}{2}$;
-the product's non-idempotence prevents any coarser finite partition
-from being well-defined.
-The rigidity is thus a property of the product t-norm paired with
-involutive negation, modulated by which companion operation
-(residuation or complement) is present.
-This suggests a broader question: for a fixed continuous t-norm, how
-does the congruence lattice of $(T, \negc)$ relate to the congruence
-lattice of $(T, \to_T)$?
+In MV-algebras~\cite{cignoli2000,mundici2011}, Chang's completeness
+theorem gives a rich congruence lattice.
+In BL-algebras, the product algebra is simple.
+The De Morgan reduct sits between: under $[0,1]$-multiplication, at
+least one non-trivial finite congruence exists (Kleene), but whether
+exactly one or more is unknown.
+Under $\mathbb{R}$-multiplication, it collapses to the BL case (none).
+
+This suggests a broader question: for a fixed continuous t-norm $T$,
+how does the congruence lattice of $(T, \negc)$ relate to the
+congruence lattice of $(T, \to_T)$?
 The product case gives one data point; the \L ukasiewicz case (where
 MV-algebras and the De Morgan triplet coincide) gives another.
 \end{remark}
@@ -872,22 +958,29 @@ MV-algebras and the De Morgan triplet coincide) gives another.
 
 The product De Morgan triplet on $[0,1]$, equipped with chain-rule
 conditioning, has a rigid quotient structure.
-The main result (Theorem~\ref{thm:congruence-main}) shows that the
-partition $\{0\},(0,1),\{1\}$ is the unique non-trivial finite
-congruence (under $\mathbb{R}$-multiplication compatibility),
-distinguishing the product De Morgan triplet from MV-algebras and
-forcing the Kleene lattice as the sole finite quotient.
-Whether this rigidity persists under the weaker hypothesis of
-$[0,1]$-multiplication alone remains open.
+The congruence analysis (Section~\ref{sec:congruence}) operates at two
+levels.
+Under $[0,1]$-multiplication
+(Theorem~\ref{thm:unit-classification}): the Kleene lattice
+$\{0, \tfrac{1}{2}, 1\}$ is the unique non-trivial three-element
+quotient, boundary classes are singletons, and no two-element quotient
+exists.
+Under $\mathbb{R}$-multiplication
+(Theorem~\ref{thm:real-impossibility}): no non-trivial finite
+congruence exists at all --- multiplicative inverses allow a scaling
+argument that collapses all identifications.
+The gap between these two results isolates $[0,1]$-cancellation as
+the key obstacle: whether quotients with four or more classes exist
+under $[0,1]$-multiplication is open.
 
 The supporting results --- uniqueness of the min copula
 (Theorem~\ref{thm:uniqueness-main}, classical~\cite{nelsen2006}),
 path dependence (Proposition~\ref{thm:path-dependence}), and the
 collapse homomorphism (Theorem~\ref{thm:collapse}) --- are known or
 elementary; our contribution is the Lean verification and the
-congruence classification.
-Open problems: the congruence classification under $[0,1]$-only
-multiplication; a general theory of how congruence lattices vary
+two-level congruence classification.
+Open problems: the $[0,1]$-multiplication classification for
+$n \geq 4$ classes; a general theory of how congruence lattices vary
 across signatures sharing the same t-norm; and whether the
 classification constrains the space of definable consequence relations.
 
@@ -958,8 +1051,8 @@ The results in this paper are formalized in two Lean~4 modules
 (with Mathlib):
 \texttt{Cred/Basic.lean} (core algebra, conditioning, fixed points,
 collapse, comparisons; ${\approx}\,1750$ lines) and
-\texttt{Cred/Congruence.lean} (congruence classification, singleton
-boundaries; ${\approx}\,350$ lines).
+\texttt{Cred/Congruence.lean} (two-level congruence classification;
+${\approx}\,400$ lines).
 Four additional modules ---
 \texttt{Valuation}, \texttt{Update}, \texttt{Consequence},
 \texttt{Predicate} --- formalize valuations, update rules,
@@ -972,6 +1065,14 @@ consequence relations, and graded predicates on the same structure.
 evidence credences, packaging the conditional together with its chain-rule
 proof.
 \texttt{ThreeVal} is an inductive type with decidable equality.
+The congruence classification uses two structures:
+\texttt{UnitCongruence} (relation on $\mathbb{R}$, multiplication
+restricted to $[0,1]$) and \texttt{RealCongruence} (relation on
+$\mathbb{R}$, unrestricted multiplication).
+Every \texttt{RealCongruence} restricts to a \texttt{UnitCongruence}
+(\texttt{toUnit}).
+The Kleene partition is a verified \texttt{UnitCongruence}
+(\texttt{kleene\_congruence}).
 
 \textbf{Key definitions:}
 
@@ -1001,10 +1102,12 @@ proof.
   \texttt{copula\_idempotent\_unique}: uniqueness
 \item \texttt{three\_element\_quotient\_unique},
   \texttt{zero\_equiv\_forces\_trivial},
-  \texttt{no\_boolean\_neg\_retraction}: congruence (Basic)
-\item \texttt{singleton\_zero}, \texttt{singleton\_one},
-  \texttt{rel\_along\_period},
-  \texttt{no\_four\_or\_more\_classes}: congruence classification
+  \texttt{no\_boolean\_neg\_retraction}: congruence building blocks
+\item \texttt{UnitCongruence.singleton\_zero},
+  \texttt{singleton\_one}: unit-congruence boundaries
+\item \texttt{kleene\_congruence}: Kleene partition as unit congruence
+\item \texttt{RealCongruence.no\_nontrivial\_finite\_quotient}:
+  $\mathbb{R}$-multiplication impossibility
 \item \texttt{no\_godel\_collapse}, \texttt{no\_luk\_collapse}:
   impossibility
 \item \texttt{path\_dep\_fixed\_a}, \texttt{path\_dep\_proportional},
