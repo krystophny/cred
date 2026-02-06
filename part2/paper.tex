@@ -69,9 +69,9 @@ logic derives it via residuation (forcing ex falso at zero).
 We study \emph{chain-rule conditioning}, where the conditional satisfies
 $\cred(A \mid B) \cdot \cred(B) = \cred(A \land B)$
 without invoking either division or residuation.
-Among truth-functional joints (copulas), the minimum is the unique
-symmetric idempotent copula (a known result we apply here to select
-the conjunction); the product t-norm then provides the algebraic
+Among truth-functional joints (copulas on $[0,1]$), the minimum is
+the unique symmetric idempotent copula (a known result we apply here
+to select the conjunction); the product t-norm then provides the algebraic
 operations, while the chain rule governs inference.
 We develop Bayesian and Jeffrey update as graded inference on $[0,1]$
 and prove that the \emph{equilibria} $\{0, \tfrac{1}{2}, 1\}$ ---
@@ -102,7 +102,9 @@ the conditional is undefined.
 \emph{Many-valued logic}~\cite{hajek1998,gottwald2001,klement2000}
 interprets $[0,1]$ as degree of truth, supplies a t-norm conjunction,
 an involutive negation, and derives the conditional via
-\emph{residuation}: $a \to b = \sup\{c : a \otimes c \leq b\}$.
+\emph{residuation}: $a \to b = \sup\{c : a \otimes c \leq b\}$
+(see~\cite{galatos2007} for the general theory of residuated
+lattices).
 Since $0 \otimes c = 0 \leq b$ for all $c$ and $b$, every residuated
 implication forces $0 \to b = 1$ --- ex falso quodlibet is built
 in~\cite{hajek1998}.
@@ -133,8 +135,9 @@ $\cred(A \mid 0)$ unconstrained.
 
 \textbf{Literature positioning.}
 The relationship between probability and many-valued logic on $[0,1]$
-has been explored from several directions, none of which yields the
-bridge we construct here.
+has been explored from several
+directions~\cite{halpern2003,cintula2011}, none of which yields the
+specific combination we develop here.
 
 \emph{Fuzzy logic with product t-norm.}
 H\'ajek~\cite{hajek1998} and Esteva--Godo~\cite{esteva2000,esteva2001}
@@ -212,6 +215,13 @@ Instead, the joint $\cred(A \land B)$ is an independent parameter,
 and the conditional at zero evidence is unconstrained rather than
 determined by Cox's functional equation.
 The other Cox desiderata (complement law, associativity) are retained.
+Lewis's triviality result~\cite{lewis1976} shows that conditional
+probability $P(A \mid B)$ cannot in general equal the probability of
+any ``conditional event'' $A \to B$.
+Chain-rule conditioning sidesteps this: $\cred(A \mid B)$ is not
+a truth function of marginals but is constrained by the chain rule
+with the joint as a separate parameter, so Lewis's triviality
+conditions do not apply~\cite{halpern2003}.
 
 To our knowledge, no prior work combines copula uniqueness (applied
 to select a conjunction), chain-rule conditioning (with evidence-zero
@@ -259,7 +269,7 @@ its evidence-zero analysis and path dependence) and the Kleene
 collapse (with its uniqueness and impossibility theorems).
 Third (Sections~\ref{sec:valuations}--\ref{sec:update}), we build
 the applied theory: valuations with collapse composition, Bayesian
-and Jeffrey update, convergence toward the three attractors, and the
+and Jeffrey update, convergence toward the three equilibria, and the
 argument that this dynamics is unavailable in finite-valued logics.
 The paper is self-contained: all results are either proved in full,
 proof-sketched with the key idea, or stated as ``it can be shown''
@@ -268,7 +278,7 @@ with a Lean reference.
 \textbf{Note on formalization.}
 All results marked with ``Lean:'' are machine-checked in Lean~4 with
 Mathlib (Appendix~\ref{app:lean}).
-The formalization totals approximately 2500 lines across six modules
+The formalization totals approximately 2900 lines across six modules
 with zero \texttt{sorry}.
 We do not consider the formalization itself a contribution of this
 paper; it serves as a guarantee of correctness for the reader who
@@ -282,7 +292,7 @@ evidence-zero analysis.
 Section~\ref{sec:collapse}: the Kleene collapse.
 Section~\ref{sec:valuations}: valuations and collapse composition.
 Section~\ref{sec:update}: update, convergence, and the three
-attractors.
+equilibria.
 Section~\ref{sec:conclusion}: the intersection thesis and open
 problems.
 
@@ -403,6 +413,18 @@ The triplet retains exactly the structure that is shared by all
 probability spaces (complement, product, chain rule) while discarding
 everything specific to measure theory --- making it the ``greatest
 common factor'' of probability and $[0,1]$-valued logic.
+
+\textbf{Limitations.}
+The framework cannot express sigma-additivity
+($P(A \cup B) = P(A) + P(B)$ for disjoint events), has no sample
+space or sigma-algebra, and provides no measure-theoretic
+conditioning (no disintegration, no regular conditional
+probabilities).
+The disjunction $c_1 \disjc c_2 = c_1 + c_2 - c_1 c_2$ is the
+De Morgan dual of the product, not the additive formula of
+probability; they coincide only under independence.
+These omissions are deliberate: the framework extracts the algebraic
+core shared by both traditions, not a substitute for either.
 
 %=============================================================================
 \section{Selecting the Conjunction}
@@ -539,7 +561,9 @@ $\condc{A}{B} \conjc \cred(B) = \cred(A \land B)$.
 
 The joint is supplied as input, not computed from marginals.
 H\'ajek, Godo, and Esteva~\cite{hajek1995} used the chain rule
-constraint as a technical device within fuzzy logic; here it is the
+constraint as a technical device within fuzzy logic;
+Fritz~\cite{fritz2020} developed a synthetic (categorical) approach to
+conditioning as a primitive morphism; here the chain rule is the
 defining constraint.
 Jeffrey~\cite{jeffrey1965} generalized Bayesian conditioning to
 uncertain evidence via a mixture formula, also using the chain rule as
@@ -966,6 +990,9 @@ in general; Lean: \texttt{IndepValuation.conj\_not\_idempotent}).
 A complement-preserving valuation is a \emph{Kleene valuation} if
 $v(A \land B) = \min(v(A), v(B))$ and
 $v(A \lor B) = \max(v(A), v(B))$.
+(This definition is paper-only; the Lean formalization models it
+indirectly via the collapse composition of
+Proposition~\ref{prop:collapse-composition}.)
 \end{definition}
 
 By the uniqueness theorem (Theorem~\ref{thm:min-copula-unique}), the
@@ -991,7 +1018,8 @@ reasoning.
 
 \begin{proposition}[Collapse Composition; new]
 \label{prop:collapse-composition}
-Composing any product-copula valuation with the collapse homomorphism
+Composing an independent valuation
+(Definition~\ref{def:indep-valuation}) with the collapse homomorphism
 (Theorem~\ref{thm:collapse}) yields a Kleene valuation:
 \begin{align*}
 \mathrm{collapse}(v(\negc A)) &= \mathrm{neg}(\mathrm{collapse}(v(A))), \\
@@ -1002,12 +1030,15 @@ Lean: \texttt{collapse\_val\_neg}, \texttt{collapse\_val\_conj},
 \texttt{collapse\_val\_disj}.
 \end{proposition}
 
-This is the mechanism connecting $[0,1]$ to K$_3$/LP/RM3:
-regardless of the specific copula, the collapsed valuation always
-operates with Kleene min/max.
-It is the ``forgetful functor'' from quantitative (probability) to
-qualitative (logic): every $[0,1]$-valued assessment has a unique
-Kleene shadow.
+The Lean proof (\texttt{collapse\_val\_conj/disj}) is for
+\texttt{IndepValuation}, i.e., the product copula.
+The result holds more generally: the collapse homomorphism
+(Theorem~\ref{thm:collapse}) preserves negation, conjunction, and
+disjunction by case analysis on the $\{0\}, (0,1), \{1\}$ partition,
+regardless of the specific copula used to compute the joint, since
+the collapse depends only on whether values are $0$, in $(0,1)$, or
+$1$.
+The collapsed valuation thus always operates with Kleene min/max.
 
 The collapse composition theorem is the algebraic core of the
 intersection thesis.
@@ -1101,10 +1132,10 @@ This is the static counterpart of the dynamic picture developed in
 the next section: $\tfrac{1}{2}$ is the equilibrium of irreducible
 uncertainty, and the absence of explosion reflects the fact that
 contradictory evidence does not drive the system to arbitrary
-conclusions but instead stabilizes it at the uncertainty attractor.
+conclusions but instead stabilizes it at the uncertainty equilibrium.
 
 %=============================================================================
-\section{Update, Convergence, and the Three Attractors}
+\section{Update, Convergence, and the Three Equilibria}
 \label{sec:update}
 %=============================================================================
 
@@ -1303,7 +1334,7 @@ Finite-valued logics take the three values as primitive;
 the continuous framework derives them as the algebraic equilibria
 of the product De Morgan triplet.
 
-\begin{remark}[What ``attractor'' means here]
+\begin{remark}[Algebraic equilibria vs.\ dynamical convergence]
 \label{rem:attractor-caveat}
 Propositions~\ref{prop:self-conj-decay}--\ref{prop:pow-decay}
 establish that iterated self-conjunction $c, c^2, c^4, \ldots$
@@ -1342,29 +1373,15 @@ A credence must be sustained by fresh evidence to persist above zero.
 \label{sec:not-finite}
 
 The equilibria characterization (Theorem~\ref{thm:equilibria})
-depends on two properties of the product t-norm: non-idempotence
-($c^2 \neq c$ for interior $c$) and the existence of a negation
-fixed point ($\negc\tfrac{1}{2} = \tfrac{1}{2}$).
-The three continuous t-norms differ in which of these they provide.
-
-\emph{G\"odel} (min t-norm): $\min(c,c) = c$ for all $c$, so every
-value is conjunction-idempotent.
-There are no dynamics: iterated self-conjunction is the identity.
-(G\"odel negation $\negc_G c = \begin{cases} 1 & c=0 \\ 0 &
-c>0\end{cases}$ has no fixed point at all.)
-
-\emph{\L ukasiewicz} ($\max(a+b-1, 0)$): self-conjunction gives
-$\max(2c-1, 0)$, which is non-idempotent for $c \in (0,1)$.
-But $\max(2 \cdot \tfrac{1}{2} - 1, 0) = 0$: the negation fixed
-point maps to $0$ under self-conjunction.
-The \L ukasiewicz t-norm destroys the middle equilibrium; this is
-why no \L ukasiewicz collapse exists
+depends on two properties: non-idempotence ($c^2 \neq c$ for
+interior $c$) and the existence of an involutive negation fixed
+point.
+G\"odel's min t-norm is idempotent (no dynamics);
+\L ukasiewicz's $\max(a+b-1, 0)$ is non-idempotent but destroys the
+$\tfrac{1}{2}$ fixed point ($\max(2 \cdot \tfrac{1}{2} - 1, 0) = 0$),
+explaining why no \L ukasiewicz collapse exists
 (Proposition~\ref{prop:no-godel-luk}).
-
-\emph{Product} ($c \cdot c = c^2$): non-idempotent for $c \in (0,1)$,
-and $(\tfrac{1}{2})^2 = \tfrac{1}{4} \in (0,1)$: the negation fixed
-point maps to the interior, preserving its collapse class.
-Only the product has both non-trivial dynamics and three equilibria.
+Only the product has both non-idempotence and three equilibria.
 
 \begin{center}
 \small
@@ -1420,8 +1437,8 @@ We collect the main contributions, distinguishing known results
   (Proposition~\ref{prop:self-conj-decay}).
 \item \textbf{Collapse composition}
   (Proposition~\ref{prop:collapse-composition}; new):
-  composing any copula valuation with the collapse yields a Kleene
-  valuation.
+  composing an independent valuation with the collapse yields a
+  Kleene valuation (the argument generalizes to arbitrary copulas).
 \end{enumerate}
 
 The chain rule $\cred(A \mid B) \cdot \cred(B) = \cred(A \land B)$
@@ -1521,12 +1538,12 @@ distinction between connectives and consequence relations.
 %=============================================================================
 
 The results in this paper are formalized across six Lean~4 modules
-(with Mathlib), totaling approximately 2500 lines with zero
+(with Mathlib), totaling approximately 2900 lines with zero
 \texttt{sorry}:
 
 \begin{itemize}[nosep]
 \item \texttt{Cred/Basic.lean}: core algebra, conditioning, fixed
-  points, collapse, spread, certainty, comparisons (1756 lines).
+  points, collapse, spread, certainty, comparisons (1804 lines).
 \item \texttt{Cred/Congruence.lean}: two-level congruence
   classification --- \texttt{UnitCongruence}, \texttt{RealCongruence},
   Kleene witness (396 lines).
