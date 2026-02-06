@@ -54,24 +54,19 @@
 
 \begin{abstract}
 We study the product De Morgan triplet on $[0,1]$ --- product conjunction,
-probabilistic-sum disjunction, standard complement --- equipped with
-chain-rule conditioning inspired by R\'enyi and Popper.
-Our main results are a \emph{congruence analysis} at two levels.
+probabilistic-sum disjunction ($c_1 + c_2 - c_1 c_2$), standard
+complement --- equipped with chain-rule conditioning.
+Our main results are a \emph{congruence classification} at two levels.
 Under $[0,1]$-multiplication:
 the Kleene lattice $\{0,\tfrac{1}{2},1\}$ with partition
 $\{0\},(0,1),\{1\}$ is the unique non-trivial three-element congruence;
 boundary classes are singletons; and no two-element quotient exists.
-Under the stronger hypothesis of $\mathbb{R}$-multiplication:
-no non-trivial finite congruence exists at all --- not even the Kleene
-quotient --- because multiplicative inverses outside $[0,1]$ collapse
-all identifications.
+Under $\mathbb{R}$-multiplication:
+no non-trivial finite congruence exists at all, because multiplicative
+inverses outside $[0,1]$ collapse all identifications.
 Whether quotients with four or more classes exist under
-$[0,1]$-multiplication alone remains open.
-The gap between these two results isolates $[0,1]$-cancellation as the
-key obstacle.
-As context, we give Lean-verified proofs of supporting facts:
-uniqueness of the min copula, path dependence of conditioning at zero,
-and the collapse homomorphism to the Kleene lattice.
+$[0,1]$-multiplication alone remains open; the gap isolates
+$[0,1]$-cancellation as the key obstacle.
 All proofs are machine-checked in Lean~4 with Mathlib.
 \end{abstract}
 
@@ -97,7 +92,8 @@ keep only values in $[0,1]$, the complement $\negc c = 1 - c$, and the
 chain rule
 $\cred(A \mid B) \cdot \cred(B) = \cred(A \land B)$.
 The conjunction is the product t-norm, the disjunction its De Morgan dual
-(the probabilistic sum), and together with complement they form the
+(the \emph{probabilistic sum}, $c_1 + c_2 - c_1 c_2$),
+and together with complement they form the
 \emph{product De Morgan triplet}~\cite{klement2000,hajek1998}.
 In t-norm fuzzy logic, each left-continuous t-norm determines a unique
 implication via \emph{residuation}: $a \to b = \sup\{c : a \otimes c \leq b\}$.
@@ -139,43 +135,27 @@ The proof uses only product and negation; conditioning provides
 the \emph{reason to care} about this particular signature.
 
 \textbf{Main results.}
-A \emph{congruence analysis} at two levels
+A two-level congruence classification
 (Theorems~\ref{thm:unit-classification}
-and~\ref{thm:real-impossibility}).
-Under $[0,1]$-multiplication compatibility:
-the Kleene lattice with partition $\{0\},(0,1),\{1\}$ is the unique
-non-trivial three-element congruence; boundary classes
-$\{0\}$ and $\{1\}$ are singletons; and no two-element quotient exists.
-Under $\mathbb{R}$-multiplication compatibility: no non-trivial finite
-congruence exists at all, because multiplicative inverses allow
-a scaling argument that collapses all identifications.
-Whether quotients with four or more classes exist under
-$[0,1]$-multiplication alone is an open question.
-The $[0,1]$-result distinguishes the product De Morgan triplet from
-MV-algebras (infinitely many congruences) and from BL-algebras
-(no congruences).
+and~\ref{thm:real-impossibility}):
+under $[0,1]$-multiplication, the Kleene lattice is the unique
+non-trivial three-element quotient; under $\mathbb{R}$-multiplication,
+no non-trivial finite quotient exists.
+Whether four or more classes are possible under
+$[0,1]$-multiplication is open.
+The classification places the product De Morgan triplet between
+MV-algebras (infinitely many congruences) and product BL-algebras
+(none).
 
-\textbf{Supporting results} (known results, newly Lean-verified).
-\begin{enumerate}[label=(\arabic*)]
-\item \textbf{Uniqueness of min} (Theorem~\ref{thm:uniqueness-main}):
-  The min copula is the unique symmetric, idempotent copula on
-  $[0,1]$~\cite[Theorem~2.3.5]{nelsen2006}.
-  We give a self-contained Lean-verified proof and observe that
-  this forces the Kleene conjunction as the only truth-functional
-  joint compatible with Bayesian conditioning and idempotence.
-\item \textbf{Path dependence at zero}
-  (Proposition~\ref{thm:path-dependence}):
-  Under the min-copula joint, the conditional's limit as evidence
-  $\to 0$ is path-dependent.
-  This is an elementary consequence of the chain-rule definition;
-  we include it to make the ``no ex falso'' design choice explicit.
-\item \textbf{Collapse to Kleene} (Theorem~\ref{thm:collapse},
-  Theorem~\ref{thm:quotient-unique}):
-  The Kleene lattice is the unique three-element quotient and is a
-  concrete unit congruence (existence witness).
-\item \textbf{Lean formalization} (Appendix~\ref{app:lean}):
-  All results are machine-checked in Lean~4 with Mathlib.
-\end{enumerate}
+\textbf{Supporting results} (known or elementary, newly Lean-verified):
+uniqueness of the min copula
+(Theorem~\ref{thm:uniqueness-main})~\cite{nelsen2006};
+path dependence of conditioning at zero
+(Proposition~\ref{thm:path-dependence});
+the Kleene collapse homomorphism and its uniqueness
+(Theorems~\ref{thm:collapse}--\ref{thm:quotient-unique}).
+All results are machine-checked in Lean~4 with Mathlib
+(Appendix~\ref{app:lean}).
 
 \textbf{Outline.}
 Section~\ref{sec:algebra} defines the algebra.
@@ -299,35 +279,11 @@ Lean: \texttt{neg\_neg}, \texttt{neg\_zero}, \texttt{neg\_one},
 \end{proof}
 
 The structure is two dual commutative monoids connected by De Morgan
-duality; it is not a De Morgan algebra since $\conjc$ is not
-idempotent (Lemma~\ref{thm:idempotence}).
-
-\subsection{Non-Idempotence and Non-Distributivity}
-
-% Lean: conj_idempotent_iff
-\begin{lemma}[Idempotence Characterization]
-\label{thm:idempotence}
-$c \conjc c = c$ if and only if $c \in \{0, 1\}$.
-\end{lemma}
-\begin{proof}
-$c^2 = c$ iff $c(c-1) = 0$.
-Lean: \texttt{conj\_idempotent\_iff}.
-\end{proof}
-
-% Lean: conj_disj_not_distrib
-\begin{lemma}[Non-Distributivity]
-\label{thm:nondistrib}
-The product does not distribute over disjunction.
-\end{lemma}
-\begin{proof}
-At $c_1 = c_2 = c_3 = \tfrac{1}{2}$:
-$\tfrac{1}{2} \conjc (\tfrac{1}{2} \disjc \tfrac{1}{2})
-= \tfrac{3}{8}$, but
-$(\tfrac{1}{2} \conjc \tfrac{1}{2}) \disjc
-(\tfrac{1}{2} \conjc \tfrac{1}{2})
-= \tfrac{7}{16}$.
-Lean: \texttt{conj\_disj\_not\_distrib}.
-\end{proof}
+duality; it is not a De Morgan algebra since $\conjc$ is not idempotent
+($c^2 = c$ iff $c \in \{0,1\}$;
+Lean: \texttt{conj\_idempotent\_iff}\label{thm:idempotence})
+and $\conjc$ does not distribute over $\disjc$
+(Lean: \texttt{conj\_disj\_not\_distrib}\label{thm:nondistrib}).
 
 %=============================================================================
 \section{The Uniqueness Theorem}
@@ -354,7 +310,8 @@ We impose four requirements on a truth-functional joint $j(a,b)$:
 \item \textbf{Idempotent}: $j(a,a) = a$.
 \end{enumerate}
 Independence $j(a,b) = ab$ fails (iii) and (iv);
-\L ukasiewicz $j(a,b) = \max(a+b-1,0)$ fails (iv).
+\L ukasiewicz $j(a,b) = \max(a+b-1,0)$ fails (iv):
+$\max(\tfrac{1}{2} + \tfrac{1}{2} - 1, 0) = 0 \neq \tfrac{1}{2}$.
 Lean: \texttt{prod\_trivial\_conditioning},
 \texttt{luk\_not\_idempotent}.
 
@@ -429,25 +386,14 @@ the chain rule does not force $\cred(A \mid 0) = 1$, so it is
 
 \begin{remark}[Comparison with Primitive-Conditioning Frameworks]
 \label{rem:primitive-conditioning}
-R\'enyi~\cite{renyi1955} and Popper~\cite{popper1959} also take
-conditioning as primitive, but in different settings.
-R\'enyi's conditional probability spaces define $P(A \mid B)$ as a
-function on pairs where $B$ ranges over a designated family of
-``permissible'' conditioning events, excluding measure-zero sets from
-the domain rather than leaving the conditional unconstrained.
-Popper functions similarly make $P(A \mid B)$ primitive but impose
-axioms that force $P(A \mid B) = 1$ when $B$ entails $A$, retaining
-a form of logical consequence.
-Dubois and Prade~\cite{dubois1988} define conditional possibility as
-$\Pi(A \mid B) = \Pi(A \cap B)$ when $\Pi(A \cap B) < \Pi(B)$ and
-$1$ otherwise, which also avoids division but constrains the
-zero-evidence case.
-Our structure differs from all three: it works on bare values in
-$[0,1]$ without a measure space or event algebra, and it leaves the
-zero-evidence case genuinely unconstrained --- no value is preferred,
-excluded, or forced.
-This is the strictest form of ``no ex falso'': not even a default
-value is supplied.
+R\'enyi~\cite{renyi1955} excludes measure-zero events from the
+conditioning domain; Popper~\cite{popper1959} forces
+$P(A \mid B) = 1$ when $B$ entails $A$;
+Dubois and Prade~\cite{dubois1988} define conditional possibility
+with a default of~$1$ at zero evidence.
+Our structure differs: it works on bare values in $[0,1]$ without a
+measure space, and leaves the zero-evidence case genuinely
+unconstrained.
 \end{remark}
 
 \subsection{Path Dependence at Evidence Zero}
@@ -516,30 +462,32 @@ chain-rule conditioning leaves $\cred(A \mid 0)$ unconstrained.
 Thus the product residuated implication appears as a special case of
 chain-rule conditioning (when evidence is positive), not as the
 primitive.
+The three definitions agree on all positive-evidence rows; they differ
+only in how they handle evidence~$= 0$:
 
 \begin{center}
 \small
-\begin{tabular}{c|ccc}
+\begin{tabular}{r|ccc}
 \multicolumn{4}{c}{\textbf{Kleene material}\textsuperscript{1}: $\max(\negc a, b)$} \\
-& 0 & $\tfrac{1}{2}$ & 1 \\
+$a \!\downarrow\; b \!\to$ & 0 & $\tfrac{1}{2}$ & 1 \\
 \hline
 0 & 1 & 1 & 1 \\
 $\tfrac{1}{2}$ & $\tfrac{1}{2}$ & $\tfrac{1}{2}$ & 1 \\
 1 & 0 & $\tfrac{1}{2}$ & 1
 \end{tabular}
 \quad
-\begin{tabular}{c|ccc}
+\begin{tabular}{r|ccc}
 \multicolumn{4}{c}{\textbf{Prod.\ resid.}\textsuperscript{2}: $\min(b/a, 1)$} \\
-& 0 & $\tfrac{1}{2}$ & 1 \\
+$a \!\downarrow\; b \!\to$ & 0 & $\tfrac{1}{2}$ & 1 \\
 \hline
 0 & 1 & 1 & 1 \\
 $\tfrac{1}{2}$ & 0 & 1 & 1 \\
 1 & 0 & $\tfrac{1}{2}$ & 1
 \end{tabular}
 \quad
-\begin{tabular}{c|ccc}
+\begin{tabular}{r|ccc}
 \multicolumn{4}{c}{\textbf{Chain-rule}: joint $= \min(a,b)$} \\
-& 0 & $\tfrac{1}{2}$ & 1 \\
+$a \!\downarrow\; b \!\to$ & 0 & $\tfrac{1}{2}$ & 1 \\
 \hline
 0 & $*$ & $*$ & $*$ \\
 $\tfrac{1}{2}$ & 0 & 1 & 1 \\
@@ -548,13 +496,11 @@ $\tfrac{1}{2}$ & 0 & 1 & 1 \\
 \normalsize
 \end{center}
 \smallskip
-{\footnotesize $*$ = unconstrained (any value in $[0,1]$ satisfies
-the chain rule).
+{\footnotesize Rows = evidence $a$, columns = conclusion $b$.
+$*$ = unconstrained (any value in $[0,1]$ satisfies the chain rule).
 \textsuperscript{1}Shared by K$_3$, LP, RM3~\cite{priest2008}.
 \textsuperscript{2}Coincides with G\"odel on $\{0, \tfrac{1}{2}, 1\}$
-(Lean: \texttt{godel\_impl\_eq\_prod\_resid}).
-All three columns show $\cred(A \mid B)$ under different
-definitions; they agree except the evidence${}=0$ row.}
+(Lean: \texttt{godel\_impl\_eq\_prod\_resid}).}
 
 \subsection{Bayes Consistency}
 
@@ -668,19 +614,12 @@ The target is the Kleene lattice~\cite{kleene1952}, underlying
 K$_3$~\cite{kleene1952}, LP~\cite{priest1979}, and
 RM3~\cite{meyer1972}.
 
-\begin{remark}[Connection to Possibility Theory (aside)]
+\begin{remark}[Connection to Possibility Theory]
 \label{rem:possibility}
-The Kleene quotient's operations --- $\mathrm{conj} = \min$,
-$\mathrm{disj} = \max$ --- are exactly the operations of possibility
-theory~\cite{dubois1988}.
-A possibility measure satisfies
-$\Pi(A \cup B) = \max(\Pi(A), \Pi(B))$; the dual necessity measure
-satisfies $N(A) = 1 - \Pi(\bar{A})$, matching the Kleene negation
-$\mathrm{neg}(c) = 1 - c$.
-The collapse homomorphism thus maps the product De Morgan triplet
-(probability-compatible) to the possibility/necessity structure
-(logic-compatible), providing an algebraic bridge between probability
-and possibility theory.
+The Kleene quotient's $\min$/$\max$ operations are exactly the
+conjunction/disjunction of possibility theory~\cite{dubois1988}:
+the collapse maps the product De Morgan triplet to the
+possibility/necessity structure.
 \end{remark}
 
 \subsection{Impossibility Results}
@@ -712,7 +651,8 @@ and \L ukasiewicz conjunction~\cite{lukasiewicz1920}.
 \end{proposition}
 \begin{proof}
 Negation forces $\varphi(\tfrac{1}{2}) = \tfrac{1}{2}$.
-Pick $c = \sqrt{1/2}$; then $c \conjc c = \tfrac{1}{2}$.
+Pick $c = \sqrt{1/2}$ (a preimage of $\tfrac{1}{2}$ under squaring);
+then $c \conjc c = \tfrac{1}{2}$.
 But $\mathrm{conj}_{\text{\L}}(v,v) \in \{0, 1\}$ for all
 $v \in \{0, \tfrac{1}{2}, 1\}$, so no preimage of $\tfrac{1}{2}$ exists.
 Lean: \texttt{no\_luk\_collapse}.
@@ -846,9 +786,10 @@ Negation gives $0 \sim 1 - a^p$.
 Since $0 < a^p < 1$, we have $1 - a^p > 0$, contradicting
 singleton boundaries (Theorem~\ref{thm:unit-classification}(1)).
 
-For the Kleene partition specifically: $0.5 \sim 0.3$ (both interior)
-and $2 \sim 2$ (reflexivity) give $1.0 \sim 0.6$ by
-$\mathbb{R}$-multiplication, contradicting $\{1\}$ as a singleton.
+For the Kleene partition specifically: $\tfrac{1}{2} \sim \tfrac{3}{10}$
+(both interior) and $2 \sim 2$ (reflexivity) give
+$1 \sim \tfrac{3}{5}$ by $\mathbb{R}$-multiplication,
+contradicting $\{1\}$ as a singleton.
 \end{proof}
 
 \begin{remark}[Lean verification]
@@ -935,6 +876,10 @@ conversely: the Kleene quotient survives in the De Morgan reduct
 precisely because dropping residuation removes the constraint
 $0 \to b = 1$ (ex falso) that forces simplicity in the BL
 case~\cite{hajek1998,agliano2003,galatos2007}.
+Structurally, residuation links conjunction to implication so tightly
+that any congruence respecting both is trivial; the involutive
+complement is a weaker companion, leaving room for the Kleene
+partition.
 
 In MV-algebras~\cite{cignoli2000,mundici2011}, Chang's completeness
 theorem gives a rich congruence lattice.
@@ -1037,9 +982,13 @@ $\max(a + b - 1, 0) \leq C(a, b) \leq \min(a, b)$.
 \begin{definition}[Coherence]
 \label{def:dutchbook}
 A credence assignment is \emph{coherent} if no combination of bets
-guarantees a net loss~\cite{ramsey1931,definetti1937}:
-$\cred(A) + \cred(\negc A) = 1$ and
-$\cred(A \mid B) \cdot \cred(B) = \cred(A \land B)$.
+guarantees a net loss~\cite{ramsey1931,definetti1937}.
+The complement condition $\cred(A) + \cred(\negc A) = 1$ is the
+basic coherence constraint.
+The chain rule
+$\cred(A \mid B) \cdot \cred(B) = \cred(A \land B)$ is an additional
+structural constraint used in this paper; it follows from probability
+but is strictly weaker (no sigma-algebra or additivity).
 \end{definition}
 
 %=============================================================================
