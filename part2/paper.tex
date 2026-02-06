@@ -255,6 +255,18 @@ the specific arithmetic of $[0,1]$.
 Goguen~\cite{goguen1969} used the product t-norm as the conjunction in
 his logic of inexact concepts.
 
+\textbf{Why the product?}
+Among the three basic continuous t-norms (product, G\"odel, \L
+ukasiewicz; Appendix~\ref{app:prelim}), the product is the unique
+one that: (i)~shares the conjunction of independent probability
+($P(A \land B) = P(A) \cdot P(B)$), (ii)~has non-trivial dynamics
+under self-conjunction ($c^2 < c$ for $c \in (0,1)$), and (iii)~admits
+exactly three algebraic equilibria $\{0, \tfrac{1}{2}, 1\}$
+(Section~\ref{sec:equilibria}).
+G\"odel's min is idempotent (no dynamics); \L ukasiewicz's
+self-conjunction destroys the $\tfrac{1}{2}$ fixed point
+(Table~\ref{tab:tnorm}).
+
 \begin{definition}[Credence]
 \label{def:credence}
 A \emph{credence} is a real number $c \in [0, 1]$.
@@ -433,18 +445,20 @@ What is $\cred(\text{rain} \mid \text{wet})$?
 \label{def:conditioning}
 A \emph{conditioning structure} for
 $(\text{joint}, \text{evidence}) \in [0,1]^2$
-with $\text{joint} \leq \text{evidence}$
 consists of $\text{condCred} \in [0,1]$ satisfying
 $\text{condCred} \conjc \text{evidence} = \text{joint}$.
 In propositional notation:
-$\condc{A}{B} \conjc \cred(B) = \cred(A \land B)$,
-where $\cred(A \land B) \leq \cred(B)$.
+$\condc{A}{B} \conjc \cred(B) = \cred(A \land B)$.
 \end{definition}
 
 The joint $\cred(A \land B)$ is supplied as input, not computed from
-marginals; the constraint $\cred(A \land B) \leq \cred(B)$ is a
-hypothesis ensuring that the conditional lies in $[0,1]$
-(equivalently, $\cred(B \mid B) \leq 1$).
+marginals.
+A conditioning structure exists if and only if
+$\text{joint} \leq \text{evidence}$ (when evidence $> 0$) or
+$\text{joint} = 0$ (when evidence $= 0$); the constraint
+$\text{joint} \leq \text{evidence}$ is thus a \emph{consequence}
+of the conditioning structure existing with positive evidence, not
+an independent hypothesis.
 H\'ajek, Godo, and Esteva~\cite{hajek1995} used the chain rule
 constraint as a technical device within fuzzy logic;
 Fritz~\cite{fritz2020} developed a categorical approach to
@@ -513,8 +527,12 @@ $*$ = unconstrained (any value in $[0,1]$ satisfies the chain rule).
 LP~\cite{priest1979}, RM3~\cite{anderson1975}.
 \textsuperscript{2}Coincides with G\"odel on $\{0, \tfrac{1}{2}, 1\}$
 (Lean: \texttt{godel\_impl\_eq\_prod\_resid}).
-The chain-rule table uses the min-copula joint $\min(e, p)$; other
-joint choices yield different positive-evidence entries.}
+The chain-rule table uses the min-copula joint $\min(e, p)$
+(the unique symmetric idempotent copula;
+Theorem~\ref{thm:min-copula-unique}), giving the most direct
+comparison with the material conditional.
+Other joint choices yield different positive-evidence entries;
+only the zero-evidence row is independent of the joint.}
 
 \subsection{Existence and Uniqueness}
 \label{sec:existence}
@@ -1084,6 +1102,19 @@ Lean: \texttt{positivityConsequence},
 \texttt{certaintyConsequence}, \texttt{threeValConsequence}.
 \end{definition}
 
+All three consequence relations satisfy the standard Tarskian
+structural rules:
+\emph{reflexivity} ($A \models A$; take any $v$ with $v(A)$
+designated),
+\emph{monotonicity} (if $\Gamma \models A$ and
+$\Gamma \subseteq \Delta$ then $\Delta \models A$; adding premises
+only strengthens the hypothesis), and
+\emph{cut} (if $\Gamma \models A$ and $\Gamma, A \models B$ then
+$\Gamma \models B$; compose the two quantified statements).
+These hold because the consequence relations quantify over
+all assignments --- adding premises restricts the set of
+admissible valuations.
+
 \subsection{The Bridge}
 
 \begin{theorem}[LP Bridge Theorem; new]
@@ -1161,21 +1192,33 @@ The collapse does not merely project --- it \emph{reflects}:
 if a consequence holds on $[0,1]$, it holds on
 $\{0, \tfrac{1}{2}, 1\}$, and conversely.
 
-\textbf{Scope.}
+\begin{remark}[Scope: assignments vs.\ formulas]
+\label{rem:scope}
 The consequence relations (Definition~\ref{def:consequence}) quantify
-over \emph{all assignments} $v : \alpha \to [0,1]$ (respectively
-$w : \alpha \to \{0, \tfrac{1}{2}, 1\}$), not over structured
-formulas.
-When $\alpha$ is a set of propositional variables and formulas are
-built using $\negc$, $\conjc$, $\disjc$, the collapse homomorphism
-(Theorem~\ref{thm:collapse}) ensures that the bridge extends to
-formula-level consequence by induction on formula structure: if $v$
-is a connective-homomorphism (an independent valuation), then
-$\text{collapse} \circ\, v$ respects the Kleene truth tables
+over all assignments $v : \alpha \to [0,1]$ (respectively
+$w : \alpha \to \{0, \tfrac{1}{2}, 1\}$) to a set of propositional
+variables $\alpha$.
+The bridge theorems are proved at this level (and machine-checked in
+Lean).
+In standard matrix semantics, LP and K$_3$ consequence are defined
+over assignments to atoms, with compound formulas evaluated via the
+Kleene truth tables.
+The bridge extends to this formula-based setting because the collapse
+preserves connectives (Theorem~\ref{thm:collapse}): given an
+independent valuation $v : \alpha \to [0,1]$ on atoms, define
+$\hat{v}$ on formulas by $\hat{v}(\negc \varphi) = \negc\hat{v}(\varphi)$,
+etc.
+Then $\text{collapse} \circ\, \hat{v}$ evaluates formulas via
+the Kleene truth tables
 (Proposition~\ref{prop:collapse-composition}).
-Since every assignment in $\{0, \tfrac{1}{2}, 1\}$ lifts to a
-connective-homomorphism (Lemma~\ref{lem:lifting}), restriction to
-connective-homomorphisms on both sides preserves the equivalence.
+Conversely, every Kleene assignment lifts to an independent valuation
+(Lemma~\ref{lem:lifting}).
+Thus restriction to connective-respecting valuations on both sides
+preserves the bridge equivalence.
+The building blocks for this extension are all verified in Lean
+(\texttt{collapse\_val\_neg/conj/disj},
+\texttt{liftThreeVal}, \texttt{lift\_collapse\_id}).
+\end{remark}
 
 The key mechanism is the characterization of designated values via
 the collapse:
@@ -1336,6 +1379,22 @@ $^\P$For $t > \tfrac{1}{2}$: no valuation makes both
 $v(A) \geq t$ and $\negc v(A) \geq t$
 (Proposition~\ref{prop:graded-sharp}).}
 
+\begin{remark}[Graded consequence: all assignments vs.\ homomorphisms]
+\label{rem:graded-scope}
+Graded consequence (like positivity and certainty consequence)
+quantifies over \emph{all} assignments $v : \alpha \to [0,1]$, not
+only independent (homomorphic) valuations.
+This is deliberate: it captures what holds regardless of the
+dependence structure between propositions.
+Restricting to independent valuations would yield a stronger (less
+cautious) consequence relation.
+The bridge theorem (Theorems~\ref{thm:lp-bridge}--\ref{thm:k3-bridge})
+works precisely because both LP/K$_3$ matrix semantics and
+positivity/certainty consequence quantify over all assignments to
+atomic propositions; the collapse and lifting then connect them
+without requiring assumptions about dependence.
+\end{remark}
+
 \subsection{Graded Predicates}
 \label{sec:predicates}
 
@@ -1403,16 +1462,17 @@ recover classical $\forall$ and $\exists$.
 Lean: \texttt{crisp\_inf\_zero\_iff}, \texttt{crisp\_sup\_one\_iff}.
 \end{proposition}
 
-\begin{corollary}[Russell Equation]
-\label{prop:russell}
-The equation $c = \negc c$ (the abstract form of Russell's
-self-referential construction) has the unique solution
-$c = \tfrac{1}{2}$ by Lemma~\ref{thm:liar}.
+\begin{remark}[Self-referential equations]
+\label{rem:russell}
+The equation $c = \negc c$ (abstracting the self-referential core
+of Russell's paradox) has the unique solution
+$c = \tfrac{1}{2}$ (Lemma~\ref{thm:liar}).
+In the graded setting, self-reference produces the negation fixed
+point rather than a contradiction.
 This does not resolve the full Russell paradox (which involves set
-comprehension and quantification), but shows that the
-self-referential core is absorbed by the negation fixed point.
+comprehension and quantification over a domain).
 Lean: \texttt{russell\_fixed\_point}.
-\end{corollary}
+\end{remark}
 
 %=============================================================================
 \section{Conclusion}
@@ -1450,8 +1510,9 @@ structure:
   (the premises are unsatisfiable).
   The threshold $\tfrac{1}{2}$ is sharp.
 \item \textbf{Graded predicates} with inf/sup quantifiers recover
-  classical agreement on crisp predicates and resolve the abstract
-  Russell equation $c = \negc c$ to $\tfrac{1}{2}$.
+  classical agreement on crisp predicates; the self-referential
+  equation $c = \negc c$ resolves to $\tfrac{1}{2}$
+  (Remark~\ref{rem:russell}).
 \end{enumerate}
 
 The same algebraic fact --- $c \cdot 0 = 0$ for all $c$ ---
@@ -1664,7 +1725,7 @@ Quantifier duality (Prop.~\ref{prop:quantifier-duality})
   & \texttt{quantifier\_duality\_val} \\
 Crisp agreement (Prop.~\ref{prop:crisp-agreement})
   & \texttt{crisp\_inf\_zero\_iff}, \texttt{crisp\_sup\_one\_iff} \\
-Russell fixed point (Prop.~\ref{prop:russell})
+Self-referential equation (Rem.~\ref{rem:russell})
   & \texttt{russell\_fixed\_point} \\
 \bottomrule
 \end{tabular}
