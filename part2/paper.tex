@@ -77,13 +77,13 @@ and K$_3$ consequence to certainty consequence.
 The bridge does \emph{not} extend to conditioning: no
 truth-functional function on the lattice can reproduce the
 min-copula conditional --- a finitary impossibility result
-analogous to Lewis triviality, witnessed by two explicit pairs.
+witnessed by two explicit pairs.
 We characterize the boundary conditions under which the bridge
 does hold, show that Bayesian update inherits it, and prove
 a zero-evidence triple tying underdetermination, paraconsistency,
 and bridge failure to the annihilator identity $c \cdot 0 = 0$.
 All results are machine-checked in Lean~4 with Mathlib
-(3581 lines across seven modules, zero \texttt{sorry}).
+(3581 lines, zero \texttt{sorry}).
 \end{abstract}
 
 %=============================================================================
@@ -651,6 +651,9 @@ posterior~\cite{walley1991,levi1980}.
 Lean: \texttt{conditioning\_zero\_any}.
 \end{proposition}
 
+The three distinguished values $0$, $\tfrac{1}{2}$, $1$ lead
+naturally to a collapse homomorphism (Section~\ref{sec:collapse}).
+
 %=============================================================================
 \section{The Kleene Collapse}
 \label{sec:collapse}
@@ -768,11 +771,14 @@ The Kleene quotient's $\min/\max$ operations coincide with
 possibility theory's conjunction/disjunction~\cite{dubois1988}:
 the collapse maps the product De Morgan triplet to the
 possibility/necessity structure.
-The analogy extends partially to conditioning: Dubois--Prade
-conditioning matches the chain-rule conditional when evidence
-or conclusion is at a boundary ($0$ or $1$), but breaks down at
-interior values because truth-functional conditioning on
-$\{0, \tfrac{1}{2}, 1\}$ cannot capture ratio information
+Dubois--Prade conditioning~\cite{dubois1988} uses the same ratio
+$\min(a,b)/b$ when $b > 0$, so it coincides with the min-copula
+conditional on~$[0,1]$.
+The difference is structural: possibility theory works on a
+qualitative ordinal scale where the ratio is well-defined only
+when the scale embeds in~$[0,1]$; the collapse to
+$\{0, \tfrac{1}{2}, 1\}$ discards the metric structure that both
+frameworks require for interior conditioning
 (Section~\ref{sec:cond-bridge} develops this in detail).
 \end{remark}
 
@@ -843,6 +849,12 @@ under $[0,1]$-multiplication the Kleene lattice is the unique
 nontrivial three-element quotient and boundary classes $\{0\}$,
 $\{1\}$ are singletons, while under $\Real$-multiplication no
 nontrivial finite quotient exists at all.
+The distinction matters because $[0,1]$ lacks multiplicative
+inverses: in~$\Real$, if $a \sim b$ then multiplying by
+$a^{-1}$ can spread the equivalence across the entire line,
+making non-trivial quotients impossible.
+Restricting to $[0,1]$-multipliers removes this leverage, and
+the Kleene partition survives.
 Whether a unit congruence with $4$ or more classes exists under
 $[0,1]$-multiplication alone is \textbf{open}.
 
@@ -1130,7 +1142,9 @@ $\{0, \tfrac{1}{2}, 1\}$}
 Under the min copula, the conditional for $b > 0$ is
 $\min(a,b)/b$.
 On the Kleene lattice, the natural candidate for a three-valued
-conditional is the G\"odel implication, which coincides with the
+conditional is the G\"odel implication
+($e \to_G p = 1$ if $e \leq p$, else~$p$),
+which coincides with the
 product-residuated implication on $\{0, \tfrac{1}{2}, 1\}$
 (Lean: \texttt{godel\_impl\_eq\_prod\_resid}).
 The three conditioning tables (Table~\ref{tab:three-conditionals})
@@ -1277,29 +1291,31 @@ that is, when both $a$ and $b$ are interior and $a < b$.
 
 \begin{theorem}[Interior Bridge Failure]
 \label{thm:interior-fail}
-For any $a, b \in (0,1)$ with $a < b$, the conditional bridge fails:
-$a/b \in (0,1)$, so $\mathrm{collapse}(a/b) = \tfrac{1}{2}$, but
-$\mathrm{g\ddot{o}del}(\tfrac{1}{2}, \tfrac{1}{2}) = 1$.
-Lean: \texttt{cond\_bridge\allowbreak\_fails\_interior},
-\texttt{minCopulaCond\allowbreak\_interior}.
+There exist $a, b \in (0,1)$ with $a < b$ such that the conditional
+bridge fails.
+Lean: \texttt{cond\_bridge\allowbreak\_fails\_interior}.
 \end{theorem}
 
 \begin{proof}
-When $0 < a < b < 1$: $\min(a,b)/b = a/b$.
-Since $0 < a < b$, we have $0 < a/b < 1$, so
-$\mathrm{collapse}(a/b) = \tfrac{1}{2}$.
-Since $0 < a < 1$ and $0 < b < 1$, both collapse to $\tfrac{1}{2}$,
-and $\mathrm{g\ddot{o}del}(\tfrac{1}{2}, \tfrac{1}{2})
+Take $a = 3/10$, $b = 7/10$.
+Both are interior with $a < b$, so
+$\min(a,b)/b = a/b = 3/7 \in (0,1)$ and
+$\mathrm{collapse}(3/7) = \tfrac{1}{2}$.
+Both $a$ and $b$ collapse to $\tfrac{1}{2}$, and
+$\mathrm{g\ddot{o}del}(\tfrac{1}{2}, \tfrac{1}{2})
 = 1 \neq \tfrac{1}{2}$.
 \end{proof}
 
-The failure is systematic, not accidental.
-Whenever both the conclusion and evidence are uncertain (interior)
-and the conclusion is less credible than the evidence, the
-min-copula conditional is interior; but the G\"odel conditional on
-$\{0, \tfrac{1}{2}, 1\}$ maps $(\tfrac{1}{2}, \tfrac{1}{2})$ to
-$1$ (certainty), losing the distinction between ``partially
-supports'' and ``fully supports.''
+The argument generalizes beyond the specific witnesses: for
+\emph{any} interior $a < b$, the min-copula conditional $a/b$ is
+interior (Lean: \texttt{minCopulaCond\allowbreak\_interior}),
+so $\mathrm{collapse}(a/b) = \tfrac{1}{2}$, while
+$\mathrm{g\ddot{o}del}(\tfrac{1}{2}, \tfrac{1}{2}) = 1$.
+The failure is systematic, not accidental: whenever both the
+conclusion and evidence are uncertain and the conclusion is less
+credible than the evidence, the collapse loses the ratio
+information that distinguishes ``partially supports'' from
+``fully supports.''
 
 \begin{corollary}[Complete Characterization]
 \label{cor:complete-boundary}
@@ -1313,7 +1329,10 @@ if and only if at least one of conditions
 \begin{proof}
 Sufficiency: Theorem~\ref{thm:boundary}.
 Necessity: when none of (i)--(iv) hold, both $a$ and $b$ are interior
-with $a < b$, and Theorem~\ref{thm:interior-fail} gives failure.
+with $a < b$; the min-copula conditional is then interior
+(by the same arithmetic as Theorem~\ref{thm:interior-fail}),
+giving $\mathrm{collapse}(a/b) = \tfrac{1}{2} \neq 1
+= \mathrm{g\ddot{o}del}(\tfrac{1}{2}, \tfrac{1}{2})$.
 \end{proof}
 
 \subsection{The Role of Dependence}
@@ -1376,14 +1395,15 @@ $\cred(B) > 0$, the \emph{Bayesian posterior} is
 $\cred'(A) = \cred(A \land B) / \cred(B)$.
 \end{definition}
 
-\begin{proposition}[Chain-Rule Preservation]
+\begin{remark}
 \label{prop:bayes-chain}
-The Bayesian posterior satisfies the chain rule:
-$\cred'(A) \conjc \cred(B) = \cred(A \land B)$.
-It is the unique value with this property
+The Bayesian posterior satisfies the chain rule by construction:
+$\cred'(A) \conjc \cred(B) = (\cred(A \land B) / \cred(B))
+\cdot \cred(B) = \cred(A \land B)$.
+It is the unique value with this property when $\cred(B) > 0$
 (Lean: \texttt{bayesianUpdate\_chain\_rule},
 \texttt{bayesianUpdate\_unique}).
-\end{proposition}
+\end{remark}
 
 In the running example (Example~\ref{ex:rain}), the min-copula
 posterior is $\cred'(\text{rain}) = 8/9$: rain was already
@@ -1423,7 +1443,7 @@ which the chain rule avoids by leaving the conditional unconstrained.
 
 \subsection{Update Bridge Theorem}
 
-\begin{theorem}[Update Bridge]
+\begin{corollary}[Update Bridge]
 \label{thm:update-bridge}
 Under boundary conditions (Theorem~\ref{thm:boundary}), collapsing
 after min-copula conditioning equals qualitative update after
@@ -1438,7 +1458,7 @@ gives the same result as collapsing followed by qualitative update.
 
 \smallskip\noindent
 Lean: \texttt{update\_bridge}.
-\end{theorem}
+\end{corollary}
 
 \begin{proof}
 Immediate from Theorem~\ref{thm:boundary}: the qualitative update
@@ -1588,9 +1608,11 @@ and~\ref{thm:k3-bridge}) and shows the homomorphism cannot
 extend to conditioning (Theorem~\ref{thm:no-cond-bridge}).
 
 \textbf{Primitive conditioning and conditionals.}
-Primitive conditioning has precedents in
-R\'enyi~\cite{renyi1955}, Popper~\cite{popper1959},
-de Finetti~\cite{definetti1936,definetti1937},
+The primitive-conditioning tradition
+(R\'enyi~\cite{renyi1955}, Popper~\cite{popper1959},
+de Finetti~\cite{definetti1936,definetti1937};
+see Section~\ref{sec:conditioning})
+was extended by
 Krauss~\cite{krauss1968}, Dubins~\cite{dubins1975},
 and \'Egr\'e--Rossi--Sprenger~\cite{egre2021}.
 Adams~\cite{adams1975} developed a probabilistic logic of
@@ -1601,8 +1623,7 @@ probability with the probability of a conditional proposition
 forces triviality (Remark~\ref{rem:lewis} compares our
 impossibility theorem).
 McGee~\cite{mcgee1985} showed that modus ponens can fail for
-indicative conditionals, reinforcing the point that the conditional
-does not reduce to the material implication --- the same
+indicative conditionals --- the same
 theme that drives the conditional bridge failure in
 Section~\ref{sec:cond-bridge}.
 
@@ -1616,8 +1637,9 @@ Copulas are surveyed in Nelsen~\cite{nelsen2006}; comonotonicity
 in Dhaene et~al.~\cite{dhaene2002};
 imprecise probability in Walley~\cite{walley1991} and
 Levi~\cite{levi1980}.
-Cox~\cite{cox1961} and Jaynes~\cite{jaynes2003} showed that
-consistent plausible reasoning must be isomorphic to probability;
+The Cox--Jaynes uniqueness theorem
+(Section~\ref{sec:conditioning};~\cite{cox1961,jaynes2003})
+motivates chain-rule conditioning as a relaxation of probability;
 Gaines~\cite{gaines1978} unified fuzzy and probabilistic
 uncertainty.
 The failure of the collapse homomorphism to preserve the conditional
@@ -1670,9 +1692,10 @@ In the connexive tradition~\cite{wansing2024}, Aristotle's and
 Boethius' theses are added as axioms to block ex falso;
 the chain rule achieves a similar effect without a connexive
 axiom, by leaving the conditional unconstrained at evidence zero.
-Belnap~\cite{belnap1977} and Dunn~\cite{dunn1976} developed FDE;
-Fitting~\cite{fitting1991,fitting2006} connected bilattices to
-logic programming.
+The bilattice framework of
+Belnap~\cite{belnap1977}, Dunn~\cite{dunn1976}, and
+Fitting~\cite{fitting1991,fitting2006}
+is discussed in Section~\ref{sec:collapse-hom}.
 
 %=============================================================================
 \section{Conclusion}
@@ -1845,7 +1868,7 @@ Interior conditional range
   & \texttt{interior\_cond\_range} \\
 Qualitative update (Def.~\ref{def:qual-update})
   & \texttt{qualitativeUpdate}, \texttt{qualUpdate\_*} \\
-Update bridge (Thm.~\ref{thm:update-bridge})
+Update bridge (Cor.~\ref{thm:update-bridge})
   & \texttt{update\_bridge} \\
 Zero-evidence triple (Thm.~\ref{thm:zero-trichotomy})
   & \texttt{zero\_evidence\_duality} \\
