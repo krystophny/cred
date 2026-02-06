@@ -80,7 +80,7 @@ min-copula conditional --- a finitary impossibility result
 analogous to Lewis triviality, witnessed by two explicit pairs.
 We characterize the boundary conditions under which the bridge
 does hold, show that Bayesian update inherits it, and prove
-a zero-evidence trichotomy tying underdetermination, paraconsistency,
+a zero-evidence triple tying underdetermination, paraconsistency,
 and bridge failure to the annihilator identity $c \cdot 0 = 0$.
 All results are machine-checked in Lean~4 with Mathlib
 (3581 lines across seven modules, zero \texttt{sorry}).
@@ -147,10 +147,15 @@ homomorphism, recovering the shared truth tables of
 K$_3$~\cite{kleene1952},
 LP~\cite{asenjo1966,priest1979},
 and RM3~\cite{anderson1975,meyer1972}.
-The ``bridge'' has two senses: the collapse homomorphism connects
-three-valued logic to $[0,1]$; chain-rule conditioning connects
-Bayesian reasoning to the same algebra.
-This paper studies both senses and their interaction.
+We distinguish three uses of ``bridge'':
+the \emph{collapse homomorphism} is the surjective map from $[0,1]$
+to $\{0, \tfrac{1}{2}, 1\}$;
+the \emph{propositional bridge} is the equivalence of consequence
+relations it induces (Theorems~\ref{thm:lp-bridge}
+and~\ref{thm:k3-bridge});
+the \emph{conditional bridge} is the (attempted) commutativity
+of the collapse with conditioning.
+This paper studies all three and their interaction.
 
 \textbf{Main results.}
 \begin{enumerate}[nosep]
@@ -183,7 +188,7 @@ This paper studies both senses and their interaction.
   (evidence certain, conclusion at a boundary, or conclusion at
   least as credible as evidence);
   Bayesian update inherits the bridge under these conditions.
-\item \textbf{Zero-evidence trichotomy}
+\item \textbf{Zero-evidence triple}
   (Section~\ref{sec:cond-bridge}; new):
   the identity $c \cdot 0 = 0$ simultaneously forces
   underdetermined posteriors, LP explosion failure, and
@@ -217,21 +222,6 @@ Section~\ref{sec:related} surveys related work in detail.
 \textbf{Note on formalization.}
 All results marked with ``Lean:'' are machine-checked in Lean~4
 with Mathlib (Appendix~\ref{app:lean}).
-
-\textbf{Section guide.}
-Section~\ref{sec:triplet}: the product De Morgan triplet and
-min-copula uniqueness.
-Section~\ref{sec:conditioning}: chain-rule conditioning.
-Section~\ref{sec:collapse}: the Kleene collapse and congruence
-classification.
-Section~\ref{sec:bridge}: the propositional bridge.
-Section~\ref{sec:cond-bridge}: the conditional bridge ---
-impossibility, boundary characterization, update bridge, and
-zero-evidence trichotomy.
-Section~\ref{sec:related}: related work.
-Section~\ref{sec:conclusion}: conclusion and open problems.
-Appendix~\ref{app:lean}: Lean formalization.
-Appendix~\ref{app:proofs}: deferred proofs.
 
 %=============================================================================
 \section{The Product De Morgan Triplet}
@@ -326,10 +316,9 @@ The three basic continuous t-norms are G\"odel ($\min$),
 product ($\cdot$), and \L ukasiewicz
 ($\max(a{+}b{-}1,\allowbreak 0)$).
 G\"odel is idempotent, so conjunction has no compounding
-effect; \L ukasiewicz destroys the negation fixed point
-($T_{\text{\L}}(\tfrac{1}{2}, \tfrac{1}{2}) = 0
-\neq \tfrac{1}{2}$;
-Lean: \texttt{luk\_not\_idempotent}).
+effect; \L ukasiewicz conjunction fails to preserve the negation fixed point:
+$\max(\tfrac{1}{2} + \tfrac{1}{2} - 1,\; 0) = 0 \neq \tfrac{1}{2}$
+(Lean: \texttt{luk\_not\_idempotent}).
 Product is non-idempotent ($c^2 < c$ for interior~$c$),
 preserves the interior, and its De Morgan dual is the
 probabilistic sum~\cite{klement2000}.
@@ -361,7 +350,7 @@ $^*$G\"odel: every value in $[0,1]$ is conjunction-idempotent.
 \L ukasiewicz has the same candidate values
 $\{0, \tfrac{1}{2}, 1\}$, but
 $T_{\text{\L}}(\tfrac{1}{2}, \tfrac{1}{2}) = 0 \neq \tfrac{1}{2}$
-destroys the fixed point under conjunction, so $\{0, \tfrac{1}{2}, 1\}$
+fails to preserve the fixed point under conjunction, so $\{0, \tfrac{1}{2}, 1\}$
 does not form a valid quotient
 (Lean: \texttt{luk\_conj\_half\_half}).}
 \label{tab:tnorm-comparison}
@@ -409,18 +398,12 @@ marginals.
 Which truth-functional joint should we use when computing
 conditionals?
 
-We impose four desiderata:
-truth-functionality ($j(a,b)$ depends on $a$ and $b$ alone),
-Bayes consistency (the joint is symmetric: $j(a,b) = j(b,a)$,
-so the joint credence is the same regardless of conditioning
-direction),
-non-trivial conditioning ($j(a,b)/b \neq a$ in general),
-and idempotence ($j(a,a) = a$).
-These four are not independent: truth-functionality and Bayes
-consistency are subsumed by the copula axioms (any copula is
-truth-functional and symmetric by definition), and non-triviality
-follows from idempotence ($\min(a,b)/b \neq a$ whenever $a < b$).
-The operative conditions are symmetry and idempotence alone.
+We require two conditions: \emph{symmetry} ($j(a,b) = j(b,a)$)
+and \emph{idempotence} ($j(a,a) = a$).
+(These subsume the intuitive desiderata of truth-functionality,
+Bayes consistency, and non-trivial conditioning: any copula is
+truth-functional and symmetric by definition, and idempotence
+forces $\min(a,b)/b \neq a$ whenever $a < b$.)
 
 \begin{theorem}[Uniqueness of the Min Copula]
 \label{thm:min-copula-unique}
@@ -462,10 +445,13 @@ In propositional notation:
 $\condc{A}{B} \conjc \cred(B) = \cred(A \land B)$.
 \end{definition}
 
-Throughout, we write the conditional as $\condc{A}{B}$ with the
+Throughout, we write the conditional as $\condc{A}{B}$ with
 conclusion first and evidence second.
 In the Lean formalization, \texttt{minCopulaCond a b} likewise
 takes conclusion \texttt{a} first and evidence \texttt{b} second.
+In Theorem~\ref{thm:no-cond-bridge}, the truth-functional candidate
+$f(e, p)$ takes evidence first, following the G\"odel implication
+convention $e \to p$ where $e$ is the antecedent.
 
 The joint is supplied as input, not computed from marginals.
 H\'ajek, Godo, and Esteva~\cite{hajek1995} used the chain-rule
@@ -710,12 +696,12 @@ solution $c = \tfrac{1}{2}$
 (Lean: \texttt{liar\_fixed\_point},
 \texttt{neg\_fixed\_point\_unique}).
 
-\begin{proposition}[Algebraic Fixed Points]
+\begin{lemma}[Algebraic Fixed Points]
 \label{prop:equilibria}
 A credence $c \in [0,1]$ belongs to $\{0, \tfrac{1}{2}, 1\}$ if and
 only if $c^2 = c$ or $\negc c = c$.
 Lean: \texttt{equilibria\_characterization}.
-\end{proposition}
+\end{lemma}
 
 The three values are \emph{derived} from the algebra: $0$ and $1$
 are the conjunction-idempotent fixed points, and $\tfrac{1}{2}$ is
@@ -1046,9 +1032,21 @@ Lean: \texttt{k3\_formula\_bridge}.
 \end{theorem}
 
 \begin{proof}
-Identical structure to the LP bridge, replacing ``positive'' with
-``equal to $1$'' and the LP designated set with $\{1\}$
-(Lean: \texttt{k3\_designated\_iff\_one}).
+The bridge lemma is: $\mathrm{collapse}(c) = 1$ if and only if
+$c = 1$ (Lean: \texttt{k3\_designated\_iff\_one}).
+$(\Rightarrow)$
+Let $v : \alpha \to [0,1]$ with
+$\llbracket\psi\rrbracket_v = 1$ for all $\psi \in \Gamma$.
+Set $w = \mathrm{collapse} \circ v$.
+By Proposition~\ref{prop:collapse-eval},
+$\llbracket\psi\rrbracket_w = \mathrm{collapse}(
+\llbracket\psi\rrbracket_v) = 1$, so each premise is
+K$_3$-designated under $w$.
+By K$_3$ consequence, $\llbracket\varphi\rrbracket_w = 1$,
+hence $\llbracket\varphi\rrbracket_v = 1$.
+$(\Leftarrow)$
+Symmetric: lift K$_3$ valuations via
+$v = \mathrm{lift} \circ w$ and apply the bridge lemma in reverse.
 \end{proof}
 
 The proofs are symmetric in a precise sense: one direction collapses,
@@ -1460,9 +1458,7 @@ $\mathrm{collapse}(8/9) = \tfrac{1}{2} \neq 1 =
 \mathrm{qual}(\tfrac{1}{2}, \tfrac{1}{2})$.
 \end{example}
 
-\subsection{Jeffrey Update}
-
-\begin{definition}[Jeffrey Update]
+\begin{remark}[Jeffrey Update]
 \label{def:jeffrey}
 Jeffrey conditionalization~\cite{jeffrey1965} handles uncertain
 evidence via a mixture:
@@ -1472,30 +1468,19 @@ At $q = 1$ this reduces to Bayesian update; at $q = 0$ it conditions
 on $\negc B$
 (Lean: \texttt{jeffreyUpdate\_certain},
 \texttt{jeffreyUpdate\_zero}).
-\end{definition}
+For the Jeffrey update bridge to hold, both conditional arms must
+satisfy the boundary conditions of Theorem~\ref{thm:boundary};
+this is automatically satisfied when the conclusion is certain or
+impossible, but restrictive otherwise.
+\end{remark}
 
-For the Jeffrey update bridge to hold, \emph{both} conditional arms
-must satisfy the boundary conditions of Theorem~\ref{thm:boundary}:
-$\condc{A}{B}$ must be at a boundary, and so must
-$\condc{A}{\negc B}$.
-This is restrictive.
-In the running example, unless $\cred(\text{rain})$ is $0$, $1$,
-or at least as large as both $\cred(\text{wet})$ and
-$\cred(\negc\text{wet})$, at least one arm is interior and the
-Jeffrey bridge fails.
-The boundary conditions are automatically satisfied when the
-conclusion is certain ($\cred(A) = 1$, giving both arms $= 1$)
-or impossible ($\cred(A) = 0$, giving both arms $= 0$);
-a fuller development of Jeffrey conditioning under the bridge is
-left for future work.
-
-\subsection{Zero-Evidence Trichotomy}
+\subsection{Zero-Evidence Triple}
 \label{sec:zero-trichotomy}
 
 The algebraic fact $c \cdot 0 = 0$ for all $c \in [0,1]$ is the
 common root of three phenomena.
 
-\begin{theorem}[Zero-Evidence Trichotomy]
+\begin{theorem}[Zero-Evidence Triple]
 \label{thm:zero-trichotomy}
 The following three statements are simultaneously consequences of
 the identity $c \conjc 0 = 0$:
@@ -1542,13 +1527,13 @@ single output can be correct for all $a$
 
 Items~(i) and~(ii) are individually known
 (Proposition~\ref{prop:zero-underdet} and
-Example~\ref{ex:explosion}); the trichotomy's contribution is
+Example~\ref{ex:explosion}); the triple's contribution is
 exhibiting the common algebraic root from which all three flow.
 The annihilator property $c \cdot 0 = 0$ is necessary for all
 three items; the negation fixed point $\negc \tfrac{1}{2}
 = \tfrac{1}{2}$ provides the specific witness for~(ii).
 
-The trichotomy provides a unified perspective on the paper's results.
+The triple provides a unified perspective on the paper's results.
 The propositional bridge (Section~\ref{sec:bridge}) operates through
 the connectives, which are homomorphic under collapse.
 The conditional bridge (Section~\ref{sec:cond-bridge}) fails because
@@ -1606,6 +1591,7 @@ extend to conditioning (Theorem~\ref{thm:no-cond-bridge}).
 Primitive conditioning has precedents in
 R\'enyi~\cite{renyi1955}, Popper~\cite{popper1959},
 de Finetti~\cite{definetti1936,definetti1937},
+Krauss~\cite{krauss1968}, Dubins~\cite{dubins1975},
 and \'Egr\'e--Rossi--Sprenger~\cite{egre2021}.
 Adams~\cite{adams1975} developed a probabilistic logic of
 conditionals; van Fraassen~\cite{vanfraassen1976,vanfraassen1983}
@@ -1697,49 +1683,13 @@ The product De Morgan triplet on $[0,1]$ --- product conjunction,
 probabilistic-sum disjunction, standard complement --- admits a
 natural collapse to the Kleene lattice
 $\{0, \tfrac{1}{2}, 1\}$ via a surjective homomorphism.
-The paper develops two main threads.
-
-\textbf{Thread 1: Properties of the triplet and its collapse}
-(independent of conditioning).
-\begin{enumerate}[nosep]
-\item The bridge theorem: LP consequence on
-  $\{0, \tfrac{1}{2}, 1\}$ is equivalent to positivity consequence
-  on $[0,1]$; K$_3$ consequence is equivalent to certainty
-  consequence
-  (Theorems~\ref{thm:lp-bridge}
-  and~\ref{thm:k3-bridge}).
-\item The algebraic fixed points $\{0, \tfrac{1}{2}, 1\}$ are
-  derived from the algebra: $\tfrac{1}{2}$ is the unique
-  negation fixed point; $0$ and $1$ are the unique conjunction
-  absorber and identity.
-\item The Kleene collapse is the unique three-element quotient
-  preserving negation and conjunction.
-\item The congruence classification: under $[0,1]$-multiplication,
-  the Kleene lattice exists and is the unique three-element
-  quotient; under $\Real$-multiplication, no non-trivial finite
-  quotient exists at all (Appendix~\ref{app:proofs}).
-\end{enumerate}
-
-\textbf{Thread 2: Conditioning} (the paper's main contributions).
-\begin{enumerate}[nosep,start=5]
-\item The conditional bridge impossibility: no truth-functional
-  function on $\{0, \tfrac{1}{2}, 1\}$ can serve as a conditional
-  bridge (Theorem~\ref{thm:no-cond-bridge}).
-  This is a finitary Lewis triviality for the product De Morgan
-  triplet, witnessed by two explicit pairs.
-\item The boundary characterization: the bridge holds if and only if
-  evidence is certain, conclusion is impossible or certain, or
-  conclusion is at least as credible as evidence
-  (Theorem~\ref{thm:boundary},
-  Corollary~\ref{cor:complete-boundary}).
-\item The update bridge: Bayesian update inherits the conditional
-  bridge under boundary conditions
-  (Theorem~\ref{thm:update-bridge}).
-\item Zero-evidence trichotomy: the algebraic fact $c \cdot 0 = 0$
-  simultaneously forces underdetermined posteriors,
-  LP explosion failure, and conditional bridge failure
-  (Theorem~\ref{thm:zero-trichotomy}).
-\end{enumerate}
+On the propositional side, this collapse establishes a bidirectional
+bridge: LP consequence on the lattice is equivalent to positivity
+consequence on $[0,1]$, and K$_3$ to certainty consequence.
+On the conditional side, the bridge breaks: no truth-functional
+function on the lattice reproduces the min-copula conditional,
+though the bridge survives at boundaries and transfers to Bayesian
+update under those conditions.
 
 \textbf{The common root is $c \cdot 0 = 0$.}
 The identity that makes zero an annihilator for the product
@@ -1836,7 +1786,7 @@ Mathlib), totaling 3581 lines with zero \texttt{sorry}:
   quantifiers, Russell fixed point (210 lines).$^\dagger$
 \item \texttt{Cred/CondBridge.lean}: conditional bridge impossibility,
   boundary characterization, qualitative update, update bridge,
-  zero-evidence trichotomy (353 lines).
+  zero-evidence triple (353 lines).
 \end{itemize}
 \smallskip
 \noindent
@@ -1897,7 +1847,7 @@ Qualitative update (Def.~\ref{def:qual-update})
   & \texttt{qualitativeUpdate}, \texttt{qualUpdate\_*} \\
 Update bridge (Thm.~\ref{thm:update-bridge})
   & \texttt{update\_bridge} \\
-Zero-evidence trichotomy (Thm.~\ref{thm:zero-trichotomy})
+Zero-evidence triple (Thm.~\ref{thm:zero-trichotomy})
   & \texttt{zero\_evidence\_duality} \\
 Bayesian update chain rule
   & \texttt{bayesianUpdate\_chain\_rule} \\
@@ -2021,6 +1971,9 @@ External (prob.) & $\times$ & \checkmark & \checkmark & \checkmark \\
 \captionof{table}{Comparison of joint formulas.
 Only the minimum satisfies all four requirements among
 truth-functional formulas.
+The RM3 joint $\max(\negc a, b) \cdot a$ combines the Kleene
+material conditional $\max(\negc a, b)$ with the algebraic
+conjunction.
 Lean: \texttt{min\_copula\_unique},
 \texttt{prod\_trivial\_conditioning},
 \texttt{luk\_not\_idempotent},
