@@ -22,7 +22,7 @@
     citecolor=blue,
     urlcolor=blue,
     pdfauthor={Anonymous},
-    pdftitle={The Product De Morgan Triplet: Bridging Probability and Many-Valued Logic via Chain-Rule Conditioning}
+    pdftitle={The Product De Morgan Triplet: Chain-Rule Conditioning as a Bridge between Probability and Many-Valued Logic}
 }
 \usepackage{cleveref}
 \usepackage[margin=1in]{geometry}
@@ -49,8 +49,8 @@
 \newcommand{\Nat}{\mathbb{N}}
 
 \title{The Product De Morgan Triplet:\\
-Bridging Probability and Many-Valued Logic\\
-via Chain-Rule Conditioning}
+Chain-Rule Conditioning as a Bridge\\
+between Probability and Many-Valued Logic}
 
 \author{Anonymous for blind review}
 \date{February 2026}
@@ -60,28 +60,24 @@ via Chain-Rule Conditioning}
 \maketitle
 
 \begin{abstract}
-Probability theory and many-valued logic both operate on $[0,1]$ and
-share the same algebraic core --- product conjunction, probabilistic-sum
-disjunction, standard complement --- yet they diverge on the conditional.
-Probability derives it via division (undefined at zero evidence);
-product logic derives it via residuation (forcing ex falso at zero
-evidence).
+Probability theory and many-valued logic share the same algebraic core
+on $[0,1]$ --- product conjunction, probabilistic-sum disjunction,
+standard complement --- but diverge on the conditional:
+probability requires division (undefined at zero evidence);
+product logic uses residuation (forcing ex falso at zero evidence).
 We study \emph{chain-rule conditioning}, where the conditional satisfies
-$\cred(A \mid B) \cdot \cred(B) = \cred(A \land B)$
-without invoking either division or residuation.
-At positive evidence, the chain rule reduces to Bayesian conditioning;
-at zero evidence, it leaves the conditional unconstrained --- neither
-undefined nor explosive.
+$\cred(A \mid B) \cdot \cred(B) = \cred(A \land B)$:
+at positive evidence it reduces to Bayesian conditioning; at zero
+evidence it leaves the conditional unconstrained.
 Our main result is a \emph{bridge theorem}: LP consequence on the
 three-valued Kleene lattice is equivalent to positivity consequence on
 $[0,1]$, and K$_3$ consequence is equivalent to certainty consequence.
-Discrete logical reasoning is thus faithfully encoded in continuous
-credences.
-Supporting results include a congruence classification (the Kleene
-lattice is the unique non-trivial three-element quotient under
-$[0,1]$-multiplication; no non-trivial finite quotient exists under
-$\Real$-multiplication), graded consequence with no-explosion, and
-Bayesian and Jeffrey update with zero-evidence underdetermination.
+Discrete three-valued reasoning and continuous $[0,1]$ reasoning are
+thus two views of the same relation.
+Supporting results include a congruence classification
+(the Kleene lattice is the unique non-trivial three-element quotient
+under $[0,1]$-multiplication; no non-trivial finite quotient exists
+under $\Real$-multiplication) and graded consequence with no-explosion.
 All results are machine-checked in Lean~4 with Mathlib
 (approximately 3000 lines, zero \texttt{sorry}).
 \end{abstract}
@@ -181,7 +177,9 @@ the negation fixed point $\tfrac{1}{2}$~\cite{kripke1975}.
 \textbf{Literature positioning.}
 H\'ajek~\cite{hajek1998} and
 Esteva--Godo~\cite{esteva2000,esteva2001} developed Product Logic
-with the same t-norm but residuated implication (forcing ex falso).
+with the same t-norm but residuated implication (forcing ex falso);
+the Handbook of Mathematical Fuzzy Logic~\cite{cintula2011} provides
+a comprehensive treatment of the landscape.
 Mundici~\cite{mundici2011} and
 Flaminio--Montagna~\cite{flaminio2009} studied probability on
 MV-algebras (\L ukasiewicz, not product).
@@ -207,7 +205,9 @@ game semantics; Gaines~\cite{gaines1978} unified fuzzy and
 probabilistic uncertainty via population semantics.
 Cox~\cite{cox1961} and Jaynes~\cite{jaynes2003} showed plausible
 reasoning satisfying certain desiderata must be isomorphic to
-probability; chain-rule conditioning drops the requirement that the
+probability (see also Paris~\cite{paris1994} for a mathematical
+perspective on uncertain reasoning);
+chain-rule conditioning drops the requirement that the
 conditional be a function of the marginals alone.
 Lewis's triviality result~\cite{lewis1976} shows that if one
 treats $P(A \mid B)$ as the probability of a ``conditional
@@ -239,7 +239,6 @@ Section~\ref{sec:collapse}: the Kleene collapse and congruence
 classification.
 Section~\ref{sec:bridge}: the bridge theorem (centerpiece).
 Section~\ref{sec:applications}: update, consequence, and predicates.
-Section~\ref{sec:two-modes}: two modes of inference.
 Section~\ref{sec:conclusion}: summary and open problems.
 
 %=============================================================================
@@ -428,13 +427,18 @@ What is $\cred(\text{rain} \mid \text{wet})$?
 \label{def:conditioning}
 A \emph{conditioning structure} for
 $(\text{joint}, \text{evidence}) \in [0,1]^2$
+with $\text{joint} \leq \text{evidence}$
 consists of $\text{condCred} \in [0,1]$ satisfying
 $\text{condCred} \conjc \text{evidence} = \text{joint}$.
 In propositional notation:
-$\condc{A}{B} \conjc \cred(B) = \cred(A \land B)$.
+$\condc{A}{B} \conjc \cred(B) = \cred(A \land B)$,
+where $\cred(A \land B) \leq \cred(B)$.
 \end{definition}
 
-The joint is supplied as input, not computed from marginals.
+The joint $\cred(A \land B)$ is supplied as input, not computed from
+marginals; the constraint $\cred(A \land B) \leq \cred(B)$ is the
+standard monotonicity requirement that the conjunction cannot exceed
+either conjunct.
 H\'ajek, Godo, and Esteva~\cite{hajek1995} used the chain rule
 constraint as a technical device within fuzzy logic;
 Fritz~\cite{fritz2020} developed a categorical approach to
@@ -818,6 +822,12 @@ $0 < c_1 + c_2 - c_1 c_2 < 1$.
 The target is the Kleene lattice~\cite{kleene1952}, underlying
 K$_3$~\cite{kleene1952}, LP~\cite{priest1979}, and
 RM3~\cite{anderson1975,meyer1972}.
+Belnap~\cite{belnap1977} and Dunn~\cite{dunn1976} studied this
+three-valued structure (and its four-valued extension) as a
+``useful logic'' for reasoning with incomplete and inconsistent
+information; Fitting~\cite{fitting1991,fitting2006} developed a
+systematic bilattice framework in which the Kleene lattice
+appears as one component of a product construction.
 
 \begin{remark}[Connection to possibility theory]
 \label{rem:possibility}
@@ -912,28 +922,42 @@ Lean: \texttt{UnitCongruence.singleton\_zero},
 \texttt{singleton\_one}, \texttt{kleeneCongruence},
 \texttt{RealCongruence.no\_nontrivial\_finite\_quotient}.
 \end{theorem}
-\begin{proof}[Proof sketch]
+\begin{proof}
 (1)~Suppose $0 \sim \varepsilon$ for some $\varepsilon > 0$.
-Negation gives $1 \sim 1 - \varepsilon$.
-Multiplication compatibility: $x \sim x(1 - \varepsilon)$ for all
-$x \in [0,1]$.
+Negation compatibility gives $1 \sim 1 - \varepsilon$.
+For any $x \in [0,1]$, multiplication compatibility yields
+$x = x \cdot 1 \sim x(1 - \varepsilon)$.
 By induction, $x \sim x(1 - \varepsilon)^n$ for all $n$.
-For large $n$, $x(1 - \varepsilon)^n \leq \varepsilon$.
-Factoring: $x(1 - \varepsilon)^n = \varepsilon \cdot
-[x(1-\varepsilon)^n / \varepsilon]$, and the bracketed quotient lies
-in $[0,1]$.
-Since $0 \sim \varepsilon$, multiplication compatibility gives
-$0 \sim x(1-\varepsilon)^n$.
-Transitivity: $x \sim 0$ for every $x$.
-The quotient is trivial --- contradiction.
-The argument for $\{1\}$ is dual (apply negation).
-(2)~Immediate from the negation fixed point at $\tfrac{1}{2}$.
+Since $0 < 1 - \varepsilon < 1$, for any $x > 0$ there exists
+$n$ with $x(1 - \varepsilon)^n \leq \varepsilon$.
+Write $x(1 - \varepsilon)^n = \varepsilon \cdot q$ where
+$q = x(1 - \varepsilon)^n / \varepsilon \in [0,1]$.
+From $0 \sim \varepsilon$, multiplication compatibility gives
+$0 = 0 \cdot q \sim \varepsilon \cdot q = x(1 - \varepsilon)^n$.
+By transitivity, $x \sim x(1-\varepsilon)^n \sim 0$
+for every $x \in [0,1]$, so the quotient is trivial ---
+contradiction.
+For $\{1\}$: if $1 \sim x$ with $x < 1$, negation gives
+$0 \sim 1 - x$ with $1 - x > 0$, reducing to the previous case.
+
+(2)~A surjective $\varphi : [0,1] \to \{0,1\}$ must satisfy
+$\varphi(\tfrac{1}{2}) = 1 - \varphi(\tfrac{1}{2})$, which has no
+solution in $\{0,1\}$ (Proposition~\ref{prop:no-classical}).
+
 (3)~Theorem~\ref{thm:quotient-unique}.
-(4)~Given $n \geq 2$ classes, pigeonhole on the powers
-$a, a^2, \ldots, a^{n+1}$ (with $a = \tfrac{1}{2}$) gives
-$a^i \sim a^j$ with $i < j$.
-Under $\Real$-multiplication, multiply by $(a^i)^{-1}$
-to get $1 \sim a^{j-i}$, contradicting singleton boundaries from (1).
+The Kleene partition is a verified unit congruence
+(Theorem~\ref{thm:collapse}).
+
+(4)~Set $a = \tfrac{1}{2}$.
+With $n \geq 2$ classes, pigeonhole on the $n + 1$ powers
+$a^0, a^1, \ldots, a^n$ gives indices $i < j \leq n$ with
+$a^i \sim a^j$.
+Write $a^j = a^i \cdot a^p$ where $p = j - i > 0$.
+Under $\Real$-multiplication, multiply both sides of $a^i \sim a^j$
+by $(a^i)^{-1}$ (which exists in $\Real$):
+$1 = (a^i)^{-1} \cdot a^i \sim (a^i)^{-1} \cdot a^j = a^p$.
+Since $0 < a^p < 1$, negation gives $0 \sim 1 - a^p$ with
+$1 - a^p > 0$, contradicting singleton boundaries from~(1).
 \end{proof}
 
 The Kleene lattice exists as a quotient under $[0,1]$-multiplication;
@@ -1130,6 +1154,18 @@ value $\{1\}$ is implicitly performing certainty reasoning.
 The collapse does not merely project --- it \emph{reflects}:
 if a consequence holds on $[0,1]$, it holds on
 $\{0, \tfrac{1}{2}, 1\}$, and conversely.
+
+\textbf{Scope.}
+The consequence relations quantify over \emph{assignments} of values
+to propositional variables, not over structured formulas with
+connectives.
+The collapse preserves connectives
+(Theorem~\ref{thm:collapse}), so for a logic with a fixed set of
+connectives, the bridge extends to formulas built from those
+connectives by induction.
+But the bridge theorems themselves make no assumption about
+formula structure: they hold for arbitrary assignments
+$v : \alpha \to [0,1]$.
 
 The key mechanism is the characterization of designated values via
 the collapse:
@@ -1346,97 +1382,20 @@ Lean: \texttt{crisp\_inf\_zero\_iff}, \texttt{crisp\_sup\_one\_iff}.
 
 \begin{proposition}[Russell Fixed Point; new]
 \label{prop:russell}
-If $c = \negc c$ (the abstract Russell equation, where a predicate
-is applied to itself and negated), then $c = \tfrac{1}{2}$.
-The Russell paradox resolves to the negation fixed point rather than
-to a contradiction.
+If $c = \negc c$ (the abstract form of the Russell equation, where
+a predicate's self-application yields its own negation), then
+$c = \tfrac{1}{2}$.
+In the graded setting, the equation $c = \negc c$ has a unique
+solution rather than producing a contradiction.
+This does not resolve the full Russell paradox (which involves set
+comprehension and quantification), but it shows that the
+self-referential core of the paradox is absorbed by the algebra.
 Lean: \texttt{russell\_fixed\_point}.
 \end{proposition}
 \begin{proof}
 Immediate from the uniqueness of the negation fixed point
 (Lemma~\ref{thm:liar}).
 \end{proof}
-
-%=============================================================================
-\section{Two Modes of Inference}
-\label{sec:two-modes}
-%=============================================================================
-
-The chain rule governs two modes of inference on the same $[0,1]$
-structure: \emph{Bayesian update} and \emph{logical consequence}.
-The bridge theorem (Section~\ref{sec:bridge}) makes their
-relationship precise.
-
-\textbf{Mode 1: Bayesian update} (probabilistic inference).
-Fix a valuation $v$, observe evidence $B$ with $v(B) > 0$, compute
-the posterior $v'(A) = \cred(A \land B)/v(B)$.
-The chain rule determines the posterior \emph{uniquely} at positive
-evidence.
-At evidence zero, it yields a set of posteriors ($[0,1]$).
-This is the chain rule used as an \emph{update rule}: revise one
-valuation in light of data.
-
-\textbf{Mode 2: Logical consequence} (many-valued inference).
-Fix a threshold $t$, quantify over all valuations $v$:
-$\Gamma \models_t B$ iff for every $v$, if $v(A) \geq t$ for all
-$A \in \Gamma$, then $v(B) \geq t$.
-This is the chain rule used as a \emph{constraint on conditionals}:
-the evidence-zero behavior (unconstrained) prevents explosion, because
-the constant-$\tfrac{1}{2}$ valuation satisfies both $v(A) \geq t$
-and $v(\negc A) \geq t$ without forcing $v(B) \geq t$ for
-arbitrary $B$.
-
-\textbf{The collapse as bridge.}
-The bridge theorem connects these two modes via the collapse.
-By Theorem~\ref{thm:lp-bridge}, LP consequence is precisely
-positivity consequence; by Theorem~\ref{thm:k3-bridge}, K$_3$
-consequence is precisely certainty consequence.
-A Bayesian reasoner working on $[0,1]$ can always project to
-three-valued reasoning via the collapse, and a logician working
-with K$_3$ or LP can always lift to $[0,1]$ via the lifting lemma.
-
-\begin{center}
-\small
-\begin{tabular}{lccc}
-\toprule
-& \textbf{Bayesian (prob.)} & \textbf{Logical (many-val.)}
-  & \textbf{Chain-rule unified} \\
-\midrule
-Domain & $[0,1]$ credences & $\{0, \tfrac{1}{2}, 1\}$
-  & $[0,1]$ with collapse \\
-Inference & Update $v$ & $\Gamma \models B$
-  & Both \\
-At $e > 0$ & Unique posterior & Conditional determined
-  & Division \\
-At $e = 0$ & Underdetermined & Ex falso or void
-  & Unconstrained \\
-Conjunction & External joint & $\min$ (idempotent)
-  & Product; $\min$ on quotient \\
-Bridge & Positivity & LP designation
-  & Thm.~\ref{thm:lp-bridge} \\
-\bottomrule
-\end{tabular}
-\normalsize
-\captionof{table}{Two modes of inference on $[0,1]$.
-The chain rule is Bayesian update at positive evidence and prevents
-explosion at zero evidence.
-The collapse projects the first mode to the second;
-the bridge theorem shows this projection is faithful.}
-\label{tab:two-modes}
-\end{center}
-
-The reason both modes work is the same mechanism:
-the evidence-zero behavior of the chain rule.
-At positive evidence, the chain rule reduces to division --- Bayesian
-conditioning works and logical conditionals are determined.
-At zero evidence, the chain rule is unconstrained rather than
-explosive --- Bayesian posteriors are underdetermined (connecting to
-imprecise probability~\cite{walley1991}) and logical consequence is
-paraconsistent (the negation fixed point $\tfrac{1}{2}$ witnesses
-non-explosion).
-The same algebraic fact ($c \cdot 0 = 0$ for all $c$) manifests as
-underdetermined posteriors on the probabilistic side and as
-paraconsistency on the logical side.
 
 %=============================================================================
 \section{Conclusion}
@@ -1472,11 +1431,17 @@ structure:
   $t \leq \tfrac{1}{2}$, with the same witness ($\tfrac{1}{2}$) in
   every case; for $t > \tfrac{1}{2}$ the witness fails.
 \item \textbf{Graded predicates} with inf/sup quantifiers recover
-  classical agreement on crisp predicates and resolve the Russell
-  paradox to $\tfrac{1}{2}$.
+  classical agreement on crisp predicates and resolve the abstract
+  Russell equation $c = \negc c$ to $\tfrac{1}{2}$.
 \end{enumerate}
 
-The chain rule serves as a shared inference mechanism:
+The same algebraic fact --- $c \cdot 0 = 0$ for all $c$ ---
+manifests in two ways: as underdetermined posteriors on the
+probabilistic side (connecting to imprecise
+probability~\cite{walley1991}), and as paraconsistency on the
+logical side (the negation fixed point $\tfrac{1}{2}$ witnesses
+non-explosion).
+The chain rule thus serves as a shared inference mechanism:
 it is Bayes' rule when evidence is positive, and it prevents
 explosion when evidence is zero.
 The collapse projects Bayesian update to paraconsistent logical
