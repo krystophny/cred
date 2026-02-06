@@ -296,4 +296,210 @@ theorem positivity_no_explosion :
     norm_num
   · simp [Credence.zero_val]
 
+/-! ## Formula Type and Evaluation -/
+
+/-- Propositional formulas built from atoms, negation, conjunction, disjunction. -/
+inductive Formula (α : Type*) where
+  | atom : α → Formula α
+  | neg  : Formula α → Formula α
+  | conj : Formula α → Formula α → Formula α
+  | disj : Formula α → Formula α → Formula α
+
+/-- Evaluate a formula under a credence assignment to atoms. -/
+noncomputable def evalCred (v : α → Credence) : Formula α → Credence
+  | .atom a   => v a
+  | .neg φ    => Credence.neg (evalCred v φ)
+  | .conj φ ψ => evalCred v φ ⊗ evalCred v ψ
+  | .disj φ ψ => evalCred v φ ⊔ evalCred v ψ
+
+/-- Evaluate a formula under a three-valued assignment to atoms. -/
+def evalThreeVal (w : α → ThreeVal) : Formula α → ThreeVal
+  | .atom a   => w a
+  | .neg φ    => ThreeVal.neg (evalThreeVal w φ)
+  | .conj φ ψ => ThreeVal.conj (evalThreeVal w φ) (evalThreeVal w ψ)
+  | .disj φ ψ => ThreeVal.disj (evalThreeVal w φ) (evalThreeVal w ψ)
+
+/-! ## Collapse Commutes with Formula Evaluation -/
+
+/-- Collapsing after credence evaluation equals three-valued evaluation
+    under the collapsed assignment. -/
+theorem collapse_eval_eq (v : α → Credence) (φ : Formula α) :
+    collapse (evalCred v φ) = evalThreeVal (collapse ∘ v) φ := by
+  induction φ with
+  | atom a => simp [evalCred, evalThreeVal]
+  | neg φ ih => simp only [evalCred, evalThreeVal]; rw [collapse_neg, ih]
+  | conj φ ψ ih1 ih2 => simp only [evalCred, evalThreeVal]; rw [collapse_conj, ih1, ih2]
+  | disj φ ψ ih1 ih2 => simp only [evalCred, evalThreeVal]; rw [collapse_disj, ih1, ih2]
+
+/-- Three-valued evaluation equals collapse of credence evaluation on lifted atoms. -/
+theorem lift_eval_eq (w : α → ThreeVal) (φ : Formula α) :
+    evalThreeVal w φ = collapse (evalCred (liftThreeVal ∘ w) φ) := by
+  rw [collapse_eval_eq]
+  congr 1
+  ext a
+  simp [Function.comp, lift_collapse_id]
+
+/-! ## Formula-Level Consequence -/
+
+/-- Formula-level three-valued consequence. -/
+def formulaConsequence (designated : ThreeVal → Prop) (α : Type*)
+    (premises : List (Formula α)) (conclusion : Formula α) : Prop :=
+  ∀ w : α → ThreeVal,
+    (∀ p ∈ premises, designated (evalThreeVal w p)) →
+    designated (evalThreeVal w conclusion)
+
+/-- Formula-level positivity consequence on [0,1]. -/
+def formulaPositivity (α : Type*)
+    (premises : List (Formula α)) (conclusion : Formula α) : Prop :=
+  ∀ v : α → Credence,
+    (∀ p ∈ premises, 0 < (evalCred v p).val) →
+    0 < (evalCred v conclusion).val
+
+/-- Formula-level certainty consequence on [0,1]. -/
+def formulaCertainty (α : Type*)
+    (premises : List (Formula α)) (conclusion : Formula α) : Prop :=
+  ∀ v : α → Credence,
+    (∀ p ∈ premises, evalCred v p = 1) →
+    evalCred v conclusion = 1
+
+/-! ### Formula-Level Bridge Theorems -/
+
+/-- Formula-level LP bridge: LP formula consequence ↔ formula positivity. -/
+theorem lp_formula_bridge (α : Type*)
+    (premises : List (Formula α)) (conclusion : Formula α) :
+    formulaConsequence isDesignatedLP α premises conclusion ↔
+    formulaPositivity α premises conclusion := by
+  constructor
+  · intro hlp v hprem
+    let w : α → ThreeVal := collapse ∘ v
+    have hwprem : ∀ p ∈ premises, isDesignatedLP (evalThreeVal w p) := by
+      intro p hp
+      rw [← collapse_eval_eq]
+      exact (lp_designated_iff_pos _).mpr (hprem p hp)
+    have := hlp w hwprem
+    rw [← collapse_eval_eq] at this
+    exact (lp_designated_iff_pos _).mp this
+  · intro hpos w hwprem
+    let v : α → Credence := liftThreeVal ∘ w
+    have hvprem : ∀ p ∈ premises, 0 < (evalCred v p).val := by
+      intro p hp
+      have hd := hwprem p hp
+      rw [lift_eval_eq] at hd
+      exact (lp_designated_iff_pos _).mp hd
+    have hcpos := hpos v hvprem
+    rw [lift_eval_eq]
+    exact (lp_designated_iff_pos _).mpr hcpos
+
+/-- Formula-level K3 bridge: K3 formula consequence ↔ formula certainty. -/
+theorem k3_formula_bridge (α : Type*)
+    (premises : List (Formula α)) (conclusion : Formula α) :
+    formulaConsequence isDesignatedK3 α premises conclusion ↔
+    formulaCertainty α premises conclusion := by
+  constructor
+  · intro hk3 v hprem
+    let w : α → ThreeVal := collapse ∘ v
+    have hwprem : ∀ p ∈ premises, isDesignatedK3 (evalThreeVal w p) := by
+      intro p hp
+      rw [← collapse_eval_eq]
+      exact (k3_designated_iff_one _).mpr (hprem p hp)
+    have := hk3 w hwprem
+    rw [← collapse_eval_eq] at this
+    exact (k3_designated_iff_one _).mp this
+  · intro hcert w hwprem
+    let v : α → Credence := liftThreeVal ∘ w
+    have hvprem : ∀ p ∈ premises, evalCred v p = 1 := by
+      intro p hp
+      have hd := hwprem p hp
+      rw [lift_eval_eq] at hd
+      exact (k3_designated_iff_one _).mp hd
+    have hcone := hcert v hvprem
+    rw [lift_eval_eq]
+    exact (k3_designated_iff_one _).mpr hcone
+
+/-! ## Structural Rules for Formula Consequence -/
+
+theorem formulaLP_reflexivity (φ : Formula α) :
+    formulaConsequence isDesignatedLP α [φ] φ := by
+  intro w hprem
+  exact hprem φ (List.mem_cons_self φ [])
+
+theorem formulaLP_monotonicity (h : formulaConsequence isDesignatedLP α Γ φ)
+    (hsub : ∀ p ∈ Γ, p ∈ Δ) :
+    formulaConsequence isDesignatedLP α Δ φ := by
+  intro w hprem
+  exact h w (fun p hp => hprem p (hsub p hp))
+
+theorem formulaLP_cut (h1 : formulaConsequence isDesignatedLP α Γ φ)
+    (h2 : formulaConsequence isDesignatedLP α (φ :: Γ) ψ) :
+    formulaConsequence isDesignatedLP α Γ ψ := by
+  intro w hprem
+  have hφ := h1 w hprem
+  exact h2 w (fun p hp => by
+    cases List.mem_cons.mp hp with
+    | inl h => subst h; exact hφ
+    | inr h => exact hprem p h)
+
+theorem formulaK3_reflexivity (φ : Formula α) :
+    formulaConsequence isDesignatedK3 α [φ] φ := by
+  intro w hprem
+  exact hprem φ (List.mem_cons_self φ [])
+
+theorem formulaK3_monotonicity (h : formulaConsequence isDesignatedK3 α Γ φ)
+    (hsub : ∀ p ∈ Γ, p ∈ Δ) :
+    formulaConsequence isDesignatedK3 α Δ φ := by
+  intro w hprem
+  exact h w (fun p hp => hprem p (hsub p hp))
+
+theorem formulaK3_cut (h1 : formulaConsequence isDesignatedK3 α Γ φ)
+    (h2 : formulaConsequence isDesignatedK3 α (φ :: Γ) ψ) :
+    formulaConsequence isDesignatedK3 α Γ ψ := by
+  intro w hprem
+  have hφ := h1 w hprem
+  exact h2 w (fun p hp => by
+    cases List.mem_cons.mp hp with
+    | inl h => subst h; exact hφ
+    | inr h => exact hprem p h)
+
+theorem formulaPositivity_reflexivity (φ : Formula α) :
+    formulaPositivity α [φ] φ := by
+  intro v hprem
+  exact hprem φ (List.mem_cons_self φ [])
+
+theorem formulaPositivity_monotonicity (h : formulaPositivity α Γ φ)
+    (hsub : ∀ p ∈ Γ, p ∈ Δ) :
+    formulaPositivity α Δ φ := by
+  intro v hprem
+  exact h v (fun p hp => hprem p (hsub p hp))
+
+theorem formulaPositivity_cut (h1 : formulaPositivity α Γ φ)
+    (h2 : formulaPositivity α (φ :: Γ) ψ) :
+    formulaPositivity α Γ ψ := by
+  intro v hprem
+  have hφ := h1 v hprem
+  exact h2 v (fun p hp => by
+    cases List.mem_cons.mp hp with
+    | inl h => subst h; exact hφ
+    | inr h => exact hprem p h)
+
+theorem formulaCertainty_reflexivity (φ : Formula α) :
+    formulaCertainty α [φ] φ := by
+  intro v hprem
+  exact hprem φ (List.mem_cons_self φ [])
+
+theorem formulaCertainty_monotonicity (h : formulaCertainty α Γ φ)
+    (hsub : ∀ p ∈ Γ, p ∈ Δ) :
+    formulaCertainty α Δ φ := by
+  intro v hprem
+  exact h v (fun p hp => hprem p (hsub p hp))
+
+theorem formulaCertainty_cut (h1 : formulaCertainty α Γ φ)
+    (h2 : formulaCertainty α (φ :: Γ) ψ) :
+    formulaCertainty α Γ ψ := by
+  intro v hprem
+  have hφ := h1 v hprem
+  exact h2 v (fun p hp => by
+    cases List.mem_cons.mp hp with
+    | inl h => subst h; exact hφ
+    | inr h => exact hprem p h)
+
 end Cred

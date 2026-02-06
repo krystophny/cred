@@ -12,6 +12,7 @@
 
 \usepackage{amsmath,amssymb,amsthm}
 \usepackage{mathtools}
+\usepackage{stmaryrd}
 \usepackage{enumitem}
 \usepackage{booktabs}
 \usepackage{caption}
@@ -71,7 +72,8 @@ at positive evidence it reduces to Bayesian conditioning; at zero
 evidence it leaves the conditional unconstrained.
 Our main result is a \emph{bridge theorem}: LP consequence on the
 three-valued Kleene lattice is equivalent to positivity consequence on
-$[0,1]$, and K$_3$ consequence is equivalent to certainty consequence.
+$[0,1]$, and K$_3$ consequence is equivalent to certainty consequence,
+both at the level of propositional formulas.
 Discrete three-valued reasoning and continuous $[0,1]$ reasoning are
 thus two views of the same relation.
 Supporting results include a congruence classification of the
@@ -80,7 +82,7 @@ product De Morgan triplet
 under $[0,1]$-multiplication; no non-trivial finite quotient exists
 under $\Real$-multiplication) and graded consequence with no-explosion.
 All results are machine-checked in Lean~4 with Mathlib
-(3022 lines, zero \texttt{sorry}).
+(3228 lines, zero \texttt{sorry}).
 \end{abstract}
 
 %=============================================================================
@@ -138,8 +140,8 @@ knowledge).
 \item \textbf{Bridge theorem} [new]:
   LP consequence on the three-valued Kleene lattice is equivalent to
   positivity consequence on $[0,1]$; K$_3$ consequence is equivalent
-  to certainty consequence
-  (Theorems~\ref{thm:lp-bridge}--\ref{thm:k3-bridge}).
+  to certainty consequence, both at the level of propositional formulas
+  (Theorems~\ref{thm:lp-formula-bridge}--\ref{thm:k3-formula-bridge}).
   This is the centerpiece: discrete logical reasoning is faithfully
   encoded in continuous credences.
 \item \textbf{Equilibria characterization}
@@ -174,8 +176,6 @@ self-conjunction decay $c^2 < c$ for $c \in (0,1)$
 the Kleene collapse homomorphism~\cite{kleene1952,bergmann2008};
 K$_3$ is paracomplete~\cite{kleene1952}; LP is
 paraconsistent~\cite{asenjo1966,priest1979};
-quantifier duality for graded
-predicates~\cite{goguen1969,zadeh1965};
 the negation fixed point $\tfrac{1}{2}$~\cite{kripke1975}.
 
 \textbf{Literature positioning.}
@@ -235,12 +235,13 @@ Mathlib (Appendix~\ref{app:lean}).
 
 \textbf{Section guide.}
 Section~\ref{sec:algebra}: the product De Morgan triplet.
-Section~\ref{sec:conditioning}: chain-rule conditioning.
+Section~\ref{sec:conditioning}: chain-rule conditioning, including
+Bayesian and Jeffrey update.
 Section~\ref{sec:equilibria}: algebraic equilibria.
 Section~\ref{sec:collapse}: the Kleene collapse and congruence
 classification.
 Section~\ref{sec:bridge}: the bridge theorem (centerpiece).
-Section~\ref{sec:applications}: update, consequence, and predicates.
+Section~\ref{sec:consequence}: graded consequence and no-explosion.
 Section~\ref{sec:conclusion}: summary and open problems.
 
 %=============================================================================
@@ -702,6 +703,74 @@ is the correct epistemic response.
 Chain-rule conditioning reaches the same conclusion algebraically,
 without assuming a framework of imprecise probabilities.
 
+\subsection{Update via Conditioning}
+\label{sec:update}
+
+Bayesian and Jeffrey update are direct consequences of chain-rule
+conditioning.
+
+\begin{definition}[Bayesian Update]
+\label{def:bayesian-update}
+Given a joint-parametrized valuation $v$ with evidence $B$ satisfying
+$v(B) > 0$, the \emph{Bayesian posterior} is
+$v'(A) = \cred(A \land B) / v(B)$.
+Lean: \texttt{bayesianUpdate}.
+\end{definition}
+
+\begin{proposition}[Chain-Rule Preservation and Uniqueness;
+known~\cite{jaynes2003}, verified here]
+\label{prop:bayesian-chain}
+The posterior satisfies $v'(A) \conjc v(B) = \cred(A \land B)$ and
+is the unique credence with this property.
+Lean: \texttt{bayesianUpdate\_chain\_rule},
+\texttt{bayesianUpdate\_unique}.
+\end{proposition}
+\begin{proof}
+$v'(A) = j/e$ by construction, so $v'(A) \cdot e = j$.
+Uniqueness: if $c \cdot e = c' \cdot e$ with $e > 0$, then $c = c'$.
+\end{proof}
+
+\begin{definition}[Jeffrey Update]
+\label{def:jeffrey-update}
+For uncertain evidence with new credence $q$ for $B$:
+$v'(A) = \cred(A \mid B) \cdot q + \cred(A \mid \negc B) \cdot (1 - q)$.
+At $q = 1$ this reduces to Bayesian update; at $q = 0$ it conditions
+on $\negc B$.
+Lean: \texttt{jeffreyUpdate}, \texttt{jeffreyUpdate\_certain},
+\texttt{jeffreyUpdate\_zero}.
+\end{definition}
+
+\begin{proposition}[Jeffrey Update: Typical Case]
+\label{prop:jeffrey-typical}
+When $0 < v(B) < 1$, both conditionals $\cred(A \mid B)$ and
+$\cred(A \mid \negc B)$ are uniquely determined by the chain rule
+(since $v(B) > 0$ and $v(\negc B) = 1 - v(B) > 0$).
+The Jeffrey posterior is therefore uniquely determined by the prior
+$v$, the joint credences $\cred(A \land B)$ and
+$\cred(A \land \negc B)$, and the new evidence credence $q$.
+\end{proposition}
+\begin{proof}
+Both conditionals exist and are unique by
+Proposition~\ref{thm:existence}(i), since both $v(B)$ and
+$v(\negc B)$ are positive.
+The Jeffrey formula is a convex combination of two uniquely
+determined values.
+\end{proof}
+
+\begin{proposition}[Zero-Evidence Underdetermination; new]
+\label{prop:zero-underdetermined}
+When $v(B) = 0$, any conditional $\cred(A \mid B) \in [0,1]$ satisfies
+the chain rule, so neither Bayesian nor Jeffrey update produces a unique
+posterior.
+The set of consistent posteriors is $[0,1]$ --- the maximal imprecise
+posterior~\cite{walley1991,levi1980}.
+Lean: \texttt{bayesian\_underdetermined\_at\_zero},
+\texttt{jeffrey\_underdetermined\_at\_zero}.
+\end{proposition}
+\begin{proof}
+$c \cdot 0 = 0$ for all $c$.
+\end{proof}
+
 %=============================================================================
 \section{Algebraic Equilibria}
 \label{sec:equilibria}
@@ -920,81 +989,39 @@ This forces Kleene $\min$.
 The collapse results combine into a congruence classification at two
 levels, depending on the scope of the multiplication compatibility
 hypothesis.
-(A companion paper develops the congruence theory in more detail;
-we include self-contained proofs here.)
 A \emph{unit congruence} requires multiplication compatibility only for
 $[0,1]$-valued inputs.
 A \emph{real congruence} extends compatibility to all of $\Real$.
 
-\begin{theorem}[Congruence Classification; new]
+\begin{theorem}[Congruence Classification; Part~1, Theorems~6.1--6.2]
 \label{thm:congruence}
 \hfill
-\begin{enumerate}[label=\textup{(\arabic*)}]
+\begin{enumerate}[label=\textup{(\arabic*)},nosep]
 \item \textbf{Singleton boundaries:}
   Under any non-trivial unit congruence, $\{0\}$ and $\{1\}$ are
   singleton classes.
+  (Iterated multiplication by $1-\varepsilon$ drives any positive
+  credence into the $\varepsilon$-class, collapsing the quotient.)
 \item \textbf{No two-element quotient:}
-  No surjective homomorphism $[0,1] \to \{0,1\}$ preserves negation
-  (Proposition~\ref{prop:no-classical}).
+  The negation fixed point $\tfrac{1}{2}$ has no preimage in
+  $\{0,1\}$ (Proposition~\ref{prop:no-classical}).
 \item \textbf{Uniqueness at three elements:}
   The Kleene lattice is the unique three-element quotient
   (Theorem~\ref{thm:quotient-unique}), and the Kleene partition is
-  itself a verified unit congruence (Theorem~\ref{thm:collapse}).
+  a verified unit congruence (Theorem~\ref{thm:collapse}).
 \item \textbf{$\Real$-rigidity:}
-  Under $\Real$-multiplication, no non-trivial finite quotient exists
-  with $n \geq 2$ classes.
+  Under $\Real$-multiplication, pigeonhole plus multiplicative
+  inverses force $1 \sim a^p$ for some $a^p \in (0,1)$,
+  contradicting singleton boundaries; no non-trivial finite quotient
+  exists.
 \end{enumerate}
+Whether four or more classes are possible under $[0,1]$-multiplication
+is \textbf{open}.
+See Part~1 for full proofs.
 Lean: \texttt{UnitCongruence.singleton\_zero},
 \texttt{singleton\_one}, \texttt{kleeneCongruence},
 \texttt{RealCongruence.no\_nontrivial\_finite\_quotient}.
 \end{theorem}
-\begin{proof}
-(1)~Suppose $0 \sim \varepsilon$ for some $\varepsilon > 0$.
-Negation compatibility gives $1 \sim 1 - \varepsilon$.
-For any $x \in [0,1]$, multiplication compatibility yields
-$x = x \cdot 1 \sim x(1 - \varepsilon)$.
-By induction, $x \sim x(1 - \varepsilon)^n$ for all $n$.
-Since $0 < 1 - \varepsilon < 1$, for any $x > 0$ there exists
-$n$ with $x(1 - \varepsilon)^n \leq \varepsilon$.
-Write $x(1 - \varepsilon)^n = \varepsilon \cdot q$ where
-$q = x(1 - \varepsilon)^n / \varepsilon$; since
-$0 \leq x(1-\varepsilon)^n \leq \varepsilon$, we have
-$q \in [0,1]$.
-From $0 \sim \varepsilon$, multiplication compatibility gives
-$0 = 0 \cdot q \sim \varepsilon \cdot q = x(1 - \varepsilon)^n$.
-By transitivity, $x \sim x(1-\varepsilon)^n \sim 0$
-for every $x \in [0,1]$, so the quotient is trivial ---
-contradiction.
-For $\{1\}$: if $1 \sim x$ with $x < 1$, negation gives
-$0 \sim 1 - x$ with $1 - x > 0$, reducing to the previous case.
-
-(2)~A surjective $\varphi : [0,1] \to \{0,1\}$ must satisfy
-$\varphi(\tfrac{1}{2}) = 1 - \varphi(\tfrac{1}{2})$, which has no
-solution in $\{0,1\}$ (Proposition~\ref{prop:no-classical}).
-
-(3)~Theorem~\ref{thm:quotient-unique}.
-The Kleene partition is a verified unit congruence
-(Theorem~\ref{thm:collapse}).
-
-(4)~Set $a = \tfrac{1}{2}$.
-With $n \geq 2$ classes, pigeonhole on the $n + 1$ powers
-$a^0, a^1, \ldots, a^n$ gives indices $i < j \leq n$ with
-$a^i \sim a^j$.
-Write $a^j = a^i \cdot a^p$ where $p = j - i > 0$.
-Under $\Real$-multiplication, multiply both sides of $a^i \sim a^j$
-by $(a^i)^{-1}$ (which exists in $\Real$ but not in $[0,1]$,
-illustrating why this step requires $\Real$-multiplication):
-$1 = (a^i)^{-1} \cdot a^i \sim (a^i)^{-1} \cdot a^j = a^p$.
-Since $0 < a^p < 1$, negation gives $0 \sim 1 - a^p$ with
-$1 - a^p > 0$, contradicting singleton boundaries from~(1).
-\end{proof}
-
-The Kleene lattice exists as a quotient under $[0,1]$-multiplication;
-whether four or more classes are possible is \textbf{open}.
-The gap between unit and real congruences isolates
-$[0,1]$-cancellation as the key obstacle:
-in $\Real$, $ax = bx$ with $x > 0$ implies $a = b$;
-in $[0,1]$ the quotient $a/x$ may leave the interval.
 
 \begin{center}
 \small
@@ -1038,11 +1065,7 @@ connectives.
 This section shows it induces an \emph{equivalence of consequence
 relations}: three-valued logical consequence on
 $\{0, \tfrac{1}{2}, 1\}$ is the same as a natural consequence
-relation on $[0,1]$.
-The machine-verified results (Theorems~\ref{thm:lp-bridge}
-and~\ref{thm:k3-bridge}) work at the level of assignments to
-propositional variables; extension to formula-based consequence
-is discussed in Remark~\ref{rem:scope}.
+relation on $[0,1]$, at the level of propositional formulas.
 
 \subsection{Valuations}
 
@@ -1125,18 +1148,27 @@ Lean: \texttt{positivityConsequence},
 \texttt{certaintyConsequence}, \texttt{threeValConsequence}.
 \end{definition}
 
-All three consequence relations satisfy the standard Tarskian
+\begin{proposition}[Structural Rules; verified here]
+\label{prop:structural}
+All consequence relations above satisfy the standard Tarskian
 structural rules:
-\emph{reflexivity} ($A \models A$; take any $v$ with $v(A)$
-designated),
-\emph{monotonicity} (if $\Gamma \models A$ and
-$\Gamma \subseteq \Delta$ then $\Delta \models A$; adding premises
-only strengthens the hypothesis), and
-\emph{cut} (if $\Gamma \models A$ and $\Gamma, A \models B$ then
-$\Gamma \models B$; compose the two quantified statements).
+\begin{enumerate}[label=\textup{(\roman*)},nosep]
+\item \emph{Reflexivity:} $A \models A$.
+\item \emph{Monotonicity:} if $\Gamma \models A$ and
+  $\Gamma \subseteq \Delta$, then $\Delta \models A$.
+\item \emph{Cut:} if $\Gamma \models A$ and $\Gamma, A \models B$,
+  then $\Gamma \models B$.
+\end{enumerate}
+Lean: \texttt{formulaLP\_reflexivity/monotonicity/cut},
+\texttt{formulaK3\_reflexivity/monotonicity/cut},
+\texttt{formulaPositivity\_reflexivity/monotonicity/cut},
+\texttt{formulaCertainty\_reflexivity/monotonicity/cut}.
+\end{proposition}
+\begin{proof}
 These hold because the consequence relations quantify over
 all assignments --- adding premises restricts the set of
 admissible valuations.
+\end{proof}
 
 \subsection{The Bridge}
 
@@ -1237,39 +1269,86 @@ Via the bridge: any $v$ with $v(A) = 1$ and $v(B) = 1$ has
 $v(A) \cdot v(B) = 1$, so certainty is preserved.
 \end{example}
 
-\begin{remark}[Scope: assignments vs.\ formulas]
-\label{rem:scope}
-\emph{What is machine-verified:}
-The bridge theorems (Theorems~\ref{thm:lp-bridge}--\ref{thm:k3-bridge})
-are proved and machine-checked for consequence relations that
-quantify over all assignments $v : \alpha \to [0,1]$ (respectively
-$w : \alpha \to \{0, \tfrac{1}{2}, 1\}$) to a set $\alpha$ of
-propositional variables.
+\subsection{Extension to Formulas}
 
-\emph{Extension to formulas:}
-In standard matrix semantics, LP and K$_3$ consequence are defined
-over assignments to atoms, with compound formulas evaluated via the
-Kleene truth tables.
-The bridge extends to this formula-based setting by induction on
-formula structure, using two verified facts:
-(i)~the collapse preserves connectives
-(Theorem~\ref{thm:collapse};
-Lean: \texttt{collapse\_neg/conj/disj}); and
-(ii)~every Kleene assignment lifts to a $[0,1]$-valued
-function that round-trips through the collapse
-(Lemma~\ref{lem:lifting};
-Lean: \texttt{lift\_collapse\_id}).
-Explicitly: for the forward direction, given $v : \mathrm{Form} \to
-[0,1]$ respecting the product connectives, define
-$w = \mathrm{collapse} \circ\, v$.
-By (i) and induction, $w$ respects the Kleene connectives
-(Proposition~\ref{prop:collapse-composition} is the inductive step).
-The designation characterization then transfers premise-by-premise.
-For the reverse direction, lift $w$ to $v = \mathrm{lift} \circ\, w$
-and apply the same induction using (ii).
-The formula-level bridge itself is not assembled as a single Lean
-theorem, but its building blocks are all verified.
-\end{remark}
+The assignment-level bridge (Theorems~\ref{thm:lp-bridge}--\ref{thm:k3-bridge})
+extends to propositional formulas built from atoms, negation,
+conjunction, and disjunction.
+Define evaluation recursively:
+given an assignment $v : \alpha \to [0,1]$ to atoms,
+$\llbracket \negc\varphi \rrbracket_v = \negc\llbracket\varphi\rrbracket_v$,
+$\llbracket \varphi \conjc \psi \rrbracket_v =
+\llbracket\varphi\rrbracket_v \conjc \llbracket\psi\rrbracket_v$,
+$\llbracket \varphi \disjc \psi \rrbracket_v =
+\llbracket\varphi\rrbracket_v \disjc \llbracket\psi\rrbracket_v$;
+analogously for three-valued evaluation $\llbracket\cdot\rrbracket_w$
+using Kleene connectives.
+Lean: \texttt{Formula}, \texttt{evalCred}, \texttt{evalThreeVal}.
+
+\begin{proposition}[Collapse Commutes with Evaluation; new]
+\label{prop:collapse-eval}
+For any $v : \alpha \to [0,1]$ and formula $\varphi$:
+$\mathrm{collapse}(\llbracket\varphi\rrbracket_v)
+  = \llbracket\varphi\rrbracket_{\mathrm{collapse} \circ\, v}$.
+Conversely, for any $w : \alpha \to \{0, \tfrac{1}{2}, 1\}$:
+$\llbracket\varphi\rrbracket_w
+  = \mathrm{collapse}(\llbracket\varphi\rrbracket_{\mathrm{lift} \circ\, w})$.
+Lean: \texttt{collapse\_eval\_eq}, \texttt{lift\_eval\_eq}.
+\end{proposition}
+\begin{proof}
+Structural induction using
+\texttt{collapse\_neg/conj/disj} (Theorem~\ref{thm:collapse})
+and $\mathrm{collapse} \circ\, \mathrm{lift} = \mathrm{id}$
+(Lemma~\ref{lem:lifting}).
+\end{proof}
+
+\begin{theorem}[Formula-Level LP Bridge; new]
+\label{thm:lp-formula-bridge}
+For formulas $\Gamma$ and $\varphi$ over atoms $\alpha$:
+LP formula consequence
+$\Gamma \models_{\mathrm{LP}} \varphi$
+is equivalent to formula positivity consequence
+$\Gamma \models^+ \varphi$.
+Lean: \texttt{lp\_formula\_bridge}.
+\end{theorem}
+\begin{proof}
+$(\Rightarrow)$~Given $v : \alpha \to [0,1]$ with
+$\llbracket p \rrbracket_v > 0$ for all $p \in \Gamma$,
+define $w = \mathrm{collapse} \circ\, v$.
+By Proposition~\ref{prop:collapse-eval},
+$\llbracket p \rrbracket_w = \mathrm{collapse}(\llbracket p \rrbracket_v)$,
+which is LP-designated by the positivity characterization.
+LP consequence gives $\llbracket \varphi \rrbracket_w$ LP-designated,
+so $\llbracket \varphi \rrbracket_v > 0$.
+
+$(\Leftarrow)$~Given $w : \alpha \to \{0, \tfrac{1}{2}, 1\}$
+with all premises LP-designated, lift to
+$v = \mathrm{lift} \circ\, w$.
+By Proposition~\ref{prop:collapse-eval},
+$\llbracket p \rrbracket_w = \mathrm{collapse}(\llbracket p \rrbracket_v)$,
+so the designation characterization gives
+$\llbracket p \rrbracket_v > 0$.
+Positivity consequence gives
+$\llbracket \varphi \rrbracket_v > 0$, and
+$\mathrm{collapse} \circ\, \mathrm{lift} = \mathrm{id}$
+(Lemma~\ref{lem:lifting}) gives
+$\llbracket \varphi \rrbracket_w$ LP-designated.
+\end{proof}
+
+\begin{theorem}[Formula-Level K$_3$ Bridge; new]
+\label{thm:k3-formula-bridge}
+For formulas $\Gamma$ and $\varphi$ over atoms $\alpha$:
+K$_3$ formula consequence
+$\Gamma \models_{\mathrm{K}_3} \varphi$
+is equivalent to formula certainty consequence
+$\Gamma \models^1 \varphi$.
+Lean: \texttt{k3\_formula\_bridge}.
+\end{theorem}
+\begin{proof}
+Identical to the LP case, replacing positivity with certainty
+and using the characterization
+$\mathrm{collapse}(c) = 1 \iff c = 1$.
+\end{proof}
 
 The key mechanism is the characterization of designated values via
 the collapse:
@@ -1283,77 +1362,9 @@ Each corresponds to exactly one of the standard three-valued
 consequence relations.
 
 %=============================================================================
-\section{Applications}
-\label{sec:applications}
-%=============================================================================
-
-\subsection{Bayesian and Jeffrey Update}
-\label{sec:update}
-
-\begin{definition}[Bayesian Update]
-\label{def:bayesian-update}
-Given a joint-parametrized valuation $v$ with evidence $B$ satisfying
-$v(B) > 0$, the \emph{Bayesian posterior} is
-$v'(A) = \cred(A \land B) / v(B)$.
-Lean: \texttt{bayesianUpdate}.
-\end{definition}
-
-\begin{proposition}[Chain-Rule Preservation and Uniqueness;
-known~\cite{jaynes2003}, verified here]
-\label{prop:bayesian-chain}
-The posterior satisfies $v'(A) \conjc v(B) = \cred(A \land B)$ and
-is the unique credence with this property.
-Lean: \texttt{bayesianUpdate\_chain\_rule},
-\texttt{bayesianUpdate\_unique}.
-\end{proposition}
-\begin{proof}
-$v'(A) = j/e$ by construction, so $v'(A) \cdot e = j$.
-Uniqueness: if $c \cdot e = c' \cdot e$ with $e > 0$, then $c = c'$.
-\end{proof}
-
-\begin{definition}[Jeffrey Update]
-\label{def:jeffrey-update}
-For uncertain evidence with new credence $q$ for $B$:
-$v'(A) = \cred(A \mid B) \cdot q + \cred(A \mid \negc B) \cdot (1 - q)$.
-At $q = 1$ this reduces to Bayesian update; at $q = 0$ it conditions
-on $\negc B$.
-Lean: \texttt{jeffreyUpdate}, \texttt{jeffreyUpdate\_certain},
-\texttt{jeffreyUpdate\_zero}.
-\end{definition}
-
-\begin{proposition}[Jeffrey Update: Typical Case]
-\label{prop:jeffrey-typical}
-When $0 < v(B) < 1$, both conditionals $\cred(A \mid B)$ and
-$\cred(A \mid \negc B)$ are uniquely determined by the chain rule
-(since $v(B) > 0$ and $v(\negc B) = 1 - v(B) > 0$).
-The Jeffrey posterior is therefore uniquely determined by the prior
-$v$, the joint credences $\cred(A \land B)$ and
-$\cred(A \land \negc B)$, and the new evidence credence $q$.
-\end{proposition}
-\begin{proof}
-Both conditionals exist and are unique by
-Proposition~\ref{thm:existence}(i), since both $v(B)$ and
-$v(\negc B)$ are positive.
-The Jeffrey formula is a convex combination of two uniquely
-determined values.
-\end{proof}
-
-\begin{proposition}[Zero-Evidence Underdetermination; new]
-\label{prop:zero-underdetermined}
-When $v(B) = 0$, any conditional $\cred(A \mid B) \in [0,1]$ satisfies
-the chain rule, so neither Bayesian nor Jeffrey update produces a unique
-posterior.
-The set of consistent posteriors is $[0,1]$ --- the maximal imprecise
-posterior~\cite{walley1991,levi1980}.
-Lean: \texttt{bayesian\_underdetermined\_at\_zero},
-\texttt{jeffrey\_underdetermined\_at\_zero}.
-\end{proposition}
-\begin{proof}
-$c \cdot 0 = 0$ for all $c$.
-\end{proof}
-
-\subsection{Consequence Relations}
+\section{Graded Consequence and No-Explosion}
 \label{sec:consequence}
+%=============================================================================
 
 K$_3$ (designating $\{1\}$) is paracomplete: no tautologies
 (Lean: \texttt{k3\_no\_tautology}).
@@ -1441,90 +1452,12 @@ This is deliberate: it captures what holds regardless of the
 dependence structure between propositions.
 Restricting to independent valuations would yield a stronger (less
 cautious) consequence relation.
-The bridge theorem (Theorems~\ref{thm:lp-bridge}--\ref{thm:k3-bridge})
+The bridge theorem
+(Theorems~\ref{thm:lp-formula-bridge}--\ref{thm:k3-formula-bridge})
 works precisely because both LP/K$_3$ matrix semantics and
 positivity/certainty consequence quantify over all assignments to
 atomic propositions; the collapse and lifting then connect them
 without requiring assumptions about dependence.
-\end{remark}
-
-\subsection{Graded Predicates}
-\label{sec:predicates}
-
-Graded predicates assign credences pointwise over a domain, extending
-the framework from propositional to predicate logic.
-
-\begin{definition}[Graded Predicate]
-\label{def:graded-predicate}
-A \emph{graded predicate} over a type $\alpha$ is a function
-$P : \alpha \to [0,1]$.
-Pointwise operations are defined by
-$(\negc P)(x) = \negc P(x)$,
-$(P \conjc Q)(x) = P(x) \conjc Q(x)$,
-$(P \disjc Q)(x) = P(x) \disjc Q(x)$.
-These inherit all algebraic properties of the product De Morgan
-triplet (double negation, De Morgan laws, commutativity, etc.)
-pointwise.
-Lean: \texttt{GradedPredicate}, \texttt{GradedPredicate.neg},
-\texttt{GradedPredicate.conj}, \texttt{GradedPredicate.disj}.
-\end{definition}
-
-\begin{definition}[Quantifiers]
-\label{def:quantifiers}
-For a graded predicate $P$ over a nonempty type $\alpha$:
-\begin{align*}
-\cred(\forall x.\, P(x)) &= \inf_{x \in \alpha} P(x), \\
-\cred(\exists x.\, P(x)) &= \sup_{x \in \alpha} P(x).
-\end{align*}
-Since $P(x) \in [0,1]$ for all $x$, the infimum and supremum exist and
-lie in $[0,1]$.
-Lean: \texttt{credInf}, \texttt{credSup}.
-\end{definition}
-
-These quantifiers agree with Goguen's~\cite{goguen1969} and
-Zadeh's~\cite{zadeh1965} definitions for fuzzy predicates.
-
-\begin{proposition}[Quantifier Duality;
-known~\cite{goguen1969,zadeh1965}, verified here]
-\label{prop:quantifier-duality}
-$\negc(\forall x.\, P(x)) = \exists x.\, \negc P(x)$
-at the value level:
-$1 - \inf_x P(x) = \sup_x (1 - P(x))$.
-Lean: \texttt{quantifier\_duality\_val}.
-\end{proposition}
-\begin{proof}
-Standard real analysis: $\sup$ and $\inf$ are dual under affine
-reflection $t \mapsto 1 - t$.
-\end{proof}
-
-\begin{definition}[Crisp Predicate]
-\label{def:crisp}
-A predicate $P$ is \emph{crisp} if $P(x) \in \{0, 1\}$ for all $x$.
-\end{definition}
-
-\begin{proposition}[Crisp Agreement;
-known~\cite{goguen1969}, verified here]
-\label{prop:crisp-agreement}
-For a crisp predicate $P$:
-\begin{enumerate}[label=\textup{(\roman*)},nosep]
-\item $\inf_x P(x) = 0$ iff $\exists x.\, P(x) = 0$,
-\item $\sup_x P(x) = 1$ iff $\exists x.\, P(x) = 1$.
-\end{enumerate}
-In other words, graded quantifiers restricted to crisp predicates
-recover classical $\forall$ and $\exists$.
-Lean: \texttt{crisp\_inf\_zero\_iff}, \texttt{crisp\_sup\_one\_iff}.
-\end{proposition}
-
-\begin{remark}[Self-referential equations]
-\label{rem:russell}
-The equation $c = \negc c$ (abstracting the self-referential core
-of Russell's paradox) has the unique solution
-$c = \tfrac{1}{2}$ (Lemma~\ref{thm:liar}).
-In the graded setting, self-reference produces the negation fixed
-point rather than a contradiction.
-This does not resolve the full Russell paradox (which involves set
-comprehension and quantification over a domain).
-Lean: \texttt{russell\_fixed\_point}.
 \end{remark}
 
 %=============================================================================
@@ -1541,7 +1474,8 @@ conditioning):
 \begin{enumerate}[nosep]
 \item The \textbf{bridge theorem} shows LP consequence is equivalent
   to positivity consequence on $[0,1]$, and K$_3$ consequence is
-  equivalent to certainty consequence.
+  equivalent to certainty consequence, at the level of propositional
+  formulas.
   Discrete logical reasoning is faithfully encoded in continuous
   credences.
 \item The \textbf{equilibria} $\{0, \tfrac{1}{2}, 1\}$ are exactly the
@@ -1557,10 +1491,6 @@ conditioning):
   every case; for $t > \tfrac{1}{2}$ explosion holds vacuously
   (the premises are unsatisfiable).
   The threshold $\tfrac{1}{2}$ is sharp.
-\item \textbf{Graded predicates} with inf/sup quantifiers recover
-  classical agreement on crisp predicates; the self-referential
-  equation $c = \negc c$ resolves to $\tfrac{1}{2}$
-  (Remark~\ref{rem:russell}).
 \end{enumerate}
 
 \textbf{Properties depending on conditioning:}
@@ -1581,6 +1511,9 @@ The bridge theorem is a property of the triplet and its collapse;
 conditioning provides the mechanism that makes the framework useful
 for reasoning under uncertainty, connecting update and logical
 consequence through the same algebra.
+Graded predicates with inf/sup quantifiers extend the framework to
+predicate logic; this development, including crisp agreement and
+self-referential fixed points, is deferred to Part~3.
 
 \textbf{Open problems.}
 \begin{enumerate}[nosep]
@@ -1691,7 +1624,7 @@ allows the conditional to depend on the joint.
 %=============================================================================
 
 The results in this paper are formalized across six Lean~4 modules
-(with Mathlib), totaling 3022 lines with zero
+(with Mathlib), totaling 3228 lines with zero
 \texttt{sorry}:
 
 \begin{itemize}[nosep]
@@ -1702,8 +1635,9 @@ The results in this paper are formalized across six Lean~4 modules
   classification --- \texttt{UnitCongruence}, \texttt{RealCongruence},
   Kleene witness (396 lines).
 \item \texttt{Cred/Consequence.lean}: K$_3$/LP designation,
-  bridge theorem, graded consequence, no-explosion,
-  sharp threshold (299 lines).
+  formula evaluation, collapse-evaluation commutativity,
+  bridge theorems (assignment and formula level), structural rules,
+  graded consequence, no-explosion, sharp threshold (505 lines).
 \item \texttt{Cred/Valuation.lean}: valuations, collapse composition,
   Fr\'echet bounds on valuations (175 lines).
 \item \texttt{Cred/Update.lean}: Bayesian/Jeffrey update, chain-rule
@@ -1729,8 +1663,14 @@ Complement-preserving valuation & \texttt{Cred.CpValuation} \\
 Independent valuation & \texttt{Cred.IndepValuation} \\
 Joint valuation & \texttt{Cred.JointValuation} \\
 Graded predicate & \texttt{Cred.GradedPredicate} \\
+Propositional formula & \texttt{Cred.Formula} \\
+Credence evaluation & \texttt{Cred.evalCred} \\
+Three-valued evaluation & \texttt{Cred.evalThreeVal} \\
 Positivity consequence & \texttt{Cred.positivityConsequence} \\
 Certainty consequence & \texttt{Cred.certaintyConsequence} \\
+Formula consequence & \texttt{Cred.formulaConsequence} \\
+Formula positivity & \texttt{Cred.formulaPositivity} \\
+Formula certainty & \texttt{Cred.formulaCertainty} \\
 \bottomrule
 \end{tabular}
 \normalsize
@@ -1777,6 +1717,14 @@ Lifting lemma (Lem.~\ref{lem:lifting})
   & \texttt{liftThreeVal}, \texttt{lift\_collapse\_id} \\
 Collapse composition (Prop.~\ref{prop:collapse-composition})
   & \texttt{collapse\_val\_neg/conj/disj} \\
+Collapse commutes with eval (Prop.~\ref{prop:collapse-eval})
+  & \texttt{collapse\_eval\_eq}, \texttt{lift\_eval\_eq} \\
+Formula LP bridge (Thm.~\ref{thm:lp-formula-bridge})
+  & \texttt{lp\_formula\_bridge} \\
+Formula K$_3$ bridge (Thm.~\ref{thm:k3-formula-bridge})
+  & \texttt{k3\_formula\_bridge} \\
+Structural rules (Prop.~\ref{prop:structural})
+  & \texttt{formulaLP\_reflexivity}, etc. \\
 Bayesian update (Prop.~\ref{prop:bayesian-chain})
   & \texttt{bayesianUpdate\_chain\_rule/unique} \\
 Zero underdetermination (Prop.~\ref{prop:zero-underdetermined})
@@ -1785,12 +1733,6 @@ Graded no-explosion (Prop.~\ref{prop:graded-no-explosion})
   & \texttt{graded\_no\_explosion} \\
 Sharp threshold (Prop.~\ref{prop:graded-sharp})
   & \texttt{graded\_explosion\_vacuous} \\
-Quantifier duality (Prop.~\ref{prop:quantifier-duality})
-  & \texttt{quantifier\_duality\_val} \\
-Crisp agreement (Prop.~\ref{prop:crisp-agreement})
-  & \texttt{crisp\_inf\_zero\_iff}, \texttt{crisp\_sup\_one\_iff} \\
-Self-referential equation (Rem.~\ref{rem:russell})
-  & \texttt{russell\_fixed\_point} \\
 \bottomrule
 \end{tabular}
 \normalsize
