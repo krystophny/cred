@@ -79,7 +79,7 @@ Supporting results include a congruence classification
 under $[0,1]$-multiplication; no non-trivial finite quotient exists
 under $\Real$-multiplication) and graded consequence with no-explosion.
 All results are machine-checked in Lean~4 with Mathlib
-(approximately 3000 lines, zero \texttt{sorry}).
+(3022 lines, zero \texttt{sorry}).
 \end{abstract}
 
 %=============================================================================
@@ -231,8 +231,6 @@ consequence into a single framework on $[0,1]$.
 \textbf{Note on formalization.}
 All results marked with ``Lean:'' are machine-checked in Lean~4 with
 Mathlib (Appendix~\ref{app:lean}).
-The formalization totals approximately 3000 lines across six modules
-with zero \texttt{sorry}.
 
 \textbf{Section guide.}
 Section~\ref{sec:algebra}: the product De Morgan triplet.
@@ -384,8 +382,8 @@ sigma-additivity.
 The product De Morgan triplet drops all of these: there is no sample
 space, no sigma-algebra, no additivity beyond complement.
 The triplet retains exactly the structure shared by both probability
-and $[0,1]$-valued logic --- the greatest common factor of the two
-traditions.
+and $[0,1]$-valued logic --- the greatest common substructure of the
+two traditions.
 
 \textbf{Conjunction selection.}
 For logic-compatible valuations, idempotence
@@ -459,7 +457,9 @@ $\condc{A}{B} \conjc \cred(B) = \cred(A \land B)$.
 \end{definition}
 
 The joint $\cred(A \land B)$ is supplied as input, not computed from
-marginals.
+marginals --- a deliberate departure from truth-functionality, since
+the conditional depends on the dependence structure between $A$ and
+$B$, not only on their individual credences.
 A conditioning structure exists if and only if
 $\text{joint} \leq \text{evidence}$ (when evidence $> 0$) or
 $\text{joint} = 0$ (when evidence $= 0$); the constraint
@@ -652,16 +652,16 @@ Residuation~\cite{hajek1998} & $0 \to b = 1$ (ex falso) & Forced \\
 R\'enyi~\cite{renyi1955} & Excluded from domain & Avoided \\
 Popper~\cite{popper1959} & $P(A \mid B) = 1$ for all $A$ ($B$ abnormal)
   & Forced \\
-de Finetti~\cite{definetti1936} & Void & Suppressed \\
+de Finetti~\cite{definetti1936} & Void$^\dagger$ & Suppressed \\
 Dubois--Prade~\cite{dubois1988} & Default $1$ & Conventional \\
 Chain rule & Unconstrained & Acknowledged \\
 \bottomrule
 \end{tabular}
 \normalsize
 \captionof{table}{Handling of evidence zero across frameworks.
-De Finetti's later work~\cite{definetti1937} treated the conditional
-as primitive (closer to the chain rule); the ``void'' label reflects
-his 1936 position.
+$^\dagger$De Finetti's later work~\cite{definetti1937} treated the
+conditional as primitive (closer to the chain rule); the ``void''
+label reflects his 1936 position.
 The chain rule is the only approach that neither forces, avoids, nor
 suppresses the singularity.}
 \label{tab:evidence-zero}
@@ -715,7 +715,7 @@ Only $0$ and $1$ are stable: $0^2 = 0$, $1^2 = 1$.
 known~\cite{klement2000}, verified here]
 \label{prop:self-conj-decay}
 For all $c \in (0,1)$: $c \conjc c = c^2 < c$.
-Dually, $c \disjc c > c$.
+Dually, for all $c \in (0,1)$: $c \disjc c > c$.
 Lean: \texttt{self\_conj\_lt}, \texttt{self\_disj\_gt}.
 \end{proposition}
 \begin{proof}
@@ -795,8 +795,8 @@ $^*$G\"odel has infinitely many idempotent values
 \begin{remark}[Algebraic equilibria vs.\ dynamical convergence]
 \label{rem:attractor-caveat}
 Propositions~\ref{prop:self-conj-decay}--\ref{prop:pow-decay}
-establish that iterated self-conjunction $c, c^2, c^4, \ldots$
-converges to $0$ for every $c \in (0,1)$.
+establish that iterated conjunction with the original,
+$c, c^2, c^3, \ldots$, converges to $0$ for every $c \in (0,1)$.
 This is a precise algebraic statement about the product t-norm.
 A formal convergence theorem for Bayesian update toward $0$, $1$,
 or $\tfrac{1}{2}$ would require specifying a stochastic model for
@@ -953,7 +953,9 @@ By induction, $x \sim x(1 - \varepsilon)^n$ for all $n$.
 Since $0 < 1 - \varepsilon < 1$, for any $x > 0$ there exists
 $n$ with $x(1 - \varepsilon)^n \leq \varepsilon$.
 Write $x(1 - \varepsilon)^n = \varepsilon \cdot q$ where
-$q = x(1 - \varepsilon)^n / \varepsilon \in [0,1]$.
+$q = x(1 - \varepsilon)^n / \varepsilon$; since
+$0 \leq x(1-\varepsilon)^n \leq \varepsilon$, we have
+$q \in [0,1]$.
 From $0 \sim \varepsilon$, multiplication compatibility gives
 $0 = 0 \cdot q \sim \varepsilon \cdot q = x(1 - \varepsilon)^n$.
 By transitivity, $x \sim x(1-\varepsilon)^n \sim 0$
@@ -976,7 +978,8 @@ $a^0, a^1, \ldots, a^n$ gives indices $i < j \leq n$ with
 $a^i \sim a^j$.
 Write $a^j = a^i \cdot a^p$ where $p = j - i > 0$.
 Under $\Real$-multiplication, multiply both sides of $a^i \sim a^j$
-by $(a^i)^{-1}$ (which exists in $\Real$):
+by $(a^i)^{-1}$ (which exists in $\Real$ but not in $[0,1]$,
+illustrating why this step requires $\Real$-multiplication):
 $1 = (a^i)^{-1} \cdot a^i \sim (a^i)^{-1} \cdot a^j = a^p$.
 Since $0 < a^p < 1$, negation gives $0 \sim 1 - a^p$ with
 $1 - a^p > 0$, contradicting singleton boundaries from~(1).
@@ -1014,8 +1017,10 @@ De Morgan: $({\cdot},\; 1{-}(\cdot))$
 \captionof{table}{Congruence landscape.
 The product De Morgan triplet sits between MV-algebras (many
 congruences) and product BL-algebras (none).
-Dropping residuation in favor of involutive complement allows the
-Kleene partition to survive.}
+The product BL-algebra $[0,1]$ with residuation has no non-trivial
+congruences~\cite{agliano2003}; replacing residuation with involutive
+complement weakens the signature enough for the Kleene partition to
+survive as a congruence.}
 \label{tab:congruence}
 \end{center}
 
@@ -1191,9 +1196,12 @@ $\text{collapse} \circ\, \text{lift} = \text{id}$ gives $w(A) = 1$.
 \end{proof}
 
 \textbf{Interpretation.}
-The bridge theorems say that discrete three-valued logical reasoning
-is faithfully encoded in continuous $[0,1]$ reasoning, and
-vice versa.
+The proofs are short: each direction composes the collapse (or
+lifting) with the designation characterization.
+The value of the bridge theorems is conceptual rather than
+technical --- they make precise the folklore intuition that
+three-valued logical reasoning is faithfully encoded in continuous
+$[0,1]$ reasoning, and vice versa.
 An LP logician working with designated values
 $\{1, \tfrac{1}{2}\}$ is implicitly performing positivity reasoning
 on the continuum; a K$_3$ logician working with designated
@@ -1589,6 +1597,11 @@ consequence through the same algebra.
   For a fixed continuous t-norm $T$, how does the congruence lattice
   of the De Morgan reduct relate to the congruence lattice of the BL
   expansion?
+\item \textbf{Four-valued extension.}
+  K$_3$ and LP are both fragments of Belnap--Dunn four-valued logic
+  (FDE)~\cite{belnap1977,dunn1976}.
+  Does the bridge theorem extend to FDE, and what is the corresponding
+  consequence relation on $[0,1]$?
 \end{enumerate}
 
 \section*{Acknowledgements}
@@ -1668,7 +1681,7 @@ allows the conditional to depend on the joint.
 %=============================================================================
 
 The results in this paper are formalized across six Lean~4 modules
-(with Mathlib), totaling approximately 3000 lines with zero
+(with Mathlib), totaling 3022 lines with zero
 \texttt{sorry}:
 
 \begin{itemize}[nosep]
