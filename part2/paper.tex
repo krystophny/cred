@@ -437,7 +437,8 @@ so $C(a,b) \geq a = \min(a,b)$.
 
 The product fails idempotence ($c^2 \neq c$ for $c \in (0,1)$);
 \L ukasiewicz fails similarly
-($\max(\tfrac{1}{2} + \tfrac{1}{2} - 1, 0) = 0 \neq \tfrac{1}{2}$;
+($T_L(\tfrac{3}{4}, \tfrac{3}{4}) = \max(\tfrac{1}{2}, 0) =
+\tfrac{1}{2} \neq \tfrac{3}{4}$;
 Lean: \texttt{luk\_not\_idempotent}).
 The minimum joint is the \emph{comonotonicity copula}: the
 extremal case where all random variables are increasing functions of
@@ -673,7 +674,8 @@ is the minimal commitment consistent with the data.
 \subsection{Comparison with Primitive-Conditioning Frameworks}
 \label{sec:frameworks}
 
-\begin{center}
+\begin{table}[ht]
+\centering
 \small
 \begin{tabular}{lll}
 \toprule
@@ -690,14 +692,14 @@ Chain rule & Unconstrained & Acknowledged \\
 \bottomrule
 \end{tabular}
 \normalsize
-\captionof{table}{Handling of evidence zero across frameworks.
+\caption{Handling of evidence zero across frameworks.
 $^\dagger$De Finetti's later work~\cite{definetti1937} treated the
 conditional as primitive (closer to the chain rule); the ``void''
 label reflects his 1936 position.
 The chain rule is the only approach that neither forces, avoids, nor
 suppresses the singularity.}
 \label{tab:evidence-zero}
-\end{center}
+\end{table}
 
 The set of all posteriors consistent with the chain rule at zero
 evidence is $[0,1]$ --- the maximal imprecise
@@ -806,11 +808,12 @@ For all $c \in (0,1)$ and $n \in \Nat$:
 $c^{n+1} < c^n$.
 In particular, $c^n \to 0$ as $n \to \infty$:
 unrenewed evidence decays.
-Lean: \texttt{pow\_strictly\_decreasing}.
+Lean: \texttt{pow\_strictly\_decreasing} (strict decrease).
+The convergence follows from strict decrease and the bound
+$c^n \geq 0$ by the monotone convergence theorem.
 \end{proposition}
 \begin{proof}
-$c^n \cdot c < c^n \cdot 1 = c^n$ since $0 < c < 1$.
-Convergence: $c^n = e^{n \ln c} \to 0$ since $\ln c < 0$.
+$c^{n+1} = c^n \cdot c < c^n \cdot 1 = c^n$ since $0 < c < 1$.
 \end{proof}
 
 \begin{lemma}[Unique Negation Fixed Point;
@@ -844,7 +847,8 @@ Finite-valued logics take $\{0, \tfrac{1}{2}, 1\}$ as primitive;
 the continuous framework \emph{derives} them as the algebraic
 fixed points of the product De Morgan triplet.
 
-\begin{center}
+\begin{table}[ht]
+\centering
 \small
 \begin{tabular}{llcccc}
 \toprule
@@ -859,7 +863,7 @@ G\"odel & $c$ & No & $\tfrac{1}{2}$ & $\tfrac{1}{2}$ & No$^*$ \\
 \bottomrule
 \end{tabular}
 \normalsize
-\captionof{table}{T-norm comparison.
+\caption{T-norm comparison.
 All three t-norms share the negation fixed point $\tfrac{1}{2}$
 (since $\negc c = 1 - c$ is independent of the t-norm).
 Only the product has three algebraic fixed points: $\{0, 1\}$ from
@@ -869,7 +873,7 @@ $^*$G\"odel has infinitely many idempotent values
 \L ukasiewicz: $T_L(\tfrac{1}{2}, \tfrac{1}{2}) = 0 \neq
 \tfrac{1}{2}$, so self-conjunction destroys the negation fixed point.}
 \label{tab:tnorm}
-\end{center}
+\end{table}
 
 \begin{remark}[Algebraic fixed points vs.\ dynamical convergence]
 \label{rem:attractor-caveat}
@@ -1030,7 +1034,8 @@ Lean: \texttt{UnitCongruence.singleton\_zero},
 See Appendix~\ref{app:congruence-proofs}.
 \end{proof}
 
-\begin{center}
+\begin{table}[ht]
+\centering
 \small
 \begin{tabular}{llll}
 \toprule
@@ -1052,7 +1057,7 @@ De Morgan: $({\cdot},\; 1{-}(\cdot))$
 \bottomrule
 \end{tabular}
 \normalsize
-\captionof{table}{Congruence landscape.
+\caption{Congruence landscape.
 The product De Morgan triplet sits between MV-algebras (many
 congruences) and product BL-algebras (none).
 The product BL-algebra $[0,1]$ with residuation has no non-trivial
@@ -1060,7 +1065,7 @@ congruences~\cite{agliano2003}; replacing residuation with involutive
 complement weakens the signature enough for the Kleene partition to
 survive as a congruence.}
 \label{tab:congruence}
-\end{center}
+\end{table}
 
 %=============================================================================
 \section{The Bridge Theorem}
@@ -1703,8 +1708,7 @@ self-referential fixed points, is deferred to future work.
 
 \section*{Acknowledgements}
 
-The author thanks Graham Priest for correspondence that clarified the
-distinction between connectives and consequence relations.
+Omitted for blind review.
 
 %=============================================================================
 % Bibliography
@@ -1842,10 +1846,8 @@ The results in this paper are formalized across six Lean~4 modules
   Fr\'echet bounds on valuations (175 lines).
 \item \texttt{Cred/Update.lean}: Bayesian/Jeffrey update, chain-rule
   preservation (138 lines).
-\item \texttt{Cred/Predicate.lean}: graded predicates, quantifier
-  duality, Russell fixed point, crisp agreement (210 lines).
-  This module formalizes material deferred to future work
-  (Section~\ref{sec:conclusion}).
+\item \texttt{Cred/Predicate.lean}: formalization for future work
+  (210 lines; not used in this paper).
 \end{itemize}
 
 \textbf{Key definitions:}
