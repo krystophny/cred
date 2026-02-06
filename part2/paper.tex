@@ -171,7 +171,7 @@ self-conjunction decay $c^2 < c$ for $c \in (0,1)$
 (Proposition~\ref{prop:self-conj-decay})~\cite{klement2000};
 the Kleene collapse homomorphism~\cite{kleene1952,bergmann2008};
 K$_3$ is paracomplete~\cite{kleene1952}; LP is
-paraconsistent~\cite{priest1979};
+paraconsistent~\cite{asenjo1966,priest1979};
 quantifier duality for graded
 predicates~\cite{goguen1969,zadeh1965};
 the negation fixed point $\tfrac{1}{2}$~\cite{kripke1975}.
@@ -302,8 +302,12 @@ $c_1 \disjc c_2 = \negc(\negc c_1 \conjc \negc c_2)
   = c_1 + c_2 - c_1 \cdot c_2$.
 \end{definition}
 
-In our running example,
-$\cred(\text{rain} \lor \text{wet}) = 0.8 + 0.9 - 0.72 = 0.98$.
+In our running example, applying the De Morgan dual \emph{algebraically}
+(i.e., computing $\negc(\negc 0.8 \conjc \negc 0.9) =
+0.8 + 0.9 - 0.8 \times 0.9 = 0.98$).
+Note: this uses the product of the marginals, which equals the
+joint $\cred(\text{rain} \land \text{wet})$ only under independence
+(see Remark~\ref{rem:product-vs-joint}).
 
 The triple $(\conjc, \disjc, \negc)$ is the \emph{product De Morgan
 triplet}~\cite{klement2000,hajek1998}.
@@ -524,7 +528,7 @@ $\tfrac{1}{2}$ & 0 & 1 & 1 \\
 {\footnotesize Rows = evidence $e$, columns = conclusion $p$.
 $*$ = unconstrained (any value in $[0,1]$ satisfies the chain rule).
 \textsuperscript{1}Shared by K$_3$~\cite{kleene1952},
-LP~\cite{priest1979}, RM3~\cite{anderson1975}.
+LP~\cite{asenjo1966,priest1979}, RM3~\cite{anderson1975}.
 \textsuperscript{2}Coincides with G\"odel on $\{0, \tfrac{1}{2}, 1\}$
 (Lean: \texttt{godel\_impl\_eq\_prod\_resid}).
 The chain-rule table uses the min-copula joint $\min(e, p)$
@@ -643,8 +647,8 @@ is the minimal commitment consistent with the data.
 Probability & Undefined ($0/0$) & Singular \\
 Residuation~\cite{hajek1998} & $0 \to b = 1$ (ex falso) & Forced \\
 R\'enyi~\cite{renyi1955} & Excluded from domain & Avoided \\
-Popper~\cite{popper1959} & $P(A \mid B) = 1$ if $B \vdash A$
-  & Partial \\
+Popper~\cite{popper1959} & $P(A \mid B) = 1$ for all $A$ ($B$ abnormal)
+  & Forced \\
 de Finetti~\cite{definetti1936} & Void & Suppressed \\
 Dubois--Prade~\cite{dubois1988} & Default $1$ & Conventional \\
 Chain rule & Unconstrained & Acknowledged \\
@@ -734,15 +738,13 @@ Lean: \texttt{liar\_fixed\_point},
 \texttt{neg\_fixed\_point\_unique}.
 \end{lemma}
 
-\begin{theorem}[Equilibria Characterization; new]
+\begin{proposition}[Equilibria Characterization;
+known~\cite{klement2000,kripke1975}, verified here]
 \label{thm:equilibria}
 A credence $c \in [0,1]$ satisfies $c \conjc c = c$ or $\negc c = c$
 if and only if $c \in \{0, \tfrac{1}{2}, 1\}$.
-Equivalently, the set of conjunction-idempotent values $\{0, 1\}$
-together with the unique negation fixed point $\{\tfrac{1}{2}\}$
-exhausts the algebraic equilibria.
 Lean: \texttt{equilibria\_characterization}.
-\end{theorem}
+\end{proposition}
 \begin{proof}
 $c^2 = c$ iff $c \in \{0, 1\}$
 (Lean: \texttt{conj\_idempotent\_iff}).
@@ -832,7 +834,7 @@ $0 < c_1 + c_2 - c_1 c_2 < 1$.
 \end{proof}
 
 The target is the Kleene lattice~\cite{kleene1952}, underlying
-K$_3$~\cite{kleene1952}, LP~\cite{priest1979}, and
+K$_3$~\cite{kleene1952}, LP~\cite{asenjo1966,priest1979}, and
 RM3~\cite{anderson1975,meyer1972}.
 Belnap~\cite{belnap1977} and Dunn~\cite{dunn1976} studied this
 three-valued structure (and its four-valued extension) as a
@@ -1194,30 +1196,30 @@ $\{0, \tfrac{1}{2}, 1\}$, and conversely.
 
 \begin{remark}[Scope: assignments vs.\ formulas]
 \label{rem:scope}
-The consequence relations (Definition~\ref{def:consequence}) quantify
-over all assignments $v : \alpha \to [0,1]$ (respectively
-$w : \alpha \to \{0, \tfrac{1}{2}, 1\}$) to a set of propositional
-variables $\alpha$.
-The bridge theorems are proved at this level (and machine-checked in
-Lean).
+\emph{What is machine-verified:}
+The bridge theorems (Theorems~\ref{thm:lp-bridge}--\ref{thm:k3-bridge})
+are proved and machine-checked for consequence relations that
+quantify over all assignments $v : \alpha \to [0,1]$ (respectively
+$w : \alpha \to \{0, \tfrac{1}{2}, 1\}$) to a set $\alpha$ of
+propositional variables.
+
+\emph{Extension to formulas:}
 In standard matrix semantics, LP and K$_3$ consequence are defined
 over assignments to atoms, with compound formulas evaluated via the
 Kleene truth tables.
-The bridge extends to this formula-based setting because the collapse
-preserves connectives (Theorem~\ref{thm:collapse}): given an
-independent valuation $v : \alpha \to [0,1]$ on atoms, define
-$\hat{v}$ on formulas by $\hat{v}(\negc \varphi) = \negc\hat{v}(\varphi)$,
-etc.
-Then $\text{collapse} \circ\, \hat{v}$ evaluates formulas via
-the Kleene truth tables
-(Proposition~\ref{prop:collapse-composition}).
-Conversely, every Kleene assignment lifts to an independent valuation
-(Lemma~\ref{lem:lifting}).
-Thus restriction to connective-respecting valuations on both sides
-preserves the bridge equivalence.
-The building blocks for this extension are all verified in Lean
-(\texttt{collapse\_val\_neg/conj/disj},
-\texttt{liftThreeVal}, \texttt{lift\_collapse\_id}).
+The bridge extends to this formula-based setting by a routine
+induction, using two verified facts:
+(i)~the collapse preserves connectives
+(Theorem~\ref{thm:collapse};
+Lean: \texttt{collapse\_neg/conj/disj}), so composing an
+independent valuation with the collapse yields a Kleene valuation
+(Proposition~\ref{prop:collapse-composition}); and
+(ii)~every Kleene assignment lifts to a $[0,1]$-valued
+function that round-trips through the collapse
+(Lemma~\ref{lem:lifting};
+Lean: \texttt{lift\_collapse\_id}).
+The formula-level bridge itself is not separately assembled as a
+single Lean theorem, but its building blocks are all verified.
 \end{remark}
 
 The key mechanism is the characterization of designated values via
@@ -1479,17 +1481,12 @@ Lean: \texttt{russell\_fixed\_point}.
 \label{sec:conclusion}
 %=============================================================================
 
-The chain rule
-$\cred(A \mid B) \cdot \cred(B) = \cred(A \land B)$
-is the shared content of probability theory and many-valued logic
-on $[0,1]$.
-At positive evidence, the two traditions agree: the conditional is
-determined by division.
-At evidence zero, they diverge --- probability is undefined,
-residuation forces ex falso, and the chain rule leaves the
-conditional unconstrained.
-This single divergence at zero determines the entire qualitative
-structure:
+The product De Morgan triplet on $[0,1]$ admits a natural collapse
+homomorphism to the Kleene lattice $\{0, \tfrac{1}{2}, 1\}$.
+The main results of this paper fall into two groups.
+
+\textbf{Properties of the triplet and its collapse} (independent of
+conditioning):
 \begin{enumerate}[nosep]
 \item The \textbf{bridge theorem} shows LP consequence is equivalent
   to positivity consequence on $[0,1]$, and K$_3$ consequence is
@@ -1515,25 +1512,36 @@ structure:
   (Remark~\ref{rem:russell}).
 \end{enumerate}
 
-The same algebraic fact --- $c \cdot 0 = 0$ for all $c$ ---
-manifests in two ways: as underdetermined posteriors on the
-probabilistic side (connecting to imprecise
-probability~\cite{walley1991}), and as paraconsistency on the
-logical side (the negation fixed point $\tfrac{1}{2}$ witnesses
+\textbf{Properties depending on conditioning:}
+\begin{enumerate}[nosep,resume]
+\item \textbf{Chain-rule conditioning} at positive evidence reduces to
+  Bayesian division; at zero evidence it is unconstrained.
+  Bayesian and Jeffrey update preserve the chain rule
+  (Section~\ref{sec:update}).
+\end{enumerate}
+
+The two groups are connected by the evidence-zero behavior.
+The algebraic fact $c \cdot 0 = 0$ for all $c$ manifests as
+underdetermined posteriors on the probabilistic side (connecting to
+imprecise probability~\cite{walley1991}), and as paraconsistency on
+the logical side (the negation fixed point $\tfrac{1}{2}$ witnesses
 non-explosion).
-The chain rule thus serves as a shared inference mechanism:
-it is Bayes' rule when evidence is positive, and it prevents
-explosion when evidence is zero.
-The collapse projects Bayesian update to paraconsistent logical
-consequence; the bridge theorem shows this projection is an
-equivalence.
+The bridge theorem is a property of the triplet and its collapse;
+conditioning provides the mechanism that makes the framework useful
+for reasoning under uncertainty, connecting update and logical
+consequence through the same algebra.
 
 \textbf{Open problems.}
 \begin{enumerate}[nosep]
 \item \textbf{Four or more classes under $[0,1]$-multiplication.}
-  The scaling trick fails without multiplicative inverses; the gap
-  between unit and real congruences isolates $[0,1]$-cancellation
-  as the precise obstacle.
+  The scaling trick (Theorem~\ref{thm:congruence}(4)) uses
+  multiplicative inverses unavailable in $[0,1]$.
+  A four-class quotient would need to partition $(0,1)$ into pieces
+  closed under $[0,1]$-multiplication and compatible with complement.
+  Natural attempts fail: for any $a \in (0,1)$, iterated
+  self-multiplication $a^n \to 0$ eventually escapes any bounded
+  subinterval of $(0,1)$, so no interval partition works.
+  The question reduces to whether a non-interval partition exists.
 \item \textbf{Proof theory.}
   Is there a sound and complete calculus for chain-rule conditioning
   on $[0,1]$?
