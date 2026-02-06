@@ -135,20 +135,14 @@ When $\cred(B) = 0$, the equation $c \cdot 0 = 0$ holds for
 Impossible evidence provides no constraint.
 This echoes R\'enyi's~\cite{renyi1955} and
 Popper's~\cite{popper1959} primitive-conditioning approach to
-probability, and de Finetti's~\cite{definetti1936} three-valued
-conditional (where conditioning on a false antecedent is \emph{void}
-rather than vacuously true).
-De Finetti's~\cite{definetti1936,definetti1937} three-valued
-conditional assigns the value \emph{void} (neither true nor false)
-when the antecedent is false, rather than defaulting to true as in
-material implication.
+probability, and de Finetti's~\cite{definetti1936,definetti1937}
+three-valued conditional, which assigns the value \emph{void}
+(neither true nor false) when the antecedent is false rather than
+defaulting to true as in material implication.
 Chain-rule conditioning achieves the same effect algebraically: at
 evidence zero, the conditional is unconstrained rather than void, but
 in both cases the system refuses to draw conclusions from impossible
-evidence.
-Chain-rule conditioning does not require adding
-a connexive axiom~\cite{egre2021}: it simply leaves
-$\cred(A \mid 0)$ unconstrained.
+evidence --- without requiring a connexive axiom~\cite{egre2021}.
 
 The resulting structure sits at a crossroads.
 On one side, it connects to Bayesian probability: at positive
@@ -216,6 +210,11 @@ congruences)~\cite{agliano2003}.
 Replacing residuation with the involutive complement loosens this
 constraint: the Kleene partition survives precisely because the
 De Morgan reduct no longer forces $0 \to b = 1$.
+Esteva, Godo, H\'ajek, and Navara~\cite{esteva2000} studied
+product logic with involutive negation, retaining both residuation
+and complement; our structure is a further reduct (only complement
+and product), the minimal signature in which chain-rule conditioning
+is expressible.
 The two systems agree on all positive-evidence conditioning;
 they differ only at evidence zero.
 
@@ -365,47 +364,6 @@ maximum positive dependence gives $\min(\cred(A), \cred(B))$;
 maximum negative dependence gives
 $\max(\cred(A) + \cred(B) - 1, 0)$~\cite{nelsen2006}.
 \end{remark}
-
-\subsection{Comparison with Product Logic}
-
-The product De Morgan triplet and H\'ajek's Product Logic
-($\Pi$-logic)~\cite{hajek1998} share the product t-norm as
-conjunction.
-They differ in the companion operation.
-
-Product Logic uses \emph{residuation}:
-$a \to b = \sup\{c : a \cdot c \leq b\}$.
-For $a > 0$ this gives $\min(b/a,\, 1)$; for $a = 0$ the
-supremum is $1$ (ex falso).
-Residuation is uniquely determined by the t-norm and the adjunction
-property $a \cdot c \leq b$ iff $c \leq a \to b$, which
-makes Product Logic a BL-algebra with strong structural
-properties~\cite{hajek1998,galatos2007,agliano2003}.
-
-The product De Morgan triplet uses the \emph{involutive complement}
-$\negc c = 1 - c$ instead of residuation, together with the chain
-rule as its conditioning principle.
-When evidence is positive and the joint does not exceed
-the evidence, both systems yield the same conditional value
-$\cred(A \land B) / \cred(B)$.
-The systems diverge at evidence zero: residuation forces
-$0 \to b = 1$; chain-rule conditioning leaves
-$\cred(A \mid 0)$ unconstrained.
-This single difference propagates: the product BL-algebra on
-$[0,1]$ is simple (no nontrivial
-congruences)~\cite{agliano2003}, while the De Morgan reduct
-admits the Kleene partition
-(Section~\ref{sec:collapse}).
-Dropping residuation removes the constraint that forces simplicity.
-
-Esteva, Godo, H\'ajek, and
-Navara~\cite{esteva2000} studied product logic with involutive
-negation as a combined signature; they retain both residuation
-\emph{and} complement.
-Our structure is a further reduct: only complement and product,
-no residuation.
-This is the minimal signature in which chain-rule conditioning
-is expressible.
 
 \subsection{Relationship to Probability}
 
@@ -724,7 +682,8 @@ Chain rule (this paper)
 \normalsize
 \captionof{table}{Primitive-conditioning frameworks.
 The chain rule is the only framework that is defined at evidence
-zero, works on bare $[0,1]$ values, and avoids ex falso.}
+zero, works on bare $[0,1]$ values, and avoids ex falso without
+requiring measure-theoretic infrastructure.}
 \label{tab:conditioning-comparison}
 \end{center}
 \footnotetext{Popper functions can be axiomatized with or without
@@ -776,10 +735,10 @@ for $c \in (0,1)$,
   c \conjc c = c^2 < c.
   \label{eq:self-conj}
 \end{equation}
-Non-idempotence is a feature, not a defect.
-Repeated uncertain evidence \emph{should} decrease joint credence:
-if you are $80\%$ sure it will rain and $80\%$ sure (independently)
-it will rain again, your joint credence in both is $64\%$, not $80\%$.
+Non-idempotence is a feature, not a defect: as an algebraic
+operation, $c \conjc c < c$ for interior $c$ reflects the fact that
+the product conjunction strictly decreases credences, consistent with
+compounding uncertainty (cf.\ Remark~\ref{rem:product-vs-joint}).
 Only impossibility ($0$) and certainty ($1$) satisfy $c^2 = c$
 (Lean: \texttt{conj\_idempotent\_iff}).
 
@@ -1194,9 +1153,11 @@ the other lifts.
 The collapse does not merely project --- it \emph{reflects}:
 every three-valued counterexample lifts to a continuous one, and
 every continuous counterexample collapses to a three-valued one.
-An LP logician working with $\{0, \tfrac{1}{2}, 1\}$ is implicitly
-performing positivity reasoning on $[0,1]$; a K$_3$ logician is
-implicitly performing certainty reasoning.
+\medskip
+\noindent
+\emph{An LP logician working with $\{0, \tfrac{1}{2}, 1\}$ is
+implicitly performing positivity reasoning on $[0,1]$; a K$_3$
+logician is implicitly performing certainty reasoning.}
 
 \subsection{Consequences of the Bridge}
 \label{sec:bridge-consequences}
@@ -1373,7 +1334,10 @@ $\mathrm{g\ddot{o}del}(\mathrm{collapse}(b), 1) = 1$.
 (iii)~$b = 1$: $\min(a,1)/1 = a$; collapsing commutes trivially.
 (iv)~$a \geq b$: $\min(a,b)/b = b/b = 1$; and
 $\mathrm{g\ddot{o}del}(\mathrm{collapse}(b),
-\mathrm{collapse}(a)) = 1$ when $a \geq b > 0$.
+\mathrm{collapse}(a)) = 1$ since the G\"odel implication
+satisfies $\mathrm{g\ddot{o}del}(e, p) = 1$ whenever
+$e \leq p$, and $\mathrm{collapse}(b) \leq
+\mathrm{collapse}(a)$ when $a \geq b > 0$.
 \end{proof}
 
 \begin{example}[When the Bridge Works]
@@ -1591,14 +1555,9 @@ $\mathrm{collapse}(8/9) = \tfrac{1}{2} \neq 1 =
 \mathrm{qual}(\tfrac{1}{2}, \tfrac{1}{2})$.
 \end{example}
 
-\subsection{Jeffrey Update Bridge}
-
 For the Jeffrey update bridge to hold, \emph{both} conditional arms
-must satisfy the boundary conditions of Theorem~\ref{thm:boundary}:
-$\condc{A}{B}$ must be at a boundary, and so must
-$\condc{A}{\negc B}$.
-This is restrictive.
-In the running example, unless $\cred(\text{rain})$ is $0$, $1$,
+must satisfy the boundary conditions of Theorem~\ref{thm:boundary}.
+This is restrictive: unless $\cred(\text{rain})$ is $0$, $1$,
 or at least as large as both $\cred(\text{wet})$ and
 $\cred(\negc\text{wet})$, at least one arm is interior and the
 Jeffrey bridge fails.
@@ -1713,6 +1672,18 @@ consequence, despite using three truth values, are equivalent to
 positivity and certainty consequence on $[0,1]$ --- Suszko's
 reduction made constructive.
 
+Edgington~\cite{edgington1995} surveyed the philosophical
+landscape of conditionals, including the interplay between
+indicative and subjunctive readings relevant to the chain-rule
+framework.
+H\'ajek, Paris, and Shepherdson~\cite{hajek2000} studied the
+Liar paradox in fuzzy logic, connecting the $\tfrac{1}{2}$ fixed
+point to Kripke's construction in a many-valued setting.
+Baaz~\cite{baaz1996} developed $0$-$1$-projections for
+infinite-valued G\"odel logics; the collapse homomorphism of
+Section~\ref{sec:collapse} is an analogous projection for the
+product De Morgan triplet.
+
 \textbf{Algebraic and probabilistic extensions.}
 MV-algebras~\cite{mundici2011,cignoli2000} and the
 Flaminio--Montagna~\cite{flaminio2009} probabilistic extension
@@ -1722,8 +1693,8 @@ Fitting~\cite{fitting1991,fitting2006} connected bilattices to
 logic programming.
 Cox~\cite{cox1961} and Jaynes~\cite{jaynes2003} showed that
 consistent plausible reasoning must be isomorphic to probability;
-Gaines~\cite{gaines1978} unified fuzzy and probabilistic
-uncertainty.
+Gaines~\cite{gaines1978} explored connections between fuzzy and
+probabilistic uncertainty.
 Copulas are surveyed in Nelsen~\cite{nelsen2006}; comonotonicity
 in Dhaene et~al.~\cite{dhaene2002};
 imprecise probability in Walley~\cite{walley1991} and
@@ -1789,52 +1760,9 @@ $c \cdot 0 = 0$), and the bridge failure (collapse maps
 all of $(0,1)$ to $\tfrac{1}{2}$, discarding the ratio
 information that determines the conditional).
 
-\textbf{Graded consequence.}
-Graded consequence with threshold $t \in (0,1]$ connects the two
-bridge endpoints: at $t = 1$ it recovers certainty/K$_3$
-consequence; for $t \leq \tfrac{1}{2}$, the witness
-$v(A) = \tfrac{1}{2}$, $v(B) = 0$ defeats explosion (giving a
-sharp threshold; Lean: \texttt{graded\_no\_explosion}).
-For $t > \tfrac{1}{2}$, the premises $v(A) \geq t$ and
-$\negc v(A) \geq t$ are jointly unsatisfiable, so explosion holds
-vacuously.
-The disjunction $A \disjc \negc A$ achieves minimum $\tfrac{3}{4}$
-at $v(A) = \tfrac{1}{2}$, so excluded middle as a graded tautology
-holds for $t \leq \tfrac{3}{4}$ and fails for $t > \tfrac{3}{4}$.
-
-\begin{center}
-\small
-\begin{tabular}{lcccc}
-\toprule
-\textbf{System} & \textbf{Designated} & \textbf{Tautologies?}
-  & \textbf{Excl.\ middle?} & \textbf{Explosion?} \\
-\midrule
-Classical & $\{1\}$ (two-valued) & Yes & Yes & Yes \\
-K$_3$ & $\{1\}$ & No & No & Vacuously$^a$ \\
-LP & $\{1, \tfrac{1}{2}\}$ & Yes & Yes & No \\
-Cred: positivity & $\{c > 0\}$ & Yes & Yes & No$^b$ \\
-Cred: certainty & $\{c = 1\}$ & No & No & Vacuously$^a$ \\
-Graded ($t \leq \tfrac{1}{2}$) & $\{c \geq t\}$
-  & Some$^c$ & Yes$^c$ & No \\
-Graded ($\tfrac{1}{2} < t \leq \tfrac{3}{4}$) & $\{c \geq t\}$
-  & Some$^c$ & Yes$^c$ & Vacuously$^d$ \\
-Graded ($t > \tfrac{3}{4}$) & $\{c \geq t\}$
-  & No & No & Vacuously$^d$ \\
-\bottomrule
-\end{tabular}
-\normalsize
-\end{center}
-\smallskip
-\noindent
-{\footnotesize
-$^a$No valuation makes both $v(A) = 1$ and $\negc v(A) = 1$, so
-explosion holds vacuously (premises jointly unsatisfiable).
-$^b$The witness $v(A) = \tfrac{1}{2}$, $v(B) = 0$ refutes explosion
-(Example~\ref{ex:explosion};
-Lean: \texttt{lp\_no\_explosion}).
-$^c$Excluded middle holds for $t \leq \tfrac{3}{4}$, since
-$A \disjc \negc A$ achieves minimum $\tfrac{3}{4}$.
-$^d$Premises jointly unsatisfiable for $t > \tfrac{1}{2}$.}
+Graded consequence with threshold $t \in (0,1]$ interpolates
+between the two bridge endpoints; a detailed analysis appears in
+Appendix~\ref{app:graded}.
 
 \textbf{Open problems.}
 \begin{enumerate}[nosep]
@@ -2059,6 +1987,79 @@ Verification: \texttt{cd lean \&\& lake build}.
 Toolchain: Lean 4.16.0 with Mathlib 4.16.0.
 
 %=============================================================================
+\section{Graded Consequence}
+\label{app:graded}
+%=============================================================================
+
+Graded consequence on $[0,1]$ generalizes the discrete consequence
+relations to a continuous threshold parameter
+$t \in (0,1]$: the premises $\Gamma$ entail conclusion $\varphi$ at
+threshold $t$ when every valuation $v$ making all premises satisfy
+$v(p) \geq t$ also satisfies $v(\varphi) \geq t$
+(Lean: \texttt{gradedConsequence}).
+At $t = 1$ this recovers certainty consequence; the bridge theorem
+(Theorem~\ref{thm:k3-bridge}) identifies it with K$_3$
+consequence.
+
+\begin{theorem}[Sharp No-Explosion Threshold]
+\label{thm:graded-no-explosion}
+For $0 < t \leq \tfrac{1}{2}$:
+graded consequence is explosion-free.
+The witness $v(A) = \tfrac{1}{2}$, $v(B) = 0$ satisfies
+$v(A) \geq t$ and $\negc v(A) = \tfrac{1}{2} \geq t$, but
+$v(B) = 0 < t$.
+For $t > \tfrac{1}{2}$:
+explosion holds \emph{vacuously} (the premises $v(A) \geq t$ and
+$\negc v(A) \geq t$ are jointly unsatisfiable).
+The threshold $\tfrac{1}{2}$ is sharp.
+
+\smallskip\noindent
+Lean: \texttt{graded\_no\_explosion},
+\texttt{graded\_explosion\_vacuous}.
+Proof in Appendix~\ref{app:proofs}.
+\end{theorem}
+
+The disjunction $A \disjc \negc A$ achieves minimum $\tfrac{3}{4}$
+at $v(A) = \tfrac{1}{2}$
+(Lean: \texttt{certainty\_ge\_three\_quarters}),
+so excluded middle as a graded tautology holds for
+$t \leq \tfrac{3}{4}$ and fails for $t > \tfrac{3}{4}$.
+
+\begin{center}
+\small
+\begin{tabular}{lcccc}
+\toprule
+\textbf{System} & \textbf{Designated} & \textbf{Tautologies?}
+  & \textbf{Excl.\ middle?} & \textbf{Explosion?} \\
+\midrule
+Classical & $\{1\}$ (two-valued) & Yes & Yes & Yes \\
+K$_3$ & $\{1\}$ & No & No & Vacuously$^a$ \\
+LP & $\{1, \tfrac{1}{2}\}$ & Yes & Yes & No \\
+Cred: positivity & $\{c > 0\}$ & Yes & Yes & No$^b$ \\
+Cred: certainty & $\{c = 1\}$ & No & No & Vacuously$^a$ \\
+Graded ($t \leq \tfrac{1}{2}$) & $\{c \geq t\}$
+  & Some$^c$ & Yes$^c$ & No \\
+Graded ($\tfrac{1}{2} < t \leq \tfrac{3}{4}$) & $\{c \geq t\}$
+  & Some$^c$ & Yes$^c$ & Vacuously$^d$ \\
+Graded ($t > \tfrac{3}{4}$) & $\{c \geq t\}$
+  & No & No & Vacuously$^d$ \\
+\bottomrule
+\end{tabular}
+\normalsize
+\end{center}
+\smallskip
+\noindent
+{\footnotesize
+$^a$No valuation makes both $v(A) = 1$ and $\negc v(A) = 1$, so
+explosion holds vacuously (premises jointly unsatisfiable).
+$^b$The witness $v(A) = \tfrac{1}{2}$, $v(B) = 0$ refutes explosion
+(Example~\ref{ex:explosion};
+Lean: \texttt{lp\_no\_explosion}).
+$^c$Excluded middle holds for $t \leq \tfrac{3}{4}$, since
+$A \disjc \negc A$ achieves minimum $\tfrac{3}{4}$.
+$^d$Premises jointly unsatisfiable for $t > \tfrac{1}{2}$.}
+
+%=============================================================================
 \section{Deferred Proofs}
 \label{app:proofs}
 %=============================================================================
@@ -2083,8 +2084,9 @@ outside $[0,1]$.
 Under $[0,1]$-multiplication alone, the scaling trick fails because
 $[0,1]$ has no multiplicative inverses for elements in $(0,1)$:
 $a/x$ may leave the interval.
-This isolates \emph{$[0,1]$-cancellation} as the precise obstacle
-to resolving the four-or-more-class question.
+This isolates \emph{$[0,1]$-cancellation} --- the absence of
+multiplicative inverses in $[0,1]$ for elements in $(0,1)$ ---
+as the precise obstacle to resolving the four-or-more-class question.
 
 The following table places the product De Morgan triplet in
 the landscape of algebraic congruence theory.
