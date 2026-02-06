@@ -81,3 +81,7 @@ Toolchain: Lean 4.16.0 + Mathlib 4.16.0.
 - Renyi (1955), Popper (1959), de Finetti (1936) — primitive conditioning
 - Cox (1961), Jaynes (2003) — probability as extended logic
 - Klement, Mesiar, Pap (2000) — triangular norms and De Morgan triplets
+
+## Acknowledgements
+
+Anthropic's Claude (Opus 4.5 and 4.6) was used as an assistant for both the Lean formalization and the manuscript preparation.
