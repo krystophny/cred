@@ -36,7 +36,6 @@
 
 % Custom commands
 \newcommand{\cred}{\mathsf{cred}}
-% \newcommand{\Cred}{\mathsf{Cred}} % removed: no branding
 \newcommand{\negc}{\mathord{\sim}}
 \newcommand{\conjc}{\otimes}
 \newcommand{\disjc}{\sqcup}
@@ -57,18 +56,20 @@
 We study the product De Morgan triplet on $[0,1]$ --- product conjunction,
 probabilistic-sum disjunction, standard complement --- equipped with
 chain-rule conditioning.
-We prove: (1)~the min copula is the unique symmetric, idempotent copula
-(forcing the Kleene conjunction); (2)~conditioning at evidence zero is
+We prove: (1)~the min copula is the unique symmetric, idempotent copula,
+a classical result~\cite{nelsen2006} that we verify in Lean and
+reinterpret as forcing the Kleene conjunction;
+(2)~conditioning at evidence zero is
 path-dependent, so ex falso requires an added convention;
 (3)~the Kleene lattice is the unique non-trivial finite quotient of
 the algebra; and (4)~a complete congruence classification showing that
 $\{0\}$, $(0,1)$, $\{1\}$ is the only non-trivial finite congruence
-preserving negation and conjunction --- no quotient with four or more
+preserving negation and multiplication --- no quotient with four or more
 classes exists, and no two-element quotient exists.
 We then develop consequence relations on the collapse (K$_3$, LP, and
-graded thresholds), proving that explosion fails non-vacuously, and
+graded thresholds), showing that explosion fails non-vacuously, and
 extend to first order via graded predicates with inf/sup quantifiers
-where the Russell predicate yields credence~$\tfrac{1}{2}$.
+where self-referential negation yields credence~$\tfrac{1}{2}$.
 Proofs are machine-checked in Lean~4.
 \end{abstract}
 
@@ -107,25 +108,29 @@ where conditioning on a false antecedent yields \emph{void} rather than
 vacuous truth.
 
 The algebraic structure that results --- the product De Morgan triplet
-with chain-rule conditioning --- provides a unification point.
-On the continuum $[0,1]$, it supports probability-style reasoning via
-Bayesian and Jeffrey conditioning
+with chain-rule conditioning --- provides a common framework for
+probability-style and logic-style reasoning on the same value domain.
+On the continuum $[0,1]$, it supports Bayesian and Jeffrey conditioning
 (Sections~\ref{sec:valuations}--\ref{sec:update}).
 On the Kleene quotient $\{0, \tfrac{1}{2}, 1\}$, it recovers the shared
 truth tables of K$_3$, LP, and RM3 --- and the min/max operations of
 possibility theory (Remark~\ref{rem:possibility}).
-The collapse homomorphism (Section~\ref{sec:collapse}) is the bridge:
-it maps the probability-compatible product structure to the
-logic-compatible Kleene structure.
-This paper develops both sides and proves the bridge is unique.
+The \emph{Kleene collapse} --- the surjective homomorphism from the
+product structure onto the Kleene lattice
+$\{0, \tfrac{1}{2}, 1\}$ (Section~\ref{sec:collapse}) --- is
+the bridge.
+This paper develops both sides and proves the collapse is the unique
+non-trivial finite quotient.
 
 \textbf{Results.}
 \begin{enumerate}[label=(\arabic*)]
 \item \textbf{Uniqueness of min} (Theorem~\ref{thm:uniqueness-main}):
   The min copula is the unique symmetric, idempotent copula on
-  $[0,1]$~\cite{nelsen2006}.
-  We give a self-contained Lean-verified proof bridging copula theory
-  to many-valued logic: it forces the Kleene conjunction.
+  $[0,1]$, a classical result in copula theory~\cite{nelsen2006}.
+  Our contribution is a self-contained Lean-verified proof and
+  the observation that this forces the Kleene conjunction as the
+  only truth-functional joint compatible with Bayesian conditioning
+  and idempotence.
 \item \textbf{Path dependence at zero}
   (Proposition~\ref{thm:path-dependence}):
   Under the min-copula joint, the conditional's limit as evidence
@@ -135,9 +140,10 @@ This paper develops both sides and proves the bridge is unique.
   The Kleene lattice is the unique non-trivial finite quotient.
 \item \textbf{Complete congruence classification}
   (Theorem~\ref{thm:congruence-main}):
-  The partition $\{0\},(0,1),\{1\}$ is the \emph{only} non-trivial
-  finite congruence --- the main new result, distinguishing the product
-  De Morgan triplet from MV-algebras.
+  For equivalence relations compatible with $\mathbb{R}$-multiplication
+  and negation, the partition $\{0\},(0,1),\{1\}$ is the \emph{only}
+  non-trivial finite congruence --- the main new result, distinguishing
+  the product De Morgan triplet from MV-algebras.
 \item \textbf{Valuations} (Section~\ref{sec:valuations}):
   Three canonical valuation types --- independent (trivial conditioning),
   Kleene (the unique logic-compatible choice from
@@ -184,8 +190,11 @@ Appendix~\ref{app:lean} describes the Lean formalization.
 The algebra synthesizes known components: the product De Morgan triplet
 (product t-norm, probabilistic sum, standard
 complement)~\cite{klement2000,esteva2000}, combined with chain-rule
-conditioning in the tradition of R\'enyi~\cite{renyi1955} and
-Popper~\cite{popper1959}.
+conditioning.
+The idea of primitive conditioning has precedents in
+R\'enyi~\cite{renyi1955} and Popper~\cite{popper1959}, though those
+frameworks operate on measure spaces rather than bare algebraic values
+(see Remark~\ref{rem:primitive-conditioning}).
 The chain rule $\cred(A \mid B) \cdot \cred(B) = \cred(A \land B)$
 is the sole structural axiom beyond the triplet.
 
@@ -207,6 +216,8 @@ The \emph{product} of $c_1$ and $c_2$ is $c_1 \conjc c_2 = c_1 \cdot c_2$.
 \end{definition}
 
 The product is the product t-norm of fuzzy logic~\cite{klement2000}.
+We write $\conjc$ for the algebraic product throughout; when applied
+to logical conjunction (Kleene min), we write $\min$.
 
 \textbf{Important distinction.}
 The product $c_1 \conjc c_2$ is an \emph{algebraic operation} on credence
@@ -311,13 +322,14 @@ Lean: \texttt{conj\_disj\_not\_distrib}.
 \label{sec:uniqueness}
 %=============================================================================
 
-The min copula is the unique symmetric, idempotent copula on
-$[0,1]$~\cite{nelsen2006}.
+That the min copula is the unique symmetric, idempotent copula on
+$[0,1]$ is classical~\cite[Theorem~2.3.5]{nelsen2006}.
+We give a self-contained proof, verified in Lean, and draw the
+consequence for many-valued logic:
 Grzegorzewski~\cite{grzegorzewski2013} showed that copula-derived
-implications connect to fuzzy implications; the present result gives the
-uniqueness direction, forcing the Kleene conjunction as the only
-truth-functional joint compatible with Bayesian conditioning and
-idempotence.
+implications connect to fuzzy implications; the uniqueness forces the
+Kleene conjunction as the only truth-functional joint compatible with
+Bayesian conditioning and idempotence.
 
 \subsection{Requirements}
 
@@ -396,6 +408,29 @@ The chain rule does not force $\cred(A \mid 0) = 1$: it is
 \emph{consistent} with ex falso but does not \emph{entail} it.
 (Lean: \texttt{conditioning\_zero\_any}.)
 
+\begin{remark}[Comparison with Primitive-Conditioning Frameworks]
+\label{rem:primitive-conditioning}
+R\'enyi~\cite{renyi1955} and Popper~\cite{popper1959} also take
+conditioning as primitive, but in different settings.
+R\'enyi's conditional probability spaces define $P(A \mid B)$ as a
+function on pairs where $B$ ranges over a designated family of
+``permissible'' conditioning events, excluding measure-zero sets from
+the domain rather than leaving the conditional unconstrained.
+Popper functions similarly make $P(A \mid B)$ primitive but impose
+axioms that force $P(A \mid B) = 1$ when $B$ entails $A$, retaining
+a form of logical consequence.
+Dubois and Prade~\cite{dubois1988} define conditional possibility as
+$\Pi(A \mid B) = \Pi(A \cap B)$ when $\Pi(A \cap B) < \Pi(B)$ and
+$1$ otherwise, which also avoids division but constrains the
+zero-evidence case.
+The credence algebra differs from all three: it works on bare values in
+$[0,1]$ without a measure space or event algebra, and it leaves the
+zero-evidence case genuinely unconstrained --- no value is preferred,
+excluded, or forced.
+This is the strictest form of ``no ex falso'': not even a default
+value is supplied.
+\end{remark}
+
 \subsection{Path Dependence at Evidence Zero}
 \label{sec:path-dependence}
 
@@ -448,12 +483,21 @@ Lean: \texttt{conditioning\_mk}, \texttt{conditioning\_unique}.
 
 For evidence $> 0$ with joint $\min(a,b)$, the chain rule gives
 $\min(b/a,\; 1)$ --- the product residuated implication of
-$\Pi$-logic~\cite{hajek1998}.
+H\'ajek's Product Logic ($\Pi$-logic)~\cite{hajek1998}.
+The credence algebra and $\Pi$-logic share the same t-norm but differ
+in the status of implication:
+$\Pi$-logic defines $a \to b = \sup\{c : a \cdot c \leq b\}$
+(residuation), which forces $0 \to b = 1$ for all $b$ (ex falso);
+the credence algebra defines conditioning via the chain rule, which
+leaves $\cred(A \mid 0)$ unconstrained.
+Thus the product residuated implication appears as a special case of
+chain-rule conditioning (when evidence is positive), not as the
+primitive.
 
 \begin{center}
 \small
 \begin{tabular}{c|ccc}
-\multicolumn{4}{c}{\textbf{Kleene material}$^*$: $\max(\negc a, b)$} \\
+\multicolumn{4}{c}{\textbf{Kleene material}\textsuperscript{1}: $\max(\negc a, b)$} \\
 & 0 & $\tfrac{1}{2}$ & 1 \\
 \hline
 0 & 1 & 1 & 1 \\
@@ -462,7 +506,7 @@ $\tfrac{1}{2}$ & $\tfrac{1}{2}$ & $\tfrac{1}{2}$ & 1 \\
 \end{tabular}
 \quad
 \begin{tabular}{c|ccc}
-\multicolumn{4}{c}{\textbf{Prod.\ resid.}$^\dagger$: $\min(b/a, 1)$} \\
+\multicolumn{4}{c}{\textbf{Prod.\ resid.}\textsuperscript{2}: $\min(b/a, 1)$} \\
 & 0 & $\tfrac{1}{2}$ & 1 \\
 \hline
 0 & 1 & 1 & 1 \\
@@ -481,11 +525,13 @@ $\tfrac{1}{2}$ & 0 & 1 & 1 \\
 \normalsize
 \end{center}
 \smallskip
-{\footnotesize $*$ = unconstrained.
-$^*$Shared by K$_3$, LP, RM3~\cite{priest2008}.
-$^\dagger$Coincides with G\"odel on $\{0, \tfrac{1}{2}, 1\}$
+{\footnotesize $*$ = unconstrained (any value in $[0,1]$ satisfies
+the chain rule).
+\textsuperscript{1}Shared by K$_3$, LP, RM3~\cite{priest2008}.
+\textsuperscript{2}Coincides with G\"odel on $\{0, \tfrac{1}{2}, 1\}$
 (Lean: \texttt{godel\_impl\_eq\_prod\_resid}).
-Tables agree except the evidence${}=0$ row.}
+All three columns show $\cred(A \mid B)$ under different
+definitions; they agree except the evidence${}=0$ row.}
 
 \subsection{Bayes Consistency}
 
@@ -688,12 +734,23 @@ classification.
 
 \begin{theorem}[Complete Congruence Classification]
 \label{thm:congruence-main}
-The only non-trivial finite quotients of $([0,1], \conjc, \negc)$
-preserving negation and conjunction are onto the three-element Kleene
-lattice.
-The partition $\{0\},(0,1),\{1\}$ is the unique non-trivial finite
-congruence.
+Let $\sim$ be an equivalence relation on $\mathbb{R}$ that is compatible
+with multiplication ($a \sim b$ and $c \sim d$ imply $ac \sim bd$) and
+with negation ($a \sim b$ implies $1 - a \sim 1 - b$).
+If $\sim$ is non-trivial when restricted to $[0,1]$, then the only
+non-trivial finite quotient of $[0,1]$ is the three-element Kleene
+lattice with partition $\{0\},(0,1),\{1\}$.
 \end{theorem}
+
+The hypothesis that $\sim$ is compatible with $\mathbb{R}$-multiplication
+(not just multiplication on $[0,1]$) is essential for part~(4) of the
+proof.
+This is the natural choice: the product t-norm on $[0,1]$ is the
+restriction of $\mathbb{R}$-multiplication, and any congruence on a
+submonoid of $(\mathbb{R}, \cdot)$ that respects the monoid operation
+extends canonically.
+The Lean formalization makes this explicit
+(see \texttt{CredCongruence.conj\_compat} in Appendix~\ref{app:lean}).
 
 \begin{proof}
 We establish four facts.
@@ -715,9 +772,8 @@ Pick $a = \tfrac{1}{2}$.
 By the pigeonhole principle on $n$ classes, there exist $0 \leq i < j \leq n$
 with $a^i \sim a^j$.
 Write $a^j = a^i \cdot a^p$ where $p = j - i \geq 1$.
-Since the congruence is compatible with multiplication (on all of~$\mathbb{R}$,
-not just $[0,1]$), multiplying both sides by $(a^i)^{-1}$ yields
-$1 \sim a^p$.
+Multiplying both sides by $(a^i)^{-1}$ (using $\mathbb{R}$-multiplication
+compatibility) yields $1 \sim a^p$.
 Applying negation compatibility gives $0 \sim 1 - a^p$.
 But $0 < a^p < 1$, so $1 - a^p > 0$, contradicting~(1).
 \end{proof}
@@ -728,22 +784,27 @@ All four parts are fully Lean-verified in \texttt{Cred/Congruence.lean}:
 \texttt{no\_two\_element\_quotient},
 \texttt{unique\_three\_element\_quotient},
 \texttt{no\_four\_or\_more\_classes}.
-The scaling trick in part~(4) uses the $\mathbb{R}$-algebra structure
-of the congruence (multiplication by $(a^i)^{-1} > 1$), which is
-available because \texttt{CredCongruence.conj\_compat} operates on all
-of~$\mathbb{R}$.
 \end{remark}
 
-\begin{remark}[Comparison with MV-algebras]
+\begin{remark}[Comparison with MV-algebras and BL-algebras]
+\label{rem:mv-comparison}
 In MV-algebras~\cite{mundici2011}, Chang's completeness theorem gives a
 rich congruence lattice: every MV-algebra is a subdirect product of
 totally ordered ones, and the standard MV-algebra on $[0,1]$ has
-infinitely many congruences.
+infinitely many congruences (one for each rational).
 The product De Morgan triplet exhibits the opposite behavior: exactly one
 non-trivial finite congruence.
-This rigidity distinguishes the product structure from the
-\L ukasiewicz one: the Kleene collapse is not an arbitrary choice but a
-forced consequence of the algebra.
+More broadly, BL-algebras (the algebraic semantics of H\'ajek's Basic
+Logic~\cite{hajek1998}) admit subdirect decomposition into totally
+ordered components.
+The standard product algebra $[0,1]_\Pi$ is simple as a BL-algebra
+(no non-trivial BL-congruences)~\cite{hajek1998}.
+Our classification operates on a different signature --- $({\cdot},\,
+1{-}(\cdot))$ rather than $({\cdot},\, {\to})$ --- and shows that even
+in this weaker setting (no residuated implication), the only non-trivial
+finite quotient is the Kleene lattice.
+The rigidity is thus a property of the product t-norm itself, not of the
+choice of companion operations.
 \end{remark}
 
 %=============================================================================
@@ -989,12 +1050,12 @@ $v(A_i) \geq t$ for all $i$ satisfies $v(B) \geq t$.
 Lean: \texttt{gradedConsequence}.
 \end{definition}
 
-\begin{theorem}[No Explosion]
+\begin{proposition}[No Explosion]
 \label{thm:no-explosion}
 For $0 < t \leq \tfrac{1}{2}$, graded consequence does not have
 explosion: $v(A) = \tfrac{1}{2}$, $v(B) = 0$ witnesses the failure.
 Lean: \texttt{graded\_no\_explosion}.
-\end{theorem}
+\end{proposition}
 
 \subsection{Comparison}
 
@@ -1072,19 +1133,22 @@ Lean: \texttt{crisp\_inf\_zero\_iff}, \texttt{crisp\_sup\_one\_iff}.
 
 \subsection{Self-Reference}
 
-\begin{theorem}[Negation Fixed-Point Resolution]
+\begin{corollary}[Negation Fixed-Point Resolution]
 \label{thm:russell}
 If $c = \negc c$, then $c = \tfrac{1}{2}$.
-Lean: \texttt{russell\_fixed\_point}.
-\end{theorem}
+(Immediate from Lemma~\ref{thm:liar}; Lean: \texttt{russell\_fixed\_point}.)
+\end{corollary}
 
+The corollary applies whenever a self-referential construction produces
+a credence satisfying $c = \negc c$.
 Russell's predicate $R = \{x : x \notin x\}$ applied to itself gives
-$R(R) = \negc R(R) = \tfrac{1}{2}$: the set half-contains itself.
-This connects to paraconsistent set
+$R(R) = \negc R(R)$; the corollary then forces $R(R) = \tfrac{1}{2}$.
+This requires an ambient framework admitting unrestricted comprehension
+--- for instance, paraconsistent set
 theory~\cite{brady2006,weber2010}, where comprehension is retained and
 contradictions are tolerated.
-In the credence algebra, the ``contradiction'' has a precise numerical
-value: $\tfrac{1}{2}$.
+In such a framework, the credence algebra resolves the ``contradiction''
+to a precise numerical value: $\tfrac{1}{2}$.
 
 %=============================================================================
 \section{Conclusion}
@@ -1106,8 +1170,9 @@ distinguishing the product De Morgan triplet from MV-algebras.
 This rigidity forces the Kleene collapse: no other finite quotient
 exists.
 
-The algebra provides a single framework where probability-style reasoning
-and logic-style reasoning coexist via the collapse homomorphism.
+The algebra provides a common algebraic setting where probability-style
+reasoning and logic-style reasoning coexist via the collapse
+homomorphism.
 On $[0,1]$, Bayesian and Jeffrey update rules
 (Section~\ref{sec:update}) propagate credences through the chain rule,
 with zero-evidence underdetermination connecting to imprecise
@@ -1126,8 +1191,7 @@ unrestricted comprehension yields $\tfrac{1}{2}$ rather than paradoxes
 
 Open problems: first-order extension with formal proof theory,
 consequence relations compatible with unconstrained conditioning at zero,
-connections to paraconsistent set theory, and full Lean formalization of
-the $n \geq 4$ case in the congruence classification.
+and connections to paraconsistent set theory.
 
 \section*{Acknowledgements}
 
@@ -1357,8 +1421,8 @@ $\cred(A \mid B) \cdot \cred(B) = \cred(A \land B)$.
 \label{app:lean}
 %=============================================================================
 
-The formalization comprises approximately 2500 lines of Lean~4 with Mathlib
-across five modules:
+The formalization comprises approximately 2700 lines of Lean~4 with Mathlib
+across six modules:
 \texttt{Cred/Basic.lean} (core algebra, conditioning, fixed points, collapse,
 comparisons);
 \texttt{Cred/Congruence.lean} (congruence classification, singleton boundaries);
