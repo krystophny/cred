@@ -74,17 +74,13 @@ $\{0, \tfrac{1}{2}, 1\}$ via a unique three-element quotient,
 and establish a formula-level bridge: LP consequence on the
 lattice is equivalent to positivity consequence on $[0,1]$,
 and K$_3$ consequence to certainty consequence.
-A two-level congruence classification separates
-$[0,1]$-multiplication (where the Kleene quotient exists and is
-unique) from $\Real$-multiplication (where no nontrivial finite
-quotient exists at all).
 The bridge does \emph{not} extend to conditioning: no
 truth-functional function on the lattice can reproduce the
 min-copula conditional --- a constructive Lewis triviality result
 witnessed by two explicit pairs.
 We characterize the boundary conditions under which the bridge
 does hold, show that Bayesian update inherits it, and prove
-a zero-evidence duality tying underdetermination, paraconsistency,
+a zero-evidence trichotomy tying underdetermination, paraconsistency,
 and bridge failure to the single algebraic fact $c \cdot 0 = 0$.
 All results are machine-checked in Lean~4 with Mathlib
 (3581 lines across seven modules, zero \texttt{sorry}).
@@ -170,7 +166,7 @@ This paper studies both senses and their interaction.
   the product De Morgan triplet collapses to the Kleene lattice;
   \textbf{uniqueness of the three-element quotient} (new).
 \item \textbf{Congruence classification}
-  (Section~\ref{sec:congruence}; new):
+  (Section~\ref{sec:congruence}, Appendix~\ref{app:proofs}; new):
   under $[0,1]$-multiplication, the Kleene lattice is the unique
   nontrivial three-element quotient and boundary classes are
   singletons; under $\Real$-multiplication, no nontrivial
@@ -187,7 +183,7 @@ This paper studies both senses and their interaction.
   (evidence certain, conclusion at a boundary, or conclusion at
   least as credible as evidence);
   Bayesian update inherits the bridge under these conditions.
-\item \textbf{Zero-evidence duality}
+\item \textbf{Zero-evidence trichotomy}
   (Section~\ref{sec:update}; new):
   the identity $c \cdot 0 = 0$ simultaneously forces
   underdetermined posteriors, LP explosion failure, and
@@ -235,12 +231,8 @@ conditionals; van Fraassen~\cite{vanfraassen1976,vanfraassen1983}
 studied the interplay of probability and conditionals.
 Lewis~\cite{lewis1976} showed that identifying conditional
 probability with the probability of a conditional proposition
-forces triviality; Halpern~\cite{halpern2003} analyzed Lewis's
-conditions in detail.
-Our impossibility theorem (Section~\ref{sec:cond-bridge})
-is a different kind of triviality: the collapse homomorphism
-cannot extend to conditioning, even without treating conditionals
-as propositions.
+forces triviality (Remark~\ref{rem:lewis} compares our
+impossibility theorem).
 Pavelka~\cite{pavelka1979i} introduced graded inference
 in many-valued logic;
 B\v{e}hounek and Cintula~\cite{behounek2006} developed
@@ -251,9 +243,18 @@ necessarily at the level of truth values);
 Malinowski~\cite{malinowski1993} and
 Font--Jansana--Pigozzi~\cite{font2003} developed this theme in
 abstract algebraic logic.
-MV-algebras~\cite{mundici2011,cignoli2000} and the
-Flaminio--Montagna~\cite{flaminio2009} probabilistic extension
-provide the \L ukasiewicz counterpart.
+The bridge theorems make Suszko's reduction constructive: the
+collapse homomorphism explicitly maps $[0,1]$-valuations to
+three-valued valuations, and the lift provides the inverse
+direction.
+Mundici's~\cite{mundici2011} theory of states on MV-algebras
+provides a different bridge between many-valued logic and
+probability, using \L ukasiewicz connectives;
+Flaminio and Montagna~\cite{flaminio2009} extended this to a
+probabilistic logic.
+The product bridge differs in using the product t-norm (which
+preserves the interior) rather than \L ukasiewicz (which can
+collapse interior values to zero).
 Belnap~\cite{belnap1977} and Dunn~\cite{dunn1976} developed FDE;
 Fitting~\cite{fitting1991,fitting2006} connected bilattices to
 logic programming.
@@ -292,7 +293,7 @@ classification.
 Section~\ref{sec:bridge}: the propositional bridge.
 Section~\ref{sec:cond-bridge}: the conditional bridge impossibility.
 Section~\ref{sec:update}: update through the bridge and
-zero-evidence duality.
+zero-evidence trichotomy.
 Section~\ref{sec:graded}: graded consequence.
 Section~\ref{sec:conclusion}: conclusion and open problems.
 Appendix~\ref{app:prelim}: standard definitions.
@@ -498,8 +499,9 @@ conditionals?
 
 We impose four requirements:
 truth-functionality ($j(a,b)$ depends on $a$ and $b$ alone),
-Bayes consistency ($j(a,b)/a = j(b,a)/b$ when denominators
-are positive),
+Bayes consistency (the joint is symmetric: $j(a,b) = j(b,a)$,
+so the joint credence is the same regardless of conditioning
+direction),
 non-trivial conditioning ($j(a,b)/b \neq a$ in general),
 and idempotence ($j(a,a) = a$).
 
@@ -507,90 +509,31 @@ and idempotence ($j(a,a) = a$).
 \label{thm:min-copula-unique}
 Among symmetric copulas on $[0,1]$, the minimum
 $C(a,b) = \min(a,b)$ is the unique idempotent one.
-\end{theorem}
-
-\begin{proof}
-Let $C$ be a symmetric, idempotent copula.
-
-\emph{Upper bound.}
-The 2-increasing property on $[0,a] \times [b,1]$ with unit
-marginal gives
-$C(a,1) - C(a,b) - C(0,1) + C(0,b) \geq 0$, hence
-$a - C(a,b) \geq 0$, so $C(a,b) \leq a$.
-By symmetry $C(a,b) \leq b$, giving $C(a,b) \leq \min(a,b)$.
-
-\emph{Lower bound.}
-Assume $a \leq b$.
-Apply 2-increasing to $[0,a] \times [a,b]$:
-$C(a,b) - C(a,a) - C(0,b) + C(0,a) \geq 0$.
-By idempotence $C(a,a) = a$; by groundedness $C(0,b) = 0$
-and $C(0,a) = 0$; hence $C(a,b) \geq a = \min(a,b)$.
-
-Together: $C(a,b) = \min(a,b)$.
 
 Lean: \texttt{copula\_idempotent\_unique},
 \texttt{min\_copula\_unique}.
-\end{proof}
+Proof in Appendix~\ref{app:proofs}.
+\end{theorem}
 
+The four requirements are not independent.
+For any copula, symmetry and idempotence together force $\min$
+(Theorem~\ref{thm:min-copula-unique}).
+Bayes consistency --- that the joint $j(a,b)$ be the same regardless
+of conditioning direction --- is automatically satisfied by any
+symmetric joint: $j(a,b) = j(b,a)$.
+Non-triviality then follows: $\min(a,b)/b \neq a$ whenever $a < b$.
 Idempotence is the logically essential property:
 $\cred(A \land A) = \cred(A)$.
-Any truth-functional joint that respects this tautology must be
-the minimum.
 The uniqueness theorem says there is no freedom in this choice:
 idempotence, together with the copula axioms (groundedness, unit
 marginals, 2-increasing), forces $\min$.
-
-\begin{remark}[The Min Copula as the Comonotonicity Copula]
-\label{rem:comonotonicity}
-The min copula is not an ad hoc construction.
-In probability theory, it is the
-\emph{comonotonicity copula}~\cite{dhaene2002,nelsen2006}:
-the extremal case of maximal positive dependence, where all
-random variables are increasing functions of a single latent
-variable.
-It is the \emph{upper} Fr\'echet--Hoeffding bound:
-$\min(a,b)$ is the largest possible joint for given marginals.
-The copula axioms (including 2-increasing) ensure that
-$\min$ is a valid joint distribution consistent with probability
-theory, not merely a logical convenience~\cite{nelsen2006}.
-\end{remark}
-
-The other Fr\'echet extreme, the product copula
-$C(a,b) = a \cdot b$ (independence), fails idempotence
-($a^2 \neq a$ for $a \in (0,1)$) and gives trivial conditioning
-($a \cdot b / b = a$; the conditional does not depend on the
-evidence; Lean: \texttt{prod\_trivial\_conditioning}).
-The \L ukasiewicz copula $C(a,b) = \max(a+b-1, 0)$ also fails
-idempotence
-(Lean: \texttt{luk\_not\_idempotent}).
-Only the minimum satisfies all four requirements among
-truth-functional formulas.
-
-\begin{center}
-\small
-\begin{tabular}{lcccc}
-\toprule
-\textbf{Joint formula} & \textbf{Truth-func.} & \textbf{Bayes-cons.}
-  & \textbf{Non-trivial} & \textbf{Idempotent} \\
-\midrule
-$\min(a,b)$ & \checkmark & \checkmark & \checkmark & \checkmark \\
-$a \cdot b$ (indep.) & \checkmark & \checkmark & $\times$ & $\times$ \\
-$\max(a{+}b{-}1,0)$ & \checkmark & \checkmark & \checkmark & $\times$ \\
-$\max(\negc a,b) \cdot a$ (RM3) & \checkmark & $\times$ & --- & --- \\
-\midrule
-External (prob.) & $\times$ & \checkmark & \checkmark & \checkmark \\
-\bottomrule
-\end{tabular}
-\normalsize
-\captionof{table}{Comparison of joint formulas.
-Only the minimum satisfies all four requirements among
-truth-functional formulas.
-Lean: \texttt{min\_copula\_unique},
-\texttt{prod\_trivial\_conditioning},
-\texttt{luk\_not\_idempotent},
-\texttt{rm3\_not\_bayes\_consistent\_real}.}
-\label{tab:joint-comparison}
-\end{center}
+The product copula $C(a,b) = a \cdot b$ (independence) fails
+idempotence and gives trivial conditioning
+($a \cdot b / b = a$; Lean: \texttt{prod\_trivial\_conditioning});
+the \L ukasiewicz copula $C(a,b) = \max(a+b-1, 0)$ also fails
+idempotence (Lean: \texttt{luk\_not\_idempotent}).
+A comparison table appears in Appendix~\ref{app:proofs}
+(Table~\ref{tab:joint-comparison}).
 
 %=============================================================================
 \section{Chain-Rule Conditioning}
@@ -779,27 +722,6 @@ The chain rule is the only framework that is defined at evidence
 zero, works on bare $[0,1]$ values, and avoids ex falso.}
 \label{tab:conditioning-comparison}
 \end{center}
-
-\subsection{Lewis Triviality}
-
-\begin{remark}[Connection to Lewis Triviality]
-\label{rem:lewis-triviality}
-Lewis~\cite{lewis1976} showed that identifying $P(A \mid B)$ with
-the probability of a conditional proposition $A \to B$ in the same
-algebra forces the probability measure to be trivial.
-Van Fraassen~\cite{vanfraassen1976,vanfraassen1983} and
-Halpern~\cite{halpern2003} analyzed the scope of Lewis's
-conditions.
-Adams~\cite{adams1975} avoided Lewis's conclusion by treating
-conditionals as having ``assertability'' rather than truth value.
-Chain-rule conditioning avoids Lewis's conditions differently:
-the conditional is not a proposition in the algebra (it is a
-separate structure), so the triviality argument does not apply.
-The impossibility theorem we prove in Section~\ref{sec:cond-bridge}
-is a \emph{different} kind of triviality: the collapse homomorphism
-cannot extend to conditioning, even without treating conditionals
-as propositions.
-\end{remark}
 
 \subsection{Bayesian and Jeffrey Update}
 
@@ -1044,106 +966,16 @@ This is Kleene $\min$
 \subsection{Congruence Classification}
 \label{sec:congruence}
 
-The collapse is a congruence --- an equivalence relation compatible
-with the algebraic operations.
-How many such congruences exist?
-The answer depends on whether multiplication compatibility is
-required only for $[0,1]$-valued inputs or for all of $\Real$.
-
-A \emph{unit congruence} is an equivalence relation $\sim$ on
-$[0,1]$ satisfying: (i) $a \sim b$ implies $(1-a) \sim (1-b)$
-(negation compatibility), and (ii) $a \sim b$ and $c \sim d$, with
-$a,b,c,d \in [0,1]$, imply $ac \sim bd$ ($[0,1]$-multiplication
-compatibility).
-A \emph{real congruence} strengthens (ii) to unrestricted
-$\Real$-multiplication: $a \sim b$ and $c \sim d$ (for any
-$a,b,c,d \in \Real$) imply $ac \sim bd$.
-
-\begin{theorem}[Congruence Classification]
-\label{thm:congruence}
-Let $\sim$ be a congruence on $([0,1], \negc, \conjc)$.
-\begin{enumerate}[label=\textup{(\arabic*)}]
-\item \textbf{Singleton boundaries} (unit congruence):
-  if $0 \sim \varepsilon$ for any $\varepsilon > 0$, then $\sim$
-  is trivial; likewise for $\{1\}$ by negation duality.
-  Lean: \texttt{UnitCongruence.singleton\_zero},
-  \texttt{singleton\_one}.
-\item \textbf{No two-element quotient:}
-  no surjective homomorphism $[0,1] \to \{0,1\}$ preserves
-  negation (Proposition~\ref{prop:no-classical}).
-\item \textbf{Uniqueness at three elements:}
-  if the quotient has exactly $3$ classes, it is the Kleene lattice
-  $\{0, \tfrac{1}{2}, 1\}$
-  (Theorem~\ref{thm:quotient-unique}).
-  The Kleene partition is itself a verified unit congruence
-  (Lean: \texttt{kleeneCongruence},
-  \texttt{kleene\_nonTrivial}).
-\item \textbf{$\Real$-rigidity:}
-  under $\Real$-multiplication, no non-trivial finite quotient
-  exists.
-  Lean: \texttt{RealCongruence.no\_nontrivial\_finite\_quotient}.
-\end{enumerate}
+The collapse is the unique three-element quotient
+(Theorem~\ref{thm:quotient-unique}).
+A full congruence classification appears in
+Appendix~\ref{app:proofs} (Theorem~\ref{thm:congruence}):
+under $[0,1]$-multiplication the Kleene lattice is the unique
+nontrivial three-element quotient and boundary classes $\{0\}$,
+$\{1\}$ are singletons, while under $\Real$-multiplication no
+nontrivial finite quotient exists at all.
 Whether a unit congruence with $4$ or more classes exists under
 $[0,1]$-multiplication alone is \textbf{open}.
-Proof in Appendix~\ref{app:proofs}.
-\end{theorem}
-
-The proof of (1) iterates the contraction $x \mapsto x(1-\varepsilon)$
-to drive any $x$ below $\varepsilon$, then uses
-$[0,1]$-multiplication to factor through $0 \sim \varepsilon$.
-The proof of (4) uses the pigeonhole principle on powers of
-$\tfrac{1}{2}$ to find two powers in the same class, then multiplies
-by the real inverse (which lies outside $[0,1]$) to derive
-$1 \sim \tfrac{1}{2}^p$, contradicting singleton boundaries.
-
-The $\Real$-rigidity proof relies on multiplicative inverses
-outside $[0,1]$.
-Under $[0,1]$-multiplication alone, the scaling trick fails because
-$[0,1]$ has no multiplicative inverses for elements in $(0,1)$:
-$a/x$ may leave the interval.
-This isolates \emph{$[0,1]$-cancellation} as the precise obstacle
-to resolving the four-or-more-class question.
-
-The following table places the product De Morgan triplet in
-the landscape of algebraic congruence theory.
-
-\begin{center}
-\small
-\begin{tabular}{llll}
-\toprule
-\textbf{Signature} & \textbf{Mult.\ scope}
-  & \textbf{Finite congruences} & \textbf{Reference} \\
-\midrule
-MV: $(\max(a{+}b{-}1,0),\; 1{-}(\cdot))$
-  & $[0,1]$ & Infinitely many
-  & \cite{cignoli2000,mundici2011} \\
-BL (product): $({\cdot},\; {\to})$
-  & $[0,1]$ & None (simple)
-  & \cite{agliano2003} \\
-De Morgan: $({\cdot},\; 1{-}(\cdot))$
-  & $[0,1]$ & Kleene exists; $\geq\!4$ open
-  & Thm.~\ref{thm:congruence} \\
-De Morgan: $({\cdot},\; 1{-}(\cdot))$
-  & $\Real$ & None
-  & Thm.~\ref{thm:congruence} \\
-\bottomrule
-\end{tabular}
-\normalsize
-\end{center}
-\smallskip
-\noindent
-The product De Morgan triplet is a \emph{reduct} of the product
-BL-algebra: it drops the residuated implication and replaces it with
-the involutive complement.
-Dropping residuation removes the constraint $0 \to b = 1$ (ex falso)
-that forces simplicity in the BL
-case~\cite{agliano2003,galatos2007}, leaving room for the Kleene
-partition.
-In MV-algebras~\cite{cignoli2000,mundici2011}, Chang's completeness
-theorem gives a rich congruence lattice.
-The De Morgan reduct sits between: at least one non-trivial finite
-congruence exists (Kleene), but whether it is the only one remains
-unknown.
 
 %=============================================================================
 \section{The Propositional Bridge}
@@ -1611,6 +1443,21 @@ $\{0, \tfrac{1}{2}, 1\}$ maps $(\tfrac{1}{2}, \tfrac{1}{2})$ to
 $1$ (certainty), losing the distinction between ``partially
 supports'' and ``fully supports.''
 
+\begin{corollary}[Complete Characterization]
+\label{cor:complete-boundary}
+For $a, b \in [0,1]$ with $b > 0$, the conditional bridge holds
+(i.e., $\mathrm{collapse}(\min(a,b)/b) =
+\mathrm{g\ddot{o}del}(\mathrm{collapse}(b),\,
+\mathrm{collapse}(a))$)
+if and only if at least one of conditions
+\textup{(i)--(iv)} of Theorem~\ref{thm:boundary} holds.
+\end{corollary}
+\begin{proof}
+Sufficiency: Theorem~\ref{thm:boundary}.
+Necessity: when none of (i)--(iv) hold, both $a$ and $b$ are interior
+with $a < b$, and Theorem~\ref{thm:interior-fail} gives failure.
+\end{proof}
+
 \subsection{Path Dependence}
 \label{sec:path-dep}
 
@@ -1798,14 +1645,14 @@ or at least as large as both $\cred(\text{wet})$ and
 $\cred(\negc\text{wet})$, at least one arm is interior and the
 Jeffrey bridge fails.
 
-\subsection{Zero-Evidence Duality}
-\label{sec:zero-duality}
+\subsection{Zero-Evidence Trichotomy}
+\label{sec:zero-trichotomy}
 
 The algebraic fact $c \cdot 0 = 0$ for all $c \in [0,1]$ is the
 common root of three phenomena.
 
-\begin{theorem}[Zero-Evidence Duality]
-\label{thm:zero-duality}
+\begin{theorem}[Zero-Evidence Trichotomy]
+\label{thm:zero-trichotomy}
 The following three statements are simultaneously consequences of
 the identity $c \conjc 0 = 0$:
 \begin{enumerate}[label=\textup{(\roman*)},nosep]
@@ -1841,12 +1688,15 @@ Lean: \texttt{zero\_evidence\_duality}
 (ii)~$v(A) = \tfrac{1}{2}$, $v(B) = 0$ satisfies
 $v(A) > 0$ and $\negc v(A) = \tfrac{1}{2} > 0$ but $v(B) = 0$
 (Lean: \texttt{lp\_no\_explosion}).
-(iii)~For any $c_1, c_2 \in [0,1]$, both are consistent
-conditionals at evidence $0$
+(iii)~Any truth-functional
+$f(\mathrm{collapse}(0), \mathrm{collapse}(a))$ must return a
+single value in $\{0, \tfrac{1}{2}, 1\}$, but all values in $[0,1]$
+are equally valid conditionals at evidence $0$ (by part~(i)), so no
+single output can be correct for all $a$
 (Lean: \texttt{conditioning\_zero\_any}).
 \end{proof}
 
-The duality provides a unified perspective on the paper's results.
+The trichotomy provides a unified perspective on the paper's results.
 The propositional bridge (Section~\ref{sec:bridge}) operates through
 the connectives, which are homomorphic under collapse.
 The conditional bridge (Section~\ref{sec:cond-bridge}) fails because
@@ -2005,17 +1855,18 @@ The paper develops two main threads.
   bridge (Theorem~\ref{thm:no-cond-bridge}).
   This is a constructive Lewis triviality for the product De Morgan
   triplet, witnessed by two explicit pairs.
-\item The boundary characterization: the bridge holds exactly when
+\item The boundary characterization: the bridge holds if and only if
   evidence is certain, conclusion is impossible or certain, or
   conclusion is at least as credible as evidence
-  (Theorem~\ref{thm:boundary}).
+  (Theorem~\ref{thm:boundary},
+  Corollary~\ref{cor:complete-boundary}).
 \item The update bridge: Bayesian update inherits the conditional
   bridge under boundary conditions
   (Theorem~\ref{thm:update-bridge}).
-\item Zero-evidence duality: the algebraic fact $c \cdot 0 = 0$
+\item Zero-evidence trichotomy: the algebraic fact $c \cdot 0 = 0$
   simultaneously forces underdetermined posteriors,
   LP explosion failure, and conditional bridge failure
-  (Theorem~\ref{thm:zero-duality}).
+  (Theorem~\ref{thm:zero-trichotomy}).
 \end{enumerate}
 
 \textbf{The common root is $c \cdot 0 = 0$.}
@@ -2164,7 +2015,7 @@ Mathlib), totaling 3581 lines with zero \texttt{sorry}:
   quantifiers, Russell fixed point (210 lines).
 \item \texttt{Cred/CondBridge.lean}: conditional bridge impossibility,
   boundary characterization, qualitative update, update bridge,
-  zero-evidence duality (353 lines).
+  zero-evidence trichotomy (353 lines).
 \end{itemize}
 
 \textbf{Key definitions:}
@@ -2221,7 +2072,7 @@ Qualitative update (Def.~\ref{def:qual-update})
   & \texttt{qualitativeUpdate}, \texttt{qualUpdate\_*} \\
 Update bridge (Thm.~\ref{thm:update-bridge})
   & \texttt{update\_bridge} \\
-Zero-evidence duality (Thm.~\ref{thm:zero-duality})
+Zero-evidence trichotomy (Thm.~\ref{thm:zero-trichotomy})
   & \texttt{zero\_evidence\_duality} \\
 Bayesian update chain rule
   & \texttt{bayesianUpdate\_chain\_rule} \\
@@ -2268,12 +2119,175 @@ Toolchain: Lean 4.16.0 with Mathlib 4.16.0.
 \label{app:proofs}
 %=============================================================================
 
+\subsection{Min Copula Uniqueness}
+
+\begin{proof}[Proof of Theorem~\ref{thm:min-copula-unique}]
+Let $C$ be a symmetric, idempotent copula.
+
+\emph{Upper bound.}
+The 2-increasing property on $[0,a] \times [b,1]$ with unit
+marginal gives
+$C(a,1) - C(a,b) - C(0,1) + C(0,b) \geq 0$, hence
+$a - C(a,b) \geq 0$, so $C(a,b) \leq a$.
+By symmetry $C(a,b) \leq b$, giving $C(a,b) \leq \min(a,b)$.
+
+\emph{Lower bound.}
+Assume $a \leq b$.
+Apply 2-increasing to $[0,a] \times [a,b]$:
+$C(a,b) - C(a,a) - C(0,b) + C(0,a) \geq 0$.
+By idempotence $C(a,a) = a$; by groundedness $C(0,b) = 0$
+and $C(0,a) = 0$; hence $C(a,b) \geq a = \min(a,b)$.
+
+Together: $C(a,b) = \min(a,b)$.
+\end{proof}
+
+\begin{remark}[The Min Copula as the Comonotonicity Copula]
+\label{rem:comonotonicity}
+The min copula is not an ad hoc construction.
+In probability theory, it is the
+\emph{comonotonicity copula}~\cite{dhaene2002,nelsen2006}:
+the extremal case of maximal positive dependence, where all
+random variables are increasing functions of a single latent
+variable.
+It is the \emph{upper} Fr\'echet--Hoeffding bound:
+$\min(a,b)$ is the largest possible joint for given marginals.
+The copula axioms (including 2-increasing) ensure that
+$\min$ is a valid joint distribution consistent with probability
+theory, not merely a logical convenience~\cite{nelsen2006}.
+\end{remark}
+
+\begin{center}
+\small
+\begin{tabular}{lcccc}
+\toprule
+\textbf{Joint formula} & \textbf{Truth-func.} & \textbf{Bayes-cons.}
+  & \textbf{Non-trivial} & \textbf{Idempotent} \\
+\midrule
+$\min(a,b)$ & \checkmark & \checkmark & \checkmark & \checkmark \\
+$a \cdot b$ (indep.) & \checkmark & \checkmark & $\times$ & $\times$ \\
+$\max(a{+}b{-}1,0)$ & \checkmark & \checkmark & \checkmark & $\times$ \\
+$\max(\negc a,b) \cdot a$ (RM3) & \checkmark & $\times$ & --- & --- \\
+\midrule
+External (prob.) & $\times$ & \checkmark & \checkmark & \checkmark \\
+\bottomrule
+\end{tabular}
+\normalsize
+\captionof{table}{Comparison of joint formulas.
+Only the minimum satisfies all four requirements among
+truth-functional formulas.
+Lean: \texttt{min\_copula\_unique},
+\texttt{prod\_trivial\_conditioning},
+\texttt{luk\_not\_idempotent},
+\texttt{rm3\_not\_bayes\_consistent\_real}.}
+\label{tab:joint-comparison}
+\end{center}
+
 \subsection{Congruence Classification}
 
-The congruence classification operates at two levels depending on the
-scope of the multiplication compatibility hypothesis.
-The full proof appears below; the Lean formalization is in
-\texttt{Cred/Congruence.lean}.
+The collapse is a congruence --- an equivalence relation compatible
+with the algebraic operations.
+How many such congruences exist?
+The answer depends on whether multiplication compatibility is
+required only for $[0,1]$-valued inputs or for all of $\Real$.
+
+A \emph{unit congruence} is an equivalence relation $\sim$ on
+$[0,1]$ satisfying: (i) $a \sim b$ implies $(1-a) \sim (1-b)$
+(negation compatibility), and (ii) $a \sim b$ and $c \sim d$, with
+$a,b,c,d \in [0,1]$, imply $ac \sim bd$ ($[0,1]$-multiplication
+compatibility).
+A \emph{real congruence} strengthens (ii) to unrestricted
+$\Real$-multiplication: $a \sim b$ and $c \sim d$ (for any
+$a,b,c,d \in \Real$) imply $ac \sim bd$.
+That is, the equivalence classes are subsets of $[0,1]$, but the
+compatibility condition permits multipliers from all of $\Real$,
+not just $[0,1]$.
+
+\begin{theorem}[Congruence Classification]
+\label{thm:congruence}
+Let $\sim$ be a congruence on $([0,1], \negc, \conjc)$.
+\begin{enumerate}[label=\textup{(\arabic*)}]
+\item \textbf{Singleton boundaries} (unit congruence):
+  if $0 \sim \varepsilon$ for any $\varepsilon > 0$, then $\sim$
+  is trivial; likewise for $\{1\}$ by negation duality.
+  Lean: \texttt{UnitCongruence.singleton\_zero},
+  \texttt{singleton\_one}.
+\item \textbf{No two-element quotient:}
+  no surjective homomorphism $[0,1] \to \{0,1\}$ preserves
+  negation (Proposition~\ref{prop:no-classical}).
+\item \textbf{Uniqueness at three elements:}
+  if the quotient has exactly $3$ classes, it is the Kleene lattice
+  $\{0, \tfrac{1}{2}, 1\}$
+  (Theorem~\ref{thm:quotient-unique}).
+  The Kleene partition is itself a verified unit congruence
+  (Lean: \texttt{kleeneCongruence},
+  \texttt{kleene\_nonTrivial}).
+\item \textbf{$\Real$-rigidity:}
+  under $\Real$-multiplication, no non-trivial finite quotient
+  exists.
+  Lean: \texttt{RealCongruence.no\_nontrivial\_finite\_quotient}.
+\end{enumerate}
+Whether a unit congruence with $4$ or more classes exists under
+$[0,1]$-multiplication alone is \textbf{open}.
+\end{theorem}
+
+The proof of (1) iterates the contraction $x \mapsto x(1-\varepsilon)$
+to drive any $x$ below $\varepsilon$, then uses
+$[0,1]$-multiplication to factor through $0 \sim \varepsilon$.
+The proof of (4) uses the pigeonhole principle on powers of
+$\tfrac{1}{2}$ to find two powers in the same class, then multiplies
+by the real inverse (which lies outside $[0,1]$) to derive
+$1 \sim \tfrac{1}{2}^p$, contradicting singleton boundaries.
+
+The $\Real$-rigidity proof relies on multiplicative inverses
+outside $[0,1]$.
+Under $[0,1]$-multiplication alone, the scaling trick fails because
+$[0,1]$ has no multiplicative inverses for elements in $(0,1)$:
+$a/x$ may leave the interval.
+This isolates \emph{$[0,1]$-cancellation} as the precise obstacle
+to resolving the four-or-more-class question.
+
+The following table places the product De Morgan triplet in
+the landscape of algebraic congruence theory.
+
+\begin{center}
+\small
+\begin{tabular}{llll}
+\toprule
+\textbf{Signature} & \textbf{Mult.\ scope}
+  & \textbf{Finite congruences} & \textbf{Reference} \\
+\midrule
+MV: $(\max(a{+}b{-}1,0),\; 1{-}(\cdot))$
+  & $[0,1]$ & Infinitely many
+  & \cite{cignoli2000,mundici2011} \\
+BL (product): $({\cdot},\; {\to})$
+  & $[0,1]$ & None (simple)
+  & \cite{agliano2003} \\
+De Morgan: $({\cdot},\; 1{-}(\cdot))$
+  & $[0,1]$ & Kleene exists; $\geq\!4$ open
+  & Thm.~\ref{thm:congruence} \\
+De Morgan: $({\cdot},\; 1{-}(\cdot))$
+  & $\Real$ & None
+  & Thm.~\ref{thm:congruence} \\
+\bottomrule
+\end{tabular}
+\normalsize
+\end{center}
+\smallskip
+\noindent
+The product De Morgan triplet is a \emph{reduct} of the product
+BL-algebra: it drops the residuated implication and replaces it with
+the involutive complement.
+Dropping residuation removes the constraint $0 \to b = 1$ (ex falso)
+that forces simplicity in the BL
+case~\cite{agliano2003,galatos2007}, leaving room for the Kleene
+partition.
+In MV-algebras~\cite{cignoli2000,mundici2011}, Chang's completeness
+theorem gives a rich congruence lattice.
+The De Morgan reduct sits between: at least one non-trivial finite
+congruence exists (Kleene), but whether it is the only one remains
+unknown.
+
+The Lean formalization is in \texttt{Cred/Congruence.lean}.
 
 \begin{proof}[Proof of Theorem~\ref{thm:congruence}
 (Unit Congruence Classification)]
