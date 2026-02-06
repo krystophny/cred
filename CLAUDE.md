@@ -1,9 +1,10 @@
 # CLAUDE.md
 
-## Current Focus: Part 1 (publication-ready), Part 2 (companion)
+## Current Focus: Both papers publication-ready
 
-Part 1 focused on congruence classification (sections 1-7). Part 2 has applied material (valuations, update, consequence, predicates).
-All Lean proofs fully verified (zero sorry). Both papers build clean.
+Part 1: congruence classification of the product De Morgan triplet (6 sections + conclusion + 2 appendices, 12 pages).
+Part 2: self-contained paper — chain-rule conditioning as a bridge between probability and many-valued logic (8 sections + 2 appendices, 24 pages).
+All Lean proofs fully verified (3581 lines across 7 modules, zero sorry). Both papers build clean.
 
 ## Build (match CI)
 
@@ -42,8 +43,9 @@ Keep the separation clear: `⊗`/`⊔` are the core algebraic operations (produc
 - `lean/Cred/Update.lean` — Bayesian and Jeffrey conditionalization.
 - `lean/Cred/Predicate.lean` — graded predicates, quantifiers, Russell fixed point.
 - `lean/Cred/Congruence.lean` — two-level congruence classification (UnitCongruence, RealCongruence, Kleene witness).
+- `lean/Cred/CondBridge.lean` — conditional bridge: impossibility, boundary, update bridge, zero-evidence triple (353 lines).
 - `part1/paper.tex` — congruence classification (6 sections + conclusion + 2 appendices, 12 pages).
-- `part2/paper.tex` — valuations, update, consequence, predicates (4 sections + 1 appendix, 6 pages).
+- `part2/paper.tex` — bridge paper (8 sections + 2 appendices, 24 pages; self-contained).
 - `part3/` — future work: graded proofs, self-hosting, undecidability.
 
 ## Key Results to Keep Green (Lean)
@@ -62,8 +64,16 @@ Collapse / congruence:
 - `Cred.RealCongruence.no_nontrivial_finite_quotient` (scaling trick, no finite quotient under R-mult)
 - `Cred.kleeneCongruence` (Kleene partition as verified UnitCongruence)
 
-Consequence (from Consequence.lean):
+Bridge (from Consequence.lean):
+- `lp_formula_bridge`, `k3_formula_bridge` (LP = positivity, K3 = certainty consequence)
 - `k3_no_tautology`, `lp_no_explosion`, `graded_no_explosion`
+
+Conditional bridge (from CondBridge.lean):
+- `no_truthfunctional_cond_bridge` (impossibility: no truth-functional conditional bridge)
+- `cond_bridge_boundary` (bridge holds at boundaries)
+- `cond_bridge_fails_interior` (bridge fails for interior pairs)
+- `update_bridge` (Bayesian update inherits the bridge)
+- `zero_evidence_duality` (zero-evidence triple)
 
 Predicates (from Predicate.lean):
 - `quantifier_duality_val`, `russell_fixed_point`, `crisp_inf_zero_iff`
