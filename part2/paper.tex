@@ -141,10 +141,11 @@ knowledge).
   (Theorems~\ref{thm:lp-bridge}--\ref{thm:k3-bridge}).
   This is the centerpiece: discrete logical reasoning is faithfully
   encoded in continuous credences.
-\item \textbf{Equilibria characterization} [new]:
+\item \textbf{Equilibria characterization}
+  [known~\cite{klement2000,kripke1975}, verified here]:
   the values $\{0, \tfrac{1}{2}, 1\}$ are exactly the
   conjunction-idempotent values together with the unique negation
-  fixed point (Theorem~\ref{thm:equilibria}).
+  fixed point (Proposition~\ref{thm:equilibria}).
 \item \textbf{Kleene collapse and congruence classification} [new]:
   the Kleene lattice is the unique non-trivial three-element quotient
   (Theorem~\ref{thm:quotient-unique}); the congruence classification
@@ -302,10 +303,10 @@ $c_1 \disjc c_2 = \negc(\negc c_1 \conjc \negc c_2)
   = c_1 + c_2 - c_1 \cdot c_2$.
 \end{definition}
 
-In our running example, applying the De Morgan dual \emph{algebraically}
-(i.e., computing $\negc(\negc 0.8 \conjc \negc 0.9) =
-0.8 + 0.9 - 0.8 \times 0.9 = 0.98$).
-Note: this uses the product of the marginals, which equals the
+In our running example, the De Morgan dual gives
+$\negc(\negc 0.8 \conjc \negc 0.9) =
+0.8 + 0.9 - 0.8 \times 0.9 = 0.98$.
+This uses the product of the marginals, which equals the
 joint $\cred(\text{rain} \land \text{wet})$ only under independence
 (see Remark~\ref{rem:product-vs-joint}).
 
@@ -439,8 +440,10 @@ Suppose you want to condition on wet streets:
 $\cred(\text{rain} \mid \text{wet})$ should satisfy
 $\cred(\text{rain} \mid \text{wet}) \cdot \cred(\text{wet}) =
 \cred(\text{rain} \land \text{wet})$.
-When $\cred(\text{wet}) = 0.9 > 0$, this gives
-$\cred(\text{rain} \mid \text{wet}) = \min(0.8, 0.9) / 0.9 = 8/9$.
+When $\cred(\text{wet}) = 0.9 > 0$ and the joint is
+$\cred(\text{rain} \land \text{wet}) = \min(0.8, 0.9) = 0.8$
+(the min-copula joint; see Theorem~\ref{thm:min-copula-unique}),
+this gives $\cred(\text{rain} \mid \text{wet}) = 0.8 / 0.9 = 8/9$.
 But what if $\cred(\text{wet}) = 0$?
 You have never seen a wet street.
 What is $\cred(\text{rain} \mid \text{wet})$?
@@ -656,6 +659,9 @@ Chain rule & Unconstrained & Acknowledged \\
 \end{tabular}
 \normalsize
 \captionof{table}{Handling of evidence zero across frameworks.
+De Finetti's later work~\cite{definetti1937} treated the conditional
+as primitive (closer to the chain rule); the ``void'' label reflects
+his 1936 position.
 The chain rule is the only approach that neither forces, avoids, nor
 suppresses the singularity.}
 \label{tab:evidence-zero}
@@ -761,26 +767,28 @@ equilibria of the product De Morgan triplet.
 
 \begin{center}
 \small
-\begin{tabular}{llccc}
+\begin{tabular}{llcccc}
 \toprule
 \textbf{T-norm} & \textbf{Self-conj.}
   & \textbf{Non-idemp.?} & \textbf{$\negc$-fixed pt?}
+  & \textbf{$T(\tfrac{1}{2},\tfrac{1}{2})$}
   & \textbf{Three equil.?} \\
 \midrule
-Product ($c \cdot c$) & $c^2 < c$ & Yes & $\tfrac{1}{2}$ & Yes \\
-G\"odel ($\min(c,c)$) & $c$ & No & None & No \\
-\L ukasiewicz & $\max(2c{-}1,0)$ & Yes & $\text{\L{}uk}(\tfrac{1}{2},\tfrac{1}{2}){=}0$
-  & No \\
+Product & $c^2 < c$ & Yes & $\tfrac{1}{2}$ & $\tfrac{1}{4}$ & Yes \\
+G\"odel & $c$ & No & $\tfrac{1}{2}$ & $\tfrac{1}{2}$ & No$^*$ \\
+\L ukasiewicz & $\max(2c{-}1,0)$ & Yes & $\tfrac{1}{2}$ & $0$ & No \\
 \bottomrule
 \end{tabular}
 \normalsize
 \captionof{table}{T-norm comparison.
-Only the product has both non-idempotence and three equilibria.
-G\"odel is idempotent (no dynamics).
-\L ukasiewicz: the negation fixed point $\tfrac{1}{2}$ exists,
-but $\text{\L{}uk}(\tfrac{1}{2},\tfrac{1}{2}) = \max(0 + 0, 0) = 0
-\neq \tfrac{1}{2}$,
-so self-conjunction destroys it.}
+All three t-norms share the negation fixed point $\tfrac{1}{2}$
+(since $\negc c = 1 - c$ is independent of the t-norm).
+Only the product has three equilibria: $\{0, 1\}$ from idempotence
+plus $\tfrac{1}{2}$ from negation.
+$^*$G\"odel has infinitely many idempotent values
+($\min(c,c) = c$ for all $c$), so no finite equilibrium set.
+\L ukasiewicz: $T_L(\tfrac{1}{2}, \tfrac{1}{2}) = 0 \neq
+\tfrac{1}{2}$, so self-conjunction destroys the negation fixed point.}
 \label{tab:tnorm}
 \end{center}
 
@@ -992,7 +1000,7 @@ MV: $(\max(a{+}b{-}1,0),\; 1{-}(\cdot))$
   & $[0,1]$ & Infinitely many
   & \cite{cignoli2000,mundici2011} \\
 BL (product): $({\cdot},\; {\to})$
-  & $[0,1]$ & None (simple)
+  & $[0,1]$ & None (no non-trivial congruences)
   & \cite[Cor.~3.7]{agliano2003} \\
 De Morgan: $({\cdot},\; 1{-}(\cdot))$
   & $[0,1]$ & Kleene exists; $\geq\!4$ open
@@ -1194,6 +1202,25 @@ The collapse does not merely project --- it \emph{reflects}:
 if a consequence holds on $[0,1]$, it holds on
 $\{0, \tfrac{1}{2}, 1\}$, and conversely.
 
+\begin{example}[Bridge in Action]
+\label{ex:bridge-action}
+\emph{Explosion failure.}
+In LP, the valuation $w(A) = \tfrac{1}{2}$, $w(B) = 0$ refutes
+$A, \negc A \models_{\mathrm{LP}} B$:
+both $w(A)$ and $\negc w(A) = \tfrac{1}{2}$ are LP-designated, but
+$w(B) = 0$ is not.
+Via the bridge, the positivity witness $v(A) = \tfrac{1}{2}$,
+$v(B) = 0$ satisfies $v(A) > 0$ and $\negc v(A) = \tfrac{1}{2} > 0$
+but $v(B) = 0$, refuting positivity explosion.
+The witnesses correspond: $\text{collapse} \circ\, v = w$ and
+$\text{lift} \circ\, w = v$.
+\emph{Conjunction preservation.}
+In K$_3$, if $w(A) = 1$ and $w(B) = 1$, then
+$\min(w(A), w(B)) = 1$ is K$_3$-designated.
+Via the bridge: any $v$ with $v(A) = 1$ and $v(B) = 1$ has
+$v(A) \cdot v(B) = 1$, so certainty is preserved.
+\end{example}
+
 \begin{remark}[Scope: assignments vs.\ formulas]
 \label{rem:scope}
 \emph{What is machine-verified:}
@@ -1207,19 +1234,25 @@ propositional variables.
 In standard matrix semantics, LP and K$_3$ consequence are defined
 over assignments to atoms, with compound formulas evaluated via the
 Kleene truth tables.
-The bridge extends to this formula-based setting by a routine
-induction, using two verified facts:
+The bridge extends to this formula-based setting by induction on
+formula structure, using two verified facts:
 (i)~the collapse preserves connectives
 (Theorem~\ref{thm:collapse};
-Lean: \texttt{collapse\_neg/conj/disj}), so composing an
-independent valuation with the collapse yields a Kleene valuation
-(Proposition~\ref{prop:collapse-composition}); and
+Lean: \texttt{collapse\_neg/conj/disj}); and
 (ii)~every Kleene assignment lifts to a $[0,1]$-valued
 function that round-trips through the collapse
 (Lemma~\ref{lem:lifting};
 Lean: \texttt{lift\_collapse\_id}).
-The formula-level bridge itself is not separately assembled as a
-single Lean theorem, but its building blocks are all verified.
+Explicitly: for the forward direction, given $v : \mathrm{Form} \to
+[0,1]$ respecting the product connectives, define
+$w = \mathrm{collapse} \circ\, v$.
+By (i) and induction, $w$ respects the Kleene connectives
+(Proposition~\ref{prop:collapse-composition} is the inductive step).
+The designation characterization then transfers premise-by-premise.
+For the reverse direction, lift $w$ to $v = \mathrm{lift} \circ\, w$
+and apply the same induction using (ii).
+The formula-level bridge itself is not assembled as a single Lean
+theorem, but its building blocks are all verified.
 \end{remark}
 
 The key mechanism is the characterization of designated values via
@@ -1315,11 +1348,11 @@ middle holds but explosion fails
 \begin{proposition}[Graded No-Explosion; new]
 \label{prop:graded-no-explosion}
 For any threshold $0 < t \leq \tfrac{1}{2}$, graded consequence on
-$[0,1]$ is explosion-free: the constant-$\tfrac{1}{2}$ valuation
-gives $v(A) = \tfrac{1}{2} \geq t$ and
-$\negc v(A) = \tfrac{1}{2} \geq t$, so both $A$ and $\negc A$ are
-designated, while $v(B) = 0 < t$ shows the conclusion
-need not be designated.
+$[0,1]$ is explosion-free: the valuation
+$v(A) = \tfrac{1}{2}$, $v(B) = 0$ satisfies
+$v(A) \geq t$ and $\negc v(A) = \tfrac{1}{2} \geq t$, so both
+$A$ and $\negc A$ are above threshold, while $v(B) = 0 < t$ shows
+the conclusion need not be.
 Lean: \texttt{graded\_no\_explosion}.
 \end{proposition}
 
@@ -1358,12 +1391,12 @@ $v(A) \disjc \negc v(A) \geq \tfrac{3}{4} \geq t$
   & \textbf{Excl.\ middle?} & \textbf{Explosion?} \\
 \midrule
 Classical & $\{1\}$ (two-valued) & Yes & Yes & Yes \\
-K$_3$ & $\{1\}$ & No & No & Vacuously$^\S$ \\
-LP & $\{1, \tfrac{1}{2}\}$ & Yes$^\|$ & Yes$^\|$ & No \\
+K$_3$ & $\{1\}$ & No & No & Vacuously$^a$ \\
+LP & $\{1, \tfrac{1}{2}\}$ & Yes$^b$ & Yes$^b$ & No \\
 Graded ($t \leq \tfrac{1}{2}$) & $\{c \geq t\}$
-  & Yes$^\ddagger$ & Yes$^\ddagger$ & No \\
+  & Yes$^c$ & Yes$^c$ & No \\
 Graded ($t > \tfrac{1}{2}$) & $\{c \geq t\}$
-  & Yes$^\ddagger$ & Yes$^\ddagger$ & Vacuously$^\P$ \\
+  & Yes$^c$ & Yes$^c$ & Vacuously$^d$ \\
 \bottomrule
 \end{tabular}
 \normalsize
@@ -1371,13 +1404,13 @@ Graded ($t > \tfrac{1}{2}$) & $\{c \geq t\}$
 \smallskip
 \noindent
 {\footnotesize
-$^\|$Under homomorphic valuations.
-$^\S$No valuation makes both $v(A)$ and $\negc(v(A))$
+$^a$No valuation makes both $v(A)$ and $\negc(v(A))$
 K$_3$-designated.
-$^\ddagger$For all $t \leq \tfrac{3}{4}$:
+$^b$Under homomorphic valuations.
+$^c$For all $t \leq \tfrac{3}{4}$:
 $v(A) \disjc \negc v(A) \geq \tfrac{3}{4} \geq t$, so
 excluded middle and the tautology $A \disjc \negc A$ hold.
-$^\P$For $t > \tfrac{1}{2}$: no valuation makes both
+$^d$For $t > \tfrac{1}{2}$: no valuation makes both
 $v(A) \geq t$ and $\negc v(A) \geq t$
 (Proposition~\ref{prop:graded-sharp}).}
 
