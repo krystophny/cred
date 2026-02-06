@@ -74,7 +74,8 @@ three-valued Kleene lattice is equivalent to positivity consequence on
 $[0,1]$, and K$_3$ consequence is equivalent to certainty consequence.
 Discrete three-valued reasoning and continuous $[0,1]$ reasoning are
 thus two views of the same relation.
-Supporting results include a congruence classification
+Supporting results include a congruence classification of the
+product De Morgan triplet
 (the Kleene lattice is the unique non-trivial three-element quotient
 under $[0,1]$-multiplication; no non-trivial finite quotient exists
 under $\Real$-multiplication) and graded consequence with no-explosion.
@@ -364,7 +365,8 @@ $\min(0.8, 0.9) = 0.8$.
 The product De Morgan triplet and H\'ajek's Product Logic
 ($\Pi$-logic)~\cite{hajek1998} share the same t-norm.
 They differ in the companion operation: $\Pi$-logic uses
-residuation $a \to b = \sup\{c : a \cdot c \leq b\}$, which
+residuation $a \to b = \sup\{c : a \cdot c \leq b\}$
+(Appendix~\ref{app:prelim}), which
 forces $0 \to b = 1$ (ex falso);
 the triplet uses the involutive complement $\negc c = 1 - c$
 and chain-rule conditioning, which leaves $\cred(A \mid 0)$
@@ -874,7 +876,7 @@ in $\{0, 1\}$.
 \end{proof}
 
 \begin{proposition}[No Collapse to G\"odel or \L ukasiewicz Logic;
-new]
+elementary, verified here]
 \label{prop:no-godel-luk}
 No $\varphi : [0,1] \to \{0, \tfrac{1}{2}, 1\}$ preserves G\"odel
 negation (which has no fixed point), and no such $\varphi$
@@ -918,6 +920,8 @@ This forces Kleene $\min$.
 The collapse results combine into a congruence classification at two
 levels, depending on the scope of the multiplication compatibility
 hypothesis.
+(A companion paper develops the congruence theory in more detail;
+we include self-contained proofs here.)
 A \emph{unit congruence} requires multiplication compatibility only for
 $[0,1]$-valued inputs.
 A \emph{real congruence} extends compatibility to all of $\Real$.
@@ -1035,6 +1039,10 @@ This section shows it induces an \emph{equivalence of consequence
 relations}: three-valued logical consequence on
 $\{0, \tfrac{1}{2}, 1\}$ is the same as a natural consequence
 relation on $[0,1]$.
+The machine-verified results (Theorems~\ref{thm:lp-bridge}
+and~\ref{thm:k3-bridge}) work at the level of assignments to
+propositional variables; extension to formula-based consequence
+is discussed in Remark~\ref{rem:scope}.
 
 \subsection{Valuations}
 
@@ -1349,7 +1357,8 @@ $c \cdot 0 = 0$ for all $c$.
 
 K$_3$ (designating $\{1\}$) is paracomplete: no tautologies
 (Lean: \texttt{k3\_no\_tautology}).
-LP (designating $\{1, \tfrac{1}{2}\}$) is paraconsistent: excluded
+LP (designating $\{1, \tfrac{1}{2}\}$) is
+paraconsistent~\cite{priest2008}: excluded
 middle holds but explosion fails
 (Lean: \texttt{lp\_no\_explosion}).
 
@@ -1387,9 +1396,10 @@ $\negc v(A) = 1 - v(A) \leq 1 - t < \tfrac{1}{2} < t$.
 The witness is the same in all explosion-free cases: the negation
 fixed point $\tfrac{1}{2}$ makes both a proposition and its negation
 designated without forcing arbitrary conclusions.
-For $t \leq \tfrac{1}{2}$, excluded middle holds:
-$v(A) \disjc \negc v(A) \geq \tfrac{3}{4} \geq t$
-(Lean: \texttt{certainty\_ge\_three\_quarters}).
+Excluded middle holds for all $t \leq \tfrac{3}{4}$:
+$v(A) \disjc \negc v(A) = 1 - v(A)(1 - v(A)) \geq \tfrac{3}{4}$
+(tight at $v(A) = \tfrac{1}{2}$;
+Lean: \texttt{certainty\_ge\_three\_quarters}).
 
 \begin{center}
 \small
