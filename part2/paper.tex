@@ -72,16 +72,18 @@ without invoking either division or residuation.
 At positive evidence, the chain rule reduces to Bayesian conditioning;
 at zero evidence, it leaves the conditional unconstrained --- neither
 undefined nor explosive.
-We show this single divergence at zero determines the entire qualitative
-structure: the algebraic equilibria are exactly $\{0, \tfrac{1}{2}, 1\}$
-(conjunction-idempotent values plus the unique negation fixed point),
-the Kleene lattice is the unique non-trivial three-element quotient,
-and the collapse from $[0,1]$ to $\{0, \tfrac{1}{2}, 1\}$ projects
-Bayesian update to paraconsistent logical consequence.
-The chain rule thus serves as a shared inference mechanism:
-it is Bayes' rule when evidence is positive, and it prevents
-explosion when evidence is zero.
-All results are machine-checked in Lean~4 with Mathlib.
+Our main result is a \emph{bridge theorem}: LP consequence on the
+three-valued Kleene lattice is equivalent to positivity consequence on
+$[0,1]$, and K$_3$ consequence is equivalent to certainty consequence.
+Discrete logical reasoning is thus faithfully encoded in continuous
+credences.
+Supporting results include a congruence classification (the Kleene
+lattice is the unique non-trivial three-element quotient under
+$[0,1]$-multiplication; no non-trivial finite quotient exists under
+$\Real$-multiplication), graded consequence with no-explosion, and
+Bayesian and Jeffrey update with zero-evidence underdetermination.
+All results are machine-checked in Lean~4 with Mathlib
+(approximately 3000 lines, zero \texttt{sorry}).
 \end{abstract}
 
 %=============================================================================
@@ -136,35 +138,45 @@ We mark each result as \emph{known} (established in the literature,
 newly Lean-verified) or \emph{new} (first appearing here, to our
 knowledge).
 \begin{enumerate}[nosep]
-\item \textbf{Evidence-zero analysis} [new]:
-  at zero evidence, chain-rule conditioning is unconstrained and
-  path-dependent; no limiting convention resolves the singularity
-  (Proposition~\ref{thm:path-dependence}).
-  Every value in $[0,1]$ is a valid limit depending on the approach
-  path.
+\item \textbf{Bridge theorem} [new]:
+  LP consequence on the three-valued Kleene lattice is equivalent to
+  positivity consequence on $[0,1]$; K$_3$ consequence is equivalent
+  to certainty consequence
+  (Theorems~\ref{thm:lp-bridge}--\ref{thm:k3-bridge}).
+  This is the centerpiece: discrete logical reasoning is faithfully
+  encoded in continuous credences.
 \item \textbf{Equilibria characterization} [new]:
   the values $\{0, \tfrac{1}{2}, 1\}$ are exactly the
   conjunction-idempotent values together with the unique negation
   fixed point (Theorem~\ref{thm:equilibria}).
-  Self-conjunction is strictly decreasing on the interior.
-\item \textbf{Kleene collapse uniqueness} [new]:
+\item \textbf{Kleene collapse and congruence classification} [new]:
   the Kleene lattice is the unique non-trivial three-element quotient
-  (Theorem~\ref{thm:quotient-unique}); no collapse to Boolean,
-  G\"odel, or \L ukasiewicz logic exists
-  (Propositions~\ref{prop:no-classical}--\ref{prop:no-godel-luk}).
-\item \textbf{Two-level congruence classification} [new]:
-  under $[0,1]$-multiplication, boundary classes are singletons and
-  the Kleene quotient exists;
-  under $\Real$-multiplication, no non-trivial finite quotient exists
-  at all (Theorem~\ref{thm:congruence}).
-\item \textbf{Collapse composition} [new]:
-  composing an independent valuation with the collapse yields a
-  Kleene valuation (Proposition~\ref{prop:collapse-composition}).
+  (Theorem~\ref{thm:quotient-unique}); the congruence classification
+  separates $[0,1]$- from $\Real$-multiplication
+  (Theorem~\ref{thm:congruence}).
 \item \textbf{Graded no-explosion} [new]:
   explosion fails for any threshold $t \leq \tfrac{1}{2}$
   (Proposition~\ref{prop:graded-no-explosion}).
-  The witness is always the negation fixed point $\tfrac{1}{2}$.
+  For $t > \tfrac{1}{2}$ the constant-$\tfrac{1}{2}$ witness fails.
+\item \textbf{Collapse composition} [new]:
+  composing an independent valuation with the collapse yields a
+  Kleene valuation, and every Kleene valuation lifts to $[0,1]$
+  (Proposition~\ref{prop:collapse-composition}, Lemma~\ref{lem:lifting}).
 \end{enumerate}
+
+\textbf{Known results, newly verified.}
+Uniqueness of the min copula
+(Theorem~\ref{thm:min-copula-unique})~\cite{nelsen2006};
+path dependence of conditioning
+(Proposition~\ref{thm:path-dependence});
+self-conjunction decay $c^2 < c$ for $c \in (0,1)$
+(Proposition~\ref{prop:self-conj-decay})~\cite{klement2000};
+the Kleene collapse homomorphism~\cite{kleene1952,bergmann2008};
+K$_3$ is paracomplete~\cite{kleene1952}; LP is
+paraconsistent~\cite{priest1979};
+quantifier duality for graded
+predicates~\cite{goguen1969,zadeh1965};
+the negation fixed point $\tfrac{1}{2}$~\cite{kripke1975}.
 
 \textbf{Literature positioning.}
 H\'ajek~\cite{hajek1998} and
@@ -173,11 +185,23 @@ with the same t-norm but residuated implication (forcing ex falso).
 Mundici~\cite{mundici2011} and
 Flaminio--Montagna~\cite{flaminio2009} studied probability on
 MV-algebras (\L ukasiewicz, not product).
+Calabrese~\cite{calabrese1987} gave an algebraic synthesis of logic
+and probability; Coletti and
+Scozzafava~\cite{coletti2002} developed probabilistic logic in a
+coherent setting; Gilio and
+Sanfilippo~\cite{gilio2013,gilio2014} studied conditional events
+and iterated conditioning.
 R\'enyi~\cite{renyi1955}, Popper~\cite{popper1959}, and
 de Finetti~\cite{definetti1936} proposed primitive conditioning in
 measure-theoretic or Boolean settings;
 \'Egr\'e, Rossi, and Sprenger~\cite{egre2021} developed
 de Finetti's conditional algebraically.
+Adams~\cite{adams1975} developed a probabilistic logic of
+conditionals; van Fraassen~\cite{vanfraassen1976,vanfraassen1983}
+explored connections between probabilities and conditionals in
+relevant logic.
+Pavelka~\cite{pavelka1979i} developed graded inference for
+many-valued logics with truth values on $[0,1]$.
 Ferm\"uller~\cite{fermuller2014} reached the Kleene lattice from
 game semantics; Gaines~\cite{gaines1978} unified fuzzy and
 probabilistic uncertainty via population semantics.
@@ -185,31 +209,37 @@ Cox~\cite{cox1961} and Jaynes~\cite{jaynes2003} showed plausible
 reasoning satisfying certain desiderata must be isomorphic to
 probability; chain-rule conditioning drops the requirement that the
 conditional be a function of the marginals alone.
-Lewis's triviality result~\cite{lewis1976} shows conditional
-probability cannot equal the probability of a conditional event;
-chain-rule conditioning sidesteps this because $\cred(A \mid B)$ is
-constrained by the chain rule with the joint as a separate parameter,
-so Lewis's conditions do not apply~\cite{halpern2003}.
+Lewis's triviality result~\cite{lewis1976} shows that if one
+treats $P(A \mid B)$ as the probability of a ``conditional
+proposition'' $A \to B$ in the same algebra, then the probability
+measure must be trivial.
+Chain-rule conditioning avoids Lewis's conditions: the joint
+$\cred(A \land B)$ is a separate parameter (not derived from the
+conditional), and $\cred(A \mid B)$ is not identified with the
+credence of any proposition.
+Halpern~\cite{halpern2003} provides a detailed analysis of the
+scope of Lewis's result.
 To our knowledge, no prior work combines chain-rule conditioning
-(with evidence-zero analysis), the Kleene collapse (with quotient
-uniqueness and congruence classification), and the explicit
-unification of Bayesian update with paraconsistent logical
+(with evidence-zero analysis), the bridge theorem (connecting LP/K$_3$
+consequence to $[0,1]$ consequence), the congruence classification,
+and the unification of Bayesian update with paraconsistent logical
 consequence into a single framework on $[0,1]$.
 
 \textbf{Note on formalization.}
 All results marked with ``Lean:'' are machine-checked in Lean~4 with
 Mathlib (Appendix~\ref{app:lean}).
-The formalization totals approximately 2900 lines across six modules
+The formalization totals approximately 3000 lines across six modules
 with zero \texttt{sorry}.
 
 \textbf{Section guide.}
 Section~\ref{sec:algebra}: the product De Morgan triplet.
-Section~\ref{sec:conditioning}: chain-rule conditioning and
-evidence-zero analysis (centerpiece).
+Section~\ref{sec:conditioning}: chain-rule conditioning.
 Section~\ref{sec:equilibria}: algebraic equilibria.
-Section~\ref{sec:collapse}: the Kleene collapse.
-Section~\ref{sec:applications}: valuations, update, consequence,
-and the two modes of inference.
+Section~\ref{sec:collapse}: the Kleene collapse and congruence
+classification.
+Section~\ref{sec:bridge}: the bridge theorem (centerpiece).
+Section~\ref{sec:applications}: update, consequence, and predicates.
+Section~\ref{sec:two-modes}: two modes of inference.
 Section~\ref{sec:conclusion}: summary and open problems.
 
 %=============================================================================
@@ -265,7 +295,8 @@ $\cred(\text{rain} \lor \text{wet}) = 0.8 + 0.9 - 0.72 = 0.98$.
 The triple $(\conjc, \disjc, \negc)$ is the \emph{product De Morgan
 triplet}~\cite{klement2000,hajek1998}.
 
-\begin{proposition}[Algebraic Properties]
+\begin{proposition}[Algebraic Properties; known~\cite{klement2000},
+verified here]
 \label{thm:algebraic}
 For all $c, c_1, c_2, c_3 \in [0,1]$:
 \begin{enumerate}[label=(\alph*)]
@@ -338,46 +369,48 @@ traditions.
 For logic-compatible valuations, idempotence
 ($\cred(A \land A) = \cred(A)$) is essential: repeating evidence
 should not change it.
+A \emph{copula} is a function $C : [0,1]^2 \to [0,1]$ satisfying:
+$C(a, 0) = C(0, b) = 0$, $C(a, 1) = a$, $C(1, b) = b$, and the
+\emph{2-increasing property} --- for all $a_1 \leq a_2$,
+$b_1 \leq b_2$:
+$C(a_2, b_2) - C(a_2, b_1) - C(a_1, b_2) + C(a_1, b_1) \geq 0$
+(Appendix~\ref{app:prelim})~\cite{nelsen2006}.
 Among truth-functional joints (copulas on $[0,1]$), the minimum is
-the unique symmetric idempotent copula
-(Theorem~\ref{thm:min-copula-unique})~\cite{nelsen2006}.
-The product fails idempotence ($c^2 \neq c$ for $c \in (0,1)$);
-\L ukasiewicz fails similarly
-($\max(\tfrac{1}{2} + \tfrac{1}{2} - 1, 0) = 0 \neq \tfrac{1}{2}$).
-The minimum joint is also the \emph{comonotonicity copula}: the
-extremal case where all random variables are increasing functions of
-a single latent variable~\cite{dhaene2002,nelsen2006}.
-In our running example, the comonotonicity joint gives
-$\cred(\text{rain} \land \text{wet}) = \min(0.8, 0.9) = 0.8$,
-and then
-$\cred(\text{rain} \mid \text{wet}) = 0.8 / 0.9 = 8/9 \approx 0.89$.
-Independence ($0.8 \times 0.9 = 0.72$) fails both idempotence and
-non-trivial conditioning
-(Lean: \texttt{prod\_trivial\_conditioning});
-the RM3 joint fails Bayes-consistency: at $a = 0.3$, $c = 0.6$,
-$\max(0.7, 0.6) \cdot 0.3 = 0.21 \neq
-\max(0.4, 0.3) \cdot 0.6 = 0.24$
-(Lean: \texttt{rm3\_not\_bayes\_consistent\_real}).
+the unique symmetric idempotent copula.
 
 \begin{theorem}[Uniqueness of Truth-Functional Conjunction;
-known~\cite{nelsen2006}]
+known~\cite{nelsen2006}, verified here]
 \label{thm:min-copula-unique}
-Let $j : [0,1]^2 \to [0,1]$ be a symmetric idempotent copula.
-Then $j(a,b) = \min(a,b)$ for all $a,b \in [0,1]$.
+Let $C : [0,1]^2 \to [0,1]$ be a symmetric, idempotent copula.
+Then $C(a,b) = \min(a,b)$ for all $a,b \in [0,1]$.
 Lean: \texttt{copula\_idempotent\_unique},
 \texttt{min\_copula\_unique}.
 \end{theorem}
 \begin{proof}
-Upper bound: 2-increasing on $[0,a] \times [b,1]$ with unit marginal
-gives $j(a,b) \leq a$; by symmetry $j(a,b) \leq b$.
+Upper bound: the 2-increasing property on $[0,a] \times [b,1]$ with
+unit marginal gives $C(a,b) \leq a$; by symmetry $C(a,b) \leq b$.
 Lower bound: assume $a \leq b$.
 Apply 2-increasing to $[0,a] \times [a,b]$:
-$j(a,b) - j(a,a) - j(0,b) + j(0,a) \geq 0$.
-By idempotence and zero boundary: $j(a,b) \geq a = \min(a,b)$.
+$C(a,b) - C(a,a) - C(0,b) + C(0,a) \geq 0$.
+By idempotence $C(a,a) = a$ and zero boundary $C(0,b) = C(0,a) = 0$,
+so $C(a,b) \geq a = \min(a,b)$.
 \end{proof}
 
+The product fails idempotence ($c^2 \neq c$ for $c \in (0,1)$);
+\L ukasiewicz fails similarly
+($\max(\tfrac{1}{2} + \tfrac{1}{2} - 1, 0) = 0 \neq \tfrac{1}{2}$;
+Lean: \texttt{luk\_not\_idempotent}).
+The minimum joint is the \emph{comonotonicity copula}: the
+extremal case where all random variables are increasing functions of
+a single latent variable~\cite{dhaene2002,nelsen2006}.
+Independence ($c_1 \cdot c_2$) fails both idempotence and
+non-trivial conditioning
+(Lean: \texttt{prod\_trivial\_conditioning});
+the RM3 joint $\max(1-a, b)$ fails Bayes consistency
+(Lean: \texttt{rm3\_not\_bayes\_consistent\_real}).
+
 %=============================================================================
-\section{Chain-Rule Conditioning and Evidence Zero}
+\section{Chain-Rule Conditioning}
 \label{sec:conditioning}
 %=============================================================================
 
@@ -409,6 +442,11 @@ conditioning as a primitive morphism;
 Jeffrey~\cite{jeffrey1965} generalized Bayesian conditioning to
 uncertain evidence via a mixture formula, also using the chain rule as
 the primitive mechanism.
+Calabrese~\cite{calabrese1987} and
+Coletti--Scozzafava~\cite{coletti2002} developed algebraic and
+coherence-based approaches to conditional probability as a primitive;
+Gilio and Sanfilippo~\cite{gilio2013,gilio2014} extended this to
+iterated conditioning and compounds of conditionals.
 Cox~\cite{cox1961} showed plausible reasoning satisfying certain
 desiderata must be isomorphic to probability; chain-rule conditioning
 drops the requirement that the conditional be a function
@@ -449,7 +487,7 @@ $\tfrac{1}{2}$ & 0 & 1 & 1 \\
 \end{tabular}
 \quad
 \begin{tabular}{r|ccc}
-\multicolumn{4}{c}{\textbf{Chain-rule}: joint $= \min(e,p)$} \\
+\multicolumn{4}{c}{\textbf{Chain-rule with min-copula joint}} \\
 $e \!\downarrow\; p \!\to$ & 0 & $\tfrac{1}{2}$ & 1 \\
 \hline
 0 & $*$ & $*$ & $*$ \\
@@ -464,12 +502,15 @@ $*$ = unconstrained (any value in $[0,1]$ satisfies the chain rule).
 \textsuperscript{1}Shared by K$_3$~\cite{kleene1952},
 LP~\cite{priest1979}, RM3~\cite{anderson1975}.
 \textsuperscript{2}Coincides with G\"odel on $\{0, \tfrac{1}{2}, 1\}$
-(Lean: \texttt{godel\_impl\_eq\_prod\_resid}).}
+(Lean: \texttt{godel\_impl\_eq\_prod\_resid}).
+The chain-rule table uses the min-copula joint $\min(e, p)$; other
+joint choices yield different positive-evidence entries.}
 
 \subsection{Existence and Uniqueness}
 \label{sec:existence}
 
-\begin{proposition}[Existence and Uniqueness of Conditioning]
+\begin{proposition}[Existence and Uniqueness of Conditioning;
+known~\cite{renyi1955,popper1959}, verified here]
 \label{thm:existence}
 \hfill
 \begin{enumerate}[label=\textup{(\roman*)},nosep]
@@ -525,7 +566,8 @@ Every value in $[0,1]$ is achieved.
 How evidence becomes impossible matters.
 \end{example}
 
-\begin{proposition}[Path Dependence at Evidence Zero; new]
+\begin{proposition}[Path Dependence at Evidence Zero;
+known~\cite{chang1997}, verified here]
 \label{thm:path-dependence}
 The limit of $\min(a,b)/b$ as $b \to 0$ is path-dependent:
 \begin{enumerate}[label=\textup{(\roman*)},nosep]
@@ -541,7 +583,7 @@ Lean: \texttt{path\_dep\_fixed\_a}, \texttt{path\_dep\_proportional},
 \begin{proof}
 (i)~For small $b < a$, $\min(a,b)/b = 1$.
 (ii)~$\min(\lambda b, b)/b = \lambda$.
-(iii)~$b^{\alpha-1} \to 0$.
+(iii)~$\min(b^\alpha, b)/b = b^{\alpha-1} \to 0$.
 \end{proof}
 
 \begin{figure}[ht]
@@ -595,6 +637,32 @@ An agent may narrow this set by adopting a prior over the zero-evidence
 regime (de Finetti's void, Popper's convention, etc.), but the
 chain rule itself imposes no such commitment.
 
+\textbf{Lewis triviality.}
+Lewis~\cite{lewis1976} showed that if one treats $P(A \mid B)$ as the
+probability of a ``conditional proposition'' $A \to B$ in the same
+algebra --- i.e., if $P(A \mid B) = P(A \to B)$ for some event
+$A \to B$ --- then the probability measure must be trivial (supported
+on at most two atoms).
+Chain-rule conditioning avoids Lewis's conditions in two respects.
+First, $\cred(A \mid B)$ is not identified with the credence of any
+proposition; it is constrained only by the chain rule with the joint as
+a \emph{separate parameter}.
+Second, the joint $\cred(A \land B)$ is not derived from the
+conditional; it is given data.
+Lewis's proof requires both identifications, so the triviality
+conclusion does not apply~\cite{halpern2003}.
+
+\textbf{Connection to imprecise probability.}
+When evidence has credence zero, the set of chain-rule-consistent
+conditionals is $[0,1]$.
+This is exactly the vacuous lower prevision of Walley~\cite{walley1991}:
+the agent's state of belief about $\cred(A \mid B)$ is maximally
+imprecise.
+Levi~\cite{levi1980} argues that maximal imprecision at zero evidence
+is the correct epistemic response.
+Chain-rule conditioning reaches the same conclusion algebraically,
+without assuming a framework of imprecise probabilities.
+
 %=============================================================================
 \section{Algebraic Equilibria}
 \label{sec:equilibria}
@@ -606,7 +674,8 @@ Combining two independent copies of the same uncertain evidence
 \emph{decreases} the joint credence.
 Only $0$ and $1$ are stable: $0^2 = 0$, $1^2 = 1$.
 
-\begin{proposition}[Self-Conjunction Decay; new]
+\begin{proposition}[Self-Conjunction Decay;
+known~\cite{klement2000}, verified here]
 \label{prop:self-conj-decay}
 For all $c \in (0,1)$: $c \conjc c = c^2 < c$.
 Dually, $c \disjc c > c$.
@@ -616,7 +685,8 @@ Lean: \texttt{self\_conj\_lt}, \texttt{self\_disj\_gt}.
 $c^2 < c \iff c(c - 1) < 0$, which holds since $0 < c < 1$.
 \end{proof}
 
-\begin{proposition}[Iterated Self-Conjunction; new]
+\begin{proposition}[Iterated Self-Conjunction;
+known~\cite{klement2000}, verified here]
 \label{prop:pow-decay}
 For all $c \in (0,1)$ and $n \in \Nat$:
 $c^{n+1} < c^n$.
@@ -629,7 +699,8 @@ $c^n \cdot c < c^n \cdot 1 = c^n$ since $0 < c < 1$.
 Convergence: $c^n = e^{n \ln c} \to 0$ since $\ln c < 0$.
 \end{proof}
 
-\begin{lemma}[Unique Negation Fixed Point]
+\begin{lemma}[Unique Negation Fixed Point;
+known~\cite{kripke1975}, verified here]
 \label{thm:liar}
 $\negc c = c$ if and only if $c = \tfrac{1}{2}$.
 Lean: \texttt{liar\_fixed\_point},
@@ -657,15 +728,11 @@ The three equilibria have distinct epistemic characters:
 \begin{itemize}[nosep]
 \item $0$ = \emph{refuted}: conjunction-idempotent at the lower
   boundary.
-  Self-conjunction preserves it.
 \item $1$ = \emph{confirmed}: conjunction-idempotent at the upper
   boundary.
-  Self-conjunction preserves it.
 \item $\tfrac{1}{2}$ = \emph{irreducibly uncertain}: the unique
-  negation fixed point.
-  Neither confirmable nor refutable by complement alone.
-  It is $\negc\tfrac{1}{2} = \tfrac{1}{2}$: the credence of $A$
-  equals the credence of $\negc A$.
+  negation fixed point, satisfying
+  $\negc\tfrac{1}{2} = \tfrac{1}{2}$.
 \end{itemize}
 Every other credence $c \in (0,1) \setminus \{\tfrac{1}{2}\}$
 is not an equilibrium: $c^2 < c$
@@ -681,20 +748,21 @@ equilibria of the product De Morgan triplet.
 \begin{tabular}{llccc}
 \toprule
 \textbf{T-norm} & \textbf{Self-conj.}
-  & \textbf{Non-idempotent?} & \textbf{$\negc$-fixed pt?}
+  & \textbf{Non-idemp.?} & \textbf{$\negc$-fixed pt?}
   & \textbf{Three equil.?} \\
 \midrule
 Product ($c \cdot c$) & $c^2 < c$ & Yes & $\tfrac{1}{2}$ & Yes \\
 G\"odel ($\min(c,c)$) & $c$ & No & None & No \\
-\L ukasiewicz & $\max(2c-1,0)$ & Yes & $\tfrac{1}{2} \mapsto 0$
+\L ukasiewicz & $\text{\L{}uk}(\tfrac{1}{2},\tfrac{1}{2})=0$ & Yes & $\tfrac{1}{2} \mapsto 0$
   & No \\
 \bottomrule
 \end{tabular}
 \normalsize
 \captionof{table}{T-norm comparison.
 Only the product has both non-idempotence and three equilibria.
-G\"odel is idempotent (no dynamics); \L ukasiewicz destroys the
-$\tfrac{1}{2}$ fixed point.}
+G\"odel is idempotent (no dynamics);
+\L ukasiewicz self-conjunction $\max(a + b - 1, 0)$ at $a = b = \tfrac{1}{2}$ gives $0$,
+destroying the $\tfrac{1}{2}$ fixed point.}
 \label{tab:tnorm}
 \end{center}
 
@@ -710,7 +778,7 @@ the evidence sequence, which is beyond our scope.
 \end{remark}
 
 %=============================================================================
-\section{The Kleene Collapse}
+\section{The Kleene Collapse and Congruence Classification}
 \label{sec:collapse}
 %=============================================================================
 
@@ -728,7 +796,8 @@ Define the collapse:
 \end{cases}
 \]
 
-\begin{theorem}[Collapse Homomorphism; folklore, verified here]
+\begin{theorem}[Collapse Homomorphism; folklore~\cite{bergmann2008},
+verified here]
 \label{thm:collapse}
 The collapse is a surjective homomorphism from
 $([0,1], \negc, \conjc, \disjc)$ to
@@ -749,13 +818,20 @@ $0 < c_1 + c_2 - c_1 c_2 < 1$.
 The target is the Kleene lattice~\cite{kleene1952}, underlying
 K$_3$~\cite{kleene1952}, LP~\cite{priest1979}, and
 RM3~\cite{anderson1975,meyer1972}.
+
+\begin{remark}[Connection to possibility theory]
+\label{rem:possibility}
 The Kleene quotient's $\min$/$\max$ operations are exactly the
 conjunction/disjunction of possibility
 theory~\cite{dubois1988}.
+The collapse thus provides a bridge not only to many-valued logic but
+also to possibility-theoretic reasoning.
+\end{remark}
 
 \subsection{Uniqueness and Impossibility}
 
-\begin{proposition}[No Collapse to Classical Logic]
+\begin{proposition}[No Collapse to Classical Logic;
+known~\cite{bergmann2008}, verified here]
 \label{prop:no-classical}
 No $\varphi : [0,1] \to \{0,1\}$ preserves negation.
 Lean: \texttt{no\_boolean\_neg\_retraction}.
@@ -765,15 +841,27 @@ $\varphi(\tfrac{1}{2}) = 1 - \varphi(\tfrac{1}{2})$ has no solution
 in $\{0, 1\}$.
 \end{proof}
 
-\begin{proposition}[No Collapse to G\"odel or \L ukasiewicz Logic]
+\begin{proposition}[No Collapse to G\"odel or \L ukasiewicz Logic;
+new]
 \label{prop:no-godel-luk}
 No $\varphi : [0,1] \to \{0, \tfrac{1}{2}, 1\}$ preserves G\"odel
 negation (which has no fixed point), and no such $\varphi$
-preserves both negation and \L ukasiewicz conjunction
+preserves both standard negation and \L ukasiewicz conjunction
 (since $\max(\tfrac{1}{2} + \tfrac{1}{2} - 1, 0) = 0 \neq
 \tfrac{1}{2}$).
 Lean: \texttt{no\_godel\_collapse}, \texttt{no\_luk\_collapse}.
 \end{proposition}
+\begin{proof}
+G\"odel: $\varphi(\tfrac{1}{2})$ must be a fixed point of G\"odel
+negation, which has none (G\"odel negation maps every non-zero value
+to zero; Lean: \texttt{godel\_neg\_no\_fixed\_point}).
+\L ukasiewicz: negation forces $\varphi(\tfrac{1}{2}) = \tfrac{1}{2}$.
+Pick $c$ with $c \conjc c = \tfrac{1}{2}$ (e.g., $c = \sqrt{1/2}$).
+Then $\varphi(\tfrac{1}{2}) = \text{\L{}uk}(\varphi(c), \varphi(c))$.
+But $\text{\L{}uk}(v, v) \in \{0, 1\}$ for all
+$v \in \{0, \tfrac{1}{2}, 1\}$, contradicting
+$\varphi(\tfrac{1}{2}) = \tfrac{1}{2}$.
+\end{proof}
 
 \begin{theorem}[Uniqueness of the Three-Element Quotient; new]
 \label{thm:quotient-unique}
@@ -821,20 +909,29 @@ A \emph{real congruence} extends compatibility to all of $\Real$.
   with $n \geq 2$ classes.
 \end{enumerate}
 Lean: \texttt{UnitCongruence.singleton\_zero},
-\texttt{singleton\_one}, \texttt{kleene\_congruence},
+\texttt{singleton\_one}, \texttt{kleeneCongruence},
 \texttt{RealCongruence.no\_nontrivial\_finite\_quotient}.
 \end{theorem}
 \begin{proof}[Proof sketch]
 (1)~Suppose $0 \sim \varepsilon$ for some $\varepsilon > 0$.
-For any $x \in [0,1]$, the sequence
-$x, x(1-\varepsilon), x(1-\varepsilon)^2, \ldots$ converges to $0$.
-By multiplication compatibility at each step and transitivity,
-$x \sim 0$ for every $x$: trivial.
+Negation gives $1 \sim 1 - \varepsilon$.
+Multiplication compatibility: $x \sim x(1 - \varepsilon)$ for all
+$x \in [0,1]$.
+By induction, $x \sim x(1 - \varepsilon)^n$ for all $n$.
+For large $n$, $x(1 - \varepsilon)^n \leq \varepsilon$.
+Factoring: $x(1 - \varepsilon)^n = \varepsilon \cdot
+[x(1-\varepsilon)^n / \varepsilon]$, and the bracketed quotient lies
+in $[0,1]$.
+Since $0 \sim \varepsilon$, multiplication compatibility gives
+$0 \sim x(1-\varepsilon)^n$.
+Transitivity: $x \sim 0$ for every $x$.
+The quotient is trivial --- contradiction.
 The argument for $\{1\}$ is dual (apply negation).
 (2)~Immediate from the negation fixed point at $\tfrac{1}{2}$.
 (3)~Theorem~\ref{thm:quotient-unique}.
 (4)~Given $n \geq 2$ classes, pigeonhole on the powers
-$a, a^2, \ldots, a^{n+1}$ gives $a^i \sim a^j$ with $i < j$.
+$a, a^2, \ldots, a^{n+1}$ (with $a = \tfrac{1}{2}$) gives
+$a^i \sim a^j$ with $i < j$.
 Under $\Real$-multiplication, multiply by $(a^i)^{-1}$
 to get $1 \sim a^{j-i}$, contradicting singleton boundaries from (1).
 \end{proof}
@@ -877,26 +974,18 @@ Kleene partition to survive.}
 \end{center}
 
 %=============================================================================
-\section{Valuations, Update, and Consequence}
-\label{sec:applications}
+\section{The Bridge Theorem}
+\label{sec:bridge}
 %=============================================================================
 
-The chain rule supports two modes of inference on the same $[0,1]$
-structure:
-\emph{Bayesian update} (revise a single valuation in light of
-evidence) and \emph{logical consequence} (ask which conclusions follow
-from premises across all valuations).
-Both are governed by the chain rule; they differ in quantifier
-structure.
-Bayesian update applies the chain rule \emph{pointwise} to a
-particular valuation; logical consequence quantifies \emph{universally}
-over all valuations.
-This section develops both modes and shows how the collapse
-(Section~\ref{sec:collapse}) connects them:
-Bayesian reasoning on $[0,1]$ \emph{projects to} paraconsistent
-logical reasoning on $\{0, \tfrac{1}{2}, 1\}$.
+The collapse from Section~\ref{sec:collapse} is a homomorphism of
+connectives.
+This section shows it induces an \emph{equivalence of consequence
+relations}: three-valued logical consequence on
+$\{0, \tfrac{1}{2}, 1\}$ is the same as a natural consequence
+relation on $[0,1]$.
 
-\subsection{Valuations and Collapse Composition}
+\subsection{Valuations}
 
 \begin{definition}[Independent Valuation]
 \label{def:indep-valuation}
@@ -908,32 +997,13 @@ $v(A \lor B) = v(A) \disjc v(B)$.
 Lean: \texttt{CpValuation}, \texttt{IndepValuation}.
 \end{definition}
 
-Under independence, conditioning on $B$ with $v(B) > 0$ gives
-$\cred(A \mid B) = v(A)$: evidence has no effect
-(Lean: \texttt{prod\_trivial\_conditioning}).
-
 \begin{definition}[Kleene Valuation]
 \label{def:kleene-valuation}
-A complement-preserving valuation is a \emph{Kleene valuation} if
+A complement-preserving valuation into
+$\{0, \tfrac{1}{2}, 1\}$ is a \emph{Kleene valuation} if
 $v(A \land B) = \min(v(A), v(B))$ and
 $v(A \lor B) = \max(v(A), v(B))$.
 \end{definition}
-
-By the uniqueness theorem (Theorem~\ref{thm:min-copula-unique}), the
-minimum is the unique symmetric, idempotent copula.
-A Kleene valuation is the unique choice that is both
-idempotent and Bayes-consistent --- the logic-compatible valuation.
-
-\begin{example}[Running Example: Collapse]
-\label{ex:collapse-val}
-With $v(\text{rain}) = 0.8$ and $v(\text{wet}) = 0.9$, both collapse
-to $\tfrac{1}{2}$ (the interior class).
-Under independence:
-$v(\text{rain} \land \text{wet}) = 0.72$, which also collapses to
-$\tfrac{1}{2}$.
-On the quotient: $\min(\tfrac{1}{2}, \tfrac{1}{2}) = \tfrac{1}{2}$.
-The collapse preserves the algebraic structure.
-\end{example}
 
 \begin{proposition}[Collapse Composition; new]
 \label{prop:collapse-composition}
@@ -948,28 +1018,158 @@ Lean: \texttt{collapse\_val\_neg}, \texttt{collapse\_val\_conj},
 \texttt{collapse\_val\_disj}.
 \end{proposition}
 
-A probabilist working with joint-parametrized valuations can always
-project to a three-valued logic by composing with the collapse.
-A logician working with K$_3$ or LP valuations can always lift to
-$[0,1]$ by choosing any preimage of the three-valued assignment.
+\begin{lemma}[Lifting; new]
+\label{lem:lifting}
+Every Kleene valuation $w : \alpha \to \{0, \tfrac{1}{2}, 1\}$
+lifts to a $[0,1]$-valued function $v$ such that
+$\mathrm{collapse} \circ\, v = w$.
+Specifically, map $0 \mapsto 0$, $\tfrac{1}{2} \mapsto \tfrac{1}{2}$,
+$1 \mapsto 1$.
+Lean: \texttt{liftThreeVal}, \texttt{lift\_collapse\_id}.
+\end{lemma}
+\begin{proof}
+Each of the three values has a canonical preimage in $[0,1]$.
+The composition $\text{collapse} \circ \text{lift}$ is the identity
+on $\{0, \tfrac{1}{2}, 1\}$.
+\end{proof}
+
+\subsection{Consequence Relations on $[0,1]$}
+
+\begin{definition}[Consequence Relations]
+\label{def:consequence}
+For propositions drawn from a type $\alpha$:
+\begin{itemize}[nosep]
+\item \emph{Positivity consequence:}
+  $\Gamma \models^+ A$ iff for every $v : \alpha \to [0,1]$, if
+  $v(p) > 0$ for all $p \in \Gamma$, then $v(A) > 0$.
+\item \emph{Certainty consequence:}
+  $\Gamma \models^1 A$ iff for every $v : \alpha \to [0,1]$, if
+  $v(p) = 1$ for all $p \in \Gamma$, then $v(A) = 1$.
+\item \emph{Three-valued consequence:}
+  $\Gamma \models_D A$ (for designated set $D$) iff for every
+  $w : \alpha \to \{0, \tfrac{1}{2}, 1\}$, if
+  $w(p) \in D$ for all $p \in \Gamma$, then $w(A) \in D$.
+\end{itemize}
+Lean: \texttt{positivityConsequence},
+\texttt{certaintyConsequence}, \texttt{threeValConsequence}.
+\end{definition}
+
+\subsection{The Bridge}
+
+\begin{theorem}[LP Bridge Theorem; new]
+\label{thm:lp-bridge}
+LP consequence (designating $\{1, \tfrac{1}{2}\}$) on
+$\{0, \tfrac{1}{2}, 1\}$ is equivalent to positivity consequence
+on $[0,1]$:
+\[
+\Gamma \models_{\mathrm{LP}} A
+\quad \Longleftrightarrow \quad
+\Gamma \models^+ A.
+\]
+Lean: \texttt{lp\_bridge}.
+\end{theorem}
+\begin{proof}
+$(\Rightarrow)$
+Given $v : \alpha \to [0,1]$ with $v(p) > 0$ for all $p \in \Gamma$,
+define $w = \text{collapse} \circ\, v$.
+Then $w(p)$ is LP-designated iff $v(p) > 0$
+(Lean: \texttt{lp\_designated\_iff\_pos}), so all premises are
+LP-designated.
+By LP consequence, $w(A)$ is LP-designated, hence $v(A) > 0$.
+
+$(\Leftarrow)$
+Given $w : \alpha \to \{0, \tfrac{1}{2}, 1\}$ with all premises
+LP-designated, define $v = \text{lift} \circ\, w$.
+Each LP-designated value lifts to a positive credence
+(Lean: \texttt{lift\_pos\_of\_designated\_lp}).
+By positivity consequence, $v(A) > 0$.
+Then $\text{collapse}(v(A))$ is LP-designated, and
+$\text{collapse} \circ\, \text{lift} = \text{id}$
+(Lemma~\ref{lem:lifting}) gives $w(A)$ LP-designated.
+\end{proof}
+
+\begin{theorem}[K$_3$ Bridge Theorem; new]
+\label{thm:k3-bridge}
+K$_3$ consequence (designating $\{1\}$) on
+$\{0, \tfrac{1}{2}, 1\}$ is equivalent to certainty consequence
+on $[0,1]$:
+\[
+\Gamma \models_{\mathrm{K}_3} A
+\quad \Longleftrightarrow \quad
+\Gamma \models^1 A.
+\]
+Lean: \texttt{k3\_bridge}.
+\end{theorem}
+\begin{proof}
+$(\Rightarrow)$
+Given $v : \alpha \to [0,1]$ with $v(p) = 1$ for all $p \in \Gamma$,
+define $w = \text{collapse} \circ\, v$.
+Then $w(p) = 1$ iff $v(p) = 1$
+(Lean: \texttt{k3\_designated\_iff\_one}), so all premises are
+K$_3$-designated.
+By K$_3$ consequence, $w(A) = 1$, hence $v(A) = 1$.
+
+$(\Leftarrow)$
+Given $w : \alpha \to \{0, \tfrac{1}{2}, 1\}$ with all premises
+K$_3$-designated, define $v = \text{lift} \circ\, w$.
+Each K$_3$-designated value lifts to credence $1$
+(Lean: \texttt{lift\_one\_of\_designated\_k3}).
+By certainty consequence, $v(A) = 1$.
+Then $\text{collapse}(v(A)) = 1$, and
+$\text{collapse} \circ\, \text{lift} = \text{id}$ gives $w(A) = 1$.
+\end{proof}
+
+\textbf{Interpretation.}
+The bridge theorems say that discrete three-valued logical reasoning
+is faithfully encoded in continuous $[0,1]$ reasoning, and
+vice versa.
+An LP logician working with designated values
+$\{1, \tfrac{1}{2}\}$ is implicitly performing positivity reasoning
+on the continuum; a K$_3$ logician working with designated
+value $\{1\}$ is implicitly performing certainty reasoning.
+The collapse does not merely project --- it \emph{reflects}:
+if a consequence holds on $[0,1]$, it holds on
+$\{0, \tfrac{1}{2}, 1\}$, and conversely.
+
+The key mechanism is the characterization of designated values via
+the collapse:
+\begin{itemize}[nosep]
+\item $\text{collapse}(c)$ is LP-designated if and only if $c > 0$,
+\item $\text{collapse}(c)$ is K$_3$-designated if and only if $c = 1$.
+\end{itemize}
+These are the two canonical ways to carve $[0,1]$ into
+``designated'' and ``undesignated'': by positivity or by certainty.
+Each corresponds to exactly one of the standard three-valued
+consequence relations.
+
+%=============================================================================
+\section{Applications}
+\label{sec:applications}
+%=============================================================================
 
 \subsection{Bayesian and Jeffrey Update}
+\label{sec:update}
 
 \begin{definition}[Bayesian Update]
 \label{def:bayesian-update}
 Given a joint-parametrized valuation $v$ with evidence $B$ satisfying
 $v(B) > 0$, the \emph{Bayesian posterior} is
-$v'(A) = j(A,B) / v(B)$.
+$v'(A) = \cred(A \land B) / v(B)$.
 Lean: \texttt{bayesianUpdate}.
 \end{definition}
 
-\begin{proposition}[Chain-Rule Preservation]
+\begin{proposition}[Chain-Rule Preservation and Uniqueness;
+known~\cite{jaynes2003}, verified here]
 \label{prop:bayesian-chain}
-$v'(A) \conjc v(B) = j(A,B)$.
-The posterior is the unique credence with this property.
+The posterior satisfies $v'(A) \conjc v(B) = \cred(A \land B)$ and
+is the unique credence with this property.
 Lean: \texttt{bayesianUpdate\_chain\_rule},
 \texttt{bayesianUpdate\_unique}.
 \end{proposition}
+\begin{proof}
+$v'(A) = j/e$ by construction, so $v'(A) \cdot e = j$.
+Uniqueness: if $c \cdot e = c' \cdot e$ with $e > 0$, then $c = c'$.
+\end{proof}
 
 \begin{definition}[Jeffrey Update]
 \label{def:jeffrey-update}
@@ -980,6 +1180,23 @@ on $\negc B$.
 Lean: \texttt{jeffreyUpdate}, \texttt{jeffreyUpdate\_certain},
 \texttt{jeffreyUpdate\_zero}.
 \end{definition}
+
+\begin{proposition}[Jeffrey Update: Typical Case]
+\label{prop:jeffrey-typical}
+When $0 < v(B) < 1$, both conditionals $\cred(A \mid B)$ and
+$\cred(A \mid \negc B)$ are uniquely determined by the chain rule
+(since $v(B) > 0$ and $v(\negc B) = 1 - v(B) > 0$).
+The Jeffrey posterior is therefore uniquely determined by the prior
+$v$, the joint credences $\cred(A \land B)$ and
+$\cred(A \land \negc B)$, and the new evidence credence $q$.
+\end{proposition}
+\begin{proof}
+Both conditionals exist and are unique by
+Proposition~\ref{thm:existence}(i), since both $v(B)$ and
+$v(\negc B)$ are positive.
+The Jeffrey formula is a convex combination of two uniquely
+determined values.
+\end{proof}
 
 \begin{proposition}[Zero-Evidence Underdetermination; new]
 \label{prop:zero-underdetermined}
@@ -995,7 +1212,8 @@ Lean: \texttt{bayesian\_underdetermined\_at\_zero},
 $c \cdot 0 = 0$ for all $c$.
 \end{proof}
 
-\subsection{Consequence}
+\subsection{Consequence Relations}
+\label{sec:consequence}
 
 K$_3$ (designating $\{1\}$) is paracomplete: no tautologies
 (Lean: \texttt{k3\_no\_tautology}).
@@ -1009,14 +1227,29 @@ For any threshold $0 < t \leq \tfrac{1}{2}$, graded consequence on
 $[0,1]$ is explosion-free: the constant-$\tfrac{1}{2}$ valuation
 gives $v(A) = \tfrac{1}{2} \geq t$ and
 $\negc v(A) = \tfrac{1}{2} \geq t$, so both $A$ and $\negc A$ are
-designated, while an arbitrary $v(B) = 0 < t$ shows the conclusion
+designated, while $v(B) = 0 < t$ shows the conclusion
 need not be designated.
 Lean: \texttt{graded\_no\_explosion}.
 \end{proposition}
 
-The witness is the same in all three cases: the negation fixed point
-$\tfrac{1}{2}$ makes both a proposition and its negation designated
-without forcing arbitrary conclusions.
+\begin{remark}[Graded consequence for $t > \tfrac{1}{2}$]
+\label{rem:graded-large-t}
+For $t > \tfrac{1}{2}$, the constant-$\tfrac{1}{2}$ witness fails:
+$\tfrac{1}{2} < t$, so neither $A$ nor $\negc A$ is designated.
+The explosion question for $t > \tfrac{1}{2}$ is thus not resolved by
+this witness; it depends on which valuations are admitted by the logic.
+At $t = 1$, graded consequence coincides with K$_3$ consequence
+(Lean: \texttt{graded\_at\_one\_is\_strict}), which is paracomplete
+rather than paraconsistent: explosion is vacuously avoided because
+no valuation makes both $v(A) = 1$ and $\negc v(A) = 1$.
+\end{remark}
+
+The witness is the same in all explosion-free cases: the negation
+fixed point $\tfrac{1}{2}$ makes both a proposition and its negation
+designated without forcing arbitrary conclusions.
+For $t \leq \tfrac{1}{2}$, excluded middle holds:
+$v(A) \disjc \negc v(A) \geq \tfrac{3}{4} \geq t$
+(Lean: \texttt{certainty\_ge\_three\_quarters}).
 
 \begin{center}
 \small
@@ -1044,16 +1277,99 @@ $^\ddagger$For $t \leq \tfrac{1}{2}$:
 $v(A) \disjc \negc v(A) \geq \tfrac{3}{4} \geq t$, so
 excluded middle and the tautology $A \disjc \negc A$ hold.}
 
-\subsection{Two Modes of Inference}
+\subsection{Graded Predicates}
+\label{sec:predicates}
+
+Graded predicates assign credences pointwise over a domain, extending
+the framework from propositional to predicate logic.
+
+\begin{definition}[Graded Predicate]
+\label{def:graded-predicate}
+A \emph{graded predicate} over a type $\alpha$ is a function
+$P : \alpha \to [0,1]$.
+Pointwise operations are defined by
+$(\negc P)(x) = \negc P(x)$,
+$(P \conjc Q)(x) = P(x) \conjc Q(x)$,
+$(P \disjc Q)(x) = P(x) \disjc Q(x)$.
+These inherit all algebraic properties of the product De Morgan
+triplet (double negation, De Morgan laws, commutativity, etc.)
+pointwise.
+Lean: \texttt{GradedPredicate}, \texttt{GradedPredicate.neg},
+\texttt{GradedPredicate.conj}, \texttt{GradedPredicate.disj}.
+\end{definition}
+
+\begin{definition}[Quantifiers]
+\label{def:quantifiers}
+For a graded predicate $P$ over a nonempty type $\alpha$:
+\begin{align*}
+\cred(\forall x.\, P(x)) &= \inf_{x \in \alpha} P(x), \\
+\cred(\exists x.\, P(x)) &= \sup_{x \in \alpha} P(x).
+\end{align*}
+Since $P(x) \in [0,1]$ for all $x$, the infimum and supremum exist and
+lie in $[0,1]$.
+Lean: \texttt{credInf}, \texttt{credSup}.
+\end{definition}
+
+These quantifiers agree with Goguen's~\cite{goguen1969} and
+Zadeh's~\cite{zadeh1965} definitions for fuzzy predicates.
+
+\begin{proposition}[Quantifier Duality;
+known~\cite{goguen1969,zadeh1965}, verified here]
+\label{prop:quantifier-duality}
+$\negc(\forall x.\, P(x)) = \exists x.\, \negc P(x)$
+at the value level:
+$1 - \inf_x P(x) = \sup_x (1 - P(x))$.
+Lean: \texttt{quantifier\_duality\_val}.
+\end{proposition}
+\begin{proof}
+Standard real analysis: $\sup$ and $\inf$ are dual under affine
+reflection $t \mapsto 1 - t$.
+\end{proof}
+
+\begin{definition}[Crisp Predicate]
+\label{def:crisp}
+A predicate $P$ is \emph{crisp} if $P(x) \in \{0, 1\}$ for all $x$.
+\end{definition}
+
+\begin{proposition}[Crisp Agreement;
+known~\cite{goguen1969}, verified here]
+\label{prop:crisp-agreement}
+For a crisp predicate $P$:
+\begin{enumerate}[label=\textup{(\roman*)},nosep]
+\item $\inf_x P(x) = 0$ iff $\exists x.\, P(x) = 0$,
+\item $\sup_x P(x) = 1$ iff $\exists x.\, P(x) = 1$.
+\end{enumerate}
+In other words, graded quantifiers restricted to crisp predicates
+recover classical $\forall$ and $\exists$.
+Lean: \texttt{crisp\_inf\_zero\_iff}, \texttt{crisp\_sup\_one\_iff}.
+\end{proposition}
+
+\begin{proposition}[Russell Fixed Point; new]
+\label{prop:russell}
+If $c = \negc c$ (the abstract Russell equation, where a predicate
+is applied to itself and negated), then $c = \tfrac{1}{2}$.
+The Russell paradox resolves to the negation fixed point rather than
+to a contradiction.
+Lean: \texttt{russell\_fixed\_point}.
+\end{proposition}
+\begin{proof}
+Immediate from the uniqueness of the negation fixed point
+(Lemma~\ref{thm:liar}).
+\end{proof}
+
+%=============================================================================
+\section{Two Modes of Inference}
 \label{sec:two-modes}
+%=============================================================================
 
 The chain rule governs two modes of inference on the same $[0,1]$
-structure.
-We can now make the relationship precise.
+structure: \emph{Bayesian update} and \emph{logical consequence}.
+The bridge theorem (Section~\ref{sec:bridge}) makes their
+relationship precise.
 
 \textbf{Mode 1: Bayesian update} (probabilistic inference).
 Fix a valuation $v$, observe evidence $B$ with $v(B) > 0$, compute
-the posterior $v'(A) = j(A,B)/v(B)$.
+the posterior $v'(A) = \cred(A \land B)/v(B)$.
 The chain rule determines the posterior \emph{uniquely} at positive
 evidence.
 At evidence zero, it yields a set of posteriors ($[0,1]$).
@@ -1071,22 +1387,13 @@ and $v(\negc A) \geq t$ without forcing $v(B) \geq t$ for
 arbitrary $B$.
 
 \textbf{The collapse as bridge.}
-The collapse (Theorem~\ref{thm:collapse}) connects these two modes.
-Given a Bayesian reasoner working on $[0,1]$ with an independent
-valuation $v$:
-\begin{enumerate}[nosep]
-\item Composing $v$ with the collapse yields a Kleene valuation
-  (Proposition~\ref{prop:collapse-composition}).
-\item On the quotient $\{0, \tfrac{1}{2}, 1\}$, Bayesian conditioning
-  becomes the Kleene material conditional on all positive-evidence
-  rows.
-\item The logical consequence relation on the quotient (K$_3$ or LP)
-  is the ``qualitative shadow'' of the continuous $[0,1]$ reasoning.
-\end{enumerate}
-The projection is information-losing: many $[0,1]$ valuations
-collapse to the same Kleene valuation.
-But it is structure-preserving: the algebraic operations, and
-therefore the consequence relations, are faithfully projected.
+The bridge theorem connects these two modes via the collapse.
+By Theorem~\ref{thm:lp-bridge}, LP consequence is precisely
+positivity consequence; by Theorem~\ref{thm:k3-bridge}, K$_3$
+consequence is precisely certainty consequence.
+A Bayesian reasoner working on $[0,1]$ can always project to
+three-valued reasoning via the collapse, and a logician working
+with K$_3$ or LP can always lift to $[0,1]$ via the lifting lemma.
 
 \begin{center}
 \small
@@ -1101,17 +1408,20 @@ Inference & Update $v$ & $\Gamma \models B$
   & Both \\
 At $e > 0$ & Unique posterior & Conditional determined
   & Division \\
-At $e = 0$ & Undefined & Ex falso or void
+At $e = 0$ & Underdetermined & Ex falso or void
   & Unconstrained \\
 Conjunction & External joint & $\min$ (idempotent)
   & Product; $\min$ on quotient \\
+Bridge & Positivity & LP designation
+  & Thm.~\ref{thm:lp-bridge} \\
 \bottomrule
 \end{tabular}
 \normalsize
 \captionof{table}{Two modes of inference on $[0,1]$.
 The chain rule is Bayesian update at positive evidence and prevents
 explosion at zero evidence.
-The collapse projects the first mode to the second.}
+The collapse projects the first mode to the second;
+the bridge theorem shows this projection is faithful.}
 \label{tab:two-modes}
 \end{center}
 
@@ -1121,20 +1431,12 @@ At positive evidence, the chain rule reduces to division --- Bayesian
 conditioning works and logical conditionals are determined.
 At zero evidence, the chain rule is unconstrained rather than
 explosive --- Bayesian posteriors are underdetermined (connecting to
-imprecise probability) and logical consequence is paraconsistent
-(the negation fixed point $\tfrac{1}{2}$ witnesses non-explosion).
+imprecise probability~\cite{walley1991}) and logical consequence is
+paraconsistent (the negation fixed point $\tfrac{1}{2}$ witnesses
+non-explosion).
 The same algebraic fact ($c \cdot 0 = 0$ for all $c$) manifests as
 underdetermined posteriors on the probabilistic side and as
 paraconsistency on the logical side.
-
-The graded threshold $t \in (0, \tfrac{1}{2}]$ provides a continuous
-interpolation.
-At $t = 1$, consequence is K$_3$-strict (paracomplete, no tautologies).
-At $t = \tfrac{1}{2}$, consequence is LP-equivalent (paraconsistent,
-tautologies hold, explosion fails).
-For intermediate values, consequence is paraconsistent with tautologies.
-The threshold parameterizes a family of consequence relations, all
-explosion-free, all governed by the chain rule.
 
 %=============================================================================
 \section{Conclusion}
@@ -1153,30 +1455,33 @@ conditional unconstrained.
 This single divergence at zero determines the entire qualitative
 structure:
 \begin{enumerate}[nosep]
-\item The \emph{evidence-zero analysis} shows chain-rule conditioning
-  is unconstrained and path-dependent; no limiting convention
-  resolves the singularity.
-\item The \emph{equilibria} $\{0, \tfrac{1}{2}, 1\}$ are exactly the
+\item The \textbf{bridge theorem} shows LP consequence is equivalent
+  to positivity consequence on $[0,1]$, and K$_3$ consequence is
+  equivalent to certainty consequence.
+  Discrete logical reasoning is faithfully encoded in continuous
+  credences.
+\item The \textbf{equilibria} $\{0, \tfrac{1}{2}, 1\}$ are exactly the
   conjunction-idempotent values together with the negation fixed
   point; they are derived from the algebra, not postulated.
-\item The \emph{Kleene collapse} to $\{0, \tfrac{1}{2}, 1\}$ is the
+\item The \textbf{Kleene collapse} to $\{0, \tfrac{1}{2}, 1\}$ is the
   unique non-trivial three-element quotient.
-\item The \emph{congruence classification} shows the Kleene quotient
+\item The \textbf{congruence classification} shows the Kleene quotient
   exists under $[0,1]$-multiplication; no non-trivial finite quotient
   exists under $\Real$-multiplication.
-\item The \emph{collapse composition} projects probabilistic valuations
-  to logical ones.
-\item The \emph{graded no-explosion} shows paraconsistency for
+\item The \textbf{graded no-explosion} shows paraconsistency for
   $t \leq \tfrac{1}{2}$, with the same witness ($\tfrac{1}{2}$) in
-  every case.
+  every case; for $t > \tfrac{1}{2}$ the witness fails.
+\item \textbf{Graded predicates} with inf/sup quantifiers recover
+  classical agreement on crisp predicates and resolve the Russell
+  paradox to $\tfrac{1}{2}$.
 \end{enumerate}
 
 The chain rule serves as a shared inference mechanism:
 it is Bayes' rule when evidence is positive, and it prevents
 explosion when evidence is zero.
 The collapse projects Bayesian update to paraconsistent logical
-consequence, connecting the two traditions through a single
-algebraic structure.
+consequence; the bridge theorem shows this projection is an
+equivalence.
 
 \textbf{Open problems.}
 \begin{enumerate}[nosep]
@@ -1218,27 +1523,108 @@ distinction between connectives and consequence relations.
 \appendix
 
 %=============================================================================
+\section{Preliminaries}
+\label{app:prelim}
+%=============================================================================
+
+This appendix collects standard definitions used in the paper.
+
+\textbf{T-norms.}
+A \emph{t-norm} is a binary operation
+$T : [0,1]^2 \to [0,1]$ that is commutative, associative,
+monotone (in each argument), and satisfies $T(a, 1) = a$ for all
+$a$~\cite{klement2000}.
+The three basic continuous t-norms are:
+\begin{itemize}[nosep]
+\item \emph{Product}: $T_P(a,b) = a \cdot b$.
+\item \emph{G\"odel} (minimum): $T_G(a,b) = \min(a,b)$.
+\item \emph{\L ukasiewicz}: $T_L(a,b) = \max(a + b - 1, 0)$.
+\end{itemize}
+
+\textbf{Copulas.}
+A (bivariate) \emph{copula} is a function
+$C : [0,1]^2 \to [0,1]$ satisfying~\cite{nelsen2006}:
+\begin{enumerate}[label=(\roman*),nosep]
+\item $C(a, 0) = C(0, b) = 0$ for all $a, b$ (grounded),
+\item $C(a, 1) = a$ and $C(1, b) = b$ for all $a, b$
+  (unit marginals),
+\item $C(a_2, b_2) - C(a_2, b_1) - C(a_1, b_2) + C(a_1, b_1) \geq 0$
+  for all $a_1 \leq a_2$, $b_1 \leq b_2$ (2-increasing).
+\end{enumerate}
+Every copula satisfies the Fr\'echet-Hoeffding bounds:
+$\max(a + b - 1, 0) \leq C(a, b) \leq \min(a, b)$.
+The upper bound $\min(a, b)$ is the \emph{comonotonicity copula};
+the product $a \cdot b$ is the \emph{independence copula}.
+
+\textbf{Coherence.}
+De Finetti~\cite{definetti1937} introduced coherence as a criterion
+for probability assignments: an assignment is coherent if no finite
+combination of bets on it yields a sure loss.
+Coletti and Scozzafava~\cite{coletti2002} extended coherence to
+conditional probabilities, treating the conditional as a primitive
+rather than derived via division.
+The chain-rule constraint
+$\cred(A \mid B) \cdot \cred(B) = \cred(A \land B)$
+is a necessary condition for coherence~\cite{coletti2002,gilio2014}.
+
+\textbf{Residuation.}
+Given a (left-continuous) t-norm $T$, the \emph{residuum} is
+$a \to_T b = \sup\{c : T(a,c) \leq b\}$~\cite{hajek1998,galatos2007}.
+For the product t-norm: $a \to_P b = \min(b/a, 1)$ when $a > 0$, and
+$0 \to_P b = 1$.
+The last equation is ex falso: $0 \to b = 1$ regardless of $b$.
+Residuation forces a truth-functional conditional; the chain rule
+allows the conditional to depend on the joint.
+
+%=============================================================================
 \section{Lean Formalization}
 \label{app:lean}
 %=============================================================================
 
 The results in this paper are formalized across six Lean~4 modules
-(with Mathlib), totaling approximately 2900 lines with zero
+(with Mathlib), totaling approximately 3000 lines with zero
 \texttt{sorry}:
 
 \begin{itemize}[nosep]
 \item \texttt{Cred/Basic.lean}: core algebra, conditioning, fixed
-  points, collapse, comparisons (1804 lines).
+  points, collapse, Bayes consistency, path dependence, congruence
+  building blocks (1804 lines).
 \item \texttt{Cred/Congruence.lean}: two-level congruence
   classification --- \texttt{UnitCongruence}, \texttt{RealCongruence},
   Kleene witness (396 lines).
-\item \texttt{Cred/Valuation.lean}: valuations, collapse composition.
-\item \texttt{Cred/Update.lean}: Bayesian/Jeffrey update.
 \item \texttt{Cred/Consequence.lean}: K$_3$/LP designation,
-  no-explosion.
+  bridge theorem, graded consequence, no-explosion (285 lines).
+\item \texttt{Cred/Valuation.lean}: valuations, collapse composition,
+  Fr\'echet bounds on valuations (175 lines).
+\item \texttt{Cred/Update.lean}: Bayesian/Jeffrey update, chain-rule
+  preservation (138 lines).
 \item \texttt{Cred/Predicate.lean}: graded predicates, quantifier
-  duality, Russell fixed point.
+  duality, Russell fixed point, crisp agreement (210 lines).
 \end{itemize}
+
+\textbf{Key definitions:}
+\begin{center}
+\small
+\begin{tabular}{ll}
+\toprule
+\textbf{Concept} & \textbf{Lean name} \\
+\midrule
+Credence & \texttt{Cred.Credence} \\
+Conditioning structure & \texttt{Cred.Credence.Conditioning} \\
+Three-valued collapse & \texttt{Cred.collapse} \\
+Unit congruence & \texttt{Cred.UnitCongruence} \\
+Real congruence & \texttt{Cred.RealCongruence} \\
+Kleene congruence & \texttt{Cred.kleeneCongruence} \\
+Complement-preserving valuation & \texttt{Cred.CpValuation} \\
+Independent valuation & \texttt{Cred.IndepValuation} \\
+Joint valuation & \texttt{Cred.JointValuation} \\
+Graded predicate & \texttt{Cred.GradedPredicate} \\
+Positivity consequence & \texttt{Cred.positivityConsequence} \\
+Certainty consequence & \texttt{Cred.certaintyConsequence} \\
+\bottomrule
+\end{tabular}
+\normalsize
+\end{center}
 
 \textbf{Key theorems:}
 \begin{center}
@@ -1269,14 +1655,30 @@ Singleton boundaries (Thm.~\ref{thm:congruence}(1))
   & \texttt{UnitCongruence.singleton\_zero/one} \\
 $\Real$-impossibility (Thm.~\ref{thm:congruence}(4))
   & \texttt{RealCongruence.no\_nontrivial\_finite\_quotient} \\
+LP bridge (Thm.~\ref{thm:lp-bridge})
+  & \texttt{lp\_bridge} \\
+K$_3$ bridge (Thm.~\ref{thm:k3-bridge})
+  & \texttt{k3\_bridge} \\
+LP designated iff positive
+  & \texttt{lp\_designated\_iff\_pos} \\
+K$_3$ designated iff one
+  & \texttt{k3\_designated\_iff\_one} \\
+Lifting lemma (Lem.~\ref{lem:lifting})
+  & \texttt{liftThreeVal}, \texttt{lift\_collapse\_id} \\
 Collapse composition (Prop.~\ref{prop:collapse-composition})
   & \texttt{collapse\_val\_neg/conj/disj} \\
 Bayesian update (Prop.~\ref{prop:bayesian-chain})
   & \texttt{bayesianUpdate\_chain\_rule/unique} \\
 Zero underdetermination (Prop.~\ref{prop:zero-underdetermined})
   & \texttt{bayesian\_underdetermined\_at\_zero} \\
-No explosion
-  & \texttt{k3\_no\_tautology}, \texttt{graded\_no\_explosion} \\
+Graded no-explosion (Prop.~\ref{prop:graded-no-explosion})
+  & \texttt{graded\_no\_explosion} \\
+Quantifier duality (Prop.~\ref{prop:quantifier-duality})
+  & \texttt{quantifier\_duality\_val} \\
+Crisp agreement (Prop.~\ref{prop:crisp-agreement})
+  & \texttt{crisp\_inf\_zero\_iff}, \texttt{crisp\_sup\_one\_iff} \\
+Russell fixed point (Prop.~\ref{prop:russell})
+  & \texttt{russell\_fixed\_point} \\
 \bottomrule
 \end{tabular}
 \normalsize
