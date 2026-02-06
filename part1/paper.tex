@@ -125,20 +125,11 @@ Chain-rule conditioning motivates studying the product De Morgan triplet
 as a unit: it is the specific choice of companion operations
 (complement, product) that makes conditioning at zero unconstrained
 rather than forcing ex falso.
-The main contribution is a congruence analysis at two levels:
-under $[0,1]$-multiplication, the Kleene lattice is the unique
-non-trivial three-element quotient
-(Theorem~\ref{thm:unit-classification});
-under $\mathbb{R}$-multiplication, no non-trivial finite quotient
-exists at all (Theorem~\ref{thm:real-impossibility}).
-The proof uses only product and negation; conditioning provides
-the \emph{reason to care} about this particular signature.
-
 \textbf{Main results.}
 A two-level congruence classification
 (Theorems~\ref{thm:unit-classification}
-and~\ref{thm:real-impossibility}):
-under $[0,1]$-multiplication, the Kleene lattice is the unique
+and~\ref{thm:real-impossibility}).
+Under $[0,1]$-multiplication, the Kleene lattice is the unique
 non-trivial three-element quotient; under $\mathbb{R}$-multiplication,
 no non-trivial finite quotient exists.
 Whether four or more classes are possible under
@@ -146,6 +137,8 @@ $[0,1]$-multiplication is open.
 The classification places the product De Morgan triplet between
 MV-algebras (infinitely many congruences) and product BL-algebras
 (none).
+The proof uses only product and negation; conditioning provides
+the \emph{reason to care} about this particular signature.
 
 \textbf{Supporting results} (known or elementary, newly Lean-verified):
 uniqueness of the min copula
@@ -160,14 +153,10 @@ All results are machine-checked in Lean~4 with Mathlib
 \textbf{Outline.}
 Section~\ref{sec:algebra} defines the algebra.
 Section~\ref{sec:uniqueness} proves uniqueness of min.
-Section~\ref{sec:conditioning} develops chain-rule conditioning and path
-dependence.
-Section~\ref{sec:fixed-points} treats fixed points.
+Section~\ref{sec:conditioning} develops chain-rule conditioning.
 Section~\ref{sec:collapse} establishes the collapse to the Kleene lattice.
 Section~\ref{sec:congruence} gives the congruence classification.
-Section~\ref{sec:conclusion} concludes.
-Appendix~\ref{app:prelim} provides formal preliminaries.
-Appendix~\ref{app:lean} describes the Lean formalization.
+Appendices provide preliminaries and the Lean formalization.
 
 %=============================================================================
 \section{The Product De Morgan Triplet with Conditioning}
@@ -281,9 +270,9 @@ Lean: \texttt{neg\_neg}, \texttt{neg\_zero}, \texttt{neg\_one},
 The structure is two dual commutative monoids connected by De Morgan
 duality; it is not a De Morgan algebra since $\conjc$ is not idempotent
 ($c^2 = c$ iff $c \in \{0,1\}$;
-Lean: \texttt{conj\_idempotent\_iff}\label{thm:idempotence})
+Lean: \texttt{conj\_idempotent\_iff})
 and $\conjc$ does not distribute over $\disjc$
-(Lean: \texttt{conj\_disj\_not\_distrib}\label{thm:nondistrib}).
+(Lean: \texttt{conj\_disj\_not\_distrib}).
 
 %=============================================================================
 \section{The Uniqueness Theorem}
@@ -377,7 +366,7 @@ conditioning relaxes Cox's requirement that the conditional be a function.
 
 \textbf{Evidence = 0.}
 The chain rule gives $c \conjc 0 = 0$ for all $c$: the conditional is
-\emph{unconstrained}\label{thm:noexfalso}.
+\emph{unconstrained}.
 This is an elementary consequence of the definition --- any $c$ satisfies
 the equation --- but the design choice it reflects is significant:
 the chain rule does not force $\cred(A \mid 0) = 1$, so it is
@@ -528,7 +517,7 @@ $\{0, \tfrac{1}{2}, 1\}$
 $\min(a,b)$ & \checkmark & \checkmark & \checkmark & \checkmark \\
 $a \cdot b$ (indep.) & \checkmark & \checkmark & $\times$ & $\times$ \\
 $\max(a{+}b{-}1,0)$ & \checkmark & \checkmark & \checkmark & $\times$ \\
-RM3 induced & --- & $\times$ & --- & --- \\
+$\max(\negc a,b) \cdot a$ (RM3) & \checkmark & $\times$ & --- & --- \\
 G\"odel (on $[0,1]$) & --- & $\times$ & --- & --- \\
 External (prob.) & $\times$ & \checkmark & \checkmark & \checkmark \\
 \bottomrule
@@ -553,7 +542,8 @@ At evidence zero, probability is undefined; chain-rule conditioning is
 unconstrained.
 
 %=============================================================================
-\section{Fixed Points}
+\section{Collapse to the Kleene Lattice}
+\label{sec:collapse}
 \label{sec:fixed-points}
 %=============================================================================
 
@@ -562,19 +552,10 @@ unconstrained.
 \label{thm:liar}
 \label{thm:fixedunique}
 $\negc c = c$ if and only if $c = \tfrac{1}{2}$.
-\end{lemma}
-\begin{proof}
-$1 - c = c$ iff $c = \tfrac{1}{2}$.
+This is standard~\cite{hajek1998,gottwald2001}; the collapse and
+congruence results depend on it.
 Lean: \texttt{liar\_fixed\_point}, \texttt{neg\_fixed\_point\_unique}.
-\end{proof}
-
-This is standard~\cite{hajek1998,gottwald2001};
-we record it because the collapse and congruence results depend on it.
-
-%=============================================================================
-\section{Collapse to the Kleene Lattice}
-\label{sec:collapse}
-%=============================================================================
+\end{lemma}
 
 The partition $\{0\}, (0,1), \{1\}$ is a congruence on the product De Morgan
 triplet.
@@ -671,23 +652,11 @@ $\varphi(\tfrac{1}{2})$ must be the unique negation fixed point of $S$.
 The remaining elements $\varphi(0)$, $\varphi(1)$ form the 2-cycle.
 The conjunction table is then forced: $\varphi(0)$ absorbs, $\varphi(1)$
 is identity,
-$\varphi(\tfrac{1}{2}) \conjc \varphi(\tfrac{1}{2}) =
-\varphi(\tfrac{1}{2})$ (since $\tfrac{1}{4} \in (0,1)$).
-This is Kleene $\min$.
+and $\varphi(\tfrac{1}{2} \conjc \tfrac{1}{2}) =
+\varphi(\tfrac{1}{4}) = \varphi(\tfrac{1}{2})$
+(since $\tfrac{1}{4} \in (0,1)$ maps to the interior class).
+This forces Kleene $\min$.
 Lean: \texttt{three\_element\_quotient\_unique}.
-\end{proof}
-
-% Lean: zero_equiv_forces_trivial
-\begin{proposition}[Zero Equivalence Forces Collapse]
-\label{thm:zero-collapse}
-If a congruence identifies $0$ with some $\varepsilon > 0$, it identifies
-all elements.
-\end{proposition}
-\begin{proof}
-From $0 \sim \varepsilon$: $1 \sim 1 - \varepsilon$ (negation);
-$x \sim x(1 - \varepsilon)$ for all $x$ (multiply); iterate to get
-$x \sim x(1-\varepsilon)^n \to 0$, then $x \sim 0$.
-Lean: \texttt{zero\_equiv\_forces\_trivial}.
 \end{proof}
 
 %=============================================================================
@@ -707,6 +676,9 @@ compatible with $[0,1]$-multiplication
 and with negation ($a \sim b$ implies $1 - a \sim 1 - b$).
 This is the natural congruence notion for the product De Morgan triplet,
 since $[0,1]$ is closed under product and complement.
+(In the Lean formalization, the relation is technically defined on
+$\mathbb{R}$ for uniformity with \texttt{RealCongruence}, but the
+multiplication axiom is restricted to $[0,1]$-valued inputs.)
 
 \begin{theorem}[Unit Congruence Classification]
 \label{thm:unit-classification}
@@ -786,10 +758,10 @@ Negation gives $0 \sim 1 - a^p$.
 Since $0 < a^p < 1$, we have $1 - a^p > 0$, contradicting
 singleton boundaries (Theorem~\ref{thm:unit-classification}(1)).
 
-For the Kleene partition specifically: $\tfrac{1}{2} \sim \tfrac{3}{10}$
-(both interior) and $2 \sim 2$ (reflexivity) give
-$1 \sim \tfrac{3}{5}$ by $\mathbb{R}$-multiplication,
-contradicting $\{1\}$ as a singleton.
+As a concrete illustration for $n = 3$:
+$\tfrac{1}{2} \sim \tfrac{3}{10}$ (both interior) and $2 \sim 2$
+(reflexivity) give $1 \sim \tfrac{3}{5}$ by
+$\mathbb{R}$-multiplication, contradicting $\{1\}$ as a singleton.
 \end{proof}
 
 \begin{remark}[Lean verification]
@@ -833,7 +805,9 @@ must ``use'' the boundary of $[0,1]$ in an essential way.
 The scaling trick fails because $[0,1]$ has no multiplicative inverses
 for elements in $(0,1)$: there is no $[0,1]$-valued operation that
 ``undoes'' multiplication by $\tfrac{1}{2}$.
-This isolates \emph{$[0,1]$-cancellation} as the key obstacle.
+This isolates \emph{$[0,1]$-cancellation} as the key obstacle:
+in $\mathbb{R}$, $ax = bx$ with $x > 0$ implies $a = b$ (divide by
+$x$), but in $[0,1]$ the quotient $a/x$ may leave the interval.
 
 \subsection{Comparison with MV-Algebras and BL-Algebras}
 
