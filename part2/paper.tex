@@ -83,7 +83,7 @@ to the same algebra without forcing ex falso.
 Supporting results include a congruence classification and graded
 consequence with a sharp no-explosion threshold.
 All results are machine-checked in Lean~4 with Mathlib
-(3228 lines, zero \texttt{sorry}).
+(over 3000 lines, zero \texttt{sorry}).
 \end{abstract}
 
 %=============================================================================
@@ -1068,7 +1068,7 @@ MV: $(\max(a{+}b{-}1,0),\; 1{-}(\cdot))$
   & $[0,1]$ & Infinitely many
   & \cite{cignoli2000,mundici2011} \\
 BL (product): $({\cdot},\; {\to})$
-  & $[0,1]$ & None (no non-trivial, finite or infinite)
+  & $[0,1]$ & Simple (none)
   & \cite[Cor.~3.7]{agliano2003} \\
 De Morgan: $({\cdot},\; 1{-}(\cdot))$
   & $[0,1]$ & Kleene exists; $\geq\!4$ open
@@ -1209,6 +1209,10 @@ The bridge theorem works precisely because both LP/K$_3$ matrix
 semantics and positivity/certainty consequence share this
 quantification; the collapse and lifting connect them without
 requiring assumptions about dependence.
+Restricting to independent (homomorphic) valuations would not
+change the equivalence: the lifted three-valued assignments
+land in $\{0, \tfrac{1}{2}, 1\}$, which is closed under all
+connectives, so they are automatically homomorphic.
 \end{remark}
 
 \begin{proposition}[Structural Rules; verified here]
@@ -1286,7 +1290,9 @@ define $w = \text{collapse} \circ\, v$.
 Then $w(p) = 1$ iff $v(p) = 1$
 (Lean: \texttt{k3\_designated\_iff\_one}), so all premises are
 K$_3$-designated.
-By K$_3$ consequence, $w(A) = 1$, hence $v(A) = 1$.
+By K$_3$ consequence, $w(A) = 1$, i.e.,
+$\text{collapse}(v(A)) = 1$; the same characterization gives
+$v(A) = 1$.
 
 $(\Leftarrow)$
 Given $w : \alpha \to \{0, \tfrac{1}{2}, 1\}$ with all premises
@@ -1492,14 +1498,19 @@ commutativity (Proposition~\ref{prop:collapse-eval}) ensures this
 works for compound formulas, and the designated sets are
 characterized as exactly the two canonical partitions of
 $[0,1]$ (positivity and certainty).
+
 \textbf{Relationship to degree-preserving consequence.}
 B\v{e}hounek and Cintula~\cite{behounek2006} characterized fuzzy
 logics via \emph{degree-preserving consequence}:
 $\Gamma \models_t \varphi$ holds iff every evaluation making all
 premises $\geq t$ also makes the conclusion $\geq t$.
-Certainty consequence is degree-preserving at threshold $1$;
-positivity consequence is degree-preserving at threshold $0^+$.
-The bridge identifies these with K$_3$ and LP respectively.
+Certainty consequence coincides with degree-preserving consequence
+at threshold $t = 1$.
+Positivity consequence (which uses strict inequality $> 0$)
+is the intersection $\bigcap_{t > 0} \models_t$: a consequence
+holds under positivity iff it holds for all thresholds $t > 0$.
+The bridge identifies these two extremes with K$_3$ and LP
+respectively.
 
 One might ask whether the bridge theorem is subsumed by the
 degree-preserving framework.
@@ -1542,11 +1553,12 @@ decidable by exhaustive search over $3^{|\alpha|}$ assignments.
 Non-consequence reduces to finding a counterexample in
 $\{0, \tfrac{1}{2}, 1\}^{|\alpha|}$ (verifiable in polynomial time),
 placing consequence in coNP.
-For coNP-hardness: every classical tautology is an LP tautology
-(restricting to $\{0, 1\} \subset \{0, \tfrac{1}{2}, 1\}$
-preserves designation), so classical validity reduces to LP
-consequence, and the bridge transfers this to positivity
-consequence.
+For coNP-hardness: classical validity reduces to LP consequence
+because $\{0, 1\} \subset \{0, \tfrac{1}{2}, 1\}$ and every
+classical counter-assignment (in $\{0,1\}$) is also an LP
+counter-assignment, so non-tautologies are preserved.
+The bridge then transfers coNP-hardness to positivity consequence
+on $[0,1]$.
 Lean: direct corollary of \texttt{lp\_formula\_bridge},
 \texttt{k3\_formula\_bridge}.
 \end{corollary}
@@ -1669,9 +1681,9 @@ Classical & $\{1\}$ (two-valued) & Yes & Yes & Yes \\
 K$_3$ & $\{1\}$ & No & No & Vacuously$^a$ \\
 LP & $\{1, \tfrac{1}{2}\}$ & Yes & Yes & No \\
 Graded ($t \leq \tfrac{1}{2}$) & $\{c \geq t\}$
-  & Yes$^b$ & Yes$^b$ & No \\
+  & If $t \leq \tfrac{3}{4}$ & If $t \leq \tfrac{3}{4}$ & No \\
 Graded ($t > \tfrac{1}{2}$) & $\{c \geq t\}$
-  & Yes$^b$ & Yes$^b$ & Vacuously$^c$ \\
+  & If $t \leq \tfrac{3}{4}$ & If $t \leq \tfrac{3}{4}$ & Vacuously$^b$ \\
 \bottomrule
 \end{tabular}
 \normalsize
@@ -1681,10 +1693,7 @@ Graded ($t > \tfrac{1}{2}$) & $\{c \geq t\}$
 {\footnotesize
 $^a$No valuation makes both $v(A)$ and $\negc(v(A))$
 K$_3$-designated.
-$^b$For all $t \leq \tfrac{3}{4}$:
-$v(A) \disjc \negc v(A) \geq \tfrac{3}{4} \geq t$, so
-excluded middle and the tautology $A \disjc \negc A$ hold.
-$^c$For $t > \tfrac{1}{2}$: no valuation makes both
+$^b$For $t > \tfrac{1}{2}$: no valuation makes both
 $v(A) \geq t$ and $\negc v(A) \geq t$
 (Proposition~\ref{prop:graded-sharp}).}
 
@@ -1915,8 +1924,8 @@ $1 - a^p > 0$, contradicting singleton boundaries from~(1).
 \label{app:lean}
 %=============================================================================
 
-The results in this paper are formalized across six Lean~4 modules
-(with Mathlib), totaling 3228 lines with zero
+The results in this paper are formalized across five Lean~4 modules
+(with Mathlib), totaling 3018 lines with zero
 \texttt{sorry}:
 
 \begin{itemize}[nosep]
@@ -1934,9 +1943,13 @@ The results in this paper are formalized across six Lean~4 modules
   Fr\'echet bounds on valuations (175 lines).
 \item \texttt{Cred/Update.lean}: Bayesian/Jeffrey update, chain-rule
   preservation (138 lines).
-\item \texttt{Cred/Predicate.lean}: formalization for future work
-  (210 lines; not used in this paper).
 \end{itemize}
+
+\noindent
+The project also includes \texttt{Cred/Predicate.lean} (210 lines),
+formalizing graded predicates for future work; it is not used in this
+paper but builds as part of the verified codebase (total with
+predicates: 3228 lines).
 
 \textbf{Key definitions:}
 \begin{center}
