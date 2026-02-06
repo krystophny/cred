@@ -402,9 +402,11 @@ and chain-rule conditioning, which leaves $\cred(A \mid 0)$
 unconstrained.
 On positive evidence with $\mathrm{joint} \leq \mathrm{evidence}$,
 both yield $\mathrm{joint}/\mathrm{evidence}$: the residuated
-implication gives $\min(\mathrm{joint}/\mathrm{evidence}, 1) =
-\mathrm{joint}/\mathrm{evidence}$, and the chain rule gives the
-same by uniqueness (Proposition~\ref{thm:existence}).
+implication gives $\min(\mathrm{joint}/\mathrm{evidence}, 1)$,
+which equals $\mathrm{joint}/\mathrm{evidence}$ since
+$\mathrm{joint} \leq \mathrm{evidence}$ ensures the ratio is
+at most $1$; the chain rule gives the same by uniqueness
+(Proposition~\ref{thm:existence}).
 
 \textbf{Relationship to probability.}
 Every probability space satisfies the chain rule and complement axioms.
@@ -540,7 +542,7 @@ part ways.
 \small
 \begin{tabular}{r|ccc}
 \multicolumn{4}{c}{\textbf{Kleene material}\textsuperscript{1}: $\max(\negc e, p)$} \\
-$e \!\downarrow\; p \!\to$ & 0 & $\tfrac{1}{2}$ & 1 \\
+$e \!\downarrow\;\; p$ & 0 & $\tfrac{1}{2}$ & 1 \\
 \hline
 0 & 1 & 1 & 1 \\
 $\tfrac{1}{2}$ & $\tfrac{1}{2}$ & $\tfrac{1}{2}$ & 1 \\
@@ -549,7 +551,7 @@ $\tfrac{1}{2}$ & $\tfrac{1}{2}$ & $\tfrac{1}{2}$ & 1 \\
 \quad
 \begin{tabular}{r|ccc}
 \multicolumn{4}{c}{\textbf{Prod.\ resid.}\textsuperscript{2}: $\min(p/e, 1)$} \\
-$e \!\downarrow\; p \!\to$ & 0 & $\tfrac{1}{2}$ & 1 \\
+$e \!\downarrow\;\; p$ & 0 & $\tfrac{1}{2}$ & 1 \\
 \hline
 0 & 1 & 1 & 1 \\
 $\tfrac{1}{2}$ & 0 & 1 & 1 \\
@@ -558,7 +560,7 @@ $\tfrac{1}{2}$ & 0 & 1 & 1 \\
 \quad
 \begin{tabular}{r|ccc}
 \multicolumn{4}{c}{\textbf{Chain-rule with min-copula joint}} \\
-$e \!\downarrow\; p \!\to$ & 0 & $\tfrac{1}{2}$ & 1 \\
+$e \!\downarrow\;\; p$ & 0 & $\tfrac{1}{2}$ & 1 \\
 \hline
 0 & $*$ & $*$ & $*$ \\
 $\tfrac{1}{2}$ & 0 & 1 & 1 \\
@@ -835,8 +837,9 @@ $c^{n+1} < c^n$.
 In particular, $c^n \to 0$ as $n \to \infty$:
 unrenewed evidence decays.
 Lean: \texttt{pow\_strictly\_decreasing} (strict decrease).
-The convergence follows from strict decrease and the bound
-$c^n \geq 0$ by the monotone convergence theorem.
+The convergence follows because $\{c^n\}$ is strictly decreasing
+and bounded below by $0$, so it converges; the only possible
+limit is $0$ (since $L = cL$ forces $L = 0$).
 \end{proposition}
 \begin{proof}
 $c^{n+1} = c^n \cdot c < c^n \cdot 1 = c^n$ since $0 < c < 1$.
@@ -1686,9 +1689,9 @@ Classical & $\{1\}$ (two-valued) & Yes & Yes & Yes \\
 K$_3$ & $\{1\}$ & No & No & Vacuously$^a$ \\
 LP & $\{1, \tfrac{1}{2}\}$ & Yes & Yes & No \\
 Graded ($t \leq \tfrac{1}{2}$) & $\{c \geq t\}$
-  & Yes$^c$ & Yes$^c$ & No \\
+  & Some$^c$ & Yes$^c$ & No \\
 Graded ($\tfrac{1}{2} < t \leq \tfrac{3}{4}$) & $\{c \geq t\}$
-  & Yes$^c$ & Yes$^c$ & Vacuously$^b$ \\
+  & Some$^c$ & Yes$^c$ & Vacuously$^b$ \\
 Graded ($t > \tfrac{3}{4}$) & $\{c \geq t\}$
   & No & No & Vacuously$^b$ \\
 \bottomrule
