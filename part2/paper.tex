@@ -215,7 +215,11 @@ B\v{e}hounek and Cintula~\cite{behounek2006} characterized fuzzy
 logics via degree-preserving consequence on chains.
 Suszko~\cite{suszko1977} argued that every Tarskian consequence
 relation is logically bivalent (designated vs.\ undesignated);
-Malinowski~\cite{malinowski1993} provided a systematic treatment.
+Malinowski~\cite{malinowski1993} provided a systematic treatment;
+Font, Jansana, and Pigozzi~\cite{font2003} surveyed the abstract
+algebraic logic framework.
+Avron~\cite{avron1991} gave a systematic classification and proof
+theory for three-valued logics including LP and K$_3$.
 Ferm\"uller~\cite{fermuller2014} reached the Kleene lattice from
 game semantics; Gaines~\cite{gaines1978} unified fuzzy and
 probabilistic uncertainty via population semantics.
@@ -1158,6 +1162,19 @@ Lean: \texttt{positivityConsequence},
 \texttt{certaintyConsequence}, \texttt{threeValConsequence}.
 \end{definition}
 
+\begin{remark}[All assignments, not just homomorphisms]
+\label{rem:graded-scope}
+All consequence relations above quantify over \emph{all} assignments
+$v : \alpha \to [0,1]$ (or $\{0, \tfrac{1}{2}, 1\}$), not only
+independent (homomorphic) valuations.
+This captures what holds regardless of the dependence structure
+between propositions.
+The bridge theorem works precisely because both LP/K$_3$ matrix
+semantics and positivity/certainty consequence share this
+quantification; the collapse and lifting connect them without
+requiring assumptions about dependence.
+\end{remark}
+
 \begin{proposition}[Structural Rules; verified here]
 \label{prop:structural}
 All consequence relations above satisfy the standard Tarskian
@@ -1423,17 +1440,26 @@ framework a concrete three-valued interpretation.
 The bridge theorem is not merely an observation; it transfers
 concrete results between the discrete and continuous settings.
 
-\textbf{Finite model property and decidability.}
-LP and K$_3$ consequence over a finite set of atoms is decidable by
-exhaustive search over $\{0, \tfrac{1}{2}, 1\}^n$ valuations.
-Via the bridge, positivity and certainty consequence on $[0,1]$
-inherit the same decidability: to decide whether
-$\Gamma \models^+ \varphi$ (or $\Gamma \models^1 \varphi$) for
-formulas over $n$ atoms, it suffices to check $3^n$ Kleene
-valuations rather than the uncountable space $[0,1]^n$.
-The continuous consequence relations thus have a \emph{finite model
-property}: every non-consequence is witnessed by an assignment into
-$\{0, \tfrac{1}{2}, 1\}$.
+\begin{theorem}[Finite Model Property; new]
+\label{thm:finite-model}
+For formulas $\Gamma$, $\varphi$ over atoms $\alpha$:
+\begin{enumerate}[label=\textup{(\roman*)},nosep]
+\item $\Gamma \not\models^+ \varphi$ if and only if there exists
+  $v : \alpha \to \{0, \tfrac{1}{2}, 1\}$ with all premises
+  positive and conclusion zero.
+\item $\Gamma \not\models^1 \varphi$ if and only if there exists
+  $v : \alpha \to \{0, \tfrac{1}{2}, 1\}$ with all premises $1$ and
+  conclusion $\neq 1$.
+\end{enumerate}
+In particular, positivity and certainty consequence on $[0,1]$ are
+decidable by exhaustive search over $3^{|\alpha|}$ assignments.
+\end{theorem}
+\begin{proof}
+Immediate from the bridge: a $[0,1]$ counterexample exists iff
+an LP (resp.\ K$_3$) counterexample exists.
+Every LP/K$_3$ counterexample is an assignment into
+$\{0, \tfrac{1}{2}, 1\}$, which is finite.
+\end{proof}
 
 \textbf{Transfer of paraconsistency and paracompleteness.}
 The bridge gives precise content to the following meta-logical
@@ -1464,18 +1490,31 @@ formula is LP-equivalent to one in CNF or DNF); via the bridge,
 every formula is positivity-equivalent to one in CNF or DNF.
 Similarly, K$_3$'s normal forms transfer to certainty equivalence.
 
-\textbf{The bridge as inter-simulation.}
-The collapse $\text{collapse} : [0,1] \to \{0, \tfrac{1}{2}, 1\}$ and
-the lifting $\text{lift} : \{0, \tfrac{1}{2}, 1\} \to [0,1]$ are
-mutual pseudo-inverses: $\text{collapse} \circ\, \text{lift} =
-\text{id}$ and $\text{collapse} \circ\, v$ witnesses the same
-consequences as $v$.
-This means any reasoning about the connectives
-$(\negc, \conjc, \disjc)$ can be carried out interchangeably in
-either framework.
-The three-valued framework provides finitary decidability; the
-continuous framework provides the connection to credences, update,
-and the conditioning apparatus of Sections~\ref{sec:conditioning}--\ref{sec:update}.
+\textbf{The bridge connects conditioning and consequence.}
+The bridge and conditioning are largely independent mechanisms ---
+the bridge operates on the connectives
+$(\negc, \conjc, \disjc)$ and does not extend to conditionals
+(Section~\ref{sec:bridge-scope}) --- but they are linked through
+the negation fixed point $\tfrac{1}{2}$.
+The chain rule at zero evidence is unconstrained because
+$c \cdot 0 = 0$ for all $c$ (Section~\ref{sec:three-answers}).
+The same value $\tfrac{1}{2}$ that makes conditioning underdetermined
+($\condc{A}{0} = \tfrac{1}{2}$ is consistent) is the witness that
+defeats LP explosion: $v(A) = \tfrac{1}{2}$ satisfies $v(A) > 0$ and
+$\negc v(A) = \tfrac{1}{2} > 0$ but $v(B) = 0$.
+Via the bridge, LP's paraconsistency is equivalent to the
+underdetermination of conditioning at zero evidence: both are
+manifestations of the algebraic fact that $\tfrac{1}{2}$ is
+simultaneously the negation fixed point and an interior point of
+$[0,1]$.
+Formally: ex falso fails in LP iff
+the positivity witness $v(A) = \tfrac{1}{2}$, $v(B) = 0$ exists,
+which is exactly the assignment that makes conditioning at
+$\cred(B) = 0$ unconstrained.
+The three-valued framework provides finitary decidability
+(Theorem~\ref{thm:finite-model}); the continuous framework
+provides the connection to credences, update, and the conditioning
+apparatus of Sections~\ref{sec:conditioning}--\ref{sec:update}.
 
 %=============================================================================
 \section{Graded Consequence and No-Explosion}
@@ -1563,23 +1602,6 @@ $^d$For $t > \tfrac{1}{2}$: no valuation makes both
 $v(A) \geq t$ and $\negc v(A) \geq t$
 (Proposition~\ref{prop:graded-sharp}).}
 
-\begin{remark}[Graded consequence: all assignments vs.\ homomorphisms]
-\label{rem:graded-scope}
-Graded consequence (like positivity and certainty consequence)
-quantifies over \emph{all} assignments $v : \alpha \to [0,1]$, not
-only independent (homomorphic) valuations.
-This is deliberate: it captures what holds regardless of the
-dependence structure between propositions.
-Restricting to independent valuations would yield a stronger (less
-cautious) consequence relation.
-The bridge theorem
-(Theorems~\ref{thm:lp-formula-bridge}--\ref{thm:k3-formula-bridge})
-works precisely because both LP/K$_3$ matrix semantics and
-positivity/certainty consequence quantify over all assignments to
-atomic propositions; the collapse and lifting then connect them
-without requiring assumptions about dependence.
-\end{remark}
-
 \begin{remark}[Compactness]
 \label{rem:compactness}
 All consequence relations in this paper (LP, K$_3$, positivity,
@@ -1601,6 +1623,9 @@ $\Gamma_0$ suffices.
 The bridge preserves compactness directly: a finite
 $\Gamma_0$ witnessing LP non-consequence maps via collapse to a
 finite witness for positivity non-consequence, and vice versa.
+(This result is not formalized in Lean; it relies on Tychonoff's
+theorem, which is available in Mathlib but would require
+topologizing the evaluation space.)
 \end{remark}
 
 %=============================================================================
@@ -1679,10 +1704,15 @@ self-referential fixed points, is deferred to future work.
   multiplicative inverses unavailable in $[0,1]$.
   A four-class quotient would need to partition $(0,1)$ into pieces
   closed under $[0,1]$-multiplication and compatible with complement.
-  Natural attempts fail: for any $a \in (0,1)$, iterated
-  self-multiplication $a^n \to 0$ eventually escapes any bounded
-  subinterval of $(0,1)$, so no interval partition works.
-  The question reduces to whether a non-interval partition exists.
+  Strong constraints apply: for any $a \in (0,1)$, the sequence
+  $a^n \to 0$, so the congruence class of $a$ must contain values
+  arbitrarily close to $0$.
+  Since $\{0\}$ is singleton (Theorem~\ref{thm:congruence}(1)),
+  this means each class in $(0,1)$ is dense near $0$,
+  precluding interval partitions.
+  The question reduces to whether a non-interval partition of
+  $(0,1)$, closed under $[0,1]$-multiplication and compatible with
+  complement, can have more than one class.
 \item \textbf{Proof theory.}
   Is there a sound and complete calculus for chain-rule conditioning
   on $[0,1]$?
@@ -1809,9 +1839,9 @@ The Kleene partition is a verified unit congruence
 (Theorem~\ref{thm:collapse}).
 
 (4)~Set $a = \tfrac{1}{2}$.
-With $n \geq 2$ classes, pigeonhole on the $n + 1$ powers
-$a^0, a^1, \ldots, a^n$ gives indices $i < j \leq n$ with
-$a^i \sim a^j$.
+With $n \geq 2$ classes, the $n + 1$ powers
+$a^0, a^1, \ldots, a^n$ map into $n$ classes; by pigeonhole,
+some $i < j \leq n$ satisfy $a^i \sim a^j$.
 Write $a^j = a^i \cdot a^p$ where $p = j - i > 0$.
 Under $\Real$-multiplication, multiply both sides of $a^i \sim a^j$
 by $(a^i)^{-1}$ (which exists in $\Real$ but not in $[0,1]$,
@@ -1847,6 +1877,8 @@ The results in this paper are formalized across six Lean~4 modules
   preservation (138 lines).
 \item \texttt{Cred/Predicate.lean}: graded predicates, quantifier
   duality, Russell fixed point, crisp agreement (210 lines).
+  This module formalizes material deferred to future work
+  (Section~\ref{sec:conclusion}).
 \end{itemize}
 
 \textbf{Key definitions:}
