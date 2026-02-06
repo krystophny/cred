@@ -526,6 +526,54 @@ theorem certainty_eq_one_iff (c : Credence) :
     · exact certainty_zero
     · exact certainty_one
 
+/-! ### Dynamics: Self-Conjunction and Self-Disjunction
+
+Self-conjunction strictly decreases interior credences (c² < c for c ∈ (0,1)),
+self-disjunction strictly increases them (c ⊔ c > c for c ∈ (0,1)),
+and the power sequence c^n is strictly decreasing for interior credences.
+These facts formalize the "three attractors" picture:
+- {0,1} are the conjunction-idempotent fixed points (Theorem conj_idempotent_iff)
+- {1/2} is the negation fixed point (Theorem neg_fixed_point_unique)
+- Interior credences are driven toward 0 by self-conjunction and toward 1
+  by self-disjunction. -/
+
+/-- Self-conjunction strictly decreases interior credences: c² < c for c ∈ (0,1). -/
+theorem self_conj_lt (c : Credence) (h0 : 0 < c.val) (h1 : c.val < 1) :
+    (c ⊗ c).val < c.val := by
+  simp only [conj_val]
+  nlinarith
+
+/-- Self-disjunction strictly increases interior credences: c ⊔ c > c for c ∈ (0,1). -/
+theorem self_disj_gt (c : Credence) (h0 : 0 < c.val) (h1 : c.val < 1) :
+    c.val < (c ⊔ c).val := by
+  simp only [disj_val]
+  nlinarith
+
+/-- Powers of interior credences are strictly decreasing: c^(n+1) < c^n for c ∈ (0,1). -/
+theorem pow_strictly_decreasing (c : Credence) (h0 : 0 < c.val) (h1 : c.val < 1) (n : ℕ) :
+    c.val ^ (n + 1) < c.val ^ n := by
+  rw [pow_succ]
+  calc c.val ^ n * c.val < c.val ^ n * 1 :=
+        mul_lt_mul_of_pos_left h1 (pow_pos h0 n)
+    _ = c.val ^ n := mul_one _
+
+/-- The equilibria {0, 1/2, 1} are exactly the conjunction-idempotent values
+    together with the negation fixed point. -/
+theorem equilibria_characterization (c : Credence) :
+    (c ⊗ c = c ∨ ~c = c) ↔ (c = 0 ∨ c = 1 ∨ c = half) := by
+  constructor
+  · intro h
+    rcases h with hconj | hneg
+    · rcases (conj_idempotent_iff c).mp hconj with rfl | rfl
+      · left; rfl
+      · right; left; rfl
+    · right; right; exact neg_fixed_point_unique c hneg
+  · intro h
+    rcases h with rfl | rfl | rfl
+    · left; simp
+    · left; simp
+    · right; exact liar_fixed_point
+
 end Credence
 
 /-! ## Three-Valued Collapse
