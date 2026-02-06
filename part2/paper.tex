@@ -647,8 +647,9 @@ How evidence becomes impossible matters.
 \begin{proposition}[Path Dependence at Evidence Zero; verified here]
 \label{thm:path-dependence}
 The limit of $\min(a,b)/b$ as $b \to 0$ is path-dependent
-(algebraic identities verified in Lean; limits by elementary
-analysis):
+(the Lean formalization verifies the algebraic identities at
+each point; the topological limit statements are standard
+elementary analysis, not formalized):
 \begin{enumerate}[label=\textup{(\roman*)},nosep]
 \item Fixed $a > 0$: limit is $1$.
 \item $a(b) = \lambda b$, $\lambda \in (0,1]$: limit is $\lambda$.
@@ -1205,20 +1206,12 @@ Lean: \texttt{positivityConsequence},
 \label{rem:graded-scope}
 All consequence relations above quantify over \emph{all} assignments
 $v : \alpha \to [0,1]$ (or $\{0, \tfrac{1}{2}, 1\}$), not only
-independent (homomorphic) valuations.
-This captures what holds regardless of the dependence structure
-between propositions.
-The bridge theorem works precisely because both LP/K$_3$ matrix
-semantics and positivity/certainty consequence share this
-quantification; the collapse and lifting connect them without
-requiring assumptions about dependence.
-Restricting to independent (homomorphic) valuations would not
-change the equivalence: lifted three-valued assignments
-land in $\{0, \tfrac{1}{2}, 1\}$, which is closed under all
-connectives, so they are automatically homomorphic; in the
-collapsing direction, collapsed valuations are homomorphic
-because the collapse itself is a homomorphism
-(Theorem~\ref{thm:collapse}).
+homomorphic valuations.
+Restricting to homomorphisms would not change the equivalence:
+lifted three-valued assignments land in $\{0, \tfrac{1}{2}, 1\}$
+(closed under all connectives, hence automatically homomorphic),
+and collapsed valuations are homomorphic because the collapse is a
+homomorphism (Theorem~\ref{thm:collapse}).
 \end{remark}
 
 \begin{proposition}[Structural Rules; verified here]
@@ -1693,7 +1686,7 @@ Classical & $\{1\}$ (two-valued) & Yes & Yes & Yes \\
 K$_3$ & $\{1\}$ & No & No & Vacuously$^a$ \\
 LP & $\{1, \tfrac{1}{2}\}$ & Yes & Yes & No \\
 Graded ($t \leq \tfrac{1}{2}$) & $\{c \geq t\}$
-  & Yes & Yes & No \\
+  & Yes$^c$ & Yes$^c$ & No \\
 Graded ($\tfrac{1}{2} < t \leq \tfrac{3}{4}$) & $\{c \geq t\}$
   & Yes$^c$ & Yes$^c$ & Vacuously$^b$ \\
 Graded ($t > \tfrac{3}{4}$) & $\{c \geq t\}$
@@ -1705,8 +1698,8 @@ Graded ($t > \tfrac{3}{4}$) & $\{c \geq t\}$
 \smallskip
 \noindent
 {\footnotesize
-$^a$No valuation makes both $v(A)$ and $\negc(v(A))$
-K$_3$-designated.
+$^a$No valuation makes both $v(A) = 1$ and $\negc v(A) = 1$, so
+explosion holds vacuously (the premises are jointly unsatisfiable).
 $^b$For $t > \tfrac{1}{2}$: no valuation makes both
 $v(A) \geq t$ and $\negc v(A) \geq t$
 (Proposition~\ref{prop:graded-sharp}).
