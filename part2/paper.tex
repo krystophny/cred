@@ -83,7 +83,7 @@ to the same algebra without forcing ex falso.
 Supporting results include a congruence classification and graded
 consequence with a sharp no-explosion threshold.
 All results are machine-checked in Lean~4 with Mathlib
-(over 3000 lines, zero \texttt{sorry}).
+(3018 lines across five modules, zero \texttt{sorry}).
 \end{abstract}
 
 %=============================================================================
@@ -1068,7 +1068,7 @@ MV: $(\max(a{+}b{-}1,0),\; 1{-}(\cdot))$
   & $[0,1]$ & Infinitely many
   & \cite{cignoli2000,mundici2011} \\
 BL (product): $({\cdot},\; {\to})$
-  & $[0,1]$ & Simple (none)
+  & $[0,1]$ & None (simple algebra)
   & \cite[Cor.~3.7]{agliano2003} \\
 De Morgan: $({\cdot},\; 1{-}(\cdot))$
   & $[0,1]$ & Kleene exists; $\geq\!4$ open
@@ -1349,11 +1349,13 @@ The assignment-level bridge (Theorems~\ref{thm:lp-bridge}--\ref{thm:k3-bridge})
 treats propositions as opaque atoms: it says that if every
 valuation making atoms designated also makes a target atom designated,
 the same holds under the other consequence relation.
-The formula-level bridge extends this to compound formulas built from
-atoms, negation, conjunction, and disjunction.
-The additional ingredient is that the collapse commutes with recursive
-evaluation (Proposition~\ref{prop:collapse-eval} below), so
-designated status of compound formulas is preserved.
+The formula-level bridge is not an independent result: it follows by
+composing the assignment-level bridge with the commutativity of collapse
+and evaluation (Proposition~\ref{prop:collapse-eval} below).
+Because $\mathrm{collapse}(\llbracket\varphi\rrbracket_v)
+= \llbracket\varphi\rrbracket_{\mathrm{collapse}\circ v}$,
+designated status transfers from atoms to compound formulas
+built from negation, conjunction, and disjunction.
 Define evaluation recursively:
 given an assignment $v : \alpha \to [0,1]$ to atoms,
 $\llbracket \negc\varphi \rrbracket_v = \negc\llbracket\varphi\rrbracket_v$,
@@ -1661,6 +1663,9 @@ $\negc v(A) = 1 - v(A) \leq 1 - t < \tfrac{1}{2} < t$.
 The witness is the same in all explosion-free cases: the negation
 fixed point $\tfrac{1}{2}$ makes both a proposition and its negation
 designated without forcing arbitrary conclusions.
+
+\begin{remark}[Graded excluded middle]
+\label{rem:graded-em}
 Excluded middle as a graded tautology
 ($\emptyset \models_t A \disjc \negc A$) holds for $t \leq
 \tfrac{3}{4}$: the minimum of
@@ -1669,6 +1674,7 @@ $\tfrac{3}{4}$, attained at $v(A) = \tfrac{1}{2}$.
 Under positivity consequence ($t > 0$), excluded middle holds
 trivially since $1 - v(A)(1 - v(A)) > 0$ for all $v(A)$.
 Lean: \texttt{certainty\_ge\_three\_quarters}.
+\end{remark}
 
 \begin{center}
 \small
