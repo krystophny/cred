@@ -81,7 +81,7 @@ witnessed by two explicit pairs.
 We characterize the boundary conditions under which the bridge
 does hold, show that Bayesian update inherits it, and prove
 a zero-evidence trichotomy tying underdetermination, paraconsistency,
-and bridge failure to the single algebraic fact $c \cdot 0 = 0$.
+and bridge failure to the annihilator identity $c \cdot 0 = 0$.
 All results are machine-checked in Lean~4 with Mathlib
 (3581 lines across seven modules, zero \texttt{sorry}).
 \end{abstract}
@@ -178,13 +178,13 @@ This paper studies both senses and their interaction.
   --- a finitary Lewis triviality, witnessed by two
   explicit pairs.
 \item \textbf{Update bridge and boundary characterization}
-  (Section~\ref{sec:update}; new):
+  (Section~\ref{sec:cond-bridge}; new):
   the conditional bridge holds at boundaries
   (evidence certain, conclusion at a boundary, or conclusion at
   least as credible as evidence);
   Bayesian update inherits the bridge under these conditions.
 \item \textbf{Zero-evidence trichotomy}
-  (Section~\ref{sec:update}; new):
+  (Section~\ref{sec:cond-bridge}; new):
   the identity $c \cdot 0 = 0$ simultaneously forces
   underdetermined posteriors, LP explosion failure, and
   conditional bridge failure.
@@ -225,12 +225,11 @@ Section~\ref{sec:conditioning}: chain-rule conditioning.
 Section~\ref{sec:collapse}: the Kleene collapse and congruence
 classification.
 Section~\ref{sec:bridge}: the propositional bridge.
-Section~\ref{sec:cond-bridge}: the conditional bridge impossibility.
-Section~\ref{sec:update}: update through the bridge and
+Section~\ref{sec:cond-bridge}: the conditional bridge ---
+impossibility, boundary characterization, update bridge, and
 zero-evidence trichotomy.
 Section~\ref{sec:related}: related work.
 Section~\ref{sec:conclusion}: conclusion and open problems.
-Appendix~\ref{app:prelim}: standard definitions.
 Appendix~\ref{app:lean}: Lean formalization.
 Appendix~\ref{app:proofs}: deferred proofs.
 
@@ -301,11 +300,9 @@ For all $c, c_1, c_2, c_3 \in [0,1]$:
   $\negc(c_1 \disjc c_2) = \negc c_1 \conjc \negc c_2$
   \hfill (De Morgan)
 \end{enumerate}
-Lean: \texttt{neg\_neg}, \texttt{conj\_comm},
-\texttt{conj\_assoc}, \texttt{conj\_one}, \texttt{conj\_zero},
-\texttt{disj\_comm}, \texttt{disj\_assoc}, \texttt{disj\_zero},
-\texttt{disj\_one}, \texttt{de\_morgan\_conj},
-\texttt{de\_morgan\_disj}.
+Lean: \texttt{neg\_neg}, \texttt{conj\_comm/\allowbreak assoc/\allowbreak one/\allowbreak zero},
+\texttt{disj\_comm/\allowbreak assoc/\allowbreak zero/\allowbreak one},
+\texttt{de\_morgan\_conj/\allowbreak disj}.
 \end{proposition}
 
 \begin{proof}
@@ -322,35 +319,17 @@ and $\conjc$ does not distribute over $\disjc$
 
 \subsection{Why the Product?}
 
-The three basic continuous t-norms are G\"odel ($\min$), product
-($\cdot$), and \L ukasiewicz ($\max(a+b-1, 0)$).
-Why prefer the product?
-
-\emph{G\"odel} ($\min$) is idempotent: $\min(c,c) = c$.
-This makes it the weakest t-norm and gives it no ``dynamics'' ---
-repeated conjunction has no effect.
-As a model of belief combination, this is unrealistically static:
-combining two independent pieces of evidence should compound their
-uncertainty.
-
-\emph{\L ukasiewicz} ($\max(a+b-1, 0)$) destroys the
-$\tfrac{1}{2}$ fixed point of negation:
-$\max(\tfrac{1}{2} + \tfrac{1}{2} - 1, 0) = 0 \neq \tfrac{1}{2}$
-(Lean: \texttt{luk\_not\_idempotent}).
-In a system where $\tfrac{1}{2}$ represents maximal uncertainty
-and equals its own negation, the conjunction of maximal uncertainty
-with itself should remain uncertain, not collapse to impossibility.
-
-\emph{Product} ($\cdot$) occupies the middle ground.
-It is not idempotent ($c^2 \neq c$ for $c \in (0,1)$), so
-conjunction has dynamic content.
-It preserves the interior:
-$0 < c_1, c_2 < 1$ implies $0 < c_1 c_2 < 1$,
-so uncertain credences remain uncertain after conjunction.
-And it is the only basic continuous t-norm whose De Morgan
-dual ($c_1 + c_2 - c_1 c_2$) is the probabilistic sum ---
-the standard formula for the probability of a disjunction
-under independence~\cite{klement2000}.
+The three basic continuous t-norms are G\"odel ($\min$),
+product ($\cdot$), and \L ukasiewicz
+($\max(a{+}b{-}1,\allowbreak 0)$).
+G\"odel is idempotent, so conjunction has no compounding
+effect; \L ukasiewicz destroys the negation fixed point
+($T_{\text{\L}}(\tfrac{1}{2}, \tfrac{1}{2}) = 0
+\neq \tfrac{1}{2}$;
+Lean: \texttt{luk\_not\_idempotent}).
+Product is non-idempotent ($c^2 < c$ for interior~$c$),
+preserves the interior, and its De Morgan dual is the
+probabilistic sum~\cite{klement2000}.
 Table~\ref{tab:tnorm-comparison} summarizes the comparison.
 
 \begin{center}
@@ -375,8 +354,11 @@ G\"odel & $\min(c,c) = c$ & No & $\tfrac{1}{2}$ & $\tfrac{1}{2}$
 algebraically distinguished values: the conjunction-idempotent
 pair $\{0,1\}$ and the negation fixed point $\tfrac{1}{2}$.
 $^*$G\"odel: every value in $[0,1]$ is conjunction-idempotent.
-\L ukasiewicz:
+\L ukasiewicz has the same candidate values
+$\{0, \tfrac{1}{2}, 1\}$, but
 $T_{\text{\L}}(\tfrac{1}{2}, \tfrac{1}{2}) = 0 \neq \tfrac{1}{2}$
+destroys the fixed point under conjunction, so $\{0, \tfrac{1}{2}, 1\}$
+does not form a valid quotient
 (Lean: \texttt{luk\_conj\_half\_half}).}
 \label{tab:tnorm-comparison}
 \end{center}
@@ -483,8 +465,10 @@ takes conclusion \texttt{a} first and evidence \texttt{b} second.
 
 The joint is supplied as input, not computed from marginals.
 H\'ajek, Godo, and Esteva~\cite{hajek1995} used the chain-rule
-constraint as a technical device within fuzzy logic;
-here it is the defining constraint.
+identity to show that the conditional probability of fuzzy events
+can be axiomatized within product logic, establishing that
+probability and fuzzy logic share the chain rule as a common
+algebraic constraint; here it is the defining primitive.
 Cox~\cite{cox1961} and Jaynes~\cite{jaynes2003} showed consistent
 plausible reasoning must be isomorphic to probability;
 chain-rule conditioning relaxes Cox's requirement that the
@@ -602,9 +586,8 @@ path-dependent:
 Every value in $[0,1]$ is achieved.
 The singularity at the origin is essential, not removable.
 
-Lean: \texttt{path\_dep\_fixed\_a},
-\texttt{path\_dep\_proportional},
-\texttt{path\_dep\_square},
+Lean: \texttt{path\_dep\_fixed\_a}, \texttt{path\_dep\_square},
+\texttt{path\_dep\_\linebreak proportional},
 \texttt{path\_any\_positive\_value}.
 \end{proposition}
 
@@ -623,6 +606,12 @@ The singularity is essential, not removable.}
 \end{figure}
 
 \subsection{Comparison with Primitive-Conditioning Frameworks}
+
+Table~\ref{tab:conditioning-comparison} places the chain rule among
+primitive-conditioning frameworks (extending the three-valued
+comparison of Table~\ref{tab:three-conditionals} to the broader
+literature).
+Bayesian update is developed in Section~\ref{sec:cond-bridge}.
 
 \begin{center}
 \small
@@ -662,12 +651,6 @@ zero, works on bare $[0,1]$ values, and avoids ex falso.}
 \label{tab:conditioning-comparison}
 \end{center}
 
-\subsection{Update}
-
-Bayesian update, which applies the chain rule to compute posteriors,
-is developed in Section~\ref{sec:update} alongside the bridge
-analysis.
-
 \begin{proposition}[Zero-Evidence Underdetermination]
 \label{prop:zero-underdet}
 When evidence has credence $0$, any conditional
@@ -675,7 +658,6 @@ $c \in [0,1]$ satisfies the chain rule.
 The set of consistent posteriors is the entire interval $[0,1]$
 --- the maximal imprecise
 posterior~\cite{walley1991,levi1980}.
-
 Lean: \texttt{conditioning\_zero\_any}.
 \end{proposition}
 
@@ -792,25 +774,16 @@ bilattice semantics for logic programming in this setting.
 
 \begin{remark}[Connection to Possibility Theory]
 \label{rem:possibility}
-The Kleene quotient's $\min/\max$ operations are the
-conjunction/disjunction of possibility
-theory~\cite{dubois1988}: the collapse maps the product
-De Morgan triplet to the possibility/necessity structure.
-This is not a coincidence: possibility theory's operations are
-precisely what remains when continuous credences are coarsened to
-the boundary/interior/boundary trichotomy.
-The analogy extends partially to conditioning:
-Dubois and Prade~\cite{dubois1988} define possibility-theoretic
-conditioning as $\Pi(A \mid B) = \Pi(A \land B)$ when
-$\Pi(A \land B) < \Pi(B)$, and $1$ otherwise --- which matches the
-chain-rule conditional under the min copula at boundaries
-(Theorem~\ref{thm:boundary}, case~(iv): $a \geq b$ gives
-conditional $= 1$).
-At interior values, however, the analogy breaks down for the same
-reason the conditional bridge fails: possibility-theoretic
-conditioning, like the G\"odel conditional, is truth-functional on
-$\{0, \tfrac{1}{2}, 1\}$ and therefore cannot capture the ratio
-information that the chain rule preserves on $[0,1]$.
+The Kleene quotient's $\min/\max$ operations coincide with
+possibility theory's conjunction/disjunction~\cite{dubois1988}:
+the collapse maps the product De Morgan triplet to the
+possibility/necessity structure.
+The analogy extends partially to conditioning: Dubois--Prade
+conditioning matches the chain-rule conditional at boundaries
+(Theorem~\ref{thm:boundary}, case~(iv)), but breaks down at
+interior values for the same reason the conditional bridge
+fails --- truth-functional conditioning on
+$\{0, \tfrac{1}{2}, 1\}$ cannot capture ratio information.
 \end{remark}
 
 \subsection{Uniqueness and Impossibility}
@@ -850,15 +823,14 @@ relabeling).
 
 \begin{proof}
 The negation fixed point $\tfrac{1}{2}$ maps to the unique
-negation fixed point of $S$.
-The remaining elements $\varphi(0)$, $\varphi(1)$ form the
-$2$-cycle.
+negation fixed point of~$S$; $\varphi(0)$ and $\varphi(1)$ form
+the $2$-cycle.
 The conjunction table is forced:
 $\varphi(\tfrac{1}{2} \conjc \tfrac{1}{2})
-= \varphi(\tfrac{1}{4}) = \varphi(\tfrac{1}{2})$ since
-$\tfrac{1}{4} \in (0,1)$ maps to the interior class.
+= \varphi(\tfrac{1}{4}) = \varphi(\tfrac{1}{2})$
+since $\tfrac{1}{4} \in (0,1)$ maps to the interior class.
 This is Kleene $\min$
-(Lean: \texttt{three\_element\_quotient\_unique}).
+(Lean: \texttt{three\_element\allowbreak\_quotient\_unique}).
 \end{proof}
 
 \subsection{Congruence Classification}
@@ -986,8 +958,11 @@ homomorphisms or probability measures.
 \label{prop:structural}
 All four consequence relations satisfy reflexivity, monotonicity, and
 cut.
-Lean: \texttt{formulaLP\_reflexivity/monotonicity/cut},
-\texttt{formulaK3\_*}, \texttt{formulaPositivity\_*},
+Lean: \texttt{formulaLP\_reflexivity},
+\texttt{formulaLP\_monotonicity},
+\texttt{formulaLP\_cut},
+and analogous \texttt{formulaK3\_*},
+\texttt{formulaPositivity\_*},
 \texttt{formulaCertainty\_*}.
 \end{proposition}
 
@@ -1080,6 +1055,10 @@ implicitly performing certainty reasoning.
 Positivity and certainty consequence on $[0,1]$ are decidable:
 non-consequence reduces to a counterexample in
 $\{0, \tfrac{1}{2}, 1\}^{|\alpha|}$.
+The bridge reduces the uncountable domain $[0,1]$ to the
+three-element lattice: every counterexample to consequence on
+$[0,1]$ collapses to a counterexample on
+$\{0, \tfrac{1}{2}, 1\}$, and conversely.
 LP and K$_3$ consequence are
 coNP-complete~\cite{priest2008,avron1991}; the bridge transfers
 this complexity to positivity and certainty consequence.
@@ -1111,9 +1090,6 @@ Via the bridge, certainty consequence on $[0,1]$ has no tautologies
 either
 (Lean: \texttt{k3\_no\_tautology}).
 \end{example}
-
-\subsection{Transition}
-\label{sec:transition}
 
 The propositional bridge covers every formula built from negation,
 conjunction, and disjunction.
@@ -1246,10 +1222,7 @@ whenever at least one of the following holds:
 \end{enumerate}
 In all four cases, the min-copula conditional is either $0$ or $1$.
 Lean: \texttt{cond\_bridge\_boundary},
-\texttt{cond\_bridge\_at\_a\_zero},
-\texttt{cond\_bridge\_at\_a\_one},
-\texttt{cond\_bridge\_at\_b\_one},
-\texttt{cond\_bridge\_at\_a\_ge\_b}.
+\texttt{cond\_bridge\_at\_a\_zero/\linebreak a\_one/b\_one/a\_ge\_b}.
 \end{theorem}
 
 \begin{proof}
@@ -1286,8 +1259,8 @@ that is, when both $a$ and $b$ are interior and $a < b$.
 For any $a, b \in (0,1)$ with $a < b$, the conditional bridge fails:
 $a/b \in (0,1)$, so $\mathrm{collapse}(a/b) = \tfrac{1}{2}$, but
 $\mathrm{g\ddot{o}del}(\tfrac{1}{2}, \tfrac{1}{2}) = 1$.
-Lean: \texttt{cond\_bridge\_fails\_interior},
-\texttt{minCopulaCond\_interior}.
+Lean: \texttt{cond\_bridge\allowbreak\_fails\_interior},
+\texttt{minCopulaCond\allowbreak\_interior}.
 \end{theorem}
 
 \begin{proof}
@@ -1372,17 +1345,6 @@ whether a conditional bridge exists remains open; the answer
 likely depends on how much ratio information the copula preserves.
 \end{remark}
 
-%=============================================================================
-\section{Update Through the Bridge}
-\label{sec:update}
-%=============================================================================
-
-The conditional bridge fails in general but holds at boundaries.
-This section shows that Bayesian update inherits the bridge under
-the same boundary conditions, defines qualitative update on
-$\{0, \tfrac{1}{2}, 1\}$, and connects zero-evidence behavior
-across the probabilistic and logical perspectives.
-
 \subsection{Bayesian Update on $[0,1]$}
 \label{sec:bayesian}
 
@@ -1399,10 +1361,9 @@ Lean: \texttt{bayesianUpdate\_chain\_rule},
 \end{definition}
 
 In the running example (Example~\ref{ex:rain}), the min-copula
-posterior is $\cred'(\text{rain}) = \min(0.8, 0.9) / 0.9
-= 8/9 \approx 0.889$.
-Rain was already likely; conditioning on wet streets (which are
-maximally positively dependent) makes it slightly more likely.
+posterior is $\cred'(\text{rain}) = 8/9$: rain was already
+likely, and conditioning on wet streets makes it slightly more
+likely.
 
 \subsection{Qualitative Update on $\{0, \tfrac{1}{2}, 1\}$}
 
@@ -1471,11 +1432,11 @@ boundary characterization gives.
 \begin{example}[Running Example: Update Bridge]
 \label{ex:update-bridge}
 Continuing Example~\ref{ex:bridge-works}: when
-$\cred(\text{rain}) = 0.95 > 0.9 = \cred(\text{wet})$ (case~(iv)),
-the conditional is $1$ and both paths agree.
-But with the original running-example values
-(Example~\ref{ex:rain}: $\cred(\text{rain}) = 0.8 < 0.9$,
-interior with $a < b$), the bridge fails:
+$\cred(\text{rain}) = 0.95 > 0.9 = \cred(\text{wet})$
+(case~(iv)), the conditional is~$1$ and both paths agree.
+With the original values (Example~\ref{ex:rain}:
+$\cred(\text{rain}) = 0.8 < 0.9$, interior with $a < b$),
+the bridge fails:
 $\mathrm{collapse}(8/9) = \tfrac{1}{2} \neq 1 =
 \mathrm{qual}(\tfrac{1}{2}, \tfrac{1}{2})$.
 \end{example}
@@ -1541,9 +1502,9 @@ the identity $c \conjc 0 = 0$:
 
 \smallskip\noindent
 Lean: \texttt{zero\_evidence\_duality}
-(packaging \texttt{zero\_evidence\_underdetermined},
-\texttt{zero\_evidence\_paraconsistency},
-\texttt{zero\_evidence\_bridge\_failure}).
+(packaging \texttt{zero\_evidence\allowbreak\_underdetermined},
+\texttt{zero\_evidence\allowbreak\_paraconsistency},
+\texttt{zero\_evidence\allowbreak\_bridge\_failure}).
 \end{theorem}
 
 \begin{proof}
@@ -1563,8 +1524,10 @@ single output can be correct for all $a$
 Items~(i) and~(ii) are individually known
 (Proposition~\ref{prop:zero-underdet} and
 Example~\ref{ex:explosion}); the trichotomy's contribution is
-exhibiting the single algebraic root $c \cdot 0 = 0$ from which
-all three flow.
+exhibiting the common algebraic root from which all three flow.
+The annihilator property $c \cdot 0 = 0$ is necessary for all
+three items; the negation fixed point $\negc \tfrac{1}{2}
+= \tfrac{1}{2}$ provides the specific witness for~(ii).
 
 The trichotomy provides a unified perspective on the paper's results.
 The propositional bridge (Section~\ref{sec:bridge}) operates through
@@ -1614,12 +1577,13 @@ the standard complement~\cite{bergmann2008},
 and the probabilistic sum (De Morgan dual).
 The Kleene lattice and its logics are
 classical~\cite{kleene1952,asenjo1966,priest1979,priest2008,avron1991}.
-Ferm\"uller~\cite{fermuller2014} used the collapse to connect
-game-theoretic semantics for fuzzy logics to three-valued truth
-functions; the present work extends the observation to a full
-consequence-level equivalence (Theorems~\ref{thm:lp-bridge}
-and~\ref{thm:k3-bridge}) and establishes the impossibility of
-extending it to conditioning.
+Ferm\"uller~\cite{fermuller2014} used the collapse in
+game-theoretic semantics to compare truth values; the present work
+proves a consequence-level equivalence
+(Theorems~\ref{thm:lp-bridge} and~\ref{thm:k3-bridge}) that
+Ferm\"uller did not address, and shows that the homomorphism
+cannot extend to conditioning
+(Theorem~\ref{thm:no-cond-bridge}).
 
 \textbf{Primitive conditioning and conditionals.}
 Primitive conditioning has precedents in
@@ -1686,6 +1650,14 @@ probabilistic logic.
 The product bridge differs in using the product t-norm (which
 preserves the interior) rather than \L ukasiewicz (which can
 collapse interior values to zero).
+Metcalfe, Olivetti, and Gabbay~\cite{metcalfe2009} survey proof
+theory for fuzzy logics, including hypersequent and
+display calculi; adapting these to chain-rule conditioning is an
+open problem (Section~\ref{sec:conclusion}).
+In the connexive tradition~\cite{wansing2024}, Aristotle's and
+Boethius' theses are added as axioms to block ex falso;
+the chain rule achieves a similar effect without a connexive
+axiom, by leaving the conditional unconstrained at evidence zero.
 Belnap~\cite{belnap1977} and Dunn~\cite{dunn1976} developed FDE;
 Fitting~\cite{fitting1991,fitting2006} connected bilattices to
 logic programming.
@@ -1760,22 +1732,18 @@ bridge breaks precisely where ratio information matters.
 
 \textbf{Open problems.}
 \begin{enumerate}[nosep]
-\item \textbf{Four or more classes under $[0,1]$-multiplication.}
-  The Kleene lattice is the unique three-element quotient, but
-  whether four or more classes are possible under
-  $[0,1]$-multiplication remains open.
-  Any such quotient faces strong constraints: boundary classes
-  $\{0\}$ and $\{1\}$ must be singletons, and each interior class
-  must be dense near $0$ (since multiplication can shrink any
-  element arbitrarily close to $0$).
+\item \textbf{Four or more congruence classes.}
+  The Kleene lattice is the unique three-element quotient
+  under $[0,1]$-multiplication, but whether four or more
+  classes are possible remains open.
+  Boundary classes $\{0\}$ and $\{1\}$ must be singletons,
+  and each interior class must be dense near~$0$.
 \item \textbf{Non-truth-functional conditional bridge.}
-  A conditional bridge with an explicit dependence indicator
-  (e.g., a function
-  $g : \{0, \tfrac{1}{2}, 1\}^2 \times D \to
-  \{0, \tfrac{1}{2}, 1\}$
-  for some dependence type $D$) might recover the bridge at the
+  A conditional bridge with a dependence indicator~$D$
+  (e.g., $g : \{0, \tfrac{1}{2}, 1\}^2 \times D \to
+  \{0, \tfrac{1}{2}, 1\}$) might recover the bridge at the
   cost of an additional parameter.
-  What is the minimal such $D$?
+  What is the minimal such~$D$?
 \item \textbf{Four-valued FDE extension.}
   K$_3$ and LP are both fragments of Belnap--Dunn four-valued logic
   (FDE)~\cite{belnap1977,dunn1976}.
@@ -1785,8 +1753,10 @@ bridge breaks precisely where ratio information matters.
   Is there a sound and complete calculus for chain-rule conditioning
   on $[0,1]$?
   H\'ajek's completeness theorem~\cite{hajek1998} answers this for
-  product logic with residuation; replacing residuation with the
-  chain rule changes the answer.
+  product logic with residuation;
+  Metcalfe, Olivetti, and Gabbay~\cite{metcalfe2009} survey proof
+  systems for fuzzy logics more broadly.
+  Replacing residuation with the chain rule changes the answer.
 \item \textbf{Iterated update convergence.}
   Under what stochastic model for the evidence sequence does
   iterated Bayesian update drive $\cred_n(A) \to 1$, $0$, or
@@ -1815,39 +1785,6 @@ Omitted for blind review.
 \appendix
 
 %=============================================================================
-\section{Preliminaries}
-\label{app:prelim}
-%=============================================================================
-
-This appendix collects standard definitions used throughout the paper.
-
-\textbf{T-norms.}
-A \emph{triangular norm} (t-norm) is a binary operation
-$T : [0,1]^2 \to [0,1]$ that is commutative, associative,
-monotone, and satisfies $T(a, 1) = a$ for all
-$a$~\cite{klement2000}.
-The three basic continuous t-norms are:
-product ($a \cdot b$),
-G\"odel ($\min(a,b)$), and
-\L ukasiewicz ($\max(a+b-1, 0)$).
-
-\textbf{Copulas.}
-A \emph{copula} is $C : [0,1]^2 \to [0,1]$ satisfying:
-grounded ($C(a,0) = C(0,b) = 0$), unit marginals
-($C(a,1) = a$, $C(1,b) = b$), and the 2-increasing
-property~\cite{nelsen2006}.
-The Fr\'echet-Hoeffding bounds apply:
-$\max(a+b-1, 0) \leq C(a,b) \leq \min(a,b)$.
-Comonotonicity corresponds to the upper bound $C(a,b) = \min(a,b)$;
-independence to the product $C(a,b) = a \cdot b$.
-
-\textbf{Residuation.}
-Given a left-continuous t-norm $T$, the \emph{residuum} is
-$a \to_T b = \sup\{c : T(a,c) \leq b\}$~\cite{hajek1998,galatos2007}.
-For the product: $a \to_P b = \min(b/a, 1)$ when $a > 0$, and
-$0 \to_P b = 1$ (ex falso).
-
-%=============================================================================
 \section{Lean Formalization}
 \label{app:lean}
 %=============================================================================
@@ -1859,9 +1796,9 @@ Mathlib), totaling 3581 lines with zero \texttt{sorry}:
 \item \texttt{Cred/Basic.lean}: core algebra, conditioning, fixed
   points, collapse, Bayes consistency, path dependence, congruence
   building blocks (1804 lines).
-\item \texttt{Cred/Congruence.lean}: two-level congruence
-  classification --- \texttt{UnitCongruence}, \texttt{RealCongruence},
-  Kleene witness (396 lines).
+\item \texttt{Cred/Congruence.lean}: congruence
+  classification --- \texttt{UnitCongruence},
+  \texttt{Real\-Congruence}, Kleene witness (396 lines).
 \item \texttt{Cred/Consequence.lean}: K$_3$/LP designation,
   formula evaluation, collapse-evaluation commutativity,
   bridge theorems, structural rules, no-explosion (505 lines).
@@ -1990,8 +1927,9 @@ The $\Real$-rigidity proof uses pigeonhole on powers of
 $\tfrac{1}{2}$ followed by multiplication by the real inverse
 $2^i > 1$, a step that requires $\Real$-multiplication
 compatibility.
-The bridge theorems are structural inductions on formulas, with each
-connective case resolved by the corresponding homomorphism lemma.
+The bridge theorems use Lean's \texttt{induction} tactic for
+structural induction on formulas, with each connective case
+dispatched by the corresponding homomorphism lemma.
 The collapse-evaluation commutativity
 (\texttt{collapse\_eval\_eq}) is the key inductive step; the
 bridge theorems then follow by contraposition on designated sets.
@@ -2091,8 +2029,8 @@ Let $\sim$ be a congruence on $([0,1], \negc, \conjc)$.
 \item \textbf{Singleton boundaries} (unit congruence):
   if $0 \sim \varepsilon$ for any $\varepsilon > 0$, then $\sim$
   is trivial; likewise for $\{1\}$ by negation duality.
-  Lean: \texttt{UnitCongruence.singleton\_zero},
-  \texttt{singleton\_one}.
+  Lean: \texttt{UnitCongruence\allowbreak.singleton\_zero},
+  \texttt{singleton\allowbreak\_one}.
 \item \textbf{No two-element quotient:}
   no surjective homomorphism $[0,1] \to \{0,1\}$ preserves
   negation (Proposition~\ref{prop:no-classical}).
@@ -2106,7 +2044,8 @@ Let $\sim$ be a congruence on $([0,1], \negc, \conjc)$.
 \item \textbf{$\Real$-rigidity:}
   under $\Real$-multiplication, no non-trivial finite quotient
   exists.
-  Lean: \texttt{RealCongruence.no\_nontrivial\_finite\_quotient}.
+  Lean:\\
+  \texttt{RealCongruence.no\_nontrivial\_finite\_quotient}.
 \end{enumerate}
 Whether a unit congruence with $4$ or more classes exists under
 $[0,1]$-multiplication alone is \textbf{open}.
@@ -2219,8 +2158,8 @@ since $\tfrac{1}{4} \in (0,1)$ maps to the interior class.
 This forces Kleene $\min$.
 
 \emph{(4) Existence.}
-The partition $\{0\}, (0,1), \{1\}$ is verified as a unit
-congruence (Lean: \texttt{kleeneCongruence}).
+The partition $\{0\}$, $(0,1)$, $\{1\}$ is a verified
+unit congruence (Lean: \texttt{kleene\-Congruence}).
 \end{proof}
 
 \begin{proof}[Proof of the $\Real$-Multiplication Impossibility]
