@@ -993,15 +993,13 @@ A \emph{unit congruence} requires multiplication compatibility only for
 $[0,1]$-valued inputs.
 A \emph{real congruence} extends compatibility to all of $\Real$.
 
-\begin{theorem}[Congruence Classification; Part~1, Theorems~6.1--6.2]
+\begin{theorem}[Congruence Classification; new]
 \label{thm:congruence}
 \hfill
 \begin{enumerate}[label=\textup{(\arabic*)},nosep]
 \item \textbf{Singleton boundaries:}
   Under any non-trivial unit congruence, $\{0\}$ and $\{1\}$ are
   singleton classes.
-  (Iterated multiplication by $1-\varepsilon$ drives any positive
-  credence into the $\varepsilon$-class, collapsing the quotient.)
 \item \textbf{No two-element quotient:}
   The negation fixed point $\tfrac{1}{2}$ has no preimage in
   $\{0,1\}$ (Proposition~\ref{prop:no-classical}).
@@ -1010,18 +1008,18 @@ A \emph{real congruence} extends compatibility to all of $\Real$.
   (Theorem~\ref{thm:quotient-unique}), and the Kleene partition is
   a verified unit congruence (Theorem~\ref{thm:collapse}).
 \item \textbf{$\Real$-rigidity:}
-  Under $\Real$-multiplication, pigeonhole plus multiplicative
-  inverses force $1 \sim a^p$ for some $a^p \in (0,1)$,
-  contradicting singleton boundaries; no non-trivial finite quotient
-  exists.
+  Under $\Real$-multiplication, no non-trivial finite quotient
+  exists with $n \geq 2$ classes.
 \end{enumerate}
 Whether four or more classes are possible under $[0,1]$-multiplication
 is \textbf{open}.
-See Part~1 for full proofs.
 Lean: \texttt{UnitCongruence.singleton\_zero},
 \texttt{singleton\_one}, \texttt{kleeneCongruence},
 \texttt{RealCongruence.no\_nontrivial\_finite\_quotient}.
 \end{theorem}
+\begin{proof}
+See Appendix~\ref{app:congruence-proofs}.
+\end{proof}
 
 \begin{center}
 \small
@@ -1513,7 +1511,7 @@ for reasoning under uncertainty, connecting update and logical
 consequence through the same algebra.
 Graded predicates with inf/sup quantifiers extend the framework to
 predicate logic; this development, including crisp agreement and
-self-referential fixed points, is deferred to Part~3.
+self-referential fixed points, is deferred to future work.
 
 \textbf{Open problems.}
 \begin{enumerate}[nosep]
@@ -1617,6 +1615,52 @@ $0 \to_P b = 1$.
 The last equation is ex falso: $0 \to b = 1$ regardless of $b$.
 Residuation forces a truth-functional conditional; the chain rule
 allows the conditional to depend on the joint.
+
+%=============================================================================
+\section{Congruence Classification Proofs}
+\label{app:congruence-proofs}
+%=============================================================================
+
+\begin{proof}[Proof of Theorem~\ref{thm:congruence}]
+(1)~Suppose $0 \sim \varepsilon$ for some $\varepsilon > 0$.
+Negation compatibility gives $1 \sim 1 - \varepsilon$.
+For any $x \in [0,1]$, multiplication compatibility yields
+$x = x \cdot 1 \sim x(1 - \varepsilon)$.
+By induction, $x \sim x(1 - \varepsilon)^n$ for all $n$.
+Since $0 < 1 - \varepsilon < 1$, for any $x > 0$ there exists
+$n$ with $x(1 - \varepsilon)^n \leq \varepsilon$.
+Write $x(1 - \varepsilon)^n = \varepsilon \cdot q$ where
+$q = x(1 - \varepsilon)^n / \varepsilon$; since
+$0 \leq x(1-\varepsilon)^n \leq \varepsilon$, we have
+$q \in [0,1]$.
+From $0 \sim \varepsilon$, multiplication compatibility gives
+$0 = 0 \cdot q \sim \varepsilon \cdot q = x(1 - \varepsilon)^n$.
+By transitivity, $x \sim x(1-\varepsilon)^n \sim 0$
+for every $x \in [0,1]$, so the quotient is trivial ---
+contradiction.
+For $\{1\}$: if $1 \sim x$ with $x < 1$, negation gives
+$0 \sim 1 - x$ with $1 - x > 0$, reducing to the previous case.
+
+(2)~A surjective $\varphi : [0,1] \to \{0,1\}$ must satisfy
+$\varphi(\tfrac{1}{2}) = 1 - \varphi(\tfrac{1}{2})$, which has no
+solution in $\{0,1\}$ (Proposition~\ref{prop:no-classical}).
+
+(3)~Theorem~\ref{thm:quotient-unique}.
+The Kleene partition is a verified unit congruence
+(Theorem~\ref{thm:collapse}).
+
+(4)~Set $a = \tfrac{1}{2}$.
+With $n \geq 2$ classes, pigeonhole on the $n + 1$ powers
+$a^0, a^1, \ldots, a^n$ gives indices $i < j \leq n$ with
+$a^i \sim a^j$.
+Write $a^j = a^i \cdot a^p$ where $p = j - i > 0$.
+Under $\Real$-multiplication, multiply both sides of $a^i \sim a^j$
+by $(a^i)^{-1}$ (which exists in $\Real$ but not in $[0,1]$,
+illustrating why this step requires $\Real$-multiplication):
+$1 = (a^i)^{-1} \cdot a^i \sim (a^i)^{-1} \cdot a^j = a^p$.
+Since $0 < a^p < 1$, negation gives $0 \sim 1 - a^p$ with
+$1 - a^p > 0$, contradicting singleton boundaries from~(1).
+\end{proof}
 
 %=============================================================================
 \section{Lean Formalization}
