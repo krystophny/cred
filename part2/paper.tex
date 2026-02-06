@@ -78,13 +78,10 @@ is equivalent to certainty consequence, both at the level of
 propositional formulas.
 The bridge operates through the collapse homomorphism on the
 connectives; chain-rule conditioning provides the complementary
-mechanism that makes the framework useful for reasoning under
-uncertainty, connecting Bayesian update to the same algebra without
-forcing ex falso.
-Supporting results include a congruence classification
-(the Kleene lattice is the unique non-trivial three-element quotient
-under $[0,1]$-multiplication; no non-trivial finite quotient exists
-under $\Real$-multiplication) and graded consequence with no-explosion.
+mechanism for reasoning under uncertainty, connecting Bayesian update
+to the same algebra without forcing ex falso.
+Supporting results include a congruence classification and graded
+consequence with a sharp no-explosion threshold.
 All results are machine-checked in Lean~4 with Mathlib
 (3228 lines, zero \texttt{sorry}).
 \end{abstract}
@@ -708,17 +705,25 @@ An agent may narrow this set by adopting a prior over the zero-evidence
 regime (de Finetti's void, Popper's convention, etc.), but the
 chain rule itself imposes no such commitment.
 
-\textbf{Lewis triviality and imprecise probability.}
+\begin{remark}[Lewis Triviality and Imprecise Probability]
+\label{rem:lewis}
 Lewis~\cite{lewis1976} showed that identifying $P(A \mid B)$ with
 the probability of a conditional proposition forces triviality.
-Chain-rule conditioning avoids this: $\condc{A}{B}$ is not the
-credence of any proposition, and the joint is a separate
-parameter~\cite{halpern2003}.
+Chain-rule conditioning avoids Lewis's conditions in two ways:
+\begin{enumerate}[label=\textup{(\roman*)},nosep]
+\item The joint $\cred(A \land B)$ is a separate parameter, not
+  derived from the conditional.
+\item The conditional $\condc{A}{B}$ is not identified with
+  the credence of any proposition in the algebra.
+\end{enumerate}
+See Halpern~\cite{halpern2003} for a detailed analysis of Lewis's
+conditions.
 At zero evidence, the set of chain-rule-consistent conditionals is
 $[0,1]$ --- the vacuous lower prevision of
 Walley~\cite{walley1991}, confirming algebraically that maximal
 imprecision is the correct response to impossible
 evidence~\cite{levi1980}.
+\end{remark}
 
 \subsection{Update via Conditioning}
 \label{sec:update}
@@ -1046,7 +1051,7 @@ MV: $(\max(a{+}b{-}1,0),\; 1{-}(\cdot))$
   & $[0,1]$ & Infinitely many
   & \cite{cignoli2000,mundici2011} \\
 BL (product): $({\cdot},\; {\to})$
-  & $[0,1]$ & None (no non-trivial congruences)
+  & $[0,1]$ & None (no non-trivial, finite or infinite)
   & \cite[Cor.~3.7]{agliano2003} \\
 De Morgan: $({\cdot},\; 1{-}(\cdot))$
   & $[0,1]$ & Kleene exists; $\geq\!4$ open
@@ -1282,30 +1287,41 @@ The collapse does not merely project --- it \emph{reflects}:
 if a consequence holds on $[0,1]$, it holds on
 $\{0, \tfrac{1}{2}, 1\}$, and conversely.
 
-\begin{example}[Bridge in Action]
+\begin{example}[Bridge in Action: Rain and Wet Streets]
 \label{ex:bridge-action}
 \emph{Explosion failure.}
-In LP, the valuation $w(A) = \tfrac{1}{2}$, $w(B) = 0$ refutes
-$A, \negc A \models_{\mathrm{LP}} B$:
-both $w(A)$ and $\negc w(A) = \tfrac{1}{2}$ are LP-designated, but
-$w(B) = 0$ is not.
-Via the bridge, the positivity witness $v(A) = \tfrac{1}{2}$,
-$v(B) = 0$ satisfies $v(A) > 0$ and $\negc v(A) = \tfrac{1}{2} > 0$
-but $v(B) = 0$, refuting positivity explosion.
+Set $\cred(\text{rain}) = \tfrac{1}{2}$
+(maximum uncertainty) and $\cred(\text{snow}) = 0$.
+In LP: $w(\text{rain}) = \tfrac{1}{2}$, $w(\text{snow}) = 0$ refutes
+$\text{rain}, \negc\text{rain} \models_{\mathrm{LP}} \text{snow}$
+--- both $w(\text{rain})$ and $\negc w(\text{rain}) = \tfrac{1}{2}$
+are LP-designated, but $w(\text{snow}) = 0$ is not.
+Via the bridge, the positivity witness $v(\text{rain}) = \tfrac{1}{2}$,
+$v(\text{snow}) = 0$ satisfies $v(\text{rain}) > 0$ and
+$\negc v(\text{rain}) > 0$ but $v(\text{snow}) = 0$, refuting
+positivity explosion: contradictory evidence about rain does not
+force belief in snow.
 The witnesses correspond: $\text{collapse} \circ\, v = w$ and
 $\text{lift} \circ\, w = v$.
 \emph{Conjunction preservation.}
-In K$_3$, if $w(A) = 1$ and $w(B) = 1$, then
-$\min(w(A), w(B)) = 1$ is K$_3$-designated.
-Via the bridge: any $v$ with $v(A) = 1$ and $v(B) = 1$ has
-$v(A) \cdot v(B) = 1$, so certainty is preserved.
+Set $\cred(\text{rain}) = 1$ and $\cred(\text{wet}) = 1$.
+In K$_3$: $\min(1, 1) = 1$ is K$_3$-designated.
+Via the bridge: $v(\text{rain}) \cdot v(\text{wet}) = 1$, so
+certainty is preserved --- certain rain and certain wet streets
+give certain conjunction.
 \end{example}
 
 \subsection{Extension to Formulas}
 
 The assignment-level bridge (Theorems~\ref{thm:lp-bridge}--\ref{thm:k3-bridge})
-extends to propositional formulas built from atoms, negation,
-conjunction, and disjunction.
+treats propositions as opaque atoms: it says that if every
+valuation making atoms designated also makes a target atom designated,
+the same holds under the other consequence relation.
+The formula-level bridge extends this to compound formulas built from
+atoms, negation, conjunction, and disjunction.
+The additional ingredient is that the collapse commutes with recursive
+evaluation (Proposition~\ref{prop:collapse-eval} below), so
+designated status of compound formulas is preserved.
 Define evaluation recursively:
 given an assignment $v : \alpha \to [0,1]$ to atoms,
 $\llbracket \negc\varphi \rrbracket_v = \negc\llbracket\varphi\rrbracket_v$,
@@ -1427,17 +1443,22 @@ relation is logically bivalent: the truth values reduce to
 algebraic truth values~\cite{malinowski1993}.
 The bridge theorem is in the spirit of this observation --- it
 reduces LP and K$_3$ consequence to binary distinctions (positive
-vs.\ zero, certain vs.\ uncertain) on $[0,1]$ --- but goes further.
-Where Suszko's thesis is about the abstract structure of
-consequence relations, the bridge theorem provides a concrete
-\emph{semantic} equivalence: the same assignments, mediated by the
-collapse and lifting maps, witness consequence in both directions.
+vs.\ zero, certain vs.\ uncertain) on $[0,1]$.
+Suszko's thesis is about the abstract structure of consequence
+relations in general; the bridge theorem complements it by
+providing a concrete \emph{semantic} equivalence for two specific
+consequence relations: the same assignments, mediated by the collapse
+and lifting maps, witness consequence in both directions.
 The bridge also connects to degree-preserving
-consequence~\cite{behounek2006}: certainty consequence is
-degree-preserving at threshold $1$; positivity consequence is
-degree-preserving at threshold $0^+$; the bridge identifies these
-with K$_3$ and LP respectively, giving the degree-preserving
-framework a concrete three-valued interpretation.
+consequence~\cite{behounek2006}, where $\Gamma \models_t \varphi$
+holds iff every evaluation making all premises $\geq t$ also makes
+the conclusion $\geq t$.
+Certainty consequence is degree-preserving at threshold $1$;
+positivity consequence is degree-preserving at threshold $0^+$.
+The bridge identifies these with K$_3$ and LP respectively,
+giving the degree-preserving framework a concrete three-valued
+interpretation: the two extreme thresholds ($0^+$ and $1$) are
+precisely the ones that correspond to standard three-valued logics.
 
 \subsection{Consequences of the Bridge}
 \label{sec:bridge-consequences}
@@ -1458,6 +1479,10 @@ For formulas $\Gamma$, $\varphi$ over atoms $\alpha$:
 \end{enumerate}
 In particular, positivity and certainty consequence on $[0,1]$ are
 decidable by exhaustive search over $3^{|\alpha|}$ assignments.
+Non-consequence reduces to finding a counterexample in
+$\{0, \tfrac{1}{2}, 1\}^{|\alpha|}$ (verifiable in polynomial time),
+placing consequence in coNP; coNP-hardness follows by reduction from
+classical validity.
 Lean: direct corollary of \texttt{lp\_formula\_bridge},
 \texttt{k3\_formula\_bridge}.
 \end{corollary}
