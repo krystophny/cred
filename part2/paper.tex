@@ -148,7 +148,7 @@ knowledge).
   (Theorems~\ref{thm:lp-formula-bridge}--\ref{thm:k3-formula-bridge}).
   Discrete logical reasoning and continuous $[0,1]$ reasoning are
   inter-simulable; the bridge transfers decidability (via a finite
-  model property), paraconsistency, paracompleteness, and normal forms
+  model property), paraconsistency, and paracompleteness
   between the two frameworks
   (Section~\ref{sec:bridge-consequences}).
 \item \textbf{Algebraic fixed points}
@@ -1440,7 +1440,7 @@ framework a concrete three-valued interpretation.
 The bridge theorem is not merely an observation; it transfers
 concrete results between the discrete and continuous settings.
 
-\begin{theorem}[Finite Model Property; new]
+\begin{corollary}[Finite Model Property; new]
 \label{thm:finite-model}
 For formulas $\Gamma$, $\varphi$ over atoms $\alpha$:
 \begin{enumerate}[label=\textup{(\roman*)},nosep]
@@ -1453,42 +1453,35 @@ For formulas $\Gamma$, $\varphi$ over atoms $\alpha$:
 \end{enumerate}
 In particular, positivity and certainty consequence on $[0,1]$ are
 decidable by exhaustive search over $3^{|\alpha|}$ assignments.
-\end{theorem}
+Lean: direct corollary of \texttt{lp\_formula\_bridge},
+\texttt{k3\_formula\_bridge}.
+\end{corollary}
 \begin{proof}
-Immediate from the bridge: a $[0,1]$ counterexample exists iff
-an LP (resp.\ K$_3$) counterexample exists.
+Immediate from
+Theorems~\ref{thm:lp-formula-bridge}--\ref{thm:k3-formula-bridge}:
+a $[0,1]$ counterexample exists iff an LP (resp.\ K$_3$)
+counterexample exists.
 Every LP/K$_3$ counterexample is an assignment into
 $\{0, \tfrac{1}{2}, 1\}$, which is finite.
 \end{proof}
 
 \textbf{Transfer of paraconsistency and paracompleteness.}
-The bridge gives precise content to the following meta-logical
-transfers:
+The bridge gives precise content to the following transfers
+(each combining a bridge theorem with a Lean-verified discrete
+result):
 \begin{itemize}[nosep]
-\item LP is paraconsistent (explosion-free)~\cite{priest2008}
+\item LP is paraconsistent (explosion-free;
+  Lean: \texttt{lp\_no\_explosion})
   $\iff$ positivity consequence on $[0,1]$ is explosion-free.
-  This is a \emph{consequence of the bridge}, not merely an analogy:
-  the LP counterexample $w(A) = \tfrac{1}{2}$, $w(B) = 0$ maps to
+  The LP counterexample $w(A) = \tfrac{1}{2}$, $w(B) = 0$ maps to
   the positivity counterexample $v(A) = \tfrac{1}{2}$, $v(B) = 0$,
   and conversely.
-\item K$_3$ is paracomplete (no tautologies)~\cite{kleene1952}
+\item K$_3$ is paracomplete (no tautologies;
+  Lean: \texttt{k3\_no\_tautology})
   $\iff$ certainty consequence on $[0,1]$ has no tautologies.
   The K$_3$ counterexample $w(A) = \tfrac{1}{2}$ maps to
   $v(A) = \tfrac{1}{2}$ (with $v(A) \neq 1$).
 \end{itemize}
-These are instances of a general principle: any property of LP/K$_3$
-that can be stated in terms of existence or non-existence of
-a valuation satisfying a condition transfers to $[0,1]$ via the
-collapse and lifting.
-
-\textbf{Normal forms.}
-Since the bridge preserves all consequence relations on formulas,
-any normal form result for LP or K$_3$ transfers to the continuous
-setting.
-For instance, LP has a conjunctive/disjunctive normal form (every
-formula is LP-equivalent to one in CNF or DNF); via the bridge,
-every formula is positivity-equivalent to one in CNF or DNF.
-Similarly, K$_3$'s normal forms transfer to certainty equivalence.
 
 \textbf{The bridge connects conditioning and consequence.}
 The bridge and conditioning are largely independent mechanisms ---
@@ -1602,32 +1595,6 @@ $^d$For $t > \tfrac{1}{2}$: no valuation makes both
 $v(A) \geq t$ and $\negc v(A) \geq t$
 (Proposition~\ref{prop:graded-sharp}).}
 
-\begin{remark}[Compactness]
-\label{rem:compactness}
-All consequence relations in this paper (LP, K$_3$, positivity,
-certainty, graded) are compact over a propositional language:
-if $\Gamma \models A$ holds, it holds for some finite
-$\Gamma_0 \subseteq \Gamma$.
-\emph{Proof sketch.}
-For each $p \in \Gamma$, the set $D_p = \{v \in V^\alpha :
-\llbracket p \rrbracket_v \text{ is designated}\}$ is closed in the
-product topology on $V^\alpha$ (where $V = [0,1]$ or
-$\{0, \tfrac{1}{2}, 1\}$), because the evaluation
-$v \mapsto \llbracket p \rrbracket_v$ is continuous and the
-designated set is closed.
-If $\Gamma \models A$ fails, some $v^* \in \bigcap_{p \in \Gamma}
-D_p$ satisfies $\llbracket A \rrbracket_{v^*}$ undesignated.
-Since $V^\alpha$ is compact (Tychonoff) and each $D_p$ is closed,
-the finite intersection property guarantees that some finite
-$\Gamma_0$ suffices.
-The bridge preserves compactness directly: a finite
-$\Gamma_0$ witnessing LP non-consequence maps via collapse to a
-finite witness for positivity non-consequence, and vice versa.
-(This result is not formalized in Lean; it relies on Tychonoff's
-theorem, which is available in Mathlib but would require
-topologizing the evaluation space.)
-\end{remark}
-
 %=============================================================================
 \section{Conclusion}
 \label{sec:conclusion}
@@ -1645,7 +1612,7 @@ conditioning):
   equivalent to certainty consequence, at the level of propositional
   formulas.
   The bridge transfers decidability (finite model property),
-  paraconsistency, paracompleteness, and normal forms between the
+  paraconsistency, and paracompleteness between the
   discrete and continuous frameworks.
 \item The \textbf{algebraic fixed points} $\{0, \tfrac{1}{2}, 1\}$
   are exactly the conjunction-idempotent values together with the
