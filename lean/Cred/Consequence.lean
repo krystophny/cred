@@ -138,6 +138,20 @@ theorem graded_no_explosion (t : Credence) (ht : t.val ≤ 1/2) (ht_pos : 0 < t.
   · simp [Credence.le_def, Credence.zero_val]
     linarith
 
+/-- For t > 1/2, no valuation can make both v(A) >= t and ~v(A) >= t:
+    the premises of explosion are vacuously unsatisfiable. Explosion holds
+    vacuously because t + t > 1 but v(A) + ~v(A) = 1. -/
+theorem graded_explosion_vacuous (t : Credence) (ht : 1/2 < t.val) :
+    ∀ v : Fin 2 → Credence,
+      t ≤ v 0 → t ≤ Credence.neg (v 0) → t ≤ v 1 := by
+  intro v h0 h0neg
+  exfalso
+  have h1 : t.val ≤ (v 0).val := h0
+  have h2 : t.val ≤ 1 - (v 0).val := by
+    simp [Credence.le_def, Credence.neg_val] at h0neg
+    exact h0neg
+  linarith
+
 /-- Connection: unconstrained conditioning at zero means that
     when evidence has credence 0, no conclusion is forced. This is the
     algebraic basis for explosion failure. -/

@@ -152,8 +152,10 @@ knowledge).
   (Theorem~\ref{thm:congruence}).
 \item \textbf{Graded no-explosion} [new]:
   explosion fails for any threshold $t \leq \tfrac{1}{2}$
-  (Proposition~\ref{prop:graded-no-explosion}).
-  For $t > \tfrac{1}{2}$ the constant-$\tfrac{1}{2}$ witness fails.
+  (Proposition~\ref{prop:graded-no-explosion});
+  for $t > \tfrac{1}{2}$, explosion holds vacuously
+  (Proposition~\ref{prop:graded-sharp}).
+  The threshold $\tfrac{1}{2}$ is sharp.
 \item \textbf{Collapse composition} [new]:
   composing an independent valuation with the collapse yields a
   Kleene valuation, and every Kleene valuation lifts to $[0,1]$
@@ -352,7 +354,11 @@ forces $0 \to b = 1$ (ex falso);
 the triplet uses the involutive complement $\negc c = 1 - c$
 and chain-rule conditioning, which leaves $\cred(A \mid 0)$
 unconstrained.
-On positive evidence, the two coincide.
+On positive evidence with $\mathrm{joint} \leq \mathrm{evidence}$,
+both yield $\mathrm{joint}/\mathrm{evidence}$: the residuated
+implication gives $\min(\mathrm{joint}/\mathrm{evidence}, 1) =
+\mathrm{joint}/\mathrm{evidence}$, and the chain rule gives the
+same by uniqueness (Proposition~\ref{thm:existence}).
 
 \textbf{Relationship to probability.}
 Every probability space satisfies the chain rule and complement axioms.
@@ -436,9 +442,9 @@ where $\cred(A \land B) \leq \cred(B)$.
 \end{definition}
 
 The joint $\cred(A \land B)$ is supplied as input, not computed from
-marginals; the constraint $\cred(A \land B) \leq \cred(B)$ is the
-standard monotonicity requirement that the conjunction cannot exceed
-either conjunct.
+marginals; the constraint $\cred(A \land B) \leq \cred(B)$ is a
+hypothesis ensuring that the conditional lies in $[0,1]$
+(equivalently, $\cred(B \mid B) \leq 1$).
 H\'ajek, Godo, and Esteva~\cite{hajek1995} used the chain rule
 constraint as a technical device within fuzzy logic;
 Fritz~\cite{fritz2020} developed a categorical approach to
@@ -570,8 +576,7 @@ Every value in $[0,1]$ is achieved.
 How evidence becomes impossible matters.
 \end{example}
 
-\begin{proposition}[Path Dependence at Evidence Zero;
-known~\cite{chang1997}, verified here]
+\begin{proposition}[Path Dependence at Evidence Zero; verified here]
 \label{thm:path-dependence}
 The limit of $\min(a,b)/b$ as $b \to 0$ is path-dependent:
 \begin{enumerate}[label=\textup{(\roman*)},nosep]
@@ -727,23 +732,10 @@ $1 - c = c$ iff $c = \tfrac{1}{2}$
 (Lemma~\ref{thm:liar}).
 \end{proof}
 
-\textbf{Interpretation.}
-The three equilibria have distinct epistemic characters:
-\begin{itemize}[nosep]
-\item $0$ = \emph{refuted}: conjunction-idempotent at the lower
-  boundary.
-\item $1$ = \emph{confirmed}: conjunction-idempotent at the upper
-  boundary.
-\item $\tfrac{1}{2}$ = \emph{irreducibly uncertain}: the unique
-  negation fixed point, satisfying
-  $\negc\tfrac{1}{2} = \tfrac{1}{2}$.
-\end{itemize}
 Every other credence $c \in (0,1) \setminus \{\tfrac{1}{2}\}$
 is not an equilibrium: $c^2 < c$
-(Proposition~\ref{prop:self-conj-decay}), so iterated
-self-conjunction drives it toward $0$; it is not a negation fixed
-point either.
-Finite-valued logics take the three values as primitive;
+(Proposition~\ref{prop:self-conj-decay}) and $\negc c \neq c$.
+Finite-valued logics take $\{0, \tfrac{1}{2}, 1\}$ as primitive;
 the continuous framework \emph{derives} them as the algebraic
 equilibria of the product De Morgan triplet.
 
@@ -757,16 +749,18 @@ equilibria of the product De Morgan triplet.
 \midrule
 Product ($c \cdot c$) & $c^2 < c$ & Yes & $\tfrac{1}{2}$ & Yes \\
 G\"odel ($\min(c,c)$) & $c$ & No & None & No \\
-\L ukasiewicz & $\text{\L{}uk}(\tfrac{1}{2},\tfrac{1}{2})=0$ & Yes & $\tfrac{1}{2} \mapsto 0$
+\L ukasiewicz & $\max(2c{-}1,0)$ & Yes & $\text{\L{}uk}(\tfrac{1}{2},\tfrac{1}{2}){=}0$
   & No \\
 \bottomrule
 \end{tabular}
 \normalsize
 \captionof{table}{T-norm comparison.
 Only the product has both non-idempotence and three equilibria.
-G\"odel is idempotent (no dynamics);
-\L ukasiewicz self-conjunction $\max(a + b - 1, 0)$ at $a = b = \tfrac{1}{2}$ gives $0$,
-destroying the $\tfrac{1}{2}$ fixed point.}
+G\"odel is idempotent (no dynamics).
+\L ukasiewicz: the negation fixed point $\tfrac{1}{2}$ exists,
+but $\text{\L{}uk}(\tfrac{1}{2},\tfrac{1}{2}) = \max(0 + 0, 0) = 0
+\neq \tfrac{1}{2}$,
+so self-conjunction destroys it.}
 \label{tab:tnorm}
 \end{center}
 
@@ -1021,6 +1015,18 @@ $v(A \lor B) = v(A) \disjc v(B)$.
 Lean: \texttt{CpValuation}, \texttt{IndepValuation}.
 \end{definition}
 
+Independent valuations treat all conjunctions as independent
+(the product).
+When propositions are correlated, a \emph{joint-parametrized}
+valuation supplies $\cred(A \land B)$ separately
+(Definition~\ref{def:conditioning}).
+The bridge theorem (below) uses neither: it quantifies over all
+assignments $v : \alpha \to [0,1]$ to propositional variables, with
+compound values determined by the truth tables.
+Collapse composition (Proposition~\ref{prop:collapse-composition})
+uses independent valuations to show that the collapse preserves
+connective structure.
+
 \begin{definition}[Kleene Valuation]
 \label{def:kleene-valuation}
 A complement-preserving valuation into
@@ -1156,16 +1162,20 @@ if a consequence holds on $[0,1]$, it holds on
 $\{0, \tfrac{1}{2}, 1\}$, and conversely.
 
 \textbf{Scope.}
-The consequence relations quantify over \emph{assignments} of values
-to propositional variables, not over structured formulas with
-connectives.
-The collapse preserves connectives
-(Theorem~\ref{thm:collapse}), so for a logic with a fixed set of
-connectives, the bridge extends to formulas built from those
-connectives by induction.
-But the bridge theorems themselves make no assumption about
-formula structure: they hold for arbitrary assignments
-$v : \alpha \to [0,1]$.
+The consequence relations (Definition~\ref{def:consequence}) quantify
+over \emph{all assignments} $v : \alpha \to [0,1]$ (respectively
+$w : \alpha \to \{0, \tfrac{1}{2}, 1\}$), not over structured
+formulas.
+When $\alpha$ is a set of propositional variables and formulas are
+built using $\negc$, $\conjc$, $\disjc$, the collapse homomorphism
+(Theorem~\ref{thm:collapse}) ensures that the bridge extends to
+formula-level consequence by induction on formula structure: if $v$
+is a connective-homomorphism (an independent valuation), then
+$\text{collapse} \circ\, v$ respects the Kleene truth tables
+(Proposition~\ref{prop:collapse-composition}).
+Since every assignment in $\{0, \tfrac{1}{2}, 1\}$ lifts to a
+connective-homomorphism (Lemma~\ref{lem:lifting}), restriction to
+connective-homomorphisms on both sides preserves the equivalence.
 
 The key mechanism is the characterization of designated values via
 the collapse:
@@ -1268,17 +1278,25 @@ need not be designated.
 Lean: \texttt{graded\_no\_explosion}.
 \end{proposition}
 
-\begin{remark}[Graded consequence for $t > \tfrac{1}{2}$]
-\label{rem:graded-large-t}
-For $t > \tfrac{1}{2}$, the constant-$\tfrac{1}{2}$ witness fails:
-$\tfrac{1}{2} < t$, so neither $A$ nor $\negc A$ is designated.
-The explosion question for $t > \tfrac{1}{2}$ is thus not resolved by
-this witness; it depends on which valuations are admitted by the logic.
+\begin{proposition}[Sharp Threshold; new]
+\label{prop:graded-sharp}
+For $t > \tfrac{1}{2}$, graded explosion holds \emph{vacuously}:
+no valuation can satisfy both $v(A) \geq t$ and
+$\negc v(A) \geq t$, since these require $t \leq v(A)$ and
+$t \leq 1 - v(A)$, giving $2t \leq 1$, contradicting
+$t > \tfrac{1}{2}$.
+The threshold $\tfrac{1}{2}$ is thus sharp:
+paraconsistency holds for $t \leq \tfrac{1}{2}$ (the
+constant-$\tfrac{1}{2}$ witness works) and fails for
+$t > \tfrac{1}{2}$ (the premises are unsatisfiable).
 At $t = 1$, graded consequence coincides with K$_3$ consequence
-(Lean: \texttt{graded\_at\_one\_is\_strict}), which is paracomplete
-rather than paraconsistent: explosion is vacuously avoided because
-no valuation makes both $v(A) = 1$ and $\negc v(A) = 1$.
-\end{remark}
+(Lean: \texttt{graded\_at\_one\_is\_strict}), which is paracomplete.
+Lean: \texttt{graded\_explosion\_vacuous}.
+\end{proposition}
+\begin{proof}
+If $t > \tfrac{1}{2}$ and $v(A) \geq t$, then
+$\negc v(A) = 1 - v(A) \leq 1 - t < \tfrac{1}{2} < t$.
+\end{proof}
 
 The witness is the same in all explosion-free cases: the negation
 fixed point $\tfrac{1}{2}$ makes both a proposition and its negation
@@ -1299,6 +1317,8 @@ K$_3$ & $\{1\}$ & No & No & Vacuously$^\S$ \\
 LP & $\{1, \tfrac{1}{2}\}$ & Yes$^\|$ & Yes$^\|$ & No \\
 Graded ($t \leq \tfrac{1}{2}$) & $\{c \geq t\}$
   & Yes$^\ddagger$ & Yes$^\ddagger$ & No \\
+Graded ($t > \tfrac{1}{2}$) & $\{c \geq t\}$
+  & Yes$^\ddagger$ & Yes$^\ddagger$ & Vacuously$^\P$ \\
 \bottomrule
 \end{tabular}
 \normalsize
@@ -1309,9 +1329,12 @@ Graded ($t \leq \tfrac{1}{2}$) & $\{c \geq t\}$
 $^\|$Under homomorphic valuations.
 $^\S$No valuation makes both $v(A)$ and $\negc(v(A))$
 K$_3$-designated.
-$^\ddagger$For $t \leq \tfrac{1}{2}$:
+$^\ddagger$For all $t \leq \tfrac{3}{4}$:
 $v(A) \disjc \negc v(A) \geq \tfrac{3}{4} \geq t$, so
-excluded middle and the tautology $A \disjc \negc A$ hold.}
+excluded middle and the tautology $A \disjc \negc A$ hold.
+$^\P$For $t > \tfrac{1}{2}$: no valuation makes both
+$v(A) \geq t$ and $\negc v(A) \geq t$
+(Proposition~\ref{prop:graded-sharp}).}
 
 \subsection{Graded Predicates}
 \label{sec:predicates}
@@ -1380,22 +1403,16 @@ recover classical $\forall$ and $\exists$.
 Lean: \texttt{crisp\_inf\_zero\_iff}, \texttt{crisp\_sup\_one\_iff}.
 \end{proposition}
 
-\begin{proposition}[Russell Fixed Point; new]
+\begin{corollary}[Russell Equation]
 \label{prop:russell}
-If $c = \negc c$ (the abstract form of the Russell equation, where
-a predicate's self-application yields its own negation), then
-$c = \tfrac{1}{2}$.
-In the graded setting, the equation $c = \negc c$ has a unique
-solution rather than producing a contradiction.
+The equation $c = \negc c$ (the abstract form of Russell's
+self-referential construction) has the unique solution
+$c = \tfrac{1}{2}$ by Lemma~\ref{thm:liar}.
 This does not resolve the full Russell paradox (which involves set
-comprehension and quantification), but it shows that the
-self-referential core of the paradox is absorbed by the algebra.
+comprehension and quantification), but shows that the
+self-referential core is absorbed by the negation fixed point.
 Lean: \texttt{russell\_fixed\_point}.
-\end{proposition}
-\begin{proof}
-Immediate from the uniqueness of the negation fixed point
-(Lemma~\ref{thm:liar}).
-\end{proof}
+\end{corollary}
 
 %=============================================================================
 \section{Conclusion}
@@ -1429,7 +1446,9 @@ structure:
   exists under $\Real$-multiplication.
 \item The \textbf{graded no-explosion} shows paraconsistency for
   $t \leq \tfrac{1}{2}$, with the same witness ($\tfrac{1}{2}$) in
-  every case; for $t > \tfrac{1}{2}$ the witness fails.
+  every case; for $t > \tfrac{1}{2}$ explosion holds vacuously
+  (the premises are unsatisfiable).
+  The threshold $\tfrac{1}{2}$ is sharp.
 \item \textbf{Graded predicates} with inf/sup quantifiers recover
   classical agreement on crisp predicates and resolve the abstract
   Russell equation $c = \negc c$ to $\tfrac{1}{2}$.
@@ -1558,7 +1577,8 @@ The results in this paper are formalized across six Lean~4 modules
   classification --- \texttt{UnitCongruence}, \texttt{RealCongruence},
   Kleene witness (396 lines).
 \item \texttt{Cred/Consequence.lean}: K$_3$/LP designation,
-  bridge theorem, graded consequence, no-explosion (285 lines).
+  bridge theorem, graded consequence, no-explosion,
+  sharp threshold (299 lines).
 \item \texttt{Cred/Valuation.lean}: valuations, collapse composition,
   Fr\'echet bounds on valuations (175 lines).
 \item \texttt{Cred/Update.lean}: Bayesian/Jeffrey update, chain-rule
@@ -1638,6 +1658,8 @@ Zero underdetermination (Prop.~\ref{prop:zero-underdetermined})
   & \texttt{bayesian\_underdetermined\_at\_zero} \\
 Graded no-explosion (Prop.~\ref{prop:graded-no-explosion})
   & \texttt{graded\_no\_explosion} \\
+Sharp threshold (Prop.~\ref{prop:graded-sharp})
+  & \texttt{graded\_explosion\_vacuous} \\
 Quantifier duality (Prop.~\ref{prop:quantifier-duality})
   & \texttt{quantifier\_duality\_val} \\
 Crisp agreement (Prop.~\ref{prop:crisp-agreement})
