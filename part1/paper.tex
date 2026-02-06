@@ -513,6 +513,7 @@ $a \cdot b$ (indep.) & \checkmark & \checkmark & $\times$ & $\times$ \\
 $\max(a{+}b{-}1,0)$ & \checkmark & \checkmark & \checkmark & $\times$ \\
 $\max(\negc a,b) \cdot a$ (RM3) & \checkmark & $\times$ & --- & --- \\
 G\"odel (on $[0,1]$) & --- & $\times$ & --- & --- \\
+\midrule
 External (prob.) & $\times$ & \checkmark & \checkmark & \checkmark \\
 \bottomrule
 \end{tabular}
@@ -595,6 +596,9 @@ The Kleene quotient's $\min$/$\max$ operations are exactly the
 conjunction/disjunction of possibility theory~\cite{dubois1988}:
 the collapse maps the product De Morgan triplet to the
 possibility/necessity structure.
+Possibilistic conditioning also uses $\min$: $\Pi(A \mid B) =
+\min(\Pi(A \land B),\, \Pi(B)) / \Pi(B)$ when $\Pi(B) > 0$, which
+on $\{0, \tfrac{1}{2}, 1\}$ reduces to the Kleene material conditional.
 \end{remark}
 
 \subsection{Impossibility Results}
@@ -629,7 +633,9 @@ Negation forces $\varphi(\tfrac{1}{2}) = \tfrac{1}{2}$.
 Pick $c = \sqrt{1/2}$ (a preimage of $\tfrac{1}{2}$ under squaring);
 then $c \conjc c = \tfrac{1}{2}$.
 But $\mathrm{conj}_{\text{\L}}(v,v) \in \{0, 1\}$ for all
-$v \in \{0, \tfrac{1}{2}, 1\}$, so no preimage of $\tfrac{1}{2}$ exists.
+$v \in \{0, \tfrac{1}{2}, 1\}$ (in particular,
+$\max(\tfrac{1}{2} + \tfrac{1}{2} - 1, 0) = 0 \neq \tfrac{1}{2}$),
+so no preimage of $\tfrac{1}{2}$ exists.
 Lean: \texttt{no\_luk\_collapse}.
 \end{proof}
 
@@ -788,7 +794,7 @@ is the unique three-element quotient
 (Theorem~\ref{thm:unit-classification}), and boundary classes are
 singletons.
 What we do not know is whether a unit congruence with four or more
-finite classes can exist.
+classes can exist.
 
 \begin{quote}
 \textbf{Open question.}
@@ -866,8 +872,11 @@ Under $\mathbb{R}$-multiplication, it collapses to the BL case (none).
 This suggests a broader question: for a fixed continuous t-norm $T$,
 how does the congruence lattice of $(T, \negc)$ relate to the
 congruence lattice of $(T, \to_T)$?
-The product case gives one data point; the \L ukasiewicz case (where
-MV-algebras and the De Morgan triplet coincide) gives another.
+In particular, does dropping residuation always \emph{strictly enlarge}
+the set of congruences, or can the two lattices coincide?
+The product case gives one data point (enlargement under $[0,1]$-multiplication);
+the \L ukasiewicz case (where the De Morgan reduct and MV-algebra
+coincide because $\negc a = a \to 0$) gives the opposite.
 \end{remark}
 
 %=============================================================================
@@ -970,13 +979,9 @@ but is strictly weaker (no sigma-algebra or additivity).
 The results in this paper are formalized in two Lean~4 modules
 (with Mathlib):
 \texttt{Cred/Basic.lean} (core algebra, conditioning, fixed points,
-collapse, comparisons; ${\approx}\,1750$ lines) and
+collapse, comparisons; 1756 lines) and
 \texttt{Cred/Congruence.lean} (two-level congruence classification;
-${\approx}\,400$ lines).
-Four additional modules ---
-\texttt{Valuation}, \texttt{Update}, \texttt{Consequence},
-\texttt{Predicate} --- formalize valuations, update rules,
-consequence relations, and graded predicates on the same structure.
+396 lines).
 
 \textbf{Design choices.}
 \texttt{Credence} is a structure carrying explicit \texttt{nonneg} and
