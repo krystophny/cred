@@ -51,11 +51,11 @@ Part 2 — bridge between probability and many-valued logic:
 
 ```
 [0,1]  →  {0,½,1}      →  {0,1}
-Cred      Kleene lattice    Classical (ex falso appears)
+Cred      Kleene lattice    Classical
           (K3/LP/RM3)
 ```
 
-The collapse is a surjective homomorphism. It faithfully preserves propositional consequence (the bridge) but cannot preserve conditioning (Lewis-type impossibility).
+The collapse is a surjective homomorphism. It faithfully preserves propositional consequence (the bridge) but cannot preserve conditioning (Lewis-type impossibility). Ex falso appears whenever conditioning is defined via residuation or material implication — already at the Kleene level (Gödel: `0 → p = 1`). Chain-rule conditioning avoids it at every level by leaving the conditional unconstrained at evidence zero.
 
 ## Repo Layout
 
