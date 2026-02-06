@@ -146,8 +146,11 @@ knowledge).
   positivity consequence on $[0,1]$; K$_3$ consequence is equivalent
   to certainty consequence, both at the level of propositional formulas
   (Theorems~\ref{thm:lp-formula-bridge}--\ref{thm:k3-formula-bridge}).
-  This is the centerpiece: discrete logical reasoning is faithfully
-  encoded in continuous credences.
+  Discrete logical reasoning and continuous $[0,1]$ reasoning are
+  inter-simulable; the bridge transfers decidability (via a finite
+  model property), paraconsistency, paracompleteness, and normal forms
+  between the two frameworks
+  (Section~\ref{sec:bridge-consequences}).
 \item \textbf{Algebraic fixed points}
   [known~\cite{klement2000,kripke1975}, verified here]:
   the values $\{0, \tfrac{1}{2}, 1\}$ are exactly the
@@ -249,7 +252,7 @@ Bayesian and Jeffrey update.
 Section~\ref{sec:equilibria}: algebraic fixed points.
 Section~\ref{sec:collapse}: the Kleene collapse and congruence
 classification.
-Section~\ref{sec:bridge}: the bridge theorem (centerpiece).
+Section~\ref{sec:bridge}: the bridge theorem, scope, and consequences.
 Section~\ref{sec:consequence}: graded consequence and no-explosion.
 Section~\ref{sec:conclusion}: summary and open problems.
 
@@ -634,6 +637,10 @@ Every value in $[0,1]$ is achieved; ex falso requires an added
 convention.
 Lean: \texttt{path\_dep\_fixed\_a}, \texttt{path\_dep\_proportional},
 \texttt{path\_dep\_square}, \texttt{path\_any\_positive\_value}.
+The Lean proofs verify the algebraic identities at each point
+(e.g., $\min(a,b)/b = 1$ when $b < a$), not the topological limit
+statements; the limits follow from these identities by elementary
+analysis.
 \end{proposition}
 \begin{proof}
 (i)~For small $b < a$, $\min(a,b)/b = 1$.
@@ -695,31 +702,17 @@ An agent may narrow this set by adopting a prior over the zero-evidence
 regime (de Finetti's void, Popper's convention, etc.), but the
 chain rule itself imposes no such commitment.
 
-\textbf{Lewis triviality.}
-Lewis~\cite{lewis1976} showed that if one treats $P(A \mid B)$ as the
-probability of a ``conditional proposition'' $A \to B$ in the same
-algebra --- i.e., if $P(A \mid B) = P(A \to B)$ for some event
-$A \to B$ --- then the probability measure must be trivial (supported
-on at most two atoms).
-Chain-rule conditioning avoids Lewis's conditions in two respects.
-First, $\cred(A \mid B)$ is not identified with the credence of any
-proposition; it is constrained only by the chain rule with the joint as
-a \emph{separate parameter}.
-Second, the joint $\cred(A \land B)$ is not derived from the
-conditional; it is given data.
-Lewis's proof requires both identifications, so the triviality
-conclusion does not apply~\cite{halpern2003}.
-
-\textbf{Connection to imprecise probability.}
-When evidence has credence zero, the set of chain-rule-consistent
-conditionals is $[0,1]$.
-This is exactly the vacuous lower prevision of Walley~\cite{walley1991}:
-the agent's state of belief about $\cred(A \mid B)$ is maximally
-imprecise.
-Levi~\cite{levi1980} argues that maximal imprecision at zero evidence
-is the correct epistemic response.
-Chain-rule conditioning reaches the same conclusion algebraically,
-without assuming a framework of imprecise probabilities.
+\textbf{Lewis triviality and imprecise probability.}
+Lewis~\cite{lewis1976} showed that identifying $P(A \mid B)$ with
+the probability of a conditional proposition forces triviality.
+Chain-rule conditioning avoids this: $\condc{A}{B}$ is not the
+credence of any proposition, and the joint is a separate
+parameter~\cite{halpern2003}.
+At zero evidence, the set of chain-rule-consistent conditionals is
+$[0,1]$ --- the vacuous lower prevision of
+Walley~\cite{walley1991}, confirming algebraically that maximal
+imprecision is the correct response to impossible
+evidence~\cite{levi1980}.
 
 \subsection{Update via Conditioning}
 \label{sec:update}
@@ -754,26 +747,12 @@ For uncertain evidence with new credence $q$ for $B$:
 $v'(A) = \cred(A \mid B) \cdot q + \cred(A \mid \negc B) \cdot (1 - q)$.
 At $q = 1$ this reduces to Bayesian update; at $q = 0$ it conditions
 on $\negc B$.
+When $0 < v(B) < 1$, both conditionals are uniquely determined by
+the chain rule (Proposition~\ref{thm:existence}), so the Jeffrey
+posterior is uniquely determined by $v$, the joints, and $q$.
 Lean: \texttt{jeffreyUpdate}, \texttt{jeffreyUpdate\_certain},
 \texttt{jeffreyUpdate\_zero}.
 \end{definition}
-
-\begin{proposition}[Jeffrey Update: Typical Case]
-\label{prop:jeffrey-typical}
-When $0 < v(B) < 1$, both conditionals $\cred(A \mid B)$ and
-$\cred(A \mid \negc B)$ are uniquely determined by the chain rule
-(since $v(B) > 0$ and $v(\negc B) = 1 - v(B) > 0$).
-The Jeffrey posterior is therefore uniquely determined by the prior
-$v$, the joint credences $\cred(A \land B)$ and
-$\cred(A \land \negc B)$, and the new evidence credence $q$.
-\end{proposition}
-\begin{proof}
-Both conditionals exist and are unique by
-Proposition~\ref{thm:existence}(i), since both $v(B)$ and
-$v(\negc B)$ are positive.
-The Jeffrey formula is a convex combination of two uniquely
-determined values.
-\end{proof}
 
 \begin{proposition}[Zero-Evidence Underdetermination; new]
 \label{prop:zero-underdetermined}
@@ -1438,6 +1417,66 @@ degree-preserving at threshold $0^+$; the bridge identifies these
 with K$_3$ and LP respectively, giving the degree-preserving
 framework a concrete three-valued interpretation.
 
+\subsection{Consequences of the Bridge}
+\label{sec:bridge-consequences}
+
+The bridge theorem is not merely an observation; it transfers
+concrete results between the discrete and continuous settings.
+
+\textbf{Finite model property and decidability.}
+LP and K$_3$ consequence over a finite set of atoms is decidable by
+exhaustive search over $\{0, \tfrac{1}{2}, 1\}^n$ valuations.
+Via the bridge, positivity and certainty consequence on $[0,1]$
+inherit the same decidability: to decide whether
+$\Gamma \models^+ \varphi$ (or $\Gamma \models^1 \varphi$) for
+formulas over $n$ atoms, it suffices to check $3^n$ Kleene
+valuations rather than the uncountable space $[0,1]^n$.
+The continuous consequence relations thus have a \emph{finite model
+property}: every non-consequence is witnessed by an assignment into
+$\{0, \tfrac{1}{2}, 1\}$.
+
+\textbf{Transfer of paraconsistency and paracompleteness.}
+The bridge gives precise content to the following meta-logical
+transfers:
+\begin{itemize}[nosep]
+\item LP is paraconsistent (explosion-free)~\cite{priest2008}
+  $\iff$ positivity consequence on $[0,1]$ is explosion-free.
+  This is a \emph{consequence of the bridge}, not merely an analogy:
+  the LP counterexample $w(A) = \tfrac{1}{2}$, $w(B) = 0$ maps to
+  the positivity counterexample $v(A) = \tfrac{1}{2}$, $v(B) = 0$,
+  and conversely.
+\item K$_3$ is paracomplete (no tautologies)~\cite{kleene1952}
+  $\iff$ certainty consequence on $[0,1]$ has no tautologies.
+  The K$_3$ counterexample $w(A) = \tfrac{1}{2}$ maps to
+  $v(A) = \tfrac{1}{2}$ (with $v(A) \neq 1$).
+\end{itemize}
+These are instances of a general principle: any property of LP/K$_3$
+that can be stated in terms of existence or non-existence of
+a valuation satisfying a condition transfers to $[0,1]$ via the
+collapse and lifting.
+
+\textbf{Normal forms.}
+Since the bridge preserves all consequence relations on formulas,
+any normal form result for LP or K$_3$ transfers to the continuous
+setting.
+For instance, LP has a conjunctive/disjunctive normal form (every
+formula is LP-equivalent to one in CNF or DNF); via the bridge,
+every formula is positivity-equivalent to one in CNF or DNF.
+Similarly, K$_3$'s normal forms transfer to certainty equivalence.
+
+\textbf{The bridge as inter-simulation.}
+The collapse $\text{collapse} : [0,1] \to \{0, \tfrac{1}{2}, 1\}$ and
+the lifting $\text{lift} : \{0, \tfrac{1}{2}, 1\} \to [0,1]$ are
+mutual pseudo-inverses: $\text{collapse} \circ\, \text{lift} =
+\text{id}$ and $\text{collapse} \circ\, v$ witnesses the same
+consequences as $v$.
+This means any reasoning about the connectives
+$(\negc, \conjc, \disjc)$ can be carried out interchangeably in
+either framework.
+The three-valued framework provides finitary decidability; the
+continuous framework provides the connection to credences, update,
+and the conditioning apparatus of Sections~\ref{sec:conditioning}--\ref{sec:update}.
+
 %=============================================================================
 \section{Graded Consequence and No-Explosion}
 \label{sec:consequence}
@@ -1547,14 +1586,21 @@ All consequence relations in this paper (LP, K$_3$, positivity,
 certainty, graded) are compact over a propositional language:
 if $\Gamma \models A$ holds, it holds for some finite
 $\Gamma_0 \subseteq \Gamma$.
-This follows from the standard compactness argument for matrix
-semantics over finite signatures: the set of models of $\Gamma$ is
-a closed subset of $[0,1]^\alpha$ (or $\{0,\tfrac{1}{2},1\}^\alpha$)
-in the product topology, and the constraint ``$v(p)$ is designated
-for $p \in \Gamma$'' has the finite intersection property.
-The bridge theorem preserves compactness: if LP consequence is
-compact, then positivity consequence is compact (and vice versa),
-since the collapse and lifting preserve the finite-witness structure.
+\emph{Proof sketch.}
+For each $p \in \Gamma$, the set $D_p = \{v \in V^\alpha :
+\llbracket p \rrbracket_v \text{ is designated}\}$ is closed in the
+product topology on $V^\alpha$ (where $V = [0,1]$ or
+$\{0, \tfrac{1}{2}, 1\}$), because the evaluation
+$v \mapsto \llbracket p \rrbracket_v$ is continuous and the
+designated set is closed.
+If $\Gamma \models A$ fails, some $v^* \in \bigcap_{p \in \Gamma}
+D_p$ satisfies $\llbracket A \rrbracket_{v^*}$ undesignated.
+Since $V^\alpha$ is compact (Tychonoff) and each $D_p$ is closed,
+the finite intersection property guarantees that some finite
+$\Gamma_0$ suffices.
+The bridge preserves compactness directly: a finite
+$\Gamma_0$ witnessing LP non-consequence maps via collapse to a
+finite witness for positivity non-consequence, and vice versa.
 \end{remark}
 
 %=============================================================================
@@ -1573,8 +1619,9 @@ conditioning):
   to positivity consequence on $[0,1]$, and K$_3$ consequence is
   equivalent to certainty consequence, at the level of propositional
   formulas.
-  Discrete logical reasoning is faithfully encoded in continuous
-  credences.
+  The bridge transfers decidability (finite model property),
+  paraconsistency, paracompleteness, and normal forms between the
+  discrete and continuous frameworks.
 \item The \textbf{algebraic fixed points} $\{0, \tfrac{1}{2}, 1\}$
   are exactly the conjunction-idempotent values together with the
   negation fixed point; they are derived from the algebra, not
