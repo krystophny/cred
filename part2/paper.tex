@@ -70,14 +70,18 @@ We study \emph{chain-rule conditioning}, where the conditional satisfies
 $\cred(A \mid B) \cdot \cred(B) = \cred(A \land B)$:
 at positive evidence it reduces to Bayesian conditioning; at zero
 evidence it leaves the conditional unconstrained.
-Our main result is a \emph{bridge theorem}: LP consequence on the
-three-valued Kleene lattice is equivalent to positivity consequence on
-$[0,1]$, and K$_3$ consequence is equivalent to certainty consequence,
-both at the level of propositional formulas.
-Discrete three-valued reasoning and continuous $[0,1]$ reasoning are
-thus two views of the same relation.
-Supporting results include a congruence classification of the
-product De Morgan triplet
+The product De Morgan triplet admits a natural collapse to the
+Kleene lattice $\{0, \tfrac{1}{2}, 1\}$, which we use to establish
+a \emph{bridge theorem}: LP consequence on the Kleene lattice is
+equivalent to positivity consequence on $[0,1]$, and K$_3$ consequence
+is equivalent to certainty consequence, both at the level of
+propositional formulas.
+The bridge operates through the collapse homomorphism on the
+connectives; chain-rule conditioning provides the complementary
+mechanism that makes the framework useful for reasoning under
+uncertainty, connecting Bayesian update to the same algebra without
+forcing ex falso.
+Supporting results include a congruence classification
 (the Kleene lattice is the unique non-trivial three-element quotient
 under $[0,1]$-multiplication; no non-trivial finite quotient exists
 under $\Real$-multiplication) and graded consequence with no-explosion.
@@ -144,7 +148,7 @@ knowledge).
   (Theorems~\ref{thm:lp-formula-bridge}--\ref{thm:k3-formula-bridge}).
   This is the centerpiece: discrete logical reasoning is faithfully
   encoded in continuous credences.
-\item \textbf{Equilibria characterization}
+\item \textbf{Algebraic fixed points}
   [known~\cite{klement2000,kripke1975}, verified here]:
   the values $\{0, \tfrac{1}{2}, 1\}$ are exactly the
   conjunction-idempotent values together with the unique negation
@@ -203,7 +207,12 @@ conditionals; van Fraassen~\cite{vanfraassen1976,vanfraassen1983}
 explored connections between probabilities and conditionals in
 relevant logic.
 Pavelka~\cite{pavelka1979i} developed graded inference for
-many-valued logics with truth values on $[0,1]$.
+many-valued logics with truth values on $[0,1]$;
+B\v{e}hounek and Cintula~\cite{behounek2006} characterized fuzzy
+logics via degree-preserving consequence on chains.
+Suszko~\cite{suszko1977} argued that every Tarskian consequence
+relation is logically bivalent (designated vs.\ undesignated);
+Malinowski~\cite{malinowski1993} provided a systematic treatment.
 Ferm\"uller~\cite{fermuller2014} reached the Kleene lattice from
 game semantics; Gaines~\cite{gaines1978} unified fuzzy and
 probabilistic uncertainty via population semantics.
@@ -237,7 +246,7 @@ Mathlib (Appendix~\ref{app:lean}).
 Section~\ref{sec:algebra}: the product De Morgan triplet.
 Section~\ref{sec:conditioning}: chain-rule conditioning, including
 Bayesian and Jeffrey update.
-Section~\ref{sec:equilibria}: algebraic equilibria.
+Section~\ref{sec:equilibria}: algebraic fixed points.
 Section~\ref{sec:collapse}: the Kleene collapse and congruence
 classification.
 Section~\ref{sec:bridge}: the bridge theorem (centerpiece).
@@ -262,7 +271,7 @@ ukasiewicz; Appendix~\ref{app:prelim}), the product is the unique
 one that: (i)~shares the conjunction of independent probability
 ($P(A \land B) = P(A) \cdot P(B)$), (ii)~has non-trivial dynamics
 under self-conjunction ($c^2 < c$ for $c \in (0,1)$), and (iii)~admits
-exactly three algebraic equilibria $\{0, \tfrac{1}{2}, 1\}$
+exactly three algebraic fixed points $\{0, \tfrac{1}{2}, 1\}$
 (Section~\ref{sec:equilibria}).
 G\"odel's min is idempotent (no dynamics); \L ukasiewicz's
 self-conjunction destroys the $\tfrac{1}{2}$ fixed point
@@ -453,10 +462,17 @@ What is $\cred(\text{rain} \mid \text{wet})$?
 \label{def:conditioning}
 A \emph{conditioning structure} for
 $(\text{joint}, \text{evidence}) \in [0,1]^2$
-consists of $\text{condCred} \in [0,1]$ satisfying
+consists of a value $\text{condCred} \in [0,1]$ satisfying
 $\text{condCred} \conjc \text{evidence} = \text{joint}$.
-In propositional notation:
-$\condc{A}{B} \conjc \cred(B) = \cred(A \land B)$.
+In propositional notation we write
+$\condc{A}{B} \conjc \cred(B) = \cred(A \land B)$,
+where $\condc{A}{B}$ abbreviates the condCred component of the
+conditioning structure for joint $= \cred(A \land B)$ and
+evidence $= \cred(B)$.
+When evidence is positive, the conditioning structure is unique and
+$\condc{A}{B}$ is a number (Definition~\ref{thm:existence});
+when evidence is zero, $\condc{A}{B}$ denotes any value in $[0,1]$
+satisfying the chain rule.
 \end{definition}
 
 The joint $\cred(A \land B)$ is supplied as input, not computed from
@@ -541,14 +557,16 @@ The chain-rule table uses the min-copula joint $\min(e, p)$
 (the unique symmetric idempotent copula;
 Theorem~\ref{thm:min-copula-unique}), giving the most direct
 comparison with the material conditional.
-Other joint choices yield different positive-evidence entries;
-only the zero-evidence row is independent of the joint.}
+Under the independence joint $e \cdot p$, the entry $(e, p) =
+(\tfrac{1}{2}, \tfrac{1}{2})$ would be
+$\tfrac{1}{4}/\tfrac{1}{2} = \tfrac{1}{2}$ instead of $1$;
+only the zero-evidence row ($*$) is independent of the joint choice.}
 
 \subsection{Existence and Uniqueness}
 \label{sec:existence}
 
 \begin{proposition}[Existence and Uniqueness of Conditioning;
-known~\cite{renyi1955,popper1959}, verified here]
+cf.~\cite{renyi1955,popper1959}, formulation and verification here]
 \label{thm:existence}
 \hfill
 \begin{enumerate}[label=\textup{(\roman*)},nosep]
@@ -772,15 +790,20 @@ $c \cdot 0 = 0$ for all $c$.
 \end{proof}
 
 %=============================================================================
-\section{Algebraic Equilibria}
+\section{Algebraic Fixed Points}
 \label{sec:equilibria}
 %=============================================================================
 
 What happens when you conjoin a credence with itself?
 $\cred(\text{rain}) \conjc \cred(\text{rain}) = 0.8^2 = 0.64 < 0.8$.
-Combining two independent copies of the same uncertain evidence
-\emph{decreases} the joint credence.
-Only $0$ and $1$ are stable: $0^2 = 0$, $1^2 = 1$.
+The product of two independent copies of the same uncertain credence
+is strictly smaller than the original.
+Only $0$ and $1$ satisfy $c^2 = c$; the negation fixed point
+$\tfrac{1}{2}$ (Lemma~\ref{thm:liar}) is the third distinguished
+value.
+These are \emph{algebraic} facts about the product; we make no
+dynamical claims about convergence of Bayesian posteriors (see
+Remark~\ref{rem:attractor-caveat}).
 
 \begin{proposition}[Self-Conjunction Decay;
 known~\cite{klement2000}, verified here]
@@ -815,11 +838,13 @@ Lean: \texttt{liar\_fixed\_point},
 \texttt{neg\_fixed\_point\_unique}.
 \end{lemma}
 
-\begin{proposition}[Equilibria Characterization;
+\begin{proposition}[Algebraic Fixed Points;
 known~\cite{klement2000,kripke1975}, verified here]
 \label{thm:equilibria}
 A credence $c \in [0,1]$ satisfies $c \conjc c = c$ or $\negc c = c$
 if and only if $c \in \{0, \tfrac{1}{2}, 1\}$.
+These are the \emph{algebraic fixed points}: values invariant under
+conjunction-idempotence or negation.
 Lean: \texttt{equilibria\_characterization}.
 \end{proposition}
 \begin{proof}
@@ -830,11 +855,11 @@ $1 - c = c$ iff $c = \tfrac{1}{2}$
 \end{proof}
 
 Every other credence $c \in (0,1) \setminus \{\tfrac{1}{2}\}$
-is not an equilibrium: $c^2 < c$
+is not a fixed point: $c^2 < c$
 (Proposition~\ref{prop:self-conj-decay}) and $\negc c \neq c$.
 Finite-valued logics take $\{0, \tfrac{1}{2}, 1\}$ as primitive;
 the continuous framework \emph{derives} them as the algebraic
-equilibria of the product De Morgan triplet.
+fixed points of the product De Morgan triplet.
 
 \begin{center}
 \small
@@ -854,24 +879,25 @@ G\"odel & $c$ & No & $\tfrac{1}{2}$ & $\tfrac{1}{2}$ & No$^*$ \\
 \captionof{table}{T-norm comparison.
 All three t-norms share the negation fixed point $\tfrac{1}{2}$
 (since $\negc c = 1 - c$ is independent of the t-norm).
-Only the product has three equilibria: $\{0, 1\}$ from idempotence
-plus $\tfrac{1}{2}$ from negation.
+Only the product has three algebraic fixed points: $\{0, 1\}$ from
+idempotence plus $\tfrac{1}{2}$ from negation.
 $^*$G\"odel has infinitely many idempotent values
-($\min(c,c) = c$ for all $c$), so no finite equilibrium set.
+($\min(c,c) = c$ for all $c$), so no finite fixed-point set.
 \L ukasiewicz: $T_L(\tfrac{1}{2}, \tfrac{1}{2}) = 0 \neq
 \tfrac{1}{2}$, so self-conjunction destroys the negation fixed point.}
 \label{tab:tnorm}
 \end{center}
 
-\begin{remark}[Algebraic equilibria vs.\ dynamical convergence]
+\begin{remark}[Algebraic fixed points vs.\ dynamical convergence]
 \label{rem:attractor-caveat}
 Propositions~\ref{prop:self-conj-decay}--\ref{prop:pow-decay}
-establish that iterated conjunction with the original,
-$c, c^2, c^3, \ldots$, converges to $0$ for every $c \in (0,1)$.
-This is a precise algebraic statement about the product t-norm.
-A formal convergence theorem for Bayesian update toward $0$, $1$,
-or $\tfrac{1}{2}$ would require specifying a stochastic model for
-the evidence sequence, which is beyond our scope.
+establish that the sequence
+$c, c^2, c^3, \ldots$ converges to $0$ for every $c \in (0,1)$.
+This is a precise algebraic statement about the product t-norm,
+not a claim about convergence of Bayesian posteriors.
+A formal convergence theorem for iterated Bayesian update
+toward $0$, $1$, or $\tfrac{1}{2}$ would require specifying a
+stochastic model for the evidence sequence, which is beyond our scope.
 \end{remark}
 
 %=============================================================================
@@ -879,8 +905,8 @@ the evidence sequence, which is beyond our scope.
 \label{sec:collapse}
 %=============================================================================
 
-The three equilibria from Section~\ref{sec:equilibria} are not just
-fixed points --- they form a quotient algebra.
+The three algebraic fixed points from Section~\ref{sec:equilibria}
+are not merely stable values --- they form a quotient algebra.
 The partition $\{0\}, (0,1), \{1\}$ defines a congruence on the
 product De Morgan triplet, and the quotient is the Kleene lattice.
 
@@ -1082,12 +1108,19 @@ Independent valuations treat all conjunctions as independent
 When propositions are correlated, a \emph{joint-parametrized}
 valuation supplies $\cred(A \land B)$ separately
 (Definition~\ref{def:conditioning}).
-The bridge theorem (below) uses neither: it quantifies over all
-assignments $v : \alpha \to [0,1]$ to propositional variables, with
-compound values determined by the truth tables.
-Collapse composition (Proposition~\ref{prop:collapse-composition})
-uses independent valuations to show that the collapse preserves
-connective structure.
+
+\textbf{Valuations vs.\ formula evaluation.}
+The bridge theorem (below) uses neither type of valuation directly.
+Instead, it quantifies over all assignments $v : \alpha \to [0,1]$
+to \emph{propositional atoms} (variables), with the values of compound
+formulas determined recursively by the connective truth tables
+(Definition~\ref{def:consequence}, Proposition~\ref{prop:collapse-eval}).
+An assignment to atoms induces a unique evaluation of every formula;
+the consequence relations are defined by this evaluation.
+Independent valuations (Definition~\ref{def:indep-valuation}) are
+used only for the collapse-composition result
+(Proposition~\ref{prop:collapse-composition}), showing that the
+collapse preserves connective structure.
 
 \begin{definition}[Kleene Valuation]
 \label{def:kleene-valuation}
@@ -1359,6 +1392,52 @@ These are the two canonical ways to carve $[0,1]$ into
 Each corresponds to exactly one of the standard three-valued
 consequence relations.
 
+\subsection{Scope and Limitations}
+\label{sec:bridge-scope}
+
+\textbf{The bridge covers connectives, not conditioning.}
+The bridge theorem applies to propositional formulas built from
+atoms, negation, conjunction, and disjunction.
+It does \emph{not} extend to a language with conditionals, and
+this limitation is structural, not accidental.
+The collapse is a homomorphism of the triplet
+$(\negc, \conjc, \disjc)$, but conditioning is not a connective on
+individual credences: $\condc{A}{B}$ depends on the joint
+$\cred(A \land B)$, which is a separate parameter
+(Definition~\ref{def:conditioning}).
+There is no truth-functional three-valued conditional on the
+Kleene lattice that corresponds to the chain rule.
+The three conditioning tables of Section~\ref{sec:three-answers}
+--- Kleene material, product residuation, chain-rule --- all differ
+on the $e = 0$ row, and the chain rule's unconstrained entry has no
+analogue in a truth-functional three-valued setting.
+Extending the bridge to conditionals would require either
+(i)~a non-truth-functional consequence relation on $\{0,\tfrac{1}{2},1\}$
+that can express the joint as a parameter, or
+(ii)~restricting to positive evidence, where the chain rule reduces
+to division and the bridge would hold trivially.
+Neither extension is pursued here; the bridge and conditioning are
+complementary contributions.
+
+\textbf{Relationship to Suszko's thesis.}
+Suszko~\cite{suszko1977} argued that every Tarskian consequence
+relation is logically bivalent: the truth values reduce to
+``designated'' and ``undesignated,'' regardless of the number of
+algebraic truth values~\cite{malinowski1993}.
+The bridge theorem is in the spirit of this observation --- it
+reduces LP and K$_3$ consequence to binary distinctions (positive
+vs.\ zero, certain vs.\ uncertain) on $[0,1]$ --- but goes further.
+Where Suszko's thesis is about the abstract structure of
+consequence relations, the bridge theorem provides a concrete
+\emph{semantic} equivalence: the same assignments, mediated by the
+collapse and lifting maps, witness consequence in both directions.
+The bridge also connects to degree-preserving
+consequence~\cite{behounek2006}: certainty consequence is
+degree-preserving at threshold $1$; positivity consequence is
+degree-preserving at threshold $0^+$; the bridge identifies these
+with K$_3$ and LP respectively, giving the degree-preserving
+framework a concrete three-valued interpretation.
+
 %=============================================================================
 \section{Graded Consequence and No-Explosion}
 \label{sec:consequence}
@@ -1405,10 +1484,14 @@ $\negc v(A) = 1 - v(A) \leq 1 - t < \tfrac{1}{2} < t$.
 The witness is the same in all explosion-free cases: the negation
 fixed point $\tfrac{1}{2}$ makes both a proposition and its negation
 designated without forcing arbitrary conclusions.
-Excluded middle holds for all $t \leq \tfrac{3}{4}$:
-$v(A) \disjc \negc v(A) = 1 - v(A)(1 - v(A)) \geq \tfrac{3}{4}$
-(tight at $v(A) = \tfrac{1}{2}$;
-Lean: \texttt{certainty\_ge\_three\_quarters}).
+Excluded middle as a graded tautology
+($\emptyset \models_t A \disjc \negc A$) holds for $t \leq
+\tfrac{3}{4}$: the minimum of
+$v(A) \disjc \negc v(A) = 1 - v(A)(1 - v(A))$ over $[0,1]$ is
+$\tfrac{3}{4}$, attained at $v(A) = \tfrac{1}{2}$.
+Under positivity consequence ($t > 0$), excluded middle holds
+trivially since $1 - v(A)(1 - v(A)) > 0$ for all $v(A)$.
+Lean: \texttt{certainty\_ge\_three\_quarters}.
 
 \begin{center}
 \small
@@ -1458,6 +1541,22 @@ atomic propositions; the collapse and lifting then connect them
 without requiring assumptions about dependence.
 \end{remark}
 
+\begin{remark}[Compactness]
+\label{rem:compactness}
+All consequence relations in this paper (LP, K$_3$, positivity,
+certainty, graded) are compact over a propositional language:
+if $\Gamma \models A$ holds, it holds for some finite
+$\Gamma_0 \subseteq \Gamma$.
+This follows from the standard compactness argument for matrix
+semantics over finite signatures: the set of models of $\Gamma$ is
+a closed subset of $[0,1]^\alpha$ (or $\{0,\tfrac{1}{2},1\}^\alpha$)
+in the product topology, and the constraint ``$v(p)$ is designated
+for $p \in \Gamma$'' has the finite intersection property.
+The bridge theorem preserves compactness: if LP consequence is
+compact, then positivity consequence is compact (and vice versa),
+since the collapse and lifting preserve the finite-witness structure.
+\end{remark}
+
 %=============================================================================
 \section{Conclusion}
 \label{sec:conclusion}
@@ -1476,9 +1575,10 @@ conditioning):
   formulas.
   Discrete logical reasoning is faithfully encoded in continuous
   credences.
-\item The \textbf{equilibria} $\{0, \tfrac{1}{2}, 1\}$ are exactly the
-  conjunction-idempotent values together with the negation fixed
-  point; they are derived from the algebra, not postulated.
+\item The \textbf{algebraic fixed points} $\{0, \tfrac{1}{2}, 1\}$
+  are exactly the conjunction-idempotent values together with the
+  negation fixed point; they are derived from the algebra, not
+  postulated.
 \item The \textbf{Kleene collapse} to $\{0, \tfrac{1}{2}, 1\}$ is the
   unique non-trivial three-element quotient.
 \item The \textbf{congruence classification} shows the Kleene quotient
@@ -1505,10 +1605,22 @@ underdetermined posteriors on the probabilistic side (connecting to
 imprecise probability~\cite{walley1991}), and as paraconsistency on
 the logical side (the negation fixed point $\tfrac{1}{2}$ witnesses
 non-explosion).
-The bridge theorem is a property of the triplet and its collapse;
-conditioning provides the mechanism that makes the framework useful
-for reasoning under uncertainty, connecting update and logical
-consequence through the same algebra.
+
+The bridge and conditioning are complementary, not redundant.
+The bridge theorem operates through the collapse homomorphism on the
+connectives $(\negc, \conjc, \disjc)$; it does not extend to
+conditionals (Section~\ref{sec:bridge-scope}), because the chain rule
+depends on a joint parameter that has no truth-functional three-valued
+analogue.
+Conditioning provides the mechanism that makes the framework useful
+for reasoning under uncertainty: it connects Bayesian update to the
+same algebra without forcing ex falso, and its underdetermined
+zero-evidence behavior is the probabilistic counterpart of
+paraconsistency.
+Together, the bridge and conditioning unify three roles of $[0,1]$:
+as a space of truth degrees (fuzzy logic), as a space of credences
+(probability), and as the domain of a consequence relation whose
+discrete shadow is the Kleene lattice.
 Graded predicates with inf/sup quantifiers extend the framework to
 predicate logic; this development, including crisp agreement and
 self-referential fixed points, is deferred to future work.
@@ -1737,7 +1849,7 @@ Path dependence (Prop.~\ref{thm:path-dependence})
   & \texttt{path\_dep\_fixed\_a}, etc. \\
 Self-conj.\ decay (Prop.~\ref{prop:self-conj-decay})
   & \texttt{self\_conj\_lt}, \texttt{self\_disj\_gt} \\
-Equilibria (Thm.~\ref{thm:equilibria})
+Algebraic fixed points (Prop.~\ref{thm:equilibria})
   & \texttt{equilibria\_characterization} \\
 Collapse homomorphism (Thm.~\ref{thm:collapse})
   & \texttt{collapse\_neg/conj/disj} \\
