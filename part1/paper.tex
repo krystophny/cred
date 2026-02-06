@@ -43,7 +43,7 @@
 \newcommand{\Real}{\mathbb{R}}
 \newcommand{\Nat}{\mathbb{N}}
 
-\title{\textbf{The Product De Morgan Triplet, Primitive Conditioning,\\and the Kleene Collapse}}
+\title{The Product De Morgan Triplet, Primitive Conditioning, and the Kleene Collapse}
 
 \author{Anonymous for blind review}
 \date{February 2026}
@@ -64,11 +64,12 @@ classes exists.
 The unique three-element quotient is the Kleene lattice, distinguishing
 the product De Morgan triplet from MV-algebras, which have infinitely
 many congruences.
-As context for this result, we give Lean-verified proofs of known facts
-(uniqueness of the min copula among symmetric idempotent copulas,
-path dependence of conditioning at evidence zero) and develop
-consequence relations (K$_3$, LP, graded thresholds), Bayesian/Jeffrey
-update, and graded predicates on the same structure.
+Whether this rigidity persists under the weaker hypothesis of
+$[0,1]$-multiplication alone remains open.
+As context, we give Lean-verified proofs of known supporting facts:
+uniqueness of the min copula among symmetric idempotent copulas,
+path dependence of conditioning at evidence zero, and the collapse
+homomorphism to the Kleene lattice.
 All proofs are machine-checked in Lean~4 with Mathlib.
 \end{abstract}
 
@@ -95,8 +96,8 @@ $\cred(A \mid B) \cdot \cred(B) = \cred(A \land B)$.
 The conjunction is the product t-norm, the disjunction its De Morgan dual
 (the probabilistic sum), and together with complement they form the
 \emph{product De Morgan triplet}~\cite{klement2000,hajek1998}.
-In t-norm fuzzy logic, each conjunction determines a unique implication via
-\emph{residuation}: $a \to b = \sup\{c : a \otimes c \leq b\}$.
+In t-norm fuzzy logic, each left-continuous t-norm determines a unique
+implication via \emph{residuation}: $a \to b = \sup\{c : a \otimes c \leq b\}$.
 Since $0 \otimes c = 0 \leq b$ for all $c$ and $b$, every residuated
 implication forces $0 \to b = 1$ --- \emph{ex falso quodlibet} is built
 in~\cite{hajek1998}.
@@ -118,14 +119,18 @@ conditioning --- connects probability-style reasoning on $[0,1]$ to
 logic-style reasoning on the Kleene lattice
 $\{0, \tfrac{1}{2}, 1\}$ via a surjective homomorphism (the
 \emph{Kleene collapse}, Section~\ref{sec:collapse}).
-On $[0,1]$, it supports Bayesian and Jeffrey conditioning
-(Sections~\ref{sec:valuations}--\ref{sec:update}).
 On the quotient, it recovers the shared truth tables of K$_3$, LP,
 and RM3 --- and the min/max operations of possibility theory
 (Remark~\ref{rem:possibility}).
-The main contribution of this paper is showing that this collapse is
-the \emph{unique} non-trivial finite quotient: a complete congruence
+Chain-rule conditioning motivates studying the product De Morgan triplet
+as a unit: it is the specific choice of companion operations
+(complement, product) that makes conditioning at zero unconstrained
+rather than forcing ex falso.
+The main contribution is showing that the collapse to the Kleene lattice
+is the \emph{unique} non-trivial finite quotient: a complete congruence
 classification (Theorem~\ref{thm:congruence-main}).
+The proof itself uses only product and negation; conditioning provides
+the \emph{reason to care} about this particular signature.
 
 \textbf{Main result.}
 The \emph{complete congruence classification}
@@ -154,12 +159,6 @@ which have infinitely many congruences.
 \item \textbf{Collapse to Kleene} (Theorem~\ref{thm:collapse},
   Theorem~\ref{thm:quotient-unique}):
   The Kleene lattice is the unique three-element quotient.
-\item \textbf{Valuations, update, consequence, predicates}
-  (Sections~\ref{sec:valuations}--\ref{sec:predicates}):
-  Standard developments on this structure --- independent, Kleene, and
-  joint-parametrized valuations; Bayesian and Jeffrey update;
-  K$_3$/LP/graded consequence; and graded predicates with inf/sup
-  quantifiers --- contextualized by the collapse.
 \item \textbf{Lean formalization} (Appendix~\ref{app:lean}):
   All results are machine-checked in Lean~4 with Mathlib.
 \end{enumerate}
@@ -172,10 +171,6 @@ dependence.
 Section~\ref{sec:fixed-points} treats fixed points.
 Section~\ref{sec:collapse} establishes the collapse to the Kleene lattice.
 Section~\ref{sec:congruence} gives the complete congruence classification.
-Section~\ref{sec:valuations} defines valuations and collapse composition.
-Section~\ref{sec:update} develops Bayesian and Jeffrey update rules.
-Section~\ref{sec:consequence} develops consequence relations.
-Section~\ref{sec:predicates} extends to graded predicates.
 Section~\ref{sec:conclusion} concludes.
 Appendix~\ref{app:prelim} provides formal preliminaries.
 Appendix~\ref{app:lean} describes the Lean formalization.
@@ -192,7 +187,7 @@ chain-rule conditioning.
 This is not an axiomatic class of algebras: all properties follow
 from the specific arithmetic of $[0,1]$.
 The structure is well-known in fuzzy
-logic~\cite{hajek1998,klement2000};
+logic~\cite{hajek1998,klement2000,esteva2001};
 Goguen~\cite{goguen1969} used the product t-norm as the conjunction
 in his logic of inexact concepts.
 The idea of primitive conditioning has precedents in
@@ -225,21 +220,18 @@ On the Kleene quotient $\{0, \tfrac{1}{2}, 1\}$, conjunction becomes
 $\min$; we write $\min$ explicitly in that context to distinguish the
 two operations.
 
-\textbf{Important distinction.}
-The product $c_1 \conjc c_2$ is an \emph{algebraic operation} on credence
-values, not a claim about the actual joint credence
+\begin{remark}[Product vs.\ Joint]
+\label{rem:product-vs-joint}
+The product $c_1 \conjc c_2$ is an algebraic operation on credence
+values, not a claim about the joint credence
 $\cred(A \land B)$ of two propositions.
-The joint depends on the dependence structure:
-under independence, $\cred(A \land B) = \cred(A) \cdot \cred(B)$
-(trivial conditioning);
-under maximum positive dependence,
-$\cred(A \land B) = \min(\cred(A), \cred(B))$
-(non-trivial, Bayes-consistent);
-under maximum negative dependence,
-$\cred(A \land B) = \max(\cred(A) + \cred(B) - 1, 0)$
-(\L ukasiewicz t-norm).
-The joint is an \emph{external parameter} in the Fr\'echet-Hoeffding interval
-$[\max(\cred(A) + \cred(B) - 1, 0),\; \min(\cred(A), \cred(B))]$.
+The joint depends on the dependence structure and lies in the
+Fr\'echet-Hoeffding interval
+$[\max(\cred(A) + \cred(B) - 1, 0),\; \min(\cred(A), \cred(B))]$:
+independence gives $\cred(A) \cdot \cred(B)$;
+maximum positive dependence gives $\min(\cred(A), \cred(B))$;
+maximum negative dependence gives $\max(\cred(A) + \cred(B) - 1, 0)$.
+\end{remark}
 
 \begin{definition}[Disjunction]
 \label{def:disj}
@@ -499,9 +491,9 @@ Lean: \texttt{conditioning\_mk}, \texttt{conditioning\_unique}.
 
 \subsection{Implication Comparison}
 
-For evidence $> 0$ with joint $\min(a,b)$, the chain rule gives
-$\min(b/a,\; 1)$ --- the product residuated implication of
-H\'ajek's Product Logic ($\Pi$-logic)~\cite{hajek1998}.
+When evidence $a > 0$ and joint $= \min(a,b)$, the chain rule gives
+the conditional $\min(b/a,\; 1)$ --- the product residuated implication
+$a \to b$ of H\'ajek's Product Logic ($\Pi$-logic)~\cite{hajek1998}.
 The product De Morgan triplet and $\Pi$-logic share the same t-norm
 but differ in the status of implication:
 $\Pi$-logic defines $a \to b = \sup\{c : a \cdot c \leq b\}$
@@ -706,7 +698,7 @@ and \L ukasiewicz conjunction~\cite{lukasiewicz1920}.
 \end{proposition}
 \begin{proof}
 Negation forces $\varphi(\tfrac{1}{2}) = \tfrac{1}{2}$.
-Pick $c = \sqrt{1/2}$; then $c^2 = \tfrac{1}{2}$.
+Pick $c = \sqrt{1/2}$; then $c \conjc c = \tfrac{1}{2}$.
 But $\mathrm{conj}_{\text{\L}}(v,v) \in \{0, 1\}$ for all
 $v \in \{0, \tfrac{1}{2}, 1\}$, so no preimage of $\tfrac{1}{2}$ exists.
 Lean: \texttt{no\_luk\_collapse}.
@@ -765,13 +757,26 @@ lattice with partition $\{0\},(0,1),\{1\}$.
 The hypothesis that $\sim$ is compatible with $\mathbb{R}$-multiplication
 (not just multiplication on $[0,1]$) is essential for part~(4): the
 scaling trick multiplies by $(a^i)^{-1} > 1$, which lies outside $[0,1]$.
-This is the natural setting: the product t-norm on $[0,1]$ is the
-restriction of $\mathbb{R}$-multiplication, so a congruence on
-$([0,1], \cdot)$ that respects the ambient monoid $(\mathbb{R}, \cdot)$
-inherits the full scaling structure.
+This hypothesis is natural for two reasons.
+First, the product t-norm on $[0,1]$ is the restriction of
+$\mathbb{R}$-multiplication; a congruence that respects the ambient
+field inherits the scaling and inversion structure that the proof
+requires.
+Second, $[0,1]$ is not closed under multiplicative inverses --- there is
+no internal operation that ``undoes'' multiplication by a value in $(0,1)$
+--- so restricting to $[0,1]$-multiplication alone removes the algebraic
+leverage (cancellation, scaling) that distinguishes the product t-norm
+from, say, the minimum t-norm.
+The $\mathbb{R}$-compatibility hypothesis makes this leverage explicit.
+
 Whether part~(4) holds under the weaker hypothesis of
-$[0,1]$-multiplication alone is an open question;
-the Lean formalization uses $\mathbb{R}$-multiplication explicitly
+$[0,1]$-multiplication alone is an open question.
+A counterexample would require an equivalence relation on $[0,1]$
+compatible with multiplication and negation that has four or more finite
+classes but does not extend to a congruence on $(\mathbb{R}, \cdot)$.
+We know of no such example, but the proof technique above does not
+apply without inverses.
+The Lean formalization uses $\mathbb{R}$-multiplication explicitly
 (\texttt{CredCongruence.conj\_compat}).
 
 \begin{proof}
@@ -810,374 +815,55 @@ All four parts are fully Lean-verified in \texttt{Cred/Congruence.lean}:
 
 \begin{remark}[Comparison with MV-algebras and BL-algebras]
 \label{rem:mv-comparison}
-In MV-algebras~\cite{mundici2011}, Chang's completeness theorem gives a
-rich congruence lattice: every MV-algebra is a subdirect product of
-totally ordered ones, and the standard MV-algebra on $[0,1]$ has
-infinitely many congruences (one for each rational).
-The product De Morgan triplet exhibits the opposite behavior: exactly one
-non-trivial finite congruence.
-More broadly, BL-algebras (the algebraic semantics of H\'ajek's Basic
-Logic~\cite{hajek1998}) admit subdirect decomposition into totally
-ordered components.
-The standard product algebra $[0,1]_\Pi$ is simple as a BL-algebra
-(no non-trivial BL-congruences)~\cite{hajek1998}.
-Our classification operates on a different signature --- $({\cdot},\,
-1{-}(\cdot))$ rather than $({\cdot},\, {\to})$ --- and shows that even
-in this weaker setting (no residuated implication), the only non-trivial
-finite quotient is the Kleene lattice.
-The rigidity is thus a property of the product t-norm itself, not of the
-choice of companion operations.
-\end{remark}
+The congruence structure of $[0,1]$ varies sharply with the choice of
+signature, as summarized below.
 
-%=============================================================================
-\section{Valuations}
-\label{sec:valuations}
-%=============================================================================
-
-A \emph{valuation} assigns credences to propositions, bridging the
-propositional and algebraic worlds.
-The algebra of Section~\ref{sec:algebra} constrains how credences compose;
-a valuation specifies which credences particular propositions receive.
-Different choices of joint formula yield qualitatively different theories.
-
-\begin{definition}[Complement-Preserving Valuation]
-\label{def:cp-valuation}
-A valuation $v : \mathrm{Prop} \to [0,1]$ is \emph{complement-preserving}
-if $v(\sigma(A)) = \negc v(A)$ for a propositional negation $\sigma$.
-Lean: \texttt{CpValuation}.
-\end{definition}
-
-Complement preservation is the minimal requirement: the algebraic
-negation $\negc c = 1 - c$ matches propositional negation.
-
-\begin{definition}[Independent Valuation]
-\label{def:indep-valuation}
-A complement-preserving valuation is \emph{independent} if
-$v(A \land B) = v(A) \conjc v(B)$ and
-$v(A \lor B) = v(A) \disjc v(B)$ for all $A, B$.
-Lean: \texttt{IndepValuation}.
-\end{definition}
-
-Under independence, the conditional $\cred(A \mid B)$ satisfies
-$\cred(A \mid B) \cdot v(B) = v(A) \cdot v(B)$, so
-$\cred(A \mid B) = v(A)$ whenever $v(B) > 0$:
-evidence has no effect.
-Independence also fails idempotence ($v(A \land A) = v(A)^2 \neq v(A)$
-in general; Lean: \texttt{IndepValuation.conj\_not\_idempotent}).
-These two failures motivate the alternatives.
-
-\begin{definition}[Kleene Valuation]
-\label{def:kleene-valuation}
-A complement-preserving valuation is a \emph{Kleene valuation} if
-$v(A \land B) = \min(v(A), v(B))$ and
-$v(A \lor B) = \max(v(A), v(B))$.
-\end{definition}
-
-By the uniqueness theorem (Theorem~\ref{thm:uniqueness-main}), the
-minimum is the unique symmetric, idempotent copula.
-A Kleene valuation is therefore the unique choice that is both
-idempotent and Bayes-consistent --- the logic-compatible valuation.
-
-\begin{definition}[Joint-Parametrized Valuation]
-\label{def:joint-valuation}
-A \emph{joint-parametrized valuation} consists of a complement-preserving
-valuation $v$ together with an external joint function
-$j : \mathrm{Prop}^2 \to [0,1]$ satisfying the Fr\'echet bounds
-$\max(v(A) + v(B) - 1,\, 0) \leq j(A,B) \leq \min(v(A), v(B))$.
-Lean: \texttt{JointValuation}.
-\end{definition}
-
-The joint-parametrized valuation unifies the previous two:
-setting $j(A,B) = v(A) \cdot v(B)$ recovers independence;
-setting $j(A,B) = \min(v(A), v(B))$ recovers the Kleene valuation.
-An arbitrary joint from empirical data gives full probability-style
-reasoning.
-
-\begin{proposition}[Collapse Composition]
-\label{prop:collapse-composition}
-Composing any product-copula valuation with the collapse homomorphism
-of Theorem~\ref{thm:collapse} yields a Kleene valuation:
-\begin{align*}
-\mathrm{collapse}(v(\sigma(A))) &= \mathrm{neg}(\mathrm{collapse}(v(A))), \\
-\mathrm{collapse}(v(A \land B)) &= \min(\mathrm{collapse}(v(A)),\, \mathrm{collapse}(v(B))), \\
-\mathrm{collapse}(v(A \lor B)) &= \max(\mathrm{collapse}(v(A)),\, \mathrm{collapse}(v(B))).
-\end{align*}
-Lean: \texttt{collapse\_val\_neg}, \texttt{collapse\_val\_conj},
-\texttt{collapse\_val\_disj}.
-\end{proposition}
-\begin{proof}
-Each identity follows from the corresponding homomorphism property of
-the collapse (Theorem~\ref{thm:collapse}) applied to the valuation's
-compatibility conditions.
-\end{proof}
-
-This is the mechanism connecting $[0,1]$ to K$_3$/LP/RM3:
-regardless of the specific copula used on $[0,1]$, the collapsed
-valuation always operates with Kleene min/max.
-Independence gives trivial conditioning; min gives non-trivial logic;
-an external joint gives full probability.
-
-%=============================================================================
-\section{Update Rules}
-\label{sec:update}
-%=============================================================================
-
-The chain rule $\cred(A \mid B) \conjc \cred(B) = \cred(A \land B)$
-constrains how credences relate; update rules apply this constraint
-dynamically, computing a posterior valuation from a prior and new
-evidence.
-
-\begin{definition}[Bayesian Update]
-\label{def:bayesian-update}
-Given a joint-parametrized valuation $v$ with evidence $B$ satisfying
-$v(B) > 0$, the \emph{Bayesian posterior} is
-$v'(A) = j(A,B) / v(B)$.
-Lean: \texttt{bayesianUpdate}.
-\end{definition}
-
-\begin{proposition}[Chain-Rule Preservation]
-\label{prop:bayesian-chain}
-The Bayesian posterior satisfies the chain rule:
-$v'(A) \conjc v(B) = j(A,B)$.
-The posterior is the unique credence with this property
-(by Proposition~\ref{thm:uniqueness}).
-Lean: \texttt{bayesianUpdate\_chain\_rule}, \texttt{bayesianUpdate\_unique}.
-\end{proposition}
-\begin{proof}
-By construction: $v'(A) = j(A,B)/v(B)$, so
-$v'(A) \cdot v(B) = j(A,B)$.
-Uniqueness follows from \texttt{conditioning\_unique}.
-\end{proof}
-
-\begin{definition}[Jeffrey Update]
-\label{def:jeffrey-update}
-For uncertain evidence with new credence $q$ for $B$, the
-\emph{Jeffrey posterior}~\cite{jeffrey1965} is
-\[
-v'(A) = \cred(A \mid B) \cdot q + \cred(A \mid \negc B) \cdot (1 - q).
-\]
-At $q = 1$ this reduces to Bayesian update; at $q = 0$ it conditions
-on $\negc B$.
-Lean: \texttt{jeffreyUpdate}, \texttt{jeffreyUpdate\_certain},
-\texttt{jeffreyUpdate\_zero}.
-\end{definition}
-
-\begin{proposition}[Zero-Evidence Underdetermination]
-\label{prop:zero-underdetermined}
-When $v(B) = 0$, any conditional $\cred(A \mid B) \in [0,1]$ satisfies
-the chain rule, so neither Bayesian nor Jeffrey update produces a unique
-posterior.
-Lean: \texttt{bayesian\_underdetermined\_at\_zero},
-\texttt{jeffrey\_underdetermined\_at\_zero}.
-\end{proposition}
-\begin{proof}
-The chain rule gives $c \cdot 0 = 0$ for all $c$, so every $c$
-is consistent.
-\end{proof}
-
-This underdetermination is the dynamic counterpart of the
-static result at the end of Section~\ref{sec:conditioning}:
-conditioning on impossible evidence is unconstrained.
-It connects to imprecise probability~\cite{walley1991,levi1980},
-where sets of priors replace point estimates precisely when
-the data underdetermine a unique posterior.
-
+\smallskip
 \begin{center}
 \small
-\begin{tabular}{lccc}
+\begin{tabular}{lll}
 \toprule
-\textbf{Update rule} & \textbf{Evidence type} & \textbf{Requirement}
-  & \textbf{Unique posterior?} \\
+\textbf{Signature} & \textbf{Congruences on $[0,1]$} & \textbf{Reference} \\
 \midrule
-Bayesian & certain & $v(B) > 0$ & Yes \\
-Jeffrey & uncertain & $v(B) > 0$, $v(\negc B) > 0$ & Yes \\
-Disintegration & measure-theoretic & $\sigma$-algebra & Yes \\
-Chain rule at $v(B)=0$ & --- & --- & No \\
-\bottomrule
-\end{tabular}
-\normalsize
-\captionof{table}{Update rules and their requirements.
-Disintegration~\cite{chang1997} resolves the zero-evidence case via
-measure-theoretic machinery beyond the scope of this paper.}
-\label{tab:update-comparison}
-\end{center}
-
-%=============================================================================
-\section{Consequence Relations}
-\label{sec:consequence}
-%=============================================================================
-
-The product De Morgan triplet has no built-in consequence
-relation~\cite{priest2008}.
-This section shows what happens when one is added via designated values.
-
-\subsection{Designated Values}
-
-\begin{definition}[K$_3$, LP Designation]
-\label{def:designated}
-K$_3$ designates $\{1\}$; LP designates $\{1, \tfrac{1}{2}\}$.
-Lean: \texttt{isDesignatedK3}, \texttt{isDesignatedLP}.
-\end{definition}
-
-\begin{definition}[Three-Valued Consequence]
-\label{def:three-val-consequence}
-$A_1, \ldots, A_n \models_D B$ iff every valuation $v$ with
-$v(A_i) \in D$ for all $i$ satisfies $v(B) \in D$.
-Lean: \texttt{threeValConsequence}.
-\end{definition}
-
-\subsection{K$_3$: Paracomplete}
-
-K$_3$~\cite{kleene1952} designates only $1$ and has no tautologies.
-
-\begin{proposition}[K$_3$ Has No Tautologies]
-\label{prop:k3-no-taut}
-$\not\models_{\mathrm{K}_3} A$ for any $A$.
-\end{proposition}
-\begin{proof}
-The constant-$\tfrac{1}{2}$ valuation defeats every formula.
-Lean: \texttt{k3\_no\_tautology}.
-\end{proof}
-
-\begin{proposition}[K$_3$: Excluded Middle Fails]
-\label{prop:k3-em}
-$\mathrm{disj}(\tfrac{1}{2}, \tfrac{1}{2}) = \tfrac{1}{2}$ is not
-K$_3$-designated.
-Lean: \texttt{k3\_excluded\_middle\_fails}.
-\end{proposition}
-
-\subsection{LP: Paraconsistent}
-
-LP~\cite{priest1979} designates $\{1, \tfrac{1}{2}\}$.
-
-\begin{proposition}[LP: Excluded Middle Holds]
-\label{prop:lp-em}
-$\mathrm{disj}(c, \mathrm{neg}(c))$ is LP-designated for all $c$.
-Lean: \texttt{lp\_excluded\_middle}.
-\end{proposition}
-
-\begin{proposition}[LP: Explosion Fails]
-\label{prop:lp-no-explosion}
-Set $v(A) = \tfrac{1}{2}$, $v(B) = 0$: both $v(A)$ and
-$\mathrm{neg}(v(A))$ are LP-designated, but $v(B)$ is not.
-Lean: \texttt{lp\_no\_explosion}.
-\end{proposition}
-
-\subsection{Graded Consequence}
-
-\begin{definition}[Graded Consequence]
-\label{def:graded-consequence}
-For threshold $t \in [0,1]$:
-$A_1, \ldots, A_n \models_t B$ iff every $v : \alpha \to [0,1]$ with
-$v(A_i) \geq t$ for all $i$ satisfies $v(B) \geq t$.
-Lean: \texttt{gradedConsequence}.
-\end{definition}
-
-\begin{proposition}[No Explosion]
-\label{thm:no-explosion}
-For $0 < t \leq \tfrac{1}{2}$, graded consequence does not have
-explosion: $v(A) = \tfrac{1}{2}$, $v(B) = 0$ witnesses the failure.
-Lean: \texttt{graded\_no\_explosion}.
-\end{proposition}
-
-Note that graded consequence on $[0,1]$ quantifies over all valuations
-$v : \alpha \to [0,1]$; decidability and complexity of the resulting
-entailment relation are not addressed here.
-
-\subsection{Comparison}
-
-\begin{center}
-\small
-\begin{tabular}{lcccc}
-\toprule
-\textbf{System} & \textbf{Designated} & \textbf{Tautologies?}
-  & \textbf{Excl.\ middle?} & \textbf{Explosion?} \\
-\midrule
-Classical & $\{1\}$ (two-valued) & Yes & Yes & Yes \\
-K$_3$ & $\{1\}$ & No & No & Vacuously$^\S$ \\
-LP & $\{1, \tfrac{1}{2}\}$ & Yes$^\|$ & Yes$^\|$ & No \\
-RM3$^\dagger$ & $\{1, \tfrac{1}{2}\}$+relev.
-  & Yes$^\|$ & Yes$^\|$ & No \\
-Graded ($t \leq \tfrac{1}{2}$) & $\{c \geq t\}$
-  & $^\ddagger$ & $^\ddagger$ & No \\
+MV: $(\max(a{+}b{-}1,0),\; 1{-}(\cdot))$ & Infinitely many
+  & \cite{cignoli2000,mundici2011} \\
+BL (product): $({\cdot},\; {\to})$ & Simple (none)
+  & \cite{hajek1998,agliano2003} \\
+De Morgan: $({\cdot},\; 1{-}(\cdot))$ & Exactly one finite
+  & Theorem~\ref{thm:congruence-main} \\
 \bottomrule
 \end{tabular}
 \normalsize
 \end{center}
 \smallskip
-\noindent
-{\footnotesize
-$^\|$Under homomorphic valuations.
-$^\S$No valuation makes both $v(A)$ and $\mathrm{neg}(v(A))$
-K$_3$-designated.
-$^\dagger$Well-known~\cite{priest2008}; not Lean-formalized.
-$^\ddagger$Threshold-dependent.}
 
-%=============================================================================
-\section{Graded Predicates and Self-Reference}
-\label{sec:predicates}
-%=============================================================================
+In MV-algebras~\cite{cignoli2000,mundici2011}, Chang's completeness
+theorem gives a rich congruence lattice: every MV-algebra is a subdirect
+product of totally ordered ones, and the standard MV-algebra on $[0,1]$
+has infinitely many congruences (one for each rational).
+In BL-algebras~\cite{hajek1998,agliano2003} (the algebraic semantics of
+Basic Logic), the standard product algebra $[0,1]_\Pi$ is
+\emph{simple}: it has no non-trivial BL-congruences at all.
+The residuated implication $a \to b = \sup\{c : a \cdot c \leq b\}$
+is so constraining that no quotient survives.
 
-A graded predicate $P : X \to [0,1]$ generalizes fuzzy set
-membership~\cite{zadeh1965}.
-Pointwise operations
-($(\negc P)(x) = 1 - P(x)$,
-$(P \conjc Q)(x) = P(x) \cdot Q(x)$,
-$(P \disjc Q)(x) = P(x) + Q(x) - P(x) \cdot Q(x)$)
-satisfy all algebraic laws pointwise
-(Lean: \texttt{GradedPredicate.neg\_neg},
-\texttt{GradedPredicate.de\_morgan\_conj}, etc.).
-
-\begin{definition}[Graded Predicate]
-\label{def:graded-predicate}
-A \emph{graded predicate} over domain $X$ is a function
-$P : X \to [0,1]$.
-Lean: \texttt{GradedPredicate}.
-\end{definition}
-
-\subsection{Quantifiers}
-
-\begin{definition}[Quantifiers]
-\label{def:quantifiers}
-$\cred(\forall x.\; P(x)) = \inf_x P(x)$, \quad
-$\cred(\exists x.\; P(x)) = \sup_x P(x)$.
-Lean: \texttt{credInf}, \texttt{credSup}.
-\end{definition}
-
-\begin{theorem}[Quantifier Duality]
-\label{thm:quantifier-duality}
-$\negc\cred(\forall x.\; P(x)) = \cred(\exists x.\; \negc P(x))$.
-Lean: \texttt{quantifier\_duality\_val}.
-\end{theorem}
-
-\begin{proposition}[Classical Agreement]
-\label{prop:classical-agreement}
-For crisp predicates (range $\subseteq \{0, 1\}$):
-$\inf_x P(x) = 0$ iff some $x$ has $P(x) = 0$;
-$\sup_x P(x) = 1$ iff some $x$ has $P(x) = 1$.
-Lean: \texttt{crisp\_inf\_zero\_iff}, \texttt{crisp\_sup\_one\_iff}.
-\end{proposition}
-
-\subsection{Self-Reference}
-
-\begin{corollary}[Negation Fixed-Point Resolution]
-\label{thm:russell}
-If $c = \negc c$, then $c = \tfrac{1}{2}$.
-(Immediate from Lemma~\ref{thm:liar}; Lean: \texttt{russell\_fixed\_point}.)
-\end{corollary}
-
-The corollary is an immediate consequence of the fixed-point lemma
-(Lemma~\ref{thm:liar}), which is itself elementary.
-Its interest is conditional: \emph{if} one works in an ambient
-framework admitting unrestricted comprehension --- for instance,
-paraconsistent set theory~\cite{brady2006,weber2010} --- then
-Russell's predicate $R = \{x : x \notin x\}$ applied to itself gives
-$R(R) = \negc R(R)$, and the corollary forces $R(R) = \tfrac{1}{2}$.
-We do not develop such a framework here.
-The corollary merely shows that the product De Morgan triplet
-\emph{assigns a consistent value} to the fixed-point equation, which
-is a prerequisite for any graded paraconsistent set theory built on
-this structure.
+Our signature --- $({\cdot},\, 1{-}(\cdot))$ --- sits between these
+extremes.
+Replacing residuation with complement removes enough structure to allow
+one non-trivial finite congruence (the Kleene quotient) but not more.
+The complement's involutivity ($\negc\negc c = c$) forces the
+three-element structure via the negation fixed point at $\tfrac{1}{2}$;
+the product's non-idempotence prevents any coarser finite partition
+from being well-defined.
+The rigidity is thus a property of the product t-norm paired with
+involutive negation, modulated by which companion operation
+(residuation or complement) is present.
+This suggests a broader question: for a fixed continuous t-norm, how
+does the congruence lattice of $(T, \negc)$ relate to the congruence
+lattice of $(T, \to_T)$?
+The product case gives one data point; the \L ukasiewicz case (where
+MV-algebras and the De Morgan triplet coincide) gives another.
+\end{remark}
 
 %=============================================================================
 \section{Conclusion}
@@ -1199,17 +885,11 @@ The supporting results --- uniqueness of the min copula
 path dependence (Proposition~\ref{thm:path-dependence}), and the
 collapse homomorphism (Theorem~\ref{thm:collapse}) --- are known or
 elementary; our contribution is the Lean verification and the
-packaging with chain-rule conditioning.
-On $[0,1]$, Bayesian and Jeffrey update propagate credences through
-the chain rule, with zero-evidence underdetermination connecting to
-imprecise probability~\cite{walley1991}.
-On the Kleene quotient, consequence relations recover K$_3$
-(paracomplete), LP (paraconsistent), and graded thresholds.
-
+congruence classification.
 Open problems: the congruence classification under $[0,1]$-only
-multiplication; first-order extension with formal proof theory;
-consequence relations compatible with unconstrained conditioning at
-zero; and connections to paraconsistent set theory.
+multiplication; a general theory of how congruence lattices vary
+across signatures sharing the same t-norm; and whether the
+classification constrains the space of definable consequence relations.
 
 \section*{Acknowledgements}
 
@@ -1274,19 +954,16 @@ $\cred(A \mid B) \cdot \cred(B) = \cred(A \land B)$.
 \label{app:lean}
 %=============================================================================
 
-The formalization comprises approximately 2700 lines of Lean~4 with Mathlib
-across six modules.
-Of these, roughly half directly verify paper results; the remainder
-consists of supporting infrastructure (Boolean subalgebra closure,
-implication table entries for RM3/G\"odel, comparison lemmas).
-\texttt{Cred/Basic.lean} (core algebra, conditioning, fixed points, collapse,
-comparisons);
-\texttt{Cred/Congruence.lean} (congruence classification, singleton boundaries);
-\texttt{Cred/Valuation.lean} (valuations, collapse composition);
-\texttt{Cred/Consequence.lean} (K$_3$/LP designation, no-explosion);
-\texttt{Cred/Update.lean} (Bayesian/Jeffrey update);
-\texttt{Cred/Predicate.lean} (graded predicates, quantifier duality, Russell
-fixed point).
+The results in this paper are formalized in two Lean~4 modules
+(with Mathlib):
+\texttt{Cred/Basic.lean} (core algebra, conditioning, fixed points,
+collapse, comparisons; ${\approx}\,1750$ lines) and
+\texttt{Cred/Congruence.lean} (congruence classification, singleton
+boundaries; ${\approx}\,350$ lines).
+Four additional modules ---
+\texttt{Valuation}, \texttt{Update}, \texttt{Consequence},
+\texttt{Predicate} --- formalize valuations, update rules,
+consequence relations, and graded predicates on the same structure.
 
 \textbf{Design choices.}
 \texttt{Credence} is a structure carrying explicit \texttt{nonneg} and
@@ -1312,7 +989,7 @@ proof.
 \null\quad \texttt{chainRule : condCred}~$\otimes$~\texttt{evidence = joint}
 
 \medskip
-\textbf{Key theorems:}
+\textbf{Key theorems (this paper):}
 \begin{itemize}[nosep]
 \item \texttt{conditioning\_zero\_any},
   \texttt{conditioning\_unique}: boundary behavior
@@ -1330,20 +1007,8 @@ proof.
   \texttt{no\_four\_or\_more\_classes}: congruence classification
 \item \texttt{no\_godel\_collapse}, \texttt{no\_luk\_collapse}:
   impossibility
-\item \texttt{k3\_no\_tautology}, \texttt{lp\_no\_explosion},
-  \texttt{graded\_no\_explosion}: consequence
-\item \texttt{quantifier\_duality\_val},
-  \texttt{russell\_fixed\_point}: predicates
 \item \texttt{path\_dep\_fixed\_a}, \texttt{path\_dep\_proportional},
   \texttt{path\_dep\_square}: path dependence
-\item \texttt{collapse\_val\_neg}, \texttt{collapse\_val\_conj},
-  \texttt{collapse\_val\_disj}: collapse composition
-\item \texttt{bayesianUpdate\_chain\_rule},
-  \texttt{bayesianUpdate\_unique}: Bayesian update
-\item \texttt{jeffreyUpdate\_certain},
-  \texttt{jeffreyUpdate\_zero}: Jeffrey update
-\item \texttt{bayesian\_underdetermined\_at\_zero},
-  \texttt{jeffrey\_underdetermined\_at\_zero}: zero-evidence
 \end{itemize}
 
 Verification: \texttt{cd lean \&\& lake build}.

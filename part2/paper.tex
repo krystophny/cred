@@ -1,0 +1,525 @@
+% Valuations, Update, and Consequence on the Product De Morgan Triplet
+%
+% Companion to Part 1 (congruence classification).
+% References to Lean formalization: lean/Cred/{Valuation,Update,Consequence,Predicate}.lean
+
+\documentclass[11pt,a4paper]{article}
+
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{mathtools}
+\usepackage{enumitem}
+\usepackage{booktabs}
+\usepackage{caption}
+\usepackage{hyperref}
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue,
+    citecolor=blue,
+    urlcolor=blue,
+    pdfauthor={Anonymous},
+    pdftitle={Valuations, Update, and Consequence on the Product De Morgan Triplet}
+}
+\usepackage{cleveref}
+\usepackage[margin=1in]{geometry}
+
+% Theorem environments
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{example}[theorem]{Example}
+\newtheorem{remark}[theorem]{Remark}
+
+% Custom commands (matching Part 1)
+\newcommand{\cred}{\mathsf{cred}}
+\newcommand{\negc}{\mathord{\sim}}
+\newcommand{\conjc}{\otimes}
+\newcommand{\disjc}{\sqcup}
+\newcommand{\condc}[2]{({#1} \mid {#2})}
+\newcommand{\Real}{\mathbb{R}}
+\newcommand{\Nat}{\mathbb{N}}
+
+\title{Valuations, Update, and Consequence on the Product De Morgan Triplet}
+
+\author{Anonymous for blind review}
+\date{February 2026}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+We develop valuations, update rules, consequence relations, and graded
+predicates on the product De Morgan triplet --- the concrete structure
+on $[0,1]$ comprising product conjunction, probabilistic-sum disjunction,
+and standard complement, equipped with chain-rule conditioning.
+Part~I established the core algebra, uniqueness of the min copula,
+and a complete congruence classification showing the Kleene lattice
+as the unique non-trivial finite quotient.
+Here we build on that foundation: independent, Kleene, and
+joint-parametrized valuations; Bayesian and Jeffrey update with
+zero-evidence underdetermination; K$_3$, LP, and graded consequence
+relations; and graded predicates with inf/sup quantifiers and a
+self-reference fixed point.
+All results are machine-checked in Lean~4 with Mathlib.
+\end{abstract}
+
+%=============================================================================
+\section{Introduction}
+\label{sec:intro}
+%=============================================================================
+
+This paper is a companion to Part~I, which studied the product
+De Morgan triplet on $[0,1]$ --- product conjunction ($c_1 \conjc c_2 = c_1 \cdot c_2$),
+probabilistic-sum disjunction ($c_1 \disjc c_2 = c_1 + c_2 - c_1 c_2$),
+and standard complement ($\negc c = 1 - c$) --- equipped with
+chain-rule conditioning ($\condc{A}{B} \conjc \cred(B) = \cred(A \land B)$).
+Part~I established the algebraic properties, proved uniqueness of the
+min copula among symmetric idempotent copulas, analyzed path dependence
+at evidence zero, constructed the collapse homomorphism to the Kleene
+lattice, and gave a complete congruence classification: the partition
+$\{0\},(0,1),\{1\}$ is the unique non-trivial finite congruence.
+
+Here we develop the applied theory on this structure.
+Section~\ref{sec:valuations} defines complement-preserving, independent,
+Kleene, and joint-parametrized valuations, and shows that composing any
+valuation with the collapse yields a Kleene valuation.
+Section~\ref{sec:update} develops Bayesian and Jeffrey update rules,
+with zero-evidence underdetermination connecting to imprecise probability.
+Section~\ref{sec:consequence} adds consequence relations (K$_3$, LP,
+graded thresholds) via designated values.
+Section~\ref{sec:predicates} extends to graded predicates with
+quantifier duality and a self-reference fixed point.
+All results are machine-checked in Lean~4 with Mathlib.
+
+%=============================================================================
+\section{Valuations}
+\label{sec:valuations}
+%=============================================================================
+
+A \emph{valuation} assigns credences to propositions, bridging the
+propositional and algebraic worlds.
+The algebra of Part~I constrains how credences compose;
+a valuation specifies which credences particular propositions receive.
+Different choices of joint formula yield qualitatively different theories.
+
+\begin{definition}[Complement-Preserving Valuation]
+\label{def:cp-valuation}
+A valuation $v : \mathrm{Prop} \to [0,1]$ is \emph{complement-preserving}
+if $v(\sigma(A)) = \negc v(A)$ for a propositional negation $\sigma$.
+Lean: \texttt{CpValuation}.
+\end{definition}
+
+Complement preservation is the minimal requirement: the algebraic
+negation $\negc c = 1 - c$ matches propositional negation.
+
+\begin{definition}[Independent Valuation]
+\label{def:indep-valuation}
+A complement-preserving valuation is \emph{independent} if
+$v(A \land B) = v(A) \conjc v(B)$ and
+$v(A \lor B) = v(A) \disjc v(B)$ for all $A, B$.
+Lean: \texttt{IndepValuation}.
+\end{definition}
+
+Under independence, the conditional $\cred(A \mid B)$ satisfies
+$\cred(A \mid B) \cdot v(B) = v(A) \cdot v(B)$, so
+$\cred(A \mid B) = v(A)$ whenever $v(B) > 0$:
+evidence has no effect.
+Independence also fails idempotence ($v(A \land A) = v(A)^2 \neq v(A)$
+in general; Lean: \texttt{IndepValuation.conj\_not\_idempotent}).
+These two failures motivate the alternatives.
+
+\begin{definition}[Kleene Valuation]
+\label{def:kleene-valuation}
+A complement-preserving valuation is a \emph{Kleene valuation} if
+$v(A \land B) = \min(v(A), v(B))$ and
+$v(A \lor B) = \max(v(A), v(B))$.
+\end{definition}
+
+By the uniqueness theorem (Part~I, Theorem~3.1), the
+minimum is the unique symmetric, idempotent copula.
+A Kleene valuation is therefore the unique choice that is both
+idempotent and Bayes-consistent --- the logic-compatible valuation.
+
+\begin{definition}[Joint-Parametrized Valuation]
+\label{def:joint-valuation}
+A \emph{joint-parametrized valuation} consists of a complement-preserving
+valuation $v$ together with an external joint function
+$j : \mathrm{Prop}^2 \to [0,1]$ satisfying the Fr\'echet bounds
+$\max(v(A) + v(B) - 1,\, 0) \leq j(A,B) \leq \min(v(A), v(B))$.
+Lean: \texttt{JointValuation}.
+\end{definition}
+
+The joint-parametrized valuation unifies the previous two:
+setting $j(A,B) = v(A) \cdot v(B)$ recovers independence;
+setting $j(A,B) = \min(v(A), v(B))$ recovers the Kleene valuation.
+An arbitrary joint from empirical data gives full probability-style
+reasoning.
+
+\begin{proposition}[Collapse Composition]
+\label{prop:collapse-composition}
+Composing any product-copula valuation with the collapse homomorphism
+(Part~I, Theorem~6.1) yields a Kleene valuation:
+\begin{align*}
+\mathrm{collapse}(v(\sigma(A))) &= \mathrm{neg}(\mathrm{collapse}(v(A))), \\
+\mathrm{collapse}(v(A \land B)) &= \min(\mathrm{collapse}(v(A)),\, \mathrm{collapse}(v(B))), \\
+\mathrm{collapse}(v(A \lor B)) &= \max(\mathrm{collapse}(v(A)),\, \mathrm{collapse}(v(B))).
+\end{align*}
+Lean: \texttt{collapse\_val\_neg}, \texttt{collapse\_val\_conj},
+\texttt{collapse\_val\_disj}.
+\end{proposition}
+\begin{proof}
+Each identity follows from the corresponding homomorphism property of
+the collapse applied to the valuation's compatibility conditions.
+\end{proof}
+
+This is the mechanism connecting $[0,1]$ to K$_3$/LP/RM3:
+regardless of the specific copula used on $[0,1]$, the collapsed
+valuation always operates with Kleene min/max.
+Independence gives trivial conditioning; min gives non-trivial logic;
+an external joint gives full probability.
+
+%=============================================================================
+\section{Update Rules}
+\label{sec:update}
+%=============================================================================
+
+The chain rule $\cred(A \mid B) \conjc \cred(B) = \cred(A \land B)$
+constrains how credences relate; update rules apply this constraint
+dynamically, computing a posterior valuation from a prior and new
+evidence.
+
+\begin{definition}[Bayesian Update]
+\label{def:bayesian-update}
+Given a joint-parametrized valuation $v$ with evidence $B$ satisfying
+$v(B) > 0$, the \emph{Bayesian posterior} is
+$v'(A) = j(A,B) / v(B)$.
+Lean: \texttt{bayesianUpdate}.
+\end{definition}
+
+\begin{proposition}[Chain-Rule Preservation]
+\label{prop:bayesian-chain}
+The Bayesian posterior satisfies the chain rule:
+$v'(A) \conjc v(B) = j(A,B)$.
+The posterior is the unique credence with this property.
+Lean: \texttt{bayesianUpdate\_chain\_rule}, \texttt{bayesianUpdate\_unique}.
+\end{proposition}
+\begin{proof}
+By construction: $v'(A) = j(A,B)/v(B)$, so
+$v'(A) \cdot v(B) = j(A,B)$.
+Uniqueness follows from conditioning uniqueness (Part~I, Proposition~4.3).
+\end{proof}
+
+\begin{definition}[Jeffrey Update]
+\label{def:jeffrey-update}
+For uncertain evidence with new credence $q$ for $B$, the
+\emph{Jeffrey posterior}~\cite{jeffrey1965} is
+\[
+v'(A) = \cred(A \mid B) \cdot q + \cred(A \mid \negc B) \cdot (1 - q).
+\]
+At $q = 1$ this reduces to Bayesian update; at $q = 0$ it conditions
+on $\negc B$.
+Lean: \texttt{jeffreyUpdate}, \texttt{jeffreyUpdate\_certain},
+\texttt{jeffreyUpdate\_zero}.
+\end{definition}
+
+\begin{proposition}[Zero-Evidence Underdetermination]
+\label{prop:zero-underdetermined}
+When $v(B) = 0$, any conditional $\cred(A \mid B) \in [0,1]$ satisfies
+the chain rule, so neither Bayesian nor Jeffrey update produces a unique
+posterior.
+Lean: \texttt{bayesian\_underdetermined\_at\_zero},
+\texttt{jeffrey\_underdetermined\_at\_zero}.
+\end{proposition}
+\begin{proof}
+The chain rule gives $c \cdot 0 = 0$ for all $c$, so every $c$
+is consistent.
+\end{proof}
+
+This underdetermination is the dynamic counterpart of the
+static result (Part~I, Section~4):
+conditioning on impossible evidence is unconstrained.
+It connects to imprecise probability~\cite{walley1991,levi1980},
+where sets of priors replace point estimates precisely when
+the data underdetermine a unique posterior.
+
+\begin{center}
+\small
+\begin{tabular}{lccc}
+\toprule
+\textbf{Update rule} & \textbf{Evidence type} & \textbf{Requirement}
+  & \textbf{Unique posterior?} \\
+\midrule
+Bayesian & certain & $v(B) > 0$ & Yes \\
+Jeffrey & uncertain & $v(B) > 0$, $v(\negc B) > 0$ & Yes \\
+Disintegration & measure-theoretic & $\sigma$-algebra & Yes \\
+Chain rule at $v(B)=0$ & --- & --- & No \\
+\bottomrule
+\end{tabular}
+\normalsize
+\captionof{table}{Update rules and their requirements.
+Disintegration~\cite{chang1997} resolves the zero-evidence case via
+measure-theoretic machinery beyond the scope of this paper.}
+\label{tab:update-comparison}
+\end{center}
+
+%=============================================================================
+\section{Consequence Relations}
+\label{sec:consequence}
+%=============================================================================
+
+The product De Morgan triplet has no built-in consequence
+relation~\cite{priest2008}.
+This section shows what happens when one is added via designated values.
+
+\subsection{Designated Values}
+
+\begin{definition}[K$_3$, LP Designation]
+\label{def:designated}
+K$_3$ designates $\{1\}$; LP designates $\{1, \tfrac{1}{2}\}$.
+Lean: \texttt{isDesignatedK3}, \texttt{isDesignatedLP}.
+\end{definition}
+
+\begin{definition}[Three-Valued Consequence]
+\label{def:three-val-consequence}
+$A_1, \ldots, A_n \models_D B$ iff every valuation $v$ with
+$v(A_i) \in D$ for all $i$ satisfies $v(B) \in D$.
+Lean: \texttt{threeValConsequence}.
+\end{definition}
+
+\subsection{K$_3$: Paracomplete}
+
+K$_3$~\cite{kleene1952} designates only $1$ and has no tautologies.
+
+\begin{proposition}[K$_3$ Has No Tautologies]
+\label{prop:k3-no-taut}
+$\not\models_{\mathrm{K}_3} A$ for any $A$.
+\end{proposition}
+\begin{proof}
+The constant-$\tfrac{1}{2}$ valuation defeats every formula.
+Lean: \texttt{k3\_no\_tautology}.
+\end{proof}
+
+\begin{proposition}[K$_3$: Excluded Middle Fails]
+\label{prop:k3-em}
+$\mathrm{disj}(\tfrac{1}{2}, \tfrac{1}{2}) = \tfrac{1}{2}$ is not
+K$_3$-designated.
+Lean: \texttt{k3\_excluded\_middle\_fails}.
+\end{proposition}
+
+\subsection{LP: Paraconsistent}
+
+LP~\cite{priest1979} designates $\{1, \tfrac{1}{2}\}$.
+
+\begin{proposition}[LP: Excluded Middle Holds]
+\label{prop:lp-em}
+$\mathrm{disj}(c, \mathrm{neg}(c))$ is LP-designated for all $c$.
+Lean: \texttt{lp\_excluded\_middle}.
+\end{proposition}
+
+\begin{proposition}[LP: Explosion Fails]
+\label{prop:lp-no-explosion}
+Set $v(A) = \tfrac{1}{2}$, $v(B) = 0$: both $v(A)$ and
+$\mathrm{neg}(v(A))$ are LP-designated, but $v(B)$ is not.
+Lean: \texttt{lp\_no\_explosion}.
+\end{proposition}
+
+\subsection{Graded Consequence}
+
+\begin{definition}[Graded Consequence]
+\label{def:graded-consequence}
+For threshold $t \in [0,1]$:
+$A_1, \ldots, A_n \models_t B$ iff every $v : \alpha \to [0,1]$ with
+$v(A_i) \geq t$ for all $i$ satisfies $v(B) \geq t$.
+Lean: \texttt{gradedConsequence}.
+\end{definition}
+
+\begin{proposition}[No Explosion]
+\label{thm:no-explosion}
+For $0 < t \leq \tfrac{1}{2}$, graded consequence does not have
+explosion: $v(A) = \tfrac{1}{2}$, $v(B) = 0$ witnesses the failure.
+Lean: \texttt{graded\_no\_explosion}.
+\end{proposition}
+
+Note that graded consequence on $[0,1]$ quantifies over all valuations
+$v : \alpha \to [0,1]$; decidability and complexity of the resulting
+entailment relation are not addressed here.
+
+\subsection{Comparison}
+
+\begin{center}
+\small
+\begin{tabular}{lcccc}
+\toprule
+\textbf{System} & \textbf{Designated} & \textbf{Tautologies?}
+  & \textbf{Excl.\ middle?} & \textbf{Explosion?} \\
+\midrule
+Classical & $\{1\}$ (two-valued) & Yes & Yes & Yes \\
+K$_3$ & $\{1\}$ & No & No & Vacuously$^\S$ \\
+LP & $\{1, \tfrac{1}{2}\}$ & Yes$^\|$ & Yes$^\|$ & No \\
+RM3$^\dagger$ & $\{1, \tfrac{1}{2}\}$+relev.
+  & Yes$^\|$ & Yes$^\|$ & No \\
+Graded ($t \leq \tfrac{1}{2}$) & $\{c \geq t\}$
+  & $^\ddagger$ & $^\ddagger$ & No \\
+\bottomrule
+\end{tabular}
+\normalsize
+\end{center}
+\smallskip
+\noindent
+{\footnotesize
+$^\|$Under homomorphic valuations.
+$^\S$No valuation makes both $v(A)$ and $\mathrm{neg}(v(A))$
+K$_3$-designated.
+$^\dagger$Well-known~\cite{priest2008}; not Lean-formalized.
+$^\ddagger$Threshold-dependent.}
+
+%=============================================================================
+\section{Graded Predicates and Self-Reference}
+\label{sec:predicates}
+%=============================================================================
+
+A graded predicate $P : X \to [0,1]$ generalizes fuzzy set
+membership~\cite{zadeh1965}.
+Pointwise operations
+($(\negc P)(x) = 1 - P(x)$,
+$(P \conjc Q)(x) = P(x) \cdot Q(x)$,
+$(P \disjc Q)(x) = P(x) + Q(x) - P(x) \cdot Q(x)$)
+satisfy all algebraic laws pointwise
+(Lean: \texttt{GradedPredicate.neg\_neg},
+\texttt{GradedPredicate.de\_morgan\_conj}, etc.).
+
+\begin{definition}[Graded Predicate]
+\label{def:graded-predicate}
+A \emph{graded predicate} over domain $X$ is a function
+$P : X \to [0,1]$.
+Lean: \texttt{GradedPredicate}.
+\end{definition}
+
+\subsection{Quantifiers}
+
+\begin{definition}[Quantifiers]
+\label{def:quantifiers}
+$\cred(\forall x.\; P(x)) = \inf_x P(x)$, \quad
+$\cred(\exists x.\; P(x)) = \sup_x P(x)$.
+Lean: \texttt{credInf}, \texttt{credSup}.
+\end{definition}
+
+\begin{theorem}[Quantifier Duality]
+\label{thm:quantifier-duality}
+$\negc\cred(\forall x.\; P(x)) = \cred(\exists x.\; \negc P(x))$.
+Lean: \texttt{quantifier\_duality\_val}.
+\end{theorem}
+
+\begin{proposition}[Classical Agreement]
+\label{prop:classical-agreement}
+For crisp predicates (range $\subseteq \{0, 1\}$):
+$\inf_x P(x) = 0$ iff some $x$ has $P(x) = 0$;
+$\sup_x P(x) = 1$ iff some $x$ has $P(x) = 1$.
+Lean: \texttt{crisp\_inf\_zero\_iff}, \texttt{crisp\_sup\_one\_iff}.
+\end{proposition}
+
+\subsection{Self-Reference}
+
+\begin{corollary}[Negation Fixed-Point Resolution]
+\label{thm:russell}
+If $c = \negc c$, then $c = \tfrac{1}{2}$.
+(Immediate from Part~I, Lemma~5.1; Lean: \texttt{russell\_fixed\_point}.)
+\end{corollary}
+
+The corollary is an immediate consequence of the fixed-point lemma
+(Part~I, Lemma~5.1), which is itself elementary.
+Its interest is conditional: \emph{if} one works in an ambient
+framework admitting unrestricted comprehension --- for instance,
+paraconsistent set theory~\cite{brady2006,weber2010} --- then
+Russell's predicate $R = \{x : x \notin x\}$ applied to itself gives
+$R(R) = \negc R(R)$, and the corollary forces $R(R) = \tfrac{1}{2}$.
+We do not develop such a framework here.
+The corollary merely shows that the product De Morgan triplet
+\emph{assigns a consistent value} to the fixed-point equation, which
+is a prerequisite for any graded paraconsistent set theory built on
+this structure.
+
+%=============================================================================
+\section{Conclusion}
+\label{sec:conclusion}
+%=============================================================================
+
+The product De Morgan triplet supports a natural suite of applied
+constructions.
+Valuations (complement-preserving, independent, Kleene,
+joint-parametrized) assign credences to propositions under different
+dependence assumptions; composing with the collapse homomorphism
+always yields a Kleene valuation.
+Bayesian and Jeffrey update propagate credences through the chain rule,
+with zero-evidence underdetermination connecting to imprecise
+probability~\cite{walley1991}.
+On the Kleene quotient, consequence relations recover K$_3$
+(paracomplete), LP (paraconsistent), and graded thresholds ---
+all without explosion.
+Graded predicates with inf/sup quantifiers satisfy classical duality,
+and the negation fixed point at $\tfrac{1}{2}$ provides a consistent
+resolution of self-referential equations, conditional on an ambient
+framework.
+
+Open problems: first-order extension with formal proof theory;
+consequence relations compatible with unconstrained conditioning at
+zero; connections to paraconsistent set theory; and the relationship
+between the congruence classification (Part~I) and the space of
+definable consequence relations.
+
+\section*{Acknowledgements}
+
+The author thanks Graham Priest for correspondence that clarified the
+distinction between connectives and consequence relations.
+
+%=============================================================================
+% Bibliography
+%=============================================================================
+
+\bibliographystyle{plain}
+\bibliography{../cred}
+
+%=============================================================================
+% APPENDIX
+%=============================================================================
+\appendix
+
+%=============================================================================
+\section{Lean Formalization}
+\label{app:lean}
+%=============================================================================
+
+The results in this paper are formalized across four Lean~4 modules
+(with Mathlib):
+\texttt{Cred/Valuation.lean} (valuations, collapse composition);
+\texttt{Cred/Update.lean} (Bayesian/Jeffrey update);
+\texttt{Cred/Consequence.lean} (K$_3$/LP designation, no-explosion);
+\texttt{Cred/Predicate.lean} (graded predicates, quantifier duality,
+Russell fixed point).
+
+These build on the core modules from Part~I:
+\texttt{Cred/Basic.lean} (algebra, conditioning, fixed points, collapse)
+and \texttt{Cred/Congruence.lean} (congruence classification).
+
+\textbf{Key theorems:}
+\begin{itemize}[nosep]
+\item \texttt{collapse\_val\_neg}, \texttt{collapse\_val\_conj},
+  \texttt{collapse\_val\_disj}: collapse composition
+\item \texttt{bayesianUpdate\_chain\_rule},
+  \texttt{bayesianUpdate\_unique}: Bayesian update
+\item \texttt{jeffreyUpdate\_certain},
+  \texttt{jeffreyUpdate\_zero}: Jeffrey update
+\item \texttt{bayesian\_underdetermined\_at\_zero},
+  \texttt{jeffrey\_underdetermined\_at\_zero}: zero-evidence
+\item \texttt{k3\_no\_tautology}, \texttt{lp\_no\_explosion},
+  \texttt{graded\_no\_explosion}: consequence
+\item \texttt{quantifier\_duality\_val},
+  \texttt{russell\_fixed\_point}: predicates
+\end{itemize}
+
+Verification: \texttt{cd lean \&\& lake build}.
+Toolchain: Lean 4.16.0 with Mathlib 4.16.0.
+
+\end{document}

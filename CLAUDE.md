@@ -1,9 +1,9 @@
 # CLAUDE.md
 
-## Current Focus: Part 1 (publication-ready)
+## Current Focus: Part 1 (publication-ready), Part 2 (companion)
 
-Ship a publication-quality `part1/paper.tex` with machine-checked proofs.
-All Lean proofs fully verified (zero sorry). Paper and formalization are publication-ready.
+Part 1 focused on congruence classification (sections 1-7). Part 2 has applied material (valuations, update, consequence, predicates).
+All Lean proofs fully verified (zero sorry). Both papers build clean.
 
 ## Build (match CI)
 
@@ -42,7 +42,8 @@ Keep the separation clear: `⊗`/`⊔` are the core algebraic operations (produc
 - `lean/Cred/Update.lean` — Bayesian and Jeffrey conditionalization.
 - `lean/Cred/Predicate.lean` — graded predicates, quantifiers, Russell fixed point.
 - `lean/Cred/Congruence.lean` — congruence classification (all four parts fully verified).
-- `part1/paper.tex` — publication paper (12 sections + 2 appendices, ~1437 lines, 14 pages).
+- `part1/paper.tex` — congruence classification (7 sections + 2 appendices, 12 pages).
+- `part2/paper.tex` — valuations, update, consequence, predicates (4 sections + 1 appendix, 6 pages).
 - `part3/` — future work: graded proofs, self-hosting, undecidability.
 
 ## Key Results to Keep Green (Lean)
