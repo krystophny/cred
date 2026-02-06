@@ -76,8 +76,8 @@ lattice is equivalent to positivity consequence on $[0,1]$,
 and K$_3$ consequence to certainty consequence.
 The bridge does \emph{not} extend to conditioning: no
 truth-functional function on the lattice can reproduce the
-min-copula conditional --- a finitary Lewis triviality result
-witnessed by two explicit pairs.
+min-copula conditional --- a finitary impossibility result
+analogous to Lewis triviality, witnessed by two explicit pairs.
 We characterize the boundary conditions under which the bridge
 does hold, show that Bayesian update inherits it, and prove
 a zero-evidence trichotomy tying underdetermination, paraconsistency,
@@ -826,31 +826,23 @@ relabeling).
 \end{theorem}
 
 \begin{proof}
-The negation fixed point $\tfrac{1}{2}$ maps to the unique
-negation fixed point of~$S$; $\varphi(0)$ and $\varphi(1)$ form
-the $2$-cycle.
-Every interior $c \in (0,1)$ maps to $\varphi(\tfrac{1}{2})$:
-if $\varphi(c) = \varphi(0)$ for some $c \in (0,1)$, then
-conjunction preservation gives
-$\varphi(1) = \varphi(1 \conjc c) \conjc \varphi(c)^{-1}$;
-more directly, surjectivity requires a preimage for each of
-the three classes, and $\varphi(\tfrac{1}{2})$ is already the
-negation fixed point; if $\varphi(0) = \varphi(\tfrac{1}{2})$
-then $\varphi(1) = \negc\varphi(0) = \negc\varphi(\tfrac{1}{2})
-= \varphi(\tfrac{1}{2})$, collapsing $S$ to fewer than three
-elements --- contradicting $|S| = 3$.
-(The Lean proof rules out $\varphi(0) = \texttt{half}$ by
-showing $\varphi(1) = \negc\varphi(0)$ would force
-$\texttt{one} = \texttt{half}$, a contradiction.)
-With $\varphi(0)$ and $\varphi(1)$ forming the $2$-cycle,
-the conjunction table is forced:
-$\varphi(\tfrac{1}{2} \conjc \tfrac{1}{2})
-= \varphi(\tfrac{1}{2}) \conjc \varphi(\tfrac{1}{2})$
-by conjunction preservation, and in any three-element quotient
-with absorber $\varphi(0)$ and identity $\varphi(1)$, the
-product of the middle element with itself is the middle element
-(since $\min(\tfrac{1}{2}, \tfrac{1}{2}) = \tfrac{1}{2}$).
-This forces Kleene $\min$
+Let $a = \varphi(0)$, $b = \varphi(1)$, and $m = \varphi(\tfrac{1}{2})$.
+Negation preservation gives $b = \negc a$ (a $2$-cycle) and
+$m = \negc m$ (fixed point).
+Since $a$, $b$, $m$ are distinct ($|S| = 3$), we have $m \neq a$
+and $m \neq b$.
+(If $a = m$, then $b = \negc a = \negc m = m$, so $a = b = m$,
+contradicting $|S| = 3$.)
+The element $a$ is the absorber ($\varphi(0 \conjc c) = a \conjc
+\varphi(c)$, and $0 \conjc c = 0$, so $a \conjc x = a$ for all
+$x \in S$) and $b$ is the identity (similarly).
+The only undetermined entry is $m \conjc m$.
+Let $d = \sqrt{1/2} \in (0,1)$; then $d^2 = \tfrac{1}{2}$.
+Conjunction preservation gives
+$\varphi(d) \conjc \varphi(d) = \varphi(d^2) = m$.
+Since $a \conjc a = a \neq m$ and $b \conjc b = b \neq m$, we
+must have $\varphi(d) = m$, giving $m \conjc m = m$.
+This is the Kleene conjunction table
 (Lean: \texttt{three\_element\allowbreak\_quotient\_unique}).
 \end{proof}
 
@@ -1258,7 +1250,10 @@ Lean: \texttt{cond\_bridge\_boundary},
 $\mathrm{g\ddot{o}del}(\mathrm{collapse}(b), 0) = 0$ for $b > 0$.
 (ii)~$a = 1$: $\min(1,b)/b = b/b = 1$;
 $\mathrm{g\ddot{o}del}(\mathrm{collapse}(b), 1) = 1$.
-(iii)~$b = 1$: $\min(a,1)/1 = a$; collapsing commutes trivially.
+(iii)~$b = 1$: $\min(a,1)/1 = a$;
+$\mathrm{collapse}(a) = \mathrm{g\ddot{o}del}(\mathrm{collapse}(1),
+\mathrm{collapse}(a)) = \mathrm{g\ddot{o}del}(1, \mathrm{collapse}(a))
+= \mathrm{collapse}(a)$.
 (iv)~$a \geq b$: $\min(a,b)/b = b/b = 1$; and
 $\mathrm{g\ddot{o}del}(\mathrm{collapse}(b),
 \mathrm{collapse}(a)) = 1$ when $a \geq b > 0$.
@@ -1599,13 +1594,13 @@ the standard complement~\cite{bergmann2008},
 and the probabilistic sum (De Morgan dual).
 The Kleene lattice and its logics are
 classical~\cite{kleene1952,asenjo1966,priest1979,priest2008,avron1991}.
-Ferm\"uller~\cite{fermuller2014} used the collapse in
-game-theoretic semantics to compare truth values; the present work
-proves a consequence-level equivalence
-(Theorems~\ref{thm:lp-bridge} and~\ref{thm:k3-bridge}) that
-Ferm\"uller did not address, and shows that the homomorphism
-cannot extend to conditioning
-(Theorem~\ref{thm:no-cond-bridge}).
+Ferm\"uller~\cite{fermuller2014} observed the collapse in
+Hintikka-style evaluation games for product logic, using it
+to reduce continuous-valued game trees to three-valued ones;
+the present work extends the observation to a consequence-level
+equivalence (Theorems~\ref{thm:lp-bridge}
+and~\ref{thm:k3-bridge}) and shows the homomorphism cannot
+extend to conditioning (Theorem~\ref{thm:no-cond-bridge}).
 
 \textbf{Primitive conditioning and conditionals.}
 Primitive conditioning has precedents in
@@ -2185,13 +2180,16 @@ then $\varphi(1) = \negc\varphi(0) = \negc\varphi(\tfrac{1}{2})
 = \varphi(\tfrac{1}{2})$, giving $|S| \leq 1$, a contradiction.
 The conjunction table is then forced:
 $\varphi(0)$ absorbs ($0 \conjc c = 0$), $\varphi(1)$ is the
-identity ($1 \conjc c = c$), and conjunction preservation gives
-$\varphi(\tfrac{1}{2}) \conjc \varphi(\tfrac{1}{2})
-= \varphi(\tfrac{1}{2} \conjc \tfrac{1}{2}) = \varphi(\tfrac{1}{4})$.
-Since $\varphi(0)$, $\varphi(1)$, and $\varphi(\tfrac{1}{2})$ are
-distinct, and $\varphi(0)$ is the absorber while $\varphi(1)$ is
-the identity, the self-product of the middle element must be itself:
-$\varphi(\tfrac{1}{2})^2 = \varphi(\tfrac{1}{2})$.
+identity ($1 \conjc c = c$).
+The only undetermined entry is
+$\varphi(\tfrac{1}{2}) \conjc \varphi(\tfrac{1}{2})$.
+Let $d = \sqrt{1/2} \in (0,1)$; then $d^2 = \tfrac{1}{2}$.
+Conjunction preservation gives
+$\varphi(d)^2 = \varphi(\tfrac{1}{2})$.
+Since $\varphi(0)^2 = \varphi(0)$ and
+$\varphi(1)^2 = \varphi(1)$, both differ from
+$\varphi(\tfrac{1}{2})$, so $\varphi(d) = \varphi(\tfrac{1}{2})$,
+giving $\varphi(\tfrac{1}{2})^2 = \varphi(\tfrac{1}{2})$.
 This forces Kleene $\min$.
 
 \emph{(4) Existence.}
