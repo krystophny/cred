@@ -8,6 +8,7 @@
 *.fdb_latexmk
 *.bbl
 *.blg
+*.dvi
 *.pdf
 !part1/figures/*.pdf
 
