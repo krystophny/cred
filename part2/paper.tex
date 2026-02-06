@@ -1213,9 +1213,12 @@ semantics and positivity/certainty consequence share this
 quantification; the collapse and lifting connect them without
 requiring assumptions about dependence.
 Restricting to independent (homomorphic) valuations would not
-change the equivalence: the lifted three-valued assignments
+change the equivalence: lifted three-valued assignments
 land in $\{0, \tfrac{1}{2}, 1\}$, which is closed under all
-connectives, so they are automatically homomorphic.
+connectives, so they are automatically homomorphic; in the
+collapsing direction, collapsed valuations are homomorphic
+because the collapse itself is a homomorphism
+(Theorem~\ref{thm:collapse}).
 \end{remark}
 
 \begin{proposition}[Structural Rules; verified here]
@@ -1559,14 +1562,9 @@ decidable by exhaustive search over $3^{|\alpha|}$ assignments.
 Non-consequence reduces to finding a counterexample in
 $\{0, \tfrac{1}{2}, 1\}^{|\alpha|}$ (verifiable in polynomial time),
 placing consequence in coNP.
-CoNP-hardness follows because classical validity reduces to LP
-consequence: every classical assignment is also an LP assignment
-($\{0, 1\} \subset \{0, \tfrac{1}{2}, 1\}$), so a classical
-counter-assignment is an LP counter-assignment and non-tautologies
-are preserved; the standard coNP-completeness of classical
-propositional validity then applies~\cite{priest2008}.
-The bridge then transfers coNP-hardness to positivity consequence
-on $[0,1]$.
+LP and K$_3$ consequence are known to be
+coNP-complete~\cite{priest2008,avron1991}; the bridge
+transfers this to positivity and certainty consequence on $[0,1]$.
 Lean: direct corollary of \texttt{lp\_formula\_bridge},
 \texttt{k3\_formula\_bridge}.
 \end{corollary}
@@ -1696,8 +1694,10 @@ K$_3$ & $\{1\}$ & No & No & Vacuously$^a$ \\
 LP & $\{1, \tfrac{1}{2}\}$ & Yes & Yes & No \\
 Graded ($t \leq \tfrac{1}{2}$) & $\{c \geq t\}$
   & Yes & Yes & No \\
-Graded ($t > \tfrac{1}{2}$) & $\{c \geq t\}$
-  & If $t \leq \tfrac{3}{4}$ & If $t \leq \tfrac{3}{4}$ & Vacuously$^b$ \\
+Graded ($\tfrac{1}{2} < t \leq \tfrac{3}{4}$) & $\{c \geq t\}$
+  & Yes$^c$ & Yes$^c$ & Vacuously$^b$ \\
+Graded ($t > \tfrac{3}{4}$) & $\{c \geq t\}$
+  & No & No & Vacuously$^b$ \\
 \bottomrule
 \end{tabular}
 \normalsize
@@ -1709,7 +1709,9 @@ $^a$No valuation makes both $v(A)$ and $\negc(v(A))$
 K$_3$-designated.
 $^b$For $t > \tfrac{1}{2}$: no valuation makes both
 $v(A) \geq t$ and $\negc v(A) \geq t$
-(Proposition~\ref{prop:graded-sharp}).}
+(Proposition~\ref{prop:graded-sharp}).
+$^c$Excluded middle ($A \disjc \negc A$) achieves the minimum $\tfrac{3}{4}$
+(Remark~\ref{rem:graded-em}).}
 
 %=============================================================================
 \section{Conclusion}
