@@ -226,15 +226,6 @@ $c_1 \disjc c_2 = \negc(\negc c_1 \conjc \negc c_2)
 The triple $(\conjc, \disjc, \negc)$ is the \emph{product De Morgan
 triplet}~\cite{klement2000,hajek1998}.
 
-\begin{remark}[Credence vs.\ Probability]
-\label{rem:not-probability}
-Every probability space satisfies the complement and chain-rule constraints.
-Probability adds a sigma-algebra, a measure determining $P(A \land B)$,
-and sigma-additivity.
-The structure studied here drops all of these
-(Section~\ref{sec:probability}).
-\end{remark}
-
 \subsection{Algebraic Properties}
 
 % Lean: neg_neg, neg_zero, neg_one, conj_comm, conj_assoc, conj_one, conj_zero,
@@ -310,8 +301,9 @@ Lean: \texttt{prod\_trivial\_conditioning},
 \begin{theorem}[Uniqueness of Truth-Functional Conjunction]
 \label{thm:uniqueness-main}
 \label{thm:min-copula-unique}
-Let $j : [0,1]^2 \to [0,1]$ be a symmetric, idempotent copula
-(symmetry, idempotence, zero boundary, unit marginal, 2-increasing).
+Let $j : [0,1]^2 \to [0,1]$ satisfy symmetry, idempotence,
+zero boundary, unit marginal, and 2-increasing
+(i.e., a symmetric idempotent copula; see Definition~\ref{def:copula}).
 Then $j(a,b) = \min(a,b)$ for all $a,b \in [0,1]$.
 Moreover, $\min$ is non-trivial: $\min(a,b)/b \neq a$ in general.
 \end{theorem}
@@ -452,7 +444,9 @@ Thus the product residuated implication appears as a special case of
 chain-rule conditioning (when evidence is positive), not as the
 primitive.
 The three definitions agree on all positive-evidence rows; they differ
-only in how they handle evidence~$= 0$:
+only in how they handle evidence~$= 0$.
+(The chain-rule column uses the specific joint $\min(a,b)$; other
+choices of joint would give different values.)
 
 \begin{center}
 \small
@@ -792,8 +786,7 @@ finite classes can exist.
 \begin{quote}
 \textbf{Open question.}
 Does there exist an equivalence relation on $[0,1]$, compatible with
-$[0,1]$-multiplication and negation, that has four or more finite
-classes?
+$[0,1]$-multiplication and negation, that has four or more classes?
 \end{quote}
 
 A counterexample would be an equivalence that identifies some but not
@@ -875,33 +868,30 @@ MV-algebras and the De Morgan triplet coincide) gives another.
 \label{sec:conclusion}
 %=============================================================================
 
-The product De Morgan triplet on $[0,1]$, equipped with chain-rule
-conditioning, has a rigid quotient structure.
-The congruence analysis (Section~\ref{sec:congruence}) operates at two
-levels.
-Under $[0,1]$-multiplication
-(Theorem~\ref{thm:unit-classification}): the Kleene lattice
-$\{0, \tfrac{1}{2}, 1\}$ is the unique non-trivial three-element
-quotient, boundary classes are singletons, and no two-element quotient
-exists.
-Under $\mathbb{R}$-multiplication
-(Theorem~\ref{thm:real-impossibility}): no non-trivial finite
-congruence exists at all --- multiplicative inverses allow a scaling
-argument that collapses all identifications.
-The gap between these two results isolates $[0,1]$-cancellation as
-the key obstacle: whether quotients with four or more classes exist
-under $[0,1]$-multiplication is open.
+The product De Morgan triplet on $[0,1]$ admits a two-level
+congruence classification
+(Theorems~\ref{thm:unit-classification}
+and~\ref{thm:real-impossibility}): the Kleene lattice is the unique
+non-trivial three-element quotient under $[0,1]$-multiplication, while
+no non-trivial finite quotient exists under
+$\mathbb{R}$-multiplication.
 
-The supporting results --- uniqueness of the min copula
-(Theorem~\ref{thm:uniqueness-main}, classical~\cite{nelsen2006}),
-path dependence (Proposition~\ref{thm:path-dependence}), and the
-collapse homomorphism (Theorem~\ref{thm:collapse}) --- are known or
-elementary; our contribution is the Lean verification and the
-two-level congruence classification.
-Open problems: the $[0,1]$-multiplication classification for
-$n \geq 4$ classes; a general theory of how congruence lattices vary
-across signatures sharing the same t-norm; and whether the
-classification constrains the space of definable consequence relations.
+Three open problems remain.
+First, the $[0,1]$-multiplication classification for $n \geq 4$
+classes: the scaling trick fails without multiplicative inverses, and
+the gap between unit and real congruences isolates $[0,1]$-cancellation
+as the precise obstacle.
+A resolution would determine whether the Kleene lattice is the
+\emph{only} non-trivial finite quotient of the product De Morgan
+triplet, or merely the smallest.
+Second, a general theory: for a fixed continuous t-norm $T$, how does
+the congruence lattice of the De Morgan reduct $(T, \negc)$ relate to
+the congruence lattice of the BL expansion $(T, \to_T)$?
+The product case gives one data point (Remark~\ref{rem:mv-comparison});
+the \L ukasiewicz case, where the De Morgan reduct and the MV-algebra
+coincide, gives another.
+Third, whether the congruence classification constrains the space of
+definable consequence relations on this signature.
 
 \section*{Acknowledgements}
 
