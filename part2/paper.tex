@@ -252,6 +252,9 @@ logic~\cite{bergmann2008,cintula2011}.
 \begin{definition}[Credence]
 \label{def:credence}
 A \emph{credence} is a value $c \in [0,1]$.
+We use ``credence'' (from epistemology) rather than ``truth value''
+or ``membership degree'' to emphasize the probabilistic
+interpretation of values in $[0,1]$.
 \end{definition}
 
 \begin{example}[Running Example: Rain and Wet Streets]
@@ -338,7 +341,7 @@ Table~\ref{tab:tnorm-comparison} summarizes the comparison.
 \toprule
 \textbf{T-norm} & \textbf{Self-conj} & \textbf{Non-idemp?}
   & \textbf{$\negc$-fixed pt?} & $T(\tfrac{1}{2},\tfrac{1}{2})$
-  & \textbf{Exactly 3?} \\
+  & \textbf{3-class quotient?} \\
 \midrule
 Product & $c^2 < c$ & Yes & $\tfrac{1}{2}$ & $\tfrac{1}{4}$
   & Yes \\
@@ -350,9 +353,10 @@ G\"odel & $\min(c,c) = c$ & No & $\tfrac{1}{2}$ & $\tfrac{1}{2}$
 \end{tabular}
 \normalsize
 \captionof{table}{Comparison of the three basic continuous t-norms.
-``Exactly 3?'' = whether the algebra has exactly three
-algebraically distinguished values: the conjunction-idempotent
-pair $\{0,1\}$ and the negation fixed point $\tfrac{1}{2}$.
+``3-class quotient?'' = whether
+$\{0, \tfrac{1}{2}, 1\}$ forms a valid quotient algebra under the
+given t-norm, with $\{0,1\}$ as conjunction-idempotent pair
+and $\tfrac{1}{2}$ as negation fixed point.
 $^*$G\"odel: every value in $[0,1]$ is conjunction-idempotent.
 \L ukasiewicz has the same candidate values
 $\{0, \tfrac{1}{2}, 1\}$, but
@@ -779,11 +783,11 @@ possibility theory's conjunction/disjunction~\cite{dubois1988}:
 the collapse maps the product De Morgan triplet to the
 possibility/necessity structure.
 The analogy extends partially to conditioning: Dubois--Prade
-conditioning matches the chain-rule conditional at boundaries
-(Theorem~\ref{thm:boundary}, case~(iv)), but breaks down at
-interior values for the same reason the conditional bridge
-fails --- truth-functional conditioning on
-$\{0, \tfrac{1}{2}, 1\}$ cannot capture ratio information.
+conditioning matches the chain-rule conditional when evidence
+or conclusion is at a boundary ($0$ or $1$), but breaks down at
+interior values because truth-functional conditioning on
+$\{0, \tfrac{1}{2}, 1\}$ cannot capture ratio information
+(Section~\ref{sec:cond-bridge} develops this in detail).
 \end{remark}
 
 \subsection{Uniqueness and Impossibility}
@@ -825,11 +829,28 @@ relabeling).
 The negation fixed point $\tfrac{1}{2}$ maps to the unique
 negation fixed point of~$S$; $\varphi(0)$ and $\varphi(1)$ form
 the $2$-cycle.
-The conjunction table is forced:
+Every interior $c \in (0,1)$ maps to $\varphi(\tfrac{1}{2})$:
+if $\varphi(c) = \varphi(0)$ for some $c \in (0,1)$, then
+conjunction preservation gives
+$\varphi(1) = \varphi(1 \conjc c) \conjc \varphi(c)^{-1}$;
+more directly, surjectivity requires a preimage for each of
+the three classes, and $\varphi(\tfrac{1}{2})$ is already the
+negation fixed point; if $\varphi(0) = \varphi(\tfrac{1}{2})$
+then $\varphi(1) = \negc\varphi(0) = \negc\varphi(\tfrac{1}{2})
+= \varphi(\tfrac{1}{2})$, collapsing $S$ to fewer than three
+elements --- contradicting $|S| = 3$.
+(The Lean proof rules out $\varphi(0) = \texttt{half}$ by
+showing $\varphi(1) = \negc\varphi(0)$ would force
+$\texttt{one} = \texttt{half}$, a contradiction.)
+With $\varphi(0)$ and $\varphi(1)$ forming the $2$-cycle,
+the conjunction table is forced:
 $\varphi(\tfrac{1}{2} \conjc \tfrac{1}{2})
-= \varphi(\tfrac{1}{4}) = \varphi(\tfrac{1}{2})$
-since $\tfrac{1}{4} \in (0,1)$ maps to the interior class.
-This is Kleene $\min$
+= \varphi(\tfrac{1}{2}) \conjc \varphi(\tfrac{1}{2})$
+by conjunction preservation, and in any three-element quotient
+with absorber $\varphi(0)$ and identity $\varphi(1)$, the
+product of the middle element with itself is the middle element
+(since $\min(\tfrac{1}{2}, \tfrac{1}{2}) = \tfrac{1}{2}$).
+This forces Kleene $\min$
 (Lean: \texttt{three\_element\allowbreak\_quotient\_unique}).
 \end{proof}
 
@@ -1060,8 +1081,11 @@ three-element lattice: every counterexample to consequence on
 $[0,1]$ collapses to a counterexample on
 $\{0, \tfrac{1}{2}, 1\}$, and conversely.
 LP and K$_3$ consequence are
-coNP-complete~\cite{priest2008,avron1991}; the bridge transfers
-this complexity to positivity and certainty consequence.
+coNP-complete~\cite{priest2008,avron1991}; the bridge gives
+an equivalence (not merely a one-directional reduction):
+non-consequence on $[0,1]$ reduces to non-consequence on
+$\{0, \tfrac{1}{2}, 1\}$ and vice versa, so positivity and
+certainty consequence are coNP-complete as well.
 \end{corollary}
 
 The bridge also transfers the paraconsistency and paracompleteness
@@ -1155,6 +1179,10 @@ for all $a, b \in [0,1]$ with $b > 0$
 the G\"odel implication $b \to a$ where $b$ is the antecedent).
 Lean: \texttt{no\_truthfunctional\_cond\_bridge}.
 \end{theorem}
+
+This impossibility is specific to the min-copula conditional;
+other copulas may admit a conditional bridge
+(Remark~\ref{rem:min-copula-specific}).
 
 \begin{proof}
 Two witnesses force contradictory values for
@@ -1353,12 +1381,16 @@ likely depends on how much ratio information the copula preserves.
 Given a joint credence $\cred(A \land B)$ and evidence
 $\cred(B) > 0$, the \emph{Bayesian posterior} is
 $\cred'(A) = \cred(A \land B) / \cred(B)$.
-This satisfies the chain rule by construction:
-$\cred'(A) \conjc \cred(B) = \cred(A \land B)$.
-
-Lean: \texttt{bayesianUpdate\_chain\_rule},
-\texttt{bayesianUpdate\_unique}.
 \end{definition}
+
+\begin{proposition}[Chain-Rule Preservation]
+\label{prop:bayes-chain}
+The Bayesian posterior satisfies the chain rule:
+$\cred'(A) \conjc \cred(B) = \cred(A \land B)$.
+It is the unique value with this property
+(Lean: \texttt{bayesianUpdate\_chain\_rule},
+\texttt{bayesianUpdate\_unique}).
+\end{proposition}
 
 In the running example (Example~\ref{ex:rain}), the min-copula
 posterior is $\cred'(\text{rain}) = 8/9$: rain was already
@@ -1393,16 +1425,8 @@ $\tfrac{1}{2}$ & 0 & 1 & 1 \\
 Lean: \texttt{qualUpdate\_zero\_zero} through
 \texttt{qualUpdate\_one\_one}.
 
-The table has a natural reading.
-Certain evidence ($e = 1$) preserves the prior: what you believed
-stays as it was.
-Intermediate evidence ($e = \tfrac{1}{2}$) maps uncertain
-conclusions to certainty --- the G\"odel conditional's ``benefit of
-the doubt'' for compatible evidence --- while mapping impossibility
-($p = 0$) to impossibility.
-Zero evidence ($e = 0$) maps everything to $1$: this is the ex falso
-row of the G\"odel conditional, which the chain rule avoids by
-leaving the conditional unconstrained.
+The $e = 0$ row is the ex falso row of the G\"odel conditional,
+which the chain rule avoids by leaving the conditional unconstrained.
 
 \subsection{Update Bridge Theorem}
 
@@ -1560,11 +1584,9 @@ Cred: certainty & $\{c = 1\}$ & No & No & Vacuously$^a$ \\
 \smallskip
 \noindent
 {\footnotesize
-$^a$No valuation makes both $v(A) = 1$ and $\negc v(A) = 1$, so
-explosion holds vacuously (premises jointly unsatisfiable).
-$^b$The witness $v(A) = \tfrac{1}{2}$, $v(B) = 0$ refutes explosion
-(Example~\ref{ex:explosion};
-Lean: \texttt{lp\_no\_explosion}).}
+$^a$Premises jointly unsatisfiable; explosion holds vacuously.
+$^b$Witness: $v(A) = \tfrac{1}{2}$, $v(B) = 0$
+(Lean: \texttt{lp\_no\_explosion}).}
 
 %=============================================================================
 \section{Related Work}
@@ -1629,6 +1651,10 @@ the collapse to preserve it.
 \textbf{Many-valued logic and consequence.}
 Pavelka~\cite{pavelka1979i} introduced graded inference
 in many-valued logic;
+H\'ajek, Paris, and Shepherdson~\cite{hajek2000} showed that
+rational Pavelka logic is a conservative extension of
+\L ukasiewicz predicate logic, clarifying the relationship between
+graded and classical deduction;
 B\v{e}hounek and Cintula~\cite{behounek2006} developed
 degree-preserving consequence.
 Suszko~\cite{suszko1977} argued that every Tarskian consequence
@@ -1637,11 +1663,16 @@ necessarily at the level of truth values);
 Malinowski~\cite{malinowski1993} and
 Font--Jansana--Pigozzi~\cite{font2003} developed this theme in
 abstract algebraic logic.
-The bridge theorems make Suszko's reduction finitary: the
-collapse homomorphism provides an explicit construction of
-three-valued models from $[0,1]$-valuations, and the lift provides
-witnesses in the other direction --- each Tarskian counterexample in
-one framework transfers to a counterexample in the other.
+The bridge theorems
+(Theorems~\ref{thm:lp-bridge} and~\ref{thm:k3-bridge})
+go further than Suszko's thesis: Suszko showed abstractly that
+every Tarskian consequence relation is determined by a
+two-valued partition into designated and non-designated values,
+but the bridge provides an explicit, constructive,
+\emph{bidirectional} reduction --- the collapse homomorphism
+converts any $[0,1]$-counterexample to a three-valued one,
+and the lift converts any three-valued counterexample to a
+$[0,1]$-counterexample, with both directions computable.
 Mundici's~\cite{mundici2011} theory of states on MV-algebras
 provides a different bridge between many-valued logic and
 probability, using \L ukasiewicz connectives;
@@ -2149,12 +2180,18 @@ The element $\varphi(\tfrac{1}{2})$ must be the unique negation
 fixed point of $S$.
 The remaining elements $\varphi(0)$ and $\varphi(1)$ form the
 2-cycle under negation.
+First, $\varphi(0) \neq \varphi(\tfrac{1}{2})$: if they were equal,
+then $\varphi(1) = \negc\varphi(0) = \negc\varphi(\tfrac{1}{2})
+= \varphi(\tfrac{1}{2})$, giving $|S| \leq 1$, a contradiction.
 The conjunction table is then forced:
 $\varphi(0)$ absorbs ($0 \conjc c = 0$), $\varphi(1)$ is the
-identity ($1 \conjc c = c$), and
+identity ($1 \conjc c = c$), and conjunction preservation gives
 $\varphi(\tfrac{1}{2}) \conjc \varphi(\tfrac{1}{2})
-= \varphi(\tfrac{1}{4}) = \varphi(\tfrac{1}{2})$
-since $\tfrac{1}{4} \in (0,1)$ maps to the interior class.
+= \varphi(\tfrac{1}{2} \conjc \tfrac{1}{2}) = \varphi(\tfrac{1}{4})$.
+Since $\varphi(0)$, $\varphi(1)$, and $\varphi(\tfrac{1}{2})$ are
+distinct, and $\varphi(0)$ is the absorber while $\varphi(1)$ is
+the identity, the self-product of the middle element must be itself:
+$\varphi(\tfrac{1}{2})^2 = \varphi(\tfrac{1}{2})$.
 This forces Kleene $\min$.
 
 \emph{(4) Existence.}
