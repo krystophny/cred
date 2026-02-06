@@ -80,8 +80,11 @@ The bridge operates through the collapse homomorphism on the
 connectives; chain-rule conditioning provides the complementary
 mechanism for reasoning under uncertainty, connecting Bayesian update
 to the same algebra without forcing ex falso.
-Supporting results include a congruence classification and graded
-consequence with a sharp no-explosion threshold.
+A congruence classification separates
+$[0,1]$-multiplication (Kleene quotient exists; four-or-more classes
+remain open) from $\mathbb{R}$-multiplication (no non-trivial finite
+quotient), and graded consequence exhibits a sharp no-explosion
+threshold at $\tfrac{1}{2}$.
 All results are machine-checked in Lean~4 with Mathlib
 (3018 lines across five modules, zero \texttt{sorry}).
 \end{abstract}
@@ -1356,11 +1359,12 @@ Because $\mathrm{collapse}(\llbracket\varphi\rrbracket_v)
 = \llbracket\varphi\rrbracket_{\mathrm{collapse}\circ v}$,
 designated status transfers from atoms to compound formulas
 built from negation, conjunction, and disjunction.
-Define evaluation recursively:
+Define evaluation recursively using the product connectives:
 given an assignment $v : \alpha \to [0,1]$ to atoms,
 $\llbracket \negc\varphi \rrbracket_v = \negc\llbracket\varphi\rrbracket_v$,
 $\llbracket \varphi \conjc \psi \rrbracket_v =
-\llbracket\varphi\rrbracket_v \conjc \llbracket\psi\rrbracket_v$,
+\llbracket\varphi\rrbracket_v \conjc \llbracket\psi\rrbracket_v$
+(product conjunction),
 $\llbracket \varphi \disjc \psi \rrbracket_v =
 \llbracket\varphi\rrbracket_v \disjc \llbracket\psi\rrbracket_v$;
 analogously for three-valued evaluation $\llbracket\cdot\rrbracket_w$
@@ -1555,10 +1559,12 @@ decidable by exhaustive search over $3^{|\alpha|}$ assignments.
 Non-consequence reduces to finding a counterexample in
 $\{0, \tfrac{1}{2}, 1\}^{|\alpha|}$ (verifiable in polynomial time),
 placing consequence in coNP.
-For coNP-hardness: classical validity reduces to LP consequence
-because $\{0, 1\} \subset \{0, \tfrac{1}{2}, 1\}$ and every
-classical counter-assignment (in $\{0,1\}$) is also an LP
-counter-assignment, so non-tautologies are preserved.
+CoNP-hardness follows because classical validity reduces to LP
+consequence: every classical assignment is also an LP assignment
+($\{0, 1\} \subset \{0, \tfrac{1}{2}, 1\}$), so a classical
+counter-assignment is an LP counter-assignment and non-tautologies
+are preserved; the standard coNP-completeness of classical
+propositional validity then applies~\cite{priest2008}.
 The bridge then transfers coNP-hardness to positivity consequence
 on $[0,1]$.
 Lean: direct corollary of \texttt{lp\_formula\_bridge},
@@ -1651,8 +1657,10 @@ The threshold $\tfrac{1}{2}$ is thus sharp:
 paraconsistency holds for $t \leq \tfrac{1}{2}$ (the
 constant-$\tfrac{1}{2}$ witness works) and fails for
 $t > \tfrac{1}{2}$ (the premises are unsatisfiable).
-At $t = 1$, graded consequence coincides with K$_3$ consequence
-(Lean: \texttt{graded\_at\_one\_is\_strict}), which is paracomplete.
+At $t = 1$, graded consequence coincides with certainty
+consequence, which the bridge (Theorem~\ref{thm:k3-formula-bridge})
+identifies with K$_3$ consequence; hence paracomplete
+(Lean: \texttt{graded\_at\_one\_is\_strict}).
 Lean: \texttt{graded\_explosion\_vacuous}.
 \end{proposition}
 \begin{proof}
@@ -1687,7 +1695,7 @@ Classical & $\{1\}$ (two-valued) & Yes & Yes & Yes \\
 K$_3$ & $\{1\}$ & No & No & Vacuously$^a$ \\
 LP & $\{1, \tfrac{1}{2}\}$ & Yes & Yes & No \\
 Graded ($t \leq \tfrac{1}{2}$) & $\{c \geq t\}$
-  & If $t \leq \tfrac{3}{4}$ & If $t \leq \tfrac{3}{4}$ & No \\
+  & Yes & Yes & No \\
 Graded ($t > \tfrac{1}{2}$) & $\{c \geq t\}$
   & If $t \leq \tfrac{3}{4}$ & If $t \leq \tfrac{3}{4}$ & Vacuously$^b$ \\
 \bottomrule
