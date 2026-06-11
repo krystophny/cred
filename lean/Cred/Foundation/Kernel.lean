@@ -68,6 +68,13 @@ inductive CrispProof (t : Credence) :
       Proof t Γ φ → CrispProof t Γ φ
   | equalityRefl {Γ : List (Formula Func Pred)} (τ : Term Func) :
       CrispProof t Γ (.equal τ τ)
+  | equalitySymm {Γ : List (Formula Func Pred)} {τ υ : Term Func} :
+      CrispProof t Γ (.equal τ υ) →
+      CrispProof t Γ (.equal υ τ)
+  | equalityTrans {Γ : List (Formula Func Pred)} {τ υ χ : Term Func} :
+      CrispProof t Γ (.equal τ υ) →
+      CrispProof t Γ (.equal υ χ) →
+      CrispProof t Γ (.equal τ χ)
 
 namespace CrispProof
 
@@ -76,6 +83,8 @@ def toDerivation {t : Credence}
     CrispProof t Γ φ → CrispDerivation t Γ φ
   | base p => CrispDerivation.base p.toDerivation
   | equalityRefl τ => CrispDerivation.equalityRefl τ
+  | equalitySymm p => CrispDerivation.equalitySymm p.toDerivation
+  | equalityTrans p q => CrispDerivation.equalityTrans p.toDerivation q.toDerivation
 
 theorem sound {t : Credence}
     {Γ : List (Formula Func Pred)} {φ : Formula Func Pred}
@@ -129,6 +138,13 @@ inductive FoundationProof (t : Credence) :
       FoundationProof t Γ ψ
   | equalityRefl {Γ : List (Formula Func Pred)} (τ : Term Func) :
       FoundationProof t Γ (.equal τ τ)
+  | equalitySymm {Γ : List (Formula Func Pred)} {τ υ : Term Func} :
+      FoundationProof t Γ (.equal τ υ) →
+      FoundationProof t Γ (.equal υ τ)
+  | equalityTrans {Γ : List (Formula Func Pred)} {τ υ χ : Term Func} :
+      FoundationProof t Γ (.equal τ υ) →
+      FoundationProof t Γ (.equal υ χ) →
+      FoundationProof t Γ (.equal τ χ)
   | forallElim {Γ : List (Formula Func Pred)} {φ : Formula Func Pred}
       {τ : Term Func} :
       FoundationProof t Γ (.forallE φ) →
@@ -147,6 +163,9 @@ def toDerivation {t : Credence}
   | weaken p hsub => FoundationDerivation.weaken p.toDerivation hsub
   | cut p q => FoundationDerivation.cut p.toDerivation q.toDerivation
   | equalityRefl τ => FoundationDerivation.equalityRefl τ
+  | equalitySymm p => FoundationDerivation.equalitySymm p.toDerivation
+  | equalityTrans p q =>
+      FoundationDerivation.equalityTrans p.toDerivation q.toDerivation
   | forallElim p => FoundationDerivation.forallElim p.toDerivation
   | existsIntro p => FoundationDerivation.existsIntro p.toDerivation
 
