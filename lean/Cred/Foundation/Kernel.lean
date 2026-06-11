@@ -119,6 +119,14 @@ inductive FoundationProof (t : Credence) :
     List (Formula Func Pred) → Formula Func Pred → Type (max 1 u v) where
   | base {Γ : List (Formula Func Pred)} {φ : Formula Func Pred} :
       Proof t Γ φ → FoundationProof t Γ φ
+  | weaken {Γ Δ : List (Formula Func Pred)} {φ : Formula Func Pred} :
+      FoundationProof t Γ φ →
+      (∀ p ∈ Γ, p ∈ Δ) →
+      FoundationProof t Δ φ
+  | cut {Γ : List (Formula Func Pred)} {φ ψ : Formula Func Pred} :
+      FoundationProof t Γ φ →
+      FoundationProof t (φ :: Γ) ψ →
+      FoundationProof t Γ ψ
   | equalityRefl {Γ : List (Formula Func Pred)} (τ : Term Func) :
       FoundationProof t Γ (.equal τ τ)
   | forallElim {Γ : List (Formula Func Pred)} {φ : Formula Func Pred}
@@ -136,6 +144,8 @@ def toDerivation {t : Credence}
     {Γ : List (Formula Func Pred)} {φ : Formula Func Pred} :
     FoundationProof t Γ φ → FoundationDerivation t Γ φ
   | base p => FoundationDerivation.base p.toDerivation
+  | weaken p hsub => FoundationDerivation.weaken p.toDerivation hsub
+  | cut p q => FoundationDerivation.cut p.toDerivation q.toDerivation
   | equalityRefl τ => FoundationDerivation.equalityRefl τ
   | forallElim p => FoundationDerivation.forallElim p.toDerivation
   | existsIntro p => FoundationDerivation.existsIntro p.toDerivation

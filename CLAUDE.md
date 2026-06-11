@@ -178,6 +178,7 @@ Foundation kernel (from Foundation/Kernel.lean):
 - `Structure.QuantifierProof`
 - `QuantifierProof.toDerivation`, `QuantifierProof.sound`
 - `Structure.FoundationProof`
+- `FoundationProof.weaken`, `FoundationProof.cut`
 - `FoundationProof.toDerivation`, `FoundationProof.sound`
 
 Foundation equality (from Foundation/Equality.lean):
