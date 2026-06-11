@@ -472,6 +472,23 @@ The algebraic semantics literature on residuated lattices and substructural
 logics provides the natural framework for this
 investigation~\cite{galatos2007,cintula2011}.
 
+\subsection{Threshold Consequence}
+
+The consequence layer can be organized by a threshold $t$.
+A formula is designated when its credence lies in $[t,1]$.
+The Lean module \texttt{Cred/Threshold.lean} proves reflexivity,
+monotonicity, and cut once for this family.
+Certainty consequence is the endpoint $t=1$.
+Positivity consequence is the union of the positive thresholds.
+
+Two thresholds are sharp.
+Explosion has a countermodel exactly when $0<t\le\tfrac12$.
+Excluded middle holds for all credence values exactly when
+$t\le\tfrac34$.
+Hence the interval $(\tfrac12,\tfrac34]$ has excluded middle without a
+non-vacuous explosion countermodel.
+This is a parameter family, not a new primitive logic.
+
 %=============================================================================
 \section{Open Directions}
 \label{sec:open}
