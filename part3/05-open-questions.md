@@ -90,8 +90,8 @@ For the current synthesis statement, see `paper.tex`.
     `lean/Cred/Foundation/Proof.lean` adds the first sound threshold calculus.
     `lean/Cred/Foundation/Kernel.lean` adds type-level certificates for base
     and quantifier derivations.
-    `lean/Cred/Foundation/Equality.lean` adds equality reflexivity under
-    explicit crisp-equality laws.
+    `lean/Cred/Foundation/Equality.lean` adds equality reflexivity and a
+    sound derivation layer under explicit crisp-equality laws.
     `lean/Cred/Foundation/Quantifier.lean` adds semantic quantifier bounds,
     formula-level instantiation rules, and a sound quantifier derivation layer.
 
