@@ -116,7 +116,7 @@ For the current synthesis statement, see `paper.tex`.
 14. **Kernel and tooling.** `lean/Cred/Kernel.lean` now defines type-level proof
     certificates for labelled derivations. `lean/Cred/Foundation/RuleCode.lean`
     names the trusted foundation rule inventory. `lean/Cred/Foundation/Checker.lean`
-    adds one-step checked rule application. The next engineering target is a
-    serializable certificate tree whose accepted nodes erase to `Kernel.Proof`
-    or `FoundationProof`. Tactics, automation, and editor support come after
-    that kernel boundary is small and stable.
+    adds one-step and recursive checked rule application. The next engineering
+    target is a serializable certificate syntax whose accepted nodes erase to
+    `Kernel.Proof` or `FoundationProof`. Tactics, automation, and editor
+    support come after that kernel boundary is small and stable.

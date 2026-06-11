@@ -224,6 +224,8 @@ Foundation calculus (from Foundation/Calculus.lean):
 Foundation examples (from Foundation/Examples.lean):
 - `equalitySymmetryCertificate`, `equalitySubstitutionCertificate`
 - `forallElimCertificate`, `existsIntroCertificate`
+- `forallElimCertificateTree`, `equalitySubstitutionCertificateTree`
+- `forallElimCertificateTree_checks`, `equalitySubstitutionCertificateTree_checks`
 - `equality_symmetry_certificate_sound`, `equality_substitution_certificate_sound`
 - `forall_elim_certificate_sound`, `exists_intro_certificate_sound`
 
@@ -237,6 +239,8 @@ Foundation checker (from Foundation/Checker.lean):
 - `Structure.FoundationRulePayload`
 - `FoundationRulePayload.code`
 - `applyFoundationRule`
+- `Structure.FoundationCertificateTree`
+- `checkFoundationCertificate`, `checkFoundationCertificateList`
 
 ## Philosophy
 

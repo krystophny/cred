@@ -104,9 +104,11 @@ lake build
 | `Foundation.Structure.foundation_derivation_sound` | Soundness for the combined foundation derivation layer |
 | `Foundation.Structure.equalitySymmetryCertificate`, `equalitySubstitutionCertificate` | Example foundation equality certificates |
 | `Foundation.Structure.forallElimCertificate`, `existsIntroCertificate` | Example foundation quantifier certificates |
+| `Foundation.Structure.forallElimCertificateTree_checks`, `equalitySubstitutionCertificateTree_checks` | Recursive checker examples that accept certificate trees |
 | `Foundation.Structure.FoundationRuleCode` | Trusted rule names for the foundation certificate checker boundary |
 | `Foundation.Structure.mem_trustedFoundationRules` | Every trusted foundation rule code is listed |
 | `Foundation.Structure.applyFoundationRule` | One-step checker from rule payloads and checked children to typed certificates |
+| `Foundation.Structure.checkFoundationCertificate` | Recursive checker from certificate trees to typed certificates |
 
 ## Dependencies
 

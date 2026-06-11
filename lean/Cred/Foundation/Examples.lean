@@ -5,7 +5,7 @@
   quantifier rules.
 -/
 
-import Cred.Foundation.Kernel
+import Cred.Foundation.Checker
 
 namespace Cred
 namespace Foundation
@@ -76,6 +76,35 @@ theorem exists_intro_certificate_sound (t : Credence)
     FoundationThresholdConsequence.{u, v, w} t
       [Formula.instantiate τ φ] (Formula.existsE φ) :=
   FoundationProof.sound (existsIntroCertificate t φ τ)
+
+def forallElimCertificateTree (φ : Formula Func Pred) (τ : Term Func) :
+    FoundationCertificateTree Func Pred :=
+  .node (.forallElim τ)
+    [.node (.hyp [Formula.forallE φ] (Formula.forallE φ)) []]
+
+theorem forallElimCertificateTree_checks [DecidableEq Func] [DecidableEq Pred]
+    (t : Credence) (φ : Formula Func Pred) (τ : Term Func) :
+    (checkFoundationCertificate t
+      (forallElimCertificateTree φ τ)).isSome := by
+  simp [forallElimCertificateTree, checkFoundationCertificate,
+    checkFoundationCertificateList, applyFoundationRule]
+
+def equalitySubstitutionCertificateTree
+    (τ υ : Term Func) (φ : Formula Func Pred) :
+    FoundationCertificateTree Func Pred :=
+  .node (.equalitySubst τ υ φ)
+    [.node (.hyp [Formula.equal τ υ, Formula.instantiate τ φ]
+      (Formula.equal τ υ)) [],
+     .node (.hyp [Formula.equal τ υ, Formula.instantiate τ φ]
+      (Formula.instantiate τ φ)) []]
+
+theorem equalitySubstitutionCertificateTree_checks
+    [DecidableEq Func] [DecidableEq Pred]
+    (t : Credence) (τ υ : Term Func) (φ : Formula Func Pred) :
+    (checkFoundationCertificate t
+      (equalitySubstitutionCertificateTree τ υ φ)).isSome := by
+  simp [equalitySubstitutionCertificateTree, checkFoundationCertificate,
+    checkFoundationCertificateList, applyFoundationRule]
 
 end Structure
 

@@ -155,6 +155,35 @@ def applyFoundationRule [DecidableEq Func] [DecidableEq Pred]
         none
   | _, _ => none
 
+inductive FoundationCertificateTree (Func : Type u) (Pred : Type v) where
+  | node :
+      FoundationRulePayload Func Pred →
+      List (FoundationCertificateTree Func Pred) →
+      FoundationCertificateTree Func Pred
+deriving Repr
+
+mutual
+
+def checkFoundationCertificate [DecidableEq Func] [DecidableEq Pred]
+    (t : Credence) :
+    FoundationCertificateTree Func Pred →
+      Option (CheckedFoundationProof t Func Pred)
+  | .node payload children => do
+      let checkedChildren ← checkFoundationCertificateList t children
+      applyFoundationRule t payload checkedChildren
+
+def checkFoundationCertificateList [DecidableEq Func] [DecidableEq Pred]
+    (t : Credence) :
+    List (FoundationCertificateTree Func Pred) →
+      Option (List (CheckedFoundationProof t Func Pred))
+  | [] => some []
+  | child :: children => do
+      let checkedChild ← checkFoundationCertificate t child
+      let checkedChildren ← checkFoundationCertificateList t children
+      some (checkedChild :: checkedChildren)
+
+end
+
 end Structure
 
 end Foundation
