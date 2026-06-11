@@ -81,6 +81,7 @@ lake build
 | `Foundation.Structure.forall_elim_formula`, `exists_intro_formula` | Formula-level quantifier consequences |
 | `Foundation.Structure.quantifier_derivation_sound` | Soundness for the quantifier proof layer |
 | `Foundation.Structure.FoundationThresholdConsequence` | Consequence under crisp equality and quantifier laws |
+| `Foundation.Structure.FoundationDerivation.weaken`, `cut` | Structural rules for the combined foundation derivation layer |
 | `Foundation.Structure.foundation_derivation_sound` | Soundness for the combined foundation derivation layer |
 
 ## Dependencies

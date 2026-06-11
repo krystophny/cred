@@ -50,6 +50,14 @@ inductive FoundationDerivation (t : Credence) :
     List (Formula Func Pred) → Formula Func Pred → Prop where
   | base {Γ : List (Formula Func Pred)} {φ : Formula Func Pred} :
       Derivation t Γ φ → FoundationDerivation t Γ φ
+  | weaken {Γ Δ : List (Formula Func Pred)} {φ : Formula Func Pred} :
+      FoundationDerivation t Γ φ →
+      (∀ p ∈ Γ, p ∈ Δ) →
+      FoundationDerivation t Δ φ
+  | cut {Γ : List (Formula Func Pred)} {φ ψ : Formula Func Pred} :
+      FoundationDerivation t Γ φ →
+      FoundationDerivation t (φ :: Γ) ψ →
+      FoundationDerivation t Γ ψ
   | equalityRefl {Γ : List (Formula Func Pred)} (τ : Term Func) :
       FoundationDerivation t Γ (.equal τ τ)
   | forallElim {Γ : List (Formula Func Pred)} {φ : Formula Func Pred}
@@ -68,6 +76,18 @@ theorem foundation_derivation_sound {t : Credence}
   induction h with
   | base h =>
       exact threshold_to_foundation t (derivation_sound h)
+  | weaken h hsub ih =>
+      intro M env hEq hQ hΔ
+      exact ih M env hEq hQ (fun p hp => hΔ p (hsub p hp))
+  | cut hφ hψ ihφ ihψ =>
+      intro M env hEq hQ hΓ
+      have hφVal := ihφ M env hEq hQ hΓ
+      exact ihψ M env hEq hQ (fun p hp => by
+        cases List.mem_cons.mp hp with
+        | inl h =>
+            subst h
+            exact hφVal
+        | inr h => exact hΓ p h)
   | equalityRefl τ =>
       exact crisp_to_foundation t (crisp_derivation_sound
         (CrispDerivation.equalityRefl τ))
