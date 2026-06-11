@@ -203,6 +203,17 @@ theorem evalFormula_subst (env : M.Assignment) (σ : Nat → Term Func) :
       rw [evalFormula_subst (update M env x) (Term.liftSubst σ) φ]
       congr
 
+theorem evalFormula_instantiate (env : M.Assignment)
+    (τ : Term Func) (φ : Formula Func Pred) :
+    evalFormula M env (Formula.instantiate τ φ) =
+      evalFormula M (update M env (evalTerm M env τ)) φ := by
+  rw [Formula.instantiate, evalFormula_subst]
+  congr
+  funext n
+  cases n with
+  | zero => rfl
+  | succ n => rfl
+
 end Structure
 
 end Foundation

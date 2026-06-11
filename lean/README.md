@@ -38,7 +38,7 @@ lake build
 - `Cred/Foundation/Proof.lean` - first sound threshold calculus for foundation formulas
 - `Cred/Foundation/Kernel.lean` - type-level certificates for foundation proofs
 - `Cred/Foundation/Equality.lean` - crisp-equality consequence facts
-- `Cred/Foundation/Quantifier.lean` - semantic quantifier facts
+- `Cred/Foundation/Quantifier.lean` - semantic and formula-level quantifier facts
 
 ## Key Theorems
 
@@ -58,6 +58,7 @@ lake build
 | `Kernel.Proof.sound` | Proof certificates inherit labelled soundness |
 | `Kernel.no_ex_falso_certificate` | No certificate derives an unrelated positive conclusion from A and ~A |
 | `Foundation.Term.rename`, `Foundation.Term.subst` | Term-level renaming and substitution |
+| `Foundation.Term.instSubst`, `Foundation.Formula.instantiate` | Single-variable formula instantiation |
 | `Foundation.Formula.rename`, `Foundation.Formula.subst` | Binder-aware formula renaming and substitution |
 | `Foundation.Formula.hasEquality` | Structural marker for equality in foundation formulas |
 | `Foundation.Formula.hasQuantifier` | Structural marker for quantifiers in foundation formulas |
@@ -67,10 +68,12 @@ lake build
 | `Foundation.Structure.ThresholdConsequence` | Threshold consequence over all foundation structures |
 | `Foundation.Structure.evalTerm_rename`, `evalTerm_subst` | Term evaluation commutes with renaming and substitution |
 | `Foundation.Structure.evalFormula_rename`, `evalFormula_subst` | Formula evaluation commutes with renaming and substitution |
+| `Foundation.Structure.evalFormula_instantiate` | Formula instantiation updates the bound-variable environment |
 | `Foundation.Structure.derivation_sound` | Soundness for the first foundation proof calculus |
 | `Foundation.Structure.Proof.sound` | Soundness for first-order proof certificates |
 | `Foundation.Structure.equality_reflexivity_threshold` | Equality reflexivity under crisp-equality laws |
 | `Foundation.Structure.forall_elim_semantic`, `exists_intro_semantic` | Semantic quantifier bounds |
+| `Foundation.Structure.forall_elim_formula`, `exists_intro_formula` | Formula-level quantifier consequences |
 
 ## Dependencies
 

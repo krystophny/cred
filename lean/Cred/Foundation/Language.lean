@@ -52,6 +52,10 @@ def liftSubst (σ : Nat → Term Func) : Nat → Term Func
   | 0 => var 0
   | n + 1 => rename Nat.succ (σ n)
 
+def instSubst (τ : Term Func) : Nat → Term Func
+  | 0 => τ
+  | n + 1 => var n
+
 end Term
 
 inductive Formula (Func : Type u) (Pred : Type v) where
@@ -91,6 +95,9 @@ def subst (σ : Nat → Term Func) : Formula Func Pred → Formula Func Pred
   | disj φ ψ => disj (φ.subst σ) (ψ.subst σ)
   | forallE φ => forallE (φ.subst (Term.liftSubst σ))
   | existsE φ => existsE (φ.subst (Term.liftSubst σ))
+
+def instantiate (τ : Term Func) (φ : Formula Func Pred) : Formula Func Pred :=
+  φ.subst (Term.instSubst τ)
 
 def hasEquality : Formula Func Pred → Bool
   | top => false

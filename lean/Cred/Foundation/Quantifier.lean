@@ -51,6 +51,25 @@ theorem exists_intro_semantic (t : Credence)
     (fun y => M.evalFormula (M.update env y) φ) x
   exact le_trans hφ hInst
 
+theorem forall_elim_formula (t : Credence)
+    (φ : Formula Func Pred) (τ : Term Func) :
+    QuantifierThresholdConsequence.{u, v, w} t
+      [.forallE φ] (Formula.instantiate τ φ) := by
+  intro M env hQ hΓ
+  rw [evalFormula_instantiate]
+  exact forall_elim_semantic t M env hQ φ (M.evalTerm env τ)
+    (hΓ (Formula.forallE φ) (List.mem_cons_self (Formula.forallE φ) []))
+
+theorem exists_intro_formula (t : Credence)
+    (φ : Formula Func Pred) (τ : Term Func) :
+    QuantifierThresholdConsequence.{u, v, w} t
+      [Formula.instantiate τ φ] (.existsE φ) := by
+  intro M env hQ hΓ
+  apply exists_intro_semantic t M env hQ φ (M.evalTerm env τ)
+  rw [← evalFormula_instantiate]
+  exact hΓ (Formula.instantiate τ φ)
+    (List.mem_cons_self (Formula.instantiate τ φ) [])
+
 end Structure
 
 end Foundation

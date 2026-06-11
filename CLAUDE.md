@@ -64,7 +64,7 @@ Keep the separation clear: `⊗`/`⊔` are the core algebraic operations (produc
 - `lean/Cred/Foundation/Proof.lean`: first threshold proof calculus for foundation formulas, with soundness.
 - `lean/Cred/Foundation/Kernel.lean`: type-level certificates for foundation derivations, erasure, and soundness.
 - `lean/Cred/Foundation/Equality.lean`: crisp-equality consequence target and equality reflexivity.
-- `lean/Cred/Foundation/Quantifier.lean`: quantifier-law consequence target and semantic quantifier bounds.
+- `lean/Cred/Foundation/Quantifier.lean`: quantifier-law consequence target, semantic bounds, and formula instantiation rules.
 - `part1/paper.tex`: congruence classification (6 sections + conclusion + 2 appendices, 12 pages).
 - `part2/paper.tex`: bridge paper (8 sections + 2 appendices, 24 pages; self-contained).
 - `part3/paper.tex`: foundations paper: paradox without explosion, crisp fragments, solution sets, and external conditioning.
@@ -141,7 +141,8 @@ Kernel certificates (from Kernel.lean):
 Foundation language (from Foundation/Language.lean):
 - `Foundation.Term`, `Foundation.Formula`
 - `Term.rename`, `Term.subst`
-- `Term.upRenaming`, `Term.liftSubst`, `Formula.rename`, `Formula.subst`
+- `Term.upRenaming`, `Term.liftSubst`, `Term.instSubst`
+- `Formula.rename`, `Formula.subst`, `Formula.instantiate`
 - Formula constructors include equality and quantifiers; there is no implication or conditional constructor
 - `Formula.hasEquality`, `Formula.hasQuantifier`
 
@@ -150,6 +151,7 @@ Foundation semantics (from Foundation/Semantics.lean):
 - `Structure.evalTerm`, `Structure.evalTermList`, `Structure.evalFormula`
 - `evalTerm_rename`, `evalTerm_subst`
 - `evalFormula_rename`, `evalFormula_subst`
+- `evalFormula_instantiate`
 - Equality and quantifier laws are deliberately separate from the raw semantic interface
 
 Foundation laws (from Foundation/Laws.lean):
@@ -180,6 +182,7 @@ Foundation quantifiers (from Foundation/Quantifier.lean):
 - `Structure.QuantifierThresholdConsequence`
 - `threshold_to_quantifier`
 - `forall_elim_semantic`, `exists_intro_semantic`
+- `forall_elim_formula`, `exists_intro_formula`
 
 ## Philosophy
 
