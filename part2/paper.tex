@@ -1792,28 +1792,39 @@ the Lean formalization and the manuscript preparation.
 \label{app:lean}
 %=============================================================================
 
-The results are formalized across seven Lean~4 modules (with
-Mathlib), totaling 3581 lines with zero \texttt{sorry}:
+The results are formalized across thirteen Lean~4 modules (with
+Mathlib), totaling 3758 lines with zero \texttt{sorry}:
 
 \begin{itemize}[nosep]
-\item \texttt{Cred/Basic.lean}: core algebra, conditioning, fixed
-  points, collapse, Bayes consistency, path dependence, congruence
-  building blocks (1804 lines).
-\item \texttt{Cred/Congruence.lean}: congruence
-  classification --- \texttt{UnitCongruence},
-  \texttt{Real\-Congruence}, Kleene witness (396 lines).
-\item \texttt{Cred/Consequence.lean}: K$_3$/LP designation,
-  formula evaluation, collapse-evaluation commutativity,
-  bridge theorems, structural rules, no-explosion (505 lines).
+\item \texttt{Cred/Core/Value.lean}: credence values, negation,
+  product conjunction, disjunction, fixed points, spread (426 lines).
+\item \texttt{Cred/Core/Consequence.lean}: K$_3$/LP designation,
+  graded consequence, formula evaluation, structural rules,
+  no-explosion (316 lines).
+\item \texttt{Cred/Cond/Admissible.lean}: chain-rule conditioning,
+  admissible sets, Fr\'echet bounds, conditioning tables,
+  path dependence (427 lines).
+\item \texttt{Cred/Cond/Copula.lean}: Bayes consistency on $[0,1]$,
+  min-copula uniqueness, world partitioning (403 lines).
+\item \texttt{Cred/Collapse/ThreeVal.lean}: three-valued credences,
+  RM3/G\"odel/product-residuated implications (227 lines).
+\item \texttt{Cred/Collapse/Hom.lean}: collapse homomorphism,
+  impossibility results, Boolean subalgebra (313 lines).
+\item \texttt{Cred/Congruence/Unit.lean}: \texttt{UnitCongruence}
+  classification, Kleene witness (297 lines).
+\item \texttt{Cred/Congruence/Real.lean}: \texttt{RealCongruence},
+  no non-trivial finite quotient (229 lines).
+\item \texttt{Cred/Bridge/LPK3.lean}: collapse-evaluation
+  commutativity, LP/K$_3$ bridge theorems (207 lines).
+\item \texttt{Cred/Bridge/CondBridge.lean}: conditional bridge
+  impossibility, boundary characterization, qualitative update,
+  update bridge, zero-evidence triple (389 lines).
 \item \texttt{Cred/Valuation.lean}: valuations, collapse composition,
-  Fr\'echet bounds (175 lines).$^\dagger$
+  Fr\'echet bounds (176 lines).$^\dagger$
 \item \texttt{Cred/Update.lean}: Bayesian/Jeffrey update, chain-rule
   preservation (138 lines).
 \item \texttt{Cred/Predicate.lean}: graded predicates,
   quantifiers, Russell fixed point (210 lines).$^\dagger$
-\item \texttt{Cred/CondBridge.lean}: conditional bridge impossibility,
-  boundary characterization, qualitative update, update bridge,
-  zero-evidence triple (353 lines).
 \end{itemize}
 \smallskip
 \noindent
