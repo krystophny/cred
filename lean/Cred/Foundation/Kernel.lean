@@ -62,6 +62,29 @@ theorem sound {t : Credence}
 
 end Proof
 
+inductive CrispProof (t : Credence) :
+    List (Formula Func Pred) → Formula Func Pred → Type (max 1 u v) where
+  | base {Γ : List (Formula Func Pred)} {φ : Formula Func Pred} :
+      Proof t Γ φ → CrispProof t Γ φ
+  | equalityRefl {Γ : List (Formula Func Pred)} (τ : Term Func) :
+      CrispProof t Γ (.equal τ τ)
+
+namespace CrispProof
+
+def toDerivation {t : Credence}
+    {Γ : List (Formula Func Pred)} {φ : Formula Func Pred} :
+    CrispProof t Γ φ → CrispDerivation t Γ φ
+  | base p => CrispDerivation.base p.toDerivation
+  | equalityRefl τ => CrispDerivation.equalityRefl τ
+
+theorem sound {t : Credence}
+    {Γ : List (Formula Func Pred)} {φ : Formula Func Pred}
+    (p : CrispProof t Γ φ) :
+    CrispThresholdConsequence.{u, v, w} t Γ φ :=
+  crisp_derivation_sound p.toDerivation
+
+end CrispProof
+
 inductive QuantifierProof (t : Credence) :
     List (Formula Func Pred) → Formula Func Pred → Type (max 1 u v) where
   | base {Γ : List (Formula Func Pred)} {φ : Formula Func Pred} :

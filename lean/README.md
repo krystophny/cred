@@ -71,6 +71,7 @@ lake build
 | `Foundation.Structure.evalFormula_instantiate` | Formula instantiation updates the bound-variable environment |
 | `Foundation.Structure.derivation_sound` | Soundness for the first foundation proof calculus |
 | `Foundation.Structure.Proof.sound` | Soundness for first-order proof certificates |
+| `Foundation.Structure.CrispProof.sound` | Soundness for crisp-equality proof certificates |
 | `Foundation.Structure.QuantifierProof.sound` | Soundness for quantifier proof certificates |
 | `Foundation.Structure.equality_reflexivity_threshold` | Equality reflexivity under crisp-equality laws |
 | `Foundation.Structure.crisp_derivation_sound` | Soundness for the crisp-equality proof layer |
