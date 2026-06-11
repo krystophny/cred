@@ -52,6 +52,7 @@ Keep the separation clear: `⊗`/`⊔` are the core algebraic operations (produc
 - `lean/Cred/Valuation.lean`: valuations (CpValuation, IndepValuation, JointValuation) (176 lines).
 - `lean/Cred/Update.lean`: Bayesian and Jeffrey conditionalization (138 lines).
 - `lean/Cred/Predicate.lean`: graded predicates, quantifiers, Russell fixed point (210 lines).
+- `lean/Cred/Fixpoint.lean`: solution sets for liar, truth-teller, Curry, and zero-evidence conditioning.
 - `part1/paper.tex`: congruence classification (6 sections + conclusion + 2 appendices, 12 pages).
 - `part2/paper.tex`: bridge paper (8 sections + 2 appendices, 24 pages; self-contained).
 - `part3/`: future work: graded proofs, self-hosting, undecidability.
@@ -101,6 +102,11 @@ Curry bridge (from Bridge/Curry.lean):
 
 Predicates (from Predicate.lean):
 - `quantifier_duality_val`, `russell_fixed_point`, `crisp_inf_zero_iff`
+
+Fixpoints (from Fixpoint.lean):
+- `solutions`, `solutions_neg_eq_singleton`, `solutions_id_eq_univ`
+- `truth_teller_same_shape_as_zero_evidence`
+- `curry_sqrt_solution`, `curry_zero_solutions_empty`
 
 ## Philosophy
 

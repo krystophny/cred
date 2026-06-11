@@ -16,3 +16,4 @@ import Cred.Bridge.Curry
 import Cred.Valuation
 import Cred.Update
 import Cred.Predicate
+import Cred.Fixpoint

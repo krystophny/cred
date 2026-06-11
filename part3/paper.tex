@@ -333,6 +333,23 @@ iterative construction.
 The Kripke fixed point assigns truth-value gaps to liar-like sentences; the
 credence algebra assigns the definite value $\tfrac{1}{2}$.
 
+\subsection{Solution Sets}
+
+The common object is a solution set.
+For a self-map $\Phi : [0,1]\to[0,1]$, define
+\[
+  \mathrm{Sol}(\Phi)=\{c : \Phi(c)=c\}.
+\]
+The Lean module \texttt{Cred/Fixpoint.lean} records the basic cases.
+Negation has the singleton solution set $\{\tfrac12\}$.
+The truth-teller map $\Phi(c)=c$ has the full interval as its solution set.
+This is the same shape as zero-evidence conditioning:
+\[
+  \mathrm{Sol}(\mathrm{id}) = [0,1] = \mathrm{Cond}(0,0).
+\]
+Classically, Boolean negation has no fixed point.
+The graded interval changes the contradiction into a nonempty solution set.
+
 \subsection{Revision Theory}
 
 Gupta--Belnap revision theory models truth as evolving under revisions:
