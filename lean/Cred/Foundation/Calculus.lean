@@ -67,6 +67,11 @@ inductive FoundationDerivation (t : Credence) :
       FoundationDerivation t Γ (.equal τ υ) →
       FoundationDerivation t Γ (.equal υ χ) →
       FoundationDerivation t Γ (.equal τ χ)
+  | equalitySubst {Γ : List (Formula Func Pred)} {τ υ : Term Func}
+      {φ : Formula Func Pred} :
+      FoundationDerivation t Γ (.equal τ υ) →
+      FoundationDerivation t Γ (Formula.instantiate τ φ) →
+      FoundationDerivation t Γ (Formula.instantiate υ φ)
   | forallElim {Γ : List (Formula Func Pred)} {φ : Formula Func Pred}
       {τ : Term Func} :
       FoundationDerivation t Γ (.forallE φ) →
@@ -118,6 +123,19 @@ theorem foundation_derivation_sound {t : Credence}
             | inl hp =>
                 subst hp
                 exact ih2 M env hEq hQ hΓ
+            | inr hp => cases hp)
+  | equalitySubst hEqProof hφProof ihEq ihφ =>
+      intro M env hEq hQ hΓ
+      exact equality_substitution_threshold t _ _ _ M env hEq (fun p hp => by
+        cases List.mem_cons.mp hp with
+        | inl hp =>
+            subst hp
+            exact ihEq M env hEq hQ hΓ
+        | inr hp =>
+            cases List.mem_cons.mp hp with
+            | inl hp =>
+                subst hp
+                exact ihφ M env hEq hQ hΓ
             | inr hp => cases hp)
   | forallElim h ih =>
       intro M env hEq hQ hΓ

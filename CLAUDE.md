@@ -208,6 +208,7 @@ Foundation calculus (from Foundation/Calculus.lean):
 - `Structure.FoundationDerivation`
 - `FoundationDerivation.weaken`, `FoundationDerivation.cut`
 - `FoundationDerivation.equalitySymm`, `FoundationDerivation.equalityTrans`
+- `FoundationDerivation.equalitySubst`
 - `foundation_derivation_sound`
 
 ## Philosophy
