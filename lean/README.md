@@ -77,6 +77,7 @@ lake build
 | `Foundation.Structure.FoundationProof.sound` | Soundness for combined foundation proof certificates |
 | `Foundation.Structure.FoundationProof.weaken`, `cut` | Structural rules for combined foundation proof certificates |
 | `Foundation.Structure.equality_reflexivity_threshold` | Equality reflexivity under crisp-equality laws |
+| `Foundation.Structure.equality_symmetry_threshold`, `equality_transitivity_threshold` | Equality symmetry and transitivity under crisp-equality laws |
 | `Foundation.Structure.crisp_derivation_sound` | Soundness for the crisp-equality proof layer |
 | `Foundation.Structure.forall_elim_semantic`, `exists_intro_semantic` | Semantic quantifier bounds |
 | `Foundation.Structure.forall_elim_formula`, `exists_intro_formula` | Formula-level quantifier consequences |

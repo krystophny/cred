@@ -37,6 +37,49 @@ theorem equality_reflexivity_threshold (t : Credence) (τ : Term Func) :
   intro M env hEq hΓ
   simp [evalFormula, hEq.eq_refl, Credence.le_one']
 
+theorem equality_symmetry_threshold (t : Credence)
+    (τ υ : Term Func) :
+    CrispThresholdConsequence.{u, v, w} t
+      [@Formula.equal Func Pred τ υ] (Formula.equal υ τ) := by
+  intro M env hEq hΓ
+  by_cases h : M.evalTerm env τ = M.evalTerm env υ
+  · change t ≤ M.eq (M.evalTerm env υ) (M.evalTerm env τ)
+    rw [← h]
+    simp [hEq.eq_refl, Credence.le_one']
+  · have hzero : M.evalFormula env (.equal τ υ) = 0 := by
+      simp [evalFormula, hEq.eq_zero_of_ne h]
+    have hprem := hΓ (Formula.equal τ υ)
+      (List.mem_cons_self (Formula.equal τ υ) [])
+    rw [hzero] at hprem
+    exact le_trans hprem (Credence.zero_le _)
+
+theorem equality_transitivity_threshold (t : Credence)
+    (τ υ χ : Term Func) :
+    CrispThresholdConsequence.{u, v, w} t
+      [@Formula.equal Func Pred τ υ, Formula.equal υ χ]
+      (Formula.equal τ χ) := by
+  intro M env hEq hΓ
+  by_cases hac : M.evalTerm env τ = M.evalTerm env χ
+  · change t ≤ M.eq (M.evalTerm env τ) (M.evalTerm env χ)
+    rw [hac]
+    simp [hEq.eq_refl, Credence.le_one']
+  · by_cases hab : M.evalTerm env τ = M.evalTerm env υ
+    · by_cases hbc : M.evalTerm env υ = M.evalTerm env χ
+      · exact False.elim (hac (hab.trans hbc))
+      · have hzero : M.evalFormula env (.equal υ χ) = 0 := by
+          simp [evalFormula, hEq.eq_zero_of_ne hbc]
+        have hprem := hΓ (Formula.equal υ χ)
+          (List.mem_cons_of_mem (Formula.equal τ υ)
+            (List.mem_cons_self (Formula.equal υ χ) []))
+        rw [hzero] at hprem
+        exact le_trans hprem (Credence.zero_le _)
+    · have hzero : M.evalFormula env (.equal τ υ) = 0 := by
+        simp [evalFormula, hEq.eq_zero_of_ne hab]
+      have hprem := hΓ (Formula.equal τ υ)
+        (List.mem_cons_self (Formula.equal τ υ) [Formula.equal υ χ])
+      rw [hzero] at hprem
+      exact le_trans hprem (Credence.zero_le _)
+
 inductive CrispDerivation (t : Credence) :
     List (Formula Func Pred) → Formula Func Pred → Prop where
   | base {Γ : List (Formula Func Pred)} {φ : Formula Func Pred} :
