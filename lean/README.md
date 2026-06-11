@@ -74,10 +74,12 @@ lake build
 | `Foundation.Structure.Proof.sound` | Soundness for first-order proof certificates |
 | `Foundation.Structure.CrispProof.sound` | Soundness for crisp-equality proof certificates |
 | `Foundation.Structure.CrispProof.equalitySymm`, `equalityTrans` | Equality rules for crisp-equality proof certificates |
+| `Foundation.Structure.CrispProof.equalitySubst` | Equality substitution for crisp-equality proof certificates |
 | `Foundation.Structure.QuantifierProof.sound` | Soundness for quantifier proof certificates |
 | `Foundation.Structure.FoundationProof.sound` | Soundness for combined foundation proof certificates |
 | `Foundation.Structure.FoundationProof.weaken`, `cut` | Structural rules for combined foundation proof certificates |
 | `Foundation.Structure.FoundationProof.equalitySymm`, `equalityTrans` | Equality rules for combined foundation proof certificates |
+| `Foundation.Structure.FoundationProof.equalitySubst` | Equality substitution for combined foundation proof certificates |
 | `Foundation.Structure.equality_reflexivity_threshold` | Equality reflexivity under crisp-equality laws |
 | `Foundation.Structure.equality_symmetry_threshold`, `equality_transitivity_threshold` | Equality symmetry and transitivity under crisp-equality laws |
 | `Foundation.Structure.equality_substitution_threshold` | Equality substitution for instantiated formulas under crisp-equality laws |

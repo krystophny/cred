@@ -75,6 +75,11 @@ inductive CrispProof (t : Credence) :
       CrispProof t Γ (.equal τ υ) →
       CrispProof t Γ (.equal υ χ) →
       CrispProof t Γ (.equal τ χ)
+  | equalitySubst {Γ : List (Formula Func Pred)} {τ υ : Term Func}
+      {φ : Formula Func Pred} :
+      CrispProof t Γ (.equal τ υ) →
+      CrispProof t Γ (Formula.instantiate τ φ) →
+      CrispProof t Γ (Formula.instantiate υ φ)
 
 namespace CrispProof
 
@@ -85,6 +90,7 @@ def toDerivation {t : Credence}
   | equalityRefl τ => CrispDerivation.equalityRefl τ
   | equalitySymm p => CrispDerivation.equalitySymm p.toDerivation
   | equalityTrans p q => CrispDerivation.equalityTrans p.toDerivation q.toDerivation
+  | equalitySubst p q => CrispDerivation.equalitySubst p.toDerivation q.toDerivation
 
 theorem sound {t : Credence}
     {Γ : List (Formula Func Pred)} {φ : Formula Func Pred}
@@ -145,6 +151,11 @@ inductive FoundationProof (t : Credence) :
       FoundationProof t Γ (.equal τ υ) →
       FoundationProof t Γ (.equal υ χ) →
       FoundationProof t Γ (.equal τ χ)
+  | equalitySubst {Γ : List (Formula Func Pred)} {τ υ : Term Func}
+      {φ : Formula Func Pred} :
+      FoundationProof t Γ (.equal τ υ) →
+      FoundationProof t Γ (Formula.instantiate τ φ) →
+      FoundationProof t Γ (Formula.instantiate υ φ)
   | forallElim {Γ : List (Formula Func Pred)} {φ : Formula Func Pred}
       {τ : Term Func} :
       FoundationProof t Γ (.forallE φ) →
@@ -166,6 +177,8 @@ def toDerivation {t : Credence}
   | equalitySymm p => FoundationDerivation.equalitySymm p.toDerivation
   | equalityTrans p q =>
       FoundationDerivation.equalityTrans p.toDerivation q.toDerivation
+  | equalitySubst p q =>
+      FoundationDerivation.equalitySubst p.toDerivation q.toDerivation
   | forallElim p => FoundationDerivation.forallElim p.toDerivation
   | existsIntro p => FoundationDerivation.existsIntro p.toDerivation
 

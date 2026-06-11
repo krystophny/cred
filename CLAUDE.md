@@ -175,12 +175,14 @@ Foundation kernel (from Foundation/Kernel.lean):
 - `Proof.toDerivation`, `Proof.sound`
 - `Structure.CrispProof`
 - `CrispProof.equalitySymm`, `CrispProof.equalityTrans`
+- `CrispProof.equalitySubst`
 - `CrispProof.toDerivation`, `CrispProof.sound`
 - `Structure.QuantifierProof`
 - `QuantifierProof.toDerivation`, `QuantifierProof.sound`
 - `Structure.FoundationProof`
 - `FoundationProof.weaken`, `FoundationProof.cut`
 - `FoundationProof.equalitySymm`, `FoundationProof.equalityTrans`
+- `FoundationProof.equalitySubst`
 - `FoundationProof.toDerivation`, `FoundationProof.sound`
 
 Foundation equality (from Foundation/Equality.lean):
