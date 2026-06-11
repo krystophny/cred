@@ -87,10 +87,9 @@ For the current synthesis statement, see `paper.tex`.
     crisp equality and quantifier bounds.
     `lean/Cred/Foundation/Consequence.lean` adds threshold and certainty
     consequence for this first-order layer.
-    `lean/Cred/Foundation/Proof.lean` adds the first sound threshold calculus;
-    equality and quantifier rules remain next steps.
-    `lean/Cred/Foundation/Kernel.lean` adds type-level certificates for those
-    derivations.
+    `lean/Cred/Foundation/Proof.lean` adds the first sound threshold calculus.
+    `lean/Cred/Foundation/Kernel.lean` adds type-level certificates for base
+    and quantifier derivations.
     `lean/Cred/Foundation/Equality.lean` adds equality reflexivity under
     explicit crisp-equality laws.
     `lean/Cred/Foundation/Quantifier.lean` adds semantic quantifier bounds,

@@ -5,7 +5,7 @@
   erase to `Structure.Derivation` and inherit semantic soundness.
 -/
 
-import Cred.Foundation.Proof
+import Cred.Foundation.Quantifier
 
 namespace Cred
 namespace Foundation
@@ -61,6 +61,36 @@ theorem sound {t : Credence}
   derivation_sound p.toDerivation
 
 end Proof
+
+inductive QuantifierProof (t : Credence) :
+    List (Formula Func Pred) → Formula Func Pred → Type (max 1 u v) where
+  | base {Γ : List (Formula Func Pred)} {φ : Formula Func Pred} :
+      Proof t Γ φ → QuantifierProof t Γ φ
+  | forallElim {Γ : List (Formula Func Pred)} {φ : Formula Func Pred}
+      {τ : Term Func} :
+      QuantifierProof t Γ (.forallE φ) →
+      QuantifierProof t Γ (Formula.instantiate τ φ)
+  | existsIntro {Γ : List (Formula Func Pred)} {φ : Formula Func Pred}
+      {τ : Term Func} :
+      QuantifierProof t Γ (Formula.instantiate τ φ) →
+      QuantifierProof t Γ (.existsE φ)
+
+namespace QuantifierProof
+
+def toDerivation {t : Credence}
+    {Γ : List (Formula Func Pred)} {φ : Formula Func Pred} :
+    QuantifierProof t Γ φ → QuantifierDerivation t Γ φ
+  | base p => QuantifierDerivation.base p.toDerivation
+  | forallElim p => QuantifierDerivation.forallElim p.toDerivation
+  | existsIntro p => QuantifierDerivation.existsIntro p.toDerivation
+
+theorem sound {t : Credence}
+    {Γ : List (Formula Func Pred)} {φ : Formula Func Pred}
+    (p : QuantifierProof t Γ φ) :
+    QuantifierThresholdConsequence.{u, v, w} t Γ φ :=
+  quantifier_derivation_sound p.toDerivation
+
+end QuantifierProof
 
 end Structure
 

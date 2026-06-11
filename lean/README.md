@@ -36,7 +36,7 @@ lake build
 - `Cred/Foundation/Laws.lean` - crisp equality and quantifier law interfaces
 - `Cred/Foundation/Consequence.lean` - semantic consequence for foundation formulas
 - `Cred/Foundation/Proof.lean` - first sound threshold calculus for foundation formulas
-- `Cred/Foundation/Kernel.lean` - type-level certificates for foundation proofs
+- `Cred/Foundation/Kernel.lean` - type-level certificates for foundation and quantifier proofs
 - `Cred/Foundation/Equality.lean` - crisp-equality consequence facts
 - `Cred/Foundation/Quantifier.lean` - semantic and proof-theoretic quantifier facts
 
@@ -71,6 +71,7 @@ lake build
 | `Foundation.Structure.evalFormula_instantiate` | Formula instantiation updates the bound-variable environment |
 | `Foundation.Structure.derivation_sound` | Soundness for the first foundation proof calculus |
 | `Foundation.Structure.Proof.sound` | Soundness for first-order proof certificates |
+| `Foundation.Structure.QuantifierProof.sound` | Soundness for quantifier proof certificates |
 | `Foundation.Structure.equality_reflexivity_threshold` | Equality reflexivity under crisp-equality laws |
 | `Foundation.Structure.forall_elim_semantic`, `exists_intro_semantic` | Semantic quantifier bounds |
 | `Foundation.Structure.forall_elim_formula`, `exists_intro_formula` | Formula-level quantifier consequences |
