@@ -56,6 +56,12 @@ Core:
 - `Cred.Credence.liar_fixed_point`, `Cred.Credence.neg_fixed_point_unique` (0.5 fixed point and uniqueness)
 - `Cred.Credence.conj_disj_not_distrib` (⊗ does not distribute over ⊔)
 
+Admissible-set conditioning (Basic.lean, CondBridge.lean):
+- `Cred.Credence.Cond` (admissible set {c | c ⊗ e = j} as named primitive)
+- `cond_singleton_of_pos`, `cond_zero_zero_univ`, `cond_nonempty_iff` (trichotomy: singleton / full interval / empty)
+- `mem_cond_iff` (membership = Conditioning witness)
+- `zero_evidence_duality_cond`, `cond_interior_range` (CondBridge restatements through Cond)
+
 Collapse / congruence:
 - `Cred.ThreeVal.rm3_ex_falso` (RM3 implication has explosion row)
 - `Cred.ThreeVal.cred_no_ex_falso` (Cred blocks ex falso via unconstrained conditioning)
