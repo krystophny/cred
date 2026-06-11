@@ -231,7 +231,8 @@ Foundation examples (from Foundation/Examples.lean):
 
 Foundation rule codes (from Foundation/RuleCode.lean):
 - `Structure.FoundationRuleCode`
-- `FoundationRuleCode.name`
+- `FoundationRuleCode.name`, `FoundationRuleCode.ofName`
+- `FoundationRuleCode.ofName_name`, `FoundationRuleCode.ofName_eq_some_mem`
 - `trustedFoundationRules`, `mem_trustedFoundationRules`
 
 Foundation checker (from Foundation/Checker.lean):

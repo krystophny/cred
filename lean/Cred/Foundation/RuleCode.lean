@@ -43,6 +43,26 @@ def FoundationRuleCode.name : FoundationRuleCode → String
   | .forallElim => "forallElim"
   | .existsIntro => "existsIntro"
 
+def FoundationRuleCode.ofName : String → Option FoundationRuleCode
+  | "hyp" => some .hyp
+  | "weaken" => some .weaken
+  | "cut" => some .cut
+  | "conjElimLeft" => some .conjElimLeft
+  | "conjElimRight" => some .conjElimRight
+  | "disjIntroLeft" => some .disjIntroLeft
+  | "disjIntroRight" => some .disjIntroRight
+  | "equalityRefl" => some .equalityRefl
+  | "equalitySymm" => some .equalitySymm
+  | "equalityTrans" => some .equalityTrans
+  | "equalitySubst" => some .equalitySubst
+  | "forallElim" => some .forallElim
+  | "existsIntro" => some .existsIntro
+  | _ => none
+
+theorem FoundationRuleCode.ofName_name (r : FoundationRuleCode) :
+    FoundationRuleCode.ofName r.name = some r := by
+  cases r <;> rfl
+
 def trustedFoundationRules : List FoundationRuleCode :=
   [.hyp, .weaken, .cut, .conjElimLeft, .conjElimRight, .disjIntroLeft,
     .disjIntroRight, .equalityRefl, .equalitySymm, .equalityTrans,
@@ -51,6 +71,12 @@ def trustedFoundationRules : List FoundationRuleCode :=
 theorem mem_trustedFoundationRules (r : FoundationRuleCode) :
     r ∈ trustedFoundationRules := by
   cases r <;> simp [trustedFoundationRules]
+
+theorem FoundationRuleCode.ofName_eq_some_mem
+    {s : String} {r : FoundationRuleCode}
+    (_h : FoundationRuleCode.ofName s = some r) :
+    r ∈ trustedFoundationRules :=
+  mem_trustedFoundationRules r
 
 end Structure
 
