@@ -92,6 +92,8 @@ For the current synthesis statement, see `paper.tex`.
     equational law of an `observe`/conditioning primitive while preserving the
     evidence-zero underdetermination?
 
-14. **Tooling.** Once a proof target is fixed, a Cred-aware assistant becomes an
-    engineering task rather than a research question. Until then, treat it as
-    downstream.
+14. **Kernel and tooling.** `lean/Cred/Kernel.lean` now defines type-level proof
+    certificates for labelled derivations. The next engineering target is a
+    small serializable checker whose accepted certificates erase to
+    `Kernel.Proof`. Tactics, automation, and editor support come after that
+    kernel boundary is small and stable.

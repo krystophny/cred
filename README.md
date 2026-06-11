@@ -19,11 +19,14 @@ Axis A1  consequence        positivity, certainty, threshold-t
 Axis A2  conditioning       admissible sets Cond(j,e)
 Foundations                 fixed points, graded comprehension, crisp fragment
 Proof layer                 labelled sequents, external conditioning judgment
+Kernel                      proof certificates, erasure, soundness
 ```
 
 No layer contains an internal object-language conditional. Conditionals enter only as the external judgment `c ∈ Cond(j,e)`; entailment and conditioning stay metalinguistic relations. The same choice blocks Curry-style internalization.
 
 In the foundations layer, self-reference lands on solution sets instead of contradictions: the liar equation `L ≡ ¬L` stabilizes at `cred(L) = 0.5`. Fixed points, Russell's scalar theorem, crisp recovery, Curry blocking, threshold consequence, and the labelled sequent calculus are formalized.
+
+The current self-hosting route starts with `Kernel.Proof`: a type-level certificate for labelled derivations. A certificate erases to `Derivation`, inherits `derivation_sound`, and already has a NoExFalso emptiness theorem.
 
 ## Primitives
 
@@ -61,6 +64,7 @@ Foundations and proof layer (Part 3 paper):
 - `curry_block`: MP, conditional proof, and contraction have no common total carrier
 - `threshold_explosion_countermodel_iff`: sharp no-explosion threshold
 - `derivation_sound`, `labelled_no_ex_falso`: labelled external-conditioning calculus is sound and non-explosive
+- `Kernel.Proof.sound`, `Kernel.no_ex_falso_certificate`: proof certificates erase to sound labelled derivations
 
 ## Collapse
 

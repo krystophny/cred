@@ -24,7 +24,7 @@ The following topics were originally in Part 2 but belong here because they requ
 
 - **Graded proofs**: what it means to "prove" something when truth is graded (convergence to credence 1 vs. partial evidence). The labelled external-conditioning calculus is formalized in `lean/Cred/Sequent.lean`; asymptotic proof remains in `01-asymptotic-proofs.md`.
 - **Graded mathematics**: building arithmetic, analysis, and set theory on graded predicates. Covered in `06-graded-mathematics.md`.
-- **Self-hosting**: using the credence algebra to reason about the credence algebra itself, enabled by self-reference handling. Related material in `02-fixed-points.md` and `05-open-questions.md`.
+- **Self-hosting**: using the credence algebra to reason about the credence algebra itself, enabled by self-reference handling. The first checked kernel boundary is `lean/Cred/Kernel.lean`, where proof certificates erase to sound labelled derivations. Related material remains in `02-fixed-points.md` and `05-open-questions.md`.
 
 ## Key distinctions
 

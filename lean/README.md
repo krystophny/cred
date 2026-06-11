@@ -30,6 +30,7 @@ lake build
 - `Cred/Fixpoint.lean` - solution sets for liar, truth-teller, Russell, Curry
 - `Cred/Threshold.lean` - threshold consequence and sharp bounds
 - `Cred/Sequent.lean` - labelled external-conditioning calculus and soundness
+- `Cred/Kernel.lean` - type-level proof certificates and sound erasure
 
 ## Key Theorems
 
@@ -46,6 +47,8 @@ lake build
 | `russell_fixed_point` | Russell's scalar equation has value 1/2 |
 | `derivation_sound` | Labelled derivations are sound for their labels |
 | `labelled_no_ex_falso` | A and ~A do not derive an unrelated positive conclusion |
+| `Kernel.Proof.sound` | Proof certificates inherit labelled soundness |
+| `Kernel.no_ex_falso_certificate` | No certificate derives an unrelated positive conclusion from A and ~A |
 
 ## Dependencies
 

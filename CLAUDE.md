@@ -56,6 +56,7 @@ Keep the separation clear: `⊗`/`⊔` are the core algebraic operations (produc
 - `lean/Cred/Fixpoint.lean`: solution sets for liar, truth-teller, Curry, and zero-evidence conditioning.
 - `lean/Cred/Threshold.lean`: threshold consequence, structural rules, sharp explosion and excluded-middle bounds.
 - `lean/Cred/Sequent.lean`: labelled external-conditioning calculus, soundness, chain-rule cut, no-ex-falso witness.
+- `lean/Cred/Kernel.lean`: type-level proof certificates, erasure to labelled derivations, certificate soundness.
 - `part1/paper.tex`: congruence classification (6 sections + conclusion + 2 appendices, 12 pages).
 - `part2/paper.tex`: bridge paper (8 sections + 2 appendices, 24 pages; self-contained).
 - `part3/paper.tex`: foundations paper: paradox without explosion, crisp fragments, solution sets, and external conditioning.
@@ -122,6 +123,12 @@ Sequents (from Sequent.lean):
 - `derivation_sound`, `derivation_sound_thresholdConsequence`
 - `derivation_sound_formulaCertainty`, `derivation_sound_formulaPositivity`
 - `labelled_no_ex_falso` (A and ~A do not derive an unrelated positive conclusion)
+
+Kernel certificates (from Kernel.lean):
+- `Kernel.Proof` (type-level proof certificates for labelled derivations)
+- `Kernel.Proof.toDerivation`, `Kernel.Proof.sound`
+- `Kernel.Proof.to_thresholdConsequence`, `to_formulaCertainty`, `to_formulaPositivity`
+- `Kernel.no_ex_falso_certificate` (no certificate derives unrelated positive conclusions from A and ~A)
 
 ## Philosophy
 

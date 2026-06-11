@@ -19,3 +19,4 @@ import Cred.Predicate
 import Cred.Fixpoint
 import Cred.Threshold
 import Cred.Sequent
+import Cred.Kernel
