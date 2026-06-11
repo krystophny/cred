@@ -212,6 +212,8 @@ Foundation calculus (from Foundation/Calculus.lean):
 - `threshold_to_foundation`, `crisp_to_foundation`, `quantifier_to_foundation`
 - `Structure.FoundationDerivation`
 - `FoundationDerivation.weaken`, `FoundationDerivation.cut`
+- `FoundationDerivation.conjElimLeft`, `FoundationDerivation.conjElimRight`
+- `FoundationDerivation.disjIntroLeft`, `FoundationDerivation.disjIntroRight`
 - `FoundationDerivation.equalitySymm`, `FoundationDerivation.equalityTrans`
 - `FoundationDerivation.equalitySubst`
 - `foundation_derivation_sound`

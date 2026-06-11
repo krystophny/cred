@@ -46,6 +46,28 @@ theorem quantifier_to_foundation (t : Credence)
   intro M env _ hQ hΓ
   exact h M env hQ hΓ
 
+private theorem conj_le_left (a b : Credence) : a ⊗ b ≤ a := by
+  change a.val * b.val ≤ a.val
+  calc
+    a.val * b.val ≤ a.val * 1 := by
+      exact mul_le_mul_of_nonneg_left b.le_one a.nonneg
+    _ = a.val := by ring
+
+private theorem conj_le_right (a b : Credence) : a ⊗ b ≤ b := by
+  rw [Credence.conj_comm]
+  exact conj_le_left b a
+
+private theorem le_disj_left (a b : Credence) : a ≤ a ⊔ b := by
+  change a.val ≤ (a ⊔ b).val
+  rw [Credence.disj_val]
+  have h : 0 ≤ b.val * (1 - a.val) :=
+    mul_nonneg b.nonneg (by linarith [a.le_one])
+  linarith
+
+private theorem le_disj_right (a b : Credence) : b ≤ a ⊔ b := by
+  rw [Credence.disj_comm]
+  exact le_disj_left b a
+
 inductive FoundationDerivation (t : Credence) :
     List (Formula Func Pred) → Formula Func Pred → Prop where
   | base {Γ : List (Formula Func Pred)} {φ : Formula Func Pred} :
@@ -58,6 +80,18 @@ inductive FoundationDerivation (t : Credence) :
       FoundationDerivation t Γ φ →
       FoundationDerivation t (φ :: Γ) ψ →
       FoundationDerivation t Γ ψ
+  | conjElimLeft {Γ : List (Formula Func Pred)} {φ ψ : Formula Func Pred} :
+      FoundationDerivation t Γ (.conj φ ψ) →
+      FoundationDerivation t Γ φ
+  | conjElimRight {Γ : List (Formula Func Pred)} {φ ψ : Formula Func Pred} :
+      FoundationDerivation t Γ (.conj φ ψ) →
+      FoundationDerivation t Γ ψ
+  | disjIntroLeft {Γ : List (Formula Func Pred)} {φ ψ : Formula Func Pred} :
+      FoundationDerivation t Γ φ →
+      FoundationDerivation t Γ (.disj φ ψ)
+  | disjIntroRight {Γ : List (Formula Func Pred)} {φ ψ : Formula Func Pred} :
+      FoundationDerivation t Γ ψ →
+      FoundationDerivation t Γ (.disj φ ψ)
   | equalityRefl {Γ : List (Formula Func Pred)} (τ : Term Func) :
       FoundationDerivation t Γ (.equal τ τ)
   | equalitySymm {Γ : List (Formula Func Pred)} {τ υ : Term Func} :
@@ -100,6 +134,18 @@ theorem foundation_derivation_sound {t : Credence}
             subst h
             exact hφVal
         | inr h => exact hΓ p h)
+  | conjElimLeft h ih =>
+      intro M env hEq hQ hΓ
+      exact le_trans (ih M env hEq hQ hΓ) (conj_le_left _ _)
+  | conjElimRight h ih =>
+      intro M env hEq hQ hΓ
+      exact le_trans (ih M env hEq hQ hΓ) (conj_le_right _ _)
+  | disjIntroLeft h ih =>
+      intro M env hEq hQ hΓ
+      exact le_trans (ih M env hEq hQ hΓ) (le_disj_left _ _)
+  | disjIntroRight h ih =>
+      intro M env hEq hQ hΓ
+      exact le_trans (ih M env hEq hQ hΓ) (le_disj_right _ _)
   | equalityRefl τ =>
       exact crisp_to_foundation t (crisp_derivation_sound
         (CrispDerivation.equalityRefl τ))
