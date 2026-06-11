@@ -58,6 +58,7 @@ Keep the separation clear: `⊗`/`⊔` are the core algebraic operations (produc
 - `lean/Cred/Sequent.lean`: labelled external-conditioning calculus, soundness, chain-rule cut, no-ex-falso witness.
 - `lean/Cred/Kernel.lean`: type-level proof certificates, erasure to labelled derivations, certificate soundness.
 - `lean/Cred/Foundation/Language.lean`: first-order terms, equality, predicates, quantifiers, and no internal conditional.
+- `lean/Cred/Foundation/Semantics.lean`: structures, assignments, term evaluation, formula evaluation into credences.
 - `part1/paper.tex`: congruence classification (6 sections + conclusion + 2 appendices, 12 pages).
 - `part2/paper.tex`: bridge paper (8 sections + 2 appendices, 24 pages; self-contained).
 - `part3/paper.tex`: foundations paper: paradox without explosion, crisp fragments, solution sets, and external conditioning.
@@ -137,6 +138,11 @@ Foundation language (from Foundation/Language.lean):
 - `Term.upRenaming`, `Term.liftSubst`, `Formula.rename`, `Formula.subst`
 - Formula constructors include equality and quantifiers; there is no implication or conditional constructor
 - `Formula.hasEquality`, `Formula.hasQuantifier`
+
+Foundation semantics (from Foundation/Semantics.lean):
+- `Foundation.Structure` (domain, functions, predicates, equality, quantifier operations)
+- `Structure.evalTerm`, `Structure.evalTermList`, `Structure.evalFormula`
+- Equality and quantifier laws are deliberately separate from the raw semantic interface
 
 ## Philosophy
 

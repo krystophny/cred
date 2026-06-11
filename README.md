@@ -30,6 +30,7 @@ In the foundations layer, self-reference lands on solution sets instead of contr
 The current self-hosting route starts with `Kernel.Proof`: a type-level certificate for labelled derivations. A certificate erases to `Derivation`, inherits `derivation_sound`, and already has a NoExFalso emptiness theorem.
 
 The foundation route starts with `Foundation.Formula`: a first-order language with equality, predicates, and quantifiers. It has no implication or conditional constructor.
+`Foundation.Structure` interprets that language into credences. Equality and quantifier laws stay explicit, so crisp equality, graded extensionality, and comprehension can be added as separate assumptions.
 
 ## Primitives
 
@@ -69,6 +70,7 @@ Foundations and proof layer (Part 3 paper):
 - `derivation_sound`, `labelled_no_ex_falso`: labelled external-conditioning calculus is sound and non-explosive
 - `Kernel.Proof.sound`, `Kernel.no_ex_falso_certificate`: proof certificates erase to sound labelled derivations
 - `Foundation.Formula`: first-order equality and quantifiers without an internal conditional
+- `Foundation.Structure.evalFormula`: foundation formulas evaluate to credences under an explicit structure
 
 ## Collapse
 

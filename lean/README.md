@@ -32,6 +32,7 @@ lake build
 - `Cred/Sequent.lean` - labelled external-conditioning calculus and soundness
 - `Cred/Kernel.lean` - type-level proof certificates and sound erasure
 - `Cred/Foundation/Language.lean` - first-order language for the foundation layer
+- `Cred/Foundation/Semantics.lean` - structures and credence-valued formula evaluation
 
 ## Key Theorems
 
@@ -54,6 +55,7 @@ lake build
 | `Foundation.Formula.rename`, `Foundation.Formula.subst` | Binder-aware formula renaming and substitution |
 | `Foundation.Formula.hasEquality` | Structural marker for equality in foundation formulas |
 | `Foundation.Formula.hasQuantifier` | Structural marker for quantifiers in foundation formulas |
+| `Foundation.Structure.evalFormula` | Credence-valued semantics for foundation formulas |
 
 ## Dependencies
 

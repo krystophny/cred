@@ -80,6 +80,9 @@ For the current synthesis statement, see `paper.tex`.
     object-language module is `lean/Cred/Foundation/Language.lean`; equality,
     quantifiers, and binder-aware substitution are explicit, while
     conditionality remains external.
+    `lean/Cred/Foundation/Semantics.lean` interprets formulas into credences
+    using explicit equality and quantifier operations. Crispness and
+    extensionality remain separate laws.
 
 11. **Crisp subtheories.** Identify and formalize the crisp fragments (where all
     credences are `0/1`) and prove they recover the intended classical theorems.
