@@ -3,7 +3,7 @@
 ## Current Focus: Both papers publication-ready
 
 Part 1: congruence classification of the product De Morgan triplet (6 sections + conclusion + 2 appendices, 12 pages).
-Part 2: self-contained paper — chain-rule conditioning as a bridge between probability and many-valued logic (8 sections + 2 appendices, 24 pages).
+Part 2: self-contained paper on chain-rule conditioning as a bridge between probability and many-valued logic (8 sections + 2 appendices, 24 pages).
 All Lean proofs fully verified (3758 lines across 13 modules, zero sorry). Both papers build clean.
 
 ## Build (match CI)
@@ -37,22 +37,22 @@ Keep the separation clear: `⊗`/`⊔` are the core algebraic operations (produc
 
 ## Repo Map
 
-- `lean/Cred/Core/Value.lean` — credence values: negation, product conjunction, disjunction, order, fixed points, spread, equilibria (426 lines).
-- `lean/Cred/Core/Consequence.lean` — K3/LP designation, graded consequence, Formula, eval, structural rules, no-explosion theorems (316 lines).
-- `lean/Cred/Cond/Admissible.lean` — chain-rule conditioning, admissible sets (Cond), Fréchet bounds, conditioning tables, path dependence (427 lines).
-- `lean/Cred/Cond/Copula.lean` — Bayes consistency on [0,1], min-copula uniqueness, world partitioning (403 lines).
-- `lean/Cred/Collapse/ThreeVal.lean` — three-valued credences, RM3/Gödel/product-residuated implications (227 lines).
-- `lean/Cred/Collapse/Hom.lean` — collapse homomorphism, no-Gödel/no-Łukasiewicz collapse, Boolean subalgebra (313 lines).
-- `lean/Cred/Congruence/Unit.lean` — UnitCongruence classification, Kleene witness, three-element quotient uniqueness (297 lines).
-- `lean/Cred/Congruence/Real.lean` — RealCongruence, scaling trick, no non-trivial finite quotient (229 lines).
-- `lean/Cred/Bridge/LPK3.lean` — collapse-eval commutativity, LP/K3 bridge theorems (207 lines).
-- `lean/Cred/Bridge/CondBridge.lean` — conditional bridge: impossibility, boundary, update bridge, zero-evidence triple (389 lines).
-- `lean/Cred/Valuation.lean` — valuations (CpValuation, IndepValuation, JointValuation) (176 lines).
-- `lean/Cred/Update.lean` — Bayesian and Jeffrey conditionalization (138 lines).
-- `lean/Cred/Predicate.lean` — graded predicates, quantifiers, Russell fixed point (210 lines).
-- `part1/paper.tex` — congruence classification (6 sections + conclusion + 2 appendices, 12 pages).
-- `part2/paper.tex` — bridge paper (8 sections + 2 appendices, 24 pages; self-contained).
-- `part3/` — future work: graded proofs, self-hosting, undecidability.
+- `lean/Cred/Core/Value.lean`: credence values: negation, product conjunction, disjunction, order, fixed points, spread, equilibria (426 lines).
+- `lean/Cred/Core/Consequence.lean`: K3/LP designation, graded consequence, Formula, eval, structural rules, no-explosion theorems (316 lines).
+- `lean/Cred/Cond/Admissible.lean`: chain-rule conditioning, admissible sets (Cond), Fréchet bounds, conditioning tables, path dependence (427 lines).
+- `lean/Cred/Cond/Copula.lean`: Bayes consistency on [0,1], min-copula uniqueness, world partitioning (403 lines).
+- `lean/Cred/Collapse/ThreeVal.lean`: three-valued credences, RM3/Gödel/product-residuated implications (227 lines).
+- `lean/Cred/Collapse/Hom.lean`: collapse homomorphism, no-Gödel/no-Łukasiewicz collapse, Boolean subalgebra (313 lines).
+- `lean/Cred/Congruence/Unit.lean`: UnitCongruence classification, Kleene witness, three-element quotient uniqueness (297 lines).
+- `lean/Cred/Congruence/Real.lean`: RealCongruence, scaling trick, no non-trivial finite quotient (229 lines).
+- `lean/Cred/Bridge/LPK3.lean`: collapse-eval commutativity, LP/K3 bridge theorems (207 lines).
+- `lean/Cred/Bridge/CondBridge.lean`: conditional bridge: impossibility, boundary, update bridge, zero-evidence triple (389 lines).
+- `lean/Cred/Valuation.lean`: valuations (CpValuation, IndepValuation, JointValuation) (176 lines).
+- `lean/Cred/Update.lean`: Bayesian and Jeffrey conditionalization (138 lines).
+- `lean/Cred/Predicate.lean`: graded predicates, quantifiers, Russell fixed point (210 lines).
+- `part1/paper.tex`: congruence classification (6 sections + conclusion + 2 appendices, 12 pages).
+- `part2/paper.tex`: bridge paper (8 sections + 2 appendices, 24 pages; self-contained).
+- `part3/`: future work: graded proofs, self-hosting, undecidability.
 
 ## Key Results to Keep Green (Lean)
 

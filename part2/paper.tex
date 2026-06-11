@@ -78,7 +78,7 @@ lattice is equivalent to positivity consequence on $[0,1]$,
 and K$_3$ consequence to certainty consequence.
 The bridge does \emph{not} extend to conditioning: no
 truth-functional function on the lattice can reproduce the
-min-copula conditional --- a finitary impossibility result
+min-copula conditional, a finitary impossibility result
 witnessed by two explicit pairs.
 We characterize the boundary conditions under which the bridge
 does hold, show that Bayesian update inherits it, and prove
@@ -108,8 +108,8 @@ A many-valued logician working in H\'ajek's Product
 Logic~\cite{hajek1998} uses the residuated implication:
 $a \to b = \sup\{c : a \cdot c \leq b\}$.
 When $a > 0$ and the joint is the minimum, this yields the same
-$\min(b/a,\, 1)$; but at $a = 0$, the supremum is $1$
---- ex falso quodlibet is built into every residuated
+$\min(b/a,\, 1)$; but at $a = 0$, the supremum is $1$.
+Ex falso quodlibet is built into every residuated
 implication~\cite{hajek1998,esteva2001,cintula2011}.
 
 Both traditions share the same core algebra on $[0,1]$: the
@@ -126,8 +126,8 @@ The chain rule
 $\condc{A}{B} \conjc \cred(B) = \cred(A \land B)$
 is the defining constraint.
 When $\cred(B) > 0$, the conditional is uniquely determined:
-$\condc{A}{B} = \cred(A \land B) / \cred(B)$ --- the same
-as Bayesian conditioning.
+$\condc{A}{B} = \cred(A \land B) / \cred(B)$, the same
+value as Bayesian conditioning.
 When $\cred(B) = 0$, the equation $c \cdot 0 = 0$ holds for
 \emph{every} $c \in [0,1]$: the conditional is unconstrained.
 Impossible evidence provides no constraint.
@@ -207,8 +207,8 @@ do not reduce to each other even after collapse.
 \item \textbf{Conditional bridge impossibility}
   (Section~\ref{sec:cond-bridge}; new):
   no truth-functional function on $\{0, \tfrac{1}{2}, 1\}$
-  can reproduce the min-copula conditional under collapse
-  --- a finitary Lewis triviality, witnessed by two
+  can reproduce the min-copula conditional under collapse,
+  a finitary Lewis triviality witnessed by two
   explicit pairs.
 \item \textbf{Update bridge and boundary characterization}
   (Section~\ref{sec:cond-bridge}; new):
@@ -571,7 +571,7 @@ For $e > 0$: a conditioning structure exists iff
 $j \leq e$, and is then unique: $c = j / e$.
 For $e = 0$: the constraint forces
 $j = 0$ but leaves $c$ unconstrained
---- every $c \in [0,1]$ satisfies $c \cdot 0 = 0$.
+since every $c \in [0,1]$ satisfies $c \cdot 0 = 0$.
 
 Lean: \texttt{conditioning\_mk},
 \texttt{conditioning\_unique},
@@ -675,7 +675,7 @@ zero, works on bare $[0,1]$ values, and avoids ex falso.}
 When evidence has credence $0$, any conditional
 $c \in [0,1]$ satisfies the chain rule.
 The set of consistent posteriors is the entire interval $[0,1]$
---- the maximal imprecise
+and is the maximal imprecise
 posterior~\cite{walley1991,levi1980}.
 Lean: \texttt{conditioning\_zero\_any}.
 \end{proposition}
@@ -752,7 +752,7 @@ The results above are algebraic facts about the product De Morgan
 triplet, not claims about Bayesian convergence.
 Whether iterated Bayesian update drives $\cred_n(A) \to 0$,
 $\tfrac{1}{2}$, or $1$ depends on the stochastic model for the
-evidence sequence --- a question orthogonal to the algebraic structure.
+evidence sequence. That question is orthogonal to the algebraic structure.
 \end{remark}
 
 \subsection{The Collapse Homomorphism}
@@ -1041,7 +1041,7 @@ By Proposition~\ref{prop:collapse-eval},
 $\llbracket\psi\rrbracket_w = \mathrm{collapse}(
 \llbracket\psi\rrbracket_v)$.
 A credence $c$ is positive if and only if $\mathrm{collapse}(c)
-\in \{1, \tfrac{1}{2}\}$ --- the LP designated set
+\in \{1, \tfrac{1}{2}\}$, the LP designated set
 (Lean: \texttt{lp\_designated\_iff\_pos}).
 So each premise is LP-designated under $w$.
 By LP consequence, $\llbracket\varphi\rrbracket_w$ is
@@ -1092,7 +1092,7 @@ $v = \mathrm{lift} \circ w$ and apply the bridge lemma in reverse.
 
 The proofs are symmetric in a precise sense: one direction collapses,
 the other lifts.
-The collapse does not merely project --- it \emph{reflects}:
+The collapse \emph{reflects}:
 every three-valued counterexample lifts to a continuous one, and
 every continuous counterexample collapses to a three-valued one.
 An LP logician working with $\{0, \tfrac{1}{2}, 1\}$ is implicitly
@@ -1128,7 +1128,7 @@ Set $\cred(\text{rain}) = \tfrac{1}{2}$ and
 $\cred(\text{snow}) = 0$.
 Both $\text{rain}$ and $\negc\text{rain}$ are positive
 ($\tfrac{1}{2} > 0$ and $\negc\tfrac{1}{2} = \tfrac{1}{2} > 0$),
-but $\cred(\text{snow}) = 0$ --- contradictory evidence about rain
+but $\cred(\text{snow}) = 0$. Contradictory evidence about rain
 does not force belief in snow.
 Via the bridge, the LP counterexample
 $w(\text{rain}) = \tfrac{1}{2}$, $w(\text{snow}) = 0$ refutes
@@ -1149,7 +1149,7 @@ either
 The propositional bridge covers every formula built from negation,
 conjunction, and disjunction.
 The natural next question is whether the same transfer works for
-conditioning --- the operation that distinguishes the two traditions.
+conditioning, the operation that distinguishes the two traditions.
 
 %=============================================================================
 \section{The Conditional Bridge}
@@ -1244,7 +1244,7 @@ Contradiction: $\tfrac{1}{2} \neq 1$.
 The structural setting differs from Lewis~\cite{lewis1976}.
 Lewis works \emph{within} probability theory and shows that
 identifying $P(A \mid B)$ with the probability of a conditional
-proposition forces the measure to be trivial --- a contradiction
+proposition forces the measure to be trivial, a contradiction
 internal to a single framework.
 Theorem~\ref{thm:no-cond-bridge} works \emph{between} two
 frameworks and shows that the collapse homomorphism, which faithfully
@@ -1315,8 +1315,8 @@ boundaries the collapse preserves everything.
 \subsection{Interior Failure}
 \label{sec:interior-fail}
 
-The bridge fails precisely when the conditional is interior ---
-that is, when both $a$ and $b$ are interior and $a < b$.
+The bridge fails precisely when the conditional is interior:
+both $a$ and $b$ are interior and $a < b$.
 
 \begin{theorem}[Interior Bridge Failure]
 \label{thm:interior-fail}
@@ -1378,7 +1378,7 @@ What happens under other dependence structures?
 
 Under the \emph{independence copula}
 ($\cred(A \land B) = a \cdot b$), the conditional is
-$a \cdot b / b = a$ --- it does not depend on the evidence at all.
+$a \cdot b / b = a$. It does not depend on the evidence at all.
 The bridge trivially holds (collapsing $a$ gives the same answer
 either way), but the conditional is uninformative: learning $B$
 does not change your credence in $A$.
@@ -1388,8 +1388,8 @@ $\mathrm{collapse}(a) = \mathrm{collapse}(b) = \tfrac{1}{2}$),
 the set of min-copula conditionals is $(0, 1]$:
 when $a < b$ the conditional is $a/b \in (0,1)$, and when
 $b \leq a$ the conditional is $\min(a,b)/b = b/b = 1$.
-Over all interior pairs, every value in $(0,1]$ is achieved ---
-maximally underdetermined by the collapsed values
+Over all interior pairs, every value in $(0,1]$ is achieved.
+The collapsed values therefore determine no sharper interval
 (Lean: \texttt{interior\_cond\_range}).
 This is the precise sense in which the collapse loses too much
 information: interior credences are unified into a single class, but
@@ -1537,7 +1537,7 @@ the identity $c \conjc 0 = 0$:
 \item \textbf{Underdetermined posteriors:}
   When evidence has credence $0$, any conditional
   $c \in [0,1]$ satisfies the chain rule.
-  The set of consistent posteriors is $[0,1]$ --- the maximal
+  The set of consistent posteriors is $[0,1]$, the maximal
   imprecise posterior~\cite{walley1991,levi1980}.
 \item \textbf{LP explosion failure:}
   The value $\tfrac{1}{2}$ makes both $A$ and $\negc A$
@@ -1652,8 +1652,8 @@ probability with the probability of a conditional proposition
 forces triviality (Remark~\ref{rem:lewis} compares our
 impossibility theorem).
 McGee~\cite{mcgee1985} showed that modus ponens can fail for
-indicative conditionals --- the same
-theme that drives the conditional bridge failure in
+indicative conditionals, the same
+fault line that drives the conditional bridge failure in
 Section~\ref{sec:cond-bridge}.
 
 \textbf{Non-explosion without graded values (axis~A).}
@@ -1747,7 +1747,7 @@ go further than Suszko's thesis: Suszko showed abstractly that
 every Tarskian consequence relation is determined by a
 two-valued partition into designated and non-designated values,
 but the bridge provides an explicit, constructive,
-\emph{bidirectional} reduction --- the collapse homomorphism
+\emph{bidirectional} reduction: the collapse homomorphism
 converts any $[0,1]$-counterexample to a three-valued one,
 and the lift converts any three-valued counterexample to a
 $[0,1]$-counterexample, with both directions computable.
@@ -1777,8 +1777,8 @@ is discussed in Section~\ref{sec:collapse-hom}.
 \label{sec:conclusion}
 %=============================================================================
 
-The product De Morgan triplet on $[0,1]$ --- product conjunction,
-probabilistic-sum disjunction, standard complement --- admits a
+The product De Morgan triplet on $[0,1]$, with product conjunction,
+probabilistic-sum disjunction, and standard complement, admits a
 natural collapse to the Kleene lattice
 $\{0, \tfrac{1}{2}, 1\}$ via a surjective homomorphism.
 On the propositional side, this collapse establishes a bidirectional
@@ -1801,7 +1801,7 @@ information that determines the conditional).
 In the running example, rain ($0.8$) and wet streets ($0.9$) live
 in the interior: the propositional bridge faithfully transfers their
 logical relationships, but the conditional $8/9$ collapses to
-$\tfrac{1}{2}$ while the G\"odel conditional gives $1$ --- the
+$\tfrac{1}{2}$ while the G\"odel conditional gives $1$. The
 bridge breaks precisely where ratio information matters.
 
 \textbf{Open problems.}
@@ -2073,7 +2073,7 @@ theory, not merely a logical convenience~\cite{nelsen2006}.
 $\min(a,b)$ & \checkmark & \checkmark & \checkmark & \checkmark \\
 $a \cdot b$ (indep.) & \checkmark & \checkmark & $\times$ & $\times$ \\
 $\max(a{+}b{-}1,0)$ & \checkmark & \checkmark & \checkmark & $\times$ \\
-$\max(\negc a,b) \cdot a$ (RM3) & \checkmark & $\times$ & --- & --- \\
+$\max(\negc a,b) \cdot a$ (RM3) & \checkmark & $\times$ & n/a & n/a \\
 \midrule
 External (prob.) & $\times$ & \checkmark & \checkmark & \checkmark \\
 \bottomrule
@@ -2094,7 +2094,7 @@ Lean: \texttt{min\_copula\_unique},
 
 \subsection{Congruence Classification}
 
-The collapse is a congruence --- an equivalence relation compatible
+The collapse is a congruence, an equivalence relation compatible
 with the algebraic operations.
 How many such congruences exist?
 The answer depends on whether multiplication compatibility is
