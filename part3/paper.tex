@@ -68,8 +68,9 @@ directions including modal extensions and categorical perspectives.
 Part~1~\cite{part1} proved two results about truth-functional conjunctions
 on $[0,1]$.
 First, $\min(a,b)$ is the unique conjunction satisfying Bayes consistency,
-non-trivial conditioning, and idempotence---this forces the product
-De~Morgan triplet (complement $1-c$, conjunction $\min$, disjunction $\max$).
+non-trivial conditioning, and idempotence.
+This forces the product De~Morgan triplet: complement $1-c$, conjunction
+$\min$, disjunction $\max$.
 Second, the conditional's limit as evidence approaches zero is
 \emph{path-dependent}: ex falso is not forced by the algebra.
 Part~2~\cite{part2} built the reasoning layer: valuations, consequence
@@ -115,6 +116,35 @@ $c_1 \disjc c_2$ for disjunction, and $\condc{A}{B}$ for the conditional
 credence of $A$ given $B$.
 
 %=============================================================================
+\section{The Crisp Fragment}
+\label{sec:crisp}
+%=============================================================================
+
+Classical valuations embed into Cred by sending false to $0$ and true to $1$.
+On these two values, negation, product conjunction, and De Morgan disjunction
+are the Boolean operations.
+Formula evaluation commutes with this embedding.
+Lean names this theorem \texttt{crisp\_eval\_eq}.
+Classical validity is credence-validity restricted to crisp valuations
+(\texttt{crisp\_embedding}).
+
+The same restriction aligns the consequence relations.
+On crisp valuations, classical consequence, certainty consequence, and
+positivity consequence coincide.
+The Lean names are \texttt{crisp\_certainty\_iff\_classical} and
+\texttt{crisp\_positivity\_iff\_classical}.
+Thus the graded setting extends the classical fragment; it does not replace it.
+
+Conditioning marks the boundary of this conservativity.
+With true evidence, admissible conditioning is the singleton expected from the
+chain rule.
+With false evidence and zero joint, Cred returns the full interval
+$[0,1]$, while material implication selects vacuous truth.
+This is the exact divergence from classical implication.
+The Lean names are \texttt{material\_divergence} and
+\texttt{cond\_underdetermined\_iff}.
+
+%=============================================================================
 \section{Graded Set Theory}
 \label{sec:sets}
 %=============================================================================
@@ -134,8 +164,8 @@ Then $c = \negc c = 1 - c$, which gives $c = \tfrac{1}{2}$.
 
 \begin{remark}[Interpretation]
 The Russell set has credence $\tfrac{1}{2}$ of containing itself.
-This is neither full membership nor full non-membership---it is the unique
-fixed point of negation.
+This is neither full membership nor full non-membership.
+It is the unique fixed point of negation.
 The paradox is not \emph{solved} in the sense of being eliminated; it is
 \emph{accommodated} by the algebra's fixed-point structure.
 \end{remark}
@@ -152,8 +182,9 @@ The comprehension axiom becomes:
 \[
 \cred(x \in \{y : \phi(y)\}) = \cred(\phi(x))
 \]
-This does not require restriction to ``safe'' properties---the graded setting
-handles self-reference via fixed points rather than exclusion.
+This does not require restriction to ``safe'' properties.
+The graded setting handles self-reference via fixed points rather than
+exclusion.
 
 \subsection{The Takeuti--Titani Context}
 
@@ -161,8 +192,8 @@ There is a substantial tradition of ``many-valued mathematics'' in which
 set-theoretic foundations are valued in $[0,1]$ or other
 lattices~\cite{takeuti1984,zadeh1965}.
 Takeuti and Titani develop a many-valued set theory based on fuzzy logic and
-study standard set-theoretic issues---extensionality, comprehension, and the
-interpretation of membership---in that setting.
+study standard set-theoretic issues in that setting: extensionality,
+comprehension, and the interpretation of membership.
 
 The uniqueness result from Part~1 provides a canonical choice for graded
 membership operations: the minimum conjunction $\min(a,b)$ is not merely one
@@ -178,9 +209,9 @@ a modelling decision~\cite{klement2000}.
 \label{sec:zero}
 %=============================================================================
 
-The evidence-zero boundary is where the credence algebra's design choice---
-leaving the conditional underdetermined when $\cred(B) = 0$---makes contact
-with several established research programs.
+The evidence-zero boundary is where the credence algebra's design choice makes
+contact with several established research programs.
+When $\cred(B) = 0$, the conditional remains underdetermined.
 The chain rule is well-formed at evidence zero and forces only the joint to be
 zero; it does \emph{not} choose a specific conditional value.
 This is closely related to the classical ambiguity of ratios $j/a$ as
@@ -237,9 +268,10 @@ Category-theoretic approaches (e.g., Markov categories) treat conditioning
 structurally rather than as division, making clear which parts come from
 additional structure beyond the chain rule itself~\cite{fritz2020}.
 
-The algebra's underdetermination at evidence zero corresponds precisely to
-the non-uniqueness in disintegration: both recognize that the chain rule alone
-does not select a canonical conditional when the evidence has measure zero.
+The algebra's evidence-zero underdetermination matches the non-uniqueness in
+disintegration.
+In both cases, the chain rule alone does not select a canonical conditional
+when the evidence has measure zero.
 
 \subsection{Imprecise Probability}
 
@@ -264,14 +296,15 @@ semantics at measure-zero observations:
 continuous observations have probability zero, and standard conditioning uses
 densities rather than probabilities.
 The algebra's underdetermination at zero corresponds to the need for explicit
-density specifications---one must choose a particular parameterization
-(Lebesgue density, counting measure, etc.) to pin down the conditional.
+density specifications.
+One must choose a particular parameterization (Lebesgue density, counting
+measure, etc.) to pin down the conditional.
 
 Bayesian statistics sometimes uses improper priors (non-normalizable
 measures).
-The algebra's treatment of evidence-zero conditioning---underdetermined
-rather than forced to any particular value---parallels this: there is no
-canonical posterior when the prior is improper.
+The algebra's treatment of evidence-zero conditioning parallels this.
+It is underdetermined rather than forced to any particular value.
+There is no canonical posterior when the prior is improper.
 
 %=============================================================================
 \section{Self-Reference in Context}
@@ -280,9 +313,9 @@ canonical posterior when the prior is improper.
 
 The most visible self-reference result from Part~1 is the forced negation
 fixed point: $c = \negc c$ implies $c = \tfrac{1}{2}$.
-This is algebraic---it follows from the complement operation on $[0,1]$---and
-should be positioned relative to the established fixed-point traditions
-for truth and paradox.
+This is algebraic.
+It follows from the complement operation on $[0,1]$ and should be positioned
+relative to the established fixed-point traditions for truth and paradox.
 
 \subsection{Kripke Fixed Points}
 
@@ -306,15 +339,14 @@ Gupta--Belnap revision theory models truth as evolving under revisions:
 a revision operator maps one extension of the truth predicate to
 another, and the semantics is given by the long-run behavior of revision
 sequences~\cite{gupta1993}.
-This yields dynamical semantics for self-reference---truth values may
-oscillate, stabilize, or exhibit more complex patterns.
+This yields dynamical semantics for self-reference.
+Truth values may oscillate, stabilize, or exhibit more complex patterns.
 
 The credence algebra's treatment of self-reference has no revision dynamics:
 the fixed point is immediate.
 This is appropriate for the algebraic base case (negation self-application)
 but does not address the richer phenomena that revision theory
-captures---iterated revision, mutual reference, and contingent
-stabilization.
+captures: iterated revision, mutual reference, and contingent stabilization.
 
 \subsection{Many-Valued Approaches}
 
@@ -325,7 +357,7 @@ De~Morgan structure and the collapse homomorphism to the Kleene lattice
 established in Part~1.
 
 \begin{remark}[Scope of the fixed point]
-Part~3 should treat the Part~1 fixed point as the \emph{base case}---the
+Part~3 should treat the Part~1 fixed point as the \emph{base case}: the
 simplest instance of self-reference resolved by the algebraic structure.
 It is not a wholesale solution to semantic paradox, and the relationship to
 Kripke and revision-theoretic approaches is one of complementarity rather
@@ -367,8 +399,8 @@ $\|\varphi\| = \|\varphi\|^*$ where the right-hand side is the semantic truth
 degree.
 
 H\'ajek's metamathematics of fuzzy logic organizes the ``big three''
-continuous t-norm logics---\L ukasiewicz, G\"odel, and product---within the
-BL-algebra framework~\cite{hajek1998}.
+continuous t-norm logics within the BL-algebra framework: \L ukasiewicz,
+G\"odel, and product~\cite{hajek1998}.
 Product logic is a fully developed many-valued logic: it is $[0,1]$-valued,
 its implication is the product residuum (Goguen
 implication)~\cite{goguen1969}, and it validates a graded form of modus
@@ -473,7 +505,7 @@ events/coherence) and which parts are a deliberate stance (evidence-zero
 underdetermination as a first-class feature rather than an exception to be
 patched).
 
-\paragraph{Roadmap targets.}
+\paragraph{Targets.}
 The concrete next steps for this program are:
 \begin{enumerate}[label=(\arabic*),nosep]
 \item \textbf{A graded proof theory layer:} specify a minimal proof calculus
