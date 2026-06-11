@@ -27,3 +27,4 @@ import Cred.Foundation.Consequence
 import Cred.Foundation.Proof
 import Cred.Foundation.Kernel
 import Cred.Foundation.Equality
+import Cred.Foundation.Quantifier
