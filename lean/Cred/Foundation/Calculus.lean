@@ -60,6 +60,13 @@ inductive FoundationDerivation (t : Credence) :
       FoundationDerivation t Γ ψ
   | equalityRefl {Γ : List (Formula Func Pred)} (τ : Term Func) :
       FoundationDerivation t Γ (.equal τ τ)
+  | equalitySymm {Γ : List (Formula Func Pred)} {τ υ : Term Func} :
+      FoundationDerivation t Γ (.equal τ υ) →
+      FoundationDerivation t Γ (.equal υ τ)
+  | equalityTrans {Γ : List (Formula Func Pred)} {τ υ χ : Term Func} :
+      FoundationDerivation t Γ (.equal τ υ) →
+      FoundationDerivation t Γ (.equal υ χ) →
+      FoundationDerivation t Γ (.equal τ χ)
   | forallElim {Γ : List (Formula Func Pred)} {φ : Formula Func Pred}
       {τ : Term Func} :
       FoundationDerivation t Γ (.forallE φ) →
@@ -91,6 +98,27 @@ theorem foundation_derivation_sound {t : Credence}
   | equalityRefl τ =>
       exact crisp_to_foundation t (crisp_derivation_sound
         (CrispDerivation.equalityRefl τ))
+  | equalitySymm h ih =>
+      intro M env hEq hQ hΓ
+      exact equality_symmetry_threshold t _ _ M env hEq (fun p hp => by
+        cases List.mem_cons.mp hp with
+        | inl hp =>
+            subst hp
+            exact ih M env hEq hQ hΓ
+        | inr hp => cases hp)
+  | equalityTrans h1 h2 ih1 ih2 =>
+      intro M env hEq hQ hΓ
+      exact equality_transitivity_threshold t _ _ _ M env hEq (fun p hp => by
+        cases List.mem_cons.mp hp with
+        | inl hp =>
+            subst hp
+            exact ih1 M env hEq hQ hΓ
+        | inr hp =>
+            cases List.mem_cons.mp hp with
+            | inl hp =>
+                subst hp
+                exact ih2 M env hEq hQ hΓ
+            | inr hp => cases hp)
   | forallElim h ih =>
       intro M env hEq hQ hΓ
       rw [evalFormula_instantiate]

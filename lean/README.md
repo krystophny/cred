@@ -85,6 +85,7 @@ lake build
 | `Foundation.Structure.quantifier_derivation_sound` | Soundness for the quantifier proof layer |
 | `Foundation.Structure.FoundationThresholdConsequence` | Consequence under crisp equality and quantifier laws |
 | `Foundation.Structure.FoundationDerivation.weaken`, `cut` | Structural rules for the combined foundation derivation layer |
+| `Foundation.Structure.FoundationDerivation.equalitySymm`, `equalityTrans` | Equality proof rules for the combined foundation derivation layer |
 | `Foundation.Structure.foundation_derivation_sound` | Soundness for the combined foundation derivation layer |
 
 ## Dependencies
