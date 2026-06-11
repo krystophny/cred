@@ -80,6 +80,27 @@ theorem equality_transitivity_threshold (t : Credence)
       rw [hzero] at hprem
       exact le_trans hprem (Credence.zero_le _)
 
+theorem equality_substitution_threshold (t : Credence)
+    (τ υ : Term Func) (φ : Formula Func Pred) :
+    CrispThresholdConsequence.{u, v, w} t
+      [@Formula.equal Func Pred τ υ, Formula.instantiate τ φ]
+      (Formula.instantiate υ φ) := by
+  intro M env hEq hΓ
+  by_cases h : M.evalTerm env τ = M.evalTerm env υ
+  · have hφ := hΓ (Formula.instantiate τ φ)
+      (List.mem_cons_of_mem (Formula.equal τ υ)
+        (List.mem_cons_self (Formula.instantiate τ φ) []))
+    rw [evalFormula_instantiate] at hφ
+    rw [evalFormula_instantiate]
+    rw [← h]
+    exact hφ
+  · have hzero : M.evalFormula env (.equal τ υ) = 0 := by
+      simp [evalFormula, hEq.eq_zero_of_ne h]
+    have hprem := hΓ (Formula.equal τ υ)
+      (List.mem_cons_self (Formula.equal τ υ) [Formula.instantiate τ φ])
+    rw [hzero] at hprem
+    exact le_trans hprem (Credence.zero_le _)
+
 inductive CrispDerivation (t : Credence) :
     List (Formula Func Pred) → Formula Func Pred → Prop where
   | base {Γ : List (Formula Func Pred)} {φ : Formula Func Pred} :

@@ -188,6 +188,7 @@ Foundation equality (from Foundation/Equality.lean):
 - `threshold_to_crisp`
 - `equality_reflexivity_threshold`
 - `equality_symmetry_threshold`, `equality_transitivity_threshold`
+- `equality_substitution_threshold`
 - `Structure.CrispDerivation`
 - `CrispDerivation.equalitySymm`, `CrispDerivation.equalityTrans`
 - `crisp_derivation_sound`
