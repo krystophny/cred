@@ -6,6 +6,7 @@
 -/
 
 import Cred.Foundation.Equality
+import Cred.Foundation.Proof
 
 namespace Cred
 namespace Foundation
@@ -69,6 +70,36 @@ theorem exists_intro_formula (t : Credence)
   rw [← evalFormula_instantiate]
   exact hΓ (Formula.instantiate τ φ)
     (List.mem_cons_self (Formula.instantiate τ φ) [])
+
+inductive QuantifierDerivation (t : Credence) :
+    List (Formula Func Pred) → Formula Func Pred → Prop where
+  | base {Γ : List (Formula Func Pred)} {φ : Formula Func Pred} :
+      Derivation t Γ φ → QuantifierDerivation t Γ φ
+  | forallElim {Γ : List (Formula Func Pred)} {φ : Formula Func Pred}
+      {τ : Term Func} :
+      QuantifierDerivation t Γ (.forallE φ) →
+      QuantifierDerivation t Γ (Formula.instantiate τ φ)
+  | existsIntro {Γ : List (Formula Func Pred)} {φ : Formula Func Pred}
+      {τ : Term Func} :
+      QuantifierDerivation t Γ (Formula.instantiate τ φ) →
+      QuantifierDerivation t Γ (.existsE φ)
+
+theorem quantifier_derivation_sound {t : Credence}
+    {Γ : List (Formula Func Pred)} {φ : Formula Func Pred}
+    (h : QuantifierDerivation t Γ φ) :
+    QuantifierThresholdConsequence.{u, v, w} t Γ φ := by
+  induction h with
+  | base h =>
+      exact threshold_to_quantifier t (derivation_sound h)
+  | forallElim h ih =>
+      intro M env hQ hΓ
+      rw [evalFormula_instantiate]
+      exact forall_elim_semantic t M env hQ _ _ (ih M env hQ hΓ)
+  | existsIntro h ih =>
+      intro M env hQ hΓ
+      apply exists_intro_semantic t M env hQ _ _
+      rw [← evalFormula_instantiate]
+      exact ih M env hQ hΓ
 
 end Structure
 
