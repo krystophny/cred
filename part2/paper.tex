@@ -159,6 +159,32 @@ the \emph{conditional bridge} is the (attempted) commutativity
 of the collapse with conditioning.
 This paper studies all three and their interaction.
 
+\textbf{Two axes.}
+The structure factors into two independent components.
+\emph{Axis~A: admissible conditioning (non-explosion).}
+The chain rule reads conditioning as an admissibility constraint:
+given joint~$j$ and evidence~$e$, the admissible conditionals form
+the set $\{c \in [0,1] : c \conjc e = j\}$.
+Positive evidence yields a singleton; zero evidence (with zero
+joint) yields the whole interval.
+No inference rule is weakened.
+Explosion never starts, because impossible evidence forces no value.
+We call this component the \emph{admissible conditional semantics}.
+\emph{Axis~B: graded values.}
+The value space $[0,1]$ carries the product De Morgan triplet, its
+Kleene quotient, and the LP/K$_3$ consequence bridges.
+We call this component the \emph{graded credence semantics}.
+The literature realizes each axis separately: relevance logics and
+the logics of formal inconsistency block explosion without grading
+values~\cite{anderson1975,carnielli2016}, while fuzzy and product
+logics grade values without admissible
+conditioning~\cite{hajek1998,cintula2011}.
+Inside the present framework, Theorem~\ref{thm:no-cond-bridge}
+(\texttt{no\_truthfunctional\_cond\_bridge}) is the independence
+theorem for the pair: no truth-functional conditional on the
+collapsed values reproduces admissible conditioning, so the axes
+do not reduce to each other even after collapse.
+
 \textbf{Main results.}
 \begin{enumerate}[nosep]
 \item \textbf{Formula-level bridge} (Section~\ref{sec:bridge};
@@ -215,11 +241,12 @@ De Morgan reduct no longer forces $0 \to b = 1$.
 The two systems agree on all positive-evidence conditioning;
 they differ only at evidence zero.
 
-The individual components --- the product t-norm, the Kleene
-lattice, primitive conditioning, many-valued consequence --- are
-all well studied in the literature; the novelty lies in their
-synthesis and formalization.
-Section~\ref{sec:related} surveys related work in detail.
+The individual components are well studied: the product t-norm,
+the Kleene lattice, primitive conditioning, and many-valued
+consequence each have their own literature.
+The contribution is the combination of the two axes above the
+propositional layer, together with its formalization.
+Section~\ref{sec:related} surveys related work along both axes.
 
 \textbf{Note on formalization.}
 All results marked with ``Lean:'' are machine-checked in Lean~4
@@ -855,7 +882,7 @@ The distinction matters because $[0,1]$ lacks multiplicative
 inverses: in~$\Real$, if $a \sim b$ then multiplying by
 $a^{-1}$ can spread the equivalence across the entire line,
 making non-trivial quotients impossible.
-Restricting to $[0,1]$-multipliers removes this leverage, and
+Restricting to $[0,1]$-multipliers takes the inverses away, and
 the Kleene partition survives.
 Whether a unit congruence with $4$ or more classes exists under
 $[0,1]$-multiplication alone is \textbf{open}.
@@ -1629,6 +1656,48 @@ indicative conditionals --- the same
 theme that drives the conditional bridge failure in
 Section~\ref{sec:cond-bridge}.
 
+\textbf{Non-explosion without graded values (axis~A).}
+Paraconsistent logics block explosion at the level of inference
+rules.
+Relevance logics~\cite{anderson1975} reject the detour through an
+irrelevant conclusion; the logics of formal inconsistency of
+Carnielli and Coniglio~\cite{carnielli2016} restore explosion only
+for formulas marked consistent by an object-language operator.
+Admissible conditioning blocks explosion without touching any
+inference rule: at evidence zero the chain rule forces no
+conditional value, so explosion never starts
+(Theorem~\ref{thm:zero-trichotomy}).
+Restall~\cite{restall1993} showed that dropping the contraction
+rule does not by itself block Curry-style triviality: any residual
+contracting connective restores it.
+Keeping conditioning an external admissibility judgment, rather
+than an object-language connective, removes the carrier such
+arguments need.
+Khomskii and Oddsson~\cite{khomskii2024} develop BZFC, a
+paraconsistent and paracomplete Zermelo--Fraenkel set theory over
+the four-valued logic BS4, whose values form Belnap's
+four-element lattice~\cite{belnap1977}: there, non-explosion comes
+from enlarging the value space, an axis-B route to an axis-A goal.
+
+\textbf{Fixed points and self-reference.}
+Kripke's fixed-point semantics~\cite{kripke1975} reads paradoxical
+sentences as those left undetermined by a monotone grounding
+process over the Kleene scheme.
+The negation fixed point plays the analogous role here: the liar
+equation $\negc c = c$ has the unique solution $\tfrac{1}{2}$
+(Section~\ref{sec:fixed-points}), a solution set rather than a
+contradiction.
+Campbell-Moore~\cite{campbellmoore2015} extends the Kripkean
+construction to self-referential probability.
+H\'ajek, Paris, and Shepherdson~\cite{hajek2000liar} showed that a
+truth predicate satisfying all Tarski biconditionals is consistent
+over {\L}ukasiewicz predicate logic with arithmetic, but becomes
+inconsistent once the truth predicate enters the induction schema.
+White~\cite{white1979} proved the consistency of the unrestricted
+comprehension schema in {\L}ukasiewicz infinite-valued predicate
+logic; his expanded variant was later refuted, but the core result
+stands.
+
 \textbf{Algebraic approaches.}
 Algebraic approaches to probability appear in
 Calabrese~\cite{calabrese1987} and
@@ -1662,6 +1731,10 @@ rational Pavelka logic is a conservative extension of
 graded and classical deduction;
 B\v{e}hounek and Cintula~\cite{behounek2006} developed
 degree-preserving consequence.
+Chakraborty and Dutta~\cite{chakraborty2019} make the consequence
+relation itself graded, taking values in a lattice; positivity and
+certainty consequence stay crisp and sit at the two ends of the
+threshold family noted in Section~\ref{sec:conclusion}.
 Suszko~\cite{suszko1977} argued that every Tarskian consequence
 relation is two-valued at the level of consequence (though not
 necessarily at the level of truth values);
@@ -2073,8 +2146,8 @@ $a/x$ may leave the interval.
 This isolates \emph{$[0,1]$-cancellation} as the precise obstacle
 to resolving the four-or-more-class question.
 
-The following table places the product De Morgan triplet in
-the landscape of algebraic congruence theory.
+The following table places the product De Morgan triplet among
+neighboring algebraic signatures and their congruences.
 
 \begin{center}
 \small
