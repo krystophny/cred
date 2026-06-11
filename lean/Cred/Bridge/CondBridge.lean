@@ -14,8 +14,9 @@
   is the conditional credence cred(A|B) when the joint is the min copula.
 -/
 
-import Cred.Basic
-import Cred.Consequence
+import Cred.Cond.Admissible
+import Cred.Collapse.Hom
+import Cred.Core.Consequence
 
 namespace Cred
 
@@ -309,6 +310,17 @@ theorem zero_evidence_duality :
   obtain ⟨cd₂, h₂⟩ := conditioning_zero_any c₂
   exact ⟨cd₁, cd₂, h₁, h₂⟩
 
+/-- Zero-evidence duality through the admissible set: Cond 0 0 is all of
+    [0,1] (underdetermination), the ½ witness gives LP paraconsistency,
+    and any two conditional credences are simultaneously admissible
+    (bridge failure). Cond-phrased version of zero_evidence_duality. -/
+theorem zero_evidence_duality_cond :
+    Cond 0 0 = Set.univ ∧
+    (∃ v : ThreeVal, isDesignatedLP v ∧ isDesignatedLP (ThreeVal.neg v)) ∧
+    (∀ c₁ c₂ : Credence, c₁ ∈ Cond 0 0 ∧ c₂ ∈ Cond 0 0) := by
+  refine ⟨cond_zero_zero_univ, ⟨ThreeVal.half, trivial, trivial⟩, fun c₁ c₂ => ?_⟩
+  simp [cond_zero_zero_univ]
+
 /-! ## Priority 3: Interior Conditional Range
 
 For interior pairs (both collapse to ½), the set of min-copula conditionals
@@ -349,5 +361,29 @@ theorem interior_cond_range (r : Credence) (hr_pos : 0 < r.val) :
   simp only [av, bv]
   rw [div_div, mul_comm]
   norm_num
+
+/-- Interior conditional range through the admissible set: every r with
+    0 < r lies in Cond j e for an interior joint/evidence pair. With
+    positive evidence the membership is unique (cond_singleton_of_pos),
+    so r is THE conditional for that pair. Cond-phrased version of
+    interior_cond_range. -/
+theorem cond_interior_range (r : Credence) (hr_pos : 0 < r.val) :
+    ∃ j e : Credence,
+      j.val ≠ 0 ∧ j.val ≠ 1 ∧ e.val ≠ 0 ∧ e.val ≠ 1 ∧ r ∈ Cond j e := by
+  have hj_nonneg : (0 : ℝ) ≤ r.val / 2 := div_nonneg r.nonneg (by norm_num)
+  have hj_le : r.val / 2 ≤ 1 := by linarith [r.le_one]
+  set j : Credence := ⟨r.val / 2, hj_nonneg, hj_le⟩
+  set e : Credence := ⟨1 / 2, by norm_num, by norm_num⟩
+  have hj0 : j.val ≠ 0 := ne_of_gt (div_pos hr_pos (by norm_num))
+  have hj1 : j.val ≠ 1 := by
+    intro h
+    have : r.val / 2 = 1 := h
+    linarith [r.le_one]
+  refine ⟨j, e, hj0, hj1, by norm_num, by norm_num, ?_⟩
+  show r ⊗ e = j
+  ext
+  simp only [conj_val]
+  show r.val * (1 / 2) = r.val / 2
+  ring
 
 end Cred

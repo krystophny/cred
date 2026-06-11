@@ -12,12 +12,19 @@ lake build
 
 ## Structure
 
-- `Cred/Basic.lean` - Core credence algebra
-  - Credence type with [0,1] bounds
-  - Negation, conjunction, disjunction operations
-  - Conditioning via chain rule (primitive)
-  - Fixed point theorems (liar sentence)
-  - Three-valued collapse to RM3
+- `Cred/Core/Value.lean` - credence values: negation, conjunction, disjunction, order, fixed points, spread
+- `Cred/Core/Consequence.lean` - designation, graded consequence, Formula, structural rules, no-explosion
+- `Cred/Cond/Admissible.lean` - chain-rule conditioning, admissible sets, Fréchet bounds, path dependence
+- `Cred/Cond/Copula.lean` - Bayes consistency on [0,1], min-copula uniqueness, world partitioning
+- `Cred/Collapse/ThreeVal.lean` - three-valued credences, RM3/Gödel/product-residuated implications
+- `Cred/Collapse/Hom.lean` - collapse homomorphism, impossibility results, Boolean subalgebra
+- `Cred/Congruence/Unit.lean` - UnitCongruence classification, Kleene witness
+- `Cred/Congruence/Real.lean` - RealCongruence, no non-trivial finite quotient
+- `Cred/Bridge/LPK3.lean` - collapse-eval commutativity, LP/K3 bridge theorems
+- `Cred/Bridge/CondBridge.lean` - conditional bridge: impossibility, boundary, update bridge
+- `Cred/Valuation.lean` - valuations and collapse composition
+- `Cred/Update.lean` - Bayesian and Jeffrey conditionalization
+- `Cred/Predicate.lean` - graded predicates, quantifiers, Russell fixed point
 
 ## Key Theorems
 

@@ -1,9 +1,15 @@
 -- This module serves as the root of the `Cred` library.
 -- Import modules here that should be built as part of the library.
-import Cred.Basic
+import Cred.Core.Value
+import Cred.Core.Consequence
+import Cred.Cond.Admissible
+import Cred.Cond.Copula
+import Cred.Collapse.ThreeVal
+import Cred.Collapse.Hom
+import Cred.Congruence.Unit
+import Cred.Congruence.Real
+import Cred.Bridge.LPK3
+import Cred.Bridge.CondBridge
 import Cred.Valuation
-import Cred.Consequence
 import Cred.Update
 import Cred.Predicate
-import Cred.Congruence
-import Cred.CondBridge

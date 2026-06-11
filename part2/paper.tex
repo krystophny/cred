@@ -78,7 +78,7 @@ lattice is equivalent to positivity consequence on $[0,1]$,
 and K$_3$ consequence to certainty consequence.
 The bridge does \emph{not} extend to conditioning: no
 truth-functional function on the lattice can reproduce the
-min-copula conditional --- a finitary impossibility result
+min-copula conditional, a finitary impossibility result
 witnessed by two explicit pairs.
 We characterize the boundary conditions under which the bridge
 does hold, show that Bayesian update inherits it, and prove
@@ -108,8 +108,8 @@ A many-valued logician working in H\'ajek's Product
 Logic~\cite{hajek1998} uses the residuated implication:
 $a \to b = \sup\{c : a \cdot c \leq b\}$.
 When $a > 0$ and the joint is the minimum, this yields the same
-$\min(b/a,\, 1)$; but at $a = 0$, the supremum is $1$
---- ex falso quodlibet is built into every residuated
+$\min(b/a,\, 1)$; but at $a = 0$, the supremum is $1$.
+Ex falso quodlibet is built into every residuated
 implication~\cite{hajek1998,esteva2001,cintula2011}.
 
 Both traditions share the same core algebra on $[0,1]$: the
@@ -126,8 +126,8 @@ The chain rule
 $\condc{A}{B} \conjc \cred(B) = \cred(A \land B)$
 is the defining constraint.
 When $\cred(B) > 0$, the conditional is uniquely determined:
-$\condc{A}{B} = \cred(A \land B) / \cred(B)$ --- the same
-as Bayesian conditioning.
+$\condc{A}{B} = \cred(A \land B) / \cred(B)$, the same
+value as Bayesian conditioning.
 When $\cred(B) = 0$, the equation $c \cdot 0 = 0$ holds for
 \emph{every} $c \in [0,1]$: the conditional is unconstrained.
 Impossible evidence provides no constraint.
@@ -159,6 +159,32 @@ the \emph{conditional bridge} is the (attempted) commutativity
 of the collapse with conditioning.
 This paper studies all three and their interaction.
 
+\textbf{Two axes.}
+The structure factors into two independent components.
+\emph{Axis~A: admissible conditioning (non-explosion).}
+The chain rule reads conditioning as an admissibility constraint:
+given joint~$j$ and evidence~$e$, the admissible conditionals form
+the set $\{c \in [0,1] : c \conjc e = j\}$.
+Positive evidence yields a singleton; zero evidence (with zero
+joint) yields the whole interval.
+No inference rule is weakened.
+Explosion never starts, because impossible evidence forces no value.
+We call this component the \emph{admissible conditional semantics}.
+\emph{Axis~B: graded values.}
+The value space $[0,1]$ carries the product De Morgan triplet, its
+Kleene quotient, and the LP/K$_3$ consequence bridges.
+We call this component the \emph{graded credence semantics}.
+The literature realizes each axis separately: relevance logics and
+the logics of formal inconsistency block explosion without grading
+values~\cite{anderson1975,carnielli2016}, while fuzzy and product
+logics grade values without admissible
+conditioning~\cite{hajek1998,cintula2011}.
+Inside the present framework, Theorem~\ref{thm:no-cond-bridge}
+(\texttt{no\_truthfunctional\_cond\_bridge}) is the independence
+theorem for the pair: no truth-functional conditional on the
+collapsed values reproduces admissible conditioning, so the axes
+do not reduce to each other even after collapse.
+
 \textbf{Main results.}
 \begin{enumerate}[nosep]
 \item \textbf{Formula-level bridge} (Section~\ref{sec:bridge};
@@ -181,8 +207,8 @@ This paper studies all three and their interaction.
 \item \textbf{Conditional bridge impossibility}
   (Section~\ref{sec:cond-bridge}; new):
   no truth-functional function on $\{0, \tfrac{1}{2}, 1\}$
-  can reproduce the min-copula conditional under collapse
-  --- a finitary Lewis triviality, witnessed by two
+  can reproduce the min-copula conditional under collapse,
+  a finitary Lewis triviality witnessed by two
   explicit pairs.
 \item \textbf{Update bridge and boundary characterization}
   (Section~\ref{sec:cond-bridge}; new):
@@ -215,11 +241,12 @@ De Morgan reduct no longer forces $0 \to b = 1$.
 The two systems agree on all positive-evidence conditioning;
 they differ only at evidence zero.
 
-The individual components --- the product t-norm, the Kleene
-lattice, primitive conditioning, many-valued consequence --- are
-all well studied in the literature; the novelty lies in their
-synthesis and formalization.
-Section~\ref{sec:related} surveys related work in detail.
+The individual components are well studied: the product t-norm,
+the Kleene lattice, primitive conditioning, and many-valued
+consequence each have their own literature.
+The contribution is the combination of the two axes above the
+propositional layer, together with its formalization.
+Section~\ref{sec:related} surveys related work along both axes.
 
 \textbf{Note on formalization.}
 All results marked with ``Lean:'' are machine-checked in Lean~4
@@ -544,7 +571,7 @@ For $e > 0$: a conditioning structure exists iff
 $j \leq e$, and is then unique: $c = j / e$.
 For $e = 0$: the constraint forces
 $j = 0$ but leaves $c$ unconstrained
---- every $c \in [0,1]$ satisfies $c \cdot 0 = 0$.
+since every $c \in [0,1]$ satisfies $c \cdot 0 = 0$.
 
 Lean: \texttt{conditioning\_mk},
 \texttt{conditioning\_unique},
@@ -648,7 +675,7 @@ zero, works on bare $[0,1]$ values, and avoids ex falso.}
 When evidence has credence $0$, any conditional
 $c \in [0,1]$ satisfies the chain rule.
 The set of consistent posteriors is the entire interval $[0,1]$
---- the maximal imprecise
+and is the maximal imprecise
 posterior~\cite{walley1991,levi1980}.
 Lean: \texttt{conditioning\_zero\_any}.
 \end{proposition}
@@ -725,7 +752,7 @@ The results above are algebraic facts about the product De Morgan
 triplet, not claims about Bayesian convergence.
 Whether iterated Bayesian update drives $\cred_n(A) \to 0$,
 $\tfrac{1}{2}$, or $1$ depends on the stochastic model for the
-evidence sequence --- a question orthogonal to the algebraic structure.
+evidence sequence. That question is orthogonal to the algebraic structure.
 \end{remark}
 
 \subsection{The Collapse Homomorphism}
@@ -855,7 +882,7 @@ The distinction matters because $[0,1]$ lacks multiplicative
 inverses: in~$\Real$, if $a \sim b$ then multiplying by
 $a^{-1}$ can spread the equivalence across the entire line,
 making non-trivial quotients impossible.
-Restricting to $[0,1]$-multipliers removes this leverage, and
+Restricting to $[0,1]$-multipliers takes the inverses away, and
 the Kleene partition survives.
 Whether a unit congruence with $4$ or more classes exists under
 $[0,1]$-multiplication alone is \textbf{open}.
@@ -1014,7 +1041,7 @@ By Proposition~\ref{prop:collapse-eval},
 $\llbracket\psi\rrbracket_w = \mathrm{collapse}(
 \llbracket\psi\rrbracket_v)$.
 A credence $c$ is positive if and only if $\mathrm{collapse}(c)
-\in \{1, \tfrac{1}{2}\}$ --- the LP designated set
+\in \{1, \tfrac{1}{2}\}$, the LP designated set
 (Lean: \texttt{lp\_designated\_iff\_pos}).
 So each premise is LP-designated under $w$.
 By LP consequence, $\llbracket\varphi\rrbracket_w$ is
@@ -1065,7 +1092,7 @@ $v = \mathrm{lift} \circ w$ and apply the bridge lemma in reverse.
 
 The proofs are symmetric in a precise sense: one direction collapses,
 the other lifts.
-The collapse does not merely project --- it \emph{reflects}:
+The collapse \emph{reflects}:
 every three-valued counterexample lifts to a continuous one, and
 every continuous counterexample collapses to a three-valued one.
 An LP logician working with $\{0, \tfrac{1}{2}, 1\}$ is implicitly
@@ -1101,7 +1128,7 @@ Set $\cred(\text{rain}) = \tfrac{1}{2}$ and
 $\cred(\text{snow}) = 0$.
 Both $\text{rain}$ and $\negc\text{rain}$ are positive
 ($\tfrac{1}{2} > 0$ and $\negc\tfrac{1}{2} = \tfrac{1}{2} > 0$),
-but $\cred(\text{snow}) = 0$ --- contradictory evidence about rain
+but $\cred(\text{snow}) = 0$. Contradictory evidence about rain
 does not force belief in snow.
 Via the bridge, the LP counterexample
 $w(\text{rain}) = \tfrac{1}{2}$, $w(\text{snow}) = 0$ refutes
@@ -1122,7 +1149,7 @@ either
 The propositional bridge covers every formula built from negation,
 conjunction, and disjunction.
 The natural next question is whether the same transfer works for
-conditioning --- the operation that distinguishes the two traditions.
+conditioning, the operation that distinguishes the two traditions.
 
 %=============================================================================
 \section{The Conditional Bridge}
@@ -1217,7 +1244,7 @@ Contradiction: $\tfrac{1}{2} \neq 1$.
 The structural setting differs from Lewis~\cite{lewis1976}.
 Lewis works \emph{within} probability theory and shows that
 identifying $P(A \mid B)$ with the probability of a conditional
-proposition forces the measure to be trivial --- a contradiction
+proposition forces the measure to be trivial, a contradiction
 internal to a single framework.
 Theorem~\ref{thm:no-cond-bridge} works \emph{between} two
 frameworks and shows that the collapse homomorphism, which faithfully
@@ -1288,8 +1315,8 @@ boundaries the collapse preserves everything.
 \subsection{Interior Failure}
 \label{sec:interior-fail}
 
-The bridge fails precisely when the conditional is interior ---
-that is, when both $a$ and $b$ are interior and $a < b$.
+The bridge fails precisely when the conditional is interior:
+both $a$ and $b$ are interior and $a < b$.
 
 \begin{theorem}[Interior Bridge Failure]
 \label{thm:interior-fail}
@@ -1351,7 +1378,7 @@ What happens under other dependence structures?
 
 Under the \emph{independence copula}
 ($\cred(A \land B) = a \cdot b$), the conditional is
-$a \cdot b / b = a$ --- it does not depend on the evidence at all.
+$a \cdot b / b = a$. It does not depend on the evidence at all.
 The bridge trivially holds (collapsing $a$ gives the same answer
 either way), but the conditional is uninformative: learning $B$
 does not change your credence in $A$.
@@ -1361,8 +1388,8 @@ $\mathrm{collapse}(a) = \mathrm{collapse}(b) = \tfrac{1}{2}$),
 the set of min-copula conditionals is $(0, 1]$:
 when $a < b$ the conditional is $a/b \in (0,1)$, and when
 $b \leq a$ the conditional is $\min(a,b)/b = b/b = 1$.
-Over all interior pairs, every value in $(0,1]$ is achieved ---
-maximally underdetermined by the collapsed values
+Over all interior pairs, every value in $(0,1]$ is achieved.
+The collapsed values therefore determine no sharper interval
 (Lean: \texttt{interior\_cond\_range}).
 This is the precise sense in which the collapse loses too much
 information: interior credences are unified into a single class, but
@@ -1510,7 +1537,7 @@ the identity $c \conjc 0 = 0$:
 \item \textbf{Underdetermined posteriors:}
   When evidence has credence $0$, any conditional
   $c \in [0,1]$ satisfies the chain rule.
-  The set of consistent posteriors is $[0,1]$ --- the maximal
+  The set of consistent posteriors is $[0,1]$, the maximal
   imprecise posterior~\cite{walley1991,levi1980}.
 \item \textbf{LP explosion failure:}
   The value $\tfrac{1}{2}$ makes both $A$ and $\negc A$
@@ -1625,9 +1652,51 @@ probability with the probability of a conditional proposition
 forces triviality (Remark~\ref{rem:lewis} compares our
 impossibility theorem).
 McGee~\cite{mcgee1985} showed that modus ponens can fail for
-indicative conditionals --- the same
-theme that drives the conditional bridge failure in
+indicative conditionals, the same
+fault line that drives the conditional bridge failure in
 Section~\ref{sec:cond-bridge}.
+
+\textbf{Non-explosion without graded values (axis~A).}
+Paraconsistent logics block explosion at the level of inference
+rules.
+Relevance logics~\cite{anderson1975} reject the detour through an
+irrelevant conclusion; the logics of formal inconsistency of
+Carnielli and Coniglio~\cite{carnielli2016} restore explosion only
+for formulas marked consistent by an object-language operator.
+Admissible conditioning blocks explosion without touching any
+inference rule: at evidence zero the chain rule forces no
+conditional value, so explosion never starts
+(Theorem~\ref{thm:zero-trichotomy}).
+Restall~\cite{restall1993} showed that dropping the contraction
+rule does not by itself block Curry-style triviality: any residual
+contracting connective restores it.
+Keeping conditioning an external admissibility judgment, rather
+than an object-language connective, removes the carrier such
+arguments need.
+Khomskii and Oddsson~\cite{khomskii2024} develop BZFC, a
+paraconsistent and paracomplete Zermelo--Fraenkel set theory over
+the four-valued logic BS4, whose values form Belnap's
+four-element lattice~\cite{belnap1977}: there, non-explosion comes
+from enlarging the value space, an axis-B route to an axis-A goal.
+
+\textbf{Fixed points and self-reference.}
+Kripke's fixed-point semantics~\cite{kripke1975} reads paradoxical
+sentences as those left undetermined by a monotone grounding
+process over the Kleene scheme.
+The negation fixed point plays the analogous role here: the liar
+equation $\negc c = c$ has the unique solution $\tfrac{1}{2}$
+(Section~\ref{sec:fixed-points}), a solution set rather than a
+contradiction.
+Campbell-Moore~\cite{campbellmoore2015} extends the Kripkean
+construction to self-referential probability.
+H\'ajek, Paris, and Shepherdson~\cite{hajek2000liar} showed that a
+truth predicate satisfying all Tarski biconditionals is consistent
+over {\L}ukasiewicz predicate logic with arithmetic, but becomes
+inconsistent once the truth predicate enters the induction schema.
+White~\cite{white1979} proved the consistency of the unrestricted
+comprehension schema in {\L}ukasiewicz infinite-valued predicate
+logic; his expanded variant was later refuted, but the core result
+stands.
 
 \textbf{Algebraic approaches.}
 Algebraic approaches to probability appear in
@@ -1662,6 +1731,10 @@ rational Pavelka logic is a conservative extension of
 graded and classical deduction;
 B\v{e}hounek and Cintula~\cite{behounek2006} developed
 degree-preserving consequence.
+Chakraborty and Dutta~\cite{chakraborty2019} make the consequence
+relation itself graded, taking values in a lattice; positivity and
+certainty consequence stay crisp and sit at the two ends of the
+threshold family noted in Section~\ref{sec:conclusion}.
 Suszko~\cite{suszko1977} argued that every Tarskian consequence
 relation is two-valued at the level of consequence (though not
 necessarily at the level of truth values);
@@ -1674,7 +1747,7 @@ go further than Suszko's thesis: Suszko showed abstractly that
 every Tarskian consequence relation is determined by a
 two-valued partition into designated and non-designated values,
 but the bridge provides an explicit, constructive,
-\emph{bidirectional} reduction --- the collapse homomorphism
+\emph{bidirectional} reduction: the collapse homomorphism
 converts any $[0,1]$-counterexample to a three-valued one,
 and the lift converts any three-valued counterexample to a
 $[0,1]$-counterexample, with both directions computable.
@@ -1704,8 +1777,8 @@ is discussed in Section~\ref{sec:collapse-hom}.
 \label{sec:conclusion}
 %=============================================================================
 
-The product De Morgan triplet on $[0,1]$ --- product conjunction,
-probabilistic-sum disjunction, standard complement --- admits a
+The product De Morgan triplet on $[0,1]$, with product conjunction,
+probabilistic-sum disjunction, and standard complement, admits a
 natural collapse to the Kleene lattice
 $\{0, \tfrac{1}{2}, 1\}$ via a surjective homomorphism.
 On the propositional side, this collapse establishes a bidirectional
@@ -1728,7 +1801,7 @@ information that determines the conditional).
 In the running example, rain ($0.8$) and wet streets ($0.9$) live
 in the interior: the propositional bridge faithfully transfers their
 logical relationships, but the conditional $8/9$ collapses to
-$\tfrac{1}{2}$ while the G\"odel conditional gives $1$ --- the
+$\tfrac{1}{2}$ while the G\"odel conditional gives $1$. The
 bridge breaks precisely where ratio information matters.
 
 \textbf{Open problems.}
@@ -1792,28 +1865,39 @@ the Lean formalization and the manuscript preparation.
 \label{app:lean}
 %=============================================================================
 
-The results are formalized across seven Lean~4 modules (with
-Mathlib), totaling 3581 lines with zero \texttt{sorry}:
+The results are formalized across thirteen Lean~4 modules (with
+Mathlib), totaling 3758 lines with zero \texttt{sorry}:
 
 \begin{itemize}[nosep]
-\item \texttt{Cred/Basic.lean}: core algebra, conditioning, fixed
-  points, collapse, Bayes consistency, path dependence, congruence
-  building blocks (1804 lines).
-\item \texttt{Cred/Congruence.lean}: congruence
-  classification --- \texttt{UnitCongruence},
-  \texttt{Real\-Congruence}, Kleene witness (396 lines).
-\item \texttt{Cred/Consequence.lean}: K$_3$/LP designation,
-  formula evaluation, collapse-evaluation commutativity,
-  bridge theorems, structural rules, no-explosion (505 lines).
+\item \texttt{Cred/Core/Value.lean}: credence values, negation,
+  product conjunction, disjunction, fixed points, spread (426 lines).
+\item \texttt{Cred/Core/Consequence.lean}: K$_3$/LP designation,
+  graded consequence, formula evaluation, structural rules,
+  no-explosion (316 lines).
+\item \texttt{Cred/Cond/Admissible.lean}: chain-rule conditioning,
+  admissible sets, Fr\'echet bounds, conditioning tables,
+  path dependence (427 lines).
+\item \texttt{Cred/Cond/Copula.lean}: Bayes consistency on $[0,1]$,
+  min-copula uniqueness, world partitioning (403 lines).
+\item \texttt{Cred/Collapse/ThreeVal.lean}: three-valued credences,
+  RM3/G\"odel/product-residuated implications (227 lines).
+\item \texttt{Cred/Collapse/Hom.lean}: collapse homomorphism,
+  impossibility results, Boolean subalgebra (313 lines).
+\item \texttt{Cred/Congruence/Unit.lean}: \texttt{UnitCongruence}
+  classification, Kleene witness (297 lines).
+\item \texttt{Cred/Congruence/Real.lean}: \texttt{RealCongruence},
+  no non-trivial finite quotient (229 lines).
+\item \texttt{Cred/Bridge/LPK3.lean}: collapse-evaluation
+  commutativity, LP/K$_3$ bridge theorems (207 lines).
+\item \texttt{Cred/Bridge/CondBridge.lean}: conditional bridge
+  impossibility, boundary characterization, qualitative update,
+  update bridge, zero-evidence triple (389 lines).
 \item \texttt{Cred/Valuation.lean}: valuations, collapse composition,
-  Fr\'echet bounds (175 lines).$^\dagger$
+  Fr\'echet bounds (176 lines).$^\dagger$
 \item \texttt{Cred/Update.lean}: Bayesian/Jeffrey update, chain-rule
   preservation (138 lines).
 \item \texttt{Cred/Predicate.lean}: graded predicates,
   quantifiers, Russell fixed point (210 lines).$^\dagger$
-\item \texttt{Cred/CondBridge.lean}: conditional bridge impossibility,
-  boundary characterization, qualitative update, update bridge,
-  zero-evidence triple (353 lines).
 \end{itemize}
 \smallskip
 \noindent
@@ -1989,7 +2073,7 @@ theory, not merely a logical convenience~\cite{nelsen2006}.
 $\min(a,b)$ & \checkmark & \checkmark & \checkmark & \checkmark \\
 $a \cdot b$ (indep.) & \checkmark & \checkmark & $\times$ & $\times$ \\
 $\max(a{+}b{-}1,0)$ & \checkmark & \checkmark & \checkmark & $\times$ \\
-$\max(\negc a,b) \cdot a$ (RM3) & \checkmark & $\times$ & --- & --- \\
+$\max(\negc a,b) \cdot a$ (RM3) & \checkmark & $\times$ & n/a & n/a \\
 \midrule
 External (prob.) & $\times$ & \checkmark & \checkmark & \checkmark \\
 \bottomrule
@@ -2010,7 +2094,7 @@ Lean: \texttt{min\_copula\_unique},
 
 \subsection{Congruence Classification}
 
-The collapse is a congruence --- an equivalence relation compatible
+The collapse is a congruence, an equivalence relation compatible
 with the algebraic operations.
 How many such congruences exist?
 The answer depends on whether multiplication compatibility is
@@ -2073,8 +2157,8 @@ $a/x$ may leave the interval.
 This isolates \emph{$[0,1]$-cancellation} as the precise obstacle
 to resolving the four-or-more-class question.
 
-The following table places the product De Morgan triplet in
-the landscape of algebraic congruence theory.
+The following table places the product De Morgan triplet among
+neighboring algebraic signatures and their congruences.
 
 \begin{center}
 \small
