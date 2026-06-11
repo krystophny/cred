@@ -348,6 +348,31 @@ This is appropriate for the algebraic base case (negation self-application)
 but does not address the richer phenomena that revision theory
 captures: iterated revision, mutual reference, and contingent stabilization.
 
+\subsection{Curry and Contraction}
+
+Curry self-reference does not use negation.
+It combines a self-referential conditional with modus ponens, conditional
+proof, and contraction.
+In Cred these rules have no common total carrier on $[0,1]$.
+The Lean theorem \texttt{curry\_block} proves the incompatibility.
+
+The proof first identifies the candidate conditional.
+Modus ponens and conditional proof give a residuation law for product
+conjunction.
+For positive antecedents this pins the arrow to the product residuum
+\[
+  a \Rightarrow b = \min(1,b/a).
+\]
+That arrow has the usual zero row: $0 \Rightarrow b = 1$.
+It also fails contraction.
+At $a=\tfrac12$ and $b=\tfrac14$, the first implication has value
+$\tfrac12$, but the contracted implication has value $1$.
+
+Thus Curry safety is architectural.
+Cred can assign values to positive Curry equations
+(\texttt{curry\_fixed\_point\_positive}), but it does not internalize a total
+conditional that also supports contraction.
+
 \subsection{Many-Valued Approaches}
 
 Many-valued logics have their own tradition of analyzing paradoxes and
