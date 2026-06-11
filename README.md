@@ -33,6 +33,7 @@ The foundation route starts with `Foundation.Formula`: a first-order language wi
 `Foundation.Structure` interprets that language into credences. Equality and quantifier laws stay explicit, so crisp equality, graded extensionality, and comprehension can be added as separate assumptions.
 `Foundation.Laws` names the first such assumptions: crisp equality and quantifier introduction/elimination bounds.
 `Foundation.Consequence` defines threshold and certainty consequence for the first-order layer.
+`Foundation.Proof` gives the first sound threshold calculus over that language.
 
 ## Primitives
 
@@ -75,6 +76,7 @@ Foundations and proof layer (Part 3 paper):
 - `Foundation.Structure.evalFormula`: foundation formulas evaluate to credences under an explicit structure
 - `Foundation.Structure.CrispEquality`, `QuantifierLaws`: semantic contracts for equality and quantifiers
 - `Foundation.Structure.ThresholdConsequence`: semantic consequence for foundation formulas
+- `Foundation.Structure.derivation_sound`: soundness for the first foundation proof calculus
 
 ## Collapse
 

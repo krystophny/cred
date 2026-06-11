@@ -87,6 +87,8 @@ For the current synthesis statement, see `paper.tex`.
     crisp equality and quantifier bounds.
     `lean/Cred/Foundation/Consequence.lean` adds threshold and certainty
     consequence for this first-order layer.
+    `lean/Cred/Foundation/Proof.lean` adds the first sound threshold calculus;
+    equality and quantifier rules remain next steps.
 
 11. **Crisp subtheories.** Identify and formalize the crisp fragments (where all
     credences are `0/1`) and prove they recover the intended classical theorems.
