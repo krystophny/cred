@@ -95,6 +95,8 @@ For the current synthesis statement, see `paper.tex`.
     explicit crisp-equality laws.
     `lean/Cred/Foundation/Quantifier.lean` adds semantic quantifier bounds;
     formula-level quantifier rules require formula substitution semantics.
+    `Structure.evalFormula_rename` and `Structure.evalFormula_subst` provide
+    that substitution semantics.
 
 11. **Crisp subtheories.** Identify and formalize the crisp fragments (where all
     credences are `0/1`) and prove they recover the intended classical theorems.

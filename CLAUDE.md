@@ -149,6 +149,7 @@ Foundation semantics (from Foundation/Semantics.lean):
 - `Foundation.Structure` (domain, functions, predicates, equality, quantifier operations)
 - `Structure.evalTerm`, `Structure.evalTermList`, `Structure.evalFormula`
 - `evalTerm_rename`, `evalTerm_subst`
+- `evalFormula_rename`, `evalFormula_subst`
 - Equality and quantifier laws are deliberately separate from the raw semantic interface
 
 Foundation laws (from Foundation/Laws.lean):

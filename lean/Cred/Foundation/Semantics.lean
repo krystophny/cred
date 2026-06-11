@@ -89,6 +89,28 @@ theorem evalTermList_subst (env : M.Assignment) (σ : Nat → Term Func) :
 
 end
 
+theorem evalTerm_upRenaming_update (env : M.Assignment) (ρ : Nat → Nat)
+    (x : M.Domain) (t : Term Func) :
+    evalTerm M (update M env x) (Term.rename (Term.upRenaming ρ) t) =
+      evalTerm M (update M (fun n => env (ρ n)) x) t := by
+  rw [evalTerm_rename]
+  congr
+  funext n
+  cases n with
+  | zero => rfl
+  | succ n => rfl
+
+theorem evalTerm_liftSubst_update (env : M.Assignment)
+    (σ : Nat → Term Func) (x : M.Domain) :
+    ∀ n : Nat,
+      evalTerm M (update M env x) (Term.liftSubst σ n) =
+        update M (fun k => evalTerm M env (σ k)) x n
+  | 0 => rfl
+  | n + 1 => by
+      simp [Term.liftSubst]
+      rw [evalTerm_rename]
+      rfl
+
 def evalFormula (env : M.Assignment) :
     Formula Func Pred → Credence
   | .top => 1
@@ -100,6 +122,86 @@ def evalFormula (env : M.Assignment) :
   | .disj φ ψ => evalFormula env φ ⊔ evalFormula env ψ
   | .forallE φ => M.all (fun x => evalFormula (update M env x) φ)
   | .existsE φ => M.ex (fun x => evalFormula (update M env x) φ)
+
+theorem evalFormula_rename (env : M.Assignment) (ρ : Nat → Nat) :
+    ∀ φ : Formula Func Pred,
+      evalFormula M env (Formula.rename ρ φ) =
+        evalFormula M (fun n => env (ρ n)) φ
+  | .top => rfl
+  | .bot => rfl
+  | .atom p args => by
+      simp [Formula.rename, evalFormula, evalTermList_rename]
+  | .equal lhs rhs => by
+      simp [Formula.rename, evalFormula, evalTerm_rename]
+  | .neg φ => by
+      simp [Formula.rename, evalFormula, evalFormula_rename env ρ φ]
+  | .conj φ ψ => by
+      simp [Formula.rename, evalFormula, evalFormula_rename env ρ φ,
+        evalFormula_rename env ρ ψ]
+  | .disj φ ψ => by
+      simp [Formula.rename, evalFormula, evalFormula_rename env ρ φ,
+        evalFormula_rename env ρ ψ]
+  | .forallE φ => by
+      simp [Formula.rename, evalFormula]
+      congr
+      funext x
+      rw [evalFormula_rename (update M env x) (Term.upRenaming ρ) φ]
+      congr
+      funext n
+      cases n with
+      | zero => rfl
+      | succ n => rfl
+  | .existsE φ => by
+      simp [Formula.rename, evalFormula]
+      congr
+      funext x
+      rw [evalFormula_rename (update M env x) (Term.upRenaming ρ) φ]
+      congr
+      funext n
+      cases n with
+      | zero => rfl
+      | succ n => rfl
+
+theorem evalFormula_subst (env : M.Assignment) (σ : Nat → Term Func) :
+    ∀ φ : Formula Func Pred,
+      evalFormula M env (Formula.subst σ φ) =
+        evalFormula M (fun n => evalTerm M env (σ n)) φ
+  | .top => rfl
+  | .bot => rfl
+  | .atom p args => by
+      simp [Formula.subst, evalFormula, evalTermList_subst]
+  | .equal lhs rhs => by
+      simp [Formula.subst, evalFormula, evalTerm_subst]
+  | .neg φ => by
+      simp [Formula.subst, evalFormula, evalFormula_subst env σ φ]
+  | .conj φ ψ => by
+      simp [Formula.subst, evalFormula, evalFormula_subst env σ φ,
+        evalFormula_subst env σ ψ]
+  | .disj φ ψ => by
+      simp [Formula.subst, evalFormula, evalFormula_subst env σ φ,
+        evalFormula_subst env σ ψ]
+  | .forallE φ => by
+      simp [Formula.subst, evalFormula]
+      congr
+      funext x
+      have hAssign : (fun n => evalTerm M (update M env x)
+          (Term.liftSubst σ n)) =
+          update M (fun n => evalTerm M env (σ n)) x := by
+        funext n
+        exact evalTerm_liftSubst_update M env σ x n
+      rw [evalFormula_subst (update M env x) (Term.liftSubst σ) φ]
+      congr
+  | .existsE φ => by
+      simp [Formula.subst, evalFormula]
+      congr
+      funext x
+      have hAssign : (fun n => evalTerm M (update M env x)
+          (Term.liftSubst σ n)) =
+          update M (fun n => evalTerm M env (σ n)) x := by
+        funext n
+        exact evalTerm_liftSubst_update M env σ x n
+      rw [evalFormula_subst (update M env x) (Term.liftSubst σ) φ]
+      congr
 
 end Structure
 
