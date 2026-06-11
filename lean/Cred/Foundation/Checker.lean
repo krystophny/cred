@@ -52,6 +52,14 @@ def FoundationRulePayload.code :
   | .forallElim _ => .forallElim
   | .existsIntro _ _ => .existsIntro
 
+def FoundationRulePayload.childCount
+    (payload : FoundationRulePayload Func Pred) : Nat :=
+  payload.code.childCount
+
+theorem FoundationRulePayload.childCount_eq_code
+    (payload : FoundationRulePayload Func Pred) :
+    payload.childCount = payload.code.childCount := rfl
+
 def applyFoundationRule [DecidableEq Func] [DecidableEq Pred]
     (t : Credence) :
     FoundationRulePayload Func Pred →

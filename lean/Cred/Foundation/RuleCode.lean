@@ -59,6 +59,21 @@ def FoundationRuleCode.ofName : String → Option FoundationRuleCode
   | "existsIntro" => some .existsIntro
   | _ => none
 
+def FoundationRuleCode.childCount : FoundationRuleCode → Nat
+  | .hyp => 0
+  | .weaken => 1
+  | .cut => 2
+  | .conjElimLeft => 1
+  | .conjElimRight => 1
+  | .disjIntroLeft => 1
+  | .disjIntroRight => 1
+  | .equalityRefl => 0
+  | .equalitySymm => 1
+  | .equalityTrans => 2
+  | .equalitySubst => 2
+  | .forallElim => 1
+  | .existsIntro => 1
+
 theorem FoundationRuleCode.ofName_name (r : FoundationRuleCode) :
     FoundationRuleCode.ofName r.name = some r := by
   cases r <;> rfl

@@ -107,7 +107,9 @@ lake build
 | `Foundation.Structure.forallElimCertificateTree_checks`, `equalitySubstitutionCertificateTree_checks` | Recursive checker examples that accept certificate trees |
 | `Foundation.Structure.FoundationRuleCode` | Trusted rule names for the foundation certificate checker boundary |
 | `Foundation.Structure.FoundationRuleCode.ofName_name` | Rule-code string names parse back to their source code |
+| `Foundation.Structure.FoundationRuleCode.childCount` | Trusted rule codes state the required number of checked children |
 | `Foundation.Structure.mem_trustedFoundationRules` | Every trusted foundation rule code is listed |
+| `Foundation.Structure.FoundationRulePayload.childCount_eq_code` | Rule payloads use the child count of their trusted code |
 | `Foundation.Structure.applyFoundationRule` | One-step checker from rule payloads and checked children to typed certificates |
 | `Foundation.Structure.checkFoundationCertificate` | Recursive checker from certificate trees to typed certificates |
 

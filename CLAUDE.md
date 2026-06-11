@@ -232,13 +232,14 @@ Foundation examples (from Foundation/Examples.lean):
 Foundation rule codes (from Foundation/RuleCode.lean):
 - `Structure.FoundationRuleCode`
 - `FoundationRuleCode.name`, `FoundationRuleCode.ofName`
+- `FoundationRuleCode.childCount`
 - `FoundationRuleCode.ofName_name`, `FoundationRuleCode.ofName_eq_some_mem`
 - `trustedFoundationRules`, `mem_trustedFoundationRules`
 
 Foundation checker (from Foundation/Checker.lean):
 - `Structure.CheckedFoundationProof`
 - `Structure.FoundationRulePayload`
-- `FoundationRulePayload.code`
+- `FoundationRulePayload.code`, `FoundationRulePayload.childCount`
 - `applyFoundationRule`
 - `Structure.FoundationCertificateTree`
 - `checkFoundationCertificate`, `checkFoundationCertificateList`
