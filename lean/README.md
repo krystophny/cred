@@ -61,6 +61,7 @@ lake build
 | `Foundation.Structure.CrispEquality` | Interface for crisp equality laws |
 | `Foundation.Structure.QuantifierLaws` | Interface for quantifier introduction and elimination bounds |
 | `Foundation.Structure.ThresholdConsequence` | Threshold consequence over all foundation structures |
+| `Foundation.Structure.evalTerm_rename`, `evalTerm_subst` | Term evaluation commutes with renaming and substitution |
 
 ## Dependencies
 

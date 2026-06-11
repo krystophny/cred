@@ -47,6 +47,48 @@ def evalTermList (env : M.Assignment) : List (Term Func) → List M.Domain
 
 end
 
+mutual
+
+theorem evalTerm_rename (env : M.Assignment) (ρ : Nat → Nat) :
+    ∀ t : Term Func,
+      evalTerm M env (Term.rename ρ t) =
+        evalTerm M (fun n => env (ρ n)) t
+  | .var n => rfl
+  | .app f args => by
+      simp [Term.rename, evalTerm, evalTermList_rename env ρ args]
+
+theorem evalTermList_rename (env : M.Assignment) (ρ : Nat → Nat) :
+    ∀ ts : List (Term Func),
+      evalTermList M env (Term.renameList ρ ts) =
+        evalTermList M (fun n => env (ρ n)) ts
+  | [] => rfl
+  | t :: ts => by
+      simp [Term.renameList, evalTermList, evalTerm_rename env ρ t,
+        evalTermList_rename env ρ ts]
+
+end
+
+mutual
+
+theorem evalTerm_subst (env : M.Assignment) (σ : Nat → Term Func) :
+    ∀ t : Term Func,
+      evalTerm M env (Term.subst σ t) =
+        evalTerm M (fun n => evalTerm M env (σ n)) t
+  | .var n => rfl
+  | .app f args => by
+      simp [Term.subst, evalTerm, evalTermList_subst env σ args]
+
+theorem evalTermList_subst (env : M.Assignment) (σ : Nat → Term Func) :
+    ∀ ts : List (Term Func),
+      evalTermList M env (Term.substList σ ts) =
+        evalTermList M (fun n => evalTerm M env (σ n)) ts
+  | [] => rfl
+  | t :: ts => by
+      simp [Term.substList, evalTermList, evalTerm_subst env σ t,
+        evalTermList_subst env σ ts]
+
+end
+
 def evalFormula (env : M.Assignment) :
     Formula Func Pred → Credence
   | .top => 1
