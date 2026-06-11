@@ -10,6 +10,7 @@ import Cred.Congruence.Unit
 import Cred.Congruence.Real
 import Cred.Bridge.LPK3
 import Cred.Bridge.CondBridge
+import Cred.Bridge.Compare
 import Cred.Valuation
 import Cred.Update
 import Cred.Predicate
