@@ -1,17 +1,16 @@
-# Part 3: Applications and Future Directions
+# Part 3: Paradox Without Explosion
 
-Part 1 establishes the constraint algebra. Part 2 adds interpretation, consequence relations, and update rules. Part 3 positions the credence algebra relative to existing literature on many-valued logic, primitive conditional probability, and fixed-point semantics.
+Part 1 establishes the constraint algebra. Part 2 adds interpretation, consequence relations, and update rules. Part 3 studies crisp recovery, paradox solution sets, graded comprehension, and external conditioning.
 
 ## Files
 
-- `paper.tex` — publication-quality paper (merged from original paper + literature sketch)
-- `paper-sketch.tex` — original literature map + roadmap (superseded by `paper.tex`)
-- `01-asymptotic-proofs.md` — Proofs approaching certainty (cred -> 1)
-- `02-fixed-points.md` — Self-reference and paradox dissolution
-- `03-undecidability.md` — Incompleteness and underdetermination (distinct from the 1/2 fixed point)
-- `04-proof-patterns.md` — Proof patterns enabled by the credence algebra
-- `05-open-questions.md` — Research directions including self-hosting
-- `06-graded-mathematics.md` — Building mathematics (arithmetic, analysis, set theory) on graded foundations
+- `paper.tex`: working Part 3 paper: crisp fragments, solution sets, graded comprehension, and external conditioning
+- `01-asymptotic-proofs.md`: proofs approaching certainty (cred -> 1)
+- `02-fixed-points.md`: self-reference and paradox dissolution
+- `03-undecidability.md`: incompleteness and underdetermination (distinct from the 1/2 fixed point)
+- `04-proof-patterns.md`: proof patterns enabled by the credence algebra
+- `05-open-questions.md`: research directions including self-hosting
+- `06-graded-mathematics.md`: building mathematics (arithmetic, analysis, set theory) on graded foundations
 
 ## Build
 

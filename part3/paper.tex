@@ -1,7 +1,8 @@
-% The Unique Intersection of Probability and Many-Valued Logic
-% Part 3: Applications and Future Directions
+% Paradox Without Explosion
+% Part 3: Crisp Fragments, Solution Sets, and External Conditioning
 %
-% References to Lean formalization: lean/Cred/Basic.lean
+% References to Lean formalization: lean/Cred/Bridge, lean/Cred/Fixpoint.lean,
+% lean/Cred/Predicate.lean, lean/Cred/Threshold.lean
 
 \documentclass[11pt,a4paper]{article}
 
@@ -16,7 +17,7 @@
     citecolor=blue,
     urlcolor=blue,
     pdfauthor={Anonymous},
-    pdftitle={The Unique Intersection: Applications and Future Directions}
+    pdftitle={Paradox Without Explosion}
 }
 \usepackage{cleveref}
 \usepackage[margin=1in]{geometry}
@@ -30,34 +31,43 @@
 \newtheorem{remark}[theorem]{Remark}
 
 \newcommand{\cred}{\mathsf{cred}}
+\newcommand{\Cond}{\mathsf{Cond}}
+\newcommand{\Sol}{\mathsf{Sol}}
 \newcommand{\negc}{\mathord{\sim}}
 \newcommand{\conjc}{\otimes}
 \newcommand{\disjc}{\sqcup}
-\newcommand{\condc}[2]{({#1} \mid {#2})}
 \newcommand{\Real}{\mathbb{R}}
-\newcommand{\Nat}{\mathbb{N}}
+\newcommand{\Bool}{\mathbb{B}}
 
-\title{\textbf{The Unique Intersection of Probability and Many-Valued Logic}\\[0.5em]
-\large Part~3: Applications and Future Directions}
+\title{\textbf{Paradox Without Explosion}\\[0.5em]
+\large Crisp Fragments, Solution Sets, and External Conditioning}
 
 \author{Anonymous for blind review}
-\date{February 2026}
+\date{June 2026}
 
 \begin{document}
 
 \maketitle
 
 \begin{abstract}
-Parts~1--2 established the credence algebra on $[0,1]$ with primitive
-conditioning.
-This paper develops three application areas:
-(1)~graded set theory, where the negation fixed point resolves Russell's
-paradox;
-(2)~evidence-zero conditioning, positioned relative to disintegration,
-imprecise probability, and conditional events;
-(3)~self-reference, contrasted with Kripke and revision-theoretic fixed points.
-We survey connections to Pavelka-style graded proof theory and outline open
-directions including modal extensions and categorical perspectives.
+The credence algebra separates three operations that are often collapsed:
+truth-value operations, consequence, and conditioning.
+Its value algebra is the product De Morgan triplet on $[0,1]$:
+$\negc c=1-c$, $a\conjc b=ab$, and
+$a\disjc b=a+b-ab$.
+Conditioning is the external admissibility relation
+$\Cond(j,e)=\{c\in[0,1]:ce=j\}$.
+This paper studies the foundations layer built from that separation.
+Classical logic embeds exactly in the crisp fragment $\{0,1\}$, except that
+empty antecedents give underdetermined conditioning rather than vacuous truth.
+Self-reference is classified by solution sets: the liar and Russell equations
+have the singleton solution $\{\tfrac12\}$, the truth-teller has all of
+$[0,1]$, and Curry has positive solutions only after an internal product
+residuum has been added.
+The Curry block theorem proves that modus ponens, conditional proof, and
+contraction have no common total carrier on $[0,1]$.
+The result is a local foundations program: paradoxes become equations or
+admissibility failures, while classical proof survives on the crisp fragment.
 \end{abstract}
 
 %=============================================================================
@@ -65,524 +75,514 @@ directions including modal extensions and categorical perspectives.
 \label{sec:intro}
 %=============================================================================
 
-Part~1~\cite{part1} proved two results about truth-functional conjunctions
-on $[0,1]$.
-First, $\min(a,b)$ is the unique conjunction satisfying Bayes consistency,
-non-trivial conditioning, and idempotence.
-This forces the product De~Morgan triplet: complement $1-c$, conjunction
-$\min$, disjunction $\max$.
-Second, the conditional's limit as evidence approaches zero is
-\emph{path-dependent}: ex falso is not forced by the algebra.
-Part~2~\cite{part2} built the reasoning layer: valuations, consequence
-relations, threshold semantics, and update rules on this foundation.
+Russell's paradox asks for a set $R$ such that
+\[
+  R\in R \quad\Longleftrightarrow\quad R\notin R.
+\]
+The classical contradiction comes from forcing the left side to be either
+true or false.
+In the credence algebra, the same self-reference yields one scalar equation.
+If $c$ is the credence of $R\in R$, then
+\[
+  c = 1-c,
+\]
+so $c=\tfrac12$.
+Nothing explodes.
+The equation has a solution, and the solution is unique.
 
-Part~3 develops three application areas enabled by these results, and surveys
-two further directions.
+This small calculation is not the whole theory.
+It is the first test of a larger separation.
+The algebra of values is
+\[
+  \negc c=1-c,\qquad
+  a\conjc b=ab,\qquad
+  a\disjc b=1-(1-a)(1-b)=a+b-ab .
+\]
+Conditioning is not a binary connective in the object language.
+It is the admissibility relation
+\[
+  \Cond(j,e)=\{c\in[0,1]:c e=j\}.
+\]
+For $e>0$ this is the singleton $\{j/e\}$, provided $j\le e$.
+For $e=0=j$ it is all of $[0,1]$.
+For $e=0<j$ it is empty.
+Thus false or impossible evidence never licenses arbitrary conclusions.
+The chain rule imposes no conditional value at zero evidence.
 
-\paragraph{Graded set theory.}
-The negation fixed point $c = \negc c \Rightarrow c = \tfrac{1}{2}$,
-proved in Part~1, gives a natural resolution of Russell's paradox:
-the Russell set has credence $\tfrac{1}{2}$ of containing itself.
-Section~\ref{sec:sets} develops graded comprehension and positions the
-algebra within the Takeuti--Titani tradition of many-valued set
-theory~\cite{takeuti1984}.
+Parts~1--2 proved the algebraic and semantic base.
+Part~1 classified the product De Morgan triplet and its collapses.
+Part~2 added valuations, LP/K3 bridges, update rules, and the
+truth-functional no-go theorem for conditioning.
+This paper asks what remains of classical foundations once those pieces are
+kept apart.
 
-\paragraph{Evidence-zero conditioning.}
-The chain rule $\cred(A \mid B) \cdot \cred(B) = \cred(A \land B)$ is
-well-formed at $\cred(B) = 0$ and forces only the joint to be zero; it
-does not determine the conditional.
-Section~\ref{sec:zero} places this underdetermination in the context of
-primitive conditional probability (R\'enyi, Popper), conditional events
-(de~Finetti, Calabrese), disintegration (Chang--Pollard), imprecise
-probability (Walley), and probabilistic programming languages.
+The answer has four parts.
+First, the crisp fragment $\{0,1\}$ recovers classical propositional reasoning.
+The only divergence is conditioning on empty evidence.
+Second, liar, truth-teller, Russell, and Curry patterns are best compared by
+their solution sets.
+Third, graded comprehension can state Russell-style self-membership without
+making every sentence derivable.
+Fourth, Curry's paradox is blocked at the architectural level: deriving it
+requires a total internal conditional with structural rules that the algebra
+does not supply.
 
-\paragraph{Self-reference.}
-Section~\ref{sec:selfref} positions the Part~1 fixed point relative to
-Kripke's monotone fixed-point construction~\cite{kripke1975} and
-Gupta--Belnap revision theory~\cite{gupta1993}, clarifying that the
-algebraic fixed point is a base case rather than a wholesale solution to
-semantic paradox.
-
-\paragraph{Further directions.}
-Section~\ref{sec:proof} surveys connections to Pavelka-style graded proof
-theory~\cite{pavelka1979i}, distinguishing semantic threshold consequence
-(Part~2) from proof systems with provability degrees.
-Section~\ref{sec:open} outlines open directions: modal extensions,
-categorical perspectives, and computational aspects.
-
-\paragraph{Notation.}
-We write $\negc c$ for negation, $c_1 \conjc c_2$ for conjunction,
-$c_1 \disjc c_2$ for disjunction, and $\condc{A}{B}$ for the conditional
-credence of $A$ given $B$.
+This is a modest claim.
+The paper does not replace Kripke fixed points, revision theory, fuzzy set
+theory, paraconsistent set theory, or Pavelka proof theory.
+It identifies the interface at which Cred meets those traditions.
+The Lean development records the interface as theorem statements rather than
+as metaphors.
 
 %=============================================================================
 \section{The Crisp Fragment}
 \label{sec:crisp}
 %=============================================================================
 
-Classical valuations embed into Cred by sending false to $0$ and true to $1$.
-On these two values, negation, product conjunction, and De Morgan disjunction
-are the Boolean operations.
-Formula evaluation commutes with this embedding.
-Lean names this theorem \texttt{crisp\_eval\_eq}.
-Classical validity is credence-validity restricted to crisp valuations
-(\texttt{crisp\_embedding}).
+Classical values embed into credences by the map
+\[
+  \mathsf{false}\mapsto 0,\qquad \mathsf{true}\mapsto 1.
+\]
+On those two values the product De Morgan operations are Boolean:
+\[
+  1(1)=1,\quad 1(0)=0,\quad 0(0)=0,
+\]
+and
+\[
+  a\disjc b=a+b-ab
+\]
+is Boolean disjunction when $a,b\in\{0,1\}$.
+Negation is Boolean complementation.
 
-The same restriction aligns the consequence relations.
-On crisp valuations, classical consequence, certainty consequence, and
-positivity consequence coincide.
-The Lean names are \texttt{crisp\_certainty\_iff\_classical} and
-\texttt{crisp\_positivity\_iff\_classical}.
-Thus the graded setting extends the classical fragment; it does not replace it.
+Lean names the embedding theorem \texttt{crisp\_eval\_eq}.
+For every Boolean valuation $v$ and formula $\varphi$, evaluating
+$\varphi$ classically and then embedding the result gives the same credence
+as evaluating $\varphi$ directly in Cred under the embedded valuation.
+The theorem \texttt{crisp\_embedding} states the corresponding validity
+claim.
 
-Conditioning marks the boundary of this conservativity.
-With true evidence, admissible conditioning is the singleton expected from the
-chain rule.
-With false evidence and zero joint, Cred returns the full interval
-$[0,1]$, while material implication selects vacuous truth.
-This is the exact divergence from classical implication.
-The Lean names are \texttt{material\_divergence} and
-\texttt{cond\_underdetermined\_iff}.
+The consequence layer agrees on the same fragment.
+Certainty consequence requires conclusion value $1$ whenever all premises
+have value $1$.
+Positivity consequence requires a positive conclusion whenever all premises
+are positive.
+On crisp valuations, positive means true.
+Lean records this in three theorems:
+\begin{itemize}[nosep]
+\item \texttt{crisp\_certainty\_iff\_classical},
+\item \texttt{crisp\_positivity\_iff\_certainty},
+\item \texttt{crisp\_positivity\_iff\_classical}.
+\end{itemize}
 
-%=============================================================================
-\section{Graded Set Theory}
-\label{sec:sets}
-%=============================================================================
+Conditioning is where the agreement stops.
+With evidence $1$, the admissible conditional is forced:
+\[
+  \Cond(j,1)=\{j\}.
+\]
+With evidence $0$ and joint $0$, every conditional value is admissible:
+\[
+  \Cond(0,0)=[0,1].
+\]
+Material implication picks the value true for every false antecedent.
+Cred makes no such selection.
+Four Lean theorems isolate that boundary:
+\begin{itemize}[nosep]
+\item \texttt{material\_divergence},
+\item \texttt{vacuous\_truth\_admissible},
+\item \texttt{empty\_antecedent\_underdetermined},
+\item \texttt{cond\_underdetermined\_iff}.
+\end{itemize}
 
-The most immediate application of the $\tfrac{1}{2}$ fixed point is to set
-theory.
-Russell's paradox arises from the set $R = \{x : x \notin x\}$: asking
-whether $R \in R$ leads to contradiction in classical logic.
-In a graded setting, the paradox resolves naturally.
+\begin{proposition}[Crisp conservativity with one boundary]
+On the formulas built from atoms, negation, conjunction, and disjunction,
+the crisp Cred fragment is classical.
+For conditionals, the classical truth table and Cred agree at true evidence.
+At false evidence with zero joint, Cred returns the whole interval
+$[0,1]$.
+\end{proposition}
 
-\subsection{Russell's Paradox Resolution}
-
-The Russell predicate is $R(x) = \negc(x \in x)$.
-Applied to itself: $R(R) = \negc(R \in R)$.
-Let $c = \cred(R \in R)$.
-Then $c = \negc c = 1 - c$, which gives $c = \tfrac{1}{2}$.
-
-\begin{remark}[Interpretation]
-The Russell set has credence $\tfrac{1}{2}$ of containing itself.
-This is neither full membership nor full non-membership.
-It is the unique fixed point of negation.
-The paradox is not \emph{solved} in the sense of being eliminated; it is
-\emph{accommodated} by the algebra's fixed-point structure.
+\begin{remark}
+This is the first reason to keep implication and conditioning apart.
+Classical proof by cases, double-negation elimination, excluded middle on
+crisp values, and non-contradiction on crisp values survive.
+The empty antecedent receives no extra theorem.
 \end{remark}
 
-\subsection{Graded Comprehension}
+%=============================================================================
+\section{Paradoxes as Solution Sets}
+\label{sec:solutions}
+%=============================================================================
 
-In classical set theory, comprehension says: for any property $\phi(x)$,
-there exists a set $\{x : \phi(x)\}$.
-Unrestricted comprehension leads to Russell's paradox.
-
-In graded set theory, membership becomes graded:
-$\cred(x \in A)$ takes values in $[0,1]$.
-The comprehension axiom becomes:
+A self-reference pattern determines an operator
 \[
-\cred(x \in \{y : \phi(y)\}) = \cred(\phi(x))
+  \Phi:[0,1]\to[0,1].
 \]
-This does not require restriction to ``safe'' properties.
-The graded setting handles self-reference via fixed points rather than
-exclusion.
-
-\subsection{The Takeuti--Titani Context}
-
-There is a substantial tradition of ``many-valued mathematics'' in which
-set-theoretic foundations are valued in $[0,1]$ or other
-lattices~\cite{takeuti1984,zadeh1965}.
-Takeuti and Titani develop a many-valued set theory based on fuzzy logic and
-study standard set-theoretic issues in that setting: extensionality,
-comprehension, and the interpretation of membership.
-
-The uniqueness result from Part~1 provides a canonical choice for graded
-membership operations: the minimum conjunction $\min(a,b)$ is not merely one
-option among many t-norms, but the unique truth-functional conjunction
-compatible with probabilistic marginalization.
-This narrows the design space for graded set theory to a single algebraically
-forced choice of connectives, resolving an ambiguity that persists in the
-general fuzzy-set-theory literature where the choice of t-norm is typically
-a modelling decision~\cite{klement2000}.
-
-%=============================================================================
-\section{Evidence Zero and Null Conditioning}
-\label{sec:zero}
-%=============================================================================
-
-The evidence-zero boundary is where the credence algebra's design choice makes
-contact with several established research programs.
-When $\cred(B) = 0$, the conditional remains underdetermined.
-The chain rule is well-formed at evidence zero and forces only the joint to be
-zero; it does \emph{not} choose a specific conditional value.
-This is closely related to the classical ambiguity of ratios $j/a$ as
-$(j,a) \to (0,0)$: the limiting value depends on the relative rate at which
-$j$ decays compared to $a$, and no single value is canonical.
-
-\subsection{Primitive Conditional Probability}
-
-R\'enyi~\cite{renyi1955} and Popper~\cite{popper1959} develop axiom systems
-where conditional probability is primitive and the chain rule is central,
-rather than defining conditional probability as a ratio.
-Van~Fraassen develops and applies Popper-style approaches to the analysis of
-probabilities of conditionals and to the connection between probability and
-relevant logic~\cite{vanfraassen1976,vanfraassen1983}.
-
-The credence algebra's conditioning is directly aligned with these
-traditions: the chain rule $\condc{A}{B} \cdot \cred(B) = \cred(A \land B)$
-is taken as a primitive constraint rather than derived from division.
-The key difference is that the algebra makes underdetermination at evidence
-zero an explicit first-class feature, whereas R\'enyi and Popper impose
-additional structure (e.g., a family of conditional probability spaces) to
-resolve it.
-
-\subsection{Conditional Events}
-
-De~Finetti treats conditional events as three-valued (true/false/void) in a
-betting/coherence setting, providing an explicit semantics for the
-antecedent-false case that avoids vacuous truth~\cite{definetti1936,definetti1937}.
-Calabrese formalizes conditional events algebraically as Boolean fractions and
-analyzes their operations~\cite{calabrese1987}.
-The modern logic of indicative conditionals has revisited de~Finetti-style
-tables and their proof theory; see, e.g., the De~Finettian logics DF/TT and
-related systems studied by \'Egr\'e, Rossi, and Sprenger~\cite{egre2021}.
-
-More recently, the coherence-based literature develops conditional random
-quantities and operations on conditionals, including conjunction and iterated
-conditioning~\cite{gilio2014,gilio2013}.
-Coletti and Scozzafava provide a broad synthesis of probabilistic logic in a
-coherence setting and devote substantial attention to probability-zero events
-and conditionalization at the boundary case~\cite{coletti2002}.
-
-These works are especially relevant because they show how to reason coherently
-when antecedents have probability zero \emph{without} forcing a single
-truth-functional value, and because they explicitly separate:
-(i)~the algebra of values, (ii)~the event structure, and (iii)~the rules
-governing coherence and extension.
-
-\subsection{Disintegration and Categorical Conditioning}
-
-Standard measure theory uses regular conditional probabilities and
-disintegration to define conditional probabilities with null evidence, with
-uniqueness only up to almost-sure equivalence~\cite{chang1997}.
-Category-theoretic approaches (e.g., Markov categories) treat conditioning
-structurally rather than as division, making clear which parts come from
-additional structure beyond the chain rule itself~\cite{fritz2020}.
-
-The algebra's evidence-zero underdetermination matches the non-uniqueness in
-disintegration.
-In both cases, the chain rule alone does not select a canonical conditional
-when the evidence has measure zero.
-
-\subsection{Imprecise Probability}
-
-Imprecise probability develops a complementary view: at the boundary, one may
-return \emph{sets} or \emph{intervals} of admissible conditionals rather than
-a single number~\cite{walley1991,troffaes2014}.
-The algebra's evidence-zero underdetermination sits naturally with this
-perspective and suggests a set-valued update semantics as one viable
-formalization.
-
-\subsection{Probabilistic Programming}
-
-Probabilistic programming languages (PPLs) make conditioning a primitive
-operation.
-In PPLs like Stan, PyMC, or Pyro, users write generative models and the
-language handles conditioning automatically.
-The chain rule $P(A \mid B) \cdot P(B) = P(A \land B)$ is the semantic
-backbone.
-
-The path-dependence result from Part~1 has direct implications for PPL
-semantics at measure-zero observations:
-continuous observations have probability zero, and standard conditioning uses
-densities rather than probabilities.
-The algebra's underdetermination at zero corresponds to the need for explicit
-density specifications.
-One must choose a particular parameterization (Lebesgue density, counting
-measure, etc.) to pin down the conditional.
-
-Bayesian statistics sometimes uses improper priors (non-normalizable
-measures).
-The algebra's treatment of evidence-zero conditioning parallels this.
-It is underdetermined rather than forced to any particular value.
-There is no canonical posterior when the prior is improper.
-
-%=============================================================================
-\section{Self-Reference in Context}
-\label{sec:selfref}
-%=============================================================================
-
-The most visible self-reference result from Part~1 is the forced negation
-fixed point: $c = \negc c$ implies $c = \tfrac{1}{2}$.
-This is algebraic.
-It follows from the complement operation on $[0,1]$ and should be positioned
-relative to the established fixed-point traditions for truth and paradox.
-
-\subsection{Kripke Fixed Points}
-
-Kripke's fixed-point theory of truth uses monotone operators and fixed points
-to give consistent semantics for truth predicates, building up a maximal
-consistent extension from an initial ``ground'' model~\cite{kripke1975}.
-The construction is proof-theoretic: it proceeds through transfinite stages,
-and the choice of evaluation scheme (strong Kleene, weak Kleene, or
-supervaluational) affects which sentences receive truth values at the fixed
-point.
-
-The credence algebra's fixed point is different in character: it is a single
-algebraic equation ($c = 1 - c$) with a unique solution, rather than an
-iterative construction.
-The Kripke fixed point assigns truth-value gaps to liar-like sentences; the
-credence algebra assigns the definite value $\tfrac{1}{2}$.
-
-\subsection{Solution Sets}
-
-The common object is a solution set.
-For a self-map $\Phi : [0,1]\to[0,1]$, define
+Its admissible values form the solution set
 \[
-  \mathrm{Sol}(\Phi)=\{c : \Phi(c)=c\}.
+  \Sol(\Phi)=\{c\in[0,1]:\Phi(c)=c\}.
 \]
-The Lean module \texttt{Cred/Fixpoint.lean} records the basic cases.
-Negation has the singleton solution set $\{\tfrac12\}$.
-The truth-teller map $\Phi(c)=c$ has the full interval as its solution set.
-This is the same shape as zero-evidence conditioning:
+This is the common shape behind the elementary paradox cases.
+Lean defines this set as \texttt{solutions} and proves
+\texttt{solutions\_eq\_fixedPoints}.
+
+\subsection{Liar}
+
+The scalar liar pattern is negation self-reference:
 \[
-  \mathrm{Sol}(\mathrm{id}) = [0,1] = \mathrm{Cond}(0,0).
+  c=\negc c=1-c.
 \]
-Classically, Boolean negation has no fixed point.
-The graded interval changes the contradiction into a nonempty solution set.
+Its solution set is the singleton
+\[
+  \Sol(\negc)=\{\tfrac12\}.
+\]
+Lean records this as \texttt{solutions\_neg\_eq\_singleton} and
+\texttt{liar\_solution}.
+The Boolean version has no fixed point:
+\[
+  \{b\in\Bool: \neg b=b\}=\varnothing,
+\]
+proved as \texttt{bool\_neg\_solutions\_empty}.
 
-\subsection{Revision Theory}
+The contrast is useful.
+The graded interval turns the classical contradiction into a determined
+middle value.
+It does not infer arbitrary formulas from that value.
 
-Gupta--Belnap revision theory models truth as evolving under revisions:
-a revision operator maps one extension of the truth predicate to
-another, and the semantics is given by the long-run behavior of revision
-sequences~\cite{gupta1993}.
-This yields dynamical semantics for self-reference.
-Truth values may oscillate, stabilize, or exhibit more complex patterns.
+\subsection{Truth-Teller}
 
-The credence algebra's treatment of self-reference has no revision dynamics:
-the fixed point is immediate.
-This is appropriate for the algebraic base case (negation self-application)
-but does not address the richer phenomena that revision theory
-captures: iterated revision, mutual reference, and contingent stabilization.
+The truth-teller pattern is identity self-reference:
+\[
+  c=c.
+\]
+Every value solves it:
+\[
+  \Sol(\mathsf{id})=[0,1].
+\]
+Lean proves \texttt{solutions\_id\_eq\_univ} and
+\texttt{truth\_teller\_any}.
+The solution set has the same shape as zero-evidence conditioning:
+\[
+  \Sol(\mathsf{id})=[0,1]=\Cond(0,0).
+\]
+The theorem \texttt{truth\_teller\_same\_shape\_as\_zero\_evidence}
+records the equality.
 
-\subsection{Curry and Contraction}
+The interpretation differs in the two cases.
+For the truth-teller, the equation supplies no information.
+For zero evidence, the chain rule supplies no conditional value.
+Both cases are underdetermined because the constraint is the identity.
 
-Curry self-reference does not use negation.
-It combines a self-referential conditional with modus ponens, conditional
-proof, and contraction.
-In Cred these rules have no common total carrier on $[0,1]$.
-The Lean theorem \texttt{curry\_block} proves the incompatibility.
+\subsection{Russell}
 
-The proof first identifies the candidate conditional.
-Modus ponens and conditional proof give a residuation law for product
+For a graded predicate $P:\alpha\to[0,1]$, negation is pointwise:
+\[
+  (\neg P)(x)=1-P(x).
+\]
+The Lean module \texttt{Cred.Predicate} develops graded predicates,
+pointwise De Morgan operations, infimum and supremum quantifiers, and the
+crisp quantifier bridges.
+
+Russell's predicate has the scalar form
+\[
+  c=1-c.
+\]
+The theorem \texttt{russell\_fixed\_point} proves that any credence satisfying
+that equation is $\tfrac12$.
+The theorem \texttt{russell\_scalar\_solutions} states the solution-set form:
+\[
+  \{c:c=1-c\}=\{\tfrac12\}.
+\]
+
+This is only the scalar core of graded set theory.
+A full set theory needs extensionality, comprehension, equality, and
+substitution.
+The scalar theorem says that Russell's diagonal equation has a value.
+It does not by itself give a complete foundation.
+
+\subsection{Curry}
+
+Curry self-reference has a different shape.
+It does not use negation.
+It uses a conditional that can be internalized and then contracted.
+
+If one adds the product residuum
+\[
+  a\Rightarrow b =
+  \begin{cases}
+    1, & a=0,\\
+    \min(1,b/a), & a>0,
+  \end{cases}
+\]
+then positive Curry equations have square-root solutions.
+For $b>0$,
+\[
+  c = (c\Rightarrow b)
+\]
+is solved by $c=\sqrt b$.
+Lean proves the witness, the positive nonempty result, and the empty
+zero-boundary result in \texttt{Cred/Fixpoint.lean}.
+
+This boundary matters.
+The product residuum is an added connective.
+It is not Cred conditioning.
+Cred's conditional relation remains external:
+\[
+  c\in\Cond(j,e).
+\]
+That relation cannot be placed into a formula and diagonalized.
+
+\begin{table}[t]
+\centering
+\begin{tabular}{lll}
+\toprule
+Pattern & Equation & Solution set \\
+\midrule
+Liar & $c=1-c$ & $\{\tfrac12\}$ \\
+Truth-teller & $c=c$ & $[0,1]$ \\
+Russell scalar & $c=1-c$ & $\{\tfrac12\}$ \\
+Curry, $b>0$ with product residuum & $c=(c\Rightarrow b)$ & nonempty, contains $\sqrt b$ \\
+Curry, $b=0$ with product residuum & $c=(c\Rightarrow 0)$ & $\varnothing$ \\
+\bottomrule
+\end{tabular}
+\caption{Basic self-reference patterns as solution sets.}
+\label{tab:solution-sets}
+\end{table}
+
+%=============================================================================
+\section{Graded Comprehension}
+\label{sec:comprehension}
+%=============================================================================
+
+Graded predicates give the minimal language for a foundations application.
+Membership is a value in $[0,1]$.
+A comprehension principle has the schematic form
+\[
+  \cred(x\in\{y:\varphi(y)\})=\cred(\varphi(x)).
+\]
+For Russell's predicate this reduces to the fixed-point equation above.
+
+This puts Cred near several established programs.
+White proved consistency results for unrestricted comprehension in
+infinite-valued {\L}ukasiewicz predicate logic~\cite{white1979}.
+H\'ajek, Paris, and Shepherdson analyzed fuzzy truth predicates and showed
+how graded truth interacts with conservativity and model existence
+\cite{hajek2000,hajek2000liar}.
+Takeuti and Titani developed fuzzy set theory with many-valued membership
+\cite{takeuti1984}.
+Paraconsistent and paracomplete ZF-style theories such as BZFC treat
+inconsistent and incomplete membership through four-valued semantics
+\cite{khomskii2024}.
+
+Cred should be compared to these systems at the level of contracts.
+The present paper proves a scalar and predicate-level interface:
+pointwise graded predicates, De Morgan laws, quantifier duality, crisp
+quantifier recovery, and Russell's fixed point.
+It does not claim a ZF replacement or a bi-interpretability theorem.
+
+The crisp fragment supplies the recovery constraint.
+When a predicate is crisp, its infimum is zero exactly when some instance is
+zero, and its supremum is one exactly when some instance is one.
+Lean records these as \texttt{crisp\_inf\_zero\_iff} and
+\texttt{crisp\_sup\_one\_iff}.
+The theorem \texttt{quantifier\_duality\_val} gives the graded duality:
+\[
+  \inf_x P(x)=1-\sup_x(1-P(x)).
+\]
+
+These theorems are small, but they set the right burden of proof.
+A future graded foundation must specify extensionality, equality, and
+substitution in a way that preserves the crisp fragment and keeps
+conditioning external.
+Russell alone is the entrance exam.
+Curry is the harder test.
+
+%=============================================================================
+\section{Curry Without an Internal Conditional}
+\label{sec:curry}
+%=============================================================================
+
+Curry's paradox warns against an internal conditional with too much structural
+strength.
+The dangerous package contains three principles.
+For a binary operation $f$ on credences:
+\[
+\begin{array}{ll}
+\mathrm{MP}: & a\conjc f(a,b)\le b,\\[0.3em]
+\mathrm{CP}: & a\conjc c\le b\ \Rightarrow\ c\le f(a,b),\\[0.3em]
+\mathrm{Contr}: & f(a,f(a,b))\le f(a,b).
+\end{array}
+\]
+Modus ponens and conditional proof amount to residuation for product
 conjunction.
-For positive antecedents this pins the arrow to the product residuum
+They force the positive part of $f$ to be the product residuum:
 \[
-  a \Rightarrow b = \min(1,b/a).
+  f(a,b)=\min(1,b/a)\qquad(a>0).
 \]
-That arrow has the usual zero row: $0 \Rightarrow b = 1$.
-It also fails contraction.
-At $a=\tfrac12$ and $b=\tfrac14$, the first implication has value
-$\tfrac12$, but the contracted implication has value $1$.
+Lean proves the residuation step as:
+\begin{itemize}[nosep]
+\item \texttt{mp\_cp\_residuation},
+\item \texttt{residuation\_unique},
+\item \texttt{prodResid\_unique\_positive}.
+\end{itemize}
 
-Thus Curry safety is architectural.
-Cred can assign values to positive Curry equations
-(\texttt{curry\_fixed\_point\_positive}), but it does not internalize a total
-conditional that also supports contraction.
+The product residuum fails contraction.
+At $a=\tfrac12$ and $b=\tfrac14$,
+\[
+  a\Rightarrow b=\tfrac12,\qquad
+  a\Rightarrow(a\Rightarrow b)=1.
+\]
+Thus
+\[
+  a\Rightarrow(a\Rightarrow b)\le a\Rightarrow b
+\]
+fails.
+Lean proves this counterexample in the Curry bridge module.
+The theorem \texttt{curry\_block} packages it:
+no total operation on $[0,1]$ satisfies MP, CP, and contraction together.
 
-\subsection{Many-Valued Approaches}
+This is the formal reason the title can say ``without explosion.''
+Cred does not repair Curry after internalizing the conditional.
+It refuses the internalization.
+Conditioning enters as the external judgment
+\[
+  c\in\Cond(j,e),
+\]
+and consequence is a metalinguistic relation.
+There is no formula constructor $\varphi\Rightarrow\psi$ whose value can be
+fed back into its own antecedent.
 
-Many-valued logics have their own tradition of analyzing paradoxes and
-vagueness through graded truth values~\cite{bergmann2008}.
-The credence algebra connects to this tradition through its product
-De~Morgan structure and the collapse homomorphism to the Kleene lattice
-established in Part~1.
-
-\begin{remark}[Scope of the fixed point]
-Part~3 should treat the Part~1 fixed point as the \emph{base case}: the
-simplest instance of self-reference resolved by the algebraic structure.
-It is not a wholesale solution to semantic paradox, and the relationship to
-Kripke and revision-theoretic approaches is one of complementarity rather
-than replacement.
-\end{remark}
+The result matches the diagnosis in relevance and substructural logic:
+contraction is not harmless in the presence of self-reference.
+Cred gives a numerical version of the same obstruction.
+The obstruction is machine-checked for the product carrier used here.
 
 %=============================================================================
-\section{Toward Graded Proof Theory}
+\section{Conditioning and Proof}
 \label{sec:proof}
 %=============================================================================
 
-Part~2 provides consequence relations (threshold semantics), but no proof
-calculus with graded derivability.
-There is an important distinction between two notions of ``graded proof'':
+The proof layer has two axes.
+The first is consequence.
+For each threshold $t\in[0,1]$, define
+\[
+  \Gamma\models_t\varphi
+\]
+to mean: every valuation that gives all formulas in $\Gamma$ value at least
+$t$ also gives $\varphi$ value at least $t$.
+Lean defines this as \texttt{thresholdConsequence}.
+It proves reflexivity, monotonicity, and cut as
+\texttt{threshold\_reflexivity},
+\texttt{threshold\_monotonicity}, and \texttt{threshold\_cut}.
 
-\begin{enumerate}[label=(\alph*),nosep]
-\item A \emph{semantic threshold consequence relation}, as developed in
-Part~2, where $A \models_\alpha B$ means that every valuation assigning
-credence $\ge \alpha$ to $A$ also assigns credence $\ge \alpha$ to $B$.
+The endpoints recover the earlier consequence relations.
+At $t=1$ one obtains certainty consequence
+(\texttt{threshold\_one\_iff\_certainty}).
+Positivity consequence is the union of positive thresholds
+(\texttt{formulaPositivity\_iff\_exists\_threshold}).
 
-\item A \emph{proof system with provability degrees}, in the sense of
-Pavelka~\cite{pavelka1979i,pavelka1979ii,pavelka1979iii}, where theorems
-carry graded provability values and completeness is formulated in terms
-of these degrees.
-\end{enumerate}
-
-Part~2 addresses~(a).
-The question for Part~3 is whether the credence algebra supports a natural
-instance of~(b).
-
-\subsection{Pavelka-Style Graded Provability}
-
-Pavelka's 1979 series develops many-valued rules of inference, semantics via
-enriched residuated lattices, and semantic completeness for many-valued
-calculi~\cite{pavelka1979i,pavelka1979ii,pavelka1979iii}.
-The key idea is that a proof calculus assigns a \emph{degree of provability}
-$\|\varphi\|$ to each formula, and completeness requires
-$\|\varphi\| = \|\varphi\|^*$ where the right-hand side is the semantic truth
-degree.
-
-H\'ajek's metamathematics of fuzzy logic organizes the ``big three''
-continuous t-norm logics within the BL-algebra framework: \L ukasiewicz,
-G\"odel, and product~\cite{hajek1998}.
-Product logic is a fully developed many-valued logic: it is $[0,1]$-valued,
-its implication is the product residuum (Goguen
-implication)~\cite{goguen1969}, and it validates a graded form of modus
-ponens via the adjointness relationship $a \conjc f(a,b) \le b$.
-
-The credence algebra's logic-style instantiation with joint
-$j(a,b) = \min(a,b)$ agrees with product logic \emph{for positive evidence}:
-for $a > 0$, the induced conditional $f(a,b) = \min(b/a, 1)$ is exactly the
-product residuum.
-The divergence is at the evidence-zero boundary: product logic sets
-$f(0,b) = 1$ (ex falso / vacuous truth), while the credence algebra treats
-evidence-zero conditioning as underdetermined by design.
-
-\subsection{Proof-Theoretic Targets}
-
-A graded proof theory for the credence algebra would need to:
-\begin{enumerate}[label=(\roman*),nosep]
-\item specify a minimal proof calculus for a chosen consequence relation
-(e.g., a threshold semantics on $[0,1]$ or a designated-values semantics
-after collapse to the Kleene lattice);
-\item prove soundness and, ideally, completeness with respect to the
-Part~2 semantics;
-\item clarify how cut elimination works in the graded setting.
-\end{enumerate}
-
-The algebraic semantics literature on residuated lattices and substructural
-logics provides the natural framework for this
-investigation~\cite{galatos2007,cintula2011}.
-
-\subsection{Threshold Consequence}
-
-The consequence layer can be organized by a threshold $t$.
-A formula is designated when its credence lies in $[t,1]$.
-The Lean module \texttt{Cred/Threshold.lean} proves reflexivity,
-monotonicity, and cut once for this family.
-Certainty consequence is the endpoint $t=1$.
-Positivity consequence is the union of the positive thresholds.
-
-Two thresholds are sharp.
+Two sharp bounds matter for proof design.
 Explosion has a countermodel exactly when $0<t\le\tfrac12$.
-Excluded middle holds for all credence values exactly when
-$t\le\tfrac34$.
-Hence the interval $(\tfrac12,\tfrac34]$ has excluded middle without a
-non-vacuous explosion countermodel.
-This is a parameter family, not a new primitive logic.
+Excluded middle holds for all credence values exactly when $t\le\tfrac34$.
+Lean records these as
+\texttt{threshold\_explosion\_countermodel\_iff} and
+\texttt{threshold\_excluded\_middle\_iff}.
+The interval $(\tfrac12,\tfrac34]$ therefore validates excluded middle while
+losing the simple explosion countermodel used below $\tfrac12$.
+
+The second axis is conditioning.
+A labelled calculus should treat conditioning as a side judgment:
+\[
+  c\in\Cond(j,e).
+\]
+The chain-rule cut has the form
+\[
+  c\in\Cond(j,e),\quad e\ge t
+  \quad\Longrightarrow\quad
+  j=ce.
+\]
+At positive evidence this can be read as the usual ratio rule.
+At zero evidence it remains a constraint, not an implication theorem.
+
+Pavelka-style proof theory gives a mature comparison point for graded
+provability~\cite{pavelka1979i,pavelka1979ii,pavelka1979iii}.
+H\'ajek's product logic gives a mature comparison point for residuated
+truth-functional implication~\cite{hajek1998}.
+Cred takes neither calculus unchanged.
+The no-go theorem for truth-functional conditioning in Part~2 and the Curry
+block above force the proof calculus to keep conditioning external.
+
+This is the remaining Lean target.
+One should first write rules for labelled bounds and side judgments, then
+prove soundness for threshold consequence.
+Completeness can wait.
+A premature completeness theorem risks hiding a residuated implication inside
+the rules.
 
 %=============================================================================
-\section{Open Directions}
-\label{sec:open}
+\section{Underdetermination, Incompleteness, and Updates}
+\label{sec:underdetermination}
 %=============================================================================
 
-Beyond the application areas developed above, several directions merit
-investigation.
+Three notions must stay separate.
 
-\subsection{Modal Extensions}
+First, zero-evidence conditioning is underdetermination by the chain rule:
+\[
+  \Cond(0,0)=[0,1].
+\]
+The evidence value is zero, so the equation $ce=0$ imposes no restriction on
+$c$.
+This is the same boundary that appears in primitive conditional probability,
+conditional events, disintegration, and imprecise probability
+\cite{renyi1955,popper1959,definetti1936,calabrese1987,walley1991}.
 
-Modal logic (necessity, possibility) has natural graded analogues.
-One can consider $\cred(\Box A)$ (credence that $A$ is necessary) and
-$\cred(\Diamond A)$ (credence that $A$ is possible), with modal axioms
-becoming constraints on how these credences relate.
-The S5 axiom $\Box A \to A$, for instance, becomes the constraint
-$\cred(\Box A) \le \cred(A)$.
-The interaction between modality, conditioning, and the evidence-zero
-boundary is unexplored.
+Second, undecidability is proof-theoretic.
+A theory may prove neither $\varphi$ nor $\neg\varphi$.
+That does not assign $\varphi$ the value $\tfrac12$.
+The value $\tfrac12$ is forced only by equations such as $c=1-c$.
+Chosen ignorance, independence, and unproved statements require extra
+modelling assumptions.
 
-\subsection{Categorical Perspectives}
+Third, updates are dynamics.
+Bayesian and Jeffrey update rules from Part~2 handle positive evidence.
+At zero evidence, a Cred update semantics should return a set or interval of
+admissible posteriors unless an additional selection principle is supplied.
+This aligns more closely with imprecise probability than with a single
+regular conditional probability chosen on a null set.
 
-The categorical treatment of probability via Markov
-categories~\cite{fritz2020} provides structural perspectives on conditioning.
-The uniqueness theorem from Part~1 may have categorical characterizations:
-the minimum conjunction as a universal property, or the chain rule as a
-natural transformation.
-The connection between categorical conditioning (morphisms in a Markov
-category) and algebraic conditioning (the chain rule on $[0,1]$) deserves
-investigation.
-
-\subsection{Computational Aspects}
-
-Questions of complexity and tractability arise naturally: what is the
-complexity of determining whether a credence assignment is consistent with a
-set of constraints?
-Can credence values be computed efficiently in specific fragments?
-The collapse homomorphism to the Kleene lattice (Part~1) suggests that
-finite approximations may be tractable even when the full $[0,1]$-valued
-problem is not.
-
-\subsection{Graded Type Theory}
-
-The connection between graded set membership and type membership is
-suggestive but underdeveloped.
-Gradual typing~\cite{siek2006} uses a dynamic type to represent unknown type
-information, and type consistency mediates between statically and dynamically
-typed code.
-Whether graded type membership ($\cred(e : T) \in [0,1]$) can be given a
-rigorous semantics aligned with the credence algebra remains open.
+These distinctions keep the foundations claim honest.
+The algebra resolves certain self-reference equations.
+It does not solve G\"odel incompleteness, choose values for independent
+statements, or define a canonical posterior under impossible evidence.
 
 %=============================================================================
 \section{Conclusion}
 \label{sec:conclusion}
 %=============================================================================
 
-The literature map developed in this paper suggests a clean synthesis:
+The slogan ``paradox without explosion'' has a precise reading here.
+Paradoxical patterns are not all treated alike.
+Negation self-reference has the singleton solution $\{\tfrac12\}$.
+Identity self-reference has the full interval.
+Zero-evidence conditioning has the full interval for a different reason:
+the chain rule imposes no value.
+Curry requires an internal conditional plus structural rules, and those rules
+have no common total carrier on $[0,1]$.
 
-\begin{quote}
-The credence algebra isolates the chain rule as an algebraic constraint on
-conditioning and combines it with the product De~Morgan triplet on $[0,1]$;
-it is compatible with both (i)~truth-functional many-valued logics (when a
-fixed joint is chosen) and (ii)~coherence/probability-style semantics (when
-joints are supplied externally).
-Its distinguishing choice is to leave the evidence-zero boundary
-underdetermined by default, in line with conditional-event and
-imprecise-probability viewpoints, rather than forcing ex falso via
-residuation.
-\end{quote}
+Classical reasoning survives where it should.
+The crisp fragment recovers Boolean evaluation and classical consequence.
+Proof by contradiction remains available as countercase elimination inside
+that fragment.
+What disappears is the move from false or impossible evidence to an arbitrary
+conclusion.
 
-This synthesis clarifies which parts of the framework are inherited
-(t-norm logic, primitive conditional probability, conditional
-events/coherence) and which parts are a deliberate stance (evidence-zero
-underdetermination as a first-class feature rather than an exception to be
-patched).
-
-\paragraph{Targets.}
-The concrete next steps for this program are:
-\begin{enumerate}[label=(\arabic*),nosep]
-\item \textbf{A graded proof theory layer:} specify a minimal proof calculus
-for a chosen consequence relation (e.g., a threshold semantics on $[0,1]$ or
-a designated-values semantics after collapse) and prove soundness with
-respect to the Part~2 semantics.
-\item \textbf{A null-evidence update semantics:} formalize at least one
-update mechanism that extends Part~2 updates to the evidence-zero boundary
-(likely set-valued/interval-valued), and relate it to coherence and imprecise
-probability.
-\item \textbf{A self-reference interface:} state precisely what the Part~1
-fixed-point result does and does not address, with explicit comparison to
-Kripke and revision-theoretic fixed points.
-\item \textbf{A graded-foundations worked example:} pick a concrete fragment
-(e.g., graded predicates over a finite domain, or a tiny graded set fragment)
-and work through extensionality/comprehension choices, using the many-valued
-set theory literature to avoid reinventing known pitfalls.
-\end{enumerate}
+This leaves two next tasks.
+The paper task is a full graded-foundations comparison: extensionality,
+equality, substitution, and graded comprehension against White, Takeuti and
+Titani, H\'ajek--Paris--Shepherdson, and BZFC.
+The Lean task is a labelled proof calculus with external conditioning
+judgments and a soundness theorem for the threshold family.
+Both tasks should preserve the same boundary:
+conditioning constrains values through the chain rule; it is not implication.
 
 %=============================================================================
 % Bibliography
