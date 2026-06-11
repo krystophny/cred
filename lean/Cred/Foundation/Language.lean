@@ -20,6 +20,30 @@ namespace Term
 
 variable {Func : Type u}
 
+mutual
+
+def rename (ρ : Nat → Nat) : Term Func → Term Func
+  | var n => var (ρ n)
+  | app f args => app f (renameList ρ args)
+
+def renameList (ρ : Nat → Nat) : List (Term Func) → List (Term Func)
+  | [] => []
+  | t :: ts => rename ρ t :: renameList ρ ts
+
+end
+
+mutual
+
+def subst (σ : Nat → Term Func) : Term Func → Term Func
+  | var n => σ n
+  | app f args => app f (substList σ args)
+
+def substList (σ : Nat → Term Func) : List (Term Func) → List (Term Func)
+  | [] => []
+  | t :: ts => subst σ t :: substList σ ts
+
+end
+
 end Term
 
 inductive Formula (Func : Type u) (Pred : Type v) where

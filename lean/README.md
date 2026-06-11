@@ -50,6 +50,7 @@ lake build
 | `labelled_no_ex_falso` | A and ~A do not derive an unrelated positive conclusion |
 | `Kernel.Proof.sound` | Proof certificates inherit labelled soundness |
 | `Kernel.no_ex_falso_certificate` | No certificate derives an unrelated positive conclusion from A and ~A |
+| `Foundation.Term.rename`, `Foundation.Term.subst` | Term-level renaming and substitution |
 | `Foundation.Formula.hasEquality` | Structural marker for equality in foundation formulas |
 | `Foundation.Formula.hasQuantifier` | Structural marker for quantifiers in foundation formulas |
 
