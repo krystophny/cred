@@ -159,6 +159,32 @@ the \emph{conditional bridge} is the (attempted) commutativity
 of the collapse with conditioning.
 This paper studies all three and their interaction.
 
+\textbf{Two axes.}
+The structure factors into two independent components.
+\emph{Axis~A: admissible conditioning (non-explosion).}
+The chain rule reads conditioning as an admissibility constraint:
+given joint~$j$ and evidence~$e$, the admissible conditionals form
+the set $\{c \in [0,1] : c \conjc e = j\}$.
+Positive evidence yields a singleton; zero evidence (with zero
+joint) yields the whole interval.
+No inference rule is weakened.
+Explosion never starts, because impossible evidence forces no value.
+We call this component the \emph{admissible conditional semantics}.
+\emph{Axis~B: graded values.}
+The value space $[0,1]$ carries the product De Morgan triplet, its
+Kleene quotient, and the LP/K$_3$ consequence bridges.
+We call this component the \emph{graded credence semantics}.
+The literature realizes each axis separately: relevance logics and
+the logics of formal inconsistency block explosion without grading
+values~\cite{anderson1975,carnielli2016}, while fuzzy and product
+logics grade values without admissible
+conditioning~\cite{hajek1998,cintula2011}.
+Inside the present framework, Theorem~\ref{thm:no-cond-bridge}
+(\texttt{no\_truthfunctional\_cond\_bridge}) is the independence
+theorem for the pair: no truth-functional conditional on the
+collapsed values reproduces admissible conditioning, so the axes
+do not reduce to each other even after collapse.
+
 \textbf{Main results.}
 \begin{enumerate}[nosep]
 \item \textbf{Formula-level bridge} (Section~\ref{sec:bridge};
@@ -215,11 +241,12 @@ De Morgan reduct no longer forces $0 \to b = 1$.
 The two systems agree on all positive-evidence conditioning;
 they differ only at evidence zero.
 
-The individual components --- the product t-norm, the Kleene
-lattice, primitive conditioning, many-valued consequence --- are
-all well studied in the literature; the novelty lies in their
-synthesis and formalization.
-Section~\ref{sec:related} surveys related work in detail.
+The individual components are well studied: the product t-norm,
+the Kleene lattice, primitive conditioning, and many-valued
+consequence each have their own literature.
+The contribution is the combination of the two axes above the
+propositional layer, together with its formalization.
+Section~\ref{sec:related} surveys related work along both axes.
 
 \textbf{Note on formalization.}
 All results marked with ``Lean:'' are machine-checked in Lean~4
