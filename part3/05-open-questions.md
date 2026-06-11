@@ -78,8 +78,8 @@ For the current synthesis statement, see `paper.tex`.
     `[0,1]`, what are the right analogues of extensionality and comprehension?
     Use many-valued set theory as a constraint on what is plausible. The first
     object-language module is `lean/Cred/Foundation/Language.lean`; equality,
-    quantifiers, and term substitution are explicit, while conditionality
-    remains external.
+    quantifiers, and binder-aware substitution are explicit, while
+    conditionality remains external.
 
 11. **Crisp subtheories.** Identify and formalize the crisp fragments (where all
     credences are `0/1`) and prove they recover the intended classical theorems.

@@ -134,6 +134,7 @@ Kernel certificates (from Kernel.lean):
 Foundation language (from Foundation/Language.lean):
 - `Foundation.Term`, `Foundation.Formula`
 - `Term.rename`, `Term.subst`
+- `Term.upRenaming`, `Term.liftSubst`, `Formula.rename`, `Formula.subst`
 - Formula constructors include equality and quantifiers; there is no implication or conditional constructor
 - `Formula.hasEquality`, `Formula.hasQuantifier`
 

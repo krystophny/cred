@@ -20,6 +20,10 @@ namespace Term
 
 variable {Func : Type u}
 
+def upRenaming (ρ : Nat → Nat) : Nat → Nat
+  | 0 => 0
+  | n + 1 => ρ n + 1
+
 mutual
 
 def rename (ρ : Nat → Nat) : Term Func → Term Func
@@ -44,6 +48,10 @@ def substList (σ : Nat → Term Func) : List (Term Func) → List (Term Func)
 
 end
 
+def liftSubst (σ : Nat → Term Func) : Nat → Term Func
+  | 0 => var 0
+  | n + 1 => rename Nat.succ (σ n)
+
 end Term
 
 inductive Formula (Func : Type u) (Pred : Type v) where
@@ -61,6 +69,28 @@ deriving Repr
 namespace Formula
 
 variable {Func : Type u} {Pred : Type v}
+
+def rename (ρ : Nat → Nat) : Formula Func Pred → Formula Func Pred
+  | top => top
+  | bot => bot
+  | atom p args => atom p (Term.renameList ρ args)
+  | equal lhs rhs => equal (Term.rename ρ lhs) (Term.rename ρ rhs)
+  | neg φ => neg (φ.rename ρ)
+  | conj φ ψ => conj (φ.rename ρ) (ψ.rename ρ)
+  | disj φ ψ => disj (φ.rename ρ) (ψ.rename ρ)
+  | forallE φ => forallE (φ.rename (Term.upRenaming ρ))
+  | existsE φ => existsE (φ.rename (Term.upRenaming ρ))
+
+def subst (σ : Nat → Term Func) : Formula Func Pred → Formula Func Pred
+  | top => top
+  | bot => bot
+  | atom p args => atom p (Term.substList σ args)
+  | equal lhs rhs => equal (Term.subst σ lhs) (Term.subst σ rhs)
+  | neg φ => neg (φ.subst σ)
+  | conj φ ψ => conj (φ.subst σ) (ψ.subst σ)
+  | disj φ ψ => disj (φ.subst σ) (ψ.subst σ)
+  | forallE φ => forallE (φ.subst (Term.liftSubst σ))
+  | existsE φ => existsE (φ.subst (Term.liftSubst σ))
 
 def hasEquality : Formula Func Pred → Bool
   | top => false
