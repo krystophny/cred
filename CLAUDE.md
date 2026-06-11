@@ -184,6 +184,8 @@ Foundation kernel (from Foundation/Kernel.lean):
 - `QuantifierProof.toDerivation`, `QuantifierProof.sound`
 - `Structure.FoundationProof`
 - `FoundationProof.weaken`, `FoundationProof.cut`
+- `FoundationProof.conjElimLeft`, `FoundationProof.conjElimRight`
+- `FoundationProof.disjIntroLeft`, `FoundationProof.disjIntroRight`
 - `FoundationProof.equalitySymm`, `FoundationProof.equalityTrans`
 - `FoundationProof.equalitySubst`
 - `FoundationProof.toDerivation`, `FoundationProof.sound`

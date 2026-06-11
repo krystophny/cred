@@ -142,6 +142,18 @@ inductive FoundationProof (t : Credence) :
       FoundationProof t Γ φ →
       FoundationProof t (φ :: Γ) ψ →
       FoundationProof t Γ ψ
+  | conjElimLeft {Γ : List (Formula Func Pred)} {φ ψ : Formula Func Pred} :
+      FoundationProof t Γ (.conj φ ψ) →
+      FoundationProof t Γ φ
+  | conjElimRight {Γ : List (Formula Func Pred)} {φ ψ : Formula Func Pred} :
+      FoundationProof t Γ (.conj φ ψ) →
+      FoundationProof t Γ ψ
+  | disjIntroLeft {Γ : List (Formula Func Pred)} {φ ψ : Formula Func Pred} :
+      FoundationProof t Γ φ →
+      FoundationProof t Γ (.disj φ ψ)
+  | disjIntroRight {Γ : List (Formula Func Pred)} {φ ψ : Formula Func Pred} :
+      FoundationProof t Γ ψ →
+      FoundationProof t Γ (.disj φ ψ)
   | equalityRefl {Γ : List (Formula Func Pred)} (τ : Term Func) :
       FoundationProof t Γ (.equal τ τ)
   | equalitySymm {Γ : List (Formula Func Pred)} {τ υ : Term Func} :
@@ -173,6 +185,10 @@ def toDerivation {t : Credence}
   | base p => FoundationDerivation.base p.toDerivation
   | weaken p hsub => FoundationDerivation.weaken p.toDerivation hsub
   | cut p q => FoundationDerivation.cut p.toDerivation q.toDerivation
+  | conjElimLeft p => FoundationDerivation.conjElimLeft p.toDerivation
+  | conjElimRight p => FoundationDerivation.conjElimRight p.toDerivation
+  | disjIntroLeft p => FoundationDerivation.disjIntroLeft p.toDerivation
+  | disjIntroRight p => FoundationDerivation.disjIntroRight p.toDerivation
   | equalityRefl τ => FoundationDerivation.equalityRefl τ
   | equalitySymm p => FoundationDerivation.equalitySymm p.toDerivation
   | equalityTrans p q =>

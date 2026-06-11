@@ -81,6 +81,8 @@ lake build
 | `Foundation.Structure.QuantifierProof.sound` | Soundness for quantifier proof certificates |
 | `Foundation.Structure.FoundationProof.sound` | Soundness for combined foundation proof certificates |
 | `Foundation.Structure.FoundationProof.weaken`, `cut` | Structural rules for combined foundation proof certificates |
+| `Foundation.Structure.FoundationProof.conjElimLeft`, `conjElimRight` | Conjunction elimination for combined foundation proof certificates |
+| `Foundation.Structure.FoundationProof.disjIntroLeft`, `disjIntroRight` | Disjunction introduction for combined foundation proof certificates |
 | `Foundation.Structure.FoundationProof.equalitySymm`, `equalityTrans` | Equality rules for combined foundation proof certificates |
 | `Foundation.Structure.FoundationProof.equalitySubst` | Equality substitution for combined foundation proof certificates |
 | `Foundation.Structure.equality_reflexivity_threshold` | Equality reflexivity under crisp-equality laws |
