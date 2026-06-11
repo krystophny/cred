@@ -41,6 +41,7 @@ lake build
 - `Cred/Foundation/Quantifier.lean` - semantic and proof-theoretic quantifier facts
 - `Cred/Foundation/Calculus.lean` - combined foundation consequence and derivation soundness
 - `Cred/Foundation/Examples.lean` - exercised foundation proof certificates
+- `Cred/Foundation/RuleCode.lean` - trusted rule-code inventory for external checkers
 
 ## Key Theorems
 
@@ -97,6 +98,8 @@ lake build
 | `Foundation.Structure.foundation_derivation_sound` | Soundness for the combined foundation derivation layer |
 | `Foundation.Structure.equalitySymmetryCertificate`, `equalitySubstitutionCertificate` | Example foundation equality certificates |
 | `Foundation.Structure.forallElimCertificate`, `existsIntroCertificate` | Example foundation quantifier certificates |
+| `Foundation.Structure.FoundationRuleCode` | Trusted rule names for the foundation certificate checker boundary |
+| `Foundation.Structure.mem_trustedFoundationRules` | Every trusted foundation rule code is listed |
 
 ## Dependencies
 

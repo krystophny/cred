@@ -30,3 +30,4 @@ import Cred.Foundation.Equality
 import Cred.Foundation.Quantifier
 import Cred.Foundation.Calculus
 import Cred.Foundation.Examples
+import Cred.Foundation.RuleCode
