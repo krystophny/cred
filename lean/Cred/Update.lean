@@ -9,7 +9,7 @@
   - Zero-evidence underdetermination
 -/
 
-import Cred.Basic
+import Cred.Cond.Admissible
 import Cred.Valuation
 
 namespace Cred

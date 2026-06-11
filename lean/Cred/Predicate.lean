@@ -11,7 +11,7 @@
   - Russell fixed point
 -/
 
-import Cred.Basic
+import Cred.Core.Value
 import Mathlib.Tactic
 import Mathlib.Order.ConditionallyCompleteLattice.Basic
 
