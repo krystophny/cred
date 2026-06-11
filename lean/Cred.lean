@@ -22,3 +22,4 @@ import Cred.Sequent
 import Cred.Kernel
 import Cred.Foundation.Language
 import Cred.Foundation.Semantics
+import Cred.Foundation.Laws

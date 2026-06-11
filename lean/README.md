@@ -33,6 +33,7 @@ lake build
 - `Cred/Kernel.lean` - type-level proof certificates and sound erasure
 - `Cred/Foundation/Language.lean` - first-order language for the foundation layer
 - `Cred/Foundation/Semantics.lean` - structures and credence-valued formula evaluation
+- `Cred/Foundation/Laws.lean` - crisp equality and quantifier law interfaces
 
 ## Key Theorems
 
@@ -56,6 +57,8 @@ lake build
 | `Foundation.Formula.hasEquality` | Structural marker for equality in foundation formulas |
 | `Foundation.Formula.hasQuantifier` | Structural marker for quantifiers in foundation formulas |
 | `Foundation.Structure.evalFormula` | Credence-valued semantics for foundation formulas |
+| `Foundation.Structure.CrispEquality` | Interface for crisp equality laws |
+| `Foundation.Structure.QuantifierLaws` | Interface for quantifier introduction and elimination bounds |
 
 ## Dependencies
 

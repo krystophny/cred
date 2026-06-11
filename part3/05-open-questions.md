@@ -83,6 +83,8 @@ For the current synthesis statement, see `paper.tex`.
     `lean/Cred/Foundation/Semantics.lean` interprets formulas into credences
     using explicit equality and quantifier operations. Crispness and
     extensionality remain separate laws.
+    `lean/Cred/Foundation/Laws.lean` now names the first law interfaces:
+    crisp equality and quantifier bounds.
 
 11. **Crisp subtheories.** Identify and formalize the crisp fragments (where all
     credences are `0/1`) and prove they recover the intended classical theorems.
