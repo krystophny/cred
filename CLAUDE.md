@@ -68,6 +68,7 @@ Keep the separation clear: `⊗`/`⊔` are the core algebraic operations (produc
 - `lean/Cred/Foundation/Calculus.lean`: combined foundation consequence with equality and quantifier laws.
 - `lean/Cred/Foundation/Examples.lean`: small foundation proof certificates and their soundness facts.
 - `lean/Cred/Foundation/RuleCode.lean`: trusted rule-code inventory for future external checking.
+- `lean/Cred/Foundation/Checker.lean`: one-step rule checker returning typed foundation certificates.
 - `part1/paper.tex`: congruence classification (6 sections + conclusion + 2 appendices, 12 pages).
 - `part2/paper.tex`: bridge paper (8 sections + 2 appendices, 24 pages; self-contained).
 - `part3/paper.tex`: foundations paper: paradox without explosion, crisp fragments, solution sets, and external conditioning.
@@ -230,6 +231,12 @@ Foundation rule codes (from Foundation/RuleCode.lean):
 - `Structure.FoundationRuleCode`
 - `FoundationRuleCode.name`
 - `trustedFoundationRules`, `mem_trustedFoundationRules`
+
+Foundation checker (from Foundation/Checker.lean):
+- `Structure.CheckedFoundationProof`
+- `Structure.FoundationRulePayload`
+- `FoundationRulePayload.code`
+- `applyFoundationRule`
 
 ## Philosophy
 

@@ -42,6 +42,7 @@ lake build
 - `Cred/Foundation/Calculus.lean` - combined foundation consequence and derivation soundness
 - `Cred/Foundation/Examples.lean` - exercised foundation proof certificates
 - `Cred/Foundation/RuleCode.lean` - trusted rule-code inventory for external checkers
+- `Cred/Foundation/Checker.lean` - one-step checked rule application
 
 ## Key Theorems
 
@@ -105,6 +106,7 @@ lake build
 | `Foundation.Structure.forallElimCertificate`, `existsIntroCertificate` | Example foundation quantifier certificates |
 | `Foundation.Structure.FoundationRuleCode` | Trusted rule names for the foundation certificate checker boundary |
 | `Foundation.Structure.mem_trustedFoundationRules` | Every trusted foundation rule code is listed |
+| `Foundation.Structure.applyFoundationRule` | One-step checker from rule payloads and checked children to typed certificates |
 
 ## Dependencies
 
