@@ -40,6 +40,7 @@ lake build
 - `Cred/Foundation/Equality.lean` - crisp-equality consequence and proof facts
 - `Cred/Foundation/Quantifier.lean` - semantic and proof-theoretic quantifier facts
 - `Cred/Foundation/Calculus.lean` - combined foundation consequence and derivation soundness
+- `Cred/Foundation/Examples.lean` - exercised foundation proof certificates
 
 ## Key Theorems
 
@@ -94,6 +95,8 @@ lake build
 | `Foundation.Structure.FoundationDerivation.equalitySymm`, `equalityTrans` | Equality proof rules for the combined foundation derivation layer |
 | `Foundation.Structure.FoundationDerivation.equalitySubst` | Equality substitution for the combined foundation derivation layer |
 | `Foundation.Structure.foundation_derivation_sound` | Soundness for the combined foundation derivation layer |
+| `Foundation.Structure.equalitySymmetryCertificate`, `equalitySubstitutionCertificate` | Example foundation equality certificates |
+| `Foundation.Structure.forallElimCertificate`, `existsIntroCertificate` | Example foundation quantifier certificates |
 
 ## Dependencies
 

@@ -96,6 +96,8 @@ For the current synthesis statement, see `paper.tex`.
     formula-level instantiation rules, and a sound quantifier derivation layer.
     `lean/Cred/Foundation/Calculus.lean` combines base threshold rules,
     equality reflexivity, and quantifier rules under one law context.
+    `lean/Cred/Foundation/Examples.lean` adds checked certificate examples
+    for equality and quantifier rules.
 
 11. **Crisp subtheories.** Identify and formalize the crisp fragments (where all
     credences are `0/1`) and prove they recover the intended classical theorems.
