@@ -114,6 +114,11 @@ inductive CrispDerivation (t : Credence) :
       CrispDerivation t Γ (.equal τ υ) →
       CrispDerivation t Γ (.equal υ χ) →
       CrispDerivation t Γ (.equal τ χ)
+  | equalitySubst {Γ : List (Formula Func Pred)} {τ υ : Term Func}
+      {φ : Formula Func Pred} :
+      CrispDerivation t Γ (.equal τ υ) →
+      CrispDerivation t Γ (Formula.instantiate τ φ) →
+      CrispDerivation t Γ (Formula.instantiate υ φ)
 
 theorem crisp_derivation_sound {t : Credence}
     {Γ : List (Formula Func Pred)} {φ : Formula Func Pred}
@@ -145,6 +150,19 @@ theorem crisp_derivation_sound {t : Credence}
             | inl hp =>
                 subst hp
                 exact ih2 M env hEq hΓ
+            | inr hp => cases hp)
+  | equalitySubst hEqProof hφProof ihEq ihφ =>
+      intro M env hEq hΓ
+      exact equality_substitution_threshold t _ _ _ M env hEq (fun p hp => by
+        cases List.mem_cons.mp hp with
+        | inl hp =>
+            subst hp
+            exact ihEq M env hEq hΓ
+        | inr hp =>
+            cases List.mem_cons.mp hp with
+            | inl hp =>
+                subst hp
+                exact ihφ M env hEq hΓ
             | inr hp => cases hp)
 
 end Structure

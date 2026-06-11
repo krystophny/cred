@@ -82,6 +82,7 @@ lake build
 | `Foundation.Structure.equality_symmetry_threshold`, `equality_transitivity_threshold` | Equality symmetry and transitivity under crisp-equality laws |
 | `Foundation.Structure.equality_substitution_threshold` | Equality substitution for instantiated formulas under crisp-equality laws |
 | `Foundation.Structure.CrispDerivation.equalitySymm`, `equalityTrans` | Crisp-equality proof rules for symmetry and transitivity |
+| `Foundation.Structure.CrispDerivation.equalitySubst` | Crisp-equality proof rule for substitution into instantiated formulas |
 | `Foundation.Structure.crisp_derivation_sound` | Soundness for the crisp-equality proof layer |
 | `Foundation.Structure.forall_elim_semantic`, `exists_intro_semantic` | Semantic quantifier bounds |
 | `Foundation.Structure.forall_elim_formula`, `exists_intro_formula` | Formula-level quantifier consequences |

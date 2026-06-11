@@ -191,6 +191,7 @@ Foundation equality (from Foundation/Equality.lean):
 - `equality_substitution_threshold`
 - `Structure.CrispDerivation`
 - `CrispDerivation.equalitySymm`, `CrispDerivation.equalityTrans`
+- `CrispDerivation.equalitySubst`
 - `crisp_derivation_sound`
 
 Foundation quantifiers (from Foundation/Quantifier.lean):
