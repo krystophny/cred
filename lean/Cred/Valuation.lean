@@ -9,7 +9,8 @@
   - Frechet bounds lifted to valuations
 -/
 
-import Cred.Basic
+import Cred.Cond.Admissible
+import Cred.Collapse.Hom
 
 namespace Cred
 

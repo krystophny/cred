@@ -1,36 +1,31 @@
 /-
-  Congruence Classification of Finite Quotients
+  Congruence Classification: UnitCongruence ([0,1]-multiplication)
 
-  Two congruence notions:
-  - UnitCongruence: compatibility with [0,1]-multiplication (physically meaningful)
-  - RealCongruence: compatibility with full R-multiplication (strictly stronger)
-
-  The Kleene lattice ({0}, (0,1), {1}) is the unique non-trivial finite quotient
-  under UnitCongruence. Under RealCongruence, no non-trivial finite quotient exists
-  at all (the scaling trick produces values outside [0,1]).
+  The Kleene lattice ({0}, (0,1), {1}) is the unique non-trivial finite
+  quotient under UnitCongruence: compatibility with [0,1]-bounded
+  multiplication (physically meaningful).
 
   PAPER CROSS-REFERENCES (part1/paper.tex):
   ------------------------------------------
-  thm:congruence-main  -> unit_classification, no_nontrivial_finite_quotient
+  thm:congruence-main  -> unit_classification
+                          (with RealCongruence.no_nontrivial_finite_quotient)
   (1) UnitCongruence.singleton_zero, UnitCongruence.singleton_one
-  (2) no_two_element_quotient (from Basic.lean: no_boolean_neg_retraction)
-  (3) unique_three_element_quotient (from Basic.lean: three_element_quotient_unique)
-  (4) RealCongruence.no_nontrivial_finite_quotient
+  (2) no_two_element_quotient (re-export of no_boolean_neg_retraction)
+  (3) unique_three_element_quotient (re-export of three_element_quotient_unique)
+  thm:quotient-unique  -> three_element_quotient_unique
 
-  Building blocks from Basic.lean:
-  - zero_equiv_forces_trivial: if 0 ~ eps > 0 then everything collapses (R-mult)
+  Building blocks from Cred.Core.Value and Cred.Collapse.Hom:
   - no_boolean_neg_retraction: no 2-element quotient preserving negation
-  - three_element_quotient_unique: any 3-element quotient is Kleene
   - neg_fixed_point_unique: 1/2 is the unique negation fixed point
 -/
 
-import Cred.Basic
+import Cred.Collapse.Hom
 
 namespace Cred
 
 open Credence
 
-/-! ## Part 1: UnitCongruence — [0,1]-multiplication -/
+/-! ## UnitCongruence: [0,1]-multiplication -/
 
 /-- A congruence on the credence algebra with [0,1]-bounded multiplication.
     conj_compat requires all four arguments to lie in [0,1], reflecting that
@@ -137,151 +132,7 @@ theorem singleton_one (R : UnitCongruence) (hnt : R.NonTrivial) :
 
 end UnitCongruence
 
-/-! ## Part 2: RealCongruence — full R-multiplication -/
-
-/-- A congruence on the credence algebra with unrestricted real multiplication.
-    conj_compat has no bound requirements, enabling the scaling trick that
-    rules out all non-trivial finite quotients. -/
-structure RealCongruence where
-  rel : ℝ → ℝ → Prop
-  refl : ∀ a, rel a a
-  symm : ∀ a b, rel a b → rel b a
-  trans : ∀ a b c, rel a b → rel b c → rel a c
-  neg_compat : ∀ a b, rel a b → rel (1 - a) (1 - b)
-  conj_compat : ∀ a b c d, rel a b → rel c d → rel (a * c) (b * d)
-
-namespace RealCongruence
-
-/-- A congruence is non-trivial if it does not identify all [0,1] elements. -/
-def NonTrivial (R : RealCongruence) : Prop :=
-  ∃ a b : ℝ, 0 ≤ a ∧ a ≤ 1 ∧ 0 ≤ b ∧ b ≤ 1 ∧ ¬R.rel a b
-
-/-- Every RealCongruence restricts to a UnitCongruence by ignoring the
-    bound hypotheses (they are unused in conj_compat). -/
-def toUnit (R : RealCongruence) : UnitCongruence where
-  rel := R.rel
-  refl := R.refl
-  symm := R.symm
-  trans := R.trans
-  neg_compat := R.neg_compat
-  conj_compat := fun a b c d _ _ _ _ _ _ _ _ hab hcd => R.conj_compat a b c d hab hcd
-
-theorem toUnit_nonTrivial (R : RealCongruence) (hnt : R.NonTrivial) :
-    R.toUnit.NonTrivial := hnt
-
-/-- {0} is a singleton for RealCongruence (via UnitCongruence). -/
-theorem singleton_zero (R : RealCongruence) (hnt : R.NonTrivial) :
-    ∀ x : ℝ, 0 ≤ x → x ≤ 1 → R.rel 0 x → x = 0 :=
-  UnitCongruence.singleton_zero R.toUnit (toUnit_nonTrivial R hnt)
-
-/-- {1} is a singleton for RealCongruence (via UnitCongruence). -/
-theorem singleton_one (R : RealCongruence) (hnt : R.NonTrivial) :
-    ∀ x : ℝ, 0 ≤ x → x ≤ 1 → R.rel 1 x → x = 1 :=
-  UnitCongruence.singleton_one R.toUnit (toUnit_nonTrivial R hnt)
-
-/-! ### Scaling trick helpers -/
-
-/-- Powers of related elements stay related: if a ~ b then a^n ~ b^n. -/
-theorem rel_pow (R : RealCongruence) {a b : ℝ} (hab : R.rel a b) :
-    ∀ n : ℕ, R.rel (a ^ n) (b ^ n) := by
-  intro n
-  induction n with
-  | zero => simp [pow_zero]; exact R.refl 1
-  | succ n ih => rw [pow_succ, pow_succ]; exact R.conj_compat _ _ _ _ ih hab
-
-/-- In a finite quotient, power iteration cycles: exists i < j with
-    classify(a^i) = classify(a^j). Pure pigeonhole on Fin nclasses. -/
-theorem finite_class_cycle (nclasses : ℕ)
-    (classify : ℝ → Fin nclasses)
-    (a : ℝ) :
-    ∃ i j : ℕ, i < j ∧ j ≤ nclasses ∧ classify (a ^ i) = classify (a ^ j) := by
-  by_contra h
-  push_neg at h
-  have hinj : ∀ i j, i ≤ nclasses → j ≤ nclasses → i ≠ j →
-      classify (a ^ i) ≠ classify (a ^ j) := by
-    intro i j hi hj hne heq
-    rcases lt_or_gt_of_ne hne with hlt | hgt
-    · exact (h i j hlt hj).elim heq
-    · exact (h j i hgt hi).elim heq.symm
-  let f : Fin (nclasses + 1) → Fin nclasses := fun i => classify (a ^ i.val)
-  have hf : Function.Injective f := by
-    intro ⟨i, hi⟩ ⟨j, hj⟩ heq
-    simp only [f, Fin.mk.injEq] at heq ⊢
-    by_contra hne
-    exact hinj i j (Nat.lt_succ_iff.mp hi) (Nat.lt_succ_iff.mp hj) hne heq
-  exact absurd (Fintype.card_le_of_injective f hf) (by simp [Fintype.card_fin])
-
-/-- All iterates along a period are in the same class as the base. -/
-theorem rel_along_period (R : RealCongruence) (a : ℝ) (i p : ℕ)
-    (hcycle : R.rel (a ^ i) (a ^ (i + p))) :
-    ∀ k : ℕ, R.rel (a ^ i) (a ^ (i + k * p)) := by
-  intro k
-  induction k with
-  | zero => simp; exact R.refl _
-  | succ k ih =>
-    have h_mul : R.rel (a ^ i * a ^ p) (a ^ (i + k * p) * a ^ p) :=
-      R.conj_compat _ _ _ _ ih (R.refl (a ^ p))
-    have heq1 : a ^ i * a ^ p = a ^ (i + p) := by rw [pow_add]
-    have heq2 : a ^ (i + k * p) * a ^ p = a ^ (i + (k + 1) * p) := by
-      rw [pow_add]; ring_nf
-    rw [heq1, heq2] at h_mul
-    exact R.trans _ _ _ hcycle h_mul
-
-/-- No non-trivial RealCongruence admits a finite quotient.
-
-    Scaling-trick proof: Pick a = 1/2. Pigeonhole gives i < j with
-    classify(a^i) = classify(a^j). The converse hypothesis hquot yields
-    R.rel (a^i) (a^j). Write a^j = a^i * a^p where p = j - i > 0.
-    Multiply both sides by (a^i)^{-1} using conj_compat (which operates
-    on all of R, not just [0,1]) to get R.rel 1 (a^p).
-    Apply neg_compat to get R.rel 0 (1 - a^p).
-    Since 0 < a^p < 1 we have 0 < 1 - a^p, so singleton_zero forces
-    1 - a^p = 0, i.e. a^p = 1 -- contradicting 0 < a < 1. -/
-theorem no_nontrivial_finite_quotient (R : RealCongruence) (hnt : R.NonTrivial)
-    (nclasses : ℕ)
-    (classify : ℝ → Fin nclasses)
-    (hquot : ∀ a b, 0 ≤ a → a ≤ 1 → 0 ≤ b → b ≤ 1 →
-      classify a = classify b → R.rel a b) :
-    False := by
-  set a : ℝ := 1 / 2
-  have ha_pos : (0 : ℝ) < a := by norm_num
-  have ha_lt : a < 1 := by norm_num
-  have ha_nn : (0 : ℝ) ≤ a := le_of_lt ha_pos
-  have ha_le : a ≤ 1 := le_of_lt ha_lt
-  obtain ⟨i, j, hij, _, hclass⟩ := finite_class_cycle nclasses classify a
-  have hp_pos : 0 < j - i := Nat.sub_pos_of_lt hij
-  set p := j - i
-  have hj_eq : j = i + p := (Nat.add_sub_cancel' (le_of_lt hij)).symm
-  rw [hj_eq] at hclass
-  have hai_pos : (0 : ℝ) < a ^ i := pow_pos ha_pos i
-  have hai_nn : (0 : ℝ) ≤ a ^ i := le_of_lt hai_pos
-  have hai_le : a ^ i ≤ 1 := pow_le_one₀ ha_nn ha_le
-  have haj_nn : (0 : ℝ) ≤ a ^ (i + p) := pow_nonneg ha_nn (i + p)
-  have haj_le : a ^ (i + p) ≤ 1 := pow_le_one₀ ha_nn ha_le
-  have hrel : R.rel (a ^ i) (a ^ (i + p)) :=
-    hquot _ _ hai_nn hai_le haj_nn haj_le hclass
-  have hrewrite : a ^ (i + p) = a ^ i * a ^ p := by rw [pow_add]
-  rw [hrewrite] at hrel
-  have hai_inv_pos : (0 : ℝ) < (a ^ i)⁻¹ := inv_pos.mpr hai_pos
-  have hscale_raw : R.rel ((a ^ i)⁻¹ * (a ^ i)) ((a ^ i)⁻¹ * (a ^ i * a ^ p)) :=
-    R.conj_compat _ _ _ _ (R.refl (a ^ i)⁻¹) hrel
-  have hleft : (a ^ i)⁻¹ * a ^ i = 1 := inv_mul_cancel₀ (ne_of_gt hai_pos)
-  have hright : (a ^ i)⁻¹ * (a ^ i * a ^ p) = a ^ p := by
-    rw [← mul_assoc, inv_mul_cancel₀ (ne_of_gt hai_pos), one_mul]
-  rw [hleft, hright] at hscale_raw
-  have hrel_neg : R.rel 0 (1 - a ^ p) := by
-    have h := R.neg_compat 1 (a ^ p) hscale_raw; rwa [sub_self] at h
-  have hap_pos : (0 : ℝ) < a ^ p := pow_pos ha_pos p
-  have hp_ne : p ≠ 0 := Nat.not_eq_zero_of_lt hp_pos
-  have hap_lt : a ^ p < 1 := pow_lt_one₀ ha_pos.le ha_lt hp_ne
-  have hap_comp_pos : (0 : ℝ) < 1 - a ^ p := by linarith
-  have hap_comp_le : 1 - a ^ p ≤ 1 := by linarith [hap_pos]
-  have := singleton_zero R hnt (1 - a ^ p) (le_of_lt hap_comp_pos) hap_comp_le hrel_neg
-  linarith
-
-end RealCongruence
-
-/-! ## Part 3: Kleene partition as a concrete UnitCongruence -/
+/-! ## Kleene partition as a concrete UnitCongruence -/
 
 /-- The Kleene equivalence relation: three classes {0}, {1}, and (0,1). -/
 def kleeneRel (a b : ℝ) : Prop :=
@@ -365,10 +216,60 @@ theorem kleene_nonTrivial : kleeneCongruence.NonTrivial := by
   · norm_num at ha
   · exact ha0 rfl
 
-/-! ## Part 4: Re-exports and classification theorems -/
+/-! ## Uniqueness of the three-element quotient -/
+
+/-- Any surjective homomorphism from ([0,1], neg, conj) to ThreeVal
+    preserving neg and conj must map 0 to zero, 1 to one, and 1/2 to half
+    (or the dual with 0 <-> 1 swapped).
+    This shows the Kleene lattice is the unique 3-element quotient. -/
+theorem three_element_quotient_unique
+    (φ : Credence → ThreeVal)
+    (hsurj : Function.Surjective φ)
+    (hneg : ∀ c, φ (Credence.neg c) = ThreeVal.neg (φ c))
+    (hconj : ∀ c₁ c₂, φ (c₁ ⊗ c₂) = ThreeVal.conj (φ c₁) (φ c₂)) :
+    φ 0 = ThreeVal.zero ∧ φ 1 = ThreeVal.one ∧ φ Credence.half = ThreeVal.half
+    ∨ φ 0 = ThreeVal.one ∧ φ 1 = ThreeVal.zero ∧ φ Credence.half = ThreeVal.half := by
+  have hfix := hneg Credence.half
+  rw [Credence.liar_fixed_point] at hfix
+  have hphalf : φ Credence.half = ThreeVal.half := by
+    cases h : φ Credence.half <;> simp_all [ThreeVal.neg]
+  have hneg01 := hneg 0
+  rw [Credence.neg_zero] at hneg01
+  -- hneg01 : φ 1 = (φ 0).neg
+  have hconj1 : ∀ c, φ c = ThreeVal.conj (φ 1) (φ c) := by
+    intro c; have h := hconj 1 c; rwa [Credence.one_conj] at h
+  have h_phi1 : ∀ v, φ 0 = v → φ 1 = ThreeVal.neg v := by
+    intro v hv; rw [hneg01, hv]
+  cases h0 : φ 0 with
+  | zero =>
+    left
+    refine ⟨rfl, ?_, hphalf⟩
+    have := h_phi1 ThreeVal.zero h0; rw [this]; rfl
+  | half =>
+    exfalso
+    have h1 := h_phi1 ThreeVal.half h0
+    simp only [ThreeVal.neg] at h1
+    obtain ⟨c, hc⟩ := hsurj ThreeVal.zero
+    have h_eq := hconj1 c
+    rw [h1] at h_eq
+    rw [hc] at h_eq
+    -- h_eq : ThreeVal.zero = ThreeVal.conj ThreeVal.half ThreeVal.zero
+    -- conj half zero = zero, so this says zero = zero. Need a different witness.
+    obtain ⟨c', hc'⟩ := hsurj ThreeVal.one
+    have h_eq' := hconj1 c'
+    rw [h1] at h_eq'
+    rw [hc'] at h_eq'
+    -- conj half one = half, so h_eq' : one = half. Contradiction.
+    simp [ThreeVal.conj] at h_eq'
+  | one =>
+    right
+    refine ⟨rfl, ?_, hphalf⟩
+    have := h_phi1 ThreeVal.one h0; rw [this]; rfl
+
+/-! ## Re-exports and classification theorems -/
 
 /-- No 2-element quotient preserving negation exists.
-    Re-export of no_boolean_neg_retraction from Basic.lean. -/
+    Re-export of no_boolean_neg_retraction from Cred.Collapse.Hom. -/
 theorem no_two_element_quotient :
     ¬(∃ φ : Credence → Credence,
       (∀ c, φ c = 0 ∨ φ c = 1) ∧
@@ -376,7 +277,7 @@ theorem no_two_element_quotient :
   no_boolean_neg_retraction
 
 /-- Any 3-element quotient preserving negation and conjunction is Kleene.
-    Re-export of three_element_quotient_unique from Basic.lean. -/
+    Re-export of three_element_quotient_unique above. -/
 theorem unique_three_element_quotient
     (φ : Credence → ThreeVal)
     (hsurj : Function.Surjective φ)

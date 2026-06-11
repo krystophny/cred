@@ -13,7 +13,7 @@
   - No-explosion theorem for all compatible consequence relations
 -/
 
-import Cred.Basic
+import Cred.Collapse.Hom
 import Cred.Valuation
 
 namespace Cred

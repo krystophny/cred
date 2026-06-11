@@ -14,7 +14,7 @@
   is the conditional credence cred(A|B) when the joint is the min copula.
 -/
 
-import Cred.Basic
+import Cred.Collapse.Hom
 import Cred.Consequence
 
 namespace Cred
