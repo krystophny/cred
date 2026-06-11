@@ -34,6 +34,7 @@ lake build
 - `Cred/Foundation/Language.lean` - first-order language for the foundation layer
 - `Cred/Foundation/Semantics.lean` - structures and credence-valued formula evaluation
 - `Cred/Foundation/Laws.lean` - crisp equality and quantifier law interfaces
+- `Cred/Foundation/Consequence.lean` - semantic consequence for foundation formulas
 
 ## Key Theorems
 
@@ -59,6 +60,7 @@ lake build
 | `Foundation.Structure.evalFormula` | Credence-valued semantics for foundation formulas |
 | `Foundation.Structure.CrispEquality` | Interface for crisp equality laws |
 | `Foundation.Structure.QuantifierLaws` | Interface for quantifier introduction and elimination bounds |
+| `Foundation.Structure.ThresholdConsequence` | Threshold consequence over all foundation structures |
 
 ## Dependencies
 

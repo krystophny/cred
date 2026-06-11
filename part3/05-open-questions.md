@@ -85,6 +85,8 @@ For the current synthesis statement, see `paper.tex`.
     extensionality remain separate laws.
     `lean/Cred/Foundation/Laws.lean` now names the first law interfaces:
     crisp equality and quantifier bounds.
+    `lean/Cred/Foundation/Consequence.lean` adds threshold and certainty
+    consequence for this first-order layer.
 
 11. **Crisp subtheories.** Identify and formalize the crisp fragments (where all
     credences are `0/1`) and prove they recover the intended classical theorems.

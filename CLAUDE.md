@@ -60,6 +60,7 @@ Keep the separation clear: `⊗`/`⊔` are the core algebraic operations (produc
 - `lean/Cred/Foundation/Language.lean`: first-order terms, equality, predicates, quantifiers, and no internal conditional.
 - `lean/Cred/Foundation/Semantics.lean`: structures, assignments, term evaluation, formula evaluation into credences.
 - `lean/Cred/Foundation/Laws.lean`: crisp equality and quantifier law interfaces.
+- `lean/Cred/Foundation/Consequence.lean`: threshold and certainty consequence for foundation formulas.
 - `part1/paper.tex`: congruence classification (6 sections + conclusion + 2 appendices, 12 pages).
 - `part2/paper.tex`: bridge paper (8 sections + 2 appendices, 24 pages; self-contained).
 - `part3/paper.tex`: foundations paper: paradox without explosion, crisp fragments, solution sets, and external conditioning.
@@ -149,6 +150,11 @@ Foundation laws (from Foundation/Laws.lean):
 - `Structure.CrispEquality`, `Structure.QuantifierLaws`
 - `equality_no_false_positive`, `equality_reflexive_one`
 - `forall_instantiates`, `exists_introduces`
+
+Foundation consequence (from Foundation/Consequence.lean):
+- `Structure.ThresholdConsequence`, `Structure.CertaintyConsequence`
+- `threshold_reflexivity`, `threshold_monotonicity`, `threshold_cut`
+- `certainty_reflexivity`
 
 ## Philosophy
 
