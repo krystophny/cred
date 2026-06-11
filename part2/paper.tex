@@ -139,6 +139,9 @@ rather than vacuously true).
 Chain-rule conditioning achieves a similar effect without adding
 a connexive axiom~\cite{egre2021}: it simply leaves
 $\cred(A \mid 0)$ unconstrained.
+The defining equation is elementary; the claims of this paper are
+the bridges built on it, the no-go theorems, and the
+machine-checked formalization.
 
 The resulting structure sits at a crossroads.
 On one side, it connects to Bayesian probability: at positive
@@ -1644,6 +1647,18 @@ see Section~\ref{sec:conditioning})
 was extended by
 Krauss~\cite{krauss1968}, Dubins~\cite{dubins1975},
 and \'Egr\'e--Rossi--Sprenger~\cite{egre2021}.
+Measure-theoretic probability meets the same boundary: a regular
+conditional probability is fixed only up to a null set, where it
+may take arbitrary values~\cite{kallenberg2021}; the unconstrained
+zero-evidence row of Table~\ref{tab:three-conditionals}
+(Lean: \texttt{cond\_zero\_zero\_univ}) is the pointwise form of
+that arbitrariness.
+de Finetti's trivalent conditional takes the value of the
+consequent when the antecedent is true and the third value
+otherwise~\cite{definetti1936,egre2021}; instantiating
+Theorem~\ref{thm:no-cond-bridge} at this table shows that it
+fails the conditional bridge
+(Lean: \texttt{df\_cond\_fails\_bridge}).
 Adams~\cite{adams1975} developed a probabilistic logic of
 conditionals; van Fraassen~\cite{vanfraassen1976,vanfraassen1983}
 studied the interplay of probability and conditionals.
