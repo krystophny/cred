@@ -48,6 +48,7 @@ Keep the separation clear: `⊗`/`⊔` are the core algebraic operations (produc
 - `lean/Cred/Bridge/LPK3.lean`: collapse-eval commutativity, LP/K3 bridge theorems (207 lines).
 - `lean/Cred/Bridge/CondBridge.lean`: conditional bridge: impossibility, boundary, update bridge, zero-evidence triple (389 lines).
 - `lean/Cred/Bridge/Crisp.lean`: Boolean embedding, crisp consequence coincidence, conditioning divergence.
+- `lean/Cred/Bridge/Curry.lean`: product residuation, contraction failure, Curry block.
 - `lean/Cred/Valuation.lean`: valuations (CpValuation, IndepValuation, JointValuation) (176 lines).
 - `lean/Cred/Update.lean`: Bayesian and Jeffrey conditionalization (138 lines).
 - `lean/Cred/Predicate.lean`: graded predicates, quantifiers, Russell fixed point (210 lines).
@@ -92,6 +93,11 @@ Crisp bridge (from Bridge/Crisp.lean):
 - `crisp_eval_eq`, `crisp_embedding` (classical evaluation embeds into Cred)
 - `crisp_certainty_iff_classical`, `crisp_positivity_iff_classical`
 - `material_divergence`, `cond_underdetermined_iff` (exact divergence from material implication)
+
+Curry bridge (from Bridge/Curry.lean):
+- `residuation_unique`, `prodResid_unique_positive` (MP + CP pin the product residuum)
+- `prod_resid_no_contraction`, `curry_block` (contraction is incompatible)
+- `curry_fixed_point_positive`, `curry_no_fixed_point_zero` (Curry equations at the boundary)
 
 Predicates (from Predicate.lean):
 - `quantifier_duality_val`, `russell_fixed_point`, `crisp_inf_zero_iff`

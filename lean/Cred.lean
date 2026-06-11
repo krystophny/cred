@@ -12,6 +12,7 @@ import Cred.Bridge.LPK3
 import Cred.Bridge.CondBridge
 import Cred.Bridge.Compare
 import Cred.Bridge.Crisp
+import Cred.Bridge.Curry
 import Cred.Valuation
 import Cred.Update
 import Cred.Predicate
