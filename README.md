@@ -18,6 +18,7 @@ Axis B   value semantics    [0,1], Kleene quotient; later intervals, credal sets
 Axis A1  consequence        positivity, certainty, threshold-t
 Axis A2  conditioning       admissible sets Cond(j,e)
 Foundations                 fixed points, graded comprehension, crisp fragment
+Object language             terms, equality, predicates, quantifiers
 Proof layer                 labelled sequents, external conditioning judgment
 Kernel                      proof certificates, erasure, soundness
 ```
@@ -27,6 +28,8 @@ No layer contains an internal object-language conditional. Conditionals enter on
 In the foundations layer, self-reference lands on solution sets instead of contradictions: the liar equation `L ≡ ¬L` stabilizes at `cred(L) = 0.5`. Fixed points, Russell's scalar theorem, crisp recovery, Curry blocking, threshold consequence, and the labelled sequent calculus are formalized.
 
 The current self-hosting route starts with `Kernel.Proof`: a type-level certificate for labelled derivations. A certificate erases to `Derivation`, inherits `derivation_sound`, and already has a NoExFalso emptiness theorem.
+
+The foundation route starts with `Foundation.Formula`: a first-order language with equality, predicates, and quantifiers. It has no implication or conditional constructor.
 
 ## Primitives
 
@@ -65,6 +68,7 @@ Foundations and proof layer (Part 3 paper):
 - `threshold_explosion_countermodel_iff`: sharp no-explosion threshold
 - `derivation_sound`, `labelled_no_ex_falso`: labelled external-conditioning calculus is sound and non-explosive
 - `Kernel.Proof.sound`, `Kernel.no_ex_falso_certificate`: proof certificates erase to sound labelled derivations
+- `Foundation.Formula`: first-order equality and quantifiers without an internal conditional
 
 ## Collapse
 

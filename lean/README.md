@@ -31,6 +31,7 @@ lake build
 - `Cred/Threshold.lean` - threshold consequence and sharp bounds
 - `Cred/Sequent.lean` - labelled external-conditioning calculus and soundness
 - `Cred/Kernel.lean` - type-level proof certificates and sound erasure
+- `Cred/Foundation/Language.lean` - first-order language for the foundation layer
 
 ## Key Theorems
 
@@ -49,6 +50,8 @@ lake build
 | `labelled_no_ex_falso` | A and ~A do not derive an unrelated positive conclusion |
 | `Kernel.Proof.sound` | Proof certificates inherit labelled soundness |
 | `Kernel.no_ex_falso_certificate` | No certificate derives an unrelated positive conclusion from A and ~A |
+| `Foundation.Formula.hasEquality` | Structural marker for equality in foundation formulas |
+| `Foundation.Formula.hasQuantifier` | Structural marker for quantifiers in foundation formulas |
 
 ## Dependencies
 
