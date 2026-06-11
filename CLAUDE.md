@@ -47,6 +47,7 @@ Keep the separation clear: `⊗`/`⊔` are the core algebraic operations (produc
 - `lean/Cred/Congruence/Real.lean`: RealCongruence, scaling trick, no non-trivial finite quotient (229 lines).
 - `lean/Cred/Bridge/LPK3.lean`: collapse-eval commutativity, LP/K3 bridge theorems (207 lines).
 - `lean/Cred/Bridge/CondBridge.lean`: conditional bridge: impossibility, boundary, update bridge, zero-evidence triple (389 lines).
+- `lean/Cred/Bridge/Crisp.lean`: Boolean embedding, crisp consequence coincidence, conditioning divergence.
 - `lean/Cred/Valuation.lean`: valuations (CpValuation, IndepValuation, JointValuation) (176 lines).
 - `lean/Cred/Update.lean`: Bayesian and Jeffrey conditionalization (138 lines).
 - `lean/Cred/Predicate.lean`: graded predicates, quantifiers, Russell fixed point (210 lines).
@@ -86,6 +87,11 @@ Conditional bridge (from Bridge/CondBridge.lean):
 - `cond_bridge_fails_interior` (bridge fails for interior pairs)
 - `update_bridge` (Bayesian update inherits the bridge)
 - `zero_evidence_duality` (zero-evidence triple)
+
+Crisp bridge (from Bridge/Crisp.lean):
+- `crisp_eval_eq`, `crisp_embedding` (classical evaluation embeds into Cred)
+- `crisp_certainty_iff_classical`, `crisp_positivity_iff_classical`
+- `material_divergence`, `cond_underdetermined_iff` (exact divergence from material implication)
 
 Predicates (from Predicate.lean):
 - `quantifier_duality_val`, `russell_fixed_point`, `crisp_inf_zero_iff`

@@ -11,6 +11,7 @@ import Cred.Congruence.Real
 import Cred.Bridge.LPK3
 import Cred.Bridge.CondBridge
 import Cred.Bridge.Compare
+import Cred.Bridge.Crisp
 import Cred.Valuation
 import Cred.Update
 import Cred.Predicate
