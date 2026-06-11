@@ -91,6 +91,8 @@ For the current synthesis statement, see `paper.tex`.
     equality and quantifier rules remain next steps.
     `lean/Cred/Foundation/Kernel.lean` adds type-level certificates for those
     derivations.
+    `lean/Cred/Foundation/Equality.lean` adds equality reflexivity under
+    explicit crisp-equality laws.
 
 11. **Crisp subtheories.** Identify and formalize the crisp fragments (where all
     credences are `0/1`) and prove they recover the intended classical theorems.

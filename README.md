@@ -35,6 +35,7 @@ The foundation route starts with `Foundation.Formula`: a first-order language wi
 `Foundation.Consequence` defines threshold and certainty consequence for the first-order layer.
 `Foundation.Proof` gives the first sound threshold calculus over that language.
 `Foundation.Kernel` turns that calculus into type-level certificates with sound erasure.
+`Foundation.Equality` adds the first crisp-equality consequence rule without making equality primitive-global.
 
 ## Primitives
 
@@ -79,6 +80,7 @@ Foundations and proof layer (Part 3 paper):
 - `Foundation.Structure.ThresholdConsequence`: semantic consequence for foundation formulas
 - `Foundation.Structure.derivation_sound`: soundness for the first foundation proof calculus
 - `Foundation.Structure.Proof.sound`: proof certificates for the first-order layer are sound
+- `Foundation.Structure.equality_reflexivity_threshold`: equality reflexivity under explicit crisp-equality laws
 
 ## Collapse
 
