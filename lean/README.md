@@ -39,6 +39,7 @@ lake build
 - `Cred/Foundation/Kernel.lean` - type-level certificates for foundation and quantifier proofs
 - `Cred/Foundation/Equality.lean` - crisp-equality consequence and proof facts
 - `Cred/Foundation/Quantifier.lean` - semantic and proof-theoretic quantifier facts
+- `Cred/Foundation/Calculus.lean` - combined foundation consequence and derivation soundness
 
 ## Key Theorems
 
@@ -78,6 +79,8 @@ lake build
 | `Foundation.Structure.forall_elim_semantic`, `exists_intro_semantic` | Semantic quantifier bounds |
 | `Foundation.Structure.forall_elim_formula`, `exists_intro_formula` | Formula-level quantifier consequences |
 | `Foundation.Structure.quantifier_derivation_sound` | Soundness for the quantifier proof layer |
+| `Foundation.Structure.FoundationThresholdConsequence` | Consequence under crisp equality and quantifier laws |
+| `Foundation.Structure.foundation_derivation_sound` | Soundness for the combined foundation derivation layer |
 
 ## Dependencies
 

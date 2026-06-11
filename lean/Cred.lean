@@ -28,3 +28,4 @@ import Cred.Foundation.Proof
 import Cred.Foundation.Kernel
 import Cred.Foundation.Equality
 import Cred.Foundation.Quantifier
+import Cred.Foundation.Calculus
