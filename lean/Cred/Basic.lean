@@ -242,10 +242,37 @@ structure Conditioning (joint evidence : Credence) where
 theorem conditioning_zero_trivial (c : Credence) :
     c ⊗ (0 : Credence) = 0 := by simp
 
+/-! ### Admissible-Set Conditioning
+
+`Cond j e` names the solution set of the chain rule: all conditional
+credences c with c ⊗ e = j. The non-explosion mechanism is the shape of
+this set. Positive evidence yields a singleton (cond_singleton_of_pos),
+zero evidence with zero joint yields all of [0,1] (cond_zero_zero_univ),
+and incoherent pairs (j > e, or e = 0 with j ≠ 0) admit no conditional
+at all (cond_nonempty_iff). Read as imprecise probability, Cond j e is
+a credal set of posteriors. -/
+
+/-- The admissible set of conditional credences: solutions c of c ⊗ e = j -/
+def Cond (j e : Credence) : Set Credence := {c | c ⊗ e = j}
+
+/-- Membership in the admissible set = carrying a Conditioning witness -/
+theorem mem_cond_iff (c j e : Credence) :
+    c ∈ Cond j e ↔ ∃ cond : Conditioning j e, cond.condCred = c := by
+  constructor
+  · intro h
+    exact ⟨⟨c, h⟩, rfl⟩
+  · rintro ⟨cond, rfl⟩
+    exact cond.chainRule
+
+/-- Zero evidence with zero joint admits every credence -/
+theorem cond_zero_zero_univ : Cond 0 0 = Set.univ :=
+  Set.eq_univ_of_forall conditioning_zero_trivial
+
 /-- When evidence = 0, conditioning requires joint = 0, but condCred is unconstrained -/
 theorem conditioning_zero_any (c : Credence) :
     ∃ cond : Conditioning 0 0, cond.condCred = c := by
-  use ⟨c, by simp⟩
+  rw [← mem_cond_iff, cond_zero_zero_univ]
+  exact Set.mem_univ c
 
 /-- When evidence = 0, the chain rule forces joint = 0 -/
 theorem conditioning_zero_forces_joint_zero (joint : Credence)
@@ -280,19 +307,53 @@ theorem conditioning_implies_joint_le_evidence (joint evidence : Credence)
         apply mul_le_mul_of_nonneg_right cond.condCred.le_one evidence.nonneg
     _ = evidence.val := one_mul _
 
+/-- Positive evidence pins the admissible set to a singleton: the unique
+    conditional credence j/e from conditioning_mk -/
+theorem cond_singleton_of_pos (j e : Credence) (he : 0 < e.val)
+    (hle : j.val ≤ e.val) :
+    Cond j e = {(conditioning_mk j e he hle).condCred} := by
+  ext c
+  simp only [Set.mem_singleton_iff]
+  constructor
+  · intro h
+    have hc : c.val * e.val = j.val := congrArg val h
+    ext
+    show c.val = j.val / e.val
+    rw [eq_div_iff (ne_of_gt he)]
+    exact hc
+  · intro h
+    rw [h]
+    exact (conditioning_mk j e he hle).chainRule
+
+/-- The admissible set is nonempty exactly when joint ≤ evidence;
+    incoherent pairs (j > e, in particular e = 0 with j ≠ 0) admit no
+    conditional at all -/
+theorem cond_nonempty_iff (j e : Credence) :
+    (Cond j e).Nonempty ↔ j.val ≤ e.val := by
+  constructor
+  · rintro ⟨c, hc⟩
+    exact conditioning_implies_joint_le_evidence j e ⟨c, hc⟩
+  · intro hle
+    rcases lt_or_eq_of_le e.nonneg with he | he
+    · exact ⟨(conditioning_mk j e he hle).condCred,
+        (conditioning_mk j e he hle).chainRule⟩
+    · have hj : j.val = 0 := le_antisymm (by rw [← he] at hle; exact hle) j.nonneg
+      refine ⟨0, ?_⟩
+      show (0 : Credence) ⊗ e = j
+      ext
+      simp only [conj_val, zero_val, zero_mul]
+      exact hj.symm
+
 /-- Uniqueness of conditioning when evidence > 0 -/
 theorem conditioning_unique (joint evidence : Credence) (h_pos : 0 < evidence.val)
     (c₁ c₂ : Conditioning joint evidence) : c₁.condCred = c₂.condCred := by
-  ext
-  have h1 := congrArg (·.val) c₁.chainRule
-  have h2 := congrArg (·.val) c₂.chainRule
-  simp only [conj_val] at h1 h2
-  have heq : c₁.condCred.val * evidence.val = c₂.condCred.val * evidence.val := by
-    rw [h1, h2]
-  have hne : evidence.val ≠ 0 := ne_of_gt h_pos
-  calc c₁.condCred.val = c₁.condCred.val * evidence.val / evidence.val := by field_simp
-    _ = c₂.condCred.val * evidence.val / evidence.val := by rw [heq]
-    _ = c₂.condCred.val := by field_simp
+  have hle : joint.val ≤ evidence.val :=
+    conditioning_implies_joint_le_evidence joint evidence c₁
+  have h₁ : c₁.condCred ∈ Cond joint evidence := c₁.chainRule
+  have h₂ : c₂.condCred ∈ Cond joint evidence := c₂.chainRule
+  rw [cond_singleton_of_pos joint evidence h_pos hle,
+    Set.mem_singleton_iff] at h₁ h₂
+  rw [h₁, h₂]
 
 /-! ## Fréchet-Hoeffding Bounds
 
