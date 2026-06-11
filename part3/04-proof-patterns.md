@@ -2,7 +2,7 @@
 
 ## What changes from classical proof
 
-Cred is not a logic (Part 1), so "proof in Cred" requires specifying additional structure (Part 2: valuation, consequence relation, update rule). This file catalogs proof patterns that are available once that structure is in place, focusing on what differs from classical reasoning.
+Cred is not a logic by itself. Proof in Cred requires additional structure: valuation, consequence relation, update rule, and, for external conditioning, labelled side judgments. This file catalogs proof patterns that are available once that structure is in place.
 
 ## Patterns that survive from classical logic
 
@@ -16,7 +16,7 @@ Start from axioms with credence 1, apply rules that preserve credence 1, reach t
 
 ### Proof by cases
 
-If P(0) and P(1) and P(c) for all c in (0,1), then P holds for all credences. This is just case analysis on the three regions of [0,1] — the same structure used in Part 1's collapse homomorphism proofs.
+If P(0) and P(1) and P(c) for all c in (0,1), then P holds for all credences. This is case analysis on the three regions of [0,1], the same structure used in Part 1's collapse homomorphism proofs.
 
 ## Patterns that fail
 
@@ -25,7 +25,8 @@ If P(0) and P(1) and P(c) for all c in (0,1), then P holds for all credences. Th
 From A and ~A, derive anything. This fails in Cred because:
 - A and ~A can both have credence 1/2 (the negation fixed point)
 - Conditioning on evidence with credence 0 is unconstrained, not forced to 1
-- No consequence relation built on Cred should have explosion (Part 2)
+- Threshold consequence has explicit explosion countermodels up to threshold 1/2
+- The labelled calculus proves `labelled_no_ex_falso`
 
 ### Law of excluded middle (algebraic form)
 
@@ -46,7 +47,7 @@ cred(A ∧ B) = cred(A|B) * cred(B)
 cred(A ∧ B ∧ C) = cred(A|B ∧ C) * cred(B|C) * cred(C)
 ```
 
-This computes **joints** from conditionals and marginals. Turning joints into marginals (getting cred(A) from cred(A ∧ B)) requires additional structure — a Cred analogue of marginalization / total probability, which is not part of Part 1.
+This computes **joints** from conditionals and marginals. Turning joints into marginals (getting cred(A) from cred(A ∧ B)) requires additional structure: a Cred analogue of marginalization or total probability, which is not part of Part 1.
 
 ### Frechet bounding
 
@@ -62,7 +63,7 @@ This gives credence bounds on joints from marginals alone, without requiring a f
 
 Show that credence converges to 1 under a specified sequence of updates (see `01-asymptotic-proofs.md`). This pattern produces certainty in the limit rather than in finite steps.
 
-### Robust proof
+### Perturbation proof
 
 Show a conclusion holds even under perturbation of premises:
 
@@ -72,16 +73,18 @@ If all cred(premise_i) >= 1 - e, then cred(conclusion) >= 1 - delta(e)
 
 This is related to Adams' probability logic bounds (Part 2, consequence relations). It gives "noise-tolerant" derivations.
 
-## What a Cred proof theory needs to specify
+## What the labelled proof layer specifies
 
-A genuine proof theory for Cred requires (beyond Part 1):
+The Lean module `Cred.Sequent` supplies the first proof layer:
 
-1. **Syntax**: a formal language with credence-annotated formulas
-2. **Rules**: inference rules that track credence (from Part 2's consequence relation)
-3. **Soundness**: rules must respect the algebra (chain rule, complement, product)
-4. **Completeness**: every algebraically valid consequence should be derivable
+1. **Syntax**: formulas have no implication constructor
+2. **Labels**: positive, certain, and threshold judgments
+3. **Side judgments**: conditioning appears only as `c ∈ Cond(j,e)`
+4. **Rules**: structural rules, imports from the verified consequence relations, and a chain-rule cut
+5. **Soundness**: derivations respect the label semantics
+6. **NoExFalso**: `A` and `~A` do not derive an unrelated positive conclusion
 
-This is open work. The patterns above are available once such a system is specified, but the system itself is not yet defined.
+Completeness and cut elimination remain open.
 
 ## Comparison to classical
 
@@ -91,4 +94,4 @@ This is open work. The patterns above are available once such a system is specif
 | Law of excluded middle (A or not-A is true) | Fails algebraically: c ⊔ ~c < 1 for c in (0,1) |
 | Double negation elimination | Works: ~~c = c |
 | Proof by contradiction | Requires care: deriving ~A from "assume A leads to contradiction" needs a consequence relation |
-| Modus ponens | Available when implication is the product residuated arrow (Part 1, Bayes consistency section) |
+| Modus ponens | Available only after adding a residuated arrow; Cred conditioning itself stays external |

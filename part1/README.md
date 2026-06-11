@@ -17,9 +17,9 @@ _|_                     conditioning (chain rule)
 
 ## Why These Primitives?
 
-- **Product (⊗)**: Credences compound — uncertainty multiplies
+- **Product (⊗)**: Credences compound; uncertainty multiplies
 - **Complement (~)**: ~c = 1 - c, natural negation
-- **Conditioning (_|_)**: Via chain rule, NOT division — avoids ex falso
+- **Conditioning (_|_)**: via chain rule, not division; avoids ex falso
 
 ## The Chain Rule
 
@@ -31,7 +31,7 @@ When B = 0: (A | 0) is unconstrained. No ex falso.
 
 ## Files
 
-- `paper.tex` — publication paper (authoritative exposition for Part 1)
+- `paper.tex`: publication paper (authoritative exposition for Part 1)
 
 ## The Collapse Tower (Limiting Cases)
 
@@ -76,7 +76,7 @@ When B = 0: (A | 0) is unconstrained. No ex falso.
 | {0, 1} | Relevant logic (R, E) | No ex falso |
 | {0, 1} + ex falso | Classical FOL | Standard foundation |
 
-## Why This Matters
+## Two Generalizations
 
 - **Cred generalizes relevant logic** (not classical, not fuzzy)
 - **Fuzzy logic generalizes classical** (has ex falso)

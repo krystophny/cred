@@ -25,6 +25,7 @@
 }
 \usepackage{cleveref}
 \usepackage[margin=1in]{geometry}
+\emergencystretch=3em
 \usepackage{tikz}
 \usetikzlibrary{arrows.meta,positioning,shapes}
 \usepackage{graphicx}
@@ -84,8 +85,8 @@ We characterize the boundary conditions under which the bridge
 does hold, show that Bayesian update inherits it, and prove
 a zero-evidence triple tying underdetermination, paraconsistency,
 and bridge failure to the annihilator identity $c \cdot 0 = 0$.
-All results are machine-checked in Lean~4 with Mathlib
-(3581 lines, zero \texttt{sorry}).
+All results are machine-checked in Lean~4 with Mathlib and zero
+\texttt{sorry}.
 \end{abstract}
 
 %=============================================================================
@@ -1880,39 +1881,39 @@ the Lean formalization and the manuscript preparation.
 \label{app:lean}
 %=============================================================================
 
-The results are formalized across thirteen Lean~4 modules (with
-Mathlib), totaling 3758 lines with zero \texttt{sorry}:
+The results are formalized in Lean~4 with Mathlib and zero
+\texttt{sorry}:
 
 \begin{itemize}[nosep]
 \item \texttt{Cred/Core/Value.lean}: credence values, negation,
-  product conjunction, disjunction, fixed points, spread (426 lines).
+  product conjunction, disjunction, fixed points, spread.
 \item \texttt{Cred/Core/Consequence.lean}: K$_3$/LP designation,
   graded consequence, formula evaluation, structural rules,
-  no-explosion (316 lines).
+  no-explosion.
 \item \texttt{Cred/Cond/Admissible.lean}: chain-rule conditioning,
   admissible sets, Fr\'echet bounds, conditioning tables,
-  path dependence (427 lines).
+  path dependence.
 \item \texttt{Cred/Cond/Copula.lean}: Bayes consistency on $[0,1]$,
-  min-copula uniqueness, world partitioning (403 lines).
+  min-copula uniqueness, world partitioning.
 \item \texttt{Cred/Collapse/ThreeVal.lean}: three-valued credences,
-  RM3/G\"odel/product-residuated implications (227 lines).
+  RM3/G\"odel/product-residuated implications.
 \item \texttt{Cred/Collapse/Hom.lean}: collapse homomorphism,
-  impossibility results, Boolean subalgebra (313 lines).
+  impossibility results, Boolean subalgebra.
 \item \texttt{Cred/Congruence/Unit.lean}: \texttt{UnitCongruence}
-  classification, Kleene witness (297 lines).
+  classification, Kleene witness.
 \item \texttt{Cred/Congruence/Real.lean}: \texttt{RealCongruence},
-  no non-trivial finite quotient (229 lines).
+  no non-trivial finite quotient.
 \item \texttt{Cred/Bridge/LPK3.lean}: collapse-evaluation
-  commutativity, LP/K$_3$ bridge theorems (207 lines).
+  commutativity, LP/K$_3$ bridge theorems.
 \item \texttt{Cred/Bridge/CondBridge.lean}: conditional bridge
   impossibility, boundary characterization, qualitative update,
-  update bridge, zero-evidence triple (389 lines).
+  update bridge, zero-evidence triple.
 \item \texttt{Cred/Valuation.lean}: valuations, collapse composition,
-  Fr\'echet bounds (176 lines).$^\dagger$
+  Fr\'echet bounds.$^\dagger$
 \item \texttt{Cred/Update.lean}: Bayesian/Jeffrey update, chain-rule
-  preservation (138 lines).
+  preservation.
 \item \texttt{Cred/Predicate.lean}: graded predicates,
-  quantifiers, Russell fixed point (210 lines).$^\dagger$
+  quantifiers, Russell fixed point.$^\dagger$
 \end{itemize}
 \smallskip
 \noindent
@@ -2213,7 +2214,12 @@ The De Morgan reduct sits between: at least one non-trivial finite
 congruence exists (Kleene), but whether it is the only one remains
 unknown.
 
-The Lean formalization is in \texttt{Cred/Congruence.lean}.
+The Lean formalization is split across:
+\begin{center}
+\small
+\texttt{Cred/Congruence/Unit.lean}\\
+\texttt{Cred/Congruence/Real.lean}
+\end{center}
 
 \begin{proof}[Proof of Theorem~\ref{thm:congruence}
 (Unit Congruence Classification)]

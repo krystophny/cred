@@ -1,11 +1,11 @@
-# Open Questions (Part 3 Roadmap)
+# Open Questions
 
 Part 3 is where we stop re-stating Parts 1--2 and instead decide what *extra*
 structure to add, what theorems to target, and how to position Cred relative to
 existing traditions (mathematical fuzzy logic, coherence/conditional events,
 imprecise probability, and fixed-point semantics for truth).
 
-For a literature map and synthesis statement, see `paper-sketch.tex`.
+For the current synthesis statement, see `paper.tex`.
 
 ## Baselines (things to not reinvent)
 
@@ -31,18 +31,18 @@ For a literature map and synthesis statement, see `paper-sketch.tex`.
 
 ## Proof theory (graded consequence vs graded provability)
 
-1. **Pick a proof target.** Are we aiming for (a) a threshold semantics on
-   `[0,1]` (Part 2 style), (b) a designated-values system after collapse (K3/LP),
-   or (c) Pavelka-style graded provability? These lead to different calculi and
-   different completeness statements.
+1. **Proof target.** The implemented calculus in `lean/Cred/Sequent.lean`
+   tracks positive, certain, and threshold labels. Conditioning remains an
+   external side judgment. Pavelka-style graded provability is still a separate
+   target, with a different completeness statement.
 
-2. **Soundness/completeness.** For whichever target is chosen, can we state a
-   soundness theorem against the Part 2 semantics, and a completeness theorem
-   that does not silently smuggle in ex falso via the `0 -> b = 1` convention?
+2. **Completeness.** Soundness is formalized for labelled derivations. A
+   completeness theorem remains open. It must not smuggle in ex falso through
+   the `0 -> b = 1` convention.
 
-3. **Cut elimination / admissibility.** If a sequent or hypersequent calculus is
-   used, do we get a clean normalization property (cut elimination), and what
-   meta-theorems survive in the graded setting?
+3. **Cut elimination / admissibility.** The calculus has a sound cut rule. A
+   normalization theorem remains open, including the exact meta-theorems that
+   survive in the graded setting.
 
 ## Zero evidence and dynamics
 
@@ -83,11 +83,10 @@ For a literature map and synthesis statement, see `paper-sketch.tex`.
 
 ## Connections and implementation
 
-12. **Relationship to relevant logic.** With `min` as the joint, the induced
-    arrow matches product residuation for positive evidence, while the collapse
-    maps the connective algebra to the Kleene lattice. What is the cleanest way
-    to express the relationship to RM3/R/E without conflating arrows, collapses,
-    and consequence relations?
+12. **Relationship to relevant logic.** With the min-copula joint, the induced
+    positive-evidence arrow matches product residuation, while the collapse maps
+    the connective algebra to the Kleene lattice. The comparison must keep
+    arrows, collapses, and consequence relations separate.
 
 13. **Probabilistic programming semantics.** Can the chain rule be made the core
     equational law of an `observe`/conditioning primitive while preserving the

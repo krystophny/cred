@@ -9,7 +9,7 @@ Part 1 establishes the constraint algebra. Part 2 adds interpretation, consequen
 - `02-fixed-points.md`: self-reference and paradox dissolution
 - `03-undecidability.md`: incompleteness and underdetermination (distinct from the 1/2 fixed point)
 - `04-proof-patterns.md`: proof patterns enabled by the credence algebra
-- `05-open-questions.md`: research directions including self-hosting
+- `05-open-questions.md`: remaining research directions after the labelled calculus
 - `06-graded-mathematics.md`: building mathematics (arithmetic, analysis, set theory) on graded foundations
 
 ## Build
@@ -22,7 +22,7 @@ cd part3 && latexmk -pdf -interaction=nonstopmode -halt-on-error paper.tex
 
 The following topics were originally in Part 2 but belong here because they require the full machinery of Parts 1 and 2:
 
-- **Graded proofs**: what it means to "prove" something when truth is graded (convergence to credence 1 vs. partial evidence). Covered in `01-asymptotic-proofs.md`.
+- **Graded proofs**: what it means to "prove" something when truth is graded (convergence to credence 1 vs. partial evidence). The labelled external-conditioning calculus is formalized in `lean/Cred/Sequent.lean`; asymptotic proof remains in `01-asymptotic-proofs.md`.
 - **Graded mathematics**: building arithmetic, analysis, and set theory on graded predicates. Covered in `06-graded-mathematics.md`.
 - **Self-hosting**: using the credence algebra to reason about the credence algebra itself, enabled by self-reference handling. Related material in `02-fixed-points.md` and `05-open-questions.md`.
 
@@ -32,4 +32,4 @@ The following topics were originally in Part 2 but belong here because they requ
 
 2. **Unconstrained vs. undecidable**: "unconstrained" in Part 1 means the chain rule imposes no constraint when evidence is zero. "Undecidable" means a formal system neither proves nor refutes. These are different notions. See `03-undecidability.md`.
 
-3. **Proof vs. evidence**: classical proof establishes credence 1 exactly. Asymptotic proof converges to 1. Partial evidence gives intermediate credence. All three are meaningful but distinct. See `01-asymptotic-proofs.md`.
+3. **Proof vs. evidence**: classical proof establishes credence 1 exactly. Labelled derivations track positive, certain, and threshold judgments. Asymptotic proof converges to 1. Partial evidence gives intermediate credence. These are distinct notions. See `01-asymptotic-proofs.md`.

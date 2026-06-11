@@ -4,7 +4,7 @@
 
 Part 1 proves that the negation equation c = ~c = 1 - c has a unique solution at c = 1/2 (Lean: `neg_fixed_point_unique`). This handles any self-negating statement: the liar sentence, Russell's predicate, Grelling-Nelson, etc.
 
-This file explores the broader landscape of self-referential fixed points.
+This file records the broader range of self-referential fixed points.
 
 ## Self-negation: the liar and Russell
 

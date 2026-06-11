@@ -22,9 +22,14 @@ lake build
 - `Cred/Congruence/Real.lean` - RealCongruence, no non-trivial finite quotient
 - `Cred/Bridge/LPK3.lean` - collapse-eval commutativity, LP/K3 bridge theorems
 - `Cred/Bridge/CondBridge.lean` - conditional bridge: impossibility, boundary, update bridge
+- `Cred/Bridge/Crisp.lean` - classical crisp embedding and conditioning divergence
+- `Cred/Bridge/Curry.lean` - product residuation, contraction failure, Curry block
 - `Cred/Valuation.lean` - valuations and collapse composition
 - `Cred/Update.lean` - Bayesian and Jeffrey conditionalization
 - `Cred/Predicate.lean` - graded predicates, quantifiers, Russell fixed point
+- `Cred/Fixpoint.lean` - solution sets for liar, truth-teller, Russell, Curry
+- `Cred/Threshold.lean` - threshold consequence and sharp bounds
+- `Cred/Sequent.lean` - labelled external-conditioning calculus and soundness
 
 ## Key Theorems
 
@@ -36,6 +41,11 @@ lake build
 | `liar_fixed_point` | 0.5 is a negation fixed point |
 | `neg_fixed_point_unique` | 0.5 is the unique negation fixed point |
 | `conj_disj_not_distrib` | Conjunction does not distribute over disjunction |
+| `crisp_embedding` | Classical evaluation embeds into the crisp fragment |
+| `curry_block` | MP, conditional proof, and contraction have no common total carrier |
+| `russell_fixed_point` | Russell's scalar equation has value 1/2 |
+| `derivation_sound` | Labelled derivations are sound for their labels |
+| `labelled_no_ex_falso` | A and ~A do not derive an unrelated positive conclusion |
 
 ## Dependencies
 

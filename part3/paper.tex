@@ -333,7 +333,7 @@ That relation cannot be placed into a formula and diagonalized.
 
 \begin{table}[t]
 \centering
-\begin{tabular}{lll}
+\begin{tabular}{p{0.20\linewidth}p{0.30\linewidth}p{0.38\linewidth}}
 \toprule
 Pattern & Equation & Solution set \\
 \midrule
@@ -378,6 +378,24 @@ The present paper proves a scalar and predicate-level interface:
 pointwise graded predicates, De Morgan laws, quantifier duality, crisp
 quantifier recovery, and Russell's fixed point.
 It does not claim a ZF replacement or a bi-interpretability theorem.
+
+\begin{table}[t]
+\centering
+\small
+\begin{tabular}{p{0.16\linewidth}p{0.28\linewidth}p{0.38\linewidth}}
+\toprule
+Work & Contract & Cred's current claim \\
+\midrule
+White 1979 & {\L}ukasiewicz comprehension & scalar fixed points, no contraction claim \\
+HPS 2000 & fuzzy truth predicates & explicit $[0,1]$ model, no standard-model claim \\
+Takeuti-Titani & fuzzy set membership & predicate interface, no full set theory \\
+BZFC & four-valued ZF-style theory & comparison point, no bi-interpretability claim \\
+\bottomrule
+\end{tabular}
+\caption{Foundations comparison.  Cred currently proves the interface column,
+not a replacement set theory.}
+\label{tab:foundations-comparison}
+\end{table}
 
 The crisp fragment supplies the recovery constraint.
 When a predicate is crisp, its infimum is zero exactly when some instance is
@@ -490,7 +508,7 @@ The interval $(\tfrac12,\tfrac34]$ therefore validates excluded middle while
 losing the simple explosion countermodel used below $\tfrac12$.
 
 The second axis is conditioning.
-A labelled calculus should treat conditioning as a side judgment:
+The labelled calculus treats conditioning as a side judgment:
 \[
   c\in\Cond(j,e).
 \]
@@ -511,10 +529,20 @@ Cred takes neither calculus unchanged.
 The no-go theorem for truth-functional conditioning in Part~2 and the Curry
 block above force the proof calculus to keep conditioning external.
 
-This is the remaining Lean target.
-One should first write rules for labelled bounds and side judgments, then
-prove soundness for threshold consequence.
-Completeness can wait.
+Lean formalizes this interface in \texttt{Cred.Sequent}.
+Labels mark positive, certain, or threshold judgments.
+Contexts carry formula bounds and external conditioning side judgments.
+The inductive derivation relation has structural rules, imports already
+verified consequence relations, and contains a chain-rule cut:
+from $c\in\Cond(j,e)$, a lower bound on $c$, and a lower bound on $e$, derive
+the product lower bound on $j$.
+The soundness theorems target threshold consequence, positivity consequence,
+and certainty consequence.
+The theorem \texttt{labelled\_no\_ex\_falso} gives the proof-layer witness
+that $A$ and $\neg A$ do not derive an unrelated positive conclusion.
+
+Completeness remains outside the present claim.
+That is deliberate.
 A premature completeness theorem risks hiding a residuated implication inside
 the rules.
 
@@ -575,13 +603,11 @@ that fragment.
 What disappears is the move from false or impossible evidence to an arbitrary
 conclusion.
 
-This leaves two next tasks.
-The paper task is a full graded-foundations comparison: extensionality,
+This leaves one substantial next task.
+A full graded-foundations comparison must still settle extensionality,
 equality, substitution, and graded comprehension against White, Takeuti and
 Titani, H\'ajek--Paris--Shepherdson, and BZFC.
-The Lean task is a labelled proof calculus with external conditioning
-judgments and a soundness theorem for the threshold family.
-Both tasks should preserve the same boundary:
+That task must preserve the same boundary:
 conditioning constrains values through the chain rule; it is not implication.
 
 %=============================================================================

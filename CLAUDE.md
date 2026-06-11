@@ -1,18 +1,19 @@
 # CLAUDE.md
 
-## Current Focus: Both papers publication-ready
+## Current Focus: Papers and formalization publication-ready
 
 Part 1: congruence classification of the product De Morgan triplet (6 sections + conclusion + 2 appendices, 12 pages).
 Part 2: self-contained paper on chain-rule conditioning as a bridge between probability and many-valued logic (8 sections + 2 appendices, 24 pages).
-All Lean proofs fully verified (3758 lines across 13 modules, zero sorry). Both papers build clean.
+Part 3: paradox without explosion: crisp fragments, solution sets, graded comprehension, and external conditioning.
+All Lean proofs fully verified, zero sorry. All papers build clean.
 
-## Build (match CI)
+## Build
 
 ```bash
 cd lean && lake build              # Lean formalization
-cd part1 && latexmk -pdf -interaction=nonstopmode -halt-on-error paper.tex   # Paper (preferred)
-# fallback:
-# cd part1 && pdflatex paper.tex && pdflatex paper.tex
+cd part1 && latexmk -pdf -interaction=nonstopmode -halt-on-error paper.tex
+cd part2 && latexmk -pdf -interaction=nonstopmode -halt-on-error paper.tex
+cd part3 && latexmk -pdf -interaction=nonstopmode -halt-on-error paper.tex
 ```
 
 Toolchain: Lean `v4.16.0` + mathlib `v4.16.0`. Correctness = `lake build` succeeds and theorems type-check.
@@ -37,26 +38,27 @@ Keep the separation clear: `⊗`/`⊔` are the core algebraic operations (produc
 
 ## Repo Map
 
-- `lean/Cred/Core/Value.lean`: credence values: negation, product conjunction, disjunction, order, fixed points, spread, equilibria (426 lines).
-- `lean/Cred/Core/Consequence.lean`: K3/LP designation, graded consequence, Formula, eval, structural rules, no-explosion theorems (316 lines).
-- `lean/Cred/Cond/Admissible.lean`: chain-rule conditioning, admissible sets (Cond), Fréchet bounds, conditioning tables, path dependence (427 lines).
-- `lean/Cred/Cond/Copula.lean`: Bayes consistency on [0,1], min-copula uniqueness, world partitioning (403 lines).
-- `lean/Cred/Collapse/ThreeVal.lean`: three-valued credences, RM3/Gödel/product-residuated implications (227 lines).
-- `lean/Cred/Collapse/Hom.lean`: collapse homomorphism, no-Gödel/no-Łukasiewicz collapse, Boolean subalgebra (313 lines).
-- `lean/Cred/Congruence/Unit.lean`: UnitCongruence classification, Kleene witness, three-element quotient uniqueness (297 lines).
-- `lean/Cred/Congruence/Real.lean`: RealCongruence, scaling trick, no non-trivial finite quotient (229 lines).
-- `lean/Cred/Bridge/LPK3.lean`: collapse-eval commutativity, LP/K3 bridge theorems (207 lines).
-- `lean/Cred/Bridge/CondBridge.lean`: conditional bridge: impossibility, boundary, update bridge, zero-evidence triple (389 lines).
+- `lean/Cred/Core/Value.lean`: credence values: negation, product conjunction, disjunction, order, fixed points, spread, equilibria.
+- `lean/Cred/Core/Consequence.lean`: K3/LP designation, graded consequence, Formula, eval, structural rules, no-explosion theorems.
+- `lean/Cred/Cond/Admissible.lean`: chain-rule conditioning, admissible sets (Cond), Fréchet bounds, conditioning tables, path dependence.
+- `lean/Cred/Cond/Copula.lean`: Bayes consistency on [0,1], min-copula uniqueness, world partitioning.
+- `lean/Cred/Collapse/ThreeVal.lean`: three-valued credences, RM3/Gödel/product-residuated implications.
+- `lean/Cred/Collapse/Hom.lean`: collapse homomorphism, no-Gödel/no-Łukasiewicz collapse, Boolean subalgebra.
+- `lean/Cred/Congruence/Unit.lean`: UnitCongruence classification, Kleene witness, three-element quotient uniqueness.
+- `lean/Cred/Congruence/Real.lean`: RealCongruence, scaling trick, no non-trivial finite quotient.
+- `lean/Cred/Bridge/LPK3.lean`: collapse-eval commutativity, LP/K3 bridge theorems.
+- `lean/Cred/Bridge/CondBridge.lean`: conditional bridge: impossibility, boundary, update bridge, zero-evidence triple.
 - `lean/Cred/Bridge/Crisp.lean`: Boolean embedding, crisp consequence coincidence, conditioning divergence.
 - `lean/Cred/Bridge/Curry.lean`: product residuation, contraction failure, Curry block.
-- `lean/Cred/Valuation.lean`: valuations (CpValuation, IndepValuation, JointValuation) (176 lines).
-- `lean/Cred/Update.lean`: Bayesian and Jeffrey conditionalization (138 lines).
-- `lean/Cred/Predicate.lean`: graded predicates, quantifiers, Russell fixed point (210 lines).
+- `lean/Cred/Valuation.lean`: valuations (CpValuation, IndepValuation, JointValuation).
+- `lean/Cred/Update.lean`: Bayesian and Jeffrey conditionalization.
+- `lean/Cred/Predicate.lean`: graded predicates, quantifiers, Russell fixed point.
 - `lean/Cred/Fixpoint.lean`: solution sets for liar, truth-teller, Curry, and zero-evidence conditioning.
 - `lean/Cred/Threshold.lean`: threshold consequence, structural rules, sharp explosion and excluded-middle bounds.
+- `lean/Cred/Sequent.lean`: labelled external-conditioning calculus, soundness, chain-rule cut, no-ex-falso witness.
 - `part1/paper.tex`: congruence classification (6 sections + conclusion + 2 appendices, 12 pages).
 - `part2/paper.tex`: bridge paper (8 sections + 2 appendices, 24 pages; self-contained).
-- `part3/`: future work: graded proofs, self-hosting, undecidability.
+- `part3/paper.tex`: foundations paper: paradox without explosion, crisp fragments, solution sets, and external conditioning.
 
 ## Key Results to Keep Green (Lean)
 
@@ -113,6 +115,13 @@ Thresholds (from Threshold.lean):
 - `thresholdConsequence`, `threshold_reflexivity`, `threshold_monotonicity`, `threshold_cut`
 - `threshold_one_iff_certainty`, `formulaPositivity_iff_exists_threshold`
 - `threshold_explosion_countermodel_iff`, `threshold_excluded_middle_iff`
+
+Sequents (from Sequent.lean):
+- `Derivation` (labelled derivations with positive, certain, and threshold labels)
+- `CondJudgment` (external conditioning side judgments; no Formula arrow constructor)
+- `derivation_sound`, `derivation_sound_thresholdConsequence`
+- `derivation_sound_formulaCertainty`, `derivation_sound_formulaPositivity`
+- `labelled_no_ex_falso` (A and ~A do not derive an unrelated positive conclusion)
 
 ## Philosophy
 

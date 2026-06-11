@@ -1,7 +1,8 @@
 % The Product De Morgan Triplet, Primitive Conditioning, and the Kleene Collapse
 % Publication-quality paper
 %
-% References to Lean formalization: lean/Cred/Basic.lean
+% References to Lean formalization: lean/Cred/Core, lean/Cred/Cond,
+% lean/Cred/Collapse, lean/Cred/Congruence
 
 \documentclass[11pt,a4paper]{article}
 
@@ -21,6 +22,7 @@
 }
 \usepackage{cleveref}
 \usepackage[margin=1in]{geometry}
+\emergencystretch=3em
 \usepackage{tikz}
 \usetikzlibrary{arrows.meta,positioning,shapes}
 \usepackage{graphicx}
@@ -55,9 +57,9 @@
 \maketitle
 
 \begin{abstract}
-We study the product De Morgan triplet on $[0,1]$ --- product conjunction,
+We study the product De Morgan triplet on $[0,1]$: product conjunction,
 probabilistic-sum disjunction ($c_1 + c_2 - c_1 c_2$), standard
-complement --- equipped with chain-rule conditioning.
+complement, equipped with chain-rule conditioning.
 Our main results are a \emph{congruence classification} at two levels.
 Under $[0,1]$-multiplication:
 the Kleene lattice $\{0,\tfrac{1}{2},1\}$ with partition
@@ -100,7 +102,7 @@ and together with complement they form the
 In t-norm fuzzy logic, each left-continuous t-norm determines a unique
 implication via \emph{residuation}: $a \to b = \sup\{c : a \otimes c \leq b\}$.
 Since $0 \otimes c = 0 \leq b$ for all $c$ and $b$, every residuated
-implication forces $0 \to b = 1$ --- \emph{ex falso quodlibet} is built
+implication forces $0 \to b = 1$; \emph{ex falso quodlibet} is built
 in~\cite{hajek1998}.
 The chain rule avoids this: $c \cdot 0 = 0$ is satisfied by \emph{any}
 value of $c$, so conditioning on impossible evidence is unconstrained.
@@ -115,13 +117,13 @@ Chain-rule conditioning achieves a similar effect by a different mechanism:
 rather than adding a connexive axiom, it simply leaves $\cred(A \mid 0)$
 unconstrained.
 
-The resulting structure --- the product De Morgan triplet with chain-rule
-conditioning --- connects probability-style reasoning on $[0,1]$ to
+The resulting structure, the product De Morgan triplet with chain-rule
+conditioning, connects probability-style reasoning on $[0,1]$ to
 logic-style reasoning on the Kleene lattice
 $\{0, \tfrac{1}{2}, 1\}$ via a surjective homomorphism (the
 \emph{Kleene collapse}, Section~\ref{sec:collapse}).
 On the quotient, it recovers the shared truth tables of K$_3$, LP,
-and RM3 --- and the min/max operations of possibility theory
+and RM3, together with the min/max operations of possibility theory
 (Remark~\ref{rem:possibility}).
 Chain-rule conditioning motivates studying the product De Morgan triplet
 as a unit: it is the specific choice of companion operations
@@ -361,8 +363,8 @@ conditioning relaxes Cox's requirement that the conditional be a function.
 \textbf{Evidence = 0.}
 The chain rule gives $c \conjc 0 = 0$ for all $c$: the conditional is
 \emph{unconstrained}.
-This is an elementary consequence of the definition --- any $c$ satisfies
-the equation --- but the design choice it reflects is significant:
+This is an elementary consequence of the definition: any $c$ satisfies
+the equation. The design choice it reflects is significant:
 the chain rule does not force $\cred(A \mid 0) = 1$, so it is
 \emph{consistent} with ex falso but does not \emph{entail} it.
 (Lean: \texttt{conditioning\_zero\_any}.)
@@ -435,7 +437,7 @@ Lean: \texttt{conditioning\_mk}, \texttt{conditioning\_unique}.
 \subsection{Implication Comparison}
 
 When evidence $a > 0$ and joint $= \min(a,b)$, the chain rule gives
-the conditional $\min(b/a,\; 1)$ --- the product residuated implication
+the conditional $\min(b/a,\; 1)$, the product residuated implication
 $a \to b$ of H\'ajek's Product Logic ($\Pi$-logic)~\cite{hajek1998}.
 The product De Morgan triplet and $\Pi$-logic share the same t-norm
 but differ in the status of implication:
@@ -513,8 +515,8 @@ $\{0, \tfrac{1}{2}, 1\}$
 $\min(a,b)$ & \checkmark & \checkmark & \checkmark & \checkmark \\
 $a \cdot b$ (indep.) & \checkmark & \checkmark & $\times$ & $\times$ \\
 $\max(a{+}b{-}1,0)$ & \checkmark & \checkmark & \checkmark & $\times$ \\
-$\max(\negc a,b) \cdot a$ (RM3) & \checkmark & $\times$ & --- & --- \\
-G\"odel (on $[0,1]$) & --- & $\times$ & --- & --- \\
+$\max(\negc a,b) \cdot a$ (RM3) & \checkmark & $\times$ & n/a & n/a \\
+G\"odel (on $[0,1]$) & n/a & $\times$ & n/a & n/a \\
 \midrule
 External (prob.) & $\times$ & \checkmark & \checkmark & \checkmark \\
 \bottomrule
@@ -742,7 +744,7 @@ $\mathbb{R}$: $a \sim b$ and $c \sim d$ (for any $a,b,c,d \in \mathbb{R}$)
 imply $ac \sim bd$.
 Every real congruence restricts to a unit congruence, so the
 results of Theorem~\ref{thm:unit-classification} apply.
-The additional leverage of multiplicative inverses yields a stronger
+The additional use of multiplicative inverses yields a stronger
 conclusion.
 
 \begin{theorem}[$\mathbb{R}$-Multiplication Impossibility]
@@ -776,9 +778,10 @@ $\mathbb{R}$-multiplication, contradicting $\{1\}$ as a singleton.
 \begin{remark}[Lean verification]
 \label{rem:lean-congruence}
 The unit-congruence results are verified with \texttt{UnitCongruence}
-in \texttt{Cred/Congruence.lean}:
+in \texttt{Cred/Congruence/Unit.lean}:
 \texttt{singleton\_zero}, \texttt{singleton\_one}.
-The $\mathbb{R}$-impossibility uses \texttt{RealCongruence}:
+The $\mathbb{R}$-impossibility uses \texttt{RealCongruence} in
+\texttt{Cred/Congruence/Real.lean}:
 \texttt{no\_nontrivial\_finite\_quotient}.
 The Kleene partition is a verified unit congruence:
 \texttt{kleene\_congruence}.
@@ -980,12 +983,10 @@ but is strictly weaker (no sigma-algebra or additivity).
 \label{app:lean}
 %=============================================================================
 
-The results in this paper are formalized in two Lean~4 modules
-(with Mathlib):
-\texttt{Cred/Basic.lean} (core algebra, conditioning, fixed points,
-collapse, comparisons; 1756 lines) and
-\texttt{Cred/Congruence.lean} (two-level congruence classification;
-396 lines).
+The results in this paper are formalized in Lean~4 with Mathlib.
+The core algebra, conditioning, collapse, and congruence results are in
+\texttt{Cred/Core}, \texttt{Cred/Cond}, \texttt{Cred/Collapse}, and
+\texttt{Cred/Congruence}.
 
 \textbf{Design choices.}
 \texttt{Credence} is a structure carrying explicit \texttt{nonneg} and

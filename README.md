@@ -1,21 +1,15 @@
 # Cred: Admissible Conditioning over Graded Credences
 
-Cred is two modules plus an interface, machine-checked in Lean 4.
+Cred is two axes plus an interface, machine-checked in Lean 4.
 
 - **Axis A: admissible conditional semantics (non-explosion).** Conditioning is an admissibility relation, not a connective. The chain rule `cred(A|B) ⊗ cred(B) = cred(A ∧ B)` defines the admissible set `Cond(j,e) = {c | c ⊗ e = j}` for joint `j` and evidence `e`. Positive evidence yields a singleton (Bayes); zero evidence with zero joint yields the full interval `[0,1]`. No inference rule is weakened: explosion never starts, because impossible evidence forces no value.
 - **Axis B: graded credence semantics.** The value space `[0,1]` with the product De Morgan triplet (product conjunction, probabilistic-sum disjunction, standard complement), its Kleene quotient `{0, ½, 1}`, and the LP/K3 consequence bridges.
 - **The interface.** The axes combine above the propositional layer and stay independent: `no_truthfunctional_cond_bridge` proves that no truth-functional conditional on the collapsed values reproduces admissible conditioning. The axes do not reduce to each other, even after collapse.
 
 This repo contains:
-- a Lean 4 formalization (3581 lines across 7 modules, zero `sorry`; `lean/`)
-- two papers aligned with the Lean source (`part1/paper.tex`, `part2/paper.tex`; built in CI)
-- a foundations program: fixed points, graded comprehension, crisp fragment (`part3/`)
-
-## Download Latest Papers (CI build)
-
-- Part 1 (Congruence Classification): [paper.pdf](https://github.com/krystophny/cred/releases/download/paper-latest/paper.pdf)
-- Part 2 (Bridge between Probability and Many-Valued Logic): [paper.pdf](https://github.com/krystophny/cred/releases/download/paper-part2-latest/paper.pdf)
-- Per-run artifacts: [CI workflow runs](https://github.com/krystophny/cred/actions/workflows/ci.yml)
+- a Lean 4 formalization with zero `sorry` (`lean/`)
+- three papers aligned with the Lean source (`part1/`, `part2/`, `part3/`)
+- a foundations layer: crisp recovery, fixed-point solution sets, graded comprehension, and labelled external conditioning
 
 ## Architecture
 
@@ -29,7 +23,7 @@ Proof layer                 labelled sequents, external conditioning judgment
 
 No layer contains an internal object-language conditional. Conditionals enter only as the external judgment `c ∈ Cond(j,e)`; entailment and conditioning stay metalinguistic relations. The same choice blocks Curry-style internalization.
 
-In the foundations layer, self-reference lands on solution sets instead of contradictions: the liar equation `L ≡ ¬L` stabilizes at `cred(L) = 0.5`. Fixed points are formalized (`liar_fixed_point`, `russell_fixed_point`); graded comprehension, the crisp fragment, and the labelled sequent calculus are in progress.
+In the foundations layer, self-reference lands on solution sets instead of contradictions: the liar equation `L ≡ ¬L` stabilizes at `cred(L) = 0.5`. Fixed points, Russell's scalar theorem, crisp recovery, Curry blocking, threshold consequence, and the labelled sequent calculus are formalized.
 
 ## Primitives
 
@@ -38,7 +32,7 @@ Values:       [0,1]
 Negation:     ~c = 1 - c
 Conjunction:  c₁ ⊗ c₂ = c₁·c₂        (product t-norm)
 Disjunction:  c₁ ⊔ c₂ = ~(~c₁ ⊗ ~c₂)  (De Morgan dual; equals c₁ + c₂ - c₁·c₂)
-Conditioning: cred(A|B) ⊗ cred(B) = cred(A ∧ B)  (chain rule; joint via min copula)
+Conditioning: cred(A|B) ⊗ cred(B) = cred(A ∧ B)  (chain rule; joint supplied explicitly)
 ```
 
 ## Key Results (Lean)
@@ -61,6 +55,13 @@ Interface (Part 2 paper):
 - `update_bridge`: Bayesian update inherits the bridge under boundary conditions
 - `zero_evidence_duality`: zero-evidence triple (underdetermination, LP explosion failure, bridge failure)
 
+Foundations and proof layer (Part 3 paper):
+- `crisp_eval_eq`, `crisp_embedding`: classical evaluation embeds into Cred
+- `russell_fixed_point`, `solutions_neg_eq_singleton`: paradoxes become solution sets
+- `curry_block`: MP, conditional proof, and contraction have no common total carrier
+- `threshold_explosion_countermodel_iff`: sharp no-explosion threshold
+- `derivation_sound`, `labelled_no_ex_falso`: labelled external-conditioning calculus is sound and non-explosive
+
 ## Collapse
 
 ```
@@ -77,10 +78,10 @@ Each ingredient has its own literature: paraconsistency (Priest 1979; Carnielli 
 
 ## Repo Layout
 
-- `lean/`: Lean 4 + Mathlib formalization (7 modules, 3581 lines, zero `sorry`)
+- `lean/`: Lean 4 + Mathlib formalization (zero `sorry`)
 - `part1/`: Part 1 paper: congruence classification of the product De Morgan triplet (axis B)
 - `part2/`: Part 2 paper: chain-rule conditioning as a bridge between probability and many-valued logic (the interface; self-contained)
-- `part3/`: foundations program: fixed points, graded comprehension, crisp fragment
+- `part3/`: Part 3 paper: paradox without explosion, crisp fragments, solution sets, and external conditioning
 
 ## Build
 
@@ -88,6 +89,7 @@ Each ingredient has its own literature: paraconsistency (Priest 1979; Carnielli 
 cd lean && lake build
 cd part1 && latexmk -pdf -interaction=nonstopmode -halt-on-error paper.tex
 cd part2 && latexmk -pdf -interaction=nonstopmode -halt-on-error paper.tex
+cd part3 && latexmk -pdf -interaction=nonstopmode -halt-on-error paper.tex
 ```
 
 Toolchain: Lean 4.16.0 + Mathlib 4.16.0.
