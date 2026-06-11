@@ -5,7 +5,7 @@
   erase to `Structure.Derivation` and inherit semantic soundness.
 -/
 
-import Cred.Foundation.Quantifier
+import Cred.Foundation.Calculus
 
 namespace Cred
 namespace Foundation
@@ -114,6 +114,39 @@ theorem sound {t : Credence}
   quantifier_derivation_sound p.toDerivation
 
 end QuantifierProof
+
+inductive FoundationProof (t : Credence) :
+    List (Formula Func Pred) → Formula Func Pred → Type (max 1 u v) where
+  | base {Γ : List (Formula Func Pred)} {φ : Formula Func Pred} :
+      Proof t Γ φ → FoundationProof t Γ φ
+  | equalityRefl {Γ : List (Formula Func Pred)} (τ : Term Func) :
+      FoundationProof t Γ (.equal τ τ)
+  | forallElim {Γ : List (Formula Func Pred)} {φ : Formula Func Pred}
+      {τ : Term Func} :
+      FoundationProof t Γ (.forallE φ) →
+      FoundationProof t Γ (Formula.instantiate τ φ)
+  | existsIntro {Γ : List (Formula Func Pred)} {φ : Formula Func Pred}
+      {τ : Term Func} :
+      FoundationProof t Γ (Formula.instantiate τ φ) →
+      FoundationProof t Γ (.existsE φ)
+
+namespace FoundationProof
+
+def toDerivation {t : Credence}
+    {Γ : List (Formula Func Pred)} {φ : Formula Func Pred} :
+    FoundationProof t Γ φ → FoundationDerivation t Γ φ
+  | base p => FoundationDerivation.base p.toDerivation
+  | equalityRefl τ => FoundationDerivation.equalityRefl τ
+  | forallElim p => FoundationDerivation.forallElim p.toDerivation
+  | existsIntro p => FoundationDerivation.existsIntro p.toDerivation
+
+theorem sound {t : Credence}
+    {Γ : List (Formula Func Pred)} {φ : Formula Func Pred}
+    (p : FoundationProof t Γ φ) :
+    FoundationThresholdConsequence.{u, v, w} t Γ φ :=
+  foundation_derivation_sound p.toDerivation
+
+end FoundationProof
 
 end Structure
 

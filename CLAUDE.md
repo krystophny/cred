@@ -62,7 +62,7 @@ Keep the separation clear: `⊗`/`⊔` are the core algebraic operations (produc
 - `lean/Cred/Foundation/Laws.lean`: crisp equality and quantifier law interfaces.
 - `lean/Cred/Foundation/Consequence.lean`: threshold and certainty consequence for foundation formulas.
 - `lean/Cred/Foundation/Proof.lean`: first threshold proof calculus for foundation formulas, with soundness.
-- `lean/Cred/Foundation/Kernel.lean`: type-level certificates for foundation and quantifier derivations, erasure, and soundness.
+- `lean/Cred/Foundation/Kernel.lean`: type-level certificates for foundation derivations, law-specific derivations, erasure, and soundness.
 - `lean/Cred/Foundation/Equality.lean`: crisp-equality consequence target, equality reflexivity, and sound crisp derivations.
 - `lean/Cred/Foundation/Quantifier.lean`: quantifier-law consequence target, formula instantiation rules, and sound quantifier derivations.
 - `lean/Cred/Foundation/Calculus.lean`: combined foundation consequence with equality and quantifier laws.
@@ -177,6 +177,8 @@ Foundation kernel (from Foundation/Kernel.lean):
 - `CrispProof.toDerivation`, `CrispProof.sound`
 - `Structure.QuantifierProof`
 - `QuantifierProof.toDerivation`, `QuantifierProof.sound`
+- `Structure.FoundationProof`
+- `FoundationProof.toDerivation`, `FoundationProof.sound`
 
 Foundation equality (from Foundation/Equality.lean):
 - `Structure.CrispThresholdConsequence`
