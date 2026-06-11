@@ -61,6 +61,7 @@ lake build
 | `Kernel.Proof.sound` | Proof certificates inherit labelled soundness |
 | `Kernel.no_ex_falso_certificate` | No certificate derives an unrelated positive conclusion from A and ~A |
 | `Foundation.Term.rename`, `Foundation.Term.subst` | Term-level renaming and substitution |
+| `Foundation.Term.decEq`, `Foundation.Formula.instDecidableEq` | Decidable syntax equality for certificate checking |
 | `Foundation.Term.instSubst`, `Foundation.Formula.instantiate` | Single-variable formula instantiation |
 | `Foundation.Formula.rename`, `Foundation.Formula.subst` | Binder-aware formula renaming and substitution |
 | `Foundation.Formula.hasEquality` | Structural marker for equality in foundation formulas |

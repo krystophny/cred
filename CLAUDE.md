@@ -143,6 +143,7 @@ Kernel certificates (from Kernel.lean):
 
 Foundation language (from Foundation/Language.lean):
 - `Foundation.Term`, `Foundation.Formula`
+- `Term.decEq`, formula `DecidableEq`
 - `Term.rename`, `Term.subst`
 - `Term.upRenaming`, `Term.liftSubst`, `Term.instSubst`
 - `Formula.rename`, `Formula.subst`, `Formula.instantiate`

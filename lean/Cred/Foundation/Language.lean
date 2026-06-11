@@ -20,6 +20,65 @@ namespace Term
 
 variable {Func : Type u}
 
+mutual
+
+def decEq [DecidableEq Func] :
+    (a b : Term Func) → Decidable (a = b)
+  | var m, var n =>
+      if h : m = n then
+        isTrue (by cases h; rfl)
+      else
+        isFalse (by
+          intro hEq
+          cases hEq
+          exact h rfl)
+  | app f args, app g args' =>
+      if hf : f = g then
+        match decEqList args args' with
+        | isTrue hargs =>
+            isTrue (by cases hf; cases hargs; rfl)
+        | isFalse hargs =>
+            isFalse (by
+              intro hEq
+              cases hEq
+              exact hargs rfl)
+      else
+        isFalse (by
+          intro hEq
+          cases hEq
+          exact hf rfl)
+  | var _, app _ _ =>
+      isFalse (by intro hEq; cases hEq)
+  | app _ _, var _ =>
+      isFalse (by intro hEq; cases hEq)
+
+def decEqList [DecidableEq Func] :
+    (args args' : List (Term Func)) → Decidable (args = args')
+  | [], [] => isTrue rfl
+  | [], _ :: _ => isFalse (by intro hEq; cases hEq)
+  | _ :: _, [] => isFalse (by intro hEq; cases hEq)
+  | t :: ts, u :: us =>
+      match decEq t u with
+      | isTrue ht =>
+          match decEqList ts us with
+          | isTrue hts =>
+              isTrue (by cases ht; cases hts; rfl)
+          | isFalse hts =>
+              isFalse (by
+                intro hEq
+                cases hEq
+                exact hts rfl)
+      | isFalse ht =>
+          isFalse (by
+            intro hEq
+            cases hEq
+            exact ht rfl)
+
+end
+
+instance [DecidableEq Func] : DecidableEq (Term Func) :=
+  decEq
+
 def upRenaming (ρ : Nat → Nat) : Nat → Nat
   | 0 => 0
   | n + 1 => ρ n + 1
@@ -68,7 +127,7 @@ inductive Formula (Func : Type u) (Pred : Type v) where
   | disj : Formula Func Pred → Formula Func Pred → Formula Func Pred
   | forallE : Formula Func Pred → Formula Func Pred
   | existsE : Formula Func Pred → Formula Func Pred
-deriving Repr
+deriving Repr, DecidableEq
 
 namespace Formula
 
