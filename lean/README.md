@@ -36,6 +36,7 @@ lake build
 - `Cred/Foundation/Laws.lean` - crisp equality and quantifier law interfaces
 - `Cred/Foundation/Consequence.lean` - semantic consequence for foundation formulas
 - `Cred/Foundation/Proof.lean` - first sound threshold calculus for foundation formulas
+- `Cred/Foundation/Kernel.lean` - type-level certificates for foundation proofs
 
 ## Key Theorems
 
@@ -64,6 +65,7 @@ lake build
 | `Foundation.Structure.ThresholdConsequence` | Threshold consequence over all foundation structures |
 | `Foundation.Structure.evalTerm_rename`, `evalTerm_subst` | Term evaluation commutes with renaming and substitution |
 | `Foundation.Structure.derivation_sound` | Soundness for the first foundation proof calculus |
+| `Foundation.Structure.Proof.sound` | Soundness for first-order proof certificates |
 
 ## Dependencies
 

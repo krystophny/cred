@@ -89,6 +89,8 @@ For the current synthesis statement, see `paper.tex`.
     consequence for this first-order layer.
     `lean/Cred/Foundation/Proof.lean` adds the first sound threshold calculus;
     equality and quantifier rules remain next steps.
+    `lean/Cred/Foundation/Kernel.lean` adds type-level certificates for those
+    derivations.
 
 11. **Crisp subtheories.** Identify and formalize the crisp fragments (where all
     credences are `0/1`) and prove they recover the intended classical theorems.
