@@ -86,6 +86,13 @@ inductive CrispDerivation (t : Credence) :
       Derivation t Γ φ → CrispDerivation t Γ φ
   | equalityRefl {Γ : List (Formula Func Pred)} (τ : Term Func) :
       CrispDerivation t Γ (.equal τ τ)
+  | equalitySymm {Γ : List (Formula Func Pred)} {τ υ : Term Func} :
+      CrispDerivation t Γ (.equal τ υ) →
+      CrispDerivation t Γ (.equal υ τ)
+  | equalityTrans {Γ : List (Formula Func Pred)} {τ υ χ : Term Func} :
+      CrispDerivation t Γ (.equal τ υ) →
+      CrispDerivation t Γ (.equal υ χ) →
+      CrispDerivation t Γ (.equal τ χ)
 
 theorem crisp_derivation_sound {t : Credence}
     {Γ : List (Formula Func Pred)} {φ : Formula Func Pred}
@@ -97,6 +104,27 @@ theorem crisp_derivation_sound {t : Credence}
   | equalityRefl τ =>
       intro M env hEq hΓ
       simp [evalFormula, hEq.eq_refl, Credence.le_one']
+  | equalitySymm h ih =>
+      intro M env hEq hΓ
+      exact equality_symmetry_threshold t _ _ M env hEq (fun p hp => by
+        cases List.mem_cons.mp hp with
+        | inl hp =>
+            subst hp
+            exact ih M env hEq hΓ
+        | inr hp => cases hp)
+  | equalityTrans h1 h2 ih1 ih2 =>
+      intro M env hEq hΓ
+      exact equality_transitivity_threshold t _ _ _ M env hEq (fun p hp => by
+        cases List.mem_cons.mp hp with
+        | inl hp =>
+            subst hp
+            exact ih1 M env hEq hΓ
+        | inr hp =>
+            cases List.mem_cons.mp hp with
+            | inl hp =>
+                subst hp
+                exact ih2 M env hEq hΓ
+            | inr hp => cases hp)
 
 end Structure
 
