@@ -256,6 +256,8 @@ Foundation checker (from Foundation/Checker.lean):
 - `Structure.CheckedFoundationProof`
 - `Structure.FoundationRulePayload`
 - `FoundationRulePayload.code`, `FoundationRulePayload.childCount`
+- `FoundationRulePayload.header`
+- `FoundationRulePayload.header_ruleCode?`, `FoundationRulePayload.header_shapeOK`
 - `applyFoundationRuleUnchecked`
 - `applyFoundationRule`
 - `applyFoundationRule_some_childCount`

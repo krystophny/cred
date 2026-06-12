@@ -239,6 +239,20 @@ theorem FoundationCertificateHeader.childCount_eq_of_shapeOK
   rw [hcode] at hshape
   simpa using hshape
 
+def FoundationRulePayload.header
+    (payload : FoundationRulePayload Func Pred) : FoundationCertificateHeader :=
+  FoundationCertificateHeader.ofRuleCode payload.code
+
+theorem FoundationRulePayload.header_ruleCode?
+    (payload : FoundationRulePayload Func Pred) :
+    payload.header.ruleCode? = some payload.code := by
+  cases payload <;> rfl
+
+theorem FoundationRulePayload.header_shapeOK
+    (payload : FoundationRulePayload Func Pred) :
+    payload.header.shapeOK = true := by
+  cases payload <;> rfl
+
 inductive FoundationCertificateTree (Func : Type u) (Pred : Type v) where
   | node :
       FoundationRulePayload Func Pred →
