@@ -65,3 +65,5 @@ import Cred.Coherence
 import Cred.MinimalKernel
 import Cred.Completeness
 import Cred.CutElim
+import Cred.Set.Examples
+import Cred.Extraction
