@@ -388,6 +388,55 @@ theorem checkFoundationCertificateList_some_allAritiesMatchList
 
 end
 
+mutual
+
+theorem checkFoundationCertificate_some_shapeOK
+    [DecidableEq Func] [DecidableEq Pred]
+    {t : Credence} {tree : FoundationCertificateTree Func Pred}
+    {checked : CheckedFoundationProof t Func Pred}
+    (h : checkFoundationCertificate t tree = some checked) :
+    tree.shapeOK = true := by
+  cases tree with
+  | node payload children =>
+      by_cases hcount : children.length = payload.childCount
+      · simp [checkFoundationCertificate, hcount] at h
+        cases hchildren : checkFoundationCertificateList t children with
+        | none =>
+            simp [hchildren] at h
+        | some checkedChildren =>
+            have hshapeList :=
+              checkFoundationCertificateList_some_shapeOKList hchildren
+            simp [FoundationCertificateTree.shapeOK, hcount, hchildren,
+              hshapeList]
+      · simp [checkFoundationCertificate, hcount] at h
+
+theorem checkFoundationCertificateList_some_shapeOKList
+    [DecidableEq Func] [DecidableEq Pred]
+    {t : Credence} {trees : List (FoundationCertificateTree Func Pred)}
+    {checked : List (CheckedFoundationProof t Func Pred)}
+    (h : checkFoundationCertificateList t trees = some checked) :
+    FoundationCertificateTree.shapeOKList trees = true := by
+  cases trees with
+  | nil =>
+      simp [FoundationCertificateTree.shapeOKList]
+  | cons tree trees =>
+      simp [checkFoundationCertificateList] at h
+      cases htree : checkFoundationCertificate t tree with
+      | none =>
+          simp [htree] at h
+      | some checkedTree =>
+          cases htrees : checkFoundationCertificateList t trees with
+          | none =>
+              simp [htree, htrees] at h
+          | some checkedTrees =>
+              have hshape :=
+                checkFoundationCertificate_some_shapeOK htree
+              have hshapes :=
+                checkFoundationCertificateList_some_shapeOKList htrees
+              simp [FoundationCertificateTree.shapeOKList, hshape, hshapes]
+
+end
+
 end Structure
 
 end Foundation

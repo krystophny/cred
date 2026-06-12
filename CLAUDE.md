@@ -262,6 +262,8 @@ Foundation checker (from Foundation/Checker.lean):
 - `checkFoundationCertificate_some_arityMatches`
 - `checkFoundationCertificate_some_allAritiesMatch`
 - `checkFoundationCertificateList_some_allAritiesMatchList`
+- `checkFoundationCertificate_some_shapeOK`
+- `checkFoundationCertificateList_some_shapeOKList`
 - `checkFoundationCertificate`, `checkFoundationCertificateList`
 
 ## Philosophy
