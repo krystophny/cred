@@ -52,3 +52,4 @@ import Cred.Branch.Independence
 import Cred.Foundation.CertificateBuilder
 import Cred.Branch.AxiomAudit
 import Cred.Foundation.ProvabilityDeriv
+import Cred.Foundation.Arithmetic
