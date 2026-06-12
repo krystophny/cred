@@ -60,3 +60,7 @@ import Cred.CrossingOut
 import Cred.ReflectionTower
 import Cred.SeededSystem
 import Cred.Lindley
+import Cred.Algebra
+import Cred.MinimalKernel
+import Cred.Completeness
+import Cred.CutElim
