@@ -501,6 +501,27 @@ the state came from. The formalization is deliberately silent on origin, and
 that silence is load-bearing: it is the gap the synthesis names rather than
 fills.
 
+\paragraph{Minimality is relative to the substrate.} Because \texttt{T} folds the
+substrate in, shrinking the explicit seed need not shrink the commitment: it can
+move into the substrate, the decoder, the transition, the validator, or the
+selector. As a theorem, \texttt{commitment\_conservation} makes the relocation
+exact. Carry the substrate $b$ in the state instead of in the transition, and the
+run on the original state is unchanged: $(\mathrm{withSubstrate}\,T)^{n}(b,s) =
+(b, (T\,b)^{n}\,s)$. The explicit seed grew to include $b$, the substrate shrank to
+nothing, and nothing observable moved; what is conserved is the pair (substrate,
+seed), not the size of the seed alone. So every claim of a minimal seed is
+relative to a fixed substrate. As structured analogy the operational cases read
+the same way: a Stage0 hex seed is tiny only against a fixed instruction set,
+loader, and stage manuals; a minimal proof kernel is tiny only against a fixed
+syntax, semantics, value algebra, and metatheory; an AI checkpoint is a seed only
+against fixed data, architecture, and objectives. The Bayesian cases too: a flat
+prior is minimal only against a base measure, a Jeffreys prior canonical only
+against a Fisher geometry, a Solomonoff prior universal only against a chosen
+machine, and a credal prior does not remove the seed but exposes a set of seeds.
+This is the companion to fixed-substrate coherence: there the substrate is held
+fixed and the data grouping does not matter; here the question is what the fixed
+substrate already committed.
+
 \subsection{Two sizes, one artifact}
 
 Separate two measurements of a bootstrap. Call the first the \emph{seed size}:
