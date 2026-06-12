@@ -36,3 +36,8 @@ import Cred.Foundation.Certificate
 import Cred.Foundation.Serialization
 import Cred.Foundation.Examples
 import Cred.Foundation.CertificateExamples
+import Cred.Set.Basic
+import Cred.Reductio
+import Cred.Bridge.CondBridgeIff
+import Cred.Set.Russell
+import Cred.Bridge.CurryObject
