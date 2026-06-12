@@ -231,12 +231,16 @@ Foundation examples (from Foundation/Examples.lean):
 - `forallElimCertificateTree_shapeOK`, `equalitySubstitutionCertificateTree_shapeOK`
 - `forallElimCertificateTree_header_shapeOK`
 - `equalitySubstitutionCertificateTree_header_shapeOK`
+- `forallElimCertificateTree_headersShapeOK`
+- `equalitySubstitutionCertificateTree_headersShapeOK`
 - `forallElimCertificateTree_missing_child_fails`
 - `equalitySubstitutionCertificateTree_missing_child_fails`
 - `forallElimCertificateTree_missing_child_shape_fails`
 - `equalitySubstitutionCertificateTree_missing_child_shape_fails`
 - `forallElimCertificateTree_missing_child_header_fails`
 - `equalitySubstitutionCertificateTree_missing_child_header_fails`
+- `forallElimCertificateTree_missing_child_headers_fail`
+- `equalitySubstitutionCertificateTree_missing_child_headers_fail`
 - `unknownFoundationCertificateHeader_fails`
 - `equality_symmetry_certificate_sound`, `equality_substitution_certificate_sound`
 - `forall_elim_certificate_sound`, `exists_intro_certificate_sound`

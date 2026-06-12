@@ -134,6 +134,12 @@ theorem forallElimCertificateTree_header_shapeOK
     FoundationRuleCode.name,
     FoundationRulePayload.code, FoundationRuleCode.childCount]
 
+theorem forallElimCertificateTree_headersShapeOK
+    (φ : Formula Func Pred) (τ : Term Func) :
+    (forallElimCertificateTree φ τ).headersShapeOK = true := by
+  rw [FoundationCertificateTree.headersShapeOK_eq_shapeOK]
+  exact forallElimCertificateTree_shapeOK φ τ
+
 theorem forallElimCertificateTree_missing_child_fails
     [DecidableEq Func] [DecidableEq Pred]
     (t : Credence) (τ : Term Func) :
@@ -163,6 +169,14 @@ theorem forallElimCertificateTree_missing_child_header_fails
     FoundationCertificateHeader.shapeOK, FoundationCertificateHeader.ruleCode?,
     FoundationRuleCode.ofName, FoundationRuleCode.name, FoundationRulePayload.code,
     FoundationRuleCode.childCount]
+
+theorem forallElimCertificateTree_missing_child_headers_fail
+    (τ : Term Func) :
+    (FoundationCertificateTree.node
+      (FoundationRulePayload.forallElim (Func := Func) (Pred := Pred) τ)
+      []).headersShapeOK = false := by
+  rw [FoundationCertificateTree.headersShapeOK_eq_shapeOK]
+  exact forallElimCertificateTree_missing_child_shape_fails τ
 
 def equalitySubstitutionCertificateTree
     (τ υ : Term Func) (φ : Formula Func Pred) :
@@ -230,6 +244,12 @@ theorem equalitySubstitutionCertificateTree_header_shapeOK
     FoundationRuleCode.name,
     FoundationRulePayload.code, FoundationRuleCode.childCount]
 
+theorem equalitySubstitutionCertificateTree_headersShapeOK
+    (τ υ : Term Func) (φ : Formula Func Pred) :
+    (equalitySubstitutionCertificateTree τ υ φ).headersShapeOK = true := by
+  rw [FoundationCertificateTree.headersShapeOK_eq_shapeOK]
+  exact equalitySubstitutionCertificateTree_shapeOK τ υ φ
+
 theorem equalitySubstitutionCertificateTree_missing_child_fails
     [DecidableEq Func] [DecidableEq Pred]
     (t : Credence) (τ υ : Term Func) (φ : Formula Func Pred) :
@@ -268,6 +288,17 @@ theorem equalitySubstitutionCertificateTree_missing_child_header_fails
     FoundationCertificateHeader.shapeOK, FoundationCertificateHeader.ruleCode?,
     FoundationRuleCode.ofName, FoundationRuleCode.name, FoundationRulePayload.code,
     FoundationRuleCode.childCount]
+
+theorem equalitySubstitutionCertificateTree_missing_child_headers_fail
+    (τ υ : Term Func) (φ : Formula Func Pred) :
+    (FoundationCertificateTree.node
+      (FoundationRulePayload.equalitySubst τ υ φ)
+      [.node
+        (FoundationRulePayload.hyp
+          [Formula.equal τ υ, Formula.instantiate τ φ]
+          (Formula.equal τ υ)) []]).headersShapeOK = false := by
+  rw [FoundationCertificateTree.headersShapeOK_eq_shapeOK]
+  exact equalitySubstitutionCertificateTree_missing_child_shape_fails τ υ φ
 
 theorem unknownFoundationCertificateHeader_fails :
     (FoundationCertificateHeader.mk "unknownRule" 0).shapeOK = false := by
