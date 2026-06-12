@@ -85,3 +85,8 @@ import Cred.Approx.MaxPrinciple
 import Cred.Approx.NormCircle
 import Cred.Approx.Invariant
 import Cred.Approx.FirstIntegral
+import Cred.Topology.Basic
+import Cred.Topology.Clopen
+import Cred.Topology.Graded
+import Cred.Topology.Threshold
+import Cred.Topology.Fuzzy
