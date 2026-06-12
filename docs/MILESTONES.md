@@ -74,6 +74,19 @@ soundness (`Foundation/CheckerSoundness.lean`) is the smallest checkable surface
 the certificate type, the one-step rule checker, and the recursive check. The
 goal is to shrink the trusted surface monotonically toward a minimal kernel.
 
+The executable checker no longer needs the reals. `Foundation/CheckBool.lean`
+gives `checkBool`, a `Credence`-free, computable certificate checker, and proves
+it agrees with the verified checker for every threshold (`checkJudgment_eq_map`,
+`checkBool_eq_isSome`), since the threshold only ever lived in the result type,
+never the decision. A real-free `true` verdict still recovers the object-level
+consequence (`checkBool_true_sound`), and `checkBool exampleTree = true` holds by
+`rfl` depending only on `propext`. `Main.lean` runs it: `lake env lean --run
+Main.lean` prints the verdict. So the runtime trusted base for the checker is the
+small structural `checkBool`, with no reals; soundness stays certified in Lean.
+The native binary `lake exe cred` builds, but its execution on this host is
+blocked by a Lean-v4.16-toolchain versus newer-macOS `dyld` segment-flag
+mismatch, an environment issue that resolves on a compatible toolchain or OS.
+
 ## Architecture decision: the proof assistant
 
 Decision: formulate inside Lean as a deep embedding (the current state), grow a
@@ -90,9 +103,19 @@ develops this as the seed-transition-validator schema.
 
 ## Open frontier
 
-Genuine multi-session research, tracked in the issues:
-- completeness and cut elimination for the labelled calculus;
-- the second-incompleteness boundary via representability;
-- abstracting the value algebra and constructing it internally (off the reals);
-- the minimal kernel, its self-representation, and extraction to a standalone
-  checker.
+Done since the first draft: completeness and cut admissibility for the labelled
+calculus (`Completeness.lean`, `CutElim.lean`); the value algebra abstracted
+(`Algebra.lean`) and constructed off the reals on the rational unit interval
+(`Algebra/Rational.lean`); the minimal kernel (`MinimalKernel.lean`); the
+self-representation substrate (`SelfRep.lean`); and a real-free executable checker
+(`CheckBool.lean`, above).
+
+Remaining, genuine multi-session research:
+- the full reflective self-checker: a code-level checker function that does not
+  call the meta checker, with a coincidence proof (Stage 4b);
+- the internal Dedekind completion of the rational value algebra to the full unit
+  interval, with completeness for the inf/sup quantifiers;
+- the second-incompleteness boundary via full arithmetic representability of the
+  provability predicate;
+- a runnable native binary on this host (a toolchain/OS update; the checker is
+  already real-free and runs via the evaluator).
