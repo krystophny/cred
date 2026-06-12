@@ -114,6 +114,7 @@ lake build
 | `Foundation.Structure.applyFoundationRule_some_childCount` | Successful rule application has the arity declared by its rule code |
 | `Foundation.Structure.applyFoundationRule` | One-step checker from rule payloads and checked children to typed certificates |
 | `Foundation.Structure.FoundationCertificateTree.ruleName_roundtrip` | Certificate tree rule names parse back to their rule codes |
+| `Foundation.Structure.checkFoundationCertificate_some_arityMatches` | Successful certificate checks have matching root arity |
 | `Foundation.Structure.checkFoundationCertificate` | Recursive checker from certificate trees to typed certificates |
 
 ## Dependencies

@@ -203,6 +203,15 @@ def FoundationCertificateTree.childCount
     (tree : FoundationCertificateTree Func Pred) : Nat :=
   tree.ruleCode.childCount
 
+def FoundationCertificateTree.children :
+    FoundationCertificateTree Func Pred →
+      List (FoundationCertificateTree Func Pred)
+  | .node _ children => children
+
+def FoundationCertificateTree.arityMatches
+    (tree : FoundationCertificateTree Func Pred) : Prop :=
+  tree.children.length = tree.childCount
+
 theorem FoundationCertificateTree.ruleName_roundtrip
     (tree : FoundationCertificateTree Func Pred) :
     FoundationRuleCode.ofName tree.ruleName = some tree.ruleCode := by
@@ -217,8 +226,11 @@ def checkFoundationCertificate [DecidableEq Func] [DecidableEq Pred]
     FoundationCertificateTree Func Pred →
       Option (CheckedFoundationProof t Func Pred)
   | .node payload children => do
-      let checkedChildren ← checkFoundationCertificateList t children
-      applyFoundationRule t payload checkedChildren
+      if children.length = payload.childCount then
+        let checkedChildren ← checkFoundationCertificateList t children
+        applyFoundationRule t payload checkedChildren
+      else
+        none
 
 def checkFoundationCertificateList [DecidableEq Func] [DecidableEq Pred]
     (t : Credence) :
@@ -231,6 +243,21 @@ def checkFoundationCertificateList [DecidableEq Func] [DecidableEq Pred]
       some (checkedChild :: checkedChildren)
 
 end
+
+theorem checkFoundationCertificate_some_arityMatches
+    [DecidableEq Func] [DecidableEq Pred]
+    {t : Credence} {tree : FoundationCertificateTree Func Pred}
+    {checked : CheckedFoundationProof t Func Pred}
+    (h : checkFoundationCertificate t tree = some checked) :
+    tree.arityMatches := by
+  cases tree with
+  | node payload children =>
+      by_cases hcount : children.length = payload.childCount
+      · exact hcount
+      · simp [checkFoundationCertificate, FoundationCertificateTree.arityMatches,
+          FoundationCertificateTree.children,
+          FoundationCertificateTree.childCount,
+          FoundationCertificateTree.ruleCode, hcount] at h
 
 end Structure
 

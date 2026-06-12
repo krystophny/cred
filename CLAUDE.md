@@ -247,8 +247,10 @@ Foundation checker (from Foundation/Checker.lean):
 - `applyFoundationRule_some_childCount`
 - `Structure.FoundationCertificateTree`
 - `FoundationCertificateTree.ruleCode`, `FoundationCertificateTree.ruleName`
-- `FoundationCertificateTree.childCount`
+- `FoundationCertificateTree.childCount`, `FoundationCertificateTree.children`
+- `FoundationCertificateTree.arityMatches`
 - `FoundationCertificateTree.ruleName_roundtrip`
+- `checkFoundationCertificate_some_arityMatches`
 - `checkFoundationCertificate`, `checkFoundationCertificateList`
 
 ## Philosophy
