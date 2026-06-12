@@ -949,6 +949,47 @@ that an AI, a compiler, or any system can bootstrap from nothing:
 independently checked. Only the Cred row is a formal theorem; every other row is
 an analogy and is marked as such in \cref{tab:cases}.
 
+\paragraph{The schema is bookkeeping, not the deep result.} The formal bootstrap
+theorems are deliberately elementary. No seed gives no run
+(\texttt{no\_empty\_bootstrap}); a fixed point gives self-hosting
+(\texttt{selfHosts\_of\_fixed}); for a fixed Bayesian model, sequential update
+equals batch update. Their role is not a deep mathematical result but an
+accounting discipline, like double-entry bookkeeping: elementary, yet useful
+because it catches a hidden host tool in a trusted compiler path, a hidden
+model-volume commitment in a Bayesian comparison, a hidden internal conditional
+in a proof system, a hidden metatheory in a foundation, or a hidden validator
+assumption in a self-hosting claim. The nontrivial mathematical content of Cred
+lies elsewhere: admissible conditioning and no-ex-falso through zero-evidence
+underdetermination, the LP/K3 collapse bridges, the no-go against any
+truth-functional conditional bridge, the Curry block on an internal conditional,
+the provability and reflection boundaries, and the real-free checker soundness
+bridge. \Cref{tab:claim-hierarchy} separates the layers so the schema is not
+read as carrying weight it does not.
+
+\begin{table}[t]
+\centering
+\small
+\begin{tabular}{@{}lll@{}}
+\toprule
+Claim & Status & Depth \\
+\midrule
+No seed, no run & elementary theorem & bookkeeping \\
+Fixed point gives self-hosting & elementary theorem & bookkeeping \\
+Sequential = batch, fixed Bayes model & coherence theorem & bookkeeping \\
+No truth-functional conditional bridge & substantive theorem & Cred content \\
+No-ex-falso via zero-evidence & substantive theorem & Cred content \\
+Curry internal-conditional block & substantive theorem & Cred content \\
+Real-free checker soundness & formal artifact & Cred content \\
+Compiler / AI / biology readings & structured analogy & expository \\
+\bottomrule
+\end{tabular}
+\caption{The claim hierarchy. The bootstrap schema rows are elementary
+bookkeeping; the substantive mathematical content is the Cred-specific theorems;
+the cross-substrate readings are analogies. The paper claims each row only at its
+stated depth.}
+\label{tab:claim-hierarchy}
+\end{table}
+
 \section{Conclusion}
 \label{sec:conclusion}
 
