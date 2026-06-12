@@ -13,3 +13,4 @@ name = "Cred"
 [[lean_exe]]
 name = "cred"
 root = "Main"
+moreLinkArgs = ["-Wl,-no_data_const"]
