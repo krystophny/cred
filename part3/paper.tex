@@ -615,6 +615,116 @@ conditioning constrains values through the chain rule; it is not implication.
 % Bibliography
 %=============================================================================
 
+\section{Related set theories and value structures}
+\label{sec:related}
+
+This section positions Cred against three families of non-classical systems that
+share its concern with contradiction, partiality, and graded or non-Boolean
+membership. The aim is comparison of design, not a claim of superiority. We
+separate throughout what Cred \emph{proves} (machine-checked Lean results, named
+below) from what is a structural analogy with prior work.
+
+\subsection{First Degree Entailment and the Belnap--Dunn four values}
+
+First Degree Entailment, in the Belnap--Dunn reading \cite{belnap1977,dunn1976},
+equips formulas with one of four values---$\mathbf{t}$ (true only), $\mathbf{f}$
+(false only), $\mathbf{b}$ (both), $\mathbf{n}$ (neither)---tracking told-true and
+told-false evidence as two independent bits. Collapsing the two paraconsistent
+values $\mathbf{b},\mathbf{n}$ to a single middle value recovers the
+three-valued logics of Kleene (strong K3) and Priest (LP)
+\cite{priest1979,asenjo1966,priest2008}.
+
+Cred sits below this picture as a quantitative refinement. The scalar fragment
+takes values in $[0,1]$ with negation $\negc c = 1-c$, conjunction
+$c_1 \conjc c_2$ (product), and the De Morgan dual $c_1 \disjc c_2$. The
+collapse onto $\{0,\tfrac12,1\}$ sending $0 \mapsto 0$, $(0,1)\mapsto \tfrac12$,
+$1\mapsto 1$ reproduces the Kleene tables for negation, conjunction, and
+disjunction; this is verified in \texttt{Cred.ThreeVal} (\texttt{neg},
+\texttt{conj}, \texttt{disj}, with the De Morgan laws \texttt{de\_morgan\_conj},
+\texttt{de\_morgan\_disj} and the diagonal facts \texttt{conj\_half\_half},
+\texttt{disj\_half\_half}). The scalar middle value $\tfrac12$ is a single point,
+so it conflates ``both'' and ``neither'': one coordinate cannot record told-true
+and told-false strength separately.
+
+To separate them, Cred adds a two-coordinate value \texttt{BiCredence}, a pair
+$\langle \mathrm{pos}, \mathrm{neg}\rangle$ of independent credences with no
+constraint relating them. Negation swaps coordinates (\texttt{bneg}),
+conjunction multiplies positive evidence and joins negative evidence
+(\texttt{bconj}), and disjunction is the De Morgan dual (\texttt{bdisj}); negation
+is involutive (\texttt{bneg\_bneg}). The four corners $\langle 0,0\rangle$,
+$\langle 1,0\rangle$, $\langle 0,1\rangle$, $\langle 1,1\rangle$ are named
+\texttt{neither}, \texttt{trueOnly}, \texttt{falseOnly}, \texttt{both}, and the
+map \texttt{toFDE}, thresholding each coordinate at certainty, sends them to the
+four FDE values exactly (\texttt{toFDE\_neither}, \texttt{toFDE\_trueOnly},
+\texttt{toFDE\_falseOnly}, \texttt{toFDE\_both}). Negation acts on the corners as
+in FDE: it swaps \texttt{trueOnly} and \texttt{falseOnly} and fixes \texttt{both}
+and \texttt{neither} (\texttt{bneg\_trueOnly}, \texttt{bneg\_falseOnly},
+\texttt{bneg\_both}, \texttt{bneg\_neither}). The positive projection
+\texttt{projPos} is a homomorphism for conjunction and disjunction
+(\texttt{projPos\_bconj}, \texttt{projPos\_bdisj}); it commutes with negation only
+on the consistent fragment where $\mathrm{neg} = \negc\,\mathrm{pos}$
+(\texttt{projPos\_bneg\_complementary}), which is exactly where the scalar value
+and the FDE bilattice agree. So Cred refines FDE in two directions: the scalar
+$[0,1]$ grades each FDE corner, while \texttt{BiCredence} keeps the two evidence
+coordinates apart that the single $\tfrac12$ would merge.
+
+\subsection{Paraconsistent set theory}
+
+Paraconsistent and four-valued set theories build ZF-style universes over a
+non-classical membership predicate, so that $a \in b$ may take a both-true-and-false
+value without trivializing the theory; the algebra-valued constructions of
+Tarafder and Chakraborty are representative \cite{tarafder2015,chakraborty2019}.
+Cred's set layer, \texttt{CredSet}, is graded rather than four-valued: membership
+is a credence \texttt{mem}\,$: U \to [0,1]$, with complement, intersection, and
+union lifting the value operations pointwise (\texttt{compl}, \texttt{inter},
+\texttt{union}) and \texttt{emptyset}, \texttt{univ} as the constant $0$ and $1$
+sets.
+
+The contrast is in where contradiction lives and how the classical theory is
+recovered. A paraconsistent set theory locates inconsistency \emph{in a membership
+value}---a designated ``both'' that is simultaneously a member and a non-member.
+Cred has no such value: membership is a single number in $[0,1]$, and
+contradiction is instead localized at the level of \emph{consequence}, by the
+chain-rule conditioning that withholds explosion when evidence has credence $0$
+(\texttt{conditioning\_zero\_any}; cf. \texttt{cred\_no\_ex\_falso}). Comprehension
+is treated as constraint rather than as a value: a defining condition cuts out the
+solution set of credences compatible with it, in the spirit of separation, without
+forcing a membership degree where the condition is unsatisfiable. Classical set
+theory is recovered exactly on the \emph{crisp} fragment, where every membership
+value is $0$ or $1$ (\texttt{Crisp}). On crisp sets the graded operations restrict
+to the Boolean ones and stay crisp (\texttt{compl\_crisp}, \texttt{inter\_crisp},
+\texttt{union\_crisp}); the embedding \texttt{ofPred} of a predicate and its inverse
+\texttt{toPred} form a bijection (\texttt{toPred\_ofPred}, \texttt{ofPred\_toPred},
+\texttt{ofPred\_injective}, \texttt{ofPred\_surjective}) commuting with complement,
+intersection, and union (\texttt{toPred\_compl}, \texttt{toPred\_inter},
+\texttt{toPred\_union}); the pointwise subset relation becomes classical
+implication of memberships (\texttt{crisp\_subset\_iff}); and graded membership
+$\mathtt{mem}\,x = 1$ coincides with classical membership
+(\texttt{mem\_iff\_classical}, \texttt{crisp\_mem\_iff\_toPred}). Cred thus
+reproduces ordinary set theory on crisp data and confines non-classicality to
+graded membership and to conditioning, rather than to an inconsistent membership
+value.
+
+\subsection{Twist-valued models and twist structures}
+
+Twist structures present a paraconsistent algebra as pairs $\langle a, b\rangle$
+drawn from an underlying lattice, with one coordinate tracking the positive part
+and the other the negative; algebra-valued models of set theory have been built on
+such structures by L\"owe, Tarafder, and collaborators \cite{loewe2015,tarafder2015}.
+Cred's \texttt{BiCredence} is a twist-like construction over the credence algebra:
+its two coordinates are the positive and negative credence, negation is the
+coordinate swap (\texttt{bneg}), and conjunction and disjunction pair a product
+meet on the positive axis with a De Morgan join on the negative axis
+(\texttt{bconj}, \texttt{bdisj}). We state the relationship conservatively. Cred
+does not claim to reproduce any particular twist-valued model of set theory, nor to
+validate the same fixed set of axioms; what is verified is the algebra of the
+two-coordinate value, its involutive negation, the homomorphic positive projection,
+and the exact collapse to the four FDE values. The point of contact is structural:
+the twist idea of carrying positive and negative information as separate
+coordinates is exactly what \texttt{BiCredence} uses to recover the FDE distinctions
+that the scalar value cannot express, and what a future graded set theory over
+\texttt{BiCredence}-valued membership could build on.
+
 \bibliographystyle{plain}
 \bibliography{../cred}
 
