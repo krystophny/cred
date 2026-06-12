@@ -18,6 +18,12 @@ cd part3 && latexmk -pdf -interaction=nonstopmode -halt-on-error paper.tex
 
 Toolchain: Lean `v4.16.0` + mathlib `v4.16.0`. Correctness = `lake build` succeeds and theorems type-check.
 
+`make all` builds the Lean source and all seven papers (`part1`..`part7`); `make checker-test` builds the `cred` checker binary and runs the CLI test suite.
+
+## CI/CD
+
+CI/CD is allowed for this repo. `.github/workflows/ci.yml` runs the Lean build (with `lake exe cache get` for the Mathlib cache), the zero-`sorry` gate, and the `part1`..`part7` paper matrix on every push and pull request. Keep the pipeline minimal, reproducible, and pinned; do not add CI the repo cannot run locally. The CI mirrors `make all`. See `docs/RELEASE_AUDIT.md` for the one-command reproduce.
+
 ## Primitives
 
 ```
