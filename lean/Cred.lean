@@ -85,6 +85,16 @@ import Cred.Approx.MaxPrinciple
 import Cred.Approx.NormCircle
 import Cred.Approx.Invariant
 import Cred.Approx.FirstIntegral
+import Cred.Approx.Score
+import Cred.Approx.Symplectic
+import Cred.Approx.FiniteVolume
+import Cred.Approx.DivFree
+import Cred.Approx.LieGroup
+import Cred.Approx.SSP
+import Cred.Approx.Persistence
+import Cred.Approx.Compatible
+import Cred.Approx.EnergyBalance
+import Cred.Approx.Variational
 import Cred.Topology.Basic
 import Cred.Topology.Clopen
 import Cred.Topology.Graded
