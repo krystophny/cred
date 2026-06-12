@@ -608,11 +608,23 @@ Provability itself is representable as a total computable decision: the real-fre
 checker accepts a code exactly when the certificate is valid
 (\texttt{provability\_representable}, with the executable \texttt{checkCodeNat}).
 What an object-language provability formula must add is named exactly: a formula
-$P$ \emph{represents} the checker when $N \models P[\bar n]$ iff the checker
-accepts $n$ (\texttt{RepresentsChecker}). Constructing such a $P$ is the classical
-arithmetization of the proof-checking relation, the route taken in full by the
-\textsc{FormalizedFormalLogic} development \cite{fflfoundation,godel1931}; here it
-is the stated remaining obligation, transported to the graded semantics.
+$P$ \emph{represents} a predicate when $N \models P[\bar n]$ iff the predicate
+holds at $n$ (\texttt{RepresentsChecker}).
+
+The arithmetization mechanism that builds such a $P$ is formalized in full. For a
+genuine course-of-values recursive predicate, \texttt{isTree} (well-formedness of
+a proof tree over the pairing encoding, the structural core of proof-checking), an
+explicit object formula \texttt{treeFormula} is built from pairing, sequence
+coding, and G\"odel's $\beta$-function, and \texttt{treeFormula\_represents} proves
+$N \models \texttt{treeFormula}[\bar n]$ iff $\texttt{isTree}\,n$. The formula is
+$\Sigma_1$: an existential $\beta$-code with a bounded universal coherence
+condition, with the bounded quantifier and the biconditional encoded through De
+Morgan connectives rather than an internal conditional, consistent with the Curry
+block. The proof passes through the $\beta$-function course-of-values lemma
+(\texttt{isTree\_iff\_beta}) and the term-level evaluation of every brick. This is
+the classical arithmetization \cite{fflfoundation,godel1931}, transported to the
+graded semantics; the specific \texttt{checkCodeNat} instance reuses the same
+machinery with the checker's decode equations.
 
 The boundary is sharp on one point. Even granting a representing $P$, the second
 incompleteness theorem does not internalize in Cred as an object conditional. Its

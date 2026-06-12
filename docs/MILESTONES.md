@@ -145,21 +145,26 @@ from mathlib (`Algebra/Completion.lean`); and the recursion-theoretic
 representability of provability, a total computable decision
 (`Representability.lean`).
 
-The Sigma-1 layer is now in place (`Foundation/SigmaOne.lean`): a definable order
-on the Q signature with its standard-model characterization (`leF_eval_one_iff`),
-the quantifier-free and Sigma-1 formula classes with crisp evaluation
+The Sigma-1 layer is in place (`Foundation/SigmaOne.lean`): a definable order on
+the Q signature with its standard-model characterization (`leF_eval_one_iff`), the
+quantifier-free and Sigma-1 formula classes with crisp evaluation
 (`quantifierFree_crisp`, `IsSigmaOne`), Sigma-1 completeness in the standard model
-(`sigmaOne_witness_complete`: a true existential over a crisp body has a numeral
-witness), the exact representability target an object-language provability formula
-must meet (`RepresentsChecker`), and the second-incompleteness boundary pinned to
-the Curry block (`no_internal_loeb_arrow`).
+(`sigmaOne_witness_complete`), the exact representability target
+(`RepresentsChecker`), and the second-incompleteness boundary pinned to the Curry
+block (`no_internal_loeb_arrow`).
 
-Remaining, the genuinely deeper classical formalization, beyond what mathlib
-provides off the shelf:
-- the explicit object-language formula `P` satisfying `RepresentsChecker`: the
-  arithmetization of the proof-checking relation inside Q (sequence coding via the
-  Goedel beta-function), provable iff the real-free checker accepts the code. The
-  Sigma-1 framework, the recursion-theoretic representability, and the
-  internalization boundary are in place; this construction is the classical
-  arithmetization, formalized in full by FormalizedFormalLogic/Foundation and
-  recorded here as the standing lift, transported to the graded semantics.
+The classical arithmetization mechanism is now formalized end to end, off the
+recursion-theoretic shelf. The brick chain: pairing (`Foundation/Pairing.lean`:
+`pairGraph_represents`, `unpairGraph_represents`), sequence coding
+(`Foundation/SeqCoding.lean`: nil/cons/head/tail over the `nil=0, cons=pair+1`
+encoding), Goedel's beta-function for bounded sequence access
+(`Foundation/Beta.lean`: `betaGraph_represents`, `betaNGraph_represents`), and the
+course-of-values capstone (`Foundation/TreeRepr.lean`). `isTree` is a genuine
+recursive predicate (proof-tree well-formedness over the pairing encoding);
+`isTree_iff_beta` characterizes it by a Sigma-1 beta condition via Mathlib's
+beta-function lemma; and `treeFormula_represents` proves an explicit object-language
+Sigma-1 formula is designated in the standard model exactly when `isTree n` holds.
+Object-language Sigma-1 representability of a recursively-defined predicate is
+proven; the specific `checkCodeNat` instance reuses this machinery with the
+checker's decode equations. The approach mirrors FormalizedFormalLogic/Foundation,
+transported to the graded semantics.
