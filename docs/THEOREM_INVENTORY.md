@@ -75,7 +75,11 @@ decidability of real equality), not through the logic of Cred.
 | Representability target for an object Prov formula | `arithQ.RepresentsChecker` | `Foundation/SigmaOne.lean` | theorem (target) |
 | Second incompleteness does not internalize | `arithQ.no_internal_loeb_arrow` | `Foundation/SigmaOne.lean` | theorem |
 | Goedel sentence pinned to one half | `provGodel` results | `Foundation/ProvabilityDeriv.lean` | theorem |
-| Explicit object Prov arithmetization (beta-function) | n/a | n/a | citation (FFL Foundation); standing lift |
+| Pairing / unpairing represented as object formulas | `arithQ.pairGraph_represents`, `unpairGraph_represents` | `Foundation/Pairing.lean` | theorem |
+| List coding (nil/cons/head/tail) represented | `arithQ.consGraph_represents`, `isNilGraph_represents` | `Foundation/SeqCoding.lean` | theorem |
+| Goedel beta bounded sequence access represented | `arithQ.betaGraph_represents`, `betaNGraph_represents` | `Foundation/Beta.lean` | theorem |
+| Recursive predicate = Sigma-1 beta condition | `arithQ.isTree_iff_beta` | `Foundation/TreeRepr.lean` | theorem |
+| Explicit Sigma-1 object formula represents a recursive predicate | `arithQ.treeFormula_represents` | `Foundation/TreeRepr.lean` | theorem |
 
 ## Part 4: the irreducible commitment
 

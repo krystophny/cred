@@ -78,6 +78,11 @@ Keep the separation clear: `⊗`/`⊔` are the core algebraic operations (produc
 - `lean/Cred/Foundation/Certificate.lean`: external certificate envelopes with supplied headers, payload checks, and soundness.
 - `lean/Cred/Foundation/Serialization.lean`: raw header decoding for rule names and arities.
 - `lean/Cred/Foundation/CertificateExamples.lean`: envelope examples for accepted headers and forged-header rejection.
+- `lean/Cred/Foundation/SigmaOne.lean`: definable order, quantifier-free and Sigma-1 formula classes, Sigma-1 completeness, the representability target, and the second-incompleteness boundary (no internal Loeb arrow).
+- `lean/Cred/Foundation/Pairing.lean`: Nat.pair and Nat.unpair represented as explicit object formulas (pairGraph, unpairGraph).
+- `lean/Cred/Foundation/SeqCoding.lean`: list coding (nil/cons/head/tail) over the nil=0, cons=pair+1 encoding.
+- `lean/Cred/Foundation/Beta.lean`: modulo and Goedel beta-function bounded sequence access as object formulas (betaGraph, betaNGraph).
+- `lean/Cred/Foundation/TreeRepr.lean`: course-of-values capstone: the recursive predicate isTree equals a Sigma-1 beta condition (isTree_iff_beta), and an explicit Sigma-1 object formula represents it (treeFormula_represents).
 - `part1/paper.tex`: congruence classification (6 sections + conclusion + 2 appendices, 12 pages).
 - `part2/paper.tex`: bridge paper (8 sections + 2 appendices, 24 pages; self-contained).
 - `part3/paper.tex`: foundations paper: paradox without explosion, crisp fragments, solution sets, and external conditioning.
