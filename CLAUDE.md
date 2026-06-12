@@ -246,6 +246,9 @@ Foundation checker (from Foundation/Checker.lean):
 - `applyFoundationRule`
 - `applyFoundationRule_some_childCount`
 - `Structure.FoundationCertificateTree`
+- `FoundationCertificateTree.ruleCode`, `FoundationCertificateTree.ruleName`
+- `FoundationCertificateTree.childCount`
+- `FoundationCertificateTree.ruleName_roundtrip`
 - `checkFoundationCertificate`, `checkFoundationCertificateList`
 
 ## Philosophy

@@ -113,6 +113,7 @@ lake build
 | `Foundation.Structure.FoundationRulePayload.childCount_eq_code` | Rule payloads use the child count of their trusted code |
 | `Foundation.Structure.applyFoundationRule_some_childCount` | Successful rule application has the arity declared by its rule code |
 | `Foundation.Structure.applyFoundationRule` | One-step checker from rule payloads and checked children to typed certificates |
+| `Foundation.Structure.FoundationCertificateTree.ruleName_roundtrip` | Certificate tree rule names parse back to their rule codes |
 | `Foundation.Structure.checkFoundationCertificate` | Recursive checker from certificate trees to typed certificates |
 
 ## Dependencies

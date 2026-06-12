@@ -191,6 +191,25 @@ inductive FoundationCertificateTree (Func : Type u) (Pred : Type v) where
       FoundationCertificateTree Func Pred
 deriving Repr
 
+def FoundationCertificateTree.ruleCode :
+    FoundationCertificateTree Func Pred → FoundationRuleCode
+  | .node payload _ => payload.code
+
+def FoundationCertificateTree.ruleName
+    (tree : FoundationCertificateTree Func Pred) : String :=
+  tree.ruleCode.name
+
+def FoundationCertificateTree.childCount
+    (tree : FoundationCertificateTree Func Pred) : Nat :=
+  tree.ruleCode.childCount
+
+theorem FoundationCertificateTree.ruleName_roundtrip
+    (tree : FoundationCertificateTree Func Pred) :
+    FoundationRuleCode.ofName tree.ruleName = some tree.ruleCode := by
+  cases tree
+  simp [FoundationCertificateTree.ruleName, FoundationCertificateTree.ruleCode,
+    FoundationRuleCode.ofName_name]
+
 mutual
 
 def checkFoundationCertificate [DecidableEq Func] [DecidableEq Pred]
