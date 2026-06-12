@@ -74,3 +74,4 @@ import Cred.Algebra.Finite
 import Cred.Algebra.Rational
 import Cred.SelfRep
 import Cred.Foundation.Reflect
+import Cred.Foundation.CodeChecker
