@@ -5,7 +5,7 @@
   quantifier rules.
 -/
 
-import Cred.Foundation.Checker
+import Cred.Foundation.CheckerSoundness
 
 namespace Cred
 namespace Foundation

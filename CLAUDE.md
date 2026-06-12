@@ -245,7 +245,6 @@ Foundation rule codes (from Foundation/RuleCode.lean):
 
 Foundation checker (from Foundation/Checker.lean):
 - `Structure.CheckedFoundationProof`
-- `CheckedFoundationProof.sound`
 - `Structure.FoundationRulePayload`
 - `FoundationRulePayload.code`, `FoundationRulePayload.childCount`
 - `applyFoundationRuleUnchecked`
@@ -262,6 +261,10 @@ Foundation checker (from Foundation/Checker.lean):
 - `FoundationCertificateTree.shapeOK_true_allAritiesMatch`
 - `FoundationCertificateTree.shapeOKList_true_allAritiesMatchList`
 - `FoundationCertificateTree.ruleName_roundtrip`
+- `checkFoundationCertificate`, `checkFoundationCertificateList`
+
+Foundation checker soundness (from Foundation/CheckerSoundness.lean):
+- `CheckedFoundationProof.sound`
 - `checkFoundationCertificate_some_arityMatches`
 - `checkFoundationCertificate_some_allAritiesMatch`
 - `checkFoundationCertificateList_some_allAritiesMatchList`
@@ -270,7 +273,6 @@ Foundation checker (from Foundation/Checker.lean):
 - `checkFoundationCertificate_none_of_shapeOK_false`
 - `checkFoundationCertificateList_none_of_shapeOKList_false`
 - `checkFoundationCertificate_sound`
-- `checkFoundationCertificate`, `checkFoundationCertificateList`
 
 ## Philosophy
 

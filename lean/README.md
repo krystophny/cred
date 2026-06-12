@@ -118,6 +118,7 @@ lake build
 | `Foundation.Structure.applyFoundationRule_some_childCount` | Successful rule application has the arity declared by its rule code |
 | `Foundation.Structure.applyFoundationRule` | One-step checker from rule payloads and checked children to typed certificates |
 | `Foundation.Structure.FoundationCertificateTree.ruleName_roundtrip` | Certificate tree rule names parse back to their rule codes |
+| `Foundation.Structure.CheckedFoundationProof.sound` | Checked proof objects produce foundation consequences |
 | `Foundation.Structure.FoundationCertificateTree.shapeOK_true_arityMatches` | Structural precheck success implies root arity matches |
 | `Foundation.Structure.FoundationCertificateTree.shapeOK_true_allAritiesMatch` | Structural precheck success implies every node has matching arity |
 | `Foundation.Structure.checkFoundationCertificate_some_arityMatches` | Successful certificate checks have matching root arity |

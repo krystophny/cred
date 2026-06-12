@@ -1,4 +1,4 @@
--- This module serves as the root of the `Cred` library.
+-- This module is the root of the `Cred` library.
 -- Import modules here that should be built as part of the library.
 import Cred.Core.Value
 import Cred.Core.Consequence
@@ -31,4 +31,5 @@ import Cred.Foundation.Quantifier
 import Cred.Foundation.Calculus
 import Cred.Foundation.RuleCode
 import Cred.Foundation.Checker
+import Cred.Foundation.CheckerSoundness
 import Cred.Foundation.Examples
