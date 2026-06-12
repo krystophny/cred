@@ -442,6 +442,20 @@ excluded middle fails too. The classical laws are recovered at the top of the
 scale and dissolve smoothly as the threshold drops, with $\tfrac12$ as the
 fixed point where $A$ and $\negc A$ meet.
 
+\paragraph{A clopen set is not a contradiction.} Definitions decide before the
+non-explosion language applies. A set $A$ is closed when its complement is open,
+$\mathrm{Closed}\,A := \mathrm{Open}(A^{c})$, not when $A$ fails to be open. So a
+\emph{clopen} set, open and closed at once, means
+$\mathrm{Open}\,A \wedge \mathrm{Open}(A^{c})$, a consistent conjunction, not
+$\mathrm{Open}\,A \wedge \neg\,\mathrm{Open}\,A$. The empty set and the whole
+space are clopen in the standard topology of the reals, and in the discrete
+topology every set is; clopen-ness even depends on the ambient space. The point
+is machine-checked (\texttt{isClosed\_iff\_isOpen\_compl},
+\texttt{isClopen\_iff\_isOpen\_and\_isOpen\_compl}; see Part~7), and it sets a
+discipline: before reaching for graded or non-explosive language, expand the
+definitions. Cred sharpens distinctions; a name that sounds paradoxical is often
+a consistent predicate misread.
+
 \section{Proof, and proof by contradiction as crossing out}
 \label{sec:proof}
 
