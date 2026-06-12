@@ -43,4 +43,20 @@ theorem no_crisp_self_validation {S : Type} (cert : S → Credence) (d : S)
     have hv : (half : Credence).val = (1 : Credence).val := congrArg Credence.val h
     rw [half_val, one_val] at hv; norm_num at hv
 
+/-- Non-crisp self-validation is consistent: at any point there is a faithful
+    self-certification, one that reports its own value, and it equals `half`. The
+    constant `half` is faithful by the liar fixed point `~half = half`. So a system
+    can certify itself non-crisply, where a crisp self-certification is impossible. -/
+theorem faithful_self_validation_exists {S : Type} (d : S) :
+    ∃ cert : S → Credence, cert d = ~ (cert d) ∧ cert d = half :=
+  ⟨fun _ => half, liar_fixed_point.symm, rfl⟩
+
+/-- The ceiling on self-trust: any self-certification that is not `half` is
+    unfaithful, it does not report its own value at the self-application point.
+    Higher self-confidence than `half` is available only by giving up faithfulness;
+    a system cannot faithfully certify itself with more than the interior value. -/
+theorem self_validation_unfaithful_of_ne_half {S : Type} (cert : S → Credence)
+    (d : S) (h : cert d ≠ half) : cert d ≠ ~ (cert d) :=
+  fun hfix => h (self_validation_not_crisp cert d hfix)
+
 end Cred
