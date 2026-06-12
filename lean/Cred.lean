@@ -80,6 +80,7 @@ import Cred.Foundation.Representability
 import Cred.Foundation.SigmaOne
 import Cred.Foundation.Pairing
 import Cred.Foundation.SeqCoding
+import Cred.Foundation.Beta
 import Cred.Approx.Structure
 import Cred.Approx.Positivity
 import Cred.Approx.Simplex
