@@ -121,6 +121,7 @@ lake build
 | `Foundation.Structure.checkFoundationCertificate_some_arityMatches` | Successful certificate checks have matching root arity |
 | `Foundation.Structure.checkFoundationCertificate_some_allAritiesMatch` | Successful certificate checks have matching arity at every node |
 | `Foundation.Structure.checkFoundationCertificate_some_shapeOK` | Successful certificate checks imply the structural precheck accepts |
+| `Foundation.Structure.checkFoundationCertificate_none_of_shapeOK_false` | Failed structural precheck forces certificate rejection |
 | `Foundation.Structure.checkFoundationCertificate` | Recursive checker from certificate trees to typed certificates |
 
 ## Dependencies

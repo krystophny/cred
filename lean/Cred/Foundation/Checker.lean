@@ -437,6 +437,30 @@ theorem checkFoundationCertificateList_some_shapeOKList
 
 end
 
+theorem checkFoundationCertificate_none_of_shapeOK_false
+    [DecidableEq Func] [DecidableEq Pred]
+    {t : Credence} {tree : FoundationCertificateTree Func Pred}
+    (hshape : tree.shapeOK = false) :
+    checkFoundationCertificate t tree = none := by
+  cases hcheck : checkFoundationCertificate t tree with
+  | none => rfl
+  | some checked =>
+      have hok := checkFoundationCertificate_some_shapeOK hcheck
+      rw [hshape] at hok
+      contradiction
+
+theorem checkFoundationCertificateList_none_of_shapeOKList_false
+    [DecidableEq Func] [DecidableEq Pred]
+    {t : Credence} {trees : List (FoundationCertificateTree Func Pred)}
+    (hshape : FoundationCertificateTree.shapeOKList trees = false) :
+    checkFoundationCertificateList t trees = none := by
+  cases hcheck : checkFoundationCertificateList t trees with
+  | none => rfl
+  | some checked =>
+      have hok := checkFoundationCertificateList_some_shapeOKList hcheck
+      rw [hshape] at hok
+      contradiction
+
 end Structure
 
 end Foundation
