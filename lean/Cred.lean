@@ -69,6 +69,7 @@ import Cred.Completeness
 import Cred.CutElim
 import Cred.Set.Examples
 import Cred.Extraction
+import Cred.Foundation.CheckBool
 import Cred.Algebra.Finite
 import Cred.Algebra.Rational
 import Cred.SelfRep
