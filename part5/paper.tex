@@ -1,0 +1,1091 @@
+% What Is...? A Conceptual Guide to Credence-Based Reasoning
+% Part 5: didactic guide to the Cred series
+%
+% References to Lean formalization: lean/Cred/
+
+\documentclass[11pt,a4paper]{article}
+
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{mathtools}
+\usepackage{enumitem}
+\usepackage{booktabs}
+\usepackage{hyperref}
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue,
+    citecolor=blue,
+    urlcolor=blue,
+    pdfauthor={Anonymous},
+    pdftitle={What Is...? A Conceptual Guide to Credence-Based Reasoning}
+}
+\usepackage{cleveref}
+\usepackage[margin=1in]{geometry}
+
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{example}[theorem]{Example}
+\newtheorem{remark}[theorem]{Remark}
+
+\newcommand{\cred}{\mathsf{cred}}
+\newcommand{\Cond}{\mathsf{Cond}}
+\newcommand{\Sol}{\mathsf{Sol}}
+\newcommand{\negc}{\mathord{\sim}}
+\newcommand{\conjc}{\otimes}
+\newcommand{\disjc}{\sqcup}
+\newcommand{\Real}{\mathbb{R}}
+\newcommand{\Bool}{\mathbb{B}}
+
+\title{\textbf{What Is...?}\\[0.5em]
+\large A Conceptual Guide to Credence-Based Reasoning}
+
+\author{Anonymous for blind review}
+\date{June 2026}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+A newcomer to formal epistemology faces a tangle of near-synonyms: truth, certainty, high credence, proof, conditioning, entailment. This guide untangles them by keeping three levels apart. The \emph{value level} assigns numbers in $[0,1]$ to propositions via the operations $\negc c = 1-c$, $a \conjc b = ab$, and $a \disjc b = a + b - ab$. The \emph{consequence level} asks which value assignments propagate above a threshold. The \emph{conditioning level} asks which conditional credences are consistent with a given joint, via the admissibility relation $\Cond(j,e) = \{c : ce = j\}$. Keeping the three levels apart resolves eight foundational questions, from the status of contradiction to the meaning of paradox, without invoking explosion. Every claim in the guide is grounded in the machine-checked results of the Cred series.
+\end{abstract}
+
+%=============================================================================
+\section{Introduction}
+\label{sec:intro}
+%=============================================================================
+
+Start with a small table.
+A proposition $A$ can have any credence in $[0,1]$.
+Three values stand out: $0$ (impossible), $1$ (certain), and $\tfrac{1}{2}$ (the
+unique fixed point of negation).
+The table below shows what each value means at each level.
+
+\begin{center}
+\begin{tabular}{lccc}
+\toprule
+ & $\cred(A) = 0$ & $\cred(A) = \tfrac{1}{2}$ & $\cred(A) = 1$ \\
+\midrule
+Value level & impossible & half-credence & certain \\
+K3 designation & not designated & not designated & designated \\
+LP designation & not designated & designated & designated \\
+Conditioning on $A$ & unconstrained & constrains & singleton \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent
+The table already answers three questions a newcomer might ask.
+\emph{What is falsehood?} Credence $0$, not a separate truth value.
+\emph{What is contradiction?} Holding $\cred(A) = \tfrac{1}{2}$ simultaneously
+for $A$ and $\negc A$, because $\negc\tfrac{1}{2} = \tfrac{1}{2}$.
+\emph{What happens if evidence is impossible?}
+Nothing is forced: $\Cond(0,0) = [0,1]$, which is the content of
+\texttt{conditioning\_zero\_any}.
+
+This guide answers eight such questions in order.
+Each is a point where everyday logic, probability, and many-valued logic talk
+past each other because they conflate two of the three levels.
+
+\begin{enumerate}
+  \item \textbf{What is truth?} A value of $1$ at the value level, not a designation
+        or a certainty consequence.
+  \item \textbf{What is falsehood?} A value of $0$.
+  \item \textbf{What is contradiction?} A pair $A$, $\negc A$ both holding above a
+        threshold. Contradiction does not force explosion: by
+        \texttt{graded\_no\_explosion}, for any threshold $t \le \tfrac{1}{2}$
+        there is a valuation making both $A$ and $\negc A$ designated while
+        some unrelated $B$ falls below threshold.
+  \item \textbf{What is ex falso?} The inference from a contradiction to an
+        arbitrary conclusion. It fails here by design. The admissibility
+        relation imposes no constraint when evidence credence is $0$, so
+        impossible premises provide no grip on conclusions.
+  \item \textbf{What is tertium non datur?} The claim that $\cred(A \disjc \negc A)$
+        exceeds threshold $t$ for every $A$. By
+        \texttt{threshold\_excluded\_middle\_iff}, this holds exactly when
+        $t \le \tfrac{3}{4}$, so excluded middle is a threshold-sensitive fact,
+        not a logical law.
+  \item \textbf{What is proof?} A derivation that the premise set has no
+        countermodel at threshold $t$, which is exactly
+        \texttt{reductio\_iff\_countermodels\_empty}: the entailment holds
+        if and only if the set of valuations satisfying the premises while
+        dropping the conclusion below $t$ is empty. The legitimate ground
+        for asserting a conclusion is countermodel elimination, not explosion.
+  \item \textbf{What is a paradox?} A self-referential equation whose solution set
+        reveals what the algebra can tolerate. The liar equation
+        $c = \negc c$ has the unique solution $\{\tfrac{1}{2}\}$, by
+        \texttt{solutions\_neg\_eq\_singleton}. The truth-teller equation
+        $c = c$ has all of $[0,1]$, matching the zero-evidence admissibility
+        $\Cond(0,0)$, as shown by \texttt{truth\_teller\_same\_shape\_as\_zero\_evidence}.
+        Russell's self-membership yields $\tfrac{1}{2}$ by
+        \texttt{russell\_mem\_eq\_half}. Curry's equation requires a product
+        residuum not present in the base algebra, and its paradoxical fixed
+        point appears only at positive evidence, as shown by
+        \texttt{curry\_block}.
+  \item \textbf{What is the difference between implication, entailment, and
+        conditioning?} Implication is a connective in the object language.
+        Entailment is a relation between premise sets and conclusions,
+        parametrized by threshold. Conditioning is the admissibility
+        relation $\Cond$, external to the value algebra. By
+        \texttt{no\_truthfunctional\_cond\_bridge}, no truth function on
+        three values can represent conditional credence; conditioning cannot
+        be collapsed into the object language.
+\end{enumerate}
+
+The guide is didactic and not a research paper.
+Every definition is stated informally first, then given its Lean name.
+Every claim is either a theorem from the series or an immediate consequence
+of one.
+Readers wanting full proofs should consult Parts~1--4 \cite{part1,part2};
+readers wanting the Lean source can inspect
+\texttt{lean/Cred/} directly.
+
+The three levels, value, consequence, and conditioning, are not merely a
+classification.
+They mark the boundary between what the algebra decides and what must be
+supplied externally.
+Classical logic lives in the crisp fragment $\{0,1\}$, by
+\texttt{crisp\_certainty\_iff\_classical} and
+\texttt{crisp\_positivity\_iff\_classical}.
+The one divergence from classical logic at that fragment is conditioning on
+empty evidence: where classical logic assigns vacuous truth, the credence
+algebra leaves the conditional value underdetermined.
+That single gap, \texttt{cond\_underdetermined\_iff} and
+\texttt{material\_divergence}, explains every place where the guide's answers
+differ from a classical textbook.
+
+The rest of the paper proceeds question by question.
+Section~\ref{sec:values} covers the value level and the three special points.
+Section~\ref{sec:contradiction} covers the consequence level and the threshold
+structure.
+Section~\ref{sec:exfalso} covers explosion and why it fails.
+Section~\ref{sec:tnd} covers excluded middle and its threshold window.
+Section~\ref{sec:proof} covers reductio and its relation to countermodels.
+Section~\ref{sec:paradox} covers paradoxes as equations.
+Section~\ref{sec:conditioning} covers the three-way distinction between
+implication, entailment, and conditioning.
+An appendix collects a one-page glossary of every term the guide uses,
+with its Lean name and the section where it appears.
+
+
+\section{Truth, falsehood, and value}
+\label{sec:values}
+
+Classical logic offers two slots for a sentence: true or false. This guide
+works with a wider scale. A sentence carries a \emph{credence}, a number in the
+closed interval $[0,1]$. The number records how strongly the sentence is held,
+not what camp it belongs to. The two classical slots survive as the endpoints
+of that scale.
+
+\subsection{The scale}
+
+Write $\cred(A)$ for the credence of a sentence $A$.
+
+\begin{definition}[Credence value]
+A credence value is a real number $c\in[0,1]$. The value $1$ is
+\emph{certainty}; the value $0$ is \emph{impossibility}.
+\end{definition}
+
+Certainty plays the role of truth: a sentence at value $1$ is held without
+reservation. Impossibility plays the role of falsehood: a sentence at value $0$
+is ruled out. Everything strictly between is a genuine middle. The midpoint
+$\tfrac12$ is the most balanced of these: it is the unique value fixed by
+negation, since $\negc c=1-c$ forces $c=\tfrac12$.
+
+The following table fixes intuition before we generalize. Read each row as one
+sentence and the verdict its value records.
+
+\begin{center}
+\begin{tabular}{lll}
+\hline
+sentence & $\cred$ & reading \\
+\hline
+$2+2=4$ & $1.0$ & certainty (classical truth) \\
+``it will rain tomorrow'' & $0.7$ & leaning yes \\
+the liar sentence & $0.5$ & perfectly balanced \\
+``this fair coin lands heads'' & $0.5$ & balanced, but by chance \\
+``it rains and it does not'' & $0.2$ & leaning no \\
+$2+2=5$ & $0.0$ & impossibility (classical falsehood) \\
+\hline
+\end{tabular}
+\end{center}
+
+Two rows sit at $0.5$ for different reasons. The liar lands there because its
+negation must match it. The coin lands there because the evidence splits evenly.
+The scale does not distinguish these by value alone; the distinction is in how
+the value arises, not in the number.
+
+\subsection{Designation: which values count}
+
+A value is just a position on the scale. To do logic we must say which positions
+license assertion. That choice is \emph{designation}: a sentence is asserted
+when its value lies in the designated set. The same scale supports more than one
+such choice, and each yields a different logic.
+
+Two choices matter here.
+
+\begin{definition}[Positivity and certainty]
+A sentence is \emph{positive} when $\cred(A)>0$, that is, not ruled out. It is
+\emph{certain} when $\cred(A)=1$.
+\end{definition}
+
+Positivity designates every value above $0$. Certainty designates only the top.
+A consequence is then \emph{valid} when every assignment that designates all
+premises also designates the conclusion. Swapping the designated set swaps the
+logic without touching a single value.
+
+The two choices reconstruct two known three-valued logics. Collapse the scale to
+three coarse grades: ruled out ($0$), middle ($0<c<1$), and certain ($1$).
+Designating the middle along with the top gives the Logic of Paradox
+\cite{priest1979}; designating only the top gives strong Kleene logic. Belnap's
+four-valued setting motivates the same separation between ``at least somewhat
+in'' and ``fully in'' \cite{belnap1977}.
+
+\begin{example}[Designation changes the verdict]
+Take $A$ with $\cred(A)=\tfrac12$. Under positivity, $A$ is asserted: its value
+exceeds $0$. Under certainty, $A$ is not asserted: its value falls short of $1$.
+The value did not move. The standard for assertion did.
+\end{example}
+
+\subsection{The bridge to LP and K3}
+
+These two designations are not loose analogies. Each coincides exactly with a
+three-valued consequence relation, and the coincidence is machine-checked.
+
+\begin{theorem}[Designation bridge]
+On the credence scale, positivity consequence agrees with LP consequence, and
+certainty consequence agrees with K3 consequence.
+\end{theorem}
+
+In the formalization, \texttt{lp\_formula\_bridge} proves that LP consequence
+holds for a list of premises and a conclusion exactly when positivity
+consequence holds for the same data: an LP-designated valuation is one whose
+collapsed value is positive. Dually, \texttt{k3\_formula\_bridge} proves that K3
+consequence agrees with certainty consequence, since a K3-designated valuation
+is one whose value is exactly $1$. Both are stated over arbitrary atoms and
+proved as biconditionals, so neither direction is assumed.
+
+The payoff is a single algebra serving two readings. Keep the values fixed and
+move the designated set: positivity gives a paraconsistent logic, where a
+contradiction need not entail everything, and certainty gives a paracomplete
+logic, where excluded middle is not guaranteed. The next sections build on this
+split. For now the point is narrow. Truth and falsehood are the endpoints $1$
+and $0$ of one scale, and the choice of which other values count as assertable
+is what selects a logic.
+
+\section{Contradiction, noncontradiction, ex falso, and tertium non datur}
+\label{sec:contradiction}
+
+A logic that explodes treats one broken inference as a license to assert
+everything. From $A$ and $\negc A$ it derives an arbitrary $B$. Classical and
+intuitionistic logic accept this; the dialetheist tradition rejects it
+\cite{priest1979,asenjo1966}. This section takes the rejection apart. Ex falso
+is a claim about consequence, not a fact read off a truth table. The credence
+algebra keeps four notions separate that the classical picture fuses: a
+contradiction in the premises, explosion as a rule, conditioning on impossible
+evidence, and the laws of noncontradiction and excluded middle. Each gets a
+sharp threshold or a witness.
+
+\subsection{Explosion is a rule, not a row}
+\label{sec:exfalso}
+
+Start with a worked valuation. Take two atoms, $A$ and $B$, and set
+\[
+  \cred(A)=\tfrac12,\qquad \cred(\negc A)=1-\tfrac12=\tfrac12,\qquad
+  \cred(B)=0.
+\]
+Both $A$ and its negation sit at $\tfrac12$. Whatever designation we use that
+counts $\tfrac12$ as good, both premises are designated. Yet $B$ is at $0$.
+Explosion would require $B$ to inherit a high value from the premises. It does
+not. The valuation is a countermodel: premises in, conclusion out.
+
+This is the LP reading, where the designated set is $\{1,\tfrac12\}$
+\cite{priest1979,asenjo1966}. The Lean theorem \texttt{lp\_no\_explosion}
+records exactly the valuation above: $A$ at $\tfrac12$, $\negc A$ at $\tfrac12$,
+$B$ at $0$, with $B$ not designated. Nothing in the truth tables for $\negc$,
+$\conjc$, $\disjc$ changes. The tables are the same product De Morgan
+operations used everywhere in this development. What changes is the consequence
+relation layered on top: which rows count as premises-satisfied, which as
+conclusion-satisfied.
+
+The point generalizes off the single value $\tfrac12$. Read consequence at a
+threshold $t$: a premise counts when its credence lands in $[t,1]$, and the
+conclusion is entailed when it must also land in $[t,1]$. For any positive
+threshold up to one half, the explosion sequent $A,\negc A\vdash B$ fails.
+
+\begin{theorem}[Graded no-explosion]
+For every threshold $t$ with $0<t\le\tfrac12$ there is a valuation with
+$\cred(A)\ge t$, $\cred(\negc A)\ge t$, and $\cred(B)<t$.
+\end{theorem}
+
+The Lean name is \texttt{graded\_no\_explosion}. The witness is the same
+$A=\tfrac12$, $B=0$. Both $\tfrac12\ge t$ and $1-\tfrac12\ge t$ hold because
+$t\le\tfrac12$, while $0<t$ keeps $B$ below threshold. So at any threshold the
+algebra admits, the contradiction $A\conjc\negc A$ is allowed to be present in
+the premises without dragging an unrelated $B$ up with it.
+
+\subsection{The sharp boundary at one half}
+
+The bound $t\le\tfrac12$ is not a convenience. It is exactly the range where a
+countermodel can exist, and the algebra fixes the cutoff.
+
+\begin{theorem}[Explosion cutoff]
+A countermodel to $A,\negc A\vdash B$ at positive threshold $t$ exists if and
+only if $t\le\tfrac12$.
+\end{theorem}
+
+This is \texttt{threshold\_explosion\_countermodel\_iff}. The reason is one
+identity. A credence and its negation sum to one:
+\[
+  \cred(A)+\cred(\negc A)=\cred(A)+\bigl(1-\cred(A)\bigr)=1.
+\]
+To keep both premises in $[t,1]$ we need $\cred(A)\ge t$ and
+$1-\cred(A)\ge t$, hence $2t\le 1$. Above one half the two demands collide:
+no value can keep both $A$ and $\negc A$ designated. The premise set becomes
+unsatisfiable, so the sequent holds vacuously, and explosion returns by
+default, not by force. Below one half the contradiction is genuinely
+expressible, and the conclusion is genuinely free. The interesting logic lives
+in the lower window; the upper window is where a contradiction simply cannot
+be stated at full strength.
+
+\subsection{Reductio rests on emptiness, not on contradiction}
+
+Why does a contradiction among the premises fail to license $B$? Because the
+legitimate engine of reductio is not the presence of a contradiction. It is
+the emptiness of the countermodel set. To establish $\Gamma\vdash\varphi$,
+refute every valuation that keeps $\Gamma$ designated while dropping $\varphi$
+below threshold. If no such valuation survives, the entailment holds. This is
+\texttt{reductio\_iff\_countermodels\_empty}: threshold consequence is exactly
+emptiness of the reductio countermodel set.
+
+Now the contrast is clean. The explosion sequent does have a contradiction in
+its premises. But by the theorem above, for $0<t\le\tfrac12$ its countermodel
+set is nonempty. So reductio never fires, and $B$ is never derived. The broken
+branch generates no information about $B$. A contradiction is a feature of one
+valuation; entailment is a quantifier over all of them. Conflating the two is
+what makes ex falso look like a law of logic instead of an artifact of how
+classical consequence quantifies.
+
+\subsection{Two ways to break a branch: contradiction and impossible evidence}
+
+Explosion from $A\conjc\negc A$ is one way an inference can break. Conditioning
+on impossible evidence is another, and the algebra keeps them apart. Recall the
+chain rule:
+\[
+  \cred(A\mid B)\conjc\cred(B)=\cred(A\wedge B).
+\]
+When $\cred(B)=0$, the left side is $\cred(A\mid B)\cdot 0=0$ for any value of
+$\cred(A\mid B)$. The equation constrains nothing. Every conditional credence
+is admissible.
+
+\begin{theorem}[Zero evidence is unconstrained]
+For every credence $c$ there is a conditioning witness with $\cred(B)=0$,
+$\cred(A\wedge B)=0$, and conditional value $c$.
+\end{theorem}
+
+The Lean name is \texttt{conditioning\_zero\_any}. Compare the two breakages.
+The contradiction case starts from premises that overshoot ($A$ and $\negc A$
+both designated) and asks whether that forces a conclusion; it does not,
+because a countermodel survives. The zero-evidence case starts from evidence
+that cannot occur and asks what it conditions to; the answer is anything,
+because the constraint vanishes. Both refuse to manufacture content from a dead
+branch, but for different reasons: one is about consequence over all
+valuations, the other about a single equation losing its grip when multiplied
+by zero. Keeping them separate is what lets the algebra block explosion without
+collapsing conditioning into material implication.
+
+\subsection{Noncontradiction and excluded middle, graded}
+\label{sec:tnd}
+
+The classical laws are two-valued absolutes: $\negc(A\wedge\negc A)$ is true,
+$A\vee\negc A$ is true. In the credence algebra both become graded statements
+with their own sharp thresholds. Take noncontradiction first. The credence of
+$A\conjc\negc A$ is
+\[
+  \cred(A)\cdot\bigl(1-\cred(A)\bigr),
+\]
+maximized at $\cred(A)=\tfrac12$, where it equals $\tfrac14$. So the
+contradiction's credence never exceeds one quarter, and its negation
+$\negc(A\conjc\negc A)$ never drops below $\tfrac34$. A contradiction is not
+forbidden; it is merely capped. This is the graded face of the law of
+noncontradiction.
+
+Excluded middle is the De Morgan dual, and it has the matching cutoff. The
+credence of $A\disjc\negc A$ is
+\[
+  \cred(A)+\bigl(1-\cred(A)\bigr)-\cred(A)\bigl(1-\cred(A)\bigr)
+  =1-\cred(A)\bigl(1-\cred(A)\bigr),
+\]
+minimized at $\cred(A)=\tfrac12$, where it equals $\tfrac34$. So
+$A\disjc\negc A$ never falls below three quarters.
+
+\begin{theorem}[Excluded-middle cutoff]
+Threshold consequence validates $A\disjc\negc A$ at threshold $t$ if and only
+if $t\le\tfrac34$.
+\end{theorem}
+
+This is \texttt{threshold\_excluded\_middle\_iff}. Excluded middle holds for
+every threshold up to three quarters and fails above it. The two laws sit at
+complementary corners of the same parabola $\cred(A)(1-\cred(A))$:
+noncontradiction is capped at $\tfrac14$ from above, excluded middle floored at
+$\tfrac34$ from below, both extreme at $\cred(A)=\tfrac12$. Neither is asserted
+as an absolute, and neither is abandoned. Each holds to a stated degree, and
+the degree is the same number read from two sides.
+
+Putting the thresholds together draws a small map of consequence. Below
+$\tfrac12$, contradictions are expressible and explosion fails. Between
+$\tfrac12$ and $\tfrac34$, contradictory premises become unsatisfiable so
+explosion is vacuous, while excluded middle still holds. Above $\tfrac34$,
+excluded middle fails too. The classical laws are recovered at the top of the
+scale and dissolve smoothly as the threshold drops, with $\tfrac12$ as the
+fixed point where $A$ and $\negc A$ meet.
+
+\section{Proof, and proof by contradiction as crossing out}
+\label{sec:proof}
+
+Take two atoms, $A$ and $B$, and ask whether $A \conjc B$ entails $B$.
+A valuation $v$ assigns each atom a credence in $[0,1]$.
+Fix a designation threshold $t$ with $0 < t \le 1$: a formula counts as
+asserted when its credence sits in $[t,1]$.
+The entailment $A \conjc B \vdash_t B$ asks every valuation a yes-or-no
+question. Does $v$ that designates the premise also designate $B$?
+
+\begin{center}
+\begin{tabular}{cccc}
+$\cred(A)$ & $\cred(B)$ & $\cred(A\conjc B)=\cred(A)\,\cred(B)$ & premise $\ge t$? \\
+\hline
+$0.9$ & $0.9$ & $0.81$ & yes \\
+$0.9$ & $0.1$ & $0.09$ & no (if $t>0.09$) \\
+$1.0$ & $t$ & $t$ & yes \\
+\end{tabular}
+\end{center}
+
+The middle row keeps $B$ below threshold, but its premise also drops below
+threshold, so it never tests the entailment. Cross it out.
+Every surviving row has $\cred(A)\,\cred(B) \ge t$, and since $\cred(A) \le 1$
+this forces $\cred(B) \ge t$. No row both designates $A \conjc B$ and drops
+$B$. The entailment holds.
+
+\subsection*{Proof as a checked derivation}
+
+We use \emph{proof} in a fixed sense: a derivation built from a finite set of
+declared rules, each rule a step that a checker accepts or rejects.
+A proof of $\Gamma \vdash_t \varphi$ is such a tree whose leaves are
+hypotheses from $\Gamma$ and whose root is $\varphi$.
+The formalization carries this as a soundness contract: every accepted
+derivation denotes a true consequence. The threshold calculus satisfies
+reflexivity, monotonicity, and cut
+(\texttt{threshold\_reflexivity}, \texttt{threshold\_monotonicity},
+\texttt{threshold\_cut}). Cut is the chaining step. If $\Gamma \vdash_t \varphi$
+and $\varphi,\Gamma \vdash_t \psi$, then $\Gamma \vdash_t \psi$.
+A checked derivation is what makes a claim a theorem rather than an assertion.
+
+\subsection*{Reductio as crossing out}
+
+Proof by contradiction has a model-side reading that needs no explosion.
+To establish $\Gamma \vdash_t \varphi$, suppose the conclusion fails. List
+every valuation that designates all of $\Gamma$ yet drops $\varphi$ below $t$.
+Call these the \emph{countermodels}. Each one is an admissible case that, if it
+existed, would refute the entailment. Cross out each as impossible. If none
+survives, the conclusion holds in every remaining case, so the entailment holds.
+
+\begin{definition}[Reductio countermodels]
+For threshold $t$, premises $\Gamma$, and conclusion $\varphi$, the countermodel
+set is
+\[
+  \{\, v : (\forall p \in \Gamma,\ t \le \cred_v(p))\ \text{and}\ \cred_v(\varphi) < t \,\}.
+\]
+\end{definition}
+
+\begin{theorem}[Reductio is countermodel emptiness]
+$\Gamma \vdash_t \varphi$ holds if and only if its countermodel set is empty.
+\end{theorem}
+
+This biconditional is the machine-checked
+\texttt{reductio\_iff\_countermodels\_empty}. Read left to right, a valid
+entailment leaves nothing to cross out. Read right to left, an empty
+countermodel set is exactly a proof by contradiction: the refuted hypothesis is
+the conclusion's failure $\cred_v(\varphi) < t$, and ruling it out for every
+designating $v$ gives the entailment.
+The operational form \texttt{reductio\_of\_no\_failing\_valuation} states the
+same crossing-out as a single sweep: show no premise-satisfying valuation drops
+the conclusion.
+
+The crossing-out is countermodel elimination, not explosion.
+It never says ``a contradiction appears among the premises, therefore the
+conclusion.'' It says ``no admissible case refutes the conclusion.''
+The two come apart precisely when a contradictory premise pair still leaves a
+surviving case.
+
+\subsection*{A worked tautology and a surviving case}
+
+Take $\neg(A \conjc \negc A)$, the law of non-contradiction, with no premises.
+Its credence under $v$ is $\cred(A) \disjc \negc\cred(A)$, the De Morgan
+certainty of $\cred(A)$, which never falls below $\tfrac34$.
+So for any $t \le \tfrac34$ every row sits above threshold; every
+countermodel is crossed out. The formula is a threshold tautology
+(\texttt{notContradiction\_tautology}, via
+\texttt{notContradiction\_no\_countermodel}).
+The same crossing-out proves the entailment $A \conjc B \vdash_t B$ from the
+table above (\texttt{conjAB\_to\_B\_by\_crossing\_out}): the premise eliminates
+every row where $B$ falls short.
+
+Now the contrast. Explosion is the sequent $A, \negc A \vdash_t B$ for an
+unrelated $B$. At $t = \tfrac12$ consider the row $\cred(A)=\tfrac12$,
+$\cred(B)=0$. Both $A$ and $\negc A$ evaluate to $\tfrac12$, so both premises
+are designated. Yet $B$ sits at $0$, below threshold. This row is a genuine
+countermodel. It does not get crossed out.
+
+\begin{center}
+\begin{tabular}{ccccc}
+$\cred(A)$ & $\cred(\negc A)$ & $\cred(B)$ & premises $\ge \tfrac12$? & $B \ge \tfrac12$? \\
+\hline
+$\tfrac12$ & $\tfrac12$ & $0$ & yes & no \quad(survives) \\
+\end{tabular}
+\end{center}
+
+The countermodel set is nonempty (\texttt{explosion\_row\_survives}), so by the
+biconditional the entailment fails
+(\texttt{no\_explosion\_at\_half\_by\_surviving\_row}).
+A contradiction sits in the premises, yet reductio does not fire, because the
+ground of reductio is emptiness of the countermodel set, not the mere presence
+of a contradiction (\texttt{reductio\_ground\_is\_emptiness\_not\_contradiction}).
+This is the move that classical explosion makes and Cred refuses
+(\texttt{graded\_no\_explosion}).
+The two regimes hold together in \texttt{crossing\_out\_vs\_explosion}:
+for $t \le \tfrac34$ the non-contradiction tautology holds, while at
+$t = \tfrac12$ the explosion sequent fails.
+
+\subsection*{When it stays valid}
+
+Crossing-out reductio stays valid in Cred whenever the countermodel set is
+genuinely empty, and the sharp thresholds say when that happens.
+Excluded middle and non-contradiction survive for $t \le \tfrac34$, since
+certainty $c \disjc \negc c \ge \tfrac34$
+(\texttt{threshold\_excluded\_middle\_iff}).
+The simple explosion countermodel exists exactly when $0 < t \le \tfrac12$
+(\texttt{threshold\_explosion\_countermodel\_iff}); above $\tfrac12$ it
+disappears, but raising $t$ also strengthens premises and conclusions alike.
+On the crisp fragment, where every atom takes value $0$ or $1$, the surviving
+half-credence row cannot arise: a contradictory premise pair leaves no case at
+all, every countermodel is crossed out, and classical proof by contradiction
+returns in full. The graded layer keeps the same proof discipline and drops
+only the inference from impossible evidence to an arbitrary conclusion.
+
+\section{Implication, entailment, and conditioning}
+\label{sec:conditioning}
+
+Three different things in this book wear the same English word ``if.'' Run them together and the paradoxes return through the back door. So separate them first, by a concrete test.
+
+\begin{example}[Three questions about one situation]
+Let $A$ be ``the coin landed heads'' and $B$ ``the coin was fair.'' Ask:
+\begin{enumerate}
+\item Is the sentence $A \to B$ true, and what is its credence?
+\item Does $A$ \emph{entail} $B$ in our logic?
+\item Given $B$, what credence may I assign to $A$?
+\end{enumerate}
+Question 1 is about a connective inside the language: it builds a new sentence from two old ones, and that sentence has its own credence. Question 2 is about the consequence relation, which lives in our metalanguage and judges arguments. Question 3 is about conditioning: from a joint credence and the evidence $B$, which values of $\cred(A\mid B)$ are admissible. The three answers need not agree, and forcing them to agree is what breaks.
+\end{example}
+
+Priest draws this as a level distinction \cite{priest1979,priest2008}. The object language is where connectives live: $\negc$, $\conjc$, $\disjc$, and any conditional you choose to add. The metalanguage is where you state entailment, soundness, and proof rules. Conditioning, in Cred, is a third thing again, neither a connective nor the consequence relation.
+
+\subsection{The object-language connective}
+
+A connective is a function on credences. Negation is $\negc c = 1-c$; conjunction is $a \conjc b = ab$; disjunction is the De Morgan dual $a \disjc b = a+b-ab$. Each takes credences in and returns a credence. A conditional connective, if Cred had one, would be a function $f:[0,1]\times[0,1]\to[0,1]$ that reads off $\cred(A\to B)$ from $\cred(A)$ and $\cred(B)$ alone. That is the content of \emph{truth-functional}: the output depends only on the input values, on nothing else.
+
+The earlier chapters already used such connectives freely. They distribute, they have fixed points, they obey the De Morgan laws. What they do \emph{not} do is express dependence between $A$ and $B$. Two coins each fair give $\cred(A)=\cred(B)=\tfrac12$ whether they are glued together or tossed independently. A truth-functional connective sees only $\tfrac12$ and $\tfrac12$. It cannot tell the cases apart.
+
+\subsection{The metalanguage consequence relation}
+
+Entailment is not a connective. It is a relation between premises and a conclusion, defined by quantifying over all valuations. Certainty consequence ($\Gamma$ entails $A$ when every valuation that makes all of $\Gamma$ certain makes $A$ certain) and positivity consequence (the same with ``certain'' weakened to ``positive'') are the two relations used here. The Lean module \texttt{Cred.Core.Consequence} defines both, as \texttt{certaintyConsequence} and \texttt{positivityConsequence}, alongside the graded family \texttt{gradedConsequence}.
+
+The level matters for the paradoxes. A contradiction $A,\negc A$ at credence $\tfrac12$ does not entail an arbitrary $B$: this is \texttt{lp\_no\_explosion} and, in graded form, \texttt{graded\_no\_explosion}. The failure of explosion is a fact about the consequence relation, the metalanguage object. It says nothing about whether some connective $\to$ inside the language validates $A,A\to B \vdash B$. Keep the two apart and no tension arises. Confuse them and you will look for explosion in the wrong place.
+
+\subsection{Conditioning is external and set-valued}
+
+Conditioning is the third level. Cred treats it as primitive through the chain rule
+\[
+  \cred(A\mid B)\conjc \cred(B) = \cred(A\wedge B),
+\]
+and reads off not a value but a set. Given joint credence $j=\cred(A\wedge B)$ and evidence $e=\cred(B)$, the admissible conditional credences form
+\[
+  \Cond(j,e) = \{\, c\in[0,1] : c\conjc e = j \,\}.
+\]
+This is the admissibility relation, defined as \texttt{Cred.Credence.Cond} in \texttt{Cred.Cond.Admissible}. It is external: it does not build a sentence, and it does not appear among $\negc,\conjc,\disjc$. It is set-valued by design.
+
+\begin{example}[Why a set, not a value]
+When $e>0$ the chain rule pins one value: $\Cond(j,e)=\{j/e\}$ as a singleton (\texttt{cond\_singleton\_of\_pos}). When $e=0$ and $j=0$ the equation $c\conjc 0 = 0$ holds for every $c$, so $\Cond(0,0)=[0,1]$, the whole interval (\texttt{cond\_zero\_zero\_univ}, witnessed pointwise by \texttt{conditioning\_zero\_any}). Impossible evidence constrains nothing; it does not explode. A value-returning conditioning operator would have to invent a number here. The set just reports that every number is admissible.
+\end{example}
+
+This is conditioning in de Finetti's sense \cite{definetti1937}: a coherence constraint linking joint and marginal credences, not a division that demands a defined quotient. Division by zero is undefined; the constraint $c\conjc 0 = 0$ is simply slack. Returning a set absorbs the slack without special cases.
+
+\subsection{No total internal conditional}
+
+Could we still fold conditioning back into a connective, a single total function $f$ on $[0,1]^2$ that mimics it? Two results say no, from two directions.
+
+First, no truth-functional connective tracks conditioning even on positive evidence. The bridge $\cred(A\mid B) = f(\cred(B),\cred(A))$ would force $f$ to return two different values on the same input. Take $\cred(A)=0.3,\cred(B)=0.7$ and then $\cred(A)=0.7,\cred(B)=0.3$. Both inputs collapse to the interior value $\tfrac12$, yet the admissible conditional is $3/7$ in one case and $1$ in the other. The function $f$ would have to give $f(\tfrac12,\tfrac12)$ two answers. This is \texttt{no\_truthfunctional\_cond\_bridge}: dependence cannot be read off marginals.
+
+Second, even granting a non-truth-functional residuum, the natural conditional cannot also contract. A conditional that validates modus ponens (MP) and the deduction property (CP, conditional proof) is pinned, on positive antecedents, to the product residuum. Add contraction, the rule $A\to(A\to B)\vdash A\to B$, and the three demands are jointly unsatisfiable. This is \texttt{curry\_block}:
+\[
+  \neg\,\exists f.\ \mathrm{MP}(f)\wedge\mathrm{CP}(f)\wedge\mathrm{Contraction}(f).
+\]
+The witness is sharp: $f(\tfrac12,\tfrac14)=\tfrac12$ from the residuum, $f(\tfrac12,\tfrac12)=1$, and contraction would demand $f(\tfrac12,\tfrac14)\ge f(\tfrac12,\tfrac12)=1$, which $\tfrac12$ refuses. Contraction is exactly the rule Curry's paradox needs. Blocking it blocks the paradox, and the cost is giving up a total internal conditional that contracts.
+
+The two no-go results pull the same way. Keep conditioning external (a set-valued admissibility relation, not a connective) and the explosion at zero evidence and the Curry collapse both stay out. Internalize it into one total truth-functional connective and you reintroduce exactly what the level distinction was meant to prevent. The separation of implication, entailment, and conditioning is not bookkeeping. It is what makes the system safe.
+
+\section{Paradox and the unknown}
+\label{sec:paradox}
+
+A paradox looks like a wall. Self-reference seems to leave no room: the liar is both true and false, so the system breaks. In a graded credence algebra the wall is a door. A self-referential sentence is an equation, and its admissible meanings are the solutions of that equation. Some equations have one solution, some have many, some have none. None of them explode.
+
+\subsection{Paradoxes are solution sets}
+
+Treat a self-referential definition as a fixed-point equation $c=\Phi(c)$ on $[0,1]$. The sentence does not assert a single value. It constrains its own credence. The admissible values form the solution set
+\[
+  \Sol(\Phi)=\{c\in[0,1]:\Phi(c)=c\}.
+\]
+Lean names this set \texttt{solutions} and proves \texttt{solutions\_eq\_fixedPoints}: the solution set is exactly the set of fixed points.
+
+The liar says ``this sentence is false.'' Its credence equals its own negation:
+\[
+  c=\negc c=1-c.
+\]
+One value satisfies this, $c=\tfrac12$. The solution set is a singleton,
+\[
+  \Sol(\negc)=\{\tfrac12\},
+\]
+proved as \texttt{solutions\_neg\_eq\_singleton}. The classical paradox came from forcing $c\in\{0,1\}$, where $\neg b=b$ has no solution (\texttt{bool\_neg\_solutions\_empty}). The graded interval keeps the equation solvable. The liar is not a contradiction. It is the negation fixed point, the one value that equals its own complement.
+
+The truth-teller says ``this sentence is true.'' Its credence equals itself:
+\[
+  c=c.
+\]
+Every value solves this. The solution set is the whole interval,
+\[
+  \Sol(\mathsf{id})=[0,1],
+\]
+proved as \texttt{solutions\_id\_eq\_univ}. The liar pins one value; the truth-teller pins none. Same machinery, opposite outcome. The truth-teller is underdetermined because its equation is the identity: it carries no information about $c$.
+
+The two paradoxes mark the two extremes of a single mechanism. A self-referential equation can cut the interval down to a point or leave it untouched. Russell's diagonal sits with the liar. For a self-membership reading $\mathit{selfMem}$, the Russell object assigns each point the negation of its self-membership, and at a Russell point the membership degree solves $c=1-c$. So it is $\tfrac12$:
+\[
+  (\mathsf{russell}\ \mathit{selfMem}).\mathsf{mem}\ r=\tfrac12,
+\]
+the content of \texttt{russell\_mem\_eq\_half}. Belonging to the set of non-self-members is half true, half false. The diagonal has a determinate value, not a catastrophe.
+
+\subsection{A taxonomy of the unknown}
+
+``Unknown'' is one word for several things. The solution-set view separates them. Some unknowns are a single missing number. Some are a whole set of admissible values. Some live below the level of a value, at the branching of cases. Naming the kind tells you what would resolve it and what shape the answer has.
+
+\begin{example}[Lack of information]
+You hold a biased coin but do not know the bias. The credence $\cred(\text{heads})$ has a definite but unrecorded value. The unknown is \emph{scalar}: one number, currently unmeasured. More data would fix it. Nothing about the algebra is undetermined; only your record is incomplete.
+\end{example}
+
+\begin{example}[Irrelevant condition]
+Condition on something with no bearing on the question: $\cred(\text{rain tomorrow}\mid \text{a coin in Vienna landed heads})$. The condition is a genuine event, but it does not move the credence. The unknown here is not in the value at all; the value is whatever it already was. The conditioning step is \emph{scalar} and inert. This is different from the next case, where the condition is not irrelevant but impossible.
+\end{example}
+
+\begin{example}[Underdetermined admissible value]
+Take zero-credence evidence. The chain rule $c\conjc e=j$ with $e=0$ forces $j=0$ and then constrains $c$ not at all:
+\[
+  \Cond(0,0)=[0,1],
+\]
+proved as \texttt{cond\_zero\_zero\_univ}, with the witness \texttt{conditioning\_zero\_any} that every credence is admissible. The unknown is \emph{set-valued}: the answer is the full interval, not a missing number. No further measurement narrows it, because impossible evidence supplies no constraint. This is exactly why there is no ex falso: an impossible condition licenses every value, hence no particular one (see \texttt{conditioning\_zero\_any}).
+\end{example}
+
+The truth-teller is the same set-valued unknown reached from self-reference rather than from evidence. Its solution set and the zero-evidence admissible set coincide:
+\[
+  \Sol(\mathsf{id})=[0,1]=\Cond(0,0),
+\]
+recorded as \texttt{truth\_teller\_same\_shape\_as\_zero\_evidence}. The shapes match; the readings differ. The truth-teller's equation supplies no information; the zero-evidence chain rule supplies no conditional value. Both leave the interval whole.
+
+\begin{example}[Branch-dependent status]
+Conditioning splits on whether the evidence is possible. With positive evidence the admissible set is a singleton,
+\[
+  \Cond(j,e)=\{j/e\}\quad(e>0,\ j\le e),
+\]
+proved as \texttt{cond\_singleton\_of\_pos}; with zero evidence it is the whole interval. The status of $\cred(A\mid B)$ depends on which branch $\cred(B)$ lands in. The unknown is \emph{branch-level}: before you know the branch, you do not know whether the answer is one number or a full interval. Settling $\cred(B)>0$ versus $\cred(B)=0$ settles the shape.
+\end{example}
+
+\begin{example}[Inadmissible branch]
+Some pairs admit no conditional at all. The admissible set is nonempty exactly when $j\le e$:
+\[
+  \Cond(j,e)\neq\varnothing \iff \cred(A\wedge B)\le \cred(B),
+\]
+proved as \texttt{cond\_nonempty\_iff}. If a joint credence exceeds its marginal, the chain rule has no solution. The unknown is again \emph{branch-level}, but the branch is empty: there is no admissible value because the inputs are incoherent. This is not a missing number and not a full interval. It is the absence of any solution, and the right response is to reject the inputs, not to guess.
+\end{example}
+
+\begin{example}[Fixed-point value]
+The liar and Russell give a determinate but self-generated value. No external measurement produces $\tfrac12$; the equation $c=1-c$ does. The unknown was never about missing data. It was about which value is consistent with the sentence's own content, and the answer is \emph{scalar}: the single fixed point $\tfrac12$ (\texttt{russell\_mem\_eq\_half}). Contrast this with lack of information, where a definite value exists and waits to be read off. Here the value exists only because the equation pins it.
+\end{example}
+
+\subsection{Reading the taxonomy}
+
+The six cases fall into three shapes. Lack of information, irrelevant conditioning, and the fixed-point value are \emph{scalar}: the answer is one number, whether unrecorded, unchanged, or self-generated. The underdetermined admissible value and the truth-teller are \emph{set-valued}: the answer is the full interval $[0,1]$. Branch-dependent status and the inadmissible branch are \emph{branch-level}: the question is which case obtains, singleton versus interval versus empty, and only after that does a value or interval appear.
+
+The common thread is $\Cond$ and $\Sol$. Both are solution sets, both can be a singleton, a full interval, or empty, and neither produces an arbitrary conclusion from a degenerate input. A paradox is the case where the equation is self-referential; the unknown is the case where the inputs leave the solution set wider than a point. Reading the wall as a door means reading both as solution sets and asking only which shape the set has.
+
+\section{Admissible states}
+\label{sec:admissible}
+
+Start with a single concrete question.
+You assign credences $\cred(A)=\tfrac{1}{2}$ and $\cred(B)=\tfrac{1}{2}$.
+What values can $\cred(A \mid B)$ take?
+The chain rule requires
+\[
+  \cred(A \mid B)\conjc\cred(B) \;=\; \cred(A \wedge B),
+\]
+so the answer depends on a second input: the joint credence $\cred(A \wedge B)$.
+The set of \emph{admissible} conditional values is defined by that equation.
+
+\begin{definition}[Admissible set]
+For joint credence $j\in[0,1]$ and evidence credence $e\in[0,1]$,
+\[
+  \Cond(j,e) \;=\; \{c\in[0,1] : c\conjc e = j\} \;=\; \{c\in[0,1] : ce = j\}.
+\]
+A value $c$ is \emph{admissible} for the pair $(j,e)$ when $c\in\Cond(j,e)$.
+\end{definition}
+
+Lean names the membership criterion \texttt{mem\_cond\_iff}: $c\in\Cond(j,e)$
+exactly when a \texttt{Conditioning} structure with \texttt{condCred}$\,=c$
+exists, that is, when the chain rule is witnessed.
+
+\paragraph{The trichotomy.}
+The shape of $\Cond(j,e)$ has three cases, proved as
+\texttt{cond\_singleton\_of\_pos}, \texttt{cond\_zero\_zero\_univ}, and
+\texttt{cond\_nonempty\_iff}.
+
+\begin{theorem}[Admissible-set trichotomy]
+Let $j,e\in[0,1]$.
+\begin{enumerate}
+  \item If $e>0$ and $j\le e$, then $\Cond(j,e)=\{j/e\}$: one admissible value.
+  \item If $e=0$ and $j=0$, then $\Cond(0,0)=[0,1]$: every value is admissible.
+  \item If $j>e$ (in particular $e=0$ with $j>0$), then $\Cond(j,e)=\emptyset$: no admissible value.
+\end{enumerate}
+\end{theorem}
+
+\begin{example}
+Return to $e=\tfrac{1}{2}$.
+\begin{center}
+\begin{tabular}{ccl}
+\toprule
+$j$ & $\Cond(j,\tfrac{1}{2})$ & comment \\
+\midrule
+$0$           & $\{0\}$    & $c\cdot\tfrac{1}{2}=0 \Rightarrow c=0$ \\
+$\tfrac{1}{4}$ & $\{\tfrac{1}{2}\}$ & $c=\tfrac{1}{4}/\tfrac{1}{2}$ \\
+$\tfrac{1}{2}$ & $\{1\}$    & $c=1$ \\
+$\tfrac{3}{4}$ & $\emptyset$ & $j>e$, incoherent \\
+\bottomrule
+\end{tabular}
+\end{center}
+The joint credence $\cred(A\wedge B)$ selects which row applies.
+Positive evidence pins $\cred(A\mid B)$ to a unique value; the apparent
+ambiguity in the opening question was missing information about the joint,
+not a property of conditioning itself.
+\end{example}
+
+\paragraph{Admissible versus designated.}
+A value is \emph{designated} under a consequence relation when it counts as
+``accepted'' for the purpose of entailment.
+LP designates $\{1,\tfrac{1}{2}\}$; K3 designates $\{1\}$; threshold
+consequence at level $t$ designates $[t,1]$ (\texttt{thresholdConsequence}).
+Designation is a property of a single formula under a single valuation.
+Admissibility is a relational property: $c$ is admissible for the
+\emph{pair} $(j,e)$, not for $c$ alone.
+A value can be designated without being admissible for any particular
+conditioning problem, and admissible values need not be designated.
+At $e=0=j$ every $c\in[0,1]$ is admissible (\texttt{conditioning\_zero\_any}),
+yet most are not designated under K3 or any positive threshold.
+
+\paragraph{Admissible versus crisp.}
+A \emph{crisp} credence is $0$ or $1$.
+The crisp fragment $\{0,1\}$ embeds classical logic
+(\texttt{crisp\_eval\_eq}, \texttt{crisp\_certainty\_iff\_classical}).
+An admissible state need not be crisp: the unique admissible value for
+$(j,e)=(\tfrac{1}{4},\tfrac{1}{2})$ is $\tfrac{1}{2}$, which is neither
+$0$ nor $1$.
+Conversely, a crisp value is admissible only when the chain-rule equation is
+satisfied: $\cred(A\mid B)=1$ is admissible only when $j=e$, that is, when
+$\cred(A\wedge B)=\cred(B)$.
+
+\paragraph{Zero evidence and no explosion.}
+Case~2 of the trichotomy is where the system departs from classical and
+from RM3 conditioning.
+When $e=0$, the product $ce=0$ for every $c$, so no chain-rule equation
+selects a value.
+Impossible evidence imposes no constraint.
+This is the mechanism behind \texttt{lp\_no\_explosion} and
+\texttt{graded\_no\_explosion}: a contradiction $A,\negc A$ at credence
+$\tfrac{1}{2}$ does not force an arbitrary conclusion, because conditioning
+on a zero-credence event leaves the posterior unconstrained.
+The admissible set $\Cond(0,0)=[0,1]$ is the algebraic record of that
+freedom \cite{priest2008,jaynes2003}.
+
+\paragraph{Admissibility as a model constraint.}
+An \emph{admissible state} for a system of conditioning claims is a
+credence assignment that makes every chain-rule equation satisfied.
+Formally: given a list of triples $(c_i,j_i,e_i)$, the state is admissible
+when $c_i\in\Cond(j_i,e_i)$ for each $i$.
+Consequence then asks which conclusions hold in every admissible state in
+which the premises hold; this is the reading behind
+\texttt{reductio\_iff\_countermodels\_empty}, where threshold consequence
+is equivalent to the emptiness of the set of valuations that satisfy the
+premises but not the conclusion.
+Admissibility supplies the constraint; designation supplies the acceptance
+condition; together they yield the entailment.
+
+
+\section{From the 2018 notes to Cred}
+\label{sec:history}
+
+Cred grew out of an earlier attempt to fix one connective. A set of
+2018 notes tried to repair the material conditional by patching its
+truth table. The repair failed for a reason worth stating plainly,
+and the failure shaped the present design. This section reconstructs
+the old attempt, states Priest's objection to it, and shows how Cred
+answers that objection by moving conditioning out of the truth table
+entirely.
+
+\subsection*{The 2018 repair}
+
+Start with the embarrassment that motivated the notes. The material
+conditional $A\to B$, read as $\negc A\disjc B$, is true whenever $A$
+is false. So ``if the moon is cheese then $2+2=5$'' comes out true.
+The antecedent is false, the whole conditional is vacuously true, and
+the connection between the two clauses plays no role. This is one of
+the paradoxes of material implication.
+
+The 2018 fix kept implication a connective on truth values and added
+a third value for the irrelevant case. Write $i$ for irrelevant. The
+truth table gained a row: when the antecedent is false, $A\to B$
+returns $i$ rather than true. The hope was that $i$ would mark
+``no claim made'' and block the bad inference.
+
+\begin{example}[A row that does not settle anything]
+Take $A$ false, $B$ true. Material implication returns true. The
+patched table returns $i$. Now chain two such conditionals, or feed
+$A\to B$ into a disjunction, and you must say what $i\disjc \text{true}$
+is, what $\negc i$ is, what follows from a premise valued $i$. Every
+answer recreates a paradox somewhere else, because $i$ is still a
+truth value and the connectives still compose.
+\end{example}
+
+The patch treats irrelevance as a value a sentence can have. But
+irrelevance is a relation between premise and conclusion, not a
+property of either one. A truth-functional table cannot see that
+relation: it sees only the values of the parts. Adding a value does
+not add the missing information.
+
+\subsection*{Priest's three levels}
+
+Priest gives the clean diagnosis. The word ``if'' and its formal
+cousins live on three different levels, and conflating them is the
+standard source of trouble \cite{priest1979,priest2008}.
+
+\begin{enumerate}
+\item An \emph{object-language conditional}: a connective inside the
+  logic, taking two formulas to a formula. Its job is to have a
+  truth value.
+\item \emph{Metalanguage entailment}: the relation $\Gamma\vDash B$
+  that holds when every model of $\Gamma$ is a model of $B$. It is
+  not a formula and has no truth value; it is a fact about the
+  semantics.
+\item The English ``if'': ordinary indicative usage, which tracks
+  evidential support and is not committed to either of the formal
+  readings.
+\end{enumerate}
+
+The 2018 patch tried to make one object-language connective carry all
+three loads. It wanted the connective to (i) have a value like a
+formula, (ii) report when the conclusion really follows, the work of
+entailment, and (iii) match the English intuition that a false
+antecedent makes ``if'' idle. No single truth-functional connective
+does all three, because (ii) is not truth-functional at all. The
+title of Priest's textbook, \emph{From If to Is}, names exactly this
+slide from the conditional to consequence \cite{priest2008}.
+
+\subsection*{What Cred separates}
+
+Cred keeps the three levels apart by construction. It does not repair
+the conditional connective; it removes the conditional from the
+object language and assigns each level its own object.
+
+Consequence is level two, and it is handled in the metalanguage by
+thresholds, never by a connective. A conclusion follows from premises
+when its credence stays at least $t$ in every valuation that keeps the
+premises at least $t$. Designation at $t=1$ gives certainty
+consequence; positivity, credence above $\tfrac12$, gives the
+LP-style reading. Neither admits explosion: a contradictory premise
+does not license an arbitrary conclusion, proved as
+\texttt{lp\_no\_explosion} and \texttt{graded\_no\_explosion}. There
+is no formula $A\to B$ whose value is being computed; there is a
+relation between lists of formulas, decided by inequalities.
+
+Conditioning is the third object, and it is external and set-valued.
+It is not a connective and returns no truth value. Given a joint
+credence $j$ and evidence $e$, the admissible set is
+\[
+  \Cond(j,e)=\{\,c\in[0,1] : c\,e = j\,\},
+\]
+the credences consistent with the chain rule $c\,e=j$. For $e>0$ this
+is the singleton $\{j/e\}$. For $e=0=j$ it is all of $[0,1]$: zero
+evidence constrains nothing, the content of
+\texttt{conditioning\_zero\_any} and
+\texttt{zero\_evidence\_underdetermined}. The false antecedent that
+made material implication vacuously true now makes conditioning
+\emph{underdetermined} instead of vacuously satisfied. Idle evidence
+yields a full interval of admissible values, not a forced truth.
+
+This also answers the irrelevance the 2018 notes chased. The patched
+table tried to mark irrelevance with a value $i$. Cred marks it with
+the size of $\Cond(j,e)$. A singleton means the evidence pins the
+credence; the whole interval means it says nothing. Irrelevance is a
+property of the relation, recorded by the set, never squeezed into a
+truth value.
+
+One more guard rail follows. Because conditioning is not a connective,
+it cannot be made truth-functional even in principle. No function on
+the collapsed three values reproduces the conditioned credence across
+all inputs; this is \texttt{no\_truthfunctional\_cond\_bridge}. The
+2018 hope, a connective that behaves like conditioning, is provably
+unavailable. On the crisp fragment $\{0,1\}$ the picture stays
+classical except at the empty antecedent, where the admissible set
+splits from the material conditional exactly when the evidence is
+false, recorded in \texttt{material\_divergence} and
+\texttt{cond\_underdetermined\_iff}.
+
+\begin{table}[h]
+\centering
+\begin{tabular}{@{}lll@{}}
+\toprule
+ & 2018 notes & Cred \\
+\midrule
+Conditional & object-language connective & none in the object language \\
+Repair of vacuity & extra truth value $i$ & external, set-valued conditioning \\
+Consequence & read off the connective & metalanguage thresholds \\
+False antecedent & returns $i$ & $\Cond(j,e)$ underdetermined \\
+Irrelevance & a value a sentence has & size of the admissible set \\
+Truth-functional & assumed & ruled out, \texttt{no\_truthfunctional\_cond\_bridge} \\
+\bottomrule
+\end{tabular}
+\caption{The old patch loaded one connective with three jobs; Cred
+gives each job its own object.}
+\label{tab:before-after}
+\end{table}
+
+The lesson Priest states and Cred enforces is a separation, not a
+better table. Once the object-language value, the entailment relation,
+and the evidential ``if'' are distinct objects, the paradoxes of
+material implication have nowhere left to form. The conditional stops
+being a connective that must lie when its antecedent is false, and
+becomes an admissibility question with an honest answer: which
+credences are consistent with this evidence, and how many.
+
+\appendix
+\section{Glossary of foundational terms}
+\label{sec:glossary}
+
+The terms below appear throughout the series.
+Each definition matches the usage in the body and is stated for a reader without a logic background.
+
+\begin{description}
+
+\item[Truth.]
+A formula receives the credence $1$ under a valuation.
+In the crisp fragment $\{0,1\}$ this coincides with the classical truth value \textit{true};
+on the full interval $[0,1]$, a credence of $1$ is certainty, not an on/off switch.
+
+\item[Falsehood.]
+A formula receives the credence $0$ under a valuation.
+Zero is impossibility: $\negc 0 = 1$.
+A false formula is not merely unproved; every valuation assigns it the minimum value.
+
+\item[Value.]
+An element of $[0,1]$ assigned to a formula by a valuation.
+The operations on values are negation $\negc c = 1-c$, conjunction $a \conjc b = ab$,
+and disjunction $a \disjc b = a + b - ab$.
+These are the product De Morgan triplet, verified in \texttt{Cred.Core.Value}.
+
+\item[Designation.]
+A threshold condition that marks a value as sufficiently supported.
+K3 designates only $1$; LP designates $\{1, \tfrac{1}{2}\}$; threshold consequence
+at $t$ designates every value in $[t,1]$.
+Designation determines which premises count as established in a consequence relation.
+See \texttt{isDesignatedK3}, \texttt{isDesignatedLP}, and \texttt{thresholdConsequence}.
+
+\item[Consequence.]
+A metalinguistic relation $\Gamma \models \varphi$ saying that every valuation
+making all premises designated also makes the conclusion designated.
+Reflexivity, monotonicity, and cut hold for every threshold.
+The two endpoint relations are certainty consequence ($t = 1$, \texttt{formulaCertainty})
+and positivity consequence (\texttt{formulaPositivity}).
+Consequence is a relation between formula lists, not a formula constructor.
+
+\item[Proof.]
+A finite derivation witnessing a consequence claim.
+In Cred, proof certificates are type-level objects (see \texttt{Kernel.Proof} and
+\texttt{Structure.FoundationProof}) that erase to labelled derivations and satisfy
+soundness: every proved sequent is semantically valid.
+Proof does not internalize conditioning; conditioning enters as a side judgment.
+
+\item[Contradiction.]
+A pair of formulas $\varphi$ and $\negc\varphi$ both designated under the same valuation.
+At $\tfrac{1}{2}$ both $A$ and $\negc A$ have value $\tfrac{1}{2}$, so both are LP-designated.
+This is a genuine contradiction, but it does not make every formula designated:
+explosion fails for every positive threshold $t \le \tfrac{1}{2}$, witnessed by
+\texttt{graded\_no\_explosion}.
+
+\item[Paradox.]
+A self-referential specification that assigns a formula's credence to a function of itself.
+In Cred, a paradox is classified by its solution set: the liar equation $c = 1-c$ has
+the singleton solution $\{\tfrac{1}{2}\}$ (\texttt{solutions\_neg\_eq\_singleton}),
+the truth-teller $c = c$ has all of $[0,1]$ (\texttt{solutions\_id\_eq\_univ}),
+and Curry's variant under the product residuum has a positive solution only when the
+target is positive (\texttt{curry\_sqrt\_solution}).
+Nothing explodes; the equation either has a value or it does not.
+
+\item[Admissibility.]
+A credence $c$ is admissible for joint $j$ and evidence $e$ when the chain rule
+$c \conjc e = j$ holds.
+The admissible set $\Cond(j,e) = \{c \in [0,1] : c \conjc e = j\}$ is a singleton
+when $e > 0$ and $j \le e$, all of $[0,1]$ when $e = j = 0$, and empty when
+$e = 0 < j$ (\texttt{cond\_singleton\_of\_pos}, \texttt{cond\_zero\_zero\_univ},
+\texttt{cond\_nonempty\_iff}).
+Admissibility replaces the division formula for conditional probability and avoids
+the need to choose a value at zero evidence.
+
+\item[Branch.]
+A case in a proof by case analysis on the three regions of $[0,1]$: the boundary
+$0$, the boundary $1$, and the open interior $(0,1)$.
+The theorem \texttt{credence\_cases} makes this trichotomy available as an induction
+principle.
+Classical proof by cases survives intact on the crisp fragment; in the interior,
+excluded middle degrades but never below $\tfrac{3}{4}$
+(\texttt{threshold\_excluded\_middle\_iff}).
+
+\item[Update.]
+A rule that revises a prior credence in light of new evidence.
+Bayesian update for positive evidence, Jeffrey conditionalization for uncertain
+evidence, and the qualitative three-valued update (via the Godel implication)
+are developed in \texttt{Cred.Update} and \texttt{Cred.Bridge.CondBridge}.
+At zero evidence no canonical posterior exists; the admissible set returns the
+full interval $[0,1]$, consistent with imprecise probability \cite{walley1991}.
+
+\item[Conditional.]
+A relation $c \in \Cond(j, e)$ stating that $c$ is an admissible conditional
+credence of some event given evidence with credence $e$ and joint credence $j$.
+The conditional is external: there is no formula constructor $\varphi \Rightarrow \psi$
+whose truth-value in $[0,1]$ can be fed back into its own antecedent.
+This design is forced by two machine-checked obstructions:
+the no-go theorem \texttt{no\_truthfunctional\_cond\_bridge}
+rules out truth-functional conditioning, and \texttt{curry\_block}
+rules out a total internal conditional with modus ponens, conditional proof, and
+contraction.
+
+\end{description}
+
+\bibliographystyle{plain}
+\bibliography{../cred}
+
+\end{document}
