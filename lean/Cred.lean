@@ -90,3 +90,7 @@ import Cred.Topology.Clopen
 import Cred.Topology.Graded
 import Cred.Topology.Threshold
 import Cred.Topology.Fuzzy
+import Cred.Math.Nat
+import Cred.Math.Reals
+import Cred.Math.Metric
+import Cred.Math.Robustness
