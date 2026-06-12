@@ -226,6 +226,8 @@ Foundation examples (from Foundation/Examples.lean):
 - `forallElimCertificate`, `existsIntroCertificate`
 - `forallElimCertificateTree`, `equalitySubstitutionCertificateTree`
 - `forallElimCertificateTree_checks`, `equalitySubstitutionCertificateTree_checks`
+- `forallElimCertificateTree_missing_child_fails`
+- `equalitySubstitutionCertificateTree_missing_child_fails`
 - `equality_symmetry_certificate_sound`, `equality_substitution_certificate_sound`
 - `forall_elim_certificate_sound`, `exists_intro_certificate_sound`
 

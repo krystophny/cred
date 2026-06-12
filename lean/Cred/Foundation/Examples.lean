@@ -91,6 +91,16 @@ theorem forallElimCertificateTree_checks [DecidableEq Func] [DecidableEq Pred]
     applyFoundationRuleUnchecked, FoundationRulePayload.childCount,
     FoundationRulePayload.code, FoundationRuleCode.childCount]
 
+theorem forallElimCertificateTree_missing_child_fails
+    [DecidableEq Func] [DecidableEq Pred]
+    (t : Credence) (τ : Term Func) :
+    checkFoundationCertificate t
+      (.node (FoundationRulePayload.forallElim (Func := Func) (Pred := Pred) τ)
+        []) = none := by
+  simp [checkFoundationCertificate, checkFoundationCertificateList,
+    applyFoundationRule, FoundationRulePayload.childCount,
+    FoundationRulePayload.code, FoundationRuleCode.childCount]
+
 def equalitySubstitutionCertificateTree
     (τ υ : Term Func) (φ : Formula Func Pred) :
     FoundationCertificateTree Func Pred :=
@@ -109,6 +119,20 @@ theorem equalitySubstitutionCertificateTree_checks
     checkFoundationCertificateList, applyFoundationRule,
     applyFoundationRuleUnchecked, FoundationRulePayload.childCount,
     FoundationRulePayload.code, FoundationRuleCode.childCount]
+
+theorem equalitySubstitutionCertificateTree_missing_child_fails
+    [DecidableEq Func] [DecidableEq Pred]
+    (t : Credence) (τ υ : Term Func) (φ : Formula Func Pred) :
+    checkFoundationCertificate t
+      (.node (FoundationRulePayload.equalitySubst τ υ φ)
+        [.node
+          (FoundationRulePayload.hyp
+            [Formula.equal τ υ, Formula.instantiate τ φ]
+            (Formula.equal τ υ)) []]) = none := by
+  simp [checkFoundationCertificate, checkFoundationCertificateList,
+    applyFoundationRule, applyFoundationRuleUnchecked,
+    FoundationRulePayload.childCount, FoundationRulePayload.code,
+    FoundationRuleCode.childCount]
 
 end Structure
 
