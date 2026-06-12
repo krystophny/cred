@@ -5,7 +5,7 @@
   arity checks.
 -/
 
-import Cred.Foundation.Checker
+import Cred.Foundation.Certificate
 
 namespace Cred
 namespace Foundation
@@ -136,6 +136,43 @@ theorem SerializedFoundationHeader.decodeForPayload_some_matchesPayload
         cases h
         exact hmatch
       · simp [hdecode, hmatch] at h
+
+inductive SerializedFoundationEnvelope (Func : Type u) (Pred : Type v) where
+  | node :
+      SerializedFoundationHeader →
+      FoundationRulePayload Func Pred →
+      List (SerializedFoundationEnvelope Func Pred) →
+      SerializedFoundationEnvelope Func Pred
+deriving Repr
+
+mutual
+
+def SerializedFoundationEnvelope.decode :
+    SerializedFoundationEnvelope Func Pred →
+      Option (FoundationCertificateEnvelope Func Pred)
+  | .node rawHeader payload children =>
+      match rawHeader.decodeForPayload payload with
+      | some header =>
+          if children.length = payload.childCount then
+            match SerializedFoundationEnvelope.decodeList children with
+            | some decodedChildren =>
+                some (.node header payload decodedChildren)
+            | none => none
+          else
+            none
+      | none => none
+
+def SerializedFoundationEnvelope.decodeList :
+    List (SerializedFoundationEnvelope Func Pred) →
+      Option (List (FoundationCertificateEnvelope Func Pred))
+  | [] => some []
+  | child :: children =>
+      match child.decode, SerializedFoundationEnvelope.decodeList children with
+      | some decodedChild, some decodedChildren =>
+          some (decodedChild :: decodedChildren)
+      | _, _ => none
+
+end
 
 end Structure
 

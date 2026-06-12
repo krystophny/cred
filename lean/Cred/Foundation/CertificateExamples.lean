@@ -29,6 +29,26 @@ def forallElimEnvelopeBadHeader
     [.node (FoundationCertificateHeader.ofRuleCode .hyp)
       (.hyp [Formula.forallE φ] (Formula.forallE φ)) []]
 
+def serializedForallElimEnvelope
+    (φ : Formula Func Pred) (τ : Term Func) :
+    SerializedFoundationEnvelope Func Pred :=
+  .node (SerializedFoundationHeader.mk "forallElim" 1) (.forallElim τ)
+    [.node (SerializedFoundationHeader.mk "hyp" 0)
+      (.hyp [Formula.forallE φ] (Formula.forallE φ)) []]
+
+def serializedForallElimEnvelopeBadHeader
+    (φ : Formula Func Pred) (τ : Term Func) :
+    SerializedFoundationEnvelope Func Pred :=
+  .node (SerializedFoundationHeader.mk "hyp" 0) (.forallElim τ)
+    [.node (SerializedFoundationHeader.mk "hyp" 0)
+      (.hyp [Formula.forallE φ] (Formula.forallE φ)) []]
+
+def serializedForallElimEnvelopeBadChildCount
+    (τ : Term Func) :
+    SerializedFoundationEnvelope Func Pred :=
+  .node (SerializedFoundationHeader.mk "forallElim" 1) (.forallElim τ)
+    []
+
 theorem forallElimEnvelope_localShapeOK
     (φ : Formula Func Pred) (τ : Term Func) :
     (forallElimEnvelope φ τ).localShapeOK = true := by
@@ -92,6 +112,23 @@ theorem serialized_header_decodes_for_matching_payload
 theorem serialized_header_fails_for_wrong_payload :
     (SerializedFoundationHeader.mk "forallElim" 1).decodeForPayload
         (.conjElimLeft : FoundationRulePayload Func Pred) = none := by
+  rfl
+
+theorem serialized_forall_elim_envelope_decodes
+    (φ : Formula Func Pred) (τ : Term Func) :
+    (serializedForallElimEnvelope φ τ).decode =
+      some (forallElimEnvelope φ τ) := by
+  rfl
+
+theorem serialized_forall_elim_envelope_bad_header_fails
+    (φ : Formula Func Pred) (τ : Term Func) :
+    (serializedForallElimEnvelopeBadHeader φ τ).decode = none := by
+  rfl
+
+theorem serialized_forall_elim_envelope_bad_child_count_fails
+    (τ : Term Func) :
+    (serializedForallElimEnvelopeBadChildCount τ :
+      SerializedFoundationEnvelope Func Pred).decode = none := by
   rfl
 
 end Structure

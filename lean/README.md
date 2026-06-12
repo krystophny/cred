@@ -148,6 +148,10 @@ lake build
 | `Foundation.Structure.SerializedFoundationHeader.decode_none_of_bad_childCount` | Wrong serialized arities fail before trusted headers are built |
 | `Foundation.Structure.serialized_bad_arity_header_fails` | Concrete bad-arity header example is rejected |
 | `Foundation.Structure.serialized_header_fails_for_wrong_payload` | A valid header for another rule fails the payload-specific decode |
+| `Foundation.Structure.SerializedFoundationEnvelope.decode` | Raw certificate envelopes decode recursively into checked envelope input |
+| `Foundation.Structure.serialized_forall_elim_envelope_decodes` | A concrete serialized forall-elimination envelope decodes |
+| `Foundation.Structure.serialized_forall_elim_envelope_bad_header_fails` | A serialized envelope with a forged root header is rejected |
+| `Foundation.Structure.serialized_forall_elim_envelope_bad_child_count_fails` | A serialized envelope with the wrong root arity is rejected |
 
 ## Dependencies
 
