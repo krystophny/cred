@@ -269,6 +269,10 @@ Foundation checker (from Foundation/Checker.lean):
 - `FoundationCertificateHeader.shapeOK_true_ruleCode?_isSome`
 - `FoundationCertificateHeader.shapeOK_false_of_ruleCode?_none`
 - `FoundationCertificateHeader.childCount_eq_of_shapeOK`
+- `FoundationCertificateHeader.matchesPayload`
+- `FoundationCertificateHeader.matchesPayload_payload_header`
+- `FoundationCertificateHeader.matchesPayload_true_ruleCode?`
+- `FoundationCertificateHeader.matchesPayload_true_childCount`
 - `Structure.FoundationCertificateTree`
 - `FoundationCertificateTree.ruleCode`, `FoundationCertificateTree.ruleName`
 - `FoundationCertificateTree.header`, `FoundationCertificateTree.header_ruleCode?`

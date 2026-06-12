@@ -243,6 +243,14 @@ def FoundationRulePayload.header
     (payload : FoundationRulePayload Func Pred) : FoundationCertificateHeader :=
   FoundationCertificateHeader.ofRuleCode payload.code
 
+def FoundationCertificateHeader.matchesPayload
+    (header : FoundationCertificateHeader)
+    (payload : FoundationRulePayload Func Pred) : Bool :=
+  if header.ruleCode? = some payload.code then
+    header.childCount == payload.childCount
+  else
+    false
+
 theorem FoundationRulePayload.header_ruleCode?
     (payload : FoundationRulePayload Func Pred) :
     payload.header.ruleCode? = some payload.code := by
@@ -252,6 +260,32 @@ theorem FoundationRulePayload.header_shapeOK
     (payload : FoundationRulePayload Func Pred) :
     payload.header.shapeOK = true := by
   cases payload <;> rfl
+
+theorem FoundationCertificateHeader.matchesPayload_payload_header
+    (payload : FoundationRulePayload Func Pred) :
+    payload.header.matchesPayload payload = true := by
+  cases payload <;> rfl
+
+theorem FoundationCertificateHeader.matchesPayload_true_ruleCode?
+    {header : FoundationCertificateHeader}
+    {payload : FoundationRulePayload Func Pred}
+    (h : header.matchesPayload payload = true) :
+    header.ruleCode? = some payload.code := by
+  unfold FoundationCertificateHeader.matchesPayload at h
+  by_cases hcode : header.ruleCode? = some payload.code
+  · exact hcode
+  · simp [hcode] at h
+
+theorem FoundationCertificateHeader.matchesPayload_true_childCount
+    {header : FoundationCertificateHeader}
+    {payload : FoundationRulePayload Func Pred}
+    (h : header.matchesPayload payload = true) :
+    header.childCount = payload.childCount := by
+  unfold FoundationCertificateHeader.matchesPayload at h
+  by_cases hcode : header.ruleCode? = some payload.code
+  · simp [hcode] at h
+    exact h
+  · simp [hcode] at h
 
 inductive FoundationCertificateTree (Func : Type u) (Pred : Type v) where
   | node :
