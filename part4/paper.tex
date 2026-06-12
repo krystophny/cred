@@ -745,6 +745,174 @@ The product De Morgan triplet with chain-rule conditioning makes that
 commitment as small as arithmetic allows: $c \cdot 0 = 0$, nothing
 more.
 
+\appendix
+
+\section{Priors as seeds: informative, reference, and model volume}
+\label{sec:priorseed}
+
+The prior is the Bayesian name for the seed. Before the first datum, an inference
+already holds a credence over hypotheses, and no reading fixes it from inside.
+Part~4 argued this in the abstract; here we read the prior as one concrete
+instance of the irreducible commitment, and we follow it into model comparison,
+where the seed acquires a price.
+
+\paragraph{No prior is neutral.}
+An informative prior commits a lot. It names where the parameter is likely to
+sit and how tightly, and it pays for a wrong guess with slow convergence. A
+reference prior commits less: Jeffreys' rule, the flat prior, the maximum-entropy
+prior under stated constraints all aim to let the data speak with least
+interference~\cite{jaynes2003}. Less is not none. A flat prior on a parameter is
+not flat after reparametrization; maximum entropy fixes a measure and a
+constraint set; Jeffreys' rule fixes an invariance. Each choice is a commitment
+dressed as the absence of one. The reference prior is the seed held as small as
+the task allows, never the seed removed.
+
+\paragraph{Prior volume is the Occam factor.}
+The commitment becomes a number when two models are compared. Section~\ref{sec:occam}
+wrote the marginal likelihood as $m(x)\approx p(x\mid\hat\theta)\cdot\Omega$, with
+$\Omega$ the Occam factor: the fraction of its prior width the fitted parameter
+uses. A broad prior spreads credence over a large parameter space, so $\Omega$ is
+small, and the broad model is charged for the volume it spends~\cite{lindley1957}.
+A model with a diffuse prior is therefore a \emph{larger} model, not a neutral
+one. Widen the prior toward the improper limit and $\Omega\to0$ at a rate the
+prior never names, so the Bayes factor loses a determinate value; Bartlett read
+this off the flat prior directly~\cite{bartlett1957}. The seed that looked least
+committal turns out to commit the most, by claiming the most volume.
+
+This is the same accounting as $\Cond$. The admissible set
+$\Cond(j,e)=\{c\in[0,1]:c\conjc e=j\}$ records what the supplied data leave open;
+its width is the analogue of prior volume. A broad prior buys a large $\Omega$
+penalty exactly as a degenerate $e$ buys a wide $\Cond$. Width is the currency in
+both columns, and width is never free.
+
+\paragraph{The reference-prior dream and its machine.}
+Push the reference prior to its limit and you reach Solomonoff's universal prior:
+weight each hypothesis by the length of the shortest program that generates it, so
+simpler hypotheses start ahead and Occam's razor becomes the seed
+itself~\cite{solomonoff1964}. This is the cleanest attempt to fix the very first
+commitment once and for all. The price is the same one the flat prior pays in a
+cruder form. Universality holds only up to a multiplicative constant set by the
+chosen reference machine, and that constant is unbounded across machines. The
+seed is minimal in description length and still machine-dependent. Even the prior
+built to be canonical carries a free parameter, relocated from the shape of a
+distribution to the choice of a universal machine.
+
+The lesson tracks the Part~4 thesis without adding to it. Every prior is a seed
+the inference cannot derive from its data. Making it informative commits more;
+making it diffuse commits more volume, not less; making it universal commits to a
+machine. The honest move is not to find the neutral prior, which does not exist,
+but to name the seed, hold it small, and let the comparison expose what its width
+costs.
+
+\section{A worked example: does gravity exist?}
+\label{sec:gravity}
+
+Everything above runs on one experiment. We measure a downward acceleration and
+ask whether a gravitational effect exists at all. The two boundaries of
+Section~\ref{sec:boundaries} (the Occam factor and the washing out of a proper
+prior) and the coherence theorem of Section~\ref{sec:iteration} all show up in
+explicit numbers.
+
+Set up two models for a single reading $x$ of the acceleration, in units where
+the noise has standard deviation $\sigma = 1$.
+\begin{itemize}
+\item $M_0$: no effect. The acceleration is exactly $g = 0$, so
+$x \sim \mathcal{N}(0,1)$.
+\item $M_1$: an effect of unknown size. The acceleration is some
+$g \in [0, W]$, with a flat prior of width $W$, and $x \sim \mathcal{N}(g,1)$.
+\end{itemize}
+The width $W$ is the prior on $M_1$. It is the seed of Section~\ref{sec:correspondence}:
+chosen before the reading, not read off it.
+
+The marginal likelihood of $M_1$ factors the way Section~\ref{sec:occam}
+describes,
+\[
+  m_1(x) = \int_0^W \frac{1}{W}\, \frac{1}{\sqrt{2\pi}}\,
+  e^{-(x-g)^2/2}\, dg
+  \;\approx\; \underbrace{\frac{1}{\sqrt{2\pi}}\, e^{-(x-\hat g)^2/2}}_{\text{best fit}}
+  \cdot \underbrace{\frac{\sqrt{2\pi}}{W}}_{\Omega},
+\]
+with $\hat g = x$ when $x$ lands inside $[0,W]$. The Occam factor
+$\Omega = \sqrt{2\pi}/W$ is the fraction of its prior width that the fitted
+parameter uses. The Bayes factor is the maximized likelihood ratio times that
+factor:
+\[
+  B_{10} = \frac{m_1(x)}{m_0(x)}
+  \;\approx\; \underbrace{e^{x^2/2}}_{\text{likelihood ratio}}
+  \cdot \underbrace{\frac{\sqrt{2\pi}}{W}}_{\Omega}.
+\]
+
+\begin{example}[A broad prior loses on a datum that favors gravity]
+\label{ex:gravity-lindley}
+Read $x = 2$: two standard errors from zero, so the datum favors $g \neq 0$.
+The likelihood ratio is $e^{2} \approx 7.39$, decisive against $M_0$ on its
+own. Now feel the width.
+\begin{itemize}
+\item Narrow prior, $W = 5$: $\Omega = \sqrt{2\pi}/5 \approx 0.50$, so
+$B_{10} \approx 7.39 \cdot 0.50 \approx 3.7$. Evidence for gravity.
+\item Broad prior, $W = 100$: $\Omega \approx 0.025$, so
+$B_{10} \approx 7.39 \cdot 0.025 \approx 0.18$. Evidence \emph{against}
+gravity, with the same datum.
+\end{itemize}
+The reading did not change. The seed did. A prior too broad on $g$ charges
+$M_1$ for parameter space it never used, and $M_1$ loses even though the datum
+favors $g \neq 0$. This is the Lindley--Bartlett effect
+\cite{lindley1957,jeffreys1939}: a sharp null beats a diffuse alternative not
+on the fit but on the width.
+\end{example}
+
+Push $W \to \infty$, the improper limit, and $\Omega \to 0$ at a rate no
+finite reading fixes; $B_{10} \to 0$ regardless of $x$. The comparison is no
+longer underdetermined, it is ill-posed: the answer depends on a width the
+improper prior declines to name \cite{bartlett1957}. Jeffreys' fix is to keep
+the prior proper, of fixed scale, so $\Omega$ stays defined \cite{jeffreys1939}.
+
+\paragraph{Sequential measurements wash out the width.}
+Now take $n$ readings $x_1, \dots, x_n$ instead of one. The coherence theorem
+\texttt{sequential\_eq\_batch} (Section~\ref{sec:iteration}, machine-checked)
+says that with the joint model fixed, updating one datum at a time equals
+updating the whole batch at once: the intermediate posterior cancels, so
+$\cred(\theta \mid x_{1:n})$ is the same object whether assembled in $n$ steps
+or in one. Sequential and batch conditioning agree, so we may read $n$ readings
+as a single effective measurement of mean $\bar x$ with noise $1/\sqrt{n}$.
+
+\begin{example}[Accumulating data washes out a broad proper prior]
+\label{ex:gravity-washout}
+Keep the broad prior $W = 100$ that lost in
+Example~\ref{ex:gravity-lindley}, and suppose the true acceleration is
+$g = 2$, so $\bar x \to 2$. The effective likelihood ratio for $n$ readings is
+$e^{n\bar x^2/2} = e^{2n}$, while the Occam factor on the concentrated
+posterior is $\Omega_n \approx \sqrt{2\pi/n}\,/\,W$. So
+\[
+  B_{10}^{(n)} \;\approx\; e^{2n}\cdot \frac{\sqrt{2\pi/n}}{100}.
+\]
+At $n = 1$ this is $\approx 0.18$ (gravity loses, as before). At $n = 4$ it is
+$e^{8}\cdot\sqrt{\pi/2}/100 \approx 2981 \cdot 0.0125 \approx 37$. At $n = 10$
+it is astronomically large. The exponential growth of the likelihood ratio
+overruns the fixed width penalty in the denominator. The broad-but-proper prior
+that lost on one datum is forgotten once the data accumulate. This is the
+Bernstein--von Mises behavior of Section~\ref{sec:iteration}: the posterior
+concentrates at rate $1/\sqrt{n}$ and the prior washes out
+\cite{vandervaart1998}.
+\end{example}
+
+The contrast with the improper case is the whole point. A proper prior of any
+finite width, however badly chosen, is recoverable: enough readings drive
+$B_{10}^{(n)}$ to its data-driven verdict, and the coherence theorem guarantees
+that the sequential accumulation reaching that verdict is the same as the batch
+one. An improper prior, $W = \infty$, has no such limit to recover toward. The
+$\Omega = \infty^{-1}$ that made one reading ill-posed makes every reading
+ill-posed; no amount of accumulated data names the width, because there was
+never a width to name. The seed must be proper for the data to forget it.
+
+This is the same boundary, read on one experiment, that the dictionary of
+Section~\ref{sec:correspondence} reads three ways. A finite width is a prior
+the evidence can revise (singleton conditioning, $e > 0$). An infinite width is
+the unrecoverable case: not the zero of Section~\ref{sec:zero}, but its dual at
+the other end, a prior so spread that no finite evidence concentrates it. In
+both, the honest report under an unfixed seed is not a number but the set of
+verdicts the admissible seeds allow.
+
 \bibliographystyle{plain}
 \bibliography{../cred}
 
