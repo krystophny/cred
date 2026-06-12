@@ -20,6 +20,12 @@ structure CheckedFoundationProof (t : Credence)
   conclusion : Formula Func Pred
   proof : FoundationProof t premises conclusion
 
+theorem CheckedFoundationProof.sound
+    {t : Credence} (checked : CheckedFoundationProof t Func Pred) :
+    FoundationThresholdConsequence.{u, v, w} t
+      checked.premises checked.conclusion :=
+  FoundationProof.sound checked.proof
+
 inductive FoundationRulePayload (Func : Type u) (Pred : Type v) where
   | hyp : List (Formula Func Pred) → Formula Func Pred → FoundationRulePayload Func Pred
   | weaken : List (Formula Func Pred) → FoundationRulePayload Func Pred
@@ -460,6 +466,15 @@ theorem checkFoundationCertificateList_none_of_shapeOKList_false
       have hok := checkFoundationCertificateList_some_shapeOKList hcheck
       rw [hshape] at hok
       contradiction
+
+theorem checkFoundationCertificate_sound
+    [DecidableEq Func] [DecidableEq Pred]
+    {t : Credence} {tree : FoundationCertificateTree Func Pred}
+    {checked : CheckedFoundationProof t Func Pred}
+    (_h : checkFoundationCertificate t tree = some checked) :
+    FoundationThresholdConsequence.{u, v, w} t
+      checked.premises checked.conclusion :=
+  checked.sound
 
 end Structure
 
