@@ -76,3 +76,4 @@ import Cred.Algebra.Completion
 import Cred.SelfRep
 import Cred.Foundation.Reflect
 import Cred.Foundation.CodeChecker
+import Cred.Foundation.Representability
