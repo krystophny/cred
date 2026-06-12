@@ -61,6 +61,7 @@ import Cred.ReflectionTower
 import Cred.SeededSystem
 import Cred.Lindley
 import Cred.Algebra
+import Cred.Coherence
 import Cred.MinimalKernel
 import Cred.Completeness
 import Cred.CutElim
