@@ -69,6 +69,7 @@ Keep the separation clear: `⊗`/`⊔` are the core algebraic operations (produc
 - `lean/Cred/Foundation/Examples.lean`: small foundation proof certificates and their soundness facts.
 - `lean/Cred/Foundation/RuleCode.lean`: trusted rule-code inventory for future external checking.
 - `lean/Cred/Foundation/Checker.lean`: one-step rule checker returning typed foundation certificates.
+- `lean/Cred/Foundation/Certificate.lean`: external certificate envelopes with supplied headers, payload checks, and soundness.
 - `part1/paper.tex`: congruence classification (6 sections + conclusion + 2 appendices, 12 pages).
 - `part2/paper.tex`: bridge paper (8 sections + 2 appendices, 24 pages; self-contained).
 - `part3/paper.tex`: foundations paper: paradox without explosion, crisp fragments, solution sets, and external conditioning.
@@ -302,6 +303,14 @@ Foundation checker soundness (from Foundation/CheckerSoundness.lean):
 - `checkFoundationCertificate_none_of_shapeOK_false`
 - `checkFoundationCertificateList_none_of_shapeOKList_false`
 - `checkFoundationCertificate_sound`
+
+Foundation certificate envelopes (from Foundation/Certificate.lean):
+- `Structure.FoundationCertificateEnvelope`
+- `FoundationCertificateEnvelope.localShapeOK`, `FoundationCertificateEnvelope.shapeOK`
+- `checkFoundationCertificateEnvelope`
+- `checkFoundationCertificateEnvelope_sound`
+- `checkFoundationCertificateEnvelope_some_localShapeOK`
+- `checkFoundationCertificateEnvelope_some_matchesPayload`
 
 ## Philosophy
 

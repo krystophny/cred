@@ -137,6 +137,9 @@ lake build
 | `Foundation.Structure.checkFoundationCertificate_none_of_shapeOK_false` | Failed structural precheck forces certificate rejection |
 | `Foundation.Structure.checkFoundationCertificate_sound` | Successful certificate checks produce sound foundation consequences |
 | `Foundation.Structure.checkFoundationCertificate` | Recursive checker from certificate trees to typed certificates |
+| `Foundation.Structure.FoundationCertificateEnvelope.localShapeOK` | External envelope headers must match their typed payload and child count |
+| `Foundation.Structure.checkFoundationCertificateEnvelope_some_matchesPayload` | Successful envelope checks imply the supplied header matches the payload |
+| `Foundation.Structure.checkFoundationCertificateEnvelope_sound` | Successful envelope checks produce sound foundation consequences |
 
 ## Dependencies
 
