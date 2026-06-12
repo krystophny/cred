@@ -319,6 +319,21 @@ def FoundationCertificateTree.shapeOKList :
 
 end
 
+mutual
+
+def FoundationCertificateTree.headersShapeOK :
+    FoundationCertificateTree Func Pred → Bool
+  | tree@(.node _ children) =>
+      tree.header.shapeOK && FoundationCertificateTree.headersShapeOKList children
+
+def FoundationCertificateTree.headersShapeOKList :
+    List (FoundationCertificateTree Func Pred) → Bool
+  | [] => true
+  | tree :: trees =>
+      tree.headersShapeOK && FoundationCertificateTree.headersShapeOKList trees
+
+end
+
 theorem FoundationCertificateTree.ruleName_roundtrip
     (tree : FoundationCertificateTree Func Pred) :
     FoundationRuleCode.ofName tree.ruleName = some tree.ruleCode := by

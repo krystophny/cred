@@ -272,6 +272,8 @@ Foundation checker (from Foundation/Checker.lean):
 - `FoundationCertificateTree.allAritiesMatch`
 - `FoundationCertificateTree.allAritiesMatchList`
 - `FoundationCertificateTree.shapeOK`, `FoundationCertificateTree.shapeOKList`
+- `FoundationCertificateTree.headersShapeOK`
+- `FoundationCertificateTree.headersShapeOKList`
 - `FoundationCertificateTree.ruleName_roundtrip`
 - `checkFoundationCertificate`, `checkFoundationCertificateList`
 
@@ -280,6 +282,8 @@ Foundation checker soundness (from Foundation/CheckerSoundness.lean):
 - `FoundationCertificateTree.shapeOK_true_arityMatches`
 - `FoundationCertificateTree.shapeOK_true_allAritiesMatch`
 - `FoundationCertificateTree.shapeOKList_true_allAritiesMatchList`
+- `FoundationCertificateTree.headersShapeOK_eq_shapeOK`
+- `FoundationCertificateTree.headersShapeOKList_eq_shapeOKList`
 - `checkFoundationCertificate_some_arityMatches`
 - `checkFoundationCertificate_some_allAritiesMatch`
 - `checkFoundationCertificateList_some_allAritiesMatchList`

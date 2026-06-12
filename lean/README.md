@@ -122,6 +122,7 @@ lake build
 | `Foundation.Structure.FoundationCertificateHeader.shapeOK` | Serialized certificate headers parse rule names and check arity |
 | `Foundation.Structure.FoundationCertificateHeader.shapeOK_false_of_ruleCode?_none` | Unknown rule names fail the header check |
 | `Foundation.Structure.FoundationCertificateTree.header_shapeOK_true_iff` | Tree headers pass exactly when root arity matches |
+| `Foundation.Structure.FoundationCertificateTree.headersShapeOK_eq_shapeOK` | Recursive header precheck agrees with structural precheck |
 | `Foundation.Structure.FoundationCertificateTree.ruleName_roundtrip` | Certificate tree rule names parse back to their rule codes |
 | `Foundation.Structure.CheckedFoundationProof.sound` | Checked proof objects produce foundation consequences |
 | `Foundation.Structure.FoundationCertificateTree.shapeOK_true_arityMatches` | Structural precheck success implies root arity matches |

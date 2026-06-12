@@ -67,6 +67,40 @@ theorem FoundationCertificateTree.shapeOKList_true_allAritiesMatchList
 
 end
 
+mutual
+
+theorem FoundationCertificateTree.headersShapeOK_eq_shapeOK
+    (tree : FoundationCertificateTree Func Pred) :
+    tree.headersShapeOK = tree.shapeOK := by
+  cases tree with
+  | node payload children =>
+      cases payload <;>
+        simp [FoundationCertificateTree.headersShapeOK,
+          FoundationCertificateTree.shapeOK, FoundationCertificateTree.header,
+          FoundationCertificateTree.ruleName, FoundationCertificateTree.ruleCode,
+          FoundationCertificateTree.children, FoundationCertificateHeader.shapeOK,
+          FoundationCertificateHeader.ruleCode?, FoundationRuleCode.ofName,
+          FoundationRuleCode.name, FoundationRulePayload.code,
+          FoundationRulePayload.childCount,
+          FoundationRuleCode.childCount,
+          FoundationCertificateTree.headersShapeOKList_eq_shapeOKList children]
+
+theorem FoundationCertificateTree.headersShapeOKList_eq_shapeOKList
+    (trees : List (FoundationCertificateTree Func Pred)) :
+    FoundationCertificateTree.headersShapeOKList trees =
+      FoundationCertificateTree.shapeOKList trees := by
+  cases trees with
+  | nil =>
+      simp [FoundationCertificateTree.headersShapeOKList,
+        FoundationCertificateTree.shapeOKList]
+  | cons tree trees =>
+      simp [FoundationCertificateTree.headersShapeOKList,
+        FoundationCertificateTree.shapeOKList,
+        FoundationCertificateTree.headersShapeOK_eq_shapeOK tree,
+        FoundationCertificateTree.headersShapeOKList_eq_shapeOKList trees]
+
+end
+
 theorem checkFoundationCertificate_some_arityMatches
     [DecidableEq Func] [DecidableEq Pred]
     {t : Credence} {tree : FoundationCertificateTree Func Pred}
