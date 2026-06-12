@@ -46,6 +46,7 @@ import Cred.Set.Classical
 import Cred.Set.Quine
 import Cred.Reflection
 import Cred.Foundation.Diagonal
+import Cred.Foundation.CodingNat
 import Cred.Set.Separation
 import Cred.Branch.Independence
 import Cred.Foundation.CertificateBuilder
