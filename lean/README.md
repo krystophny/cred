@@ -117,6 +117,9 @@ lake build
 | `Foundation.Structure.FoundationRulePayload.childCount_eq_code` | Rule payloads use the child count of their trusted code |
 | `Foundation.Structure.applyFoundationRule_some_childCount` | Successful rule application has the arity declared by its rule code |
 | `Foundation.Structure.applyFoundationRule` | One-step checker from rule payloads and checked children to typed certificates |
+| `Foundation.Structure.FoundationCertificateHeader.shapeOK` | Serialized certificate headers parse rule names and check arity |
+| `Foundation.Structure.FoundationCertificateHeader.shapeOK_false_of_ruleCode?_none` | Unknown rule names fail the header check |
+| `Foundation.Structure.FoundationCertificateTree.header_shapeOK_true_iff` | Tree headers pass exactly when root arity matches |
 | `Foundation.Structure.FoundationCertificateTree.ruleName_roundtrip` | Certificate tree rule names parse back to their rule codes |
 | `Foundation.Structure.CheckedFoundationProof.sound` | Checked proof objects produce foundation consequences |
 | `Foundation.Structure.FoundationCertificateTree.shapeOK_true_arityMatches` | Structural precheck success implies root arity matches |

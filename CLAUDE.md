@@ -250,8 +250,18 @@ Foundation checker (from Foundation/Checker.lean):
 - `applyFoundationRuleUnchecked`
 - `applyFoundationRule`
 - `applyFoundationRule_some_childCount`
+- `Structure.FoundationCertificateHeader`
+- `FoundationCertificateHeader.ruleCode?`, `FoundationCertificateHeader.shapeOK`
+- `FoundationCertificateHeader.ofRuleCode`
+- `FoundationCertificateHeader.ofRuleCode_ruleCode?`
+- `FoundationCertificateHeader.ofRuleCode_shapeOK`
+- `FoundationCertificateHeader.shapeOK_true_ruleCode?_isSome`
+- `FoundationCertificateHeader.shapeOK_false_of_ruleCode?_none`
+- `FoundationCertificateHeader.childCount_eq_of_shapeOK`
 - `Structure.FoundationCertificateTree`
 - `FoundationCertificateTree.ruleCode`, `FoundationCertificateTree.ruleName`
+- `FoundationCertificateTree.header`, `FoundationCertificateTree.header_ruleCode?`
+- `FoundationCertificateTree.header_shapeOK_true_iff`
 - `FoundationCertificateTree.childCount`, `FoundationCertificateTree.children`
 - `FoundationCertificateTree.arityMatches`
 - `FoundationCertificateTree.allAritiesMatch`

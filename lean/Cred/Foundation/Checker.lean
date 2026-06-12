@@ -184,6 +184,61 @@ theorem applyFoundationRule_some_childCount
   · exact hcount
   · simp [applyFoundationRule, hcount] at h
 
+structure FoundationCertificateHeader where
+  ruleName : String
+  childCount : Nat
+deriving Repr, DecidableEq
+
+def FoundationCertificateHeader.ruleCode?
+    (header : FoundationCertificateHeader) : Option FoundationRuleCode :=
+  FoundationRuleCode.ofName header.ruleName
+
+def FoundationCertificateHeader.shapeOK
+    (header : FoundationCertificateHeader) : Bool :=
+  match header.ruleCode? with
+  | some code => header.childCount == code.childCount
+  | none => false
+
+def FoundationCertificateHeader.ofRuleCode
+    (code : FoundationRuleCode) : FoundationCertificateHeader :=
+  { ruleName := code.name, childCount := code.childCount }
+
+theorem FoundationCertificateHeader.ofRuleCode_ruleCode?
+    (code : FoundationRuleCode) :
+    (FoundationCertificateHeader.ofRuleCode code).ruleCode? = some code := by
+  cases code <;> rfl
+
+theorem FoundationCertificateHeader.ofRuleCode_shapeOK
+    (code : FoundationRuleCode) :
+    (FoundationCertificateHeader.ofRuleCode code).shapeOK = true := by
+  cases code <;> rfl
+
+theorem FoundationCertificateHeader.shapeOK_true_ruleCode?_isSome
+    {header : FoundationCertificateHeader}
+    (h : header.shapeOK = true) :
+    ∃ code, header.ruleCode? = some code := by
+  unfold FoundationCertificateHeader.shapeOK at h
+  cases hcode : header.ruleCode? with
+  | none =>
+      simp [hcode] at h
+  | some code =>
+      exact ⟨code, rfl⟩
+
+theorem FoundationCertificateHeader.shapeOK_false_of_ruleCode?_none
+    {header : FoundationCertificateHeader}
+    (h : header.ruleCode? = none) :
+    header.shapeOK = false := by
+  simp [FoundationCertificateHeader.shapeOK, h]
+
+theorem FoundationCertificateHeader.childCount_eq_of_shapeOK
+    {header : FoundationCertificateHeader} {code : FoundationRuleCode}
+    (hcode : header.ruleCode? = some code)
+    (hshape : header.shapeOK = true) :
+    header.childCount = code.childCount := by
+  unfold FoundationCertificateHeader.shapeOK at hshape
+  rw [hcode] at hshape
+  simpa using hshape
+
 inductive FoundationCertificateTree (Func : Type u) (Pred : Type v) where
   | node :
       FoundationRulePayload Func Pred →
@@ -208,9 +263,31 @@ def FoundationCertificateTree.children :
       List (FoundationCertificateTree Func Pred)
   | .node _ children => children
 
+def FoundationCertificateTree.header
+    (tree : FoundationCertificateTree Func Pred) : FoundationCertificateHeader :=
+  { ruleName := tree.ruleName, childCount := tree.children.length }
+
+theorem FoundationCertificateTree.header_ruleCode?
+    (tree : FoundationCertificateTree Func Pred) :
+    tree.header.ruleCode? = some tree.ruleCode := by
+  cases tree
+  simp [FoundationCertificateTree.header, FoundationCertificateTree.ruleName,
+    FoundationCertificateTree.ruleCode, FoundationCertificateHeader.ruleCode?,
+    FoundationRuleCode.ofName_name]
+
 def FoundationCertificateTree.arityMatches
     (tree : FoundationCertificateTree Func Pred) : Prop :=
   tree.children.length = tree.childCount
+
+theorem FoundationCertificateTree.header_shapeOK_true_iff
+    (tree : FoundationCertificateTree Func Pred) :
+    tree.header.shapeOK = true ↔ tree.arityMatches := by
+  cases tree
+  simp [FoundationCertificateTree.header, FoundationCertificateTree.ruleName,
+    FoundationCertificateTree.ruleCode, FoundationCertificateTree.children,
+    FoundationCertificateTree.childCount, FoundationCertificateTree.arityMatches,
+    FoundationCertificateHeader.shapeOK, FoundationCertificateHeader.ruleCode?,
+    FoundationRuleCode.ofName_name]
 
 mutual
 
