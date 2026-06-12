@@ -21,6 +21,52 @@ theorem CheckedFoundationProof.sound
       checked.premises checked.conclusion :=
   FoundationProof.sound checked.proof
 
+theorem FoundationCertificateTree.shapeOK_true_arityMatches
+    {tree : FoundationCertificateTree Func Pred}
+    (h : tree.shapeOK = true) :
+    tree.arityMatches := by
+  cases tree with
+  | node payload children =>
+      simp [FoundationCertificateTree.shapeOK,
+        FoundationCertificateTree.arityMatches,
+        FoundationCertificateTree.children,
+        FoundationCertificateTree.childCount,
+        FoundationCertificateTree.ruleCode] at h
+      exact h.left
+
+mutual
+
+theorem FoundationCertificateTree.shapeOK_true_allAritiesMatch
+    {tree : FoundationCertificateTree Func Pred}
+    (h : tree.shapeOK = true) :
+    tree.allAritiesMatch := by
+  cases tree with
+  | node payload children =>
+      simp [FoundationCertificateTree.shapeOK,
+        FoundationCertificateTree.allAritiesMatch,
+        FoundationCertificateTree.arityMatches,
+        FoundationCertificateTree.children,
+        FoundationCertificateTree.childCount,
+        FoundationCertificateTree.ruleCode] at h ⊢
+      exact ⟨h.left,
+        FoundationCertificateTree.shapeOKList_true_allAritiesMatchList h.right⟩
+
+theorem FoundationCertificateTree.shapeOKList_true_allAritiesMatchList
+    {trees : List (FoundationCertificateTree Func Pred)}
+    (h : FoundationCertificateTree.shapeOKList trees = true) :
+    FoundationCertificateTree.allAritiesMatchList trees := by
+  cases trees with
+  | nil =>
+      simp [FoundationCertificateTree.allAritiesMatchList]
+  | cons tree trees =>
+      simp [FoundationCertificateTree.shapeOKList,
+        FoundationCertificateTree.allAritiesMatchList] at h ⊢
+      exact
+        ⟨FoundationCertificateTree.shapeOK_true_allAritiesMatch h.left,
+          FoundationCertificateTree.shapeOKList_true_allAritiesMatchList h.right⟩
+
+end
+
 theorem checkFoundationCertificate_some_arityMatches
     [DecidableEq Func] [DecidableEq Pred]
     {t : Credence} {tree : FoundationCertificateTree Func Pred}
