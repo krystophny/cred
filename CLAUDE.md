@@ -70,6 +70,7 @@ Keep the separation clear: `⊗`/`⊔` are the core algebraic operations (produc
 - `lean/Cred/Foundation/RuleCode.lean`: trusted rule-code inventory for future external checking.
 - `lean/Cred/Foundation/Checker.lean`: one-step rule checker returning typed foundation certificates.
 - `lean/Cred/Foundation/Certificate.lean`: external certificate envelopes with supplied headers, payload checks, and soundness.
+- `lean/Cred/Foundation/CertificateExamples.lean`: envelope examples for accepted headers and forged-header rejection.
 - `part1/paper.tex`: congruence classification (6 sections + conclusion + 2 appendices, 12 pages).
 - `part2/paper.tex`: bridge paper (8 sections + 2 appendices, 24 pages; self-contained).
 - `part3/paper.tex`: foundations paper: paradox without explosion, crisp fragments, solution sets, and external conditioning.
@@ -311,6 +312,9 @@ Foundation certificate envelopes (from Foundation/Certificate.lean):
 - `checkFoundationCertificateEnvelope_sound`
 - `checkFoundationCertificateEnvelope_some_localShapeOK`
 - `checkFoundationCertificateEnvelope_some_matchesPayload`
+- `forallElimEnvelope_localShapeOK`
+- `forallElimEnvelope_bad_header_localShapeFails`
+- `forallElimEnvelope_bad_header_fails`
 
 ## Philosophy
 

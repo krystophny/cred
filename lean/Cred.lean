@@ -34,3 +34,4 @@ import Cred.Foundation.Checker
 import Cred.Foundation.CheckerSoundness
 import Cred.Foundation.Certificate
 import Cred.Foundation.Examples
+import Cred.Foundation.CertificateExamples

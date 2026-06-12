@@ -140,6 +140,8 @@ lake build
 | `Foundation.Structure.FoundationCertificateEnvelope.localShapeOK` | External envelope headers must match their typed payload and child count |
 | `Foundation.Structure.checkFoundationCertificateEnvelope_some_matchesPayload` | Successful envelope checks imply the supplied header matches the payload |
 | `Foundation.Structure.checkFoundationCertificateEnvelope_sound` | Successful envelope checks produce sound foundation consequences |
+| `Foundation.Structure.forallElimEnvelope_localShapeOK` | A well-formed external envelope passes the local header check |
+| `Foundation.Structure.forallElimEnvelope_bad_header_fails` | A forged root header is rejected before certificate acceptance |
 
 ## Dependencies
 
