@@ -260,6 +260,8 @@ Foundation checker (from Foundation/Checker.lean):
 - `FoundationCertificateTree.shapeOKList_true_allAritiesMatchList`
 - `FoundationCertificateTree.ruleName_roundtrip`
 - `checkFoundationCertificate_some_arityMatches`
+- `checkFoundationCertificate_some_allAritiesMatch`
+- `checkFoundationCertificateList_some_allAritiesMatchList`
 - `checkFoundationCertificate`, `checkFoundationCertificateList`
 
 ## Philosophy

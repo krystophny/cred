@@ -335,6 +335,59 @@ theorem checkFoundationCertificate_some_arityMatches
           FoundationCertificateTree.childCount,
           FoundationCertificateTree.ruleCode, hcount] at h
 
+mutual
+
+theorem checkFoundationCertificate_some_allAritiesMatch
+    [DecidableEq Func] [DecidableEq Pred]
+    {t : Credence} {tree : FoundationCertificateTree Func Pred}
+    {checked : CheckedFoundationProof t Func Pred}
+    (h : checkFoundationCertificate t tree = some checked) :
+    tree.allAritiesMatch := by
+  cases tree with
+  | node payload children =>
+      by_cases hcount : children.length = payload.childCount
+      · simp [checkFoundationCertificate, hcount] at h
+        cases hchildren : checkFoundationCertificateList t children with
+        | none =>
+            simp [hchildren] at h
+        | some checkedChildren =>
+            simp [hchildren] at h
+            simp [FoundationCertificateTree.allAritiesMatch,
+              FoundationCertificateTree.arityMatches,
+              FoundationCertificateTree.children,
+              FoundationCertificateTree.childCount,
+              FoundationCertificateTree.ruleCode]
+            exact
+              ⟨hcount,
+                checkFoundationCertificateList_some_allAritiesMatchList hchildren⟩
+      · simp [checkFoundationCertificate, hcount] at h
+
+theorem checkFoundationCertificateList_some_allAritiesMatchList
+    [DecidableEq Func] [DecidableEq Pred]
+    {t : Credence} {trees : List (FoundationCertificateTree Func Pred)}
+    {checked : List (CheckedFoundationProof t Func Pred)}
+    (h : checkFoundationCertificateList t trees = some checked) :
+    FoundationCertificateTree.allAritiesMatchList trees := by
+  cases trees with
+  | nil =>
+      simp [FoundationCertificateTree.allAritiesMatchList]
+  | cons tree trees =>
+      simp [checkFoundationCertificateList] at h
+      cases htree : checkFoundationCertificate t tree with
+      | none =>
+          simp [htree] at h
+      | some checkedTree =>
+          cases htrees : checkFoundationCertificateList t trees with
+          | none =>
+              simp [htree, htrees] at h
+          | some checkedTrees =>
+              simp [htree, htrees] at h
+              exact
+                ⟨checkFoundationCertificate_some_allAritiesMatch htree,
+                  checkFoundationCertificateList_some_allAritiesMatchList htrees⟩
+
+end
+
 end Structure
 
 end Foundation
