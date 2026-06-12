@@ -214,6 +214,21 @@ def FoundationCertificateTree.arityMatches
 
 mutual
 
+def FoundationCertificateTree.allAritiesMatch :
+    FoundationCertificateTree Func Pred → Prop
+  | tree@(.node _ children) =>
+      tree.arityMatches ∧ FoundationCertificateTree.allAritiesMatchList children
+
+def FoundationCertificateTree.allAritiesMatchList :
+    List (FoundationCertificateTree Func Pred) → Prop
+  | [] => True
+  | tree :: trees =>
+      tree.allAritiesMatch ∧ FoundationCertificateTree.allAritiesMatchList trees
+
+end
+
+mutual
+
 def FoundationCertificateTree.shapeOK :
     FoundationCertificateTree Func Pred → Bool
   | .node payload children =>
@@ -239,6 +254,39 @@ theorem FoundationCertificateTree.shapeOK_true_arityMatches
         FoundationCertificateTree.childCount,
         FoundationCertificateTree.ruleCode] at h
       exact h.left
+
+mutual
+
+theorem FoundationCertificateTree.shapeOK_true_allAritiesMatch
+    {tree : FoundationCertificateTree Func Pred}
+    (h : tree.shapeOK = true) :
+    tree.allAritiesMatch := by
+  cases tree with
+  | node payload children =>
+      simp [FoundationCertificateTree.shapeOK,
+        FoundationCertificateTree.allAritiesMatch,
+        FoundationCertificateTree.arityMatches,
+        FoundationCertificateTree.children,
+        FoundationCertificateTree.childCount,
+        FoundationCertificateTree.ruleCode] at h ⊢
+      exact ⟨h.left,
+        FoundationCertificateTree.shapeOKList_true_allAritiesMatchList h.right⟩
+
+theorem FoundationCertificateTree.shapeOKList_true_allAritiesMatchList
+    {trees : List (FoundationCertificateTree Func Pred)}
+    (h : FoundationCertificateTree.shapeOKList trees = true) :
+    FoundationCertificateTree.allAritiesMatchList trees := by
+  cases trees with
+  | nil =>
+      simp [FoundationCertificateTree.allAritiesMatchList]
+  | cons tree trees =>
+      simp [FoundationCertificateTree.shapeOKList,
+        FoundationCertificateTree.allAritiesMatchList] at h ⊢
+      exact
+        ⟨FoundationCertificateTree.shapeOK_true_allAritiesMatch h.left,
+          FoundationCertificateTree.shapeOKList_true_allAritiesMatchList h.right⟩
+
+end
 
 theorem FoundationCertificateTree.ruleName_roundtrip
     (tree : FoundationCertificateTree Func Pred) :

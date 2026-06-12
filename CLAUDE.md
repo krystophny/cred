@@ -252,8 +252,12 @@ Foundation checker (from Foundation/Checker.lean):
 - `FoundationCertificateTree.ruleCode`, `FoundationCertificateTree.ruleName`
 - `FoundationCertificateTree.childCount`, `FoundationCertificateTree.children`
 - `FoundationCertificateTree.arityMatches`
+- `FoundationCertificateTree.allAritiesMatch`
+- `FoundationCertificateTree.allAritiesMatchList`
 - `FoundationCertificateTree.shapeOK`, `FoundationCertificateTree.shapeOKList`
 - `FoundationCertificateTree.shapeOK_true_arityMatches`
+- `FoundationCertificateTree.shapeOK_true_allAritiesMatch`
+- `FoundationCertificateTree.shapeOKList_true_allAritiesMatchList`
 - `FoundationCertificateTree.ruleName_roundtrip`
 - `checkFoundationCertificate_some_arityMatches`
 - `checkFoundationCertificate`, `checkFoundationCertificateList`
