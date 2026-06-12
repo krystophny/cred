@@ -867,14 +867,17 @@ longer underdetermined, it is ill-posed: the answer depends on a width the
 improper prior declines to name \cite{bartlett1957}. Jeffreys' fix is to keep
 the prior proper, of fixed scale, so $\Omega$ stays defined \cite{jeffreys1939}.
 
-\paragraph{Sequential measurements wash out the width.}
-Now take $n$ readings $x_1, \dots, x_n$ instead of one. The coherence theorem
-\texttt{sequential\_eq\_batch} (Section~\ref{sec:iteration}, machine-checked)
-says that with the joint model fixed, updating one datum at a time equals
-updating the whole batch at once: the intermediate posterior cancels, so
-$\cred(\theta \mid x_{1:n})$ is the same object whether assembled in $n$ steps
-or in one. Sequential and batch conditioning agree, so we may read $n$ readings
-as a single effective measurement of mean $\bar x$ with noise $1/\sqrt{n}$.
+\paragraph{Coherence is not convergence.}
+Now take $n$ readings $x_1, \dots, x_n$ instead of one. Three claims must be kept
+apart. The first is \emph{fixed-seed coherence}: with the prior held fixed,
+updating one datum at a time equals updating the whole batch, because the
+intermediate posterior cancels. This is the machine-checked theorem
+\texttt{sequential\_eq\_batch} (Section~\ref{sec:iteration}): with the joint
+model fixed, $\cred(\theta \mid x_{1:n})$ is one object whether assembled in $n$
+steps or one. That is all it says. It moves no prior and forgets no width; it is
+path independence in the data grouping, not a statement about which prior wins.
+What it licenses is reading $n$ readings as a single effective measurement of
+mean $\bar x$ with noise $1/\sqrt{n}$.
 
 \begin{example}[Accumulating data washes out a broad proper prior]
 \label{ex:gravity-washout}
@@ -891,9 +894,14 @@ $e^{8}\cdot\sqrt{\pi/2}/100 \approx 2981 \cdot 0.0125 \approx 37$. At $n = 10$
 it is astronomically large. The exponential growth of the likelihood ratio
 overruns the fixed width penalty in the denominator. The broad-but-proper prior
 that lost on one datum is forgotten once the data accumulate. This is the
-Bernstein--von Mises behavior of Section~\ref{sec:iteration}: the posterior
+\emph{second}, separate claim, convergence under assumptions: the
+Bernstein--von Mises behavior of Section~\ref{sec:iteration}, where the posterior
 concentrates at rate $1/\sqrt{n}$ and the prior washes out
-\cite{vandervaart1998}.
+\cite{vandervaart1998}. The forgetting is the work of the growing likelihood
+ratio $e^{2n}$, not of the coherence theorem; the \emph{third} claim, the Occam
+factor $\Omega_n$, still divides every term, and prior-volume sensitivity is
+removed by no theorem here. Coherence guarantees only that the sequential and
+batch routes to this verdict agree.
 \end{example}
 
 The contrast with the improper case is the whole point. A proper prior of any
