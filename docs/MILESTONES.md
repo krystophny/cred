@@ -61,6 +61,21 @@ Commitment and bootstrapping
 - Part 5: a didactic conceptual guide and glossary.
 - Part 6: universal bootstrapping and seeded self-hosting.
 
+## Positioning and review guardrails
+
+The bootstrap schema in Part 6 is intentionally elementary. It is not the deep
+mathematical contribution by itself. Its role is audit discipline: every claimed
+bootstrap must name its seed, substrate, transition, validator, and equivalence
+criterion.
+
+The nontrivial mathematical content remains the Cred-specific formal results:
+admissible conditioning, no-ex-falso, LP/K3 bridges, the truth-functional
+conditional no-go, the Curry block, provability/reflection boundaries, and the
+real-free checker soundness bridge.
+
+See `docs/BOOTSTRAP_POSITIONING.md` for the claim hierarchy and
+`docs/REVIEW_CHECKLIST.md` for the adversarial review questions.
+
 ## Trusted base and axiom ledger
 
 The trusted base today is the Lean 4 kernel and Mathlib, plus the three standard
