@@ -4,6 +4,7 @@
   Small envelope checks exercise the external-header boundary.
 -/
 
+import Cred.Foundation.Serialization
 import Cred.Foundation.Certificate
 
 namespace Cred
@@ -67,6 +68,19 @@ theorem forallElimEnvelope_bad_header_fails
     FoundationCertificateHeader.ofRuleCode_ruleCode?,
     FoundationCertificateHeader.ruleCode?, FoundationRuleCode.ofName_name,
     FoundationRuleCode.childCount]
+
+theorem serialized_forall_elim_header_decodes :
+    (SerializedFoundationHeader.mk "forallElim" 1).decode =
+      some (FoundationCertificateHeader.ofRuleCode .forallElim) := by
+  rfl
+
+theorem serialized_unknown_header_fails :
+    (SerializedFoundationHeader.mk "unknownRule" 0).decode = none := by
+  rfl
+
+theorem serialized_bad_arity_header_fails :
+    (SerializedFoundationHeader.mk "forallElim" 0).decode = none := by
+  rfl
 
 end Structure
 

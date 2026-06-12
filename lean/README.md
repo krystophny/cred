@@ -142,6 +142,10 @@ lake build
 | `Foundation.Structure.checkFoundationCertificateEnvelope_sound` | Successful envelope checks produce sound foundation consequences |
 | `Foundation.Structure.forallElimEnvelope_localShapeOK` | A well-formed external envelope passes the local header check |
 | `Foundation.Structure.forallElimEnvelope_bad_header_fails` | A forged root header is rejected before certificate acceptance |
+| `Foundation.Structure.SerializedFoundationHeader.decode` | Raw header input decodes only after rule-name and arity checks |
+| `Foundation.Structure.SerializedFoundationHeader.decode_none_of_unknown` | Unknown serialized rule names fail before trusted headers are built |
+| `Foundation.Structure.SerializedFoundationHeader.decode_none_of_bad_childCount` | Wrong serialized arities fail before trusted headers are built |
+| `Foundation.Structure.serialized_bad_arity_header_fails` | Concrete bad-arity header example is rejected |
 
 ## Dependencies
 
