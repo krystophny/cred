@@ -46,3 +46,7 @@ import Cred.Set.Classical
 import Cred.Set.Quine
 import Cred.Reflection
 import Cred.Foundation.Diagonal
+import Cred.Set.Separation
+import Cred.Branch.Independence
+import Cred.Foundation.CertificateBuilder
+import Cred.Branch.AxiomAudit
