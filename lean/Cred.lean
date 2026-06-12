@@ -72,6 +72,7 @@ import Cred.Extraction
 import Cred.Foundation.CheckBool
 import Cred.Algebra.Finite
 import Cred.Algebra.Rational
+import Cred.Algebra.Completion
 import Cred.SelfRep
 import Cred.Foundation.Reflect
 import Cred.Foundation.CodeChecker
