@@ -1,6 +1,6 @@
-.PHONY: all lean part1 part2 part3 clean
+.PHONY: all lean part1 part2 part3 part4 clean
 
-all: lean part1 part2 part3
+all: lean part1 part2 part3 part4
 
 lean:
 	cd lean && lake build
@@ -11,6 +11,8 @@ part2: part2/paper.pdf
 
 part3: part3/paper.pdf
 
+part4: part4/paper.pdf
+
 part1/paper.pdf: part1/paper.tex cred.bib part1/figures/path_dependence.pdf
 	cd part1 && latexmk -pdf -interaction=nonstopmode -halt-on-error paper.tex
 
@@ -20,7 +22,11 @@ part2/paper.pdf: part2/paper.tex cred.bib
 part3/paper.pdf: part3/paper.tex cred.bib
 	cd part3 && latexmk -pdf -interaction=nonstopmode -halt-on-error paper.tex
 
+part4/paper.pdf: part4/paper.tex cred.bib
+	cd part4 && latexmk -pdf -interaction=nonstopmode -halt-on-error paper.tex
+
 clean:
 	cd part1 && latexmk -C
 	cd part2 && latexmk -C
 	cd part3 && latexmk -C
+	cd part4 && latexmk -C
