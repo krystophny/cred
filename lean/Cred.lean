@@ -41,3 +41,8 @@ import Cred.Reductio
 import Cred.Bridge.CondBridgeIff
 import Cred.Set.Russell
 import Cred.Bridge.CurryObject
+import Cred.Value.BiCredence
+import Cred.Set.Classical
+import Cred.Set.Quine
+import Cred.Reflection
+import Cred.Foundation.Diagonal
