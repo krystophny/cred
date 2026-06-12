@@ -1,0 +1,439 @@
+\documentclass[11pt,a4paper]{article}
+
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{mathtools}
+\usepackage{enumitem}
+\usepackage{booktabs}
+\usepackage{hyperref}
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue,
+    citecolor=blue,
+    urlcolor=blue,
+    pdfauthor={Anonymous},
+    pdftitle={Graded Status in Ordinary Mathematics}
+}
+\usepackage{cleveref}
+\usepackage[margin=1in]{geometry}
+
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{example}[theorem]{Example}
+\newtheorem{remark}[theorem]{Remark}
+
+\newcommand{\cred}{\mathsf{cred}}
+\newcommand{\Cond}{\mathsf{Cond}}
+\newcommand{\Sol}{\mathsf{Sol}}
+\newcommand{\negc}{\mathord{\sim}}
+\newcommand{\conjc}{\otimes}
+\newcommand{\disjc}{\sqcup}
+\newcommand{\Real}{\mathbb{R}}
+\newcommand{\Bool}{\mathbb{B}}
+
+\title{\textbf{Graded Status in Ordinary Mathematics}\\[0.5em]
+\large Structure Preservation and Topology}
+
+\author{Anonymous for blind review}
+\date{June 2026}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+Classical mathematics is the crisp fragment of the credence framework: a real number is nonnegative, a vector lies on the unit circle, a set is open, with status either $0$ or $1$. Cred adds a status layer on top of this fragment. A quantity is preserved exactly, to a threshold, on some branches but not others, admissibly, or not at all. We read two strands of ordinary mathematics through this layer. Structure-preserving numerical schemes get a uniform status grade that separates value accuracy from structural admissibility: an Euler step that drives a positive quantity negative is recorded as inadmissible status, not as larger error. Graded topology recovers the classical open sets on its crisp fragment while exposing threshold-dependent clopenness on the graded part. The contribution is the shared, machine-checked status vocabulary, not a new theory of structure preservation or topology; both already exist, and Cred reinterprets none of their mathematics.
+\end{abstract}
+
+\section{Introduction}
+
+Take one explicit Euler step of scalar decay. Start at $x=\tfrac12$, take step $h=1$, and the update $x\mapsto x-h$ returns $-\tfrac12$. The input was a nonnegative quantity, a density or a probability or a concentration; the output is negative. Call this a small numerical error and you have misdescribed it. The local value error here is order one in the step, the same size as the step itself, but that number is not the point. The point is that the scheme has left the set of objects it was supposed to compute on. A negative density is not an inaccurate density. It is not a density.
+
+The credence framework records this as a change of \emph{status}, not as added value error. The nonnegativity structure is a crisp score $\mathsf{nonnegScore}:\Real\to[0,1]$, with value $1$ on the nonnegative reals and $0$ off them; the bad step takes a point of score $1$ to a point of score $0$. The Lean development states exactly this. \texttt{explicitEuler\_counterexample} proves $\mathsf{nonnegScore}(\tfrac12)=1$ and $\mathsf{nonnegScore}(\tfrac12-1)\neq 1$, and \texttt{explicitEuler\_not\_preserves} promotes the single witness to a failure of the scheme at every positive step. The contrasting implicit update $x\mapsto x/(1+ax)$ for $a\ge 0$ keeps every nonnegative input nonnegative (\texttt{implicitUpdate\_preserves}). Value accuracy and structural admissibility are different columns in the ledger, and this paper is about keeping them apart.
+
+\paragraph{Honest positioning.} State the contribution and its limits at once. We do not invent structure-preserving computation. Geometric integration preserves the symplectic form to win long-time behaviour that small local error alone cannot buy~\cite{hairer2006}; variational integrators derive the scheme from a discrete action and inherit a discrete symplectic form and momentum conservation~\cite{marsden2001}; Lie-group methods keep the numerical flow on the manifold instead of stepping off it~\cite{iserles2000}; strong-stability-preserving schemes keep densities and probabilities nonnegative under explicit steps~\cite{gottlieb2001}; finite element exterior calculus reproduces $d\circ d=0$ and Stokes at the discrete level~\cite{arnold2006}; finite-volume methods conserve the integrated quantity cell by cell through telescoping fluxes~\cite{leveque2002}; persistent homology summarizes a filtration by a stable diagram~\cite{edelsbrunner2010}. These are mature results in their own literatures, each with its own proof that the relevant structure is kept. Cred reinterprets none of that mathematics.
+
+What Cred supplies is a uniform, machine-checked \emph{status language} in which these guarantees can be stated, tabulated, and compared on one scale against value accuracy. The shared abstraction in \texttt{Cred/Approx/Structure.lean} fixes a structure on a carrier $X$ as a credence-valued score $P:X\to[0,1]$. The reusable vocabulary is small: \texttt{StructureDegree}~$P\,x$ is the grade $P\,x$; \texttt{ExactPreserves}~$P\,x$ is $P\,x=1$; \texttt{PreservesAt}~$t\,P\,x$ is $t\le P\,x$; \texttt{AdmissibleApprox}~$t\,P\,x$ reads the same threshold test as an admissibility verdict; and \texttt{Preserves}~$P\,\Phi$ says a self-map keeps the exact-preservation class. A classical on/off property enters as the boundary case through \texttt{crispScore}, with \texttt{exactPreserves\_crispScore} stating that exact preservation of a crisp score is exactly the underlying predicate. The threshold $t$ is the single admissibility knob: $t=1$ demands exact structure, lower $t$ admits graded preservation, and \texttt{preservesAt\_zero}, \texttt{preservesAt\_mono}, \texttt{preserves\_id}, \texttt{preserves\_comp} record that the zero threshold is free, lower thresholds are easier, and the preserving schemes form a monoid under composition.
+
+\paragraph{Three kinds of claim.} We separate, throughout, three statuses of our own statements. \emph{Established mathematics}: the cited preservation theories and the mathlib topology we reuse without modification. \emph{Machine-checked Cred results}: every theorem named in \texttt{typewriter} below is verified under \texttt{lake build} with no \texttt{sorry}. \emph{Framework and positioning}: the claim that one status vocabulary is the right common scale for these comparisons. The first is not ours, the second is ours and checked, the third is ours and argued.
+
+\paragraph{The status layer.} The status of a statement is read off a family of admissible valuations or, on the conditioning side, off a pair (joint, evidence). Five levels organize the layer. \emph{Classical/crisp}: value $0$ or $1$ uniformly, the fragment where ordinary mathematics lives, tied to the classical case by \texttt{crisp\_certainty\_iff\_classical}. \emph{Graded/threshold}: value at least $t$ in every admissible valuation, captured by \texttt{thresholdConsequence} and by \texttt{PreservesAt}. \emph{Branch-dependent}: certain on one branch, impossible on another, no interior value. \emph{Admissible/underdetermined}: a genuine interval of admissible values, as in $\Cond(0,0)=[0,1]$ from conditioning on zero evidence. \emph{Inadmissible}: no witness at all, as when $\Cond(j,e)=\varnothing$ for $j>e$, or when a scheme drives a structure score to $0$. The Euler step that opens this introduction is the inadmissible case made concrete.
+
+\paragraph{Two strands.} We instantiate the layer twice. The first strand is structure preservation in numerical analysis. Beyond positivity we formalize five further crisp structures and their schemes: probability-simplex preservation under a doubly-stochastic mixing update (\texttt{mix\_preserves}) against a mass-doubling update that leaves the simplex (\texttt{scaleTwo\_not\_preserves}); monotonicity of a pair under a midpoint interpolation (\texttt{midpointUpdate\_preserves}) against a swap (\texttt{swapPair\_not\_preserves}); a maximum-principle interval bound under convex averaging (\texttt{avg\_preserves}) against an overshooting scheme (\texttt{overshoot\_not\_preserves}); unit-circle norm under rotation (\texttt{rotate\_preserves}) against the explicit oscillator step that scales every squared norm by $1+h^2$ (\texttt{eulerStep\_not\_preserves}); and a scalar invariant under any invariant-preserving map (\texttt{invariantPreserving\_preserves\_crisp}), with the quarter-turn conserving radial energy (\texttt{rot90\_firstIntegralPreserving}) against a dissipative contraction (\texttt{shrink\_not\_firstIntegralPreserving}). Each pairs an admissible scheme against an inadmissible one for the same structure, and the admissibility condition (a step-size or parameter range) is the hypothesis on the positive theorem. The simplex case carries an extra reading: a stochastic update moves inside the prior simplex rather than dividing by an evidence credence, the discrete shape of admissible conditioning that keeps Cred free of explosion at zero evidence.
+
+The second strand is topology. The crisp fragment recovers ordinary topology exactly: a \texttt{CredTopology} whose opens are all crisp induces a genuine mathlib \texttt{TopologicalSpace}, and \texttt{isOpen\_iff\_open} states that a predicate is classically open precisely when its crisp embedding is Cred-open. On that fragment the graded openness degree is two-valued (\texttt{crisp\_openness\_zero\_or\_one}), and a crisp fuzzy-open set is one whose support is classically open (\texttt{crisp\_fuzzyOpen\_iff}). The graded part is where status earns its keep. The threshold cut of a graded set is an antitone family of crisp sets (\texttt{cut\_antitone}), and clopenness becomes threshold-relative: a set with openness degree $0.8$ and closedness degree $0.7$ is clopen at $t=0.5$ (\texttt{ex\_clopen\_at\_50}) yet only open at $t=0.75$ (\texttt{ex\_not\_clopen\_at\_75}). This sharpens, rather than dissolves, the apparent paradox of ``closed and open'': \texttt{isClopen\_iff\_isOpen\_and\_isOpen\_compl} shows clopenness is a consistent conjunction of two openness facts, never $P\wedge\neg P$, the topological mirror of Cred's no-explosion stance toward conditioning on the impossible~\cite{priest1979,belnap1977}.
+
+\section{Structure preservation as admissibility}
+\label{sec:structure-preservation}
+
+A numerical scheme is judged on two axes that are usually conflated. The first is value error: how far the computed number sits from the exact one. The second is structure: whether the output still satisfies the defining property of the object it approximates. A density should stay nonnegative, a probability vector should keep unit mass, a rotation should keep the norm, a conservative flow should stay on its energy level set. A scheme can be accurate on the first axis and fail on the second. Explicit Euler on a linear oscillator has local value error of order $h^2$, yet it grows the norm every step and drifts off the invariant it should keep. The two failures are different and want separate bookkeeping.
+
+The geometric integration literature already separates them, and already proves the preservation guarantees we tabulate here. Symplectic and variational integrators secure long-time behavior by preserving the symplectic form rather than by shrinking local error \cite{hairer2006,marsden2001}; strong-stability-preserving time stepping keeps densities and probabilities nonnegative under explicit updates \cite{gottlieb2001}; Lie-group methods keep the numerical flow on the manifold \cite{iserles2000}; mimetic and finite-element-exterior-calculus discretizations reproduce $d \circ d = 0$ at the discrete level \cite{arnold2006}; finite-volume schemes conserve the integrated quantity by telescoping fluxes \cite{leveque2002}; persistent homology bounds the change in a topological summary by the input perturbation \cite{edelsbrunner2010}. We reinterpret none of this mathematics. The contribution of this section is narrower and uniform: a machine-checked status language, built from the credence value algebra, that records structural admissibility on the same scale Cred uses for logical status. The no-explosion discipline carries over. A scheme that breaks the defining property gets a low structure degree or an inadmissible status, not a larger error number.
+
+\subsection{The machine-checked framework}
+
+Fix a carrier $X$. A \emph{structure} on $X$ is a credence-valued score $P : X \to [0,1]$, where $0$ is total failure, $1$ is exact preservation, and interior values grade the failure. The Lean module \texttt{Cred/Approx/Structure.lean} fixes the vocabulary.
+
+\begin{definition}[Structure degree and preservation classes]
+\label{def:structure-degree}
+For $P : X \to [0,1]$ and $x \in X$:
+\begin{itemize}
+  \item $\texttt{StructureDegree}\, P\, x := P\, x$, the grade of structure that $x$ carries;
+  \item $\texttt{ExactPreserves}\, P\, x := (\texttt{StructureDegree}\, P\, x = 1)$, the defining property holding exactly;
+  \item $\texttt{PreservesAt}\, t\, P\, x := (t \le \texttt{StructureDegree}\, P\, x)$, preservation to at least threshold $t$;
+  \item $\texttt{AdmissibleApprox}\, t\, P\, x := \texttt{PreservesAt}\, t\, P\, x$, the admissibility verdict at threshold $t$.
+\end{itemize}
+A self-map $\Phi : X \to X$ \emph{preserves} the structure, $\texttt{Preserves}\, P\, \Phi$, when it keeps the exact-preservation class: for every $x$, if $\texttt{ExactPreserves}\, P\, x$ then $\texttt{ExactPreserves}\, P\, (\Phi\, x)$.
+\end{definition}
+
+The threshold $t$ is the admissibility knob. Setting $t = 1$ demands exact structure; lowering it admits graded preservation. A classical on/off structure embeds as the boundary case through \texttt{crispScore}, which lifts a decidable predicate to a $0/1$ score: \texttt{exactPreserves\_crispScore} states $\texttt{ExactPreserves}\, (\texttt{crispScore}\, P)\, x \leftrightarrow P\, x$, so exact preservation of a crisp structure is exactly the predicate. The endpoints of the threshold scale are pinned. \texttt{preservesAt\_zero} makes the zero threshold free, \texttt{exactPreserves\_iff\_preservesAt\_one} identifies exactness with preservation at the top, and \texttt{preservesAt\_mono} makes lower thresholds easier to clear.
+
+The preserving schemes form a monoid, which is what makes the framework usable for composite methods.
+
+\begin{theorem}[Composition closure]
+\label{thm:preserves-comp}
+For any structure $P$, the identity satisfies $\texttt{Preserves}\, P\, \mathrm{id}$ (\texttt{preserves\_id}), and if $\texttt{Preserves}\, P\, \Phi$ and $\texttt{Preserves}\, P\, \Psi$ then $\texttt{Preserves}\, P\, (\Psi \circ \Phi)$ (\texttt{preserves\_comp}).
+\end{theorem}
+
+So composing structure-preserving steps preserves structure: a multistage method built from admissible substeps is admissible, with no further proof obligation. All statements in this subsection are machine-checked in \texttt{Cred/Approx/Structure.lean}.
+
+\subsection{Worked examples}
+
+Each example fixes one structure $P$ and one scheme, instantiates Definition~\ref{def:structure-degree}, and proves both a positive preservation theorem and a concrete counterexample. The counterexample is the point: it shows the structure degree dropping to $0$ for a value-accurate scheme.
+
+\paragraph{Positivity.}
+The carrier is $\mathbb{R}$ and the structure is nonnegativity, scored crisply by \texttt{nonnegScore}. The implicit update $x \mapsto x / (1 + a x)$ with $a \ge 0$ keeps the sign because the denominator stays positive on $x \ge 0$.
+
+\begin{theorem}[Positivity preservation]
+\label{thm:positivity}
+For $a \ge 0$, the implicit update preserves nonnegativity: \texttt{implicitUpdate\_preserves}. The explicit Euler subtraction $x \mapsto x - h$ with $h > 0$ does not: \texttt{explicitEuler\_not\_preserves}, witnessed concretely at $x = 1/2$, $h = 1$ by \texttt{explicitEuler\_counterexample}, where the output $-1/2$ leaves the nonnegative cone.
+\end{theorem}
+
+\paragraph{The probability simplex.}
+On $\mathrm{Fin}\, 2 \to \mathbb{R}$ the structure \texttt{OnSimplex} demands nonnegative coordinates of unit mass, scored by \texttt{simplexScore}. The doubly-stochastic mixing update $\texttt{mix}\, a$ with matrix $\begin{psmallmatrix} a & 1-a \\ 1-a & a \end{psmallmatrix}$ keeps both constraints for $a \in [0,1]$.
+
+\begin{theorem}[Simplex preservation]
+\label{thm:simplex}
+For $a \in [0,1]$ the mixing update preserves the simplex structure: \texttt{mix\_preserves}, resting on mass conservation \texttt{mix\_sum} and nonnegativity \texttt{mix\_nonneg}. The mass-scaling update $p \mapsto 2p$ is not stochastic and breaks unit mass: \texttt{scaleTwo\_not\_preserves} sends the uniform point off the simplex.
+\end{theorem}
+
+This is the discrete shape of admissible conditioning. A row-stochastic kernel maps the prior simplex into itself rather than dividing by an evidence credence, exactly the move that keeps the conditioning chain rule of Section~\ref{sec:structure-preservation} free of explosion: total mass is redistributed, never destroyed.
+
+\paragraph{Monotonicity.}
+On pairs $(c_0, c_1)$ the structure is $c_0 \le c_1$, scored by \texttt{monoPairScore}. The midpoint update $(c_0, c_1) \mapsto ((c_0 + c_1)/2, c_1)$ contracts the left endpoint toward the right.
+
+\begin{theorem}[Monotonicity preservation]
+\label{thm:monotonicity}
+The midpoint update preserves monotone pairs: \texttt{midpointUpdate\_preserves}. The swap $(c_0, c_1) \mapsto (c_1, c_0)$ does not: \texttt{swapPair\_not\_preserves}, witnessed by $(0,1) \mapsto (1,0)$.
+\end{theorem}
+
+\paragraph{The maximum principle.}
+The structure \texttt{inBounds}\, $m\, M$ confines a value to $[m, M]$. A convex blend toward a fixed in-bounds target stays in the interval.
+
+\begin{theorem}[Maximum-principle preservation]
+\label{thm:maxprinciple}
+For a weight $w \in [0,1]$ and a target $y \in [m, M]$, the averaging update $x \mapsto (1-w)x + wy$ preserves the bound: \texttt{avg\_preserves}, from the two-sided estimate \texttt{avg\_inBounds}. The overshooting scheme $x \mapsto 2x - m$ does not: \texttt{overshoot\_not\_preserves}, since $x = 1$ in $[0,1]$ maps to $2$.
+\end{theorem}
+
+\paragraph{Norm and circle.}
+On $\mathbb{R} \times \mathbb{R}$ the structure \texttt{OnCircle} is $x^2 + y^2 = 1$, scored by \texttt{circleScore}. Rotation by any angle preserves it through the Pythagorean identity; explicit Euler for the harmonic oscillator scales every squared norm by $1 + h^2$.
+
+\begin{theorem}[Circle preservation versus norm drift]
+\label{thm:normcircle}
+Rotation by any angle $t$ preserves the unit circle: \texttt{rotate\_preserves}, from the norm identity \texttt{rotate\_norm\_sq}. The explicit Euler step $(x,v) \mapsto (x + hv,\, v - hx)$ does not: \texttt{eulerStep\_breaks\_circle} sends $(1,0)$ to $(1,-1)$ at $h = 1$, squared norm $2 \ne 1$, and \texttt{eulerStep\_not\_preserves} reads this off as failure of the exact-preservation class.
+\end{theorem}
+
+\paragraph{Invariants and first integrals.}
+A scalar invariant $I : X \to \mathbb{R}$ partitions $X$ into level sets. A map with $I(\Phi x) = I x$ keeps each level set, the general pattern behind conserved-quantity dynamics.
+
+\begin{theorem}[Invariant and first-integral preservation]
+\label{thm:firstintegral}
+An invariant-preserving map keeps every level set of $I$ in the \texttt{Preserves} sense: \texttt{invariantPreserving\_preserves\_crisp}. Concretely, the quarter-turn $(x,y) \mapsto (-y,x)$ conserves the radial energy $x^2 + y^2$, so it preserves every energy level set: \texttt{rot90\_firstIntegralPreserving} and \texttt{rot90\_preserves\_levelSets}. The dissipative contraction $(x,y) \mapsto (x/2, y/2)$ scales energy by $1/4$ and strictly decreases it at every nonzero point: \texttt{shrink\_strictly\_dissipative}, hence \texttt{shrink\_not\_firstIntegralPreserving}, and its energy structure score drops to $0$ off the origin: \texttt{shrink\_energyScore\_zero}.
+\end{theorem}
+
+The energy-preserving map keeps every level set; the dissipative map keeps none of them away from the fixed point. The status language separates the two cleanly: same carrier, same invariant, exact-preservation class kept versus exact-preservation class lost.
+
+\subsection{Comparison on one scale}
+
+Table~\ref{tab:structure-comparison} reads the examples and a few established methods off the single status scale of Definition~\ref{def:structure-degree}. The point of the table is the rightmost columns: value order and structure degree are independent, and a scheme can score high on one while failing the other.
+
+\begin{table}[t]
+\centering
+\small
+\begin{tabular}{@{}llllc@{}}
+\toprule
+Method & Order / error & Preserved structure & Structure degree & Status \\
+\midrule
+Implicit update, scalar decay & local $O(h^2)$ & nonnegativity & exact, all steps & checked \\
+Explicit Euler, scalar decay & local $O(h^2)$ & nonnegativity & $0$ for small $x$ & checked \\
+Mixing update, simplex & exact mass & simplex & exact & checked \\
+Mass scaling, simplex & order N/A & simplex & $0$ (mass $2$) & checked \\
+Midpoint interpolation & exact at nodes & monotonicity & exact & checked \\
+Averaging update & local $O(h)$ & maximum principle & exact & checked \\
+Rotation step & exact norm & unit circle & exact & checked \\
+Explicit Euler, oscillator & local $O(h^2)$ & unit circle & $0$ (norm $\times(1{+}h^2)$) & checked \\
+Quarter-turn & exact energy & energy level set & exact & checked \\
+Dissipative contraction & order N/A & energy level set & $0$ off origin & checked \\
+\midrule
+Symplectic / variational & method order & symplectic form & exact & established \cite{hairer2006,marsden2001} \\
+SSP time stepping & method order & nonnegativity & exact under CFL & established \cite{gottlieb2001} \\
+\bottomrule
+\end{tabular}
+\caption{Value accuracy against structural admissibility on one scale. Rows marked ``checked'' are machine-verified in \texttt{Cred/Approx/} by the named theorems of Theorems~\ref{thm:positivity}--\ref{thm:firstintegral}. Rows marked ``established'' are mature results in the numerical analysis literature, recorded here as structure-degree statements but not reformalized.}
+\label{tab:structure-comparison}
+\end{table}
+
+The two blocks of the table have different epistemic status, and the distinction is the honest content of this section. The ``checked'' rows are theorems of \texttt{Cred/Approx/}: each is a Lean proof that a specific scheme keeps or loses a specific structure, named in Theorems~\ref{thm:positivity}--\ref{thm:firstintegral}. The ``established'' rows are not our mathematics. Symplectic preservation and SSP positivity are theorems of geometric integration and of strong-stability-preserving time stepping \cite{hairer2006,marsden2001,gottlieb2001}; we list them to show that the status vocabulary scales to real methods, not to claim them. The framework invents no preservation result and no topology. It supplies one scale on which an exactly preserved structure, a graded one, and a destroyed one sit next to a value-error column, with the no-explosion conditioning of Cred behind the admissibility grade.
+
+\section{Topology with graded status}
+
+A set that is both closed and open sounds like a contradiction. So does
+conditioning on impossible evidence. Neither is. The same status discipline that
+keeps $\cred(A \mid B) \conjc \cred(B) = \cred(A \land B)$ from exploding at
+$\cred(B) = 0$ resolves the verbal paradox of ``clopen'': what reads as
+$P \land \neg P$ is, on inspection, a consistent conjunction of two positive
+facts about different sets.
+
+Start with the real line. In the standard topology on $\Real$, the empty set and
+the whole line are clopen, and they are the only clopen sets, because $\Real$ is
+connected (\texttt{real\_isClopen\_iff\_trivial}, reusing mathlib's
+\texttt{isClopen\_iff} for preconnected spaces). Take instead the singleton
+$\{0\} \subseteq \Real$. Under the discrete topology every set is open and
+closed, so $\{0\}$ is clopen (\texttt{singleton\_isClopen\_discrete}). Under the
+standard topology $\{0\}$ is not even open: zero has a nonempty punctured
+neighborhood, so the singleton fails the openness half
+(\texttt{singleton\_not\_isOpen\_real}), hence is not clopen
+(\texttt{singleton\_not\_isClopen\_real}). One set, opposite clopen verdicts,
+recorded as a single fact in \texttt{singleton\_clopen\_discrete\_not\_standard}.
+Clopen status is a property of the set together with its ambient topology, not of
+the set alone.
+
+Why is this not a contradiction? The word ``closed'' does not mean ``not open.''
+In mathlib, \texttt{IsClosed s} unfolds to \texttt{IsOpen} of the complement, not
+to $\neg\,\texttt{IsOpen s}$; this is \texttt{isClosed\_iff\_isOpen\_compl}, the
+identity $\texttt{IsClosed}\ s \leftrightarrow \texttt{IsOpen}\ s^{c}$. So clopen
+expands to the conjunction
+\[
+  \texttt{IsClopen}\ s \;\leftrightarrow\; \texttt{IsOpen}\ s \;\land\;
+    \texttt{IsOpen}\ s^{c},
+\]
+two positive openness claims, one about $s$ and one about its complement
+(\texttt{isClopen\_iff\_isOpen\_and\_isOpen\_compl}). There is no $P \land \neg P$
+anywhere. The clopen witness $\texttt{univ}$ in $\Real$ satisfies both conjuncts,
+its complement $\emptyset$ being open (\texttt{univ\_real\_isOpen\_and\_isOpen\_compl}).
+This is the topological mirror of Cred's no-explosion design. Naive language
+reads ``closed and open'' as paradox; the formal predicates are jointly
+satisfiable. The status vocabulary sharpens what the words blur, in the same way
+Belnap's four-valued logic separates ``told true'' from ``not told false''
+\cite{belnap1977}.
+
+\subsection{A Cred topological space}
+
+Cred packages this over graded sets. A \texttt{CredTopology} on a carrier $U$ is a
+family $\texttt{Opens}$ of open $\texttt{CredSet}$s closed under the graded
+operations: $\emptyset$ and $\texttt{univ}$ are open, binary intersection of
+opens is open, and arbitrary predicate unions of opens are open. The signature
+mirrors mathlib's \texttt{TopologicalSpace}, lifted from Boolean to graded
+membership. The derived notions follow the classical pattern. A set is
+\emph{open} when it lies in $\texttt{Opens}$ (\texttt{CredTopology.Open}); it is
+\emph{closed} when its complement is open
+($\texttt{Closed}\ s := \texttt{Open}\,(\texttt{compl}\ s)$); it is \emph{clopen}
+when both ($\texttt{Clopen}\ s := \texttt{Open}\ s \land \texttt{Closed}\ s$). A
+map is \emph{continuous} when the preimage of every open is open
+(\texttt{CredTopology.Continuous}); the identity is continuous
+(\texttt{continuous\_id}) and continuity is closed under composition
+(\texttt{continuous\_comp}). As in the classical case, $\texttt{univ}$ and
+$\emptyset$ are clopen (\texttt{clopen\_univ}, \texttt{clopen\_emptyset}), each a
+consistent conjunction rather than a contradiction.
+
+The crisp fragment recovers ordinary topology, with no new mathematics added on
+the classical side. A \texttt{CredTopology} all of whose opens are crisp induces a
+genuine mathlib \texttt{TopologicalSpace} through the \texttt{ofPred}/\texttt{toPred}
+bijection (\texttt{toTopologicalSpace}); the closure laws become the
+\texttt{TopologicalSpace} axioms. The bridge is exact.
+
+\begin{theorem}[Crisp recovery]
+For the induced topology, a set of points $P$ is mathlib-open exactly when its
+embedded crisp \texttt{CredSet} is Cred-open:
+$\texttt{IsOpen}\ P \leftrightarrow \texttt{Open}\,(\texttt{ofPred}\,(\cdot \in P))$
+(\texttt{isOpen\_iff\_open}). Equivalently, for crisp $s$,
+$\texttt{Open}\ s \leftrightarrow \texttt{IsOpen}\,(\texttt{carrier}\ s)$
+(\texttt{open\_crisp\_iff\_isOpen}).
+\end{theorem}
+
+The graded open sets restricted to the crisp fragment are precisely the classical
+open sets. Cred does not reinvent topology; it supplies the status language above
+it.
+
+\subsection{Graded openness and closedness}
+
+Off the crisp fragment, openness is a credence, not a yes/no. The
+\emph{openness degree} of a graded set $s$ is the infimum of its membership
+function (\texttt{opennessDegree}): $1$ means every point is a full member, $0$
+means some point has zero membership. \emph{Closedness degree} is the openness of
+the complement (\texttt{closednessDegree}), the infimum of non-membership. The two
+degrees obey the duality inequality
+$\texttt{closednessDegree}\ s \le \negc\,(\texttt{opennessDegree}\ s)$
+(\texttt{closednessDegree\_le\_neg}), with equality at the boundaries:
+$\texttt{univ}$ has openness $1$ and closedness $0$
+(\texttt{univ\_openness\_one}, \texttt{univ\_closedness\_zero}), $\emptyset$ the
+reverse (\texttt{emptyset\_openness\_zero}, \texttt{emptyset\_closedness\_one}).
+The degrees are monotone in the subset order (\texttt{openness\_monotone},
+\texttt{closedness\_antitone}), and intersection dominates the product of degrees,
+$\texttt{opennessDegree}\ s \conjc \texttt{opennessDegree}\ t \le
+\texttt{opennessDegree}\,(\texttt{inter}\ s\ t)$
+(\texttt{inter\_openness\_ge\_conj}).
+
+On crisp sets the classical dichotomy returns. The openness degree is $0$ or $1$
+(\texttt{crisp\_openness\_zero\_or\_one}), it is $0$ exactly when some point has
+zero membership (\texttt{crisp\_openness\_zero\_iff}), and it is $1$ exactly when
+$s = \texttt{univ}$ (\texttt{crisp\_openness\_one\_iff\_univ}). The graded degree
+is a genuine extension that collapses to the Boolean question on crisp input.
+
+\subsection{Threshold topology}
+
+Fix a threshold and a graded set becomes an ordinary crisp set. The \emph{$t$-cut}
+of $s$ is $\{x \mid t \le s.\texttt{mem}\ x\}$ (\texttt{cut}), the points whose
+membership reaches $t$. Raising $t$ can only shrink the cut, so a single graded
+set yields an antitone family of crisp sets indexed by threshold
+(\texttt{cut\_antitone}). The extremes are degenerate: the $0$-cut is everything
+(\texttt{cut\_zero}), the $1$-cut collects exactly the points of certain
+membership (\texttt{cut\_one}).
+
+The concrete case is a graded neighborhood. The tent profile
+$\mu(x) = \max(0,\, 1 - |x|)$ is certain at $0$ and fades to impossible at
+distance $1$ (\texttt{tent}). For a positive threshold its $\alpha$-cut is the
+symmetric closed interval of radius $1 - t$,
+$\texttt{cut}\ t\ \texttt{tent} = \texttt{Set.Icc}\,(-(1 - t))\,(1 - t)$
+(\texttt{cut\_tent\_eq\_Icc}). At $t = \tfrac12$ this is exactly
+$\texttt{Set.Icc}\,(-\tfrac12)\,(\tfrac12)$ (\texttt{cut\_tent\_half}), which
+mathlib certifies closed (\texttt{isClosed\_cut\_tent\_half}). A graded
+neighborhood cuts to an interval, as one should expect of a neighborhood.
+
+The threshold parameter is the same designation knob as in graded consequence.
+The graded set on valuations whose membership at $v$ is $\texttt{evalCred}\ v\ \varphi$
+(\texttt{evalSet}) has a $t$-cut consisting of the valuations that designate
+$\varphi$ at threshold $t$. Threshold consequence is then cut inclusion: every
+valuation in all premise cuts lies in the conclusion cut
+(\texttt{thresholdConsequence\_iff\_cut}). The cut bridges the graded set theory
+back to ordinary topology and to the consequence relation at once.
+
+Threshold openness is read off the degree functions: $A$ is $t$-open when
+$t \le \texttt{openDeg}$ (\texttt{IsOpenAt}), $t$-closed when
+$t \le \texttt{closedDeg}$ (\texttt{IsClosedAt}), $t$-clopen when both
+(\texttt{IsClopenAt}). The new phenomenon is that clopen status is now
+threshold-relative. Clopen verdicts are antitone: a clopen verdict at $t_2$
+survives lowering to any $t_1 \le t_2$ (\texttt{clopen\_antitone}), but raising
+the threshold can lose it. Take a set with openness degree $0.8$ and closedness
+degree $0.7$ (\texttt{exOpen}, \texttt{exClosed}).
+
+\begin{center}
+\begin{tabular}{cccc}
+\hline
+$t$ & $t$-open & $t$-closed & $t$-clopen \\
+\hline
+$0.5$  & yes & yes & yes \\
+$0.75$ & yes & no  & no  \\
+$0.9$  & no  & no  & no  \\
+\hline
+\end{tabular}
+\end{center}
+
+\noindent At $t = 0.5$ the set is clopen (\texttt{ex\_clopen\_at\_50}). At
+$t = 0.75$ it is open but not closed, so not clopen (\texttt{ex\_open\_at\_75},
+\texttt{ex\_not\_closed\_at\_75}, \texttt{ex\_not\_clopen\_at\_75}). At $t = 0.9$
+it is neither (\texttt{ex\_not\_open\_at\_90}, \texttt{ex\_not\_clopen\_at\_90}).
+Clopenness is genuinely a function of the threshold, not an intrinsic label on the
+set.
+
+\subsection{Fuzzy open sets}
+
+A fourth reading drops the threshold and works pointwise. A \texttt{CredSet} over
+a topological space $U$ is \emph{fuzzy-open} when its membership function is lower
+semicontinuous: for every point and every sub-threshold witness $\alpha$ below
+$s.\texttt{mem}\ x$, a neighborhood of $x$ stays above $\alpha$
+(\texttt{FuzzyOpen}). The empty and universal sets are fuzzy-open
+(\texttt{fuzzyOpen\_emptyset}, \texttt{fuzzyOpen\_univ}). No topology is placed on
+the credence values themselves; classical topology is reused on the ambient $U$.
+
+The crisp fragment recovers classical openness exactly.
+
+\begin{theorem}[Fuzzy recovery]
+A crisp \texttt{CredSet} is fuzzy-open iff its support $\{x \mid s.\texttt{mem}\ x = 1\}$
+is classically open (\texttt{crisp\_fuzzyOpen\_iff}).
+\end{theorem}
+
+\noindent The graded layer is genuinely fuzzy: membership ranges over $[0,1]$ and
+the condition quantifies over all sub-threshold witnesses, not just $\{0,1\}$. On
+crisp input it collapses to the two-valued question of whether the support is
+open, witnessed by a crisp example over $\texttt{Fin}\ 3$ whose support is open in
+the discrete topology (\texttt{crispExample\_fuzzyOpen}).
+
+\subsection{Status of the clopen examples}
+
+The four readings give one set of clopen examples four compatible verdicts,
+collected here.
+
+\begin{center}
+\begin{tabular}{lll}
+\hline
+Set / topology & Clopen status & Lean witness \\
+\hline
+$\emptyset,\ \texttt{univ} \subseteq \Real$ (standard) & clopen, the only ones &
+  \texttt{real\_isClopen\_iff\_trivial} \\
+$\{0\} \subseteq \Real$ (discrete) & clopen & \texttt{singleton\_isClopen\_discrete} \\
+$\{0\} \subseteq \Real$ (standard) & not clopen (not open) &
+  \texttt{singleton\_not\_isClopen\_real} \\
+$s$ with deg.\ $(0.8, 0.7)$, $t = 0.5$ & $t$-clopen & \texttt{ex\_clopen\_at\_50} \\
+$s$ with deg.\ $(0.8, 0.7)$, $t = 0.75$ & not $t$-clopen & \texttt{ex\_not\_clopen\_at\_75} \\
+\hline
+\end{tabular}
+\end{center}
+
+\noindent No row is a contradiction. Each clopen entry is the conjunction
+$\texttt{Open}\ s \land \texttt{Open}\,(\texttt{compl}\ s)$, and each non-clopen
+entry fails one positive conjunct rather than asserting $P \land \neg P$. The
+ambient topology and the threshold decide the verdict; the status language records
+which. This is the contribution: not new topology, but a uniform machine-checked
+vocabulary that places the discrete singleton, the connected line, and the graded
+$t$-cut on one status scale. The same scale anchors data: a persistence diagram is
+a topological summary of a filtration, stable under input perturbation
+\cite{edelsbrunner2010}, the kind of structural status these readings are built to
+record.
+
+\section{Positioning and what is genuinely new}
+
+A symplectic Euler step on the harmonic oscillator preserves a discrete energy for arbitrarily long times, while explicit Euler grows the norm by a factor of $1 + h^2$ each step. Both schemes have local value error of order $h^2$. The long-time difference is structural, not a matter of accuracy. Geometric integration explained this decades ago, and it did not need credences to do so. We state the boundary plainly: this paper invents none of that mathematics.
+
+\subsection{What is established, and not ours}
+
+The structure-preserving machinery is mature. Symplectic and variational integrators preserve the symplectic form and momentum maps, and their long-time energy behaviour follows from that preservation rather than from small local error \cite{hairer2006, marsden2001}. Lie-group and Munthe-Kaas methods keep the numerical flow on the manifold instead of stepping off into the ambient space \cite{iserles2000}. Strong-stability-preserving time discretizations and positivity limiters keep densities and probabilities nonnegative under explicit steps \cite{gottlieb2001}. Finite element exterior calculus reproduces $d \circ d = 0$ and a discrete Stokes theorem, so the discrete de~Rham complex stays exact \cite{arnold2006}. Telescoping numerical fluxes make finite-volume updates conserve the integrated quantity cell by cell \cite{leveque2002}. Persistent homology summarizes a filtration by a diagram whose distance is bounded by the input perturbation \cite{edelsbrunner2010}.
+
+The topology is equally established. \texttt{Cred.Topology.real\_isClopen\_iff\_trivial}, \texttt{singleton\_clopen\_discrete\_not\_standard}, and \texttt{isClopen\_iff\_isOpen\_and\_isOpen\_compl} all reduce to mathlib lemmas. Clopenness is a consistent conjunction of two openness facts, and which sets are clopen depends on the ambient topology, not on any contradiction. We reuse mathlib's \texttt{IsOpen}, \texttt{IsClosed}, and \texttt{Set.Icc} rather than redefining them; the graded-topology layer (\texttt{CredTopology}, \texttt{opennessDegree}, \texttt{FuzzyOpen}) recovers the classical notion exactly on the crisp fragment (\texttt{isOpen\_iff\_open}, \texttt{crisp\_openness\_zero\_or\_one}, \texttt{crisp\_fuzzyOpen\_iff}). None of this is new structure preservation, and none of it is new topology.
+
+\subsection{What is new}
+
+The contribution is a uniform admissibility layer over these existing guarantees, machine-checked, with two features the source literatures do not package together.
+
+First, a single graded status scale. Each defining property becomes a credence-valued score \texttt{StructureDegree} $P\,x = P\,x$, with \texttt{ExactPreserves} the score-one class and \texttt{PreservesAt}~$t$ the relaxation $t \le P\,x$ (\texttt{Cred.Approx.Structure}). A classical on/off structure embeds as the boundary case through \texttt{crispScore}, so \texttt{exactPreserves\_crispScore} reads off the predicate. The same scale carries positivity (\texttt{implicitUpdate\_preserves} versus \texttt{explicitEuler\_not\_preserves}), the probability simplex (\texttt{mix\_preserves} versus \texttt{scaleTwo\_not\_preserves}), monotonicity (\texttt{midpointUpdate\_preserves} versus \texttt{swapPair\_not\_preserves}), a maximum principle (\texttt{avg\_preserves} versus \texttt{overshoot\_not\_preserves}), norm preservation (\texttt{rotate\_preserves} versus \texttt{eulerStep\_not\_preserves}), invariants (\texttt{invariantPreserving\_preserves\_crisp}), and first integrals (\texttt{rot90\_firstIntegralPreserving} versus \texttt{shrink\_not\_firstIntegralPreserving}). One vocabulary tabulates schemes that live in different mathematical worlds.
+
+Second, non-explosive semantics for violation. This is the no-ex-falso idea of the Cred framework, carried into numerics. A structural breach is a local low-degree status, not a global catastrophe. When the explicit Euler step leaves a point off the unit circle, \texttt{eulerStep\_not\_preserves} records a failure of the exact-preservation class at that witness; it does not poison the surrounding analysis or force every later verdict to inadmissible. The dissipative contraction scores \texttt{shrink\_energyScore\_zero} at each nonzero point, a local zero, while \texttt{rot90\_exactPreserves} holds elsewhere on the same carrier. The status grade localizes the breach. This mirrors the conditioning design, where \texttt{conditioning\_zero\_any} makes impossible evidence impose no constraint rather than license explosion, and the topological mirror where \texttt{isClosed\_iff\_isOpen\_compl} keeps closedness a positive fact about the complement instead of the negation of openness.
+
+The two features combine into one further point: accuracy and structure are orthogonal verified axes. Value error measures distance from the exact solution; structure degree measures whether the defining property survives. They are separate columns. Explicit Euler on the oscillator is order-$h^2$ accurate and yet \texttt{PreservesAt}~$1$ fails for it at every step, by \texttt{eulerStep\_norm\_sq}. A scheme can clear one axis and fail the other, and the layer records each independently rather than folding a structural breach into a larger error number.
+
+\subsection{The genuine upside}
+
+The payoff is local containment across a multi-physics or multi-scheme computation. When one subsystem uses a positivity limiter, another a symplectic integrator, and a third a conservative finite-volume update, the admissibility layer assigns each region its own structure degree on a shared scale. A breach in one region is a local low-degree status. Because the semantics carry no explosion, that local failure does not invalidate the verified status of the regions that still preserve their structure. The status taxonomy (classical, graded, branch-dependent, underdetermined, inadmissible) reads the verdict region by region, and an inadmissible patch stays a patch.
+
+\section{Conclusion}
+
+The methods this paper draws on are mature: symplectic and variational integration \cite{hairer2006, marsden2001}, Lie-group methods \cite{iserles2000}, strong-stability-preserving schemes \cite{gottlieb2001}, finite element exterior calculus \cite{arnold2006}, conservative finite-volume discretization \cite{leveque2002}, and persistent homology \cite{edelsbrunner2010}, together with the classical topology reused from mathlib. We reinterpret none of that mathematics and claim no new preservation theorem.
+
+What we add is a thin, machine-checked layer on top: a graded admissibility scale (\texttt{StructureDegree}, \texttt{ExactPreserves}, \texttt{PreservesAt}) that tabulates preservation across structures of different kinds, with non-explosive semantics for violation, so that a structural breach is a local low-degree status rather than a global catastrophe. Accuracy and structure stand as two orthogonal verified axes. The worked examples are small and finite by design; each fixes one structure and one scheme and proves its admissibility condition. The aim is modest and concrete: a uniform status vocabulary, verified in Lean, under which schemes from separate literatures can be compared, and under which local failure stays local. Whether the layer scales to production multi-physics solvers is left open; the contribution here is the language and its machine-checked foundation, not a claim about large-scale numerics.
+
+\bibliographystyle{plain}
+\bibliography{../cred}
+
+\end{document}

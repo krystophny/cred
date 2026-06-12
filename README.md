@@ -8,7 +8,7 @@ Cred is two axes plus an interface, machine-checked in Lean 4.
 
 This repo contains:
 - a Lean 4 formalization with zero `sorry` (`lean/`)
-- six papers aligned with the Lean source (`part1/` through `part6/`)
+- seven papers aligned with the Lean source (`part1/` through `part7/`)
 - a foundations layer: crisp recovery, fixed-point solution sets, graded comprehension, and labelled external conditioning
 
 ## Architecture
@@ -107,6 +107,7 @@ Each ingredient has its own literature: paraconsistency (Priest 1979; Carnielli 
 - `part4/`: Part 4 paper: the irreducible commitment (prior, seed, supplied conditioning)
 - `part5/`: Part 5 paper: a didactic conceptual guide and glossary
 - `part6/`: Part 6 paper: universal bootstrapping and seeded self-hosting
+- `part7/`: Part 7 paper: graded status in ordinary mathematics (structure preservation and topology)
 - `docs/`: program milestones, trusted base, and architecture decision
 
 ## Build
@@ -119,9 +120,10 @@ cd part3 && latexmk -pdf -interaction=nonstopmode -halt-on-error paper.tex
 cd part4 && latexmk -pdf -interaction=nonstopmode -halt-on-error paper.tex
 cd part5 && latexmk -pdf -interaction=nonstopmode -halt-on-error paper.tex
 cd part6 && latexmk -pdf -interaction=nonstopmode -halt-on-error paper.tex
+cd part7 && latexmk -pdf -interaction=nonstopmode -halt-on-error paper.tex
 ```
 
-The `Makefile` builds everything: `make all` (lean, part1 through part6).
+The `Makefile` builds everything: `make all` (lean, part1 through part7).
 
 Toolchain: Lean 4.16.0 + Mathlib 4.16.0.
 
