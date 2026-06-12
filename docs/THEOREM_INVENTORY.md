@@ -75,7 +75,7 @@ decidability of real equality), not through the logic of Cred.
 | Representability target for an object Prov formula | `arithQ.RepresentsChecker` | `Foundation/SigmaOne.lean` | theorem (target) |
 | Second incompleteness does not internalize | `arithQ.no_internal_loeb_arrow` | `Foundation/SigmaOne.lean` | theorem |
 | Goedel sentence pinned to one half | `provGodel` results | `Foundation/ProvabilityDeriv.lean` | theorem |
-| Explicit object Prov arithmetization (beta-function) | — | — | citation (FFL Foundation); standing lift |
+| Explicit object Prov arithmetization (beta-function) | n/a | n/a | citation (FFL Foundation); standing lift |
 
 ## Part 4: the irreducible commitment
 
@@ -84,7 +84,7 @@ decidability of real equality), not through the logic of Cred.
 | Cromwell's rule / no-ex-falso tie | `Cromwell.lean` results | `Cromwell.lean` | theorem |
 | Credal-set / admissible-set tie | `Lindley.lean` results | `Lindley.lean` | theorem |
 | Fixed-model sequential update = batch update | `sequential_eq_batch` | `Coherence.lean` | theorem |
-| Munchhausen trilemma / de Bruijn criterion | — | — | citation / synthesis |
+| Munchhausen trilemma / de Bruijn criterion | n/a | n/a | citation / synthesis |
 
 ## Part 5: didactic guide and glossary
 
@@ -102,7 +102,7 @@ appears in the rows above (for example `solutions_eq_fixedPoints`,
 | Commitment conservation under relocation | `commitment_conservation`, `run_invariant_under_relocation` | `MetaBootstrap.lean` | theorem |
 | Real-free executable checker soundness | `checkBool_true_sound`, `checkCodeNat_sound` | `Foundation/CheckBool.lean`, `Foundation/CodeChecker.lean` | theorem |
 | Real-free value-algebra models; choice-free finite fragment | `RatUnit` instance, `Cred.Three` laws | `Algebra/Rational.lean`, `Algebra/Finite.lean` | theorem |
-| Compiler / proof-kernel / AI / biology readings | — | — | analogy |
+| Compiler / proof-kernel / AI / biology readings | n/a | n/a | analogy |
 
 ## Part 7: graded status in ordinary mathematics
 
@@ -116,7 +116,7 @@ appears in the rows above (for example `solutions_eq_fixedPoints`,
 | Clopen is a consistent conjunction, not a contradiction | `isClopen_iff_isOpen_and_isOpen_compl`, `singleton_clopen_discrete_not_standard` | `Topology/Clopen.lean` | theorem |
 | Arithmetic/analysis at certainty; graded limits = standard | `add_zero_left_certain`, `tlimit_all_iff_tendsto` | `Math/Nat.lean`, `Math/Metric.lean` | theorem |
 | Robustness audit (robust / branch-dependent / inadmissible) | `excluded_middle_robust`, `choice_not_robust`, `audit_verdicts_exclusive` | `Math/Robustness.lean` | theorem |
-| Full nonlinear symplectic / FEEC / SSP methods | — | — | citation |
+| Full nonlinear symplectic / FEEC / SSP methods | n/a | n/a | citation |
 
 ## Reproducing the ledger
 
