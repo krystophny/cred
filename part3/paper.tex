@@ -583,6 +583,46 @@ The algebra resolves certain self-reference equations.
 It does not solve G\"odel incompleteness, choose values for independent
 statements, or define a canonical posterior under impossible evidence.
 
+\subsection{The arithmetic layer and the second-incompleteness boundary}
+\label{sec:arithmetic-layer}
+
+The incompleteness side is formalized, not gestured at. The object language has a
+standard model of Robinson arithmetic (\texttt{arithQ.natModel}): the domain is
+$\mathbb{N}$ with genuine $0$, successor, addition, and multiplication, crisp
+equality, and quantifiers read as the real infimum and supremum over the whole
+domain. Every Robinson $Q$ axiom evaluates to certainty there
+(\texttt{axioms\_eval\_one}), and $\bot$ is not provable from $Q$ at certainty
+(\texttt{arithQ\_con}), the genuine $N \models Q$ and $\mathrm{Con}(Q)$ content.
+
+On that signature the order is definable even though there is no order symbol:
+$a \le b$ is $\exists c.\, a + c = b$, and in the standard model this is exactly
+the order on $\mathbb{N}$, crisply (\texttt{leF\_eval\_one\_iff}). Quantifier-free
+arithmetic formulas evaluate to $0$ or $1$ (\texttt{quantifierFree\_crisp}), and
+the $\Sigma_1$ formulas, an existential block over a quantifier-free matrix
+(\texttt{IsSigmaOne}), satisfy $\Sigma_1$ completeness: a true existential over a
+crisp body has a numeral witness (\texttt{sigmaOne\_witness\_complete}). This is
+the semantic core of $\Sigma_1$ representability, an existential true in $N$ is
+witnessed by an actual number.
+
+Provability itself is representable as a total computable decision: the real-free
+checker accepts a code exactly when the certificate is valid
+(\texttt{provability\_representable}, with the executable \texttt{checkCodeNat}).
+What an object-language provability formula must add is named exactly: a formula
+$P$ \emph{represents} the checker when $N \models P[\bar n]$ iff the checker
+accepts $n$ (\texttt{RepresentsChecker}). Constructing such a $P$ is the classical
+arithmetization of the proof-checking relation, the route taken in full by the
+\textsc{FormalizedFormalLogic} development \cite{fflfoundation,godel1931}; here it
+is the stated remaining obligation, transported to the graded semantics.
+
+The boundary is sharp on one point. Even granting a representing $P$, the second
+incompleteness theorem does not internalize in Cred as an object conditional. Its
+proof needs the L\"ob derivability conditions, hence an internal implication with
+modus ponens, conditional proof, and contraction. No total operation on credences
+carries all three (\texttt{no\_internal\_loeb\_arrow}, from the Curry block of
+Section~\ref{sec:curry}), so the internal L\"ob arrow does not
+exist. The obstruction is structural, the same no-internal-conditional design that
+blocks Curry, not a missing lemma.
+
 %=============================================================================
 \section{Conclusion}
 \label{sec:conclusion}
