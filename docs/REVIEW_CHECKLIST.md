@@ -2,6 +2,15 @@
 
 Use this checklist before release or submission. Every item should either be answered in the papers/docs or turned into a follow-up issue.
 
+## Reference docs
+
+- `docs/THEOREM_INVENTORY.md`: every paper claim mapped to a Lean theorem, citation, or analogy, with the axiom ledger.
+- `docs/RELEASE_AUDIT.md`: reproducible build of the Lean source, papers, checker binary, and axiom ledger.
+- `docs/VALUE_ALGEBRA.md`: real-dependence inventory and the choice-free fragment.
+- `docs/BOOTSTRAP_POSITIONING.md`: the claim hierarchy for the bootstrap schema.
+- `docs/SUBMISSION.md`: per-paper venue plan.
+- `docs/MILESTONES.md`: what is formalized, what is trusted, what remains.
+
 ## Positioning and claim discipline
 
 - Are we presenting bookkeeping as a deep theorem?
