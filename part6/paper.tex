@@ -1,0 +1,872 @@
+\documentclass[11pt,a4paper]{article}
+
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{mathtools}
+\usepackage{enumitem}
+\usepackage{booktabs}
+\usepackage{hyperref}
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue,
+    citecolor=blue,
+    urlcolor=blue,
+    pdfauthor={Anonymous},
+    pdftitle={Universal Bootstrapping}
+}
+\usepackage{cleveref}
+\usepackage[margin=1in]{geometry}
+
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{example}[theorem]{Example}
+\newtheorem{remark}[theorem]{Remark}
+
+\newcommand{\cred}{\mathsf{cred}}
+\newcommand{\Cond}{\mathsf{Cond}}
+\newcommand{\Sol}{\mathsf{Sol}}
+\newcommand{\negc}{\mathord{\sim}}
+\newcommand{\conjc}{\otimes}
+\newcommand{\disjc}{\sqcup}
+\newcommand{\Real}{\mathbb{R}}
+\newcommand{\Bool}{\mathbb{B}}
+
+\title{\textbf{Universal Bootstrapping}\\[0.5em]
+\large Seeds, Substrates, and Self-Hosting Fixed Points}
+
+\author{Anonymous for blind review}
+\date{June 2026}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+A compiler can compile its own source. The binary that results was built by an earlier binary, which was built by one before it, back to a first compiler written and translated by hand. The chain never bottoms out in nothing. We read this pattern as a schema: a substrate, a seed, a transition rule, and a validator, with a self-hosting fixed point where the artifact reproduces itself. The same schema recurs in proof kernels checking their own logic, in AI systems proposing their own training signal, and in accounts of life's origin. We formalize the schema in Lean as \texttt{SeededSystem} and prove that no run starts without a seed, that fixed points self-host, and that the irreducible-commitment system embeds. The formal core is one theorem family. The cross-domain readings are structured analogies, not consequences of it. The thesis: seed minimization is not origin minimization, and nothing bootstraps from nothing.
+\end{abstract}
+
+\section{Introduction}
+\label{sec:intro}
+
+Take a C compiler written in C. To run it you need a C compiler, which is the
+thing you are trying to build. The escape is historical. Some earlier compiler,
+written in assembly or fed through another language, produced the first working
+binary; that binary compiled the next version of the source; and the source has
+been improved ever since while every new binary is built by the previous one.
+Thompson's \emph{Reflections on Trusting Trust} \cite{thompson1984} turns this
+chain into a warning: a compiler can carry behavior present in no version of its
+source, passed binary to binary, because the source is only ever compiled by an
+existing binary. Wheeler's diverse double-compiling \cite{wheeler2005} answers
+the warning, but it does not remove the seed. It checks the seed against a second
+independent one. The first compiler still came from outside.
+
+Strip the example to its moving parts. There is a space of artifacts: source
+files, binaries, states. There is a \emph{seed}: the first artifact, supplied
+from outside the system. There is a \emph{transition}: the operation that folds
+the current artifact and its substrate into the next one, here ``compile this
+source with this binary.'' And there is a \emph{validator}: the check that a step
+is admissible, that the new binary is a correct compiler. Run the transition from
+the seed and you get an orbit. The interesting states are the ones where the
+transition reproduces the input: a compiler whose source, compiled by itself,
+yields a binary equivalent to itself. Such a state \emph{self-hosts}.
+
+\begin{definition}[Seeded system, informal]
+\label{def:seeded-informal}
+A seeded system is a substrate of states $S$, a predicate $\mathit{Seed}$ marking
+the artifacts you may start from, a transition $T : S \to S$ with the substrate
+folded in, a validator $V$ on steps, and a correctness relation $E$. A state $s$
+self-hosts when $E\,s\,(T\,s)$: the transition reproduces it up to $E$.
+\end{definition}
+
+This schema is the formal core of the paper. As a theorem, the Lean structure
+\texttt{Cred.SeededSystem} carries exactly the five components of
+\Cref{def:seeded-informal}, and \texttt{run} iterates $T$ from a seed. Two facts
+about it set the tone. First, \texttt{no\_empty\_bootstrap}: if no state
+satisfies $\mathit{Seed}$, no state is a seed, so there is nothing to start a run
+from. The missing information has not vanished; it has moved into the substrate.
+Second, \texttt{selfHosts\_of\_fixed}: an $E$-fixed point of $T$ self-hosts. The
+compiler that recompiles to itself is the fixed point of the build operator.
+
+The schema also has content beyond the compiler. As a theorem, the
+irreducible-commitment structure of Part~4 embeds into it: \texttt{toSeeded}
+turns any \texttt{Credence.CommitmentSystem} into a \texttt{SeededSystem} whose
+transition is the refinement operator and whose correctness relation is equality,
+and \texttt{fp\_selfHosts} and \texttt{deg\_selfHosts} show that both the
+convergence target and the degenerate absorbing element self-host. The bootstrap
+schema and the prior-and-seed schema are one structure seen twice.
+
+\subsection*{The bottleneck}
+
+Bootstrapping has a characteristic shape, and it is not minimization of the seed
+alone. A self-hosting compiler is small as source, but it expresses a rich
+language; the seed binary that first produced it was a separate, simpler tool;
+and what comes out is again a full compiler. The pattern is
+\emph{complex-prior $\to$ compressed-seed $\to$ complex-self-host}. A large prior
+capability gets squeezed through a narrow opening, the seed, and re-expands into
+a system that maintains itself. The narrow opening is real and worth finding. It
+is what \texttt{run} starts from, and what \texttt{no\_empty\_bootstrap} says
+cannot be empty. But the prior on either side of it is not removed by making the
+seed small.
+
+\begin{example}[Reading the bottleneck across domains]
+\label{ex:bottleneck}
+As structured analogies, not as instances of the theorem: a proof kernel checks
+proofs, including, after Lean4Lean \cite{carneiro2024}, a proof of its own
+checker's soundness, but the trusted kernel it runs on is the seed. An
+AI-assisted search like FunSearch \cite{romera2024} proposes programs that
+improve a problem it was set, yet the model, the evaluator, and the task are
+supplied. Accounts of life's origin, hypercycles \cite{eigen1971},
+autocatalytic sets \cite{kauffman1993}, protocell synthesis \cite{szostak2001},
+describe chemistry that maintains and copies itself, but always from a stocked
+environment. In each, a complex prior passes through a compressed seed into a
+self-maintaining system. These illustrate the schema. They are not proved by it.
+\end{example}
+
+\subsection*{Thesis and guardrails}
+
+The organizing claim, as philosophical synthesis: nothing bootstraps from
+nothing, and seed minimization is not origin minimization. You can make the seed
+explicit, hold it as small as the task allows, and check it for self-consistency.
+You cannot make it zero. Shrinking the seed redistributes the assumed complexity
+into the substrate and the transition; it does not abolish it. This continues the
+irreducible-commitment thesis of Part~4 and the regress horn of the
+M\"unchhausen trilemma \cite{albert1968}, now read through self-hosting fixed
+points.
+
+The guardrails matter, so we state them at the start. This paper has one formal
+core and a set of structured analogies built around it. The formal core is the
+Lean development: \texttt{SeededSystem} with \texttt{no\_empty\_bootstrap},
+\texttt{SelfHosts} and \texttt{selfHosts\_of\_fixed}, the
+\texttt{CommitmentSystem} embedding, and the earlier Cred results it rests on,
+no-ex-falso and the Curry block among them. Everything proved is proved about
+that schema and its instances. The compiler, proof-kernel, AI-design, and
+biological readings are analogies that share the schema's shape. They are not
+theorems.
+
+So we do not claim, and the schema does not show, that all complexity shares a
+single origin. A common seed-transition-validator structure recurring across
+domains is a claim about structure, not about causal history. We do not claim
+that biology is designed; the origin-of-life work we cite is about self-organizing
+chemistry, and the schema is neutral on how a seed arises. We do not claim that
+emergence is solved; that more is different \cite{anderson1972} is the open
+question the schema organizes, not one it answers. And we do not claim that an AI
+can bootstrap from nothing; \texttt{no\_empty\_bootstrap} says the opposite, and
+the FunSearch reading respects it. What the paper does claim is narrow and, we
+think, useful: one schema, substrate plus seed plus transition plus validator,
+with a self-hosting fixed point, recurs across these domains and is worth writing
+down once, formally, with its seed made explicit.
+
+The rest of the paper develops the schema (\Cref{sec:intro} fixes the
+vocabulary), states the Lean core as theorems, and then walks the four
+analogies in turn, marking each claim as theorem, structured analogy, or
+philosophical synthesis as it appears.
+
+\section{The formal core: seeded systems}
+
+Take a compiler that compiles its own source. Feed it the binary $b$; it
+runs the source through that binary and emits a new binary; when the new
+binary equals $b$, the compiler hosts itself. Strip away the C and the
+machine code and a skeleton remains: a space of artifacts, a starting
+artifact you are handed rather than derive, a step that folds the substrate
+into a transition, a check on each step, and a notion of when two artifacts
+count as the same. That skeleton is machine-checked. Everything in this
+section is a formal theorem about it, verified in Lean; the compiler is the
+motivating case, not a claim the schema proves. We tag each statement by
+kind. The definitions and theorems below are the \textbf{formal theorem}
+layer. The compiler reading is a \textbf{structured analogy}.
+
+\subsection{The schema}
+
+\begin{definition}[Seeded system]
+A \emph{seeded system} bundles five components: a state space $S$, a
+predicate $\mathrm{Seed} : S \to \mathrm{Prop}$ marking allowed seeds, a
+transition $T : S \to S$ with the substrate folded in, a step validator
+$V : S \to S \to \mathrm{Prop}$, and a correctness relation
+$E : S \to S \to \mathrm{Prop}$. In Lean this is the structure
+\texttt{SeededSystem} with fields \texttt{S}, \texttt{Seed}, \texttt{T},
+\texttt{V}, \texttt{E}.
+\end{definition}
+
+The five fields name the object ($S$), the operation ($T$), the constraint
+($V$ and the allowed seeds), and the consequence we track ($E$). As a
+structured analogy: $S$ is the artifact format, $\mathrm{Seed}$ marks a
+trusted starting binary, $T$ is one compile pass, $V$ checks a pass, and $E$
+is observational equivalence. Nothing in the structure forces that reading.
+The same skeleton accepts a proof kernel (states are derivations, $T$ a
+reduction, $E$ definitional equality), or an autocatalytic set (states are
+molecular populations, $T$ one reaction round). These are analogies; the
+schema does not assert them.
+
+\begin{definition}[Bootstrap run]
+The run of length $n$ from a seed $s_0$ iterates the transition:
+$\mathrm{run}\, s_0\, n = T^{[n]}\, s_0$. In Lean, \texttt{SeededSystem.run}
+with \texttt{run\_zero} and \texttt{run\_succ} unfolding the iteration.
+\end{definition}
+
+A run needs something to iterate from. There is no run without a seed, and
+the schema makes that literal.
+
+\begin{theorem}[No empty bootstrap]
+If the system has no seed, then nothing is a seed. Formally
+\texttt{SeededSystem.no\_empty\_bootstrap}: from $\neg\, \exists s,\,
+\mathrm{Seed}\, s$ it follows that $\forall s,\, \neg\, \mathrm{Seed}\, s$.
+\end{theorem}
+
+The statement is near-trivial as logic, and that is the point. A bootstrap
+never starts from nothing. The information you do not supply as a seed has
+not vanished; it has moved into the substrate folded into $T$. As
+\textbf{philosophical synthesis}: this is the irreducible-commitment thesis
+in its thinnest form. The bottleneck is unavoidable, not because the theorem
+is deep, but because the schema refuses to hide where the starting datum
+goes. The theorem does not show that all complexity shares one origin, that
+biology was designed, or that a system can lift itself from nothing. It
+shows the opposite of the last: a seed is required.
+
+\subsection{Self-hosting}
+
+\begin{definition}[Self-hosting]
+A state $s$ \emph{self-hosts} when the transition reproduces it up to
+correctness: $\mathrm{SelfHosts}\, s := E\, s\, (T\, s)$. In Lean,
+\texttt{SeededSystem.SelfHosts}.
+\end{definition}
+
+Read $T\, s$ as $\mathrm{compile}(s)$. Then $\mathrm{SelfHosts}\, s$ says
+$\mathrm{compile}(s)$ reproduces $s$ up to $E$: the compiler recompiles to
+itself. That is the structured analogy. The theorem is about $E$ and $T$,
+not about compilers.
+
+The simplest route to self-hosting is a fixed point.
+
+\begin{theorem}[Fixed points self-host]
+If $E\, s\, s$ holds and $T\, s = s$, then $\mathrm{SelfHosts}\, s$.
+Formally \texttt{SeededSystem.selfHosts\_of\_fixed}.
+\end{theorem}
+
+When $T$ already returns $s$, rewriting $T\, s$ to $s$ turns the target
+$E\, s\, (T\, s)$ into $E\, s\, s$, which the reflexivity hypothesis
+supplies. Fixed points are also stationary.
+
+\begin{theorem}[Fixed points are stationary]
+If $T\, s = s$, then $\mathrm{run}\, s\, n = s$ for every $n$. Formally
+\texttt{SeededSystem.run\_const\_of\_fixed}, by induction on $n$.
+\end{theorem}
+
+A run from a fixed point never moves. Once the artifact reproduces itself,
+further passes change nothing observable. The schema is inhabited: the
+one-state system \texttt{trivialSelfHost} (state \texttt{Unit}, identity
+transition, equality as $E$) self-hosts by \texttt{rfl}, so self-hosting is
+not a vacuous predicate.
+
+\subsection{The commitment system embeds}
+
+Part~4 studied an irreducible-commitment structure on credences: a
+refinement operator with a fixed point reached from every seed and a
+degenerate absorbing element. That structure is the metric instance of the
+schema, and the embedding is a theorem.
+
+\begin{theorem}[Commitment systems are seeded systems]
+Every \texttt{CommitmentSystem} $C$ yields a seeded system
+$C.\mathtt{toSeeded}$ with $S = \mathrm{Credence}$, transition $T = C.op$,
+correctness $E = {=}$, and every credence an allowed seed. Formally
+\texttt{Credence.CommitmentSystem.toSeeded}.
+\end{theorem}
+
+Under this embedding the refinement operator becomes the transition,
+equality becomes correctness, and the two distinguished credences self-host.
+
+\begin{theorem}[Fixed point and degenerate element self-host]
+For every commitment system $C$, both $C.\mathit{fp}$ and $C.\mathit{deg}$
+self-host in $C.\mathtt{toSeeded}$. Formally
+\texttt{Credence.CommitmentSystem.fp\_selfHosts} and
+\texttt{deg\_selfHosts}, each via \texttt{selfHosts\_of\_fixed}: the fixed
+point from the self-consistency equation $\mathit{op}\, \mathit{fp} =
+\mathit{fp}$, the degenerate element from its absorption $\mathit{op}\,
+\mathit{deg} = \mathit{deg}$.
+\end{theorem}
+
+Two states self-host for opposite reasons. The fixed point is the value the
+orbit certifies from any seed: the converged commitment that reproduces
+itself. The degenerate element is the absorbing zero of Cromwell's rule,
+unrecoverable once entered, which reproduces itself by going nowhere. The
+schema records both as $E\, s\, (T\, s)$ without collapsing the difference;
+$V$ and $\mathrm{Seed}$, left trivial in this embedding, are where a richer
+instance would separate a legitimate fixed point from a stuck one.
+
+As \textbf{philosophical synthesis}: the same seed-transition-validator
+skeleton recurs across the compiler, the proof kernel, the converging prior,
+and the autocatalytic origin story. The recurrence is a schema match, not a
+shared cause. The formal layer establishes only what the Lean names above
+assert. The analogies illustrate the schema; they are not proved by it.
+
+\section{Compiler bootstrapping}
+\label{sec:bootstrapping}
+
+A C compiler is itself a C program. To build it you need a C compiler. That circle is the cleanest worked example of the seeded-system schema, so we enter through it before generalizing. The schema columns are fixed by \texttt{SeededSystem} in the Lean development: a substrate $S$, a seed predicate $\mathrm{Seed}$, a transition $T$, a validator $V$, and a correctness relation $E$. Compiler bootstrapping instantiates all five, and it does so twice, under two opposed seed strategies. We present both as a \emph{structured analogy}: the schema illustrates the practice, and the practice illustrates the schema. Neither proves the other.
+
+\subsection{Two seed strategies}
+
+\paragraph{The large inherited seed.}
+The fast and practical route reuses what already exists. An installed GNU toolchain, GCC and its runtime, compiles the next compiler, which compiles the one after. The substrate is the source tree plus the host operating system and libraries. The seed is the whole prior toolchain, a large binary nobody reads byte by byte. The transition is one compile-and-link pass. The validator is the build's own machinery: the test suite, and the standard three-stage check in which the compiler rebuilds itself and the stage-two and stage-three binaries are compared for equality. Correctness is observational equivalence of the produced compilers.
+
+This route is cheap and it works. Its weakness is the size of the seed. A binary you cannot audit can carry a payload that the source does not mention. Thompson made the point exact: a compiler can be taught to recognize when it is compiling itself, reinsert a backdoor into its own next generation, and recognize when it is compiling the login program, inserting a second backdoor there~\cite{thompson1984}. Remove both patterns from the source and recompile with the infected binary: the source is clean, the binary is not, and the compromise reproduces through every later generation. As a \emph{structured analogy}, this is the self-hosting fixed point of the schema turned hostile. \texttt{SeededSystem.SelfHosts} says $E\,s\,(T\,s)$: the state reproduces itself up to correctness. Trusting trust is a self-hosting state whose reproduction the source-level validator cannot see.
+
+\paragraph{The minimal audited seed.}
+The opposed route shrinks the seed until a human can read it. A Stage0-style path starts from a few hundred bytes of hand-written hex, small enough to check by eye. That seed builds a minimal assembler. The assembler builds a slightly richer one. A chain of small, individually auditable stages climbs from there to a C compiler capable of building a full toolchain. The substrate is the bare machine and its instruction set. The seed is the hex monitor. The transition is each stage building the next. The validator is human inspection at the bottom, where the artifact is small, then conventional testing once the stages grow.
+
+This route is slow and laborious. Its strength is that the seed is auditable in full. Where the inherited route trusts a large opaque binary, the Stage0 route trusts only what a person has read. The two strategies trade the same currency in opposite directions: build speed against seed size and auditability. That trade is the whole content of the choice; the schema does not pick a winner.
+
+\subsection{Diverse double-compiling}
+
+Even a clean source does not certify a binary, because the binary built it. Wheeler's diverse double-compiling breaks the circle without demanding that anyone read the seed~\cite{wheeler2005}. Compile the compiler's source twice: once with the suspect compiler, once with a second, independently produced compiler. The two stage-one outputs differ, since they came from different builders. Use each to recompile the source a second time. If the source is the only common cause, the two stage-two binaries are bit-for-bit identical. A divergence exposes a builder that injected something the source did not contain.
+
+As a \emph{structured analogy} this is the validator $V$ doing work the correctness relation $E$ alone cannot. Self-hosting checks that a compiler reproduces \emph{itself}; double-compiling checks reproduction against a \emph{diverse} witness, so a backdoor that survives self-comparison still has to survive comparison with a compiler that never carried it. The disclaimer matters here. Double-compiling does not certify from nothing. It relocates trust: from one binary onto the independence of two builders and the readability of the shared source. If both builders share the infected ancestor, the diversity is fake and the check passes a compromise. The seed never reaches zero. It moves.
+
+\subsection{Mapping onto the schema}
+
+Table~\ref{tab:bootstrap} reads both strategies through the five columns of \texttt{SeededSystem}.
+
+\begin{table}[t]
+\centering
+\small
+\begin{tabular}{p{0.15\linewidth}p{0.36\linewidth}p{0.36\linewidth}}
+\toprule
+Column & Inherited seed (GCC) & Audited seed (Stage0) \\
+\midrule
+substrate $S$ &
+source tree, host OS, libraries &
+bare machine, instruction set \\[4pt]
+seed $\mathrm{Seed}$ &
+full prior toolchain (large, opaque) &
+hand-written hex monitor (small, read) \\[4pt]
+transition $T$ &
+one compile-and-link pass &
+each stage builds the next \\[4pt]
+validator $V$ &
+test suite, three-stage rebuild, double-compiling &
+human inspection low, testing high \\[4pt]
+correctness $E$ &
+observational equivalence of compilers &
+observational equivalence of compilers \\
+\bottomrule
+\end{tabular}
+\caption{The two bootstrap strategies as instances of \texttt{SeededSystem}.
+The columns are the schema fields $S$, $\mathrm{Seed}$, $T$, $V$, $E$. The
+mapping is a structured analogy: it illustrates the schema, it is not proved
+by it.}
+\label{tab:bootstrap}
+\end{table}
+
+The one Lean fact behind the analogy is small and exact. \texttt{SeededSystem.no\_empty\_bootstrap} states that if no seed exists, no state satisfies the seed predicate: with nothing allowed to start from, no run begins. Read against the table, it formalizes a single observation. As a \emph{theorem} it says only this; the gloss that follows is \emph{philosophical synthesis}. The seed that looks empty is never empty. When a build appears to start from nothing, the missing information has moved into the substrate: the loader that places the first bytes, the firmware that runs the loader, the instruction set the hex assumes, the host that hosts the cross-compiler. \texttt{no\_empty\_bootstrap} marks the place where that information has to live. It does not say what fills it, and it does not claim any particular toolchain is trustworthy.
+
+The minimal positive case is equally plain. \texttt{trivialSelfHost} is a one-state system with identity transition and equality as correctness, and \texttt{trivialSelfHost\_selfHosts} shows its state recompiles to itself: $\mathrm{compile}(b)\simeq b$. As a \emph{theorem} it certifies only that the schema is inhabited by a genuine self-hosting fixed point. It is a witness, not a model of GCC. The compiler readings stay in the prose, by the same guardrail that keeps the analogies out of the Lean file.
+
+The honest conclusion is the one the irreducible-commitment thesis draws elsewhere, now in a setting where it can be inspected to the byte. A toolchain's worth is not that it has no opening commitment. It is that the commitment is made explicit, kept minimal, and validated. The inherited seed hides a large commitment behind a fast build. The audited seed exposes a small one and pays in labor. Double-compiling does not abolish the commitment; it diversifies the witness that checks it. Across all three, the seed is irreducible. The only question is how much of it you can read.
+
+\section{Proof kernels and the trusted seed}
+\label{sec:kernels}
+
+Take a Lean development with ten thousand lines of proof. What do you trust when \texttt{lake build} reports success? Not the ten thousand lines. You trust the kernel: a small typechecker that re-derives every proof term against the inference rules of the underlying type theory. The tactics, the elaborator, the library, all of it can be wrong and the worst outcome is a failed check. A proof the kernel accepts is sound to the degree the kernel is. This is the de Bruijn criterion, named for the Automath system that first separated proof construction from proof checking \cite{debruijn1970}: let an arbitrarily clever, arbitrarily untrusted front end produce candidate proofs, and certify each one with a checker small enough to audit by hand.
+
+The criterion is the proof-theoretic face of the seeded-system schema. As a structured analogy, the kernel is the seed: a small trusted base from which everything else is licensed. The transition $T$ is the elaboration of a high-level script into a low-level proof term. The validator $V$ is the kernel's typecheck of that term. Correctness $E$ is ``the term inhabits the stated type.'' The schema does not prove that any particular kernel is correct; it names the slots that a trusting discipline must fill. The Cred skeleton fixes those slots abstractly. \texttt{SeededSystem} carries the state space \texttt{S}, the seed predicate \texttt{Seed}, the transition \texttt{T}, the validator \texttt{V}, and the correctness relation \texttt{E}; \texttt{run} iterates \texttt{T} from a seed. As a theorem, \texttt{no\_empty\_bootstrap} states the obvious-but-load-bearing fact that with no seed there is nothing to start a run from. The kernel cannot be elided. The missing trust does not vanish when you delete it; it moves into whatever you check the kernel against.
+
+\subsection{Self-hosting checkers}
+
+A compiler written in its own language can compile itself. A proof checker can do the analogous thing: check a proof, encoded in the system's own logic, that the checker is correct. Lean4Lean reimplements Lean's kernel inside Lean and proves the reimplementation sound against a formal specification of the type theory \cite{carneiro2024}. As a structured analogy, this is the proof-kernel reading of self-hosting, and it maps onto one definition in the Cred core. A state \emph{self-hosts} when the transition reproduces it up to correctness: \texttt{SelfHosts s := E s (T s)}, the checker that recompiles to itself. As a theorem, \texttt{selfHosts\_of\_fixed} shows that any \texttt{E}-fixed point of the transition self-hosts, and \texttt{run\_const\_of\_fixed} shows such a point is stationary: every run from it stays put. The minimal witness \texttt{trivialSelfHost}, one state with the identity transition, inhabits the schema so the definition is not vacuous.
+
+Self-hosting buys a sharper audit, not a smaller seed. When a checker certifies a proof of its own correctness, the certificate is only as good as the kernel that checked it: the very kernel whose correctness is at issue. The argument is not circular in a vicious way, because an independent checker, or a second compiler built from different sources, can re-run it; this is the diverse double-compiling answer to the trusting-trust attack, where a malicious compiler reproduces its own backdoor through self-compilation \cite{thompson1984,wheeler2005}. As a structured analogy, double-compiling is a second seed used to cross-check the first. Two seeds, audited against each other, beat one seed trusted blind. Neither construction removes the seed. It distributes trust across more than one and makes disagreement detectable.
+
+\subsection{Stratified reflection}
+
+The other route to enlarging a trusted base is to climb. Level $n+1$ certifies level $n$. A theory $T$ strong enough for arithmetic cannot prove its own consistency \cite{godel1931}. It can be extended: adjoin the soundness of $T$, the reflection principle ``if $T$ proves $\varphi$ then $\varphi$,'' and call the result $T_1$, which proves the consistency $T$ could not. Iterate, past the finite stages into the transfinite, indexed by ordinals. Turing studied the first such progressions \cite{turing1939} and Feferman developed the transfinite recursive progression in full \cite{feferman1962}. This is the reflection analogue of self-hosting: not a single fixed point that recompiles to itself, but a tower in which each floor certifies the one below.
+
+The tie to Cred is direct. As a theorem, the commitment system embeds into the schema via \texttt{Credence.CommitmentSystem.toSeeded}, taking the refinement operator as the transition and equality as correctness; \texttt{fp\_selfHosts} and \texttt{deg\_selfHosts} exhibit the fixed point and the degenerate element as self-hosting states. The reflection tower and the commitment orbit are two readings of one structure: an operator iterated from a seed toward a value that certifies itself. As philosophical synthesis, the irreducible commitment recurs here in its stratified form. Each level trusts the level below, and the bottom level trusts nothing but itself.
+
+That bottom level is where reflection meets its limit. Each adjoined soundness statement is an arithmetic sentence, so the new theory is again incomplete by the same theorem that forced the first extension \cite{godel1931}. No level certifies itself at its own level: Goedel and Tarski bound same-level self-certification, and the tower only ever pushes the boundary up, never closes it. As philosophical synthesis, this is the bottleneck the whole series turns on. The trusted seed shrinks as you stratify, double-compile, and minimize the kernel, but it never reaches zero. A system that claims no commitment at the base has only hidden the base it is standing on.
+
+\subsection{The link to Cred's aim}
+
+Cred's own no-explosion discipline is a seed of this kind, and the schema says where it sits. As a theorem, the chain-rule conditional refuses ex falso: conditioning on credence $0$ leaves the conditional unconstrained (\texttt{conditioning\_zero\_any}), so impossible evidence licenses nothing rather than everything. As a theorem, the product residuum blocks Curry: contraction is incompatible with the pinned-down implication (\texttt{prod\_resid\_no\_contraction}, \texttt{curry\_block}), so the self-reference that would explode a naive system instead has a fixed-point solution set. These results are the validator $V$ of Cred's own bootstrap. They say which steps the system will accept, and the schema makes explicit that the seed behind them, the choice to take conditioning as primitive rather than as division, is itself a commitment the formalism does not derive. The aim is to keep that seed small and stated: a kernel of accepted rules, checked, with the one unavoidable commitment in plain view rather than smuggled into the substrate.
+
+As philosophical synthesis, a common seed-transition-validator schema recurs across compiler bootstrapping, proof kernels, stratified reflection, and Cred's own no-explosion core. The recurrence is a pattern worth naming, not a proof that these domains share an origin. The schema does not show that all complexity comes from one source, that emergence is solved, or that any system can bootstrap from nothing. It shows the opposite: every bootstrap names a seed, and the work is to make that seed minimal, explicit, and open to audit.
+
+\section{The bottleneck: small seeds, large priors}
+\label{sec:bottleneck}
+
+A self-hosting compiler ships as a few hundred kilobytes of source. You read it
+in an afternoon. The validator is small, the seed is small, the transition rule
+is small. Then ask where the seed came from. It came from a host compiler,
+written by people, trained in a discipline, running on a fabrication stack that
+took decades and continents to build. The artifact you hold is tiny. The system
+that produced it is not.
+
+This section states the organizing claim of the part, as philosophical
+synthesis: \emph{seed minimization is not origin minimization}. The seed of a
+bootstrap can be made arbitrarily small as an object while the prior system that
+emitted it stays large. Shrinking the artifact does not shrink the history. The
+two quantities are independent, and conflating them is the bottleneck illusion.
+
+\subsection{What the formal core actually fixes}
+
+The formal core supplies the bottleneck, not the largeness behind it. As a
+theorem, \texttt{SeededSystem} bundles five things and nothing else: a state
+space \texttt{S}, an allowed-seed predicate \texttt{Seed}, a transition
+\texttt{T}, a validator \texttt{V}, and a correctness relation \texttt{E}. The
+run is iteration of \texttt{T} from a seed. The narrowest fact in the file is
+the one that names the bottleneck directly.
+
+\begin{theorem}[No empty bootstrap]
+\label{thm:noempty}
+In \texttt{SeededSystem}, \texttt{no\_empty\_bootstrap} states: if no state
+satisfies \texttt{Seed}, then no run can begin. There is nothing to iterate
+\texttt{T} on.
+\end{theorem}
+
+Read this carefully, because it says less than it seems to and that is the
+point. It does not say the seed is uncaused. It says the run needs the seed as
+an input the run cannot manufacture. The transition \texttt{T} folds the
+substrate in; whatever \texttt{T} draws on at each step is already present
+before the first step. As a theorem, \texttt{selfHosts\_of\_fixed} adds that an
+\texttt{E}-fixed point of \texttt{T} reproduces itself: \texttt{SelfHosts s :=
+E s (T s)}, the compiler that recompiles to itself. The commitment system
+embeds, and both its convergence fixed point and its degenerate element
+self-host, by \texttt{fp\_selfHosts} and \texttt{deg\_selfHosts}. These are
+statements about a state once it exists. None of them is a statement about where
+the state came from. The formalization is deliberately silent on origin, and
+that silence is load-bearing: it is the gap the synthesis names rather than
+fills.
+
+\subsection{Two sizes, one artifact}
+
+Separate two measurements of a bootstrap. Call the first the \emph{seed size}:
+the length of the artifact you hand to \texttt{T}, the kilobytes of source, the
+bits of the prior, the base sequence of the first replicator. Call the second
+the \emph{prior size}: the system that had to be in place for that seed to be a
+usable seed at all. Theorem~\ref{thm:noempty} constrains the first to be
+nonempty. It says nothing about the second.
+
+The gap between them is large in every concrete case, and the cases are
+structured analogies, not consequences of the schema.
+
+\begin{example}[Trusting trust]
+\label{ex:trust}
+Thompson's compiler attack \cite{thompson1984} hides a few lines in a compiler
+binary; the binary then reinserts them into every recompilation, including
+recompilations of itself. As a structured analogy, the seed (the planted source
+delta) is small and the validator (read the source) passes, yet the prior system
+(the already-compromised host binary) carries the payload the source never
+shows. Wheeler's diverse double-compiling \cite{wheeler2005} defeats the attack
+precisely by enlarging the prior on purpose: introduce a second, independent
+compiler so the host is no longer a single trusted point. The defense does not
+shrink the seed. It admits that trust lives in the prior and audits the prior.
+\end{example}
+
+\begin{example}[Proof kernels]
+\label{ex:kernel}
+A proof checker earns trust by having a small kernel: de Bruijn's criterion
+\cite{debruijn1970}, a core you can read in full. Lean's kernel re-checked by an
+independent implementation, Lean4Lean \cite{carneiro2024}, sharpens this: the
+checked artifact is minimal, but the confidence rests on the metatheory, the
+type theory, the second implementation, the mathematical culture that vetted
+them. As a structured analogy, the kernel is the small seed; the trusted
+foundation is the large prior. Feferman's transfinite progressions of theories
+\cite{feferman1962} and Turing's ordinal logics \cite{turing1939} make the same
+shape exact: each level certifies the one below, and the tower never bottoms out
+in nothing. G\"odel's second theorem \cite{godel1931} is the reason the prior
+cannot be folded into the seed: the system cannot prove its own consistency from
+inside.
+\end{example}
+
+\begin{example}[Origins of order]
+\label{ex:origins}
+The first replicator is short. The chemistry that made a short replicator
+selectable is not. As a structured analogy, Eigen's hypercycles
+\cite{eigen1971}, Kauffman's autocatalytic sets \cite{kauffman1993}, and
+Szostak's protocells \cite{szostak2001} each exhibit a small self-reproducing
+seed riding on a large prior: an energy gradient, a monomer supply, a
+compartment, a prebiotic environment that took a planet to assemble. The seed
+is the sequence. The prior is the world that made the sequence count as a seed.
+\end{example}
+
+We state the disclaimer the guardrails require, in the prose where it bites.
+None of Examples~\ref{ex:trust}--\ref{ex:origins} is proved by
+\texttt{SeededSystem}. The schema illustrates them; they do not follow from it.
+The recurrence of a seed-transition-validator shape across these domains is a
+descriptive pattern, not a derivation. In particular: the schema does not show
+that biology is designed, it does not solve emergence, and it does not license
+the claim that any system bootstraps from nothing. The biological cases are
+analogies to a fixed-point structure, not assertions that life was engineered.
+
+\subsection{Solomonoff: minimal description, chosen machine}
+
+The cleanest formal witness that small artifact and large prior are independent
+is the universal prior. Solomonoff's induction \cite{solomonoff1964} weights a
+hypothesis by the length of the shortest program that outputs it, which looks
+like a recipe for origin minimization: prefer the smallest description. As
+philosophical synthesis, read where the largeness hides. The description length
+is measured relative to a fixed universal machine. The minimal program is small;
+the machine that interprets it is a complete choice of computational basis, and
+different machines shift every length by a constant the data cannot remove. The
+prior is small in description and total in commitment.
+
+\begin{remark}[Where the prior sits]
+\label{rem:machine}
+This is the bottleneck in its purest form. The seed (the shortest program) is
+minimized by construction. The prior (the reference machine) is presupposed by
+construction. Jaynes's maximum-entropy priors \cite{jaynes2003} repeat the
+shape: entropy is maximized subject to constraints, and the constraints, the
+choice of what to hold fixed, are the irreducible commitment the optimization
+does not supply. Minimizing the seed sharpens the artifact and relocates the
+commitment into the machine. It does not abolish it.
+\end{remark}
+
+This mirrors the formal silence exactly. \texttt{no\_empty\_bootstrap} fixes
+that a seed is needed; it leaves the substrate folded into \texttt{T}
+unexamined. Solomonoff fixes the shortest program; it leaves the machine
+unexamined. Same gap, two vocabularies.
+
+\subsection{Emergence: more is different, not more from nothing}
+
+One reading of a small seed yielding a large system is emergence, and the
+synthesis must mark its limit. Anderson's \emph{more is different}
+\cite{anderson1972} argues that each level of organization has laws not reducible
+to the level below: a few rules of local interaction give rise to phases,
+symmetries, and structure the rules do not name. As philosophical synthesis,
+this is the right slogan for the bottleneck and the wrong slogan for origin.
+Emergence is large behavior from compact rules \emph{within} a substrate already
+rich enough to support it. The compact rules are the seed. The substrate, the
+many degrees of freedom, the prior conditions for a phase to form, is the large
+prior. Emergence does not produce the substrate; it organizes one.
+
+So the disclaimer stands. A small seed generating rich behavior is a real and
+common pattern, witnessed by FunSearch and LLM-driven mathematical discovery
+\cite{romera2024}, where a compact search loop over a large pretrained prior
+finds genuinely new constructions. As a structured analogy, the loop is the
+seed and the model plus its training corpus is the prior; the discovery is
+emergent over that prior, not over nothing. The schema does not claim that
+emergence is solved, that all complexity shares a single origin, or that an
+intelligence can bootstrap itself from an empty start. It claims, descriptively,
+that the seed-transition-validator shape recurs, and that in every recurrence
+the prior outweighs the seed.
+
+\subsection{The thesis, stated as synthesis}
+
+Gather the threads. As philosophical synthesis, the bottleneck thesis is this:
+every bootstrap admits a small seed and presupposes a large prior, and the two
+sizes are not the same measurement. You can compress the artifact toward its
+minimal description, and the compiler, the kernel, the prior, the replicator all
+reward the effort with auditability. What you cannot do is compress the prior to
+zero by compressing the seed. The missing information moves into the substrate;
+it does not vanish. That movement is exactly what \texttt{no\_empty\_bootstrap}
+records inside the formal core and what Solomonoff's chosen machine records
+inside the universal prior.
+
+The honest engineering response follows from the descriptive pattern, not from
+any theorem. Make the seed small, because a small seed is readable and a
+readable seed can be checked. Then make the prior explicit, because an unstated
+prior is where trusting-trust hides, where the reference machine smuggles in a
+basis, where a foundation borrows consistency it cannot prove. Seed minimization
+buys auditability. It does not buy a beginning from nothing, and the part claims
+no more than that.
+
+\section{AI-assisted design as recursive bootstrapping}
+\label{sec:ai-bootstrap}
+
+A program-search system mutates candidate programs, runs them against a scoring
+function, and keeps what scores higher. FunSearch is one such loop: a language
+model proposes code, an evaluator checks each proposal, and the surviving
+programs feed the next round of proposals \cite{romera2024}. The system improved
+on known constructions in extremal combinatorics. Nothing in the loop creates a
+proposal out of nothing. The model was trained, the evaluator was written, and
+the first prompt was supplied. The loop refines; it does not originate.
+
+That structure is the seeded-system schema of Part~4, read in a new domain. We
+make the mapping explicit, then say plainly what it does and does not license.
+
+\subsection{The schema, and the AI-design reading of it}
+
+Recall the formal skeleton. \emph{As a theorem}, a \texttt{SeededSystem} fixes a
+state space $S$, a seed predicate $\mathrm{Seed}$, a transition $T$, a step
+validator $V$, and a correctness relation $E$. A run iterates the transition,
+$\mathrm{run}(s_0, n) = T^{[n]}(s_0)$. A state self-hosts when the transition
+reproduces it up to correctness: $\mathrm{SelfHosts}(s) := E\,s\,(T\,s)$. Two
+facts pin the schema down. First, \texttt{no\_empty\_bootstrap}: if no seed
+exists, no state is a seed, so there is nothing to start a run from. The missing
+information moved into the substrate; it did not vanish. Second,
+\texttt{selfHosts\_of\_fixed}: an $E$-fixed point of the transition self-hosts,
+and by \texttt{run\_const\_of\_fixed} every run from it stays put.
+
+\begin{example}[The AI-design reading]
+\emph{As a structured analogy}, take the program-search loop. The state $s$ is a
+design: an algorithm, a hardware layout, a successor model's weights and code.
+The transition $T$ is one assisted-design step, model proposal plus selection,
+with the substrate folded in. The validator $V$ is the evaluator: tests,
+benchmarks, held-out scores, and in the strongest case a machine-checked proof.
+The correctness relation $E$ asks whether the new design meets the standard the
+old one set. A loop that produces designs which pass the same validator that
+seeded it is a self-hosting state: the artifact reproduces its own
+acceptability. This reading \emph{illustrates} the schema. It is not proved by
+it. The Lean facts hold over the abstract $(S,\mathrm{Seed},T,V,E)$ and carry no
+claim about any particular AI system.
+\end{example}
+
+The validator gates each step, and that is the load-bearing part. Refinement
+without a validator is drift. The schema separates the two cleanly: $T$ proposes,
+$V$ accepts or rejects, $E$ records what acceptance was supposed to mean. A
+recursive technological loop, AI helping design the next AI, is many turns of
+this single step, each turn gated by whatever $V$ the designers chose.
+
+\subsection{The seed is the substrate, and it is not small}
+
+\emph{As philosophical synthesis}, the irreducible-commitment thesis says a
+bootstrap never starts from nothing. \texttt{no\_empty\_bootstrap} is the formal
+shadow of that thesis: remove the seed and the run has no first state. For
+AI-assisted design the seed is the inherited substrate, and here the synthesis
+must be stated against a tempting misreading.
+
+The loop does not create itself from nothing. Compute, training data, the
+optimizer, the objective, and the evaluator are all supplied before the first
+proposal. They are the seed in the sense of Part~4: an input the system cannot
+derive inside itself, only inherit and make explicit. Unlike the prior of
+Part~4, which one can write on a line, this seed is large and often opaque. A
+trillion-token corpus and a learned reward model are still a commitment; nobody
+can fully read them. Holding the seed small, the management discipline the
+schema recommends, is hard precisely when the seed is a learned artifact.
+
+So the claim and the disclaimers, kept apart on purpose:
+\begin{itemize}
+  \item The paper claims a common seed--transition--validator schema recurs
+        across these domains, and that AI-assisted design instantiates it.
+  \item The paper does not claim the schema lets an AI bootstrap from nothing.
+        \texttt{no\_empty\_bootstrap} says the opposite: no seed, no run.
+  \item The paper does not claim the schema proves AI design must converge,
+        improve, or stay safe. \texttt{selfHosts\_of\_fixed} describes fixed
+        points if one is reached; it does not promise one is.
+\end{itemize}
+
+\subsection{Trusting trust, for learned components}
+
+One concern transfers directly. Thompson's compiler attack hides a backdoor in
+the binary that compiles the compiler, so the malicious behavior survives even
+though no source shows it \cite{thompson1984}. The fix is to break the
+self-reference from outside: compile the compiler with a second, independent
+compiler and check the results agree \cite{wheeler2005}. In the schema, the
+attack is a self-hosting state whose validator $V$ was the very component the
+attacker controlled. Self-hosting certifies reproduction, not honesty.
+
+The learned case is worse in one respect. A backdoored compiler is a fixed
+program; a diverse second compiler can in principle reproduce it. A learned
+component, model weights and a learned evaluator, has no readable source to
+double-compile. If the evaluator $V$ is itself a trained artifact inherited from
+the seed, a design can pass it while doing something its authors never intended,
+and there is no clean second $V$ to disagree. The proof-kernel discipline points
+the other way: keep $V$ small, fixed, and independently checkable, so that
+correctness rests on something a person can read rather than on a learned oracle.
+The schema does not resolve this. It locates the trust precisely, in $V$ and in
+the seed, which is where any answer will have to act.
+
+\section{The origins boundary}
+\label{sec:origins}
+
+The schema recurs in places where no one designed anything. A bacterium copies its genome; the copy must pass enough fidelity checks to function, or the lineage ends. There is a state (the cell), a transition (replication), and a validator (selection on viability). Nothing in that loop requires an author. This section walks the schema to its hardest edge, the origin of life, and states plainly what the recurrence does and does not license. Two warnings frame everything below. First, the seed-transition-validator pattern here is a \emph{structured analogy}, not a theorem; the Lean core proves facts about commitment systems, not about chemistry. Second, and more important, the recurrence of the pattern is \emph{descriptive}. It carries no inference to a designer. Section~\ref{sec:origins} rejects that inference explicitly.
+
+\begin{example}[Replication as a seeded transition]
+\label{ex:replication}
+Read $\mathsf{S}$ as the space of cell states, $\mathsf{T}$ as one round of replication-with-metabolism, and $\mathsf{V}$ as the predicate ``the daughter is viable.'' The orbit $\mathsf{run}(s_0, n)$ is $n$ generations from an ancestor $s_0$. This is the metric commitment system one abstraction up: \texttt{Credence.CommitmentSystem.toSeeded} sends the refinement operator to $\mathsf{T}$ and equality to the correctness relation $\mathsf{E}$. The biological reading replaces equality by ``equally viable,'' which is weaker, so the embedding is an illustration of the skeleton, not an instance of the theorem.
+\end{example}
+
+As a theorem, the skeleton says something narrow and exact. \texttt{SeededSystem.no\_empty\_bootstrap} states that if no seed exists, no run starts: $\neg(\exists s,\ \mathsf{Seed}\,s)$ forces $\forall s,\ \neg\,\mathsf{Seed}\,s$, and \texttt{run} has nothing to fold. \texttt{SeededSystem.selfHosts\_of\_fixed} states that a transition fixed point reproduces itself under $\mathsf{E}$, so $\mathsf{SelfHosts}\,s := \mathsf{E}\,s\,(\mathsf{T}\,s)$ holds. These are claims about an abstract state space. They do not mention molecules, fitness, or time. When we read $\mathsf{T}$ as replication we leave the proved territory and enter analogy.
+
+\subsection*{Where does the first seed come from?}
+
+The schema needs a seed. Push the replication loop backward and the question sharpens: what supplied the first replicator? Three research programs answer without invoking an agent.
+
+As a structured analogy, natural selection is the validator with no validator above it. Variation perturbs the transition; differential survival is $\mathsf{V}$; the population is the state. The loop closes on itself the way a self-hosting compiler does, and \texttt{trivialSelfHost} shows the schema admits a genuine self-reproducing fixed point with the identity transition. The point of the analogy is structural: selection certifies its own output the way a kernel certifies a proof, not by appeal to a higher court.
+
+\begin{remark}[Candidate near-seedless transitions]
+\label{rem:candidates}
+Three accounts narrow the seed toward chemistry. Eigen's hypercycle \cite{eigen1971} couples replicating molecules into a cycle that sustains itself above an error threshold; the cycle is the transition, the threshold is the validator, and the seed is a population of short templates, not an organism. Kauffman's autocatalytic sets \cite{kauffman1993} make collective self-production a generic property of a sufficiently rich chemical network: once the catalytic closure forms, the set produces itself, a chemical $\mathsf{SelfHosts}$. Szostak's protocells \cite{szostak2001} supply the missing container, a vesicle whose growth and division give selection something to act on. None of the three claims a seedless start. Each shrinks the seed to a chemical configuration that physics and chemistry can plausibly reach.
+\end{remark}
+
+So the seed does not vanish; it relocates into the substrate. This is the same move the schema makes everywhere. A self-hosting compiler hides the bootstrap binary in the substrate it was built with; the missing information moved, it did not disappear. The \texttt{no\_empty\_bootstrap} fact is the formal shadow of that relocation: you cannot run from nothing, but you can run from a seed thin enough that chemistry, not an author, supplies it. Whether the prebiotic seed is in fact reachable is an empirical question for chemistry. The schema does not settle it and does not pretend to.
+
+\subsection*{The non-sequitur, stated and rejected}
+
+A reader might run the recurrence the wrong way: the pattern looks engineered, therefore something engineered it. That inference does not follow, and we reject it.
+
+As philosophical synthesis, the recurrence of seed-transition-validator across replication, abiogenesis, and autocatalysis is a fact about \emph{description}, about the vocabulary that fits self-producing systems. A vocabulary fitting a system says nothing about the system's cause. The validator role is filled by natural selection and by error thresholds, both of which are blind. The transition role is filled by chemistry and by copying, neither of which deliberates. The seed role is filled by a molecular configuration, not an intention. Selection and chemistry supply transition and validator without an agent; Remark~\ref{rem:candidates} names concrete mechanisms for each role. The schema therefore gives intelligent-design inference no foothold. Reading design into the pattern mistakes a description of structure for evidence of a designer, which is a category error, not a discovery.
+
+The paper makes a bounded claim and refuses three larger ones. It claims: a common seed-transition-validator schema recurs across these domains, including the biological ones. It does \emph{not} claim that the schema proves all complexity shares a single origin; the domains share a description, not a derivation. It does \emph{not} claim that biology is designed; the candidate transitions in Remark~\ref{rem:candidates} are explicitly seedless of any agent. It does \emph{not} claim that emergence is solved; whether a chemical autocatalytic set is reachable under early-Earth conditions is open, and the schema is silent on it. Anderson's slogan that more is different \cite{anderson1972} marks the gap we leave open: new organization at one level is not deducible from the level below, and our skeleton describes such organization without explaining its arrival.
+
+\subsection*{What survives at the boundary}
+
+Strip the analogies and one formal residue remains. \texttt{no\_empty\_bootstrap} and \texttt{selfHosts\_of\_fixed} are about an abstract state space; they hold whether $\mathsf{T}$ is a compiler, a proof kernel, or a replicator. The biological reading borrows their shape and nothing more. The honest statement at the origins boundary is therefore modest. The seed is irreducible: every running system we examined had one, and the formal core says a run needs one. Where the seed comes from is, in the biological case, a question for chemistry, and the leading answers (\cite{eigen1971}, \cite{kauffman1993}, \cite{szostak2001}) place it in the substrate rather than in an agent. The schema points to the boundary and stops there. It does not cross into a designer, and pretending it could would betray both the mathematics and the biology.
+
+\section{Case studies and positioning}
+\label{sec:cases}
+
+Start with a compiler that has no compiler. To build the first C compiler you
+need a working C compiler, which does not yet exist. The way out is a seed: a
+smaller compiler, written in assembly or in an earlier language, good enough to
+compile the real one. Thompson's reflections on trusting trust \cite{thompson1984}
+turn this on its head. A compiler can learn to miscompile, hide the trick in its
+own binary, and pass it forward through every later self-build, so the malicious
+seed survives even after its source is removed. Wheeler's diverse
+double-compiling \cite{wheeler2005} answers with a second, independent compiler
+that validates the first by reproducing its output. The shape is fixed:
+substrate (source plus build environment), seed (a prior compiler), transition
+(compilation), validator (the diverse rebuild), and a self-host condition (the
+compiler recompiles to itself).
+
+That same shape is what the Lean core formalizes. As a theorem, the structure
+\texttt{SeededSystem} bundles a state space \texttt{S}, a seed predicate
+\texttt{Seed}, a transition \texttt{T}, a step validator \texttt{V}, and a
+correctness relation \texttt{E}. A run is iterated transition,
+\texttt{run s0 n}${} = \texttt{T}^{[n]}\, \texttt{s0}$, and a state self-hosts
+when the transition reproduces it up to correctness, $\texttt{SelfHosts}\, s :=
+\texttt{E}\, s\, (\texttt{T}\, s)$. Two facts pin the schema down. As a theorem,
+\texttt{no\_empty\_bootstrap} states that with no seed there is nothing to start
+a run from: the missing information moves into the substrate, it does not vanish.
+As a theorem, \texttt{selfHosts\_of\_fixed} states that an \texttt{E}-fixed point
+of the transition self-hosts, the compiler that recompiles to itself.
+
+The irreducible-commitment structure of Part~4 embeds as the metric instance.
+As a theorem, \texttt{Credence.CommitmentSystem.toSeeded} sends the refinement
+operator to the transition and equality to correctness; \texttt{fp\_selfHosts}
+and \texttt{deg\_selfHosts} then certify that both the fixed point and the
+degenerate absorbing element self-host. The schema is inhabited by a genuine
+self-hosting state, \texttt{trivialSelfHost}: one state, identity transition,
+equality as correctness, so \texttt{trivialSelfHost\_selfHosts} holds by
+reflexivity. Earlier parts supply the rest of the formal core: the no-ex-falso
+witness \texttt{labelled\_no\_ex\_falso}, the Curry block
+\texttt{curry\_block}, and reflection through the kernel certificates. These are
+the only rows the schema proves.
+
+\begin{table}[t]
+\centering
+\small
+\setlength{\tabcolsep}{4pt}\begin{tabular}{@{}p{0.13\linewidth}p{0.13\linewidth}p{0.13\linewidth}p{0.15\linewidth}p{0.18\linewidth}p{0.09\linewidth}@{}}
+\toprule
+Substrate & Seed & Transition & Validator & Self-host condition & Status \\
+\midrule
+Stage-0 compiler
+  & hand-written core
+  & compile
+  & test suite
+  & recompiles to itself
+  & analogy \\
+GNU/GCC
+  & prior GCC binary
+  & bootstrap build
+  & 3-stage comparison
+  & stage 2 = stage 3
+  & analogy \\
+Proof kernel
+  & trusted checker
+  & elaborate, check
+  & re-check in Lean
+  & checks its own export
+  & analogy \\
+Cred toy model
+  & \texttt{Seed} state
+  & \texttt{T} (refine)
+  & \texttt{V} step
+  & \texttt{E}\,$s$\,(\texttt{T}\,$s$)
+  & \textbf{formal} \\
+AI design loop
+  & base model + spec
+  & propose, evaluate
+  & scored evaluator
+  & passes own metric
+  & analogy \\
+Biological origin
+  & autocatalytic set
+  & replication
+  & selection
+  & set reproduces itself
+  & analogy only \\
+\bottomrule
+\end{tabular}
+\caption{The seed--transition--validator schema across six substrates. Only the
+Cred toy model is a formal theorem; the other rows are structured analogies that
+illustrate the schema, not consequences of it.}
+\label{tab:cases}
+\end{table}
+
+\Cref{tab:cases} reads down the same five columns. As a structured analogy, the
+GNU/GCC bootstrap fills them with a prior binary, a three-stage build, and the
+stage-2-equals-stage-3 fixed-point check that GCC actually runs. As a structured
+analogy, a Lean-style proof kernel reads as substrate (the elaborated terms),
+seed (a trusted checker), transition (elaborate and check), and validator (an
+independent re-check, as in Lean4Lean \cite{carneiro2024}); the self-host
+condition is that the kernel certifies its own exported proof. As a structured
+analogy, an AI design loop fits too: a base model and a specification seed the
+search, generation is the transition, and a scored evaluator validates, as in
+FunSearch \cite{romera2024}, where an LLM proposes programs that a fixed scorer
+ranks. These analogies illustrate the schema. They are not proved by the Lean
+core, and we mark each such row accordingly.
+
+The biological row is the one to read with most care. As a structured analogy,
+the origin of self-reproduction has the same five slots: an autocatalytic set as
+seed \cite{kauffman1993}, replication as transition, selection as validator, and
+a set that reproduces itself as the self-host condition, with the hypercycle
+\cite{eigen1971} and protocell synthesis \cite{szostak2001} as the concrete
+biochemistry. The schema describes the bookkeeping. It does not explain how the
+first such set arose, and it does not make the system designed. We mark this row
+analogy only.
+
+\begin{remark}[What the schema does and does not buy]
+The recurrence of one bookkeeping pattern across six substrates is a description,
+not a unification theorem. Anderson's point that more is different
+\cite{anderson1972} cuts the other way from any claim that a single schema
+explains complexity: new levels bring laws the lower level does not contain. The
+schema tracks where the opening commitment sits; it says nothing about what fills
+the slots in any particular domain.
+\end{remark}
+
+\paragraph{What the paper claims.} As philosophical synthesis: a common
+seed--transition--validator schema recurs across compiler bootstrapping, proof
+kernels, AI-assisted design, biological origins, and the Cred credence model;
+every instance carries an irreducible opening commitment that the downstream
+machinery cannot generate, because the machinery runs only after the seed is in
+place. As a theorem: the schema \texttt{SeededSystem} is inhabited and
+non-degenerate, \texttt{no\_empty\_bootstrap} and \texttt{selfHosts\_of\_fixed}
+hold, the commitment system of Part~4 embeds with both distinguished elements
+self-hosting, and the no-ex-falso witness, the Curry block, and reflection
+through the kernel certificates hold in Cred.
+
+\paragraph{What the paper does not claim.} The schema does not prove that all
+complexity shares a single origin: a shared bookkeeping pattern is not a shared
+cause, and Anderson's caution \cite{anderson1972} stands. It does not assert that
+biology is designed: the biological row is a structured analogy for where the
+seed sits, not a design inference. It does not solve emergence: the slots are
+labels, not a mechanism for how any level produces the next. It does not claim
+that an AI, a compiler, or any system can bootstrap from nothing:
+\texttt{no\_empty\_bootstrap} states the opposite, and Thompson's attack
+\cite{thompson1984} shows the seed is exactly what must be trusted or
+independently checked. Only the Cred row is a formal theorem; every other row is
+an analogy and is marked as such in \cref{tab:cases}.
+
+\section{Conclusion}
+\label{sec:conclusion}
+
+One schema, six substrates, a single formal core. Across probability, logic,
+foundations, compilers, proof kernels, AI design loops, and the origin of
+self-reproduction, the same five slots recur: a substrate, a seed, a transition,
+a validator, and a self-host condition under which the transition reproduces the
+state up to correctness. As a theorem, that schema is the Lean structure
+\texttt{SeededSystem}, inhabited by \texttt{trivialSelfHost}, constrained by
+\texttt{no\_empty\_bootstrap} and \texttt{selfHosts\_of\_fixed}, and large enough
+to embed the irreducible-commitment system of Part~4 with both its fixed point
+and its degenerate element self-hosting. As philosophical synthesis, the seed is
+irreducible: it cannot be derived inside the system it grounds, only made
+explicit, held small, and tested for self-consistency. The other rows are honest
+analogies, marked as analogies, illustrating the schema without being proved by
+it. The contribution is the schema, the one formal row that anchors it, and the
+discipline of not claiming more.
+
+\bibliographystyle{plain}
+\bibliography{../cred}
+
+\end{document}
