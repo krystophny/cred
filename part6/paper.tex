@@ -15,6 +15,8 @@
 }
 \usepackage{cleveref}
 \usepackage[margin=1in]{geometry}
+\usepackage{tikz}
+\usetikzlibrary{positioning}
 
 \newtheorem{theorem}{Theorem}[section]
 \newtheorem{lemma}[theorem]{Lemma}
@@ -224,6 +226,25 @@ goes. The theorem does not show that all complexity shares one origin, that
 biology was designed, or that a system can lift itself from nothing. It
 shows the opposite of the last: a seed is required.
 
+\begin{figure}[t]
+\centering
+\begin{tikzpicture}[>=stealth,
+  box/.style={draw, rounded corners, font=\small, minimum height=8mm, inner sep=4pt}]
+  \node[box] (seed) {seed $s_0$};
+  \node[box, right=12mm of seed] (T) {transition $T$};
+  \node[box, right=12mm of T] (V) {validator $V$};
+  \node[box, right=12mm of V] (sh) {self-host $E(s,\,Ts)$};
+  \draw[->] (seed) -- (T);
+  \draw[->] (T) -- (V);
+  \draw[->] (V) -- (sh);
+\end{tikzpicture}
+\caption{The seed--transition--validator pipeline of a \texttt{SeededSystem}. A
+run iterates $T$ from a seed; the validator $V$ gates each step; a self-hosting
+fixed point satisfies $E(s, Ts)$. There is no empty seed
+(\texttt{no\_empty\_bootstrap}).}
+\label{fig:schema}
+\end{figure}
+
 \subsection{Self-hosting}
 
 \begin{definition}[Self-hosting]
@@ -258,6 +279,18 @@ further passes change nothing observable. The schema is inhabited: the
 one-state system \texttt{trivialSelfHost} (state \texttt{Unit}, identity
 transition, equality as $E$) self-hosts by \texttt{rfl}, so self-hosting is
 not a vacuous predicate.
+
+Self-hosting is not self-justifying, and the gap between them is the hinge of the
+whole problem. Operationally, a fixed point self-hosts and the schema is
+inhabited; \texttt{selfHosting\_available} exhibits it, and it needs no axioms.
+At the meta level the matching move fails. A credence-valued certification that,
+at a self-application point, reports its own non-certification cannot take a crisp
+value: it is pinned to one half (\texttt{self\_validation\_not\_crisp}), neither
+$0$ nor $1$ (\texttt{no\_crisp\_self\_validation}). As a theorem, a system can host
+itself but cannot crisply certify itself. This is the Tarski boundary in graded
+form, and it is why the reflection of Section~\ref{sec:kernels} climbs a tower
+rather than resting at one fixed point: the operational self-host is available,
+the meta self-justification is not.
 
 \subsection{The commitment system embeds}
 
@@ -385,6 +418,20 @@ The tie to Cred is direct. As a theorem, the commitment system embeds into the s
 
 That bottom level is where reflection meets its limit. Each adjoined soundness statement is an arithmetic sentence, so the new theory is again incomplete by the same theorem that forced the first extension \cite{godel1931}. No level certifies itself at its own level: Goedel and Tarski bound same-level self-certification, and the tower only ever pushes the boundary up, never closes it. As philosophical synthesis, this is the bottleneck the whole series turns on. The trusted seed shrinks as you stratify, double-compile, and minimize the kernel, but it never reaches zero. A system that claims no commitment at the base has only hidden the base it is standing on.
 
+\paragraph{The second-incompleteness boundary is the Curry boundary.} Goedel's
+second theorem is reached through Loeb's: a theory proves its own consistency only
+by proving the derivability conditions, and that derivation runs through an
+internal conditional closed under modus ponens, conditional proof, and
+contraction. As a theorem, Cred has no such conditional. \texttt{curry\_block}
+shows no operation on credences satisfies all three, and
+\texttt{loeb\_internal\_arrow\_blocked} records that the internal-arrow form of
+the Loeb conditions is therefore impossible. So the place where a naive system
+would derive its own consistency, and on the verge of inconsistency explode, is
+exactly the place Curry is blocked. The graded reading agrees: a self-certifying
+provability value sits at the interior (\texttt{self\_validation\_not\_crisp}),
+not at certainty. The boundary of the second incompleteness theorem and the
+boundary of Curry are one boundary.
+
 \subsection{The link to Cred's aim}
 
 Cred's own no-explosion discipline is a seed of this kind, and the schema says where it sits. As a theorem, the chain-rule conditional refuses ex falso: conditioning on credence $0$ leaves the conditional unconstrained (\texttt{conditioning\_zero\_any}), so impossible evidence licenses nothing rather than everything. As a theorem, the product residuum blocks Curry: contraction is incompatible with the pinned-down implication (\texttt{prod\_resid\_no\_contraction}, \texttt{curry\_block}), so the self-reference that would explode a naive system instead has a fixed-point solution set. These results are the validator $V$ of Cred's own bootstrap. They say which steps the system will accept, and the schema makes explicit that the seed behind them, the choice to take conditioning as primitive rather than as division, is itself a commitment the formalism does not derive. The aim is to keep that seed small and stated: a kernel of accepted rules, checked, with the one unavoidable commitment in plain view rather than smuggled into the substrate.
@@ -393,6 +440,23 @@ As philosophical synthesis, a common seed-transition-validator schema recurs acr
 
 \section{The bottleneck: small seeds, large priors}
 \label{sec:bottleneck}
+
+\begin{figure}[t]
+\centering
+\begin{tikzpicture}[>=stealth,
+  big/.style={draw, rounded corners, font=\small, minimum width=30mm, minimum height=14mm},
+  smallb/.style={draw, rounded corners, font=\small, minimum width=14mm, minimum height=8mm}]
+  \node[big] (prior) {complex prior system};
+  \node[smallb, right=16mm of prior] (seed) {seed};
+  \node[big, right=16mm of seed] (host) {complex self-host};
+  \draw[->] (prior) -- node[above, font=\footnotesize] {compress} (seed);
+  \draw[->] (seed) -- node[above, font=\footnotesize] {bootstrap} (host);
+\end{tikzpicture}
+\caption{The bottleneck. A large prior system produces a small seed, which
+bootstraps a large self-hosting system. Seed minimization is not origin
+minimization: the small artifact still came from somewhere large.}
+\label{fig:bottleneck}
+\end{figure}
 
 A self-hosting compiler ships as a few hundred kilobytes of source. You read it
 in an afternoon. The validator is small, the seed is small, the transition rule
@@ -790,7 +854,9 @@ Biological origin
 \end{tabular}
 \caption{The seed--transition--validator schema across six substrates. Only the
 Cred toy model is a formal theorem; the other rows are structured analogies that
-illustrate the schema, not consequences of it.}
+illustrate the schema, not consequences of it. The proof-kernel row is the meta
+case: its self-host is bounded by Goedel and Tarski, the checker cannot certify
+its own soundness at its own level, unlike the compiler's operational self-host.}
 \label{tab:cases}
 \end{table}
 
