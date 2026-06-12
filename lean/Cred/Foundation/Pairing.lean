@@ -214,6 +214,35 @@ theorem pairGraph_represents (a b c : Nat) (env : natModel.Assignment) :
       c = Nat.pair a b := by
   rw [pairGraph_eval_one_iff, eval_numeral, eval_numeral, eval_numeral]
 
+/-! ## Unpairing, read off the pairing graph
+
+`Nat.unpair` is defined through `sqrt`, which does not arithmetize directly. But
+its graph is the pairing graph read backward: `(x, y)` unpairs `z` iff
+`z = Nat.pair x y`. So the same `pairGraph` formula represents unpairing, using
+the pairing bijection rather than any square-root arithmetic. -/
+
+/-- The unpairing graph: `pairGraph` with the pair argument in the output slot. -/
+def unpairGraph (z x y : ArithQTerm) : ArithQFormula := pairGraph x y z
+
+/-- `c = Nat.pair a b` iff `(a, b)` is the unpairing of `c`: the pairing
+    bijection. -/
+theorem pair_eq_iff_unpair (a b c : Nat) :
+    c = Nat.pair a b ↔ Nat.unpair c = (a, b) := by
+  constructor
+  · intro h; rw [h, Nat.unpair_pair]
+  · intro h
+    have := Nat.pair_unpair c
+    rw [h] at this
+    exact this.symm
+
+/-- Numeral-level representability of unpairing: the graph at numerals is
+    designated exactly when `(a, b)` is `Nat.unpair c`. -/
+theorem unpairGraph_represents (a b c : Nat) (env : natModel.Assignment) :
+    natModel.evalFormula env
+        (unpairGraph (numeral c) (numeral a) (numeral b)) = 1 ↔
+      Nat.unpair c = (a, b) := by
+  rw [unpairGraph, pairGraph_represents, pair_eq_iff_unpair]
+
 end arithQ
 end Foundation
 end Cred
