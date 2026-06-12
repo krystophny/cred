@@ -8,7 +8,7 @@ Cred is two axes plus an interface, machine-checked in Lean 4.
 
 This repo contains:
 - a Lean 4 formalization with zero `sorry` (`lean/`)
-- three papers aligned with the Lean source (`part1/`, `part2/`, `part3/`)
+- six papers aligned with the Lean source (`part1/` through `part6/`)
 - a foundations layer: crisp recovery, fixed-point solution sets, graded comprehension, and labelled external conditioning
 
 ## Architecture
@@ -104,6 +104,10 @@ Each ingredient has its own literature: paraconsistency (Priest 1979; Carnielli 
 - `part1/`: Part 1 paper: congruence classification of the product De Morgan triplet (axis B)
 - `part2/`: Part 2 paper: chain-rule conditioning as a bridge between probability and many-valued logic (the interface; self-contained)
 - `part3/`: Part 3 paper: paradox without explosion, crisp fragments, solution sets, and external conditioning
+- `part4/`: Part 4 paper: the irreducible commitment (prior, seed, supplied conditioning)
+- `part5/`: Part 5 paper: a didactic conceptual guide and glossary
+- `part6/`: Part 6 paper: universal bootstrapping and seeded self-hosting
+- `docs/`: program milestones, trusted base, and architecture decision
 
 ## Build
 
@@ -112,7 +116,12 @@ cd lean && lake build
 cd part1 && latexmk -pdf -interaction=nonstopmode -halt-on-error paper.tex
 cd part2 && latexmk -pdf -interaction=nonstopmode -halt-on-error paper.tex
 cd part3 && latexmk -pdf -interaction=nonstopmode -halt-on-error paper.tex
+cd part4 && latexmk -pdf -interaction=nonstopmode -halt-on-error paper.tex
+cd part5 && latexmk -pdf -interaction=nonstopmode -halt-on-error paper.tex
+cd part6 && latexmk -pdf -interaction=nonstopmode -halt-on-error paper.tex
 ```
+
+The `Makefile` builds everything: `make all` (lean, part1 through part6).
 
 Toolchain: Lean 4.16.0 + Mathlib 4.16.0.
 
