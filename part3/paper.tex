@@ -1,8 +1,10 @@
 % Paradox Without Explosion
-% Part 3: Crisp Fragments, Solution Sets, and External Conditioning
+% Part 3: Crisp Fragments, Solution Sets, Graded Comprehension, and
+% External Conditioning
 %
 % References to Lean formalization: lean/Cred/Bridge, lean/Cred/Fixpoint.lean,
-% lean/Cred/Predicate.lean, lean/Cred/Threshold.lean
+% lean/Cred/Predicate.lean, lean/Cred/Threshold.lean, lean/Cred/Sequent.lean,
+% lean/Cred/Foundation
 
 \documentclass[11pt,a4paper]{article}
 
@@ -10,18 +12,24 @@
 \usepackage{mathtools}
 \usepackage{enumitem}
 \usepackage{booktabs}
+\usepackage{caption}
 \usepackage{hyperref}
 \hypersetup{
     colorlinks=true,
     linkcolor=blue,
     citecolor=blue,
     urlcolor=blue,
-    pdfauthor={Anonymous},
+    pdfauthor={Christopher Albert},
     pdftitle={Paradox Without Explosion}
 }
 \usepackage{cleveref}
 \usepackage[margin=1in]{geometry}
+\emergencystretch=3em
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta,positioning,shapes}
+\usepackage{graphicx}
 
+% Theorem environments
 \newtheorem{theorem}{Theorem}[section]
 \newtheorem{lemma}[theorem]{Lemma}
 \newtheorem{proposition}[theorem]{Proposition}
@@ -30,19 +38,28 @@
 \newtheorem{example}[theorem]{Example}
 \newtheorem{remark}[theorem]{Remark}
 
+% Custom commands
 \newcommand{\cred}{\mathsf{cred}}
-\newcommand{\Cond}{\mathsf{Cond}}
-\newcommand{\Sol}{\mathsf{Sol}}
 \newcommand{\negc}{\mathord{\sim}}
 \newcommand{\conjc}{\otimes}
 \newcommand{\disjc}{\sqcup}
+\newcommand{\Cond}{\mathsf{Cond}}
+\newcommand{\Sol}{\mathsf{Sol}}
+\newcommand{\condc}[2]{({#1} \mid {#2})}
 \newcommand{\Real}{\mathbb{R}}
+\newcommand{\Nat}{\mathbb{N}}
 \newcommand{\Bool}{\mathbb{B}}
+\newcommand{\evalc}[2]{[\![ {#2} ]\!]_{#1}}
+\newcommand{\pair}{\operatorname{pair}}
+\newcommand{\unpair}{\operatorname{unpair}}
 
-\title{\textbf{Paradox Without Explosion}\\[0.5em]
-\large Crisp Fragments, Solution Sets, and External Conditioning}
+\title{Paradox Without Explosion:\\
+Crisp Fragments, Solution Sets, Graded Comprehension,\\
+and External Conditioning}
 
-\author{Anonymous for blind review}
+\author{Christopher Albert\\
+\small Institute for Theoretical and Computational Physics\\
+\small Graz University of Technology}
 \date{June 2026}
 
 \begin{document}
@@ -50,25 +67,39 @@
 \maketitle
 
 \begin{abstract}
-The credence algebra separates three operations that are often collapsed:
-truth-value operations, consequence, and conditioning.
-Its value algebra is the product De Morgan triplet on $[0,1]$:
-$\negc c=1-c$, $a\conjc b=ab$, and
-$a\disjc b=a+b-ab$.
-Conditioning is the external admissibility relation
-$\Cond(j,e)=\{c\in[0,1]:ce=j\}$.
-This paper studies the foundations layer built from that separation.
-Classical logic embeds exactly in the crisp fragment $\{0,1\}$, except that
-empty antecedents give underdetermined conditioning rather than vacuous truth.
-Self-reference is classified by solution sets: the liar and Russell equations
-have the singleton solution $\{\tfrac12\}$, the truth-teller has all of
-$[0,1]$, and Curry has positive solutions only after an internal product
-residuum has been added.
-The Curry block theorem proves that modus ponens, conditional proof, and
-contraction have no common total carrier on $[0,1]$.
-The result is a local foundations program: paradoxes become equations or
-admissibility failures, while classical proof survives on the crisp fragment.
-The wider setting, in which this opening commitment is seen as irreducible across probability, logic, and foundations, is developed in Part~4.
+We study the foundations layer of the credence algebra: values in
+$[0,1]$ with negation $\negc c = 1 - c$, product conjunction
+$a \conjc b = ab$, the De Morgan dual disjunction
+$a \disjc b = a + b - ab$, and \emph{external} conditioning given by the
+admissible set $\Cond(j,e) = \{c \in [0,1] : c\,e = j\}$ of the chain
+rule.
+Classical logic embeds exactly in the crisp fragment $\{0,1\}$;
+the unique divergence is the empty antecedent, where conditioning is
+underdetermined rather than vacuously true.
+Self-reference is classified by solution sets: the liar and the Russell
+scalar have the singleton $\{\tfrac12\}$, the truth-teller has all of
+$[0,1]$ (the same set as zero-evidence conditioning), and Curry
+equations acquire the solution $\sqrt b$ only after a product residuum
+is added.
+The Curry block theorem proves that no total operation on $[0,1]$
+carries modus ponens, conditional proof, and contraction together;
+this is why the language has no internal conditional.
+Threshold consequence $\Gamma \models_t \varphi$ has sharp bounds:
+explosion has a countermodel exactly for $0 < t \leq \tfrac12$, and
+excluded middle holds exactly for $t \leq \tfrac34$.
+A labelled sequent calculus with external conditioning side judgments
+is sound for these relations and derives no ex falso.
+On top sits an arithmetic $\Sigma_1$ layer: a standard model of
+Robinson~$Q$ in which every axiom is certain, $\Sigma_1$ witness
+completeness, and a full arithmetization chain (pairing, modulo,
+G\"odel $\beta$, sequence access) ending in an explicit object formula
+that represents a course-of-values recursive tree predicate.
+The second-incompleteness boundary is structural: the internal L\"ob
+arrow would need exactly the package the Curry block excludes.
+All results are machine-checked in Lean~4 with Mathlib.
+The wider setting, in which this opening commitment is seen as
+irreducible across probability, logic, and foundations, is developed
+in Part~4.
 \end{abstract}
 
 %=============================================================================
@@ -76,708 +107,1660 @@ The wider setting, in which this opening commitment is seen as irreducible acros
 \label{sec:intro}
 %=============================================================================
 
-Russell's paradox asks for a set $R$ such that
+Russell's paradox asks for a set $R$ with
+$R \in R \Leftrightarrow R \notin R$.
+The classical contradiction comes from forcing the membership claim to
+be true or false.
+If instead the claim carries a credence $c \in [0,1]$ and negation is
+the complement $\negc c = 1 - c$, the same self-reference is one scalar
+equation,
 \[
-  R\in R \quad\Longleftrightarrow\quad R\notin R.
+  c = 1 - c,
 \]
-The classical contradiction comes from forcing the left side to be either
-true or false.
-In the credence algebra, the same self-reference yields one scalar equation.
-If $c$ is the credence of $R\in R$, then
+with the unique solution $c = \tfrac12$ (\Cref{lem:neg-fixed}).
+Nothing explodes: the equation has a solution, the solution is unique,
+and no unrelated sentence inherits any value from it.
+
+This calculation is the entry point to a larger separation, developed
+in Parts~1 and~2 of this series~\cite{part1,part2} and pushed here into
+foundations.
+The value algebra is the product De Morgan
+triplet~\cite{klement2000,hajek1998} on $[0,1]$:
 \[
-  c = 1-c,
+  \negc c = 1 - c, \qquad
+  a \conjc b = ab, \qquad
+  a \disjc b = \negc(\negc a \conjc \negc b) = a + b - ab.
 \]
-so $c=\tfrac12$.
-Nothing explodes.
-The equation has a solution, and the solution is unique.
-
-This small calculation is not the whole theory.
-It is the first test of a larger separation.
-The algebra of values is
+Conditioning is not a connective of the object language.
+It is the admissible set of the chain rule,
 \[
-  \negc c=1-c,\qquad
-  a\conjc b=ab,\qquad
-  a\disjc b=1-(1-a)(1-b)=a+b-ab .
+  \Cond(j, e) = \{c \in [0,1] : c\,e = j\},
 \]
-Conditioning is not a binary connective in the object language.
-It is the admissibility relation
+following the primitive-conditioning tradition of
+R\'enyi~\cite{renyi1955}, Popper~\cite{popper1959}, and
+de Finetti~\cite{definetti1936}.
+For $e > 0$ and $j \leq e$ this set is the singleton $\{j/e\}$; for
+$e = j = 0$ it is all of $[0,1]$; for $j > e$ it is empty
+(\Cref{thm:cond-trichotomy}).
+Impossible evidence never licenses an arbitrary conclusion, because the
+equation $c \cdot 0 = 0$ constrains nothing.
+
+This paper proves what remains of classical foundations once values,
+consequence, and conditioning are kept apart.
+The results form five groups.
+
+\textbf{Crisp fragment} (\Cref{sec:crisp}).
+The Boolean embedding $\mathsf{false} \mapsto 0$,
+$\mathsf{true} \mapsto 1$ is a homomorphism, formula evaluation
+commutes with it, and classical, certainty, and positivity consequence
+coincide on crisp valuations
+(\Cref{thm:crisp-eval,thm:crisp-embedding,thm:crisp-coincide}).
+The single divergence is the empty antecedent: classical logic assigns
+vacuous truth, the chain rule returns the whole interval
+(\Cref{thm:material-divergence}).
+
+\textbf{Solution sets} (\Cref{sec:solutions}).
+A self-reference pattern is an operator $\Phi : [0,1] \to [0,1]$ and
+its meaning is the fixed-point set $\Sol(\Phi)$.
+The liar and the Russell scalar give $\{\tfrac12\}$, the truth-teller
+gives $[0,1] = \Cond(0,0)$, and Curry equations are solvable
+(by $\sqrt b$) only after an internal residuum is added
+(\Cref{thm:liar-sol,thm:truth-teller,thm:russell,thm:curry-sqrt}).
+
+\textbf{Graded comprehension} (\Cref{sec:comprehension}).
+Graded predicates with pointwise operations and $\inf$/$\sup$
+quantifiers satisfy De Morgan duality and recover classical
+quantification on crisp predicates
+(\Cref{thm:quant-duality,thm:crisp-quant}).
+
+\textbf{The Curry block and the proof layer}
+(\Cref{sec:curry,sec:proof}).
+Modus ponens and conditional proof force any internal conditional to be
+the product residuum on positive antecedents
+(\Cref{thm:resid-unique}), and the residuum violates contraction
+(\Cref{prop:no-contraction}); hence no total conditional carries all
+three (\Cref{thm:curry-block}).
+Threshold consequence has the sharp bounds $t \leq \tfrac12$
+(explosion countermodel) and $t \leq \tfrac34$ (excluded middle), and a
+labelled calculus with external conditioning judgments is sound and
+non-explosive
+(\Cref{thm:explosion-sharp,thm:em-sharp,thm:seq-sound,thm:no-ex-falso}).
+
+\textbf{The arithmetic $\Sigma_1$ layer} (\Cref{sec:arith}).
+A standard model of Robinson~$Q$ lives inside the graded semantics:
+crisp equality, quantifiers as genuine $\inf$/$\sup$ over $\Nat$, every
+axiom certain, and $\bot$ not provable at certainty
+(\Cref{thm:axioms-one,thm:q-con}).
+Quantifier-free formulas evaluate crisply, $\Sigma_1$ truths have
+numeral witnesses (\Cref{thm:sigma1}), and the classical
+arithmetization chain~\cite{godel1931,fflfoundation} is carried out in
+full: pairing, modulo, G\"odel's $\beta$-function, single-code sequence
+access, and an explicit object formula representing a course-of-values
+recursive tree predicate
+(\Cref{thm:pair-rep,thm:beta-rep,thm:tree-beta,thm:tree-rep}).
+The boundary of the program is \Cref{sec:loeb}: the second
+incompleteness theorem does not internalize, because the L\"ob arrow
+would need the exact package the Curry block excludes
+(\Cref{thm:no-loeb}).
+
+All theorems are machine-checked in Lean~4 with Mathlib; each result
+cites its Lean name once.
+\Cref{app:lean} maps the development.
+The claim is deliberately local: the framework resolves certain
+self-reference equations and keeps classical proof on the crisp
+fragment.
+It does not solve G\"odel incompleteness, replace
+Kripke~\cite{kripke1975} or fuzzy set theory~\cite{takeuti1984}, or
+select a canonical posterior at zero evidence.
+
+%=============================================================================
+\section{The Value Algebra and External Conditioning}
+\label{sec:algebra}
+%=============================================================================
+
+\begin{definition}[Credence]
+\label{def:credence}
+A \emph{credence} is a real number $c \in [0,1]$.
+\end{definition}
+
+\begin{definition}[Operations]
+\label{def:operations}
+For credences $a, b, c$:
 \[
-  \Cond(j,e)=\{c\in[0,1]:c e=j\}.
+  \negc c = 1 - c, \qquad
+  a \conjc b = a \cdot b, \qquad
+  a \disjc b = \negc(\negc a \conjc \negc b) = a + b - ab.
 \]
-For $e>0$ this is the singleton $\{j/e\}$, provided $j\le e$.
-For $e=0=j$ it is all of $[0,1]$.
-For $e=0<j$ it is empty.
-Thus false or impossible evidence never licenses arbitrary conclusions.
-The chain rule imposes no conditional value at zero evidence.
+\end{definition}
 
-Parts~1--2 proved the algebraic and semantic base.
-Part~1 classified the product De Morgan triplet and its collapses.
-Part~2 added valuations, LP/K3 bridges, update rules, and the
-truth-functional no-go theorem for conditioning.
-This paper asks what remains of classical foundations once those pieces are
-kept apart.
+\begin{proposition}[Triplet identities]
+\label{prop:triplet}
+Negation is involutive, $\conjc$ and $\disjc$ are commutative and
+associative with identities $1$ and $0$ and annihilators $0$ and $1$,
+and the De Morgan laws hold:
+$\negc(a \conjc b) = \negc a \disjc \negc b$ and
+$\negc(a \disjc b) = \negc a \conjc \negc b$.
+The product is idempotent only at the boundary: $c \conjc c = c$ iff
+$c \in \{0,1\}$.
+\end{proposition}
+\begin{proof}
+All identities are polynomial identities on $[0,1]$; for idempotence,
+$c^2 = c$ iff $c(c-1) = 0$.
+(Machine-checked, \texttt{neg\_neg} through \texttt{de\_morgan\_disj},
+\texttt{conj\_idempotent\_iff}.)
+\end{proof}
 
-The answer has four parts.
-First, the crisp fragment $\{0,1\}$ recovers classical propositional reasoning.
-The only divergence is conditioning on empty evidence.
-Second, liar, truth-teller, Russell, and Curry patterns are best compared by
-their solution sets.
-Third, graded comprehension can state Russell-style self-membership without
-making every sentence derivable.
-Fourth, Curry's paradox is blocked at the architectural level: deriving it
-requires a total internal conditional with structural rules that the algebra
-does not supply.
+The fixed-point structure of negation drives everything that follows.
 
-This is a modest claim.
-The paper does not replace Kripke fixed points, revision theory, fuzzy set
-theory, paraconsistent set theory, or Pavelka proof theory.
-It identifies the interface at which Cred meets those traditions.
-The Lean development records the interface as theorem statements rather than
-as metaphors.
+\begin{lemma}[Unique negation fixed point]
+\label{lem:neg-fixed}
+For a credence $c$:
+\[
+  \negc c = c \quad\Longleftrightarrow\quad c = \tfrac12 .
+\]
+\end{lemma}
+\begin{proof}
+If $1 - c = c$ then $2c = 1$, so $c = \tfrac12$.
+Conversely $1 - \tfrac12 = \tfrac12$.
+(Machine-checked, \texttt{liar\_fixed\_point},
+\texttt{neg\_fixed\_point\_unique}.)
+\end{proof}
+
+\begin{figure}[ht]
+\centering
+\begin{tikzpicture}[scale=4.2]
+  % axes
+  \draw[->] (-0.03,0) -- (1.12,0) node[right] {$c$};
+  \draw[->] (0,-0.03) -- (0,1.12);
+  \foreach \x/\l in {0.5/\tfrac12, 1/1} {
+    \draw (\x,0.012) -- (\x,-0.012) node[below] {$\l$};
+    \draw (0.012,\x) -- (-0.012,\x) node[left] {$\l$};
+  }
+  \node[below left] at (0,0) {$0$};
+  % identity
+  \draw[dashed] (0,0) -- (1,1) node[above right] {$y = c$};
+  % negation
+  \draw[thick] (0,1) -- (1,0);
+  \node[above right] at (0.72,0.34) {$y = \negc c = 1 - c$};
+  % fixed point
+  \fill (0.5,0.5) circle (0.012);
+  \draw[dotted] (0.5,0) -- (0.5,0.5) -- (0,0.5);
+  \node[above right] at (0.5,0.52) {$\bigl(\tfrac12,\tfrac12\bigr)$};
+\end{tikzpicture}
+\caption{The negation map $c \mapsto \negc c = 1 - c$ on $[0,1]$ and
+the identity.
+The graphs cross once, at $c = \tfrac12$: the unique solution of the
+liar equation $c = \negc c$ (\Cref{lem:neg-fixed}).
+On $\{0,1\}$ the two graphs are disjoint, which is the classical liar
+contradiction (\Cref{thm:liar-sol}).}
+\label{fig:negation}
+\end{figure}
+
+\begin{definition}[Admissible conditioning set]
+\label{def:cond}
+For credences $j$ (joint) and $e$ (evidence), the \emph{admissible set}
+of conditional credences is the solution set of the chain rule
+$\condc{A}{B} \conjc \cred(B) = \cred(A \wedge B)$:
+\[
+  \Cond(j, e) = \{c \in [0,1] : c \conjc e = j\}.
+\]
+\end{definition}
+
+The joint $j$ is supplied as data; it is not computed from marginals.
+There is no formula constructor for $\condc{A}{B}$: conditioning is a
+relation between values, external to the object language.
+
+\begin{theorem}[Trichotomy of conditioning]
+\label{thm:cond-trichotomy}
+For all credences $j, e$:
+\begin{enumerate}[label=\textup{(\roman*)},nosep]
+\item if $e > 0$ and $j \leq e$, then $\Cond(j,e) = \{j/e\}$;
+\item $\Cond(0,0) = [0,1]$;
+\item $\Cond(j,e) \neq \varnothing$ iff $j \leq e$; in particular
+  $\Cond(j,0) = \varnothing$ for $j > 0$.
+\end{enumerate}
+\end{theorem}
+\begin{proof}
+(i) For $e > 0$ the equation $ce = j$ has the unique real solution
+$c = j/e$, and $0 \leq j/e \leq 1$ because $0 \leq j \leq e$.
+(ii) $c \cdot 0 = 0$ holds for every $c$.
+(iii) If $ce = j$ then $j = ce \leq 1 \cdot e = e$.
+Conversely, for $e > 0$ take $c = j/e$; for $e = 0$ the bound forces
+$j = 0$ and $c = 0$ works.
+(Machine-checked, \texttt{cond\_singleton\_of\_pos},
+\texttt{cond\_zero\_zero\_univ}, \texttt{cond\_nonempty\_iff}.)
+\end{proof}
+
+\begin{remark}[No ex falso by design]
+\label{rem:no-ex-falso-design}
+Residuated implications of t-norm logic force $0 \to b = 1$ for all
+$b$~\cite{hajek1998}: ex falso is built into residuation.
+Case (ii) of \Cref{thm:cond-trichotomy} replaces that convention by
+underdetermination: at zero evidence every conditional value is
+admissible and none is selected.
+Read as imprecise probability, $\Cond(j,e)$ is a credal set of
+posteriors.
+\end{remark}
 
 %=============================================================================
 \section{The Crisp Fragment}
 \label{sec:crisp}
 %=============================================================================
 
-Classical values embed into credences by the map
+Formulas are built from atoms by $\neg$, $\wedge$, $\vee$ and evaluated
+by
 \[
-  \mathsf{false}\mapsto 0,\qquad \mathsf{true}\mapsto 1.
+  \evalc{v}{\neg\varphi} = \negc \evalc{v}{\varphi}, \qquad
+  \evalc{v}{\varphi \wedge \psi} =
+    \evalc{v}{\varphi} \conjc \evalc{v}{\psi}, \qquad
+  \evalc{v}{\varphi \vee \psi} =
+    \evalc{v}{\varphi} \disjc \evalc{v}{\psi},
 \]
-On those two values the product De Morgan operations are Boolean:
-\[
-  1(1)=1,\quad 1(0)=0,\quad 0(0)=0,
-\]
-and
-\[
-  a\disjc b=a+b-ab
-\]
-is Boolean disjunction when $a,b\in\{0,1\}$.
-Negation is Boolean complementation.
+for a valuation $v$ of atoms into credences.
+A valuation (or predicate) is \emph{crisp} when its values lie in
+$\{0,1\}$.
 
-Lean names the embedding theorem \texttt{crisp\_eval\_eq}.
-For every Boolean valuation $v$ and formula $\varphi$, evaluating
-$\varphi$ classically and then embedding the result gives the same credence
-as evaluating $\varphi$ directly in Cred under the embedded valuation.
-The theorem \texttt{crisp\_embedding} states the corresponding validity
-claim.
+\begin{definition}[Boolean embedding]
+\label{def:embed}
+$\iota : \Bool \to [0,1]$ with $\iota(\mathsf{false}) = 0$ and
+$\iota(\mathsf{true}) = 1$.
+\end{definition}
 
-The consequence layer agrees on the same fragment.
-Certainty consequence requires conclusion value $1$ whenever all premises
-have value $1$.
-Positivity consequence requires a positive conclusion whenever all premises
-are positive.
-On crisp valuations, positive means true.
-Lean records this in three theorems:
-\begin{itemize}[nosep]
-\item \texttt{crisp\_certainty\_iff\_classical},
-\item \texttt{crisp\_positivity\_iff\_certainty},
-\item \texttt{crisp\_positivity\_iff\_classical}.
-\end{itemize}
-
-Conditioning is where the agreement stops.
-With evidence $1$, the admissible conditional is forced:
-\[
-  \Cond(j,1)=\{j\}.
-\]
-With evidence $0$ and joint $0$, every conditional value is admissible:
-\[
-  \Cond(0,0)=[0,1].
-\]
-Material implication picks the value true for every false antecedent.
-Cred makes no such selection.
-Four Lean theorems isolate that boundary:
-\begin{itemize}[nosep]
-\item \texttt{material\_divergence},
-\item \texttt{vacuous\_truth\_admissible},
-\item \texttt{empty\_antecedent\_underdetermined},
-\item \texttt{cond\_underdetermined\_iff}.
-\end{itemize}
-
-\begin{proposition}[Crisp conservativity with one boundary]
-On the formulas built from atoms, negation, conjunction, and disjunction,
-the crisp Cred fragment is classical.
-For conditionals, the classical truth table and Cred agree at true evidence.
-At false evidence with zero joint, Cred returns the whole interval
-$[0,1]$.
+\begin{proposition}[Embedding is a homomorphism]
+\label{prop:embed-hom}
+For all $b, b_1, b_2 \in \Bool$:
+$\negc \iota(b) = \iota(\lnot b)$,
+$\iota(b_1) \conjc \iota(b_2) = \iota(b_1 \wedge b_2)$, and
+$\iota(b_1) \disjc \iota(b_2) = \iota(b_1 \vee b_2)$.
 \end{proposition}
+\begin{proof}
+Four cases each: e.g.\ $1 \conjc 1 = 1$, $1 \conjc 0 = 0 \conjc 0 = 0$,
+and $a \disjc b = a + b - ab \in \{0,1\}$ matches Boolean disjunction
+on $\{0,1\}$.
+(Machine-checked, \texttt{embed\_neg}, \texttt{embed\_conj},
+\texttt{embed\_disj}.)
+\end{proof}
 
-\begin{remark}
-This is the first reason to keep implication and conditioning apart.
-Classical proof by cases, double-negation elimination, excluded middle on
-crisp values, and non-contradiction on crisp values survive.
-The empty antecedent receives no extra theorem.
-\end{remark}
+\begin{theorem}[Evaluation commutes with the embedding]
+\label{thm:crisp-eval}
+For every Boolean valuation $v$ and formula $\varphi$,
+\[
+  \evalc{\iota \circ v}{\varphi} = \iota\bigl(\evalc{v}{\varphi}^{\Bool}\bigr),
+\]
+where $\evalc{v}{\cdot}^{\Bool}$ is classical two-valued evaluation.
+In particular every crisp valuation gives every formula a crisp value.
+\end{theorem}
+\begin{proof}
+Induction on $\varphi$; each step is one clause of
+\Cref{prop:embed-hom}.
+(Machine-checked, \texttt{crisp\_eval\_eq}, \texttt{evalCred\_crisp}.)
+\end{proof}
+
+\begin{theorem}[Crisp embedding of validity]
+\label{thm:crisp-embedding}
+A formula $\varphi$ is a classical tautology iff
+$\evalc{w}{\varphi} = 1$ for every crisp valuation $w$.
+\end{theorem}
+\begin{proof}
+Every crisp valuation factors as $\iota \circ v$ for a Boolean $v$;
+apply \Cref{thm:crisp-eval} in both directions and use that
+$\iota(b) = 1$ iff $b = \mathsf{true}$.
+(Machine-checked, \texttt{crisp\_embedding},
+\texttt{crisp\_exists\_bool}.)
+\end{proof}
+
+Three consequence relations restrict to the crisp fragment:
+\emph{classical} consequence (Boolean valuations, truth in and out),
+\emph{certainty} consequence ($\evalc{w}{p} = 1$ for all premises
+forces $\evalc{w}{\varphi} = 1$), and \emph{positivity} consequence
+($\evalc{w}{p} > 0$ for all premises forces
+$\evalc{w}{\varphi} > 0$).
+
+\begin{theorem}[Consequence coincidence on crisp valuations]
+\label{thm:crisp-coincide}
+On crisp valuations the three relations coincide:
+positivity consequence holds iff certainty consequence holds iff
+classical consequence holds.
+\end{theorem}
+\begin{proof}
+On a crisp value $c$, positivity and certainty are the same condition:
+$0 < c$ iff $c = 1$.
+This identifies crisp positivity with crisp certainty, and
+\Cref{thm:crisp-eval} translates crisp certainty into classical
+consequence.
+(Machine-checked, \texttt{crisp\_positivity\_iff\_certainty},
+\texttt{crisp\_certainty\_iff\_classical},
+\texttt{crisp\_positivity\_iff\_classical}.)
+\end{proof}
+
+\begin{proposition}[Crisp proof patterns]
+\label{prop:crisp-patterns}
+For every crisp valuation $w$ and formula $\varphi$:
+$\evalc{w}{\varphi \vee \neg\varphi} = 1$,
+$\evalc{w}{\varphi \wedge \neg\varphi} = 0$, and
+$\evalc{w}{\neg\neg\varphi} = \evalc{w}{\varphi}$ (the last on all
+valuations).
+In the interior, excluded middle degrades but stays bounded:
+$(c \disjc \negc c) = 1 - c(1-c) \geq \tfrac34$ for all
+$c \in [0,1]$.
+\end{proposition}
+\begin{proof}
+For crisp $c$, $c \disjc \negc c = 1 - c(1-c) = 1$ and
+$c \conjc \negc c = c(1-c) = 0$.
+Double negation is involutivity.
+For the bound, $c(1-c) \leq \tfrac14$ with maximum at $c = \tfrac12$,
+since $\tfrac14 - c(1-c) = (c - \tfrac12)^2 \geq 0$.
+(Machine-checked, \texttt{crisp\_excluded\_middle\_formula},
+\texttt{crisp\_non\_contradiction\_formula},
+\texttt{double\_neg\_elim\_formula},
+\texttt{certainty\_ge\_three\_quarters}.)
+\end{proof}
+
+\subsection{The divergence: conditioning at the empty antecedent}
+
+On crisp values the material conditional, read off the (joint,
+evidence) pair, is $j \vee \lnot e$.
+Coherence means a true joint forces true evidence ($j \leq e$).
+
+\begin{theorem}[Material divergence]
+\label{thm:material-divergence}
+Let $j, e \in \Bool$ be coherent.
+Then
+\[
+  \Cond(\iota(j), \iota(e)) = \{\iota(j \vee \lnot e)\}
+  \quad\Longleftrightarrow\quad e = \mathsf{true}.
+\]
+At $e = \mathsf{false}$ (hence $j = \mathsf{false}$ by coherence) the
+admissible set is all of $[0,1]$, while the material conditional picks
+the single value $1$.
+\end{theorem}
+\begin{proof}
+If $e = \mathsf{true}$ then $\Cond(\iota(j), 1) = \{\iota(j)\}$ by
+\Cref{thm:cond-trichotomy}(i), and
+$j \vee \lnot e = j$.
+If $e = \mathsf{false}$ then coherence gives $j = \mathsf{false}$ and
+$\Cond(0,0) = [0,1]$ by \Cref{thm:cond-trichotomy}(ii), which is not a
+singleton since $0 \neq 1$.
+(Machine-checked, \texttt{material\_divergence},
+\texttt{vacuous\_truth\_admissible}.)
+\end{proof}
+
+\begin{proposition}[Exact underdetermination]
+\label{prop:underdet}
+For $j, e \in \Bool$:
+$\Cond(\iota(j), \iota(e)) = [0,1]$ iff
+$j = e = \mathsf{false}$.
+\end{proposition}
+\begin{proof}
+If $e = \mathsf{true}$ the set is a singleton; if $e = \mathsf{false}$
+and $j = \mathsf{true}$ it is empty
+(\Cref{thm:cond-trichotomy}(iii)); the remaining case is
+\Cref{thm:cond-trichotomy}(ii).
+(Machine-checked, \texttt{cond\_underdetermined\_iff}.)
+\end{proof}
+
+\begin{figure}[ht]
+\centering
+\begin{tikzpicture}[
+  >=Stealth,
+  lvl/.style={minimum height=0.8cm},
+  node distance=1.6cm
+]
+  % level 1: the interval with its three classes
+  \draw[very thick] (0,0) -- (6,0);
+  \fill (0,0) circle (0.07);
+  \fill (6,0) circle (0.07);
+  \node[below] at (0,-0.1) {$\{0\}$};
+  \node[below] at (3,-0.1) {$(0,1)$};
+  \node[below] at (6,-0.1) {$\{1\}$};
+  \node[left=0.4cm] at (0,0) {$[0,1]$:};
+  \draw (1.0,0.12) -- (1.0,-0.12);
+  \draw (5.0,0.12) -- (5.0,-0.12);
+  % level 2: Kleene lattice
+  \begin{scope}[yshift=-2.2cm]
+    \fill (0,0) circle (0.07) node[below=2pt] {$0$};
+    \fill (3,0) circle (0.07) node[below=2pt] {$\tfrac12$};
+    \fill (6,0) circle (0.07) node[below=2pt] {$1$};
+    \node[left=0.4cm] at (0,0) {$\{0,\tfrac12,1\}$:};
+  \end{scope}
+  % level 3: Booleans
+  \begin{scope}[yshift=-4.4cm]
+    \fill (2,0) circle (0.07) node[below=2pt] {$0$};
+    \fill (4,0) circle (0.07) node[below=2pt] {$1$};
+    \node[left=2.4cm] at (0,0) {$\{0,1\}$:};
+  \end{scope}
+  % collapse arrows
+  \draw[->] (0,-0.45) -- (0,-1.75);
+  \draw[->] (3,-0.45) -- (3,-1.75);
+  \draw[->] (6,-0.45) -- (6,-1.75);
+  \node[right] at (6.2,-1.1)
+    {$\mathrm{collapse}$ (homomorphism, \cite{part1})};
+  % no retraction
+  \draw[->] (3,-2.85) -- (3,-4.0);
+  \draw[thick] (2.8,-3.25) -- (3.2,-3.6);
+  \draw[thick] (3.2,-3.25) -- (2.8,-3.6);
+  \node[right] at (6.2,-3.4)
+    {no map preserving $\negc$ (\Cref{prop:no-bool})};
+\end{tikzpicture}
+\caption{The collapse tower.
+The partition $\{0\}, (0,1), \{1\}$ of $[0,1]$ is a congruence for
+$(\negc, \conjc, \disjc)$ and the quotient is the Kleene lattice
+$\{0, \tfrac12, 1\}$~\cite{kleene1952,part1}.
+No further negation-preserving collapse onto $\{0,1\}$ exists: the
+fixed point $\tfrac12$ has nowhere to go.}
+\label{fig:tower}
+\end{figure}
+
+\begin{proposition}[No Boolean retraction]
+\label{prop:no-bool}
+No map $\varphi : [0,1] \to \{0,1\}$ satisfies
+$\varphi(\negc c) = 1 - \varphi(c)$ for all $c$.
+\end{proposition}
+\begin{proof}
+At $c = \tfrac12$, \Cref{lem:neg-fixed} gives
+$\varphi(\tfrac12) = 1 - \varphi(\tfrac12)$, which has no solution in
+$\{0,1\}$.
+(Machine-checked, \texttt{no\_boolean\_neg\_retraction}.)
+\end{proof}
+
+\Cref{fig:tower} summarizes: classical logic sits at the bottom of a
+tower whose top level $[0,1]$ supports the liar fixed point, and the
+two levels are connected only through the three-valued Kleene quotient
+of Part~1~\cite{part1,priest1979,belnap1977}.
 
 %=============================================================================
-\section{Paradoxes as Solution Sets}
+\section{Self-Reference as Solution Sets}
 \label{sec:solutions}
 %=============================================================================
 
-A self-reference pattern determines an operator
+\begin{definition}[Solution set]
+\label{def:solutions}
+For an operator $\Phi : [0,1] \to [0,1]$, the \emph{solution set} of
+the self-referential definition $c = \Phi(c)$ is
 \[
-  \Phi:[0,1]\to[0,1].
+  \Sol(\Phi) = \{c \in [0,1] : \Phi(c) = c\},
 \]
-Its admissible values form the solution set
+the fixed-point set of $\Phi$.
+(Machine-checked, \texttt{solutions},
+\texttt{solutions\_eq\_fixedPoints}.)
+\end{definition}
+
+A paradox, on this reading, is an equation; its pathology or health is
+the shape of its solution set.
+
+\begin{theorem}[Liar]
+\label{thm:liar-sol}
+$\Sol(\negc) = \{\tfrac12\}$, while the Boolean liar has no solution:
+$\{b \in \Bool : \lnot b = b\} = \varnothing$.
+\end{theorem}
+\begin{proof}
+The first claim is \Cref{lem:neg-fixed}.
+For the second, $\lnot\mathsf{true} = \mathsf{false}$ and
+$\lnot\mathsf{false} = \mathsf{true}$.
+(Machine-checked, \texttt{solutions\_neg\_eq\_singleton},
+\texttt{bool\_neg\_solutions\_empty}.)
+\end{proof}
+
+\begin{theorem}[Truth-teller and zero evidence]
+\label{thm:truth-teller}
+$\Sol(\mathrm{id}) = [0,1]$, and this is the same set as zero-evidence
+conditioning:
 \[
-  \Sol(\Phi)=\{c\in[0,1]:\Phi(c)=c\}.
+  \Sol(\mathrm{id}) = [0,1] = \Cond(0,0).
 \]
-This is the common shape behind the elementary paradox cases.
-Lean defines this set as \texttt{solutions} and proves
-\texttt{solutions\_eq\_fixedPoints}.
+\end{theorem}
+\begin{proof}
+Every $c$ satisfies $c = c$; the second equality is
+\Cref{thm:cond-trichotomy}(ii).
+(Machine-checked, \texttt{solutions\_id\_eq\_univ},
+\texttt{truth\_teller\_same\_shape\_as\_zero\_evidence}.)
+\end{proof}
 
-\subsection{Liar}
+The two full intervals have different sources: for the truth-teller the
+defining equation is the identity and supplies no information; at zero
+evidence the chain rule degenerates to $c \cdot 0 = 0$ and supplies no
+constraint.
+The common shape is underdetermination, not contradiction.
 
-The scalar liar pattern is negation self-reference:
+\begin{theorem}[Russell scalar]
+\label{thm:russell}
+The scalar Russell equation has the singleton solution set
 \[
-  c=\negc c=1-c.
+  \{c \in [0,1] : c = 1 - c\} = \{\tfrac12\}.
 \]
-Its solution set is the singleton
+\end{theorem}
+\begin{proof}
+\Cref{lem:neg-fixed}.
+(Machine-checked, \texttt{russell\_fixed\_point},
+\texttt{russell\_scalar\_solutions}.)
+\end{proof}
+
+Curry's pattern differs from all three: it uses no negation, only a
+conditional that can be diagonalized.
+The algebra has no internal conditional, so the Curry equation cannot
+even be written until one is added.
+The canonical candidate is the product residuum.
+
+\begin{definition}[Product residuum]
+\label{def:prodresid}
 \[
-  \Sol(\negc)=\{\tfrac12\}.
-\]
-Lean records this as \texttt{solutions\_neg\_eq\_singleton} and
-\texttt{liar\_solution}.
-The Boolean version has no fixed point:
-\[
-  \{b\in\Bool: \neg b=b\}=\varnothing,
-\]
-proved as \texttt{bool\_neg\_solutions\_empty}.
-
-The contrast is useful.
-The graded interval turns the classical contradiction into a determined
-middle value.
-It does not infer arbitrary formulas from that value.
-
-\subsection{Truth-Teller}
-
-The truth-teller pattern is identity self-reference:
-\[
-  c=c.
-\]
-Every value solves it:
-\[
-  \Sol(\mathsf{id})=[0,1].
-\]
-Lean proves \texttt{solutions\_id\_eq\_univ} and
-\texttt{truth\_teller\_any}.
-The solution set has the same shape as zero-evidence conditioning:
-\[
-  \Sol(\mathsf{id})=[0,1]=\Cond(0,0).
-\]
-The theorem \texttt{truth\_teller\_same\_shape\_as\_zero\_evidence}
-records the equality.
-
-The interpretation differs in the two cases.
-For the truth-teller, the equation supplies no information.
-For zero evidence, the chain rule supplies no conditional value.
-Both cases are underdetermined because the constraint is the identity.
-
-\subsection{Russell}
-
-For a graded predicate $P:\alpha\to[0,1]$, negation is pointwise:
-\[
-  (\neg P)(x)=1-P(x).
-\]
-The Lean module \texttt{Cred.Predicate} develops graded predicates,
-pointwise De Morgan operations, infimum and supremum quantifiers, and the
-crisp quantifier bridges.
-
-Russell's predicate has the scalar form
-\[
-  c=1-c.
-\]
-The theorem \texttt{russell\_fixed\_point} proves that any credence satisfying
-that equation is $\tfrac12$.
-The theorem \texttt{russell\_scalar\_solutions} states the solution-set form:
-\[
-  \{c:c=1-c\}=\{\tfrac12\}.
-\]
-
-This is only the scalar core of graded set theory.
-A full set theory needs extensionality, comprehension, equality, and
-substitution.
-The scalar theorem says that Russell's diagonal equation has a value.
-It does not by itself give a complete foundation.
-
-\subsection{Curry}
-
-Curry self-reference has a different shape.
-It does not use negation.
-It uses a conditional that can be internalized and then contracted.
-
-If one adds the product residuum
-\[
-  a\Rightarrow b =
+  a \Rightarrow b =
   \begin{cases}
-    1, & a=0,\\
-    \min(1,b/a), & a>0,
+    1, & a = 0,\\
+    \min\!\bigl(1,\, b/a\bigr), & a > 0.
   \end{cases}
 \]
-then positive Curry equations have square-root solutions.
-For $b>0$,
-\[
-  c = (c\Rightarrow b)
-\]
-is solved by $c=\sqrt b$.
-Lean proves the witness, the positive nonempty result, and the empty
-zero-boundary result in \texttt{Cred/Fixpoint.lean}.
+(Machine-checked, \texttt{prodResid}.)
+\end{definition}
 
-This boundary matters.
-The product residuum is an added connective.
-It is not Cred conditioning.
-Cred's conditional relation remains external:
+\begin{theorem}[Curry solutions at positive conclusion]
+\label{thm:curry-sqrt}
+For $b > 0$,
 \[
-  c\in\Cond(j,e).
+  \sqrt{b} \in \Sol\bigl(c \mapsto (c \Rightarrow b)\bigr),
 \]
-That relation cannot be placed into a formula and diagonalized.
+so the solution set is nonempty.
+\end{theorem}
+\begin{proof}
+Set $c = \sqrt b > 0$.
+Then $b/c = b/\sqrt b = \sqrt b$, and $\sqrt b \leq 1$ since
+$b \leq 1$, so
+$c \Rightarrow b = \min(1, \sqrt b) = \sqrt b = c$.
+(Machine-checked, \texttt{curry\_sqrt\_solution},
+\texttt{curry\_solutions\_nonempty\_positive}.)
+\end{proof}
 
-\begin{table}[t]
+\begin{theorem}[Curry at zero conclusion]
+\label{thm:curry-zero}
+$\Sol\bigl(c \mapsto (c \Rightarrow 0)\bigr) = \varnothing$.
+\end{theorem}
+\begin{proof}
+If $c = 0$ then $c \Rightarrow 0 = 1 \neq 0$.
+If $c > 0$ then $c \Rightarrow 0 = \min(1, 0/c) = 0 \neq c$.
+(Machine-checked, \texttt{curry\_zero\_solutions\_empty},
+\texttt{curry\_no\_fixed\_point\_zero}.)
+\end{proof}
+
+\begin{table}[ht]
 \centering
-\begin{tabular}{p{0.20\linewidth}p{0.30\linewidth}p{0.38\linewidth}}
+\begin{tabular}{lll}
 \toprule
 Pattern & Equation & Solution set \\
 \midrule
-Liar & $c=1-c$ & $\{\tfrac12\}$ \\
-Truth-teller & $c=c$ & $[0,1]$ \\
-Russell scalar & $c=1-c$ & $\{\tfrac12\}$ \\
-Curry, $b>0$ with product residuum & $c=(c\Rightarrow b)$ & nonempty, contains $\sqrt b$ \\
-Curry, $b=0$ with product residuum & $c=(c\Rightarrow 0)$ & $\varnothing$ \\
+Liar & $c = 1 - c$ & $\{\tfrac12\}$ \\
+Boolean liar & $\lnot b = b$ & $\varnothing$ \\
+Truth-teller & $c = c$ & $[0,1]$ \\
+Zero-evidence conditioning & $c \cdot 0 = 0$ & $[0,1]$ \\
+Russell scalar & $c = 1 - c$ & $\{\tfrac12\}$ \\
+Curry, $b > 0$ (residuum added) & $c = (c \Rightarrow b)$
+  & $\ni \sqrt b$ (nonempty) \\
+Curry, $b = 0$ (residuum added) & $c = (c \Rightarrow 0)$
+  & $\varnothing$ \\
 \bottomrule
 \end{tabular}
-\caption{Basic self-reference patterns as solution sets.}
+\caption{Self-reference patterns and their solution sets
+(\Cref{thm:liar-sol,thm:truth-teller,thm:russell,thm:curry-sqrt,thm:curry-zero}).
+The Curry rows require adding the product residuum as a connective;
+without it the equation is not expressible, which is the point of
+\Cref{sec:curry}.}
 \label{tab:solution-sets}
 \end{table}
 
 %=============================================================================
-\section{Graded Comprehension}
+\section{Graded Predicates and Comprehension}
 \label{sec:comprehension}
 %=============================================================================
 
-Graded predicates give the minimal language for a foundations application.
-Membership is a value in $[0,1]$.
-A comprehension principle has the schematic form
+\begin{definition}[Graded predicate]
+\label{def:graded-pred}
+A \emph{graded predicate} on a domain $\alpha$ is a function
+$P : \alpha \to [0,1]$.
+Operations are pointwise:
+$(\negc P)(x) = 1 - P(x)$,
+$(P \conjc Q)(x) = P(x) Q(x)$,
+$(P \disjc Q)(x) = P(x) \disjc Q(x)$.
+A predicate is \emph{crisp} when $P(x) \in \{0,1\}$ for all $x$.
+\end{definition}
+
+\begin{definition}[Quantifiers]
+\label{def:quantifiers}
+For nonempty $\alpha$:
 \[
-  \cred(x\in\{y:\varphi(y)\})=\cred(\varphi(x)).
+  \cred(\forall x.\, P(x)) = \inf_{x \in \alpha} P(x), \qquad
+  \cred(\exists x.\, P(x)) = \sup_{x \in \alpha} P(x).
 \]
-For Russell's predicate this reduces to the fixed-point equation above.
+Both lie in $[0,1]$ because the range of $P$ is bounded.
+(Machine-checked, \texttt{credInf}, \texttt{credSup}.)
+\end{definition}
 
-This puts Cred near several established programs.
-White proved consistency results for unrestricted comprehension in
-infinite-valued {\L}ukasiewicz predicate logic~\cite{white1979}.
-H\'ajek, Paris, and Shepherdson analyzed fuzzy truth predicates and showed
-how graded truth interacts with conservativity and model existence
-\cite{hajek2000,hajek2000liar}.
-Takeuti and Titani developed fuzzy set theory with many-valued membership
-\cite{takeuti1984}.
-Paraconsistent and paracomplete ZF-style theories such as BZFC treat
-inconsistent and incomplete membership through four-valued semantics
-\cite{khomskii2024}.
+\begin{proposition}[Pointwise De Morgan laws and instance bounds]
+\label{prop:pred-demorgan}
+$\negc(P \conjc Q) = \negc P \disjc \negc Q$ and
+$\negc(P \disjc Q) = \negc P \conjc \negc Q$ pointwise; moreover
+$\inf_x P(x) \leq P(a) \leq \sup_x P(x)$ for every $a$.
+\end{proposition}
+\begin{proof}
+Pointwise instances of \Cref{prop:triplet}; the bounds are the defining
+properties of $\inf$ and $\sup$ on the bounded range.
+(Machine-checked, \texttt{GradedPredicate.de\_morgan\_conj},
+\texttt{de\_morgan\_disj}, \texttt{forall\_le}, \texttt{le\_exists}.)
+\end{proof}
 
-Cred should be compared to these systems at the level of contracts.
-The present paper proves a scalar and predicate-level interface:
-pointwise graded predicates, De Morgan laws, quantifier duality, crisp
-quantifier recovery, and Russell's fixed point.
-It does not claim a ZF replacement or a bi-interpretability theorem.
-
-\begin{table}[t]
-\centering
-\small
-\begin{tabular}{p{0.16\linewidth}p{0.28\linewidth}p{0.38\linewidth}}
-\toprule
-Work & Contract & Cred's current claim \\
-\midrule
-White 1979 & {\L}ukasiewicz comprehension & scalar fixed points, no contraction claim \\
-HPS 2000 & fuzzy truth predicates & explicit $[0,1]$ model, no standard-model claim \\
-Takeuti-Titani & fuzzy set membership & predicate interface, no full set theory \\
-BZFC & four-valued ZF-style theory & comparison point, no bi-interpretability claim \\
-\bottomrule
-\end{tabular}
-\caption{Foundations comparison.  Cred currently proves the interface column,
-not a replacement set theory.}
-\label{tab:foundations-comparison}
-\end{table}
-
-The crisp fragment supplies the recovery constraint.
-When a predicate is crisp, its infimum is zero exactly when some instance is
-zero, and its supremum is one exactly when some instance is one.
-Lean records these as \texttt{crisp\_inf\_zero\_iff} and
-\texttt{crisp\_sup\_one\_iff}.
-The theorem \texttt{quantifier\_duality\_val} gives the graded duality:
+\begin{theorem}[Quantifier duality]
+\label{thm:quant-duality}
+For every graded predicate $P$ on nonempty $\alpha$,
 \[
-  \inf_x P(x)=1-\sup_x(1-P(x)).
+  1 - \inf_{x} P(x) = \sup_{x} \bigl(1 - P(x)\bigr),
 \]
+i.e.\ $\negc \forall x. P(x) = \exists x. \negc P(x)$ at the value
+level.
+\end{theorem}
+\begin{proof}
+Both ranges are bounded.
+For $\leq$: for each $a$, $\inf_x P(x) \leq P(a)$, so
+$1 - P(a) \leq 1 - \inf_x P(x)$; taking $\sup$ over $a$ gives
+$\sup_x (1 - P(x)) \leq 1 - \inf_x P(x)$.
+For $\geq$: for each $a$,
+$1 - P(a) \leq \sup_x(1 - P(x))$, so
+$P(a) \geq 1 - \sup_x(1 - P(x))$; taking $\inf$ gives
+$\inf_x P(x) \geq 1 - \sup_x(1 - P(x))$, i.e.\
+$1 - \inf_x P(x) \leq \sup_x(1 - P(x))$.
+(Machine-checked, \texttt{quantifier\_duality\_val}.)
+\end{proof}
 
-These theorems are small, but they set the right burden of proof.
-A future graded foundation must specify extensionality, equality, and
-substitution in a way that preserves the crisp fragment and keeps
-conditioning external.
-Russell alone is the entrance exam.
-Curry is the harder test.
+\begin{theorem}[Crisp quantifier recovery]
+\label{thm:crisp-quant}
+For a crisp predicate $P$ on nonempty $\alpha$:
+\[
+  \inf_x P(x) = 0 \iff \exists a,\ P(a) = 0,
+  \qquad
+  \sup_x P(x) = 1 \iff \exists a,\ P(a) = 1.
+\]
+\end{theorem}
+\begin{proof}
+If some $P(a) = 0$ the infimum is $0$ since all values are
+nonnegative.
+If no $P(a) = 0$ then crispness forces $P \equiv 1$ and the infimum is
+$1$, not $0$.
+The supremum claim is symmetric.
+(Machine-checked, \texttt{crisp\_inf\_zero\_iff},
+\texttt{crisp\_sup\_one\_iff}.)
+\end{proof}
+
+\subsection{Comprehension as a constraint}
+
+A graded comprehension principle has the schematic form
+\[
+  \cred\bigl(x \in \{y : \varphi(y)\}\bigr) = \cred(\varphi(x)).
+\]
+For Russell's predicate $R(x) = \negc\, x(x)$, instantiating at $R$
+itself yields the scalar equation $c = 1 - c$ of \Cref{thm:russell}.
+Comprehension here is a constraint on values: a defining condition cuts
+out the solution set of credences compatible with it, and an
+unsatisfiable condition yields an empty set rather than a trivializing
+theorem.
+
+This places the framework next to, not in place of, several
+established programs:
+White's consistency proof for unrestricted comprehension in
+infinite-valued \L ukasiewicz logic~\cite{white1979}, the
+H\'ajek\,/\,Paris\,/\,Shepherdson analysis of fuzzy truth
+predicates~\cite{hajek2000,hajek2000liar}, Takeuti and Titani's fuzzy
+set theory~\cite{takeuti1984}, and four-valued ZF-style theories such
+as BZFC~\cite{khomskii2024}.
+What is proved here is the scalar and predicate-level interface
+(\Cref{thm:quant-duality,thm:crisp-quant,thm:russell});
+extensionality, equality, and substitution for a full graded set
+theory are addressed at the first-order layer of \Cref{sec:arith} and
+remain open beyond it.
+Russell is the entrance exam; Curry, next, is the harder test.
 
 %=============================================================================
-\section{Curry Without an Internal Conditional}
+\section{The Curry Block}
 \label{sec:curry}
 %=============================================================================
 
-Curry's paradox warns against an internal conditional with too much structural
-strength.
-The dangerous package contains three principles.
-For a binary operation $f$ on credences:
-\[
-\begin{array}{ll}
-\mathrm{MP}: & a\conjc f(a,b)\le b,\\[0.3em]
-\mathrm{CP}: & a\conjc c\le b\ \Rightarrow\ c\le f(a,b),\\[0.3em]
-\mathrm{Contr}: & f(a,f(a,b))\le f(a,b).
-\end{array}
-\]
-Modus ponens and conditional proof amount to residuation for product
-conjunction.
-They force the positive part of $f$ to be the product residuum:
-\[
-  f(a,b)=\min(1,b/a)\qquad(a>0).
-\]
-Lean proves the residuation step as:
-\begin{itemize}[nosep]
-\item \texttt{mp\_cp\_residuation},
-\item \texttt{residuation\_unique},
-\item \texttt{prodResid\_unique\_positive}.
-\end{itemize}
+Curry's paradox needs an internal conditional with three structural
+properties.
+For a total operation $f : [0,1]^2 \to [0,1]$, write $f(a,b)$ for the
+value of the conditional with antecedent value $a$ and consequent
+value $b$.
 
-The product residuum fails contraction.
-At $a=\tfrac12$ and $b=\tfrac14$,
-\[
-  a\Rightarrow b=\tfrac12,\qquad
-  a\Rightarrow(a\Rightarrow b)=1.
-\]
-Thus
-\[
-  a\Rightarrow(a\Rightarrow b)\le a\Rightarrow b
-\]
-fails.
-Lean proves this counterexample in the Curry bridge module.
-The theorem \texttt{curry\_block} packages it:
-no total operation on $[0,1]$ satisfies MP, CP, and contraction together.
+\begin{definition}[MP, CP, contraction, residuation]
+\label{def:mp-cp}
+\begin{align*}
+  \mathrm{MP}(f) &:\iff \forall a, b:\ f(a,b) \conjc a \leq b,\\
+  \mathrm{CP}(f) &:\iff \forall a, b, c:\
+    c \conjc a \leq b \implies c \leq f(a,b),\\
+  \mathrm{Contr}(f) &:\iff \forall a, b:\
+    f\bigl(a, f(a,b)\bigr) \leq f(a,b),\\
+  \mathrm{Resid}(f) &:\iff \forall a, b, c:\
+    \bigl(c \conjc a \leq b \iff c \leq f(a,b)\bigr).
+\end{align*}
+(Machine-checked, \texttt{MP}, \texttt{CP}, \texttt{Contraction},
+\texttt{Residuation}.)
+\end{definition}
 
-This is the formal reason the title can say ``without explosion.''
-Cred does not repair Curry after internalizing the conditional.
-It refuses the internalization.
-Conditioning enters as the external judgment
-\[
-  c\in\Cond(j,e),
-\]
-and consequence is a metalinguistic relation.
-There is no formula constructor $\varphi\Rightarrow\psi$ whose value can be
-fed back into its own antecedent.
+\begin{lemma}[MP and CP amount to residuation]
+\label{lem:mp-cp-resid}
+If $\mathrm{MP}(f)$ and $\mathrm{CP}(f)$, then $\mathrm{Resid}(f)$.
+\end{lemma}
+\begin{proof}
+CP is one direction.
+For the other, $c \leq f(a,b)$ gives
+$c \conjc a = ca \leq f(a,b)\,a = f(a,b) \conjc a \leq b$ by
+monotonicity of multiplication and MP.
+(Machine-checked, \texttt{mp\_cp\_residuation}.)
+\end{proof}
 
-The result matches the diagnosis in relevance and substructural logic:
-contraction is not harmless in the presence of self-reference.
-Cred gives a numerical version of the same obstruction.
-The obstruction is machine-checked for the product carrier used here.
+\begin{theorem}[Uniqueness of the residuated conditional]
+\label{thm:resid-unique}
+If $\mathrm{Resid}(f)$, then for all $a > 0$ and all $b$,
+\[
+  f(a,b) = \min\!\bigl(1,\, b/a\bigr) = (a \Rightarrow b).
+\]
+Hence MP and CP pin every internal conditional to the product residuum
+on positive antecedents.
+\end{theorem}
+\begin{proof}
+Upper bound: $f(a,b) \leq 1$, and taking $c = f(a,b)$ in residuation
+gives $f(a,b)\,a \leq b$, so $f(a,b) \leq b/a$; together
+$f(a,b) \leq \min(1, b/a)$.
+Lower bound: $r = \min(1, b/a)$ is a credence and satisfies
+$r a \leq b$ (if $b \leq a$ then $r = b/a$ and $ra = b$; otherwise
+$r = 1$ and $ra = a < b$), so residuation gives $r \leq f(a,b)$.
+The second equality with \Cref{def:prodresid} is definitional for
+$a > 0$.
+(Machine-checked, \texttt{residuation\_unique},
+\texttt{prodResid\_unique\_positive}.)
+\end{proof}
+
+\begin{proposition}[The residuum fails contraction]
+\label{prop:no-contraction}
+At $a = \tfrac12$, $b = \tfrac14$:
+\[
+  a \Rightarrow b = \tfrac12,
+  \qquad
+  a \Rightarrow (a \Rightarrow b) = \tfrac12 \Rightarrow \tfrac12 = 1,
+  \qquad
+  1 \not\leq \tfrac12 .
+\]
+So $\mathrm{Contr}(\Rightarrow)$ fails.
+\end{proposition}
+\begin{proof}
+$\tfrac12 \Rightarrow \tfrac14 = \min(1, \tfrac{1/4}{1/2}) = \tfrac12$
+and
+$\tfrac12 \Rightarrow \tfrac12 = \min(1, 1) = 1$.
+(Machine-checked, \texttt{prod\_resid\_no\_contraction}.)
+\end{proof}
+
+\begin{theorem}[Curry block]
+\label{thm:curry-block}
+No total $f : [0,1]^2 \to [0,1]$ satisfies $\mathrm{MP}(f)$,
+$\mathrm{CP}(f)$, and $\mathrm{Contr}(f)$ together.
+\end{theorem}
+\begin{proof}
+Suppose $f$ satisfies all three.
+By \Cref{lem:mp-cp-resid,thm:resid-unique},
+$f(\tfrac12, \tfrac14) = \tfrac12$ and
+$f(\tfrac12, \tfrac12) = 1$.
+Contraction at $(a,b) = (\tfrac12, \tfrac14)$ then reads
+\[
+  1 = f\bigl(\tfrac12, f(\tfrac12,\tfrac14)\bigr)
+    \leq f(\tfrac12, \tfrac14) = \tfrac12,
+\]
+a contradiction.
+(Machine-checked, \texttt{curry\_block}.)
+\end{proof}
+
+\begin{remark}[Why the language has no arrow]
+\label{rem:no-arrow}
+\Cref{thm:curry-block} is the architectural reason the formula language
+of \Cref{sec:crisp} and the first-order language of \Cref{sec:arith}
+have no implication constructor.
+Curry is not repaired after internalization; the internalization is
+refused, and conditioning enters only as the external judgment
+$c \in \Cond(j,e)$.
+The diagnosis matches substructural logic: contraction is the unsafe
+rule in the presence of self-reference~\cite{restall1993}; here the
+obstruction is numerical and machine-checked for the product carrier.
+The crisp fragment is unaffected: on $\{0,1\}$ the material conditional
+$\max(\negc a, b)$ satisfies MP, CP, and contraction, so
+\Cref{thm:curry-block} is a statement about the interior of $[0,1]$.
+\end{remark}
 
 %=============================================================================
-\section{Conditioning and Proof}
+\section{Threshold Consequence and the Labelled Calculus}
 \label{sec:proof}
 %=============================================================================
 
-The proof layer has two axes.
-The first is consequence.
-For each threshold $t\in[0,1]$, define
+\subsection{Threshold consequence}
+
+\begin{definition}[Threshold consequence]
+\label{def:threshold}
+For a threshold $t \in [0,1]$, premises $\Gamma$, and a conclusion
+$\varphi$:
 \[
-  \Gamma\models_t\varphi
+  \Gamma \models_t \varphi
+  \quad:\iff\quad
+  \forall v:\
+  \bigl(\forall p \in \Gamma:\ \evalc{v}{p} \geq t\bigr)
+  \implies \evalc{v}{\varphi} \geq t,
 \]
-to mean: every valuation that gives all formulas in $\Gamma$ value at least
-$t$ also gives $\varphi$ value at least $t$.
-Lean defines this as \texttt{thresholdConsequence}.
-It proves reflexivity, monotonicity, and cut as
-\texttt{threshold\_reflexivity},
-\texttt{threshold\_monotonicity}, and \texttt{threshold\_cut}.
+where $v$ ranges over all credence valuations.
+(Machine-checked, \texttt{thresholdConsequence}.)
+\end{definition}
 
-The endpoints recover the earlier consequence relations.
-At $t=1$ one obtains certainty consequence
-(\texttt{threshold\_one\_iff\_certainty}).
-Positivity consequence is the union of positive thresholds
-(\texttt{formulaPositivity\_iff\_exists\_threshold}).
+\begin{proposition}[Structural rules]
+\label{prop:threshold-structural}
+For every $t$: reflexivity ($\varphi \models_t \varphi$),
+monotonicity ($\Gamma \models_t \varphi$ and
+$\Gamma \subseteq \Delta$ imply $\Delta \models_t \varphi$), and cut
+($\Gamma \models_t \varphi$ and
+$\varphi, \Gamma \models_t \psi$ imply $\Gamma \models_t \psi$).
+\end{proposition}
+\begin{proof}
+Immediate from \Cref{def:threshold}: a valuation satisfying the
+premises of the conclusion relation satisfies the premises of the
+hypotheses.
+(Machine-checked, \texttt{threshold\_reflexivity},
+\texttt{threshold\_monotonicity}, \texttt{threshold\_cut}.)
+\end{proof}
 
-Two sharp bounds matter for proof design.
-Explosion has a countermodel exactly when $0<t\le\tfrac12$.
-Excluded middle holds for all credence values exactly when $t\le\tfrac34$.
-Lean records these as
-\texttt{threshold\_explosion\_countermodel\_iff} and
-\texttt{threshold\_excluded\_middle\_iff}.
-The interval $(\tfrac12,\tfrac34]$ therefore validates excluded middle while
-losing the simple explosion countermodel used below $\tfrac12$.
+\begin{proposition}[Endpoints]
+\label{prop:threshold-endpoints}
+$\Gamma \models_1 \varphi$ iff certainty consequence holds
+(premise values $1$ force conclusion value $1$), and positivity
+consequence holds iff for every valuation a positive threshold
+witnesses the conclusion whenever positive thresholds witness all
+premises.
+\end{proposition}
+\begin{proof}
+At $t = 1$, $\geq 1$ on $[0,1]$ is $= 1$.
+For positivity, $0 < c$ iff some $t > 0$ has $t \leq c$ (take
+$t = c$).
+(Machine-checked, \texttt{threshold\_one\_iff\_certainty},
+\texttt{formulaPositivity\_iff\_exists\_threshold}.)
+\end{proof}
 
-The second axis is conditioning.
-The labelled calculus treats conditioning as a side judgment:
+The two sharp bounds calibrate proof design.
+Write $A$ for an atom and consider explosion
+$\{A, \neg A\} \models_t B$ with $B$ an unrelated atom.
+
+\begin{theorem}[Sharp explosion bound]
+\label{thm:explosion-sharp}
+For $t > 0$, there is a valuation $v$ with
+$\evalc{v}{A} \geq t$, $\evalc{v}{\neg A} \geq t$, and
+$\evalc{v}{B} < t$
+\emph{iff} $t \leq \tfrac12$.
+Hence explosion fails as a $\models_t$ rule exactly for
+$0 < t \leq \tfrac12$, and holds vacuously for $t > \tfrac12$
+(its premises are unsatisfiable).
+\end{theorem}
+\begin{proof}
+If such a $v$ exists, then $t \leq v(A)$ and $t \leq 1 - v(A)$, so
+$2t \leq 1$.
+Conversely, for $0 < t \leq \tfrac12$ take $v(A) = \tfrac12$,
+$v(B) = 0$: then $v(A) = 1 - v(A) = \tfrac12 \geq t$ and
+$0 < t \not\leq 0$.
+For $t > \tfrac12$, $t \leq v(A)$ and $t \leq 1 - v(A)$ would give
+$2t \leq 1$.
+(Machine-checked, \texttt{threshold\_explosion\_countermodel\_iff},
+\texttt{graded\_no\_explosion}, \texttt{graded\_explosion\_vacuous}.)
+\end{proof}
+
+\begin{theorem}[Sharp excluded-middle bound]
+\label{thm:em-sharp}
+$t \leq c \disjc \negc c$ holds for all $c \in [0,1]$ \emph{iff}
+$t \leq \tfrac34$.
+\end{theorem}
+\begin{proof}
+$c \disjc \negc c = c + (1-c) - c(1-c) = 1 - c(1-c)$, and
+$c(1-c) = \tfrac14 - (c - \tfrac12)^2 \leq \tfrac14$ with equality at
+$c = \tfrac12$.
+So the minimum of $c \disjc \negc c$ over $[0,1]$ is $\tfrac34$,
+attained at $\tfrac12$.
+(Machine-checked, \texttt{threshold\_excluded\_middle\_iff}.)
+\end{proof}
+
+\begin{corollary}[A working window]
+\label{cor:window}
+The interval $(\tfrac12, \tfrac34]$ is nonempty, and every threshold in
+it validates excluded middle while making the explosion premises
+unsatisfiable.
+(Machine-checked, \texttt{threshold\_window\_nonempty}.)
+\end{corollary}
+
+\begin{figure}[ht]
+\centering
+\begin{tikzpicture}[>=Stealth, xscale=10, yscale=1]
+  % window (shaded band over the axis region)
+  \fill[gray!20] (0.5,-0.12) rectangle (0.75,2.0);
+  \node[above] at (0.625,2.0) {\small window (\Cref{cor:window})};
+  % axis
+  \draw[->] (-0.02,0) -- (1.06,0) node[right] {$t$};
+  \foreach \x/\l in {0/0, 0.5/\tfrac12, 0.75/\tfrac34, 1/1} {
+    \draw (\x,0.04) -- (\x,-0.04) node[below] {$\l$};
+  }
+  % explosion countermodel region
+  \draw[very thick] (0.005,0.5) -- (0.5,0.5);
+  \fill (0.5,0.5) circle (0.012);
+  \draw (0.005,0.44) -- (0.005,0.56);
+  \node[above] at (0.25,0.56)
+    {\small explosion countermodel exists ($0 < t \leq \tfrac12$)};
+  % excluded middle region
+  \draw[very thick] (0,1.35) -- (0.75,1.35);
+  \fill (0.75,1.35) circle (0.012);
+  \node[above] at (0.32,1.41)
+    {\small excluded middle holds ($t \leq \tfrac34$)};
+  % vacuous explosion region
+  \draw[very thick,dashed] (0.5,-0.6) -- (1,-0.6);
+  \fill (1,-0.6) circle (0.012);
+  \node[below] at (0.75,-0.68)
+    {\small explosion premises unsatisfiable ($t > \tfrac12$)};
+\end{tikzpicture}
+\caption{The threshold map of consequence
+(\Cref{thm:explosion-sharp,thm:em-sharp}).
+Explosion has a countermodel exactly on $(0,\tfrac12]$; excluded
+middle holds exactly on $[0,\tfrac34]$.
+The shaded window $(\tfrac12,\tfrac34]$ keeps excluded middle while
+the explosion premises cannot be satisfied.}
+\label{fig:threshold}
+\end{figure}
+
+\subsection{The labelled calculus}
+
+The proof layer makes the separation syntactic.
+A \emph{label} is one of $\mathsf{pos}$, $\mathsf{cert}$, or
+$\mathsf{thr}(t)$; a credence $c$ satisfies them when $c > 0$,
+$c = 1$, or $c \geq t$ respectively.
+A \emph{conditioning side judgment} is a triple
+$J = (c; \varphi_j, \varphi_e)$ of a credence and two formulas; a
+valuation $v$ satisfies $J$ when
+$c \in \Cond\bigl(\evalc{v}{\varphi_j}, \evalc{v}{\varphi_e}\bigr)$,
+i.e.\ $c \conjc \evalc{v}{\varphi_e} = \evalc{v}{\varphi_j}$.
+A context $\Gamma$ is a list of labelled formulas plus a list of side
+judgments.
+
+\begin{definition}[Labelled derivations]
+\label{def:derivation}
+$\Gamma \vdash \ell : \varphi$ is generated by: hypothesis, weakening,
+cut; threshold monotonicity
+($\mathsf{thr}(s)$ to $\mathsf{thr}(t)$ for $t \leq s$),
+$\mathsf{thr}(t)$ to $\mathsf{pos}$ for $t > 0$, $\mathsf{cert}$ to
+$\mathsf{thr}(t)$; semantic import of any verified positivity,
+certainty, or threshold consequence; conjunction elimination and
+disjunction introduction at threshold labels; double-negation
+introduction and elimination; and the \emph{chain-rule cut}
 \[
-  c\in\Cond(j,e).
+  \frac{(c; \varphi_j, \varphi_e) \in \Gamma
+        \qquad \ell_0 \leq c
+        \qquad \Gamma \vdash \mathsf{thr}(t) : \varphi_e}
+       {\Gamma \vdash \mathsf{thr}(\ell_0 \conjc t) : \varphi_j}.
 \]
-The chain-rule cut has the form
-\[
-  c\in\Cond(j,e),\quad e\ge t
-  \quad\Longrightarrow\quad
-  j=ce.
-\]
-At positive evidence this can be read as the usual ratio rule.
-At zero evidence it remains a constraint, not an implication theorem.
+There is no rule introducing a conditional formula, because the
+language has none.
+(Machine-checked, \texttt{Derivation}, \texttt{CondJudgment}.)
+\end{definition}
 
-Pavelka-style proof theory gives a mature comparison point for graded
-provability~\cite{pavelka1979i,pavelka1979ii,pavelka1979iii}.
-H\'ajek's product logic gives a mature comparison point for residuated
-truth-functional implication~\cite{hajek1998}.
-Cred takes neither calculus unchanged.
-The no-go theorem for truth-functional conditioning in Part~2 and the Curry
-block above force the proof calculus to keep conditioning external.
+\begin{theorem}[Soundness]
+\label{thm:seq-sound}
+If $\Gamma \vdash \ell : \varphi$, then every valuation satisfying all
+bounds and side judgments of $\Gamma$ gives $\evalc{v}{\varphi}$ a
+value satisfying $\ell$.
+Consequently a derivation from threshold-$t$ premises to a
+threshold-$t$ conclusion certifies $\Gamma \models_t \varphi$, and
+likewise for certainty and positivity.
+\end{theorem}
+\begin{proof}
+Induction on the derivation.
+The only rule beyond bookkeeping is the chain-rule cut: from
+$c \conjc \evalc{v}{\varphi_e} = \evalc{v}{\varphi_j}$,
+$\ell_0 \leq c$, and $t \leq \evalc{v}{\varphi_e}$, monotonicity of the
+product gives
+$\ell_0 \conjc t \leq c \conjc \evalc{v}{\varphi_e}
+  = \evalc{v}{\varphi_j}$.
+Conjunction elimination uses $a \conjc b \leq a, b$; disjunction
+introduction uses $a, b \leq a \disjc b$.
+(Machine-checked, \texttt{derivation\_sound},
+\texttt{derivation\_sound\_thresholdConsequence},
+\texttt{derivation\_sound\_formulaCertainty},
+\texttt{derivation\_sound\_formulaPositivity}.)
+\end{proof}
 
-Lean formalizes this interface in \texttt{Cred.Sequent}.
-Labels mark positive, certain, or threshold judgments.
-Contexts carry formula bounds and external conditioning side judgments.
-The inductive derivation relation has structural rules, imports already
-verified consequence relations, and contains a chain-rule cut:
-from $c\in\Cond(j,e)$, a lower bound on $c$, and a lower bound on $e$, derive
-the product lower bound on $j$.
-The soundness theorems target threshold consequence, positivity consequence,
-and certainty consequence.
-The theorem \texttt{labelled\_no\_ex\_falso} gives the proof-layer witness
-that $A$ and $\neg A$ do not derive an unrelated positive conclusion.
+\begin{theorem}[No ex falso in the calculus]
+\label{thm:no-ex-falso}
+Let $\Gamma_0$ contain exactly the bounds $\mathsf{pos} : A$ and
+$\mathsf{pos} : \neg A$ and no side judgments.
+Then $\Gamma_0 \nvdash \mathsf{pos} : B$ for an atom $B$ distinct
+from $A$.
+\end{theorem}
+\begin{proof}
+The valuation $v(A) = \tfrac12$, $v(B) = 0$ satisfies $\Gamma_0$:
+$\tfrac12 > 0$ and $1 - \tfrac12 > 0$.
+By \Cref{thm:seq-sound} a derivation would force $v(B) > 0$,
+contradicting $v(B) = 0$.
+(Machine-checked, \texttt{labelled\_no\_ex\_falso}.)
+\end{proof}
 
-Completeness remains outside the present claim.
-That is deliberate.
-A premature completeness theorem risks hiding a residuated implication inside
-the rules.
+\begin{remark}[Comparison]
+Pavelka-style graded provability~\cite{pavelka1979i} and H\'ajek's
+product logic~\cite{hajek1998} are the mature calculi for graded truth
+with internal residuated implication.
+The calculus above takes neither unchanged: by
+\Cref{thm:curry-block} an internal residuated arrow with contraction
+is not available, so conditioning stays a side judgment and the
+chain-rule cut transports bounds instead of detaching implications.
+Completeness is deliberately not claimed; a premature completeness
+theorem risks smuggling a residuated implication into the rules.
+\end{remark}
 
 %=============================================================================
-\section{Underdetermination, Incompleteness, and Updates}
-\label{sec:underdetermination}
+\section{The Arithmetic \texorpdfstring{$\Sigma_1$}{Sigma-1} Layer}
+\label{sec:arith}
 %=============================================================================
 
-Three notions must stay separate.
+The foundations claim needs arithmetic, not just propositional logic.
+This section equips the graded semantics with a standard model of
+Robinson~$Q$ and carries out the classical arithmetization
+chain~\cite{godel1931}, following the route of the
+FormalizedFormalLogic development~\cite{fflfoundation} transported to
+credence semantics.
 
-First, zero-evidence conditioning is underdetermination by the chain rule:
+\subsection{The standard model and Robinson Q}
+
+The first-order language has function symbols $0, S, +, \cdot$,
+equality as a formula constructor, the De Morgan connectives, and
+quantifiers; it has \emph{no} implication or conditional constructor
+(\Cref{rem:no-arrow}).
+Material implication, where needed inside axioms, is the encoding
+$\varphi \to \psi := \neg\varphi \vee \psi$, which on crisp values is
+the classical conditional.
+
+\begin{definition}[Standard model]
+\label{def:natmodel}
+The structure $N$ has domain $\Nat$ with the genuine $0$, successor,
+addition, and multiplication; crisp equality
 \[
-  \Cond(0,0)=[0,1].
+  \evalc{N}{a = b} =
+  \begin{cases} 1, & a = b,\\ 0, & a \neq b; \end{cases}
 \]
-The evidence value is zero, so the equation $ce=0$ imposes no restriction on
-$c$.
-This is the same boundary that appears in primitive conditional probability,
-conditional events, disintegration, and imprecise probability
-\cite{renyi1955,popper1959,definetti1936,calabrese1987,walley1991}.
+and quantifiers as genuine infima and suprema over the whole domain:
+\[
+  \evalc{N}{\forall x.\,\varphi} = \inf_{n \in \Nat}
+    \evalc{N}{\varphi[n]},
+  \qquad
+  \evalc{N}{\exists x.\,\varphi} = \sup_{n \in \Nat}
+    \evalc{N}{\varphi[n]}.
+\]
+(Machine-checked, \texttt{natModel}.)
+\end{definition}
 
-Second, undecidability is proof-theoretic.
-A theory may prove neither $\varphi$ nor $\neg\varphi$.
-That does not assign $\varphi$ the value $\tfrac12$.
-The value $\tfrac12$ is forced only by equations such as $c=1-c$.
-Chosen ignorance, independence, and unproved statements require extra
-modelling assumptions.
+\begin{definition}[Robinson Q]
+\label{def:robinson-q}
+The axioms are the closed formulas
+\begin{align*}
+  &Q_1:\ \forall x.\ \neg(Sx = 0)
+  &&Q_2:\ \forall x \forall y.\ Sx = Sy \to x = y\\
+  &Q_3:\ \forall x.\ \bigl(x = 0 \vee \exists y.\ x = Sy\bigr)
+  &&Q_4:\ \forall x.\ x + 0 = x\\
+  &Q_5:\ \forall x \forall y.\ x + Sy = S(x + y)
+  &&Q_6:\ \forall x.\ x \cdot 0 = 0\\
+  &Q_7:\ \forall x \forall y.\ x \cdot Sy = x \cdot y + x
+\end{align*}
+with $\to$ the De Morgan encoding.
+(Machine-checked, \texttt{arithQ.axioms}.)
+\end{definition}
 
-Third, updates are dynamics.
-Bayesian and Jeffrey update rules from Part~2 handle positive evidence.
-At zero evidence, a Cred update semantics should return a set or interval of
-admissible posteriors unless an additional selection principle is supplied.
-This aligns more closely with imprecise probability than with a single
-regular conditional probability chosen on a null set.
+\begin{theorem}[$N \models Q$ at certainty]
+\label{thm:axioms-one}
+Every axiom of \Cref{def:robinson-q} evaluates to $1$ in $N$, under
+every assignment.
+\end{theorem}
+\begin{proof}
+Equality is crisp, so each quantifier-free matrix is the indicator of
+a true statement about $\Nat$: e.g.\ for $Q_2$ the matrix at $(x,y)$ is
+$\negc[Sx = Sy] \disjc [x = y]$, which is $1$ because $S$ is injective;
+for $Q_3$ at $x = k+1$ the existential body has witness $k$, and the
+supremum dominates the instance.
+Each matrix is therefore constantly $1$, and the infimum of a constant
+family of ones is $1$.
+(Machine-checked, \texttt{axioms\_eval\_one}.)
+\end{proof}
 
-These distinctions keep the foundations claim honest.
-The algebra resolves certain self-reference equations.
-It does not solve G\"odel incompleteness, choose values for independent
-statements, or define a canonical posterior under impossible evidence.
+\begin{theorem}[Consistency of Q over the standard model]
+\label{thm:q-con}
+$\bot$ is not provable from the $Q$ axioms at certainty in the
+foundation proof calculus.
+\end{theorem}
+\begin{proof}
+The calculus is sound: a proof at threshold $1$ from premises
+designated $1$ in a structure with crisp equality and the quantifier
+laws yields $1 \leq \evalc{N}{\bot}$.
+By \Cref{thm:axioms-one} the premises are designated in $N$, and
+$\evalc{N}{\bot} = 0$, so $1 \leq 0$, a contradiction.
+(Machine-checked, \texttt{arithQ\_con},
+\texttt{FoundationProof.sound}.)
+\end{proof}
 
-\subsection{The arithmetic layer and the second-incompleteness boundary}
-\label{sec:arithmetic-layer}
+\begin{remark}[Non-vacuity]
+The provability relation is not empty: $0 = 0$ is derivable by the
+reflexivity rule, and universal instantiation of $Q_4$ derives
+$0 + 0 = 0$; the concrete equation $2 + 1 = 3$ evaluates to $1$ in
+$N$.
+(Machine-checked, \texttt{provableFromQ\_zero\_refl},
+\texttt{provableFromQ\_addZero\_zero}, \texttt{natModel\_two\_add\_one}.)
+\end{remark}
 
-The incompleteness side is formalized, not gestured at. The object language has a
-standard model of Robinson arithmetic (\texttt{arithQ.natModel}): the domain is
-$\mathbb{N}$ with genuine $0$, successor, addition, and multiplication, crisp
-equality, and quantifiers read as the real infimum and supremum over the whole
-domain. Every Robinson $Q$ axiom evaluates to certainty there
-(\texttt{axioms\_eval\_one}), and $\bot$ is not provable from $Q$ at certainty
-(\texttt{arithQ\_con}), the genuine $N \models Q$ and $\mathrm{Con}(Q)$ content.
+\subsection{Crisp evaluation and \texorpdfstring{$\Sigma_1$}{Sigma-1}
+  completeness}
 
-On that signature the order is definable even though there is no order symbol:
-$a \le b$ is $\exists c.\, a + c = b$, and in the standard model this is exactly
-the order on $\mathbb{N}$, crisply (\texttt{leF\_eval\_one\_iff}). Quantifier-free
-arithmetic formulas evaluate to $0$ or $1$ (\texttt{quantifierFree\_crisp}), and
-the $\Sigma_1$ formulas, an existential block over a quantifier-free matrix
-(\texttt{IsSigmaOne}), satisfy $\Sigma_1$ completeness: a true existential over a
-crisp body has a numeral witness (\texttt{sigmaOne\_witness\_complete}). This is
-the semantic core of $\Sigma_1$ representability, an existential true in $N$ is
-witnessed by an actual number.
+\begin{definition}[Definable order]
+\label{def:leF}
+The signature has no order symbol; define
+\[
+  (a \leq b) := \exists c.\ a + c = b,
+  \qquad
+  (a < b) := (Sa \leq b).
+\]
+(Machine-checked, \texttt{leF}, \texttt{ltF}.)
+\end{definition}
 
-Provability itself is representable as a total computable decision: the real-free
-checker accepts a code exactly when the certificate is valid
-(\texttt{provability\_representable}, with the executable \texttt{checkCodeNat}).
-What an object-language provability formula must add is named exactly: a formula
-$P$ \emph{represents} a predicate when $N \models P[\bar n]$ iff the predicate
-holds at $n$ (\texttt{RepresentsChecker}).
+\begin{theorem}[The definable order is the order, crisply]
+\label{thm:leF}
+For all terms $a, b$ and assignments,
+$\evalc{N}{a \leq b} = 1$ iff
+$\evalc{N}{a} \leq \evalc{N}{b}$ in $\Nat$, and the value is $0$
+otherwise.
+\end{theorem}
+\begin{proof}
+The body $a + c = b$ at witness $c$ is the crisp indicator of
+$\evalc{N}{a} + c = \evalc{N}{b}$.
+By \Cref{thm:crisp-quant} the supremum over $c$ is $1$ iff some witness
+exists, i.e.\ iff $\evalc{N}{a} \leq \evalc{N}{b}$; otherwise the
+family is constantly $0$ and the supremum is $0$.
+(Machine-checked, \texttt{leF\_eval\_one\_iff},
+\texttt{leF\_eval\_eq}, \texttt{ltF\_eval\_one\_iff}.)
+\end{proof}
 
-The arithmetization mechanism that builds such a $P$ is formalized in full. For a
-genuine course-of-values recursive predicate, \texttt{isTree} (well-formedness of
-a proof tree over the pairing encoding, the structural core of proof-checking), an
-explicit object formula \texttt{treeFormula} is built from pairing, sequence
-coding, and G\"odel's $\beta$-function, and \texttt{treeFormula\_represents} proves
-$N \models \texttt{treeFormula}[\bar n]$ iff $\texttt{isTree}\,n$. The formula is
-$\Sigma_1$: an existential $\beta$-code with a bounded universal coherence
-condition, with the bounded quantifier and the biconditional encoded through De
-Morgan connectives rather than an internal conditional, consistent with the Curry
-block. The proof passes through the $\beta$-function course-of-values lemma
-(\texttt{isTree\_iff\_beta}) and the term-level evaluation of every brick. This is
-the classical arithmetization \cite{fflfoundation,godel1931}, transported to the
-graded semantics; the specific \texttt{checkCodeNat} instance reuses the same
-machinery with the checker's decode equations.
+\begin{definition}[$\Sigma_1$ formulas]
+\label{def:sigma1}
+A formula is \emph{quantifier-free} when it contains no quantifier.
+A formula is $\Sigma_1$ when it is an existential block over a
+quantifier-free matrix:
+$\exists x_1 \cdots \exists x_k.\ \varphi$ with $\varphi$
+quantifier-free.
+(Machine-checked, \texttt{QuantifierFree}, \texttt{IsSigmaOne}.)
+\end{definition}
 
-The boundary is sharp on one point. Even granting a representing $P$, the second
-incompleteness theorem does not internalize in Cred as an object conditional. Its
-proof needs the L\"ob derivability conditions, hence an internal implication with
-modus ponens, conditional proof, and contraction. No total operation on credences
-carries all three (\texttt{no\_internal\_loeb\_arrow}, from the Curry block of
-Section~\ref{sec:curry}), so the internal L\"ob arrow does not
-exist. The obstruction is structural, the same no-internal-conditional design that
-blocks Curry, not a missing lemma.
+\begin{proposition}[Quantifier-free formulas are crisp]
+\label{prop:qf-crisp}
+Every quantifier-free arithmetic formula evaluates to $0$ or $1$ in
+$N$, under every assignment.
+\end{proposition}
+\begin{proof}
+Induction.
+Equality atoms are crisp by \Cref{def:natmodel}, and on $\{0,1\}$ the
+operations $\negc$, $\conjc$, $\disjc$ stay in $\{0,1\}$
+(\Cref{prop:embed-hom}).
+(Machine-checked, \texttt{quantifierFree\_crisp}.)
+\end{proof}
+
+\begin{theorem}[$\Sigma_1$ witness completeness]
+\label{thm:sigma1}
+Let $\varphi$ be quantifier-free.
+Then
+\[
+  \evalc{N}{\exists x.\ \varphi} = 1
+  \quad\Longleftrightarrow\quad
+  \exists n \in \Nat:\ \evalc{N}{\varphi[n]} = 1 .
+\]
+In particular a true $\Sigma_1$ existential is witnessed by an actual
+natural number, and a numeral witness certifies the existential.
+\end{theorem}
+\begin{proof}
+By \Cref{prop:qf-crisp} the family
+$n \mapsto \evalc{N}{\varphi[n]}$ is crisp, and by
+\Cref{thm:crisp-quant} its supremum is $1$ iff some instance is $1$.
+(Machine-checked, \texttt{existsE\_crisp\_one\_iff},
+\texttt{sigmaOne\_witness\_complete}.)
+\end{proof}
+
+\begin{definition}[Numerals and representation]
+\label{def:represents}
+The numeral $\bar n$ is $S^n 0$; it evaluates to $n$.
+An object formula $P$ with one free variable \emph{represents} a
+predicate $R \subseteq \Nat$ in $N$ when
+\[
+  \forall n:\quad \evalc{N}{P[\bar n]} = 1
+  \iff n \in R .
+\]
+In particular, a provability formula must represent the certificate
+checker: the real-free checker $\mathsf{checkCodeNat}$ is a total
+computable decision that accepts a code exactly when the encoded
+certificate is valid.
+(Machine-checked, \texttt{numeral}, \texttt{RepresentsChecker},
+\texttt{provability\_representable}.)
+\end{definition}
+
+\subsection{The arithmetization chain}
+
+The bricks below build a representing formula for a genuine recursive
+predicate.
+Mathlib's pairing function is
+\[
+  \pair(a,b) =
+  \begin{cases}
+    b^2 + a, & a < b,\\
+    a^2 + a + b, & b \leq a,
+  \end{cases}
+\]
+a bijection $\Nat^2 \to \Nat$ with inverse $\unpair$.
+
+\begin{definition}[Pairing graph]
+\label{def:pairgraph}
+\[
+  \mathrm{pairGraph}(x,y,z) :=
+  \bigl(x < y \wedge z = y \cdot y + x\bigr)
+  \vee
+  \bigl(y \leq x \wedge z = x \cdot x + x + y\bigr),
+\]
+with the orders of \Cref{def:leF}.
+The unpairing graph is the same formula read backward:
+$\mathrm{unpairGraph}(z,x,y) := \mathrm{pairGraph}(x,y,z)$.
+\end{definition}
+
+\begin{theorem}[Pairing is represented]
+\label{thm:pair-rep}
+For all $a, b, c \in \Nat$:
+\[
+  \evalc{N}{\mathrm{pairGraph}(\bar a, \bar b, \bar c)} = 1
+  \iff c = \pair(a,b),
+\]
+and
+$\evalc{N}{\mathrm{unpairGraph}(\bar c, \bar a, \bar b)} = 1$ iff
+$\unpair(c) = (a,b)$.
+\end{theorem}
+\begin{proof}
+Each branch is a crisp conjunction of an order guard
+(\Cref{thm:leF}) and an equality atom, and the disjunction of crisp
+values is $1$ iff one disjunct is.
+The two guards are exclusive and exhaustive, matching the case split in
+the definition of $\pair$.
+The unpairing claim follows from the bijection:
+$c = \pair(a,b)$ iff $\unpair(c) = (a,b)$.
+(Machine-checked, \texttt{pairGraph\_represents},
+\texttt{unpairGraph\_represents}.)
+\end{proof}
+
+\begin{definition}[Modulo and $\beta$ graphs]
+\label{def:betagraph}
+\[
+  \mathrm{modGraph}(a,m,r) :=
+  \exists q.\ \bigl(a = q \cdot m + r \;\wedge\; r < m\bigr),
+\]
+and G\"odel's two-argument $\beta$-extraction
+$\beta(a,d,i) = a \bmod \bigl(1 + (i+1)d\bigr)$ has the graph
+\[
+  \mathrm{betaGraph}(a,d,i,w) :=
+  \mathrm{modGraph}\bigl(a,\ S((Si) \cdot d),\ w\bigr).
+\]
+The single-code form packs both arguments into one number,
+$\beta(n, i) = \unpair(n)_1 \bmod \bigl((i+1) \cdot \unpair(n)_2 + 1\bigr)$,
+with graph
+\[
+  \mathrm{betaN}(n,i,w) :=
+  \exists a \exists d.\
+  \bigl(\mathrm{unpairGraph}(n,a,d)
+    \wedge \mathrm{betaGraph}(a,d,i,w)\bigr).
+\]
+\end{definition}
+
+\begin{theorem}[$\beta$-extraction is represented]
+\label{thm:beta-rep}
+For all $a, d, i, w, n, m, r \in \Nat$ with $m > 0$:
+\begin{align*}
+  \evalc{N}{\mathrm{modGraph}(\bar a, \bar m, \bar r)} = 1
+    &\iff r = a \bmod m,\\
+  \evalc{N}{\mathrm{betaGraph}(\bar a, \bar d, \bar i, \bar w)} = 1
+    &\iff w = a \bmod \bigl(1 + (i+1)d\bigr),\\
+  \evalc{N}{\mathrm{betaN}(\bar n, \bar i, \bar w)} = 1
+    &\iff w = \beta(n, i).
+\end{align*}
+\end{theorem}
+\begin{proof}
+The matrix of $\mathrm{modGraph}$ is crisp, so \Cref{thm:sigma1}
+reduces the existential to witness arithmetic: a quotient $q$ with
+$a = qm + r$ and $r < m$ exists iff $r = a \bmod m$ (division with
+remainder).
+The $\mathrm{betaGraph}$ modulus term $S((Si) \cdot d)$ evaluates to
+$(i+1)d + 1 \geq 1$, so no positivity side condition remains.
+For $\mathrm{betaN}$, two applications of \Cref{thm:sigma1} peel the
+binders; the witnesses are forced to be $\unpair(n)$ by
+\Cref{thm:pair-rep}, and the remainder clause is the previous case.
+(Machine-checked, \texttt{modGraph\_represents},
+\texttt{betaGraph\_represents}, \texttt{betaNGraph\_represents}.)
+\end{proof}
+
+\subsection{A course-of-values predicate and its object formula}
+
+The target predicate is genuine course-of-values recursion: the
+well-formedness of a coded binary tree, the structural core of
+proof-checking.
+
+\begin{definition}[Tree codes]
+\label{def:istree}
+$\mathrm{isTree} : \Nat \to \Bool$ is defined by
+\[
+  \mathrm{isTree}(0) = \mathsf{true},
+  \qquad
+  \mathrm{isTree}(n+1) =
+  \mathrm{isTree}\bigl(\unpair(n)_1\bigr) \wedge
+  \mathrm{isTree}\bigl(\unpair(n)_2\bigr).
+\]
+The recursion terminates because $\unpair(n)_1, \unpair(n)_2 \leq n
+< n + 1$.
+(Machine-checked, \texttt{isTree}.)
+\end{definition}
+
+\begin{definition}[Coherence of a $\beta$-table]
+\label{def:cohere}
+For $N, k \in \Nat$,
+\[
+  \mathrm{Coh}(N, k) :\iff
+  \Bigl(\beta(N,k) = 1 \iff
+    k = 0 \;\vee\;
+    \bigl(0 < k \wedge \beta(N, \unpair(k-1)_1) = 1
+      \wedge \beta(N, \unpair(k-1)_2) = 1\bigr)\Bigr).
+\]
+(Machine-checked, \texttt{CohereNat}.)
+\end{definition}
+
+\begin{theorem}[Course-of-values via $\beta$]
+\label{thm:tree-beta}
+For every $n \in \Nat$:
+\[
+  \mathrm{isTree}(n) = \mathsf{true}
+  \quad\Longleftrightarrow\quad
+  \exists N \in \Nat:\
+  \beta(N, n) = 1 \;\wedge\;
+  \forall k \leq n:\ \mathrm{Coh}(N,k).
+\]
+\end{theorem}
+\begin{proof}
+($\Rightarrow$) Let $l = [\,\chi(0), \ldots, \chi(n)\,]$ with
+$\chi(k) = 1$ if $\mathrm{isTree}(k)$ and $0$ otherwise, and let
+$N = \mathrm{unbeta}(l)$ be a $\beta$-code of the list, so that
+$\beta(N,k) = \chi(k)$ for $k \leq n$ (the G\"odel $\beta$-lemma,
+via the Chinese remainder theorem).
+Then $\beta(N,n) = 1$, and coherence at every $k \leq n$ is the
+recursion equation of \Cref{def:istree} rewritten through $\chi$,
+using that the children indices $\unpair(k-1)_j \leq k - 1 \leq n$
+stay within the table.
+($\Leftarrow$) Strong induction on $k \leq n$ with the claim
+$\beta(N,k) = 1 \Rightarrow \mathrm{isTree}(k)$.
+Coherence at $k$ either gives $k = 0$, where
+$\mathrm{isTree}(0) = \mathsf{true}$, or gives $k = m + 1$ with both
+children of $m$ marked; the children are strictly smaller and still
+$\leq n$, so the induction hypothesis applies and the recursion
+equation closes the case.
+(Machine-checked, \texttt{isTree\_iff\_beta}.)
+\end{proof}
+
+\begin{definition}[The tree formula]
+\label{def:treeformula}
+With $\to$ and $\leftrightarrow$ the De Morgan encodings,
+\[
+  \mathrm{treeFormula}(x) :=
+  \exists N.\ \Bigl(
+    \mathrm{betaN}(N, x, \bar 1)
+    \;\wedge\;
+    \forall k.\ \bigl(k \leq x \to \mathrm{cohF}(N, k)\bigr)
+  \Bigr),
+\]
+where $\mathrm{cohF}(N,k)$ is the object form of \Cref{def:cohere}:
+\[
+  \mathrm{betaN}(N, k, \bar 1)
+  \;\leftrightarrow\;
+  \Bigl(k = 0 \;\vee\;
+    \exists a \exists b \exists p.\
+    \bigl(k = Sp \wedge \mathrm{pairGraph}(a,b,p)
+      \wedge \mathrm{betaN}(N,a,\bar 1)
+      \wedge \mathrm{betaN}(N,b,\bar 1)\bigr)\Bigr).
+\]
+(Machine-checked, \texttt{treeFormula}.)
+\end{definition}
+
+\begin{theorem}[The tree predicate is represented]
+\label{thm:tree-rep}
+For every $n \in \Nat$ and every assignment,
+\[
+  \evalc{N}{\mathrm{treeFormula}(\bar n)} = 1
+  \quad\Longleftrightarrow\quad
+  \mathrm{isTree}(n) = \mathsf{true}.
+\]
+\end{theorem}
+\begin{proof}
+Every brick of $\mathrm{treeFormula}$ evaluates crisply at every term
+tuple: equality atoms and order guards by
+\Cref{prop:qf-crisp,thm:leF}, the graphs by
+\Cref{thm:pair-rep,thm:beta-rep}, the De Morgan implication and
+biconditional because $\{0,1\}$ is closed under the connectives, the
+bounded universal because an infimum of a crisp family is crisp.
+On crisp values each connective is classical, so peeling the outer
+existential (\Cref{thm:sigma1}), the conjunction, the guarded
+universal, and the three inner existentials translates designation of
+$\mathrm{treeFormula}(\bar n)$ into exactly the right-hand side of
+\Cref{thm:tree-beta}; the node case matches \Cref{def:cohere} because
+$k = p + 1$ with $p = \pair(a,b)$ forces
+$(a,b) = \unpair(k-1)$.
+\Cref{thm:tree-beta} closes the equivalence.
+(Machine-checked, \texttt{treeFormula\_eval\_one\_iff},
+\texttt{treeFormula\_represents}.)
+\end{proof}
+
+\begin{remark}[Shape of the formula]
+\label{rem:tree-shape}
+$\mathrm{treeFormula}$ is an existential ($\beta$-code) over a matrix
+whose only universal quantifier is bounded by $x$; in the classical
+arithmetical hierarchy this is the $\Sigma_1$ shape of arithmetized
+course-of-values recursion~\cite{godel1931}.
+The biconditional and the bounded implication inside it are encoded
+through $\negc$ and $\disjc$ alone, consistent with the absence of an
+internal conditional (\Cref{rem:no-arrow}): on the crisp values where
+the formula lives, the De Morgan encoding is the classical
+conditional, and no contraction-bearing arrow is ever introduced.
+\end{remark}
+
+\begin{figure}[ht]
+\centering
+\begin{tikzpicture}[
+  >=Stealth,
+  brick/.style={draw, rounded corners, align=center,
+    inner sep=5pt, font=\small},
+  node distance=0.55cm and 0.9cm
+]
+  \node[brick] (pair) {$\mathrm{pairGraph}$\\
+    $z = \pair(x,y)$ (\Cref{thm:pair-rep})};
+  \node[brick, right=of pair] (mod) {$\mathrm{modGraph}$\\
+    $r = a \bmod m$ (\Cref{thm:beta-rep})};
+  \node[brick, below=of pair] (unpair) {$\mathrm{unpairGraph}$\\
+    $\unpair(z) = (x,y)$};
+  \node[brick, below=of mod] (beta) {$\mathrm{betaGraph}$\\
+    $w = a \bmod (1 + (i{+}1)d)$};
+  \node[brick, below right=0.7cm and -1.2cm of unpair] (betan)
+    {$\mathrm{betaN}$\\
+    $w = \beta(n,i)$ (\Cref{thm:beta-rep})};
+  \node[brick, below=of betan] (tree) {$\mathrm{treeFormula}$\\
+    $\mathrm{isTree}(n)$ (\Cref{thm:tree-rep})};
+  \draw[->] (pair) -- (unpair);
+  \draw[->] (mod) -- (beta);
+  \draw[->] (unpair) -- (betan);
+  \draw[->] (beta) -- (betan);
+  \draw[->] (betan) -- (tree);
+  \draw[->] (pair.west) .. controls +(-1.0,0) and +(-1.6,0.4) ..
+    node[left, font=\small, pos=0.55] {node case} (tree.west);
+\end{tikzpicture}
+\caption{The arithmetization chain.
+Each box is an explicit object formula over the Robinson~$Q$
+signature, proved to represent the stated function or predicate in the
+standard model; each arrow is a use of the lower brick inside the
+higher one.
+$\Sigma_1$ witness extraction (\Cref{thm:sigma1}) discharges every
+existential.}
+\label{fig:bricks}
+\end{figure}
+
+%=============================================================================
+\section{The Second-Incompleteness Boundary}
+\label{sec:loeb}
+%=============================================================================
+
+\Cref{sec:arith} delivers the semantic core of representability: a
+standard model where $Q$ is certain ($\Cref{thm:axioms-one}$),
+$\Sigma_1$ witness completeness ($\Cref{thm:sigma1}$), a named target
+for a provability formula (\Cref{def:represents}), and a completed
+arithmetization of a course-of-values recursive predicate
+(\Cref{thm:tree-rep}).
+The boundary of the program is equally precise.
+
+\begin{theorem}[No internal L\"ob arrow]
+\label{thm:no-loeb}
+There is no total operation $f : [0,1]^2 \to [0,1]$ satisfying
+$\mathrm{MP}(f)$, $\mathrm{CP}(f)$, and $\mathrm{Contr}(f)$.
+Consequently the L\"ob derivability argument, which requires an
+internal implication with modus ponens, conditional proof, and
+contraction, has no internal-arrow formulation in this algebra,
+regardless of any representing provability formula.
+\end{theorem}
+\begin{proof}
+The first sentence is \Cref{thm:curry-block}; the second reads off
+which structural rules the standard proof of L\"ob's theorem uses on
+the internal arrow.
+(Machine-checked, \texttt{no\_internal\_loeb\_arrow}.)
+\end{proof}
+
+\begin{remark}[Honest scope]
+\label{rem:scope}
+Three boundaries should not be blurred.
+First, \Cref{thm:no-loeb} is an impossibility for an
+\emph{internalized} second incompleteness argument; it does not refute
+G\"odel's theorem, which concerns classical theories with a classical
+conditional.
+Second, zero-evidence conditioning ($\Cond(0,0) = [0,1]$) is
+underdetermination by an equation; proof-theoretic undecidability is a
+different phenomenon and does not assign any sentence the value
+$\tfrac12$.
+Third, the representability target of \Cref{def:represents} is named
+and the mechanism for meeting it is proved on a genuine
+course-of-values predicate (\Cref{thm:tree-rep}); instantiating the
+same chain on the full certificate checker is mechanical but not yet
+machine-checked, and nothing in this paper claims it.
+\end{remark}
 
 %=============================================================================
 \section{Conclusion}
 \label{sec:conclusion}
 %=============================================================================
 
-The slogan ``paradox without explosion'' has a precise reading here.
-Paradoxical patterns are not all treated alike.
-Negation self-reference has the singleton solution $\{\tfrac12\}$.
-Identity self-reference has the full interval.
-Zero-evidence conditioning has the full interval for a different reason:
-the chain rule imposes no value.
-Curry requires an internal conditional plus structural rules, and those rules
-have no common total carrier on $[0,1]$.
+The slogan ``paradox without explosion'' has a theorem-level reading.
+Self-reference patterns are equations with solution sets:
+$\{\tfrac12\}$ for liar and Russell, $[0,1]$ for the truth-teller and
+for zero-evidence conditioning, $\varnothing$ or $\{\sqrt b\}$-type
+sets for Curry once a residuum is added
+(\Cref{thm:liar-sol,thm:truth-teller,thm:russell,thm:curry-sqrt,thm:curry-zero}).
+Classical reasoning survives exactly where it should: the crisp
+fragment is classical for evaluation and consequence
+(\Cref{thm:crisp-eval,thm:crisp-coincide}), excluded middle holds for
+thresholds up to $\tfrac34$, and explosion loses its countermodel only
+when its premises become unsatisfiable
+(\Cref{thm:explosion-sharp,thm:em-sharp}).
+What disappears is one inference: from false or impossible evidence to
+an arbitrary conclusion
+(\Cref{thm:material-divergence,thm:no-ex-falso}).
 
-Classical reasoning survives where it should.
-The crisp fragment recovers Boolean evaluation and classical consequence.
-Proof by contradiction remains available as countercase elimination inside
-that fragment.
-What disappears is the move from false or impossible evidence to an arbitrary
-conclusion.
+The mechanism is a single design decision applied uniformly:
+conditioning is the external relation $c \in \Cond(j,e)$, never an
+internal arrow.
+The Curry block (\Cref{thm:curry-block}) shows the decision is forced,
+since MP, CP, and contraction have no common total carrier on
+$[0,1]$; the labelled calculus (\Cref{thm:seq-sound}) shows the
+decision is workable; and the arithmetic layer
+(\Cref{thm:axioms-one,thm:sigma1,thm:tree-rep}) shows it reaches
+genuine arithmetization, up to the structural boundary of
+\Cref{thm:no-loeb}.
 
-This leaves one substantial next task.
-A full graded-foundations comparison must still settle extensionality,
-equality, substitution, and graded comprehension against White, Takeuti and
-Titani, H\'ajek--Paris--Shepherdson, and BZFC.
-That task must preserve the same boundary:
-conditioning constrains values through the chain rule; it is not implication.
+Two tasks remain open.
+A graded set theory over this interface must settle extensionality,
+equality, and substitution against the comprehension programs of
+White, H\'ajek\,/\,Paris\,/\,Shepherdson, Takeuti and Titani, and
+BZFC~\cite{white1979,hajek2000,takeuti1984,khomskii2024}, while
+keeping conditioning external.
+And the arithmetization chain of \Cref{fig:bricks} should be pushed
+from the tree predicate to the full certificate checker, closing the
+representability target of \Cref{def:represents}.
+
+\section*{Acknowledgements}
+
+Anthropic's Claude (Opus 4.5 and 4.6) was used as an assistant for both
+the Lean formalization and the manuscript preparation.
 
 %=============================================================================
 % Bibliography
 %=============================================================================
 
-\section{Related set theories and value structures}
-\label{sec:related}
-
-This section positions Cred against three families of non-classical systems that
-share its concern with contradiction, partiality, and graded or non-Boolean
-membership. The aim is comparison of design, not a claim of superiority. We
-separate throughout what Cred \emph{proves} (machine-checked Lean results, named
-below) from what is a structural analogy with prior work.
-
-\subsection{First Degree Entailment and the Belnap--Dunn four values}
-
-First Degree Entailment, in the Belnap--Dunn reading \cite{belnap1977,dunn1976},
-equips formulas with one of four values: $\mathbf{t}$ (true only), $\mathbf{f}$
-(false only), $\mathbf{b}$ (both), $\mathbf{n}$ (neither), tracking told-true and
-told-false evidence as two independent bits. Collapsing the two paraconsistent
-values $\mathbf{b},\mathbf{n}$ to a single middle value recovers the
-three-valued logics of Kleene (strong K3) and Priest (LP)
-\cite{priest1979,asenjo1966,priest2008}.
-
-Cred sits below this picture as a quantitative refinement. The scalar fragment
-takes values in $[0,1]$ with negation $\negc c = 1-c$, conjunction
-$c_1 \conjc c_2$ (product), and the De Morgan dual $c_1 \disjc c_2$. The
-collapse onto $\{0,\tfrac12,1\}$ sending $0 \mapsto 0$, $(0,1)\mapsto \tfrac12$,
-$1\mapsto 1$ reproduces the Kleene tables for negation, conjunction, and
-disjunction; this is verified in \texttt{Cred.ThreeVal} (\texttt{neg},
-\texttt{conj}, \texttt{disj}, with the De Morgan laws \texttt{de\_morgan\_conj},
-\texttt{de\_morgan\_disj} and the diagonal facts \texttt{conj\_half\_half},
-\texttt{disj\_half\_half}). The scalar middle value $\tfrac12$ is a single point,
-so it conflates ``both'' and ``neither'': one coordinate cannot record told-true
-and told-false strength separately.
-
-To separate them, Cred adds a two-coordinate value \texttt{BiCredence}, a pair
-$\langle \mathrm{pos}, \mathrm{neg}\rangle$ of independent credences with no
-constraint relating them. Negation swaps coordinates (\texttt{bneg}),
-conjunction multiplies positive evidence and joins negative evidence
-(\texttt{bconj}), and disjunction is the De Morgan dual (\texttt{bdisj}); negation
-is involutive (\texttt{bneg\_bneg}). The four corners $\langle 0,0\rangle$,
-$\langle 1,0\rangle$, $\langle 0,1\rangle$, $\langle 1,1\rangle$ are named
-\texttt{neither}, \texttt{trueOnly}, \texttt{falseOnly}, \texttt{both}, and the
-map \texttt{toFDE}, thresholding each coordinate at certainty, sends them to the
-four FDE values exactly (\texttt{toFDE\_neither}, \texttt{toFDE\_trueOnly},
-\texttt{toFDE\_falseOnly}, \texttt{toFDE\_both}). Negation acts on the corners as
-in FDE: it swaps \texttt{trueOnly} and \texttt{falseOnly} and fixes \texttt{both}
-and \texttt{neither} (\texttt{bneg\_trueOnly}, \texttt{bneg\_falseOnly},
-\texttt{bneg\_both}, \texttt{bneg\_neither}). The positive projection
-\texttt{projPos} is a homomorphism for conjunction and disjunction
-(\texttt{projPos\_bconj}, \texttt{projPos\_bdisj}); it commutes with negation only
-on the consistent fragment where $\mathrm{neg} = \negc\,\mathrm{pos}$
-(\texttt{projPos\_bneg\_complementary}), which is exactly where the scalar value
-and the FDE bilattice agree. So Cred refines FDE in two directions: the scalar
-$[0,1]$ grades each FDE corner, while \texttt{BiCredence} keeps the two evidence
-coordinates apart that the single $\tfrac12$ would merge.
-
-\subsection{Paraconsistent set theory}
-
-Paraconsistent and four-valued set theories build ZF-style universes over a
-non-classical membership predicate, so that $a \in b$ may take a both-true-and-false
-value without trivializing the theory; the algebra-valued constructions of
-Tarafder and Chakraborty are representative \cite{tarafder2015,chakraborty2019}.
-Cred's set layer, \texttt{CredSet}, is graded rather than four-valued: membership
-is a credence \texttt{mem}\,$: U \to [0,1]$, with complement, intersection, and
-union lifting the value operations pointwise (\texttt{compl}, \texttt{inter},
-\texttt{union}) and \texttt{emptyset}, \texttt{univ} as the constant $0$ and $1$
-sets.
-
-The contrast is in where contradiction lives and how the classical theory is
-recovered. A paraconsistent set theory locates inconsistency \emph{in a membership
-value}, a designated ``both'' that is simultaneously a member and a non-member.
-Cred has no such value: membership is a single number in $[0,1]$, and
-contradiction is instead localized at the level of \emph{consequence}, by the
-chain-rule conditioning that withholds explosion when evidence has credence $0$
-(\texttt{conditioning\_zero\_any}; cf. \texttt{cred\_no\_ex\_falso}). Comprehension
-is treated as constraint rather than as a value: a defining condition cuts out the
-solution set of credences compatible with it, in the spirit of separation, without
-forcing a membership degree where the condition is unsatisfiable. Classical set
-theory is recovered exactly on the \emph{crisp} fragment, where every membership
-value is $0$ or $1$ (\texttt{Crisp}). On crisp sets the graded operations restrict
-to the Boolean ones and stay crisp (\texttt{compl\_crisp}, \texttt{inter\_crisp},
-\texttt{union\_crisp}); the embedding \texttt{ofPred} of a predicate and its inverse
-\texttt{toPred} form a bijection (\texttt{toPred\_ofPred}, \texttt{ofPred\_toPred},
-\texttt{ofPred\_injective}, \texttt{ofPred\_surjective}) commuting with complement,
-intersection, and union (\texttt{toPred\_compl}, \texttt{toPred\_inter},
-\texttt{toPred\_union}); the pointwise subset relation becomes classical
-implication of memberships (\texttt{crisp\_subset\_iff}); and graded membership
-$\mathtt{mem}\,x = 1$ coincides with classical membership
-(\texttt{mem\_iff\_classical}, \texttt{crisp\_mem\_iff\_toPred}). Cred thus
-reproduces ordinary set theory on crisp data and confines non-classicality to
-graded membership and to conditioning, rather than to an inconsistent membership
-value.
-
-\subsection{Twist-valued models and twist structures}
-
-Twist structures present a paraconsistent algebra as pairs $\langle a, b\rangle$
-drawn from an underlying lattice, with one coordinate tracking the positive part
-and the other the negative; algebra-valued models of set theory have been built on
-such structures by L\"owe, Tarafder, and collaborators \cite{loewe2015,tarafder2015}.
-Cred's \texttt{BiCredence} is a twist-like construction over the credence algebra:
-its two coordinates are the positive and negative credence, negation is the
-coordinate swap (\texttt{bneg}), and conjunction and disjunction pair a product
-meet on the positive axis with a De Morgan join on the negative axis
-(\texttt{bconj}, \texttt{bdisj}). We state the relationship conservatively. Cred
-does not claim to reproduce any particular twist-valued model of set theory, nor to
-validate the same fixed set of axioms; what is verified is the algebra of the
-two-coordinate value, its involutive negation, the homomorphic positive projection,
-and the exact collapse to the four FDE values. The point of contact is structural:
-the twist idea of carrying positive and negative information as separate
-coordinates is exactly what \texttt{BiCredence} uses to recover the FDE distinctions
-that the scalar value cannot express, and what a future graded set theory over
-\texttt{BiCredence}-valued membership could build on.
-
 \bibliographystyle{plain}
 \bibliography{../cred}
+
+%=============================================================================
+% APPENDICES
+%=============================================================================
+\appendix
+
+%=============================================================================
+\section{Lean Formalization}
+\label{app:lean}
+%=============================================================================
+
+All results are formalized in Lean~4 with Mathlib (toolchain 4.16.0).
+Verification: \texttt{cd lean \&\& lake build}; correctness is
+type-checking with zero \texttt{sorry}.
+
+\begin{itemize}[nosep]
+\item \texttt{Cred/Core/Value.lean}: the value algebra
+  (\Cref{sec:algebra}), negation fixed point, spread bounds.
+\item \texttt{Cred/Cond/Admissible.lean}: $\Cond$, trichotomy
+  (\Cref{thm:cond-trichotomy}).
+\item \texttt{Cred/Core/Consequence.lean}: formulas, evaluation,
+  positivity and certainty consequence, no-explosion witnesses.
+\item \texttt{Cred/Bridge/Crisp.lean}: Boolean embedding, consequence
+  coincidence, material divergence (\Cref{sec:crisp}).
+\item \texttt{Cred/Fixpoint.lean}: solution sets
+  (\Cref{sec:solutions}).
+\item \texttt{Cred/Predicate.lean}: graded predicates and quantifiers
+  (\Cref{sec:comprehension}).
+\item \texttt{Cred/Bridge/Curry.lean}: residuation, contraction
+  failure, Curry block (\Cref{sec:curry}).
+\item \texttt{Cred/Threshold.lean}, \texttt{Cred/Sequent.lean}:
+  threshold consequence, sharp bounds, labelled calculus, soundness,
+  no ex falso (\Cref{sec:proof}).
+\item \texttt{Cred/Foundation/Arithmetic.lean}: standard model,
+  Robinson $Q$, \Cref{thm:axioms-one,thm:q-con}.
+\item \texttt{Cred/Foundation/SigmaOne.lean}: definable order,
+  quantifier-free crispness, $\Sigma_1$ completeness,
+  representability target, \Cref{thm:no-loeb}.
+\item \texttt{Cred/Foundation/Pairing.lean},
+  \texttt{Beta.lean}, \texttt{TreeRepr.lean}: the arithmetization
+  chain of \Cref{fig:bricks}.
+\end{itemize}
+
+Design choices: \texttt{Credence} is a structure carrying
+\texttt{nonneg} and \texttt{le\_one} proofs; \texttt{Conditioning} is
+a dependent type packaging a conditional value with its chain-rule
+proof, and \texttt{Cond} is its solution-set form; the first-order
+\texttt{Formula} type has equality and quantifier constructors and
+deliberately no implication constructor; quantifiers in the standard
+model are \texttt{credInf}/\texttt{credSup} over the whole domain,
+not witness-only collapses.
 
 \end{document}

@@ -1,5 +1,10 @@
-% The Irreducible Commitment
-% Part 4: Prior, Seed, and Supplied Conditioning
+% The Irreducible Commitment: Prior, Seed, and Supplied Conditioning
+% Part 4: the bridge between Bayesian conditioning, the chain-rule primitive,
+% and the bootstrap commitment, made precise.
+%
+% References to Lean formalization: lean/Cred/Cond/Admissible.lean,
+% lean/Cred/Update.lean, lean/Cred/Coherence.lean, lean/Cred/Cromwell.lean,
+% lean/Cred/Lindley.lean, lean/Cred/Valuation.lean, lean/Cred/ToyModel.lean
 
 \documentclass[11pt,a4paper]{article}
 
@@ -7,18 +12,24 @@
 \usepackage{mathtools}
 \usepackage{enumitem}
 \usepackage{booktabs}
+\usepackage{caption}
 \usepackage{hyperref}
 \hypersetup{
     colorlinks=true,
     linkcolor=blue,
     citecolor=blue,
     urlcolor=blue,
-    pdfauthor={Anonymous},
-    pdftitle={The Irreducible Commitment}
+    pdfauthor={Christopher Albert},
+    pdftitle={The Irreducible Commitment: Prior, Seed, and Supplied Conditioning}
 }
-\usepackage{cleveref}
+\usepackage[capitalize]{cleveref}
 \usepackage[margin=1in]{geometry}
+\emergencystretch=3em
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta,positioning,shapes}
+\usepackage{graphicx}
 
+% Theorem environments
 \newtheorem{theorem}{Theorem}[section]
 \newtheorem{lemma}[theorem]{Lemma}
 \newtheorem{proposition}[theorem]{Proposition}
@@ -27,19 +38,23 @@
 \newtheorem{example}[theorem]{Example}
 \newtheorem{remark}[theorem]{Remark}
 
+% Custom commands
 \newcommand{\cred}{\mathsf{cred}}
-\newcommand{\Cond}{\mathsf{Cond}}
-\newcommand{\Sol}{\mathsf{Sol}}
 \newcommand{\negc}{\mathord{\sim}}
 \newcommand{\conjc}{\otimes}
 \newcommand{\disjc}{\sqcup}
+\newcommand{\condc}[2]{({#1} \mid {#2})}
+\newcommand{\Cond}{\mathsf{Cond}}
+\newcommand{\CondSet}{\mathsf{CondSet}}
 \newcommand{\Real}{\mathbb{R}}
-\newcommand{\Bool}{\mathbb{B}}
+\newcommand{\Nat}{\mathbb{N}}
 
-\title{The Irreducible Commitment\\[0.5em]
-\large Prior, Seed, and Supplied Conditioning}
+\title{The Irreducible Commitment:\\
+Prior, Seed, and Supplied Conditioning}
 
-\author{Anonymous for blind review}
+\author{Christopher Albert\\
+\small Institute for Theoretical and Computational Physics\\
+\small Graz University of Technology}
 \date{June 2026}
 
 \begin{document}
@@ -47,19 +62,30 @@
 \maketitle
 
 \begin{abstract}
-Take the first measurement of an unknown quantity. Before you can update on the
-reading, you must already hold a prior. Take the construction of a foundation
-for mathematics. Before you can prove anything about the real line, you must
-already believe a structure into which the proof runs. Neither act starts from
-nothing. The opening commitment, the prior, the seed, the supplied conditioning,
-cannot be derived inside the system it grounds; it can only be made explicit,
-held as small as the task allows, and tested for self-consistency. This is an
-old observation, the regress horn of the M\"unchhausen trilemma
-\cite{albert1968} and Neurath's boat \cite{neurath1932}. Our contribution is not
-a theorem about the world but a synthesis: we exhibit the same irreducible
-commitment across probability, many-valued logic, and the foundations of
-mathematics, and we mechanize the foundations instance in Lean so that the seed
-appears as an explicit hypothesis rather than a hidden assumption.
+We make precise the bridge between Bayesian conditioning, the chain-rule
+conditioning primitive of Parts~1--3, and the opening commitment that any
+updating system must supply before it can run.
+The formal core: the chain rule
+$\cred(A \mid B) \conjc \cred(B) = \cred(A \land B)$ defines the
+admissible set $\Cond(j,e) = \{c \in [0,1] : c \cdot e = j\}$, which
+obeys a trichotomy (singleton $\{j/e\}$ for $e > 0$, all of $[0,1]$ for
+$e = j = 0$, empty for $e = 0 < j$); Cromwell's rule (credences $0$ and
+$1$ are absorbing under coherent conditioning); sequential update equals
+batch update for a fixed joint model; a contraction model in which the
+seed determines every finite stage yet washes out in the limit; and a
+credal-set characterization in which ranging the supplied joint over a
+class of priors yields exactly the interval-valued posteriors of
+imprecise probability, degenerating to the full interval at zero
+evidence.
+The Bayesian model-comparison boundary (Occam factor, Bartlett's
+improper-prior indeterminacy, Lindley's paradox) is derived exactly for
+a Gaussian location model.
+All credence-algebra results are machine-checked in Lean~4 with Mathlib;
+the Gaussian computations are classical.
+The synthesis is honest in scope: the prior, the foundational seed, and
+the supplied joint play the same structural role, an input the machinery
+needs and cannot generate, but the correspondence is an organizing
+analogy, not a theorem; we claim no resolution of Bayesian foundations.
 \end{abstract}
 
 %=============================================================================
@@ -67,861 +93,1233 @@ appears as an explicit hypothesis rather than a hidden assumption.
 \label{sec:intro}
 %=============================================================================
 
-Measure an unknown length once. The instrument returns a number, and you want to
-say what the length is. Bayes' rule gives the posterior from the likelihood and
-the prior, but it needs the prior as input. There is no reading you can take, and
-no rule you can apply to the reading, that fixes the prior for you. Pick a flat
-prior and you have chosen one; pick Jeffreys' rule \cite{jeffreys1939} and you
-have chosen another; refuse to choose and you cannot update at all. The first
-inference forces a commitment that the data did not supply. This is not a defect
-in the experiment. With more data the choice washes out under mild conditions,
-which is the content of the Bernstein--von Mises theorem
-\cite{vandervaart1998} and of Blackwell and Dubins on the merging of opinions
-\cite{blackwell1962}. The washing out is itself conditional: Lindley's paradox
-\cite{lindley1957,bartlett1957} and the inconsistency examples of Diaconis and
-Freedman \cite{diaconis1986} show priors that never wash out. Either way the
-prior was there first.
+Bayesian updating needs a prior before the first datum
+arrives~\cite{ramsey1931,definetti1937,jaynes2003}; a formal foundation
+needs axioms before the first proof runs~\cite{simpson2009}; chain-rule
+conditioning needs a supplied joint credence before a conditional has a
+value~\cite{part1}.
+This paper makes the third instance fully precise and uses it to state
+exactly what the first two share with it.
 
-Now try to build mathematics from the ground. You want the real numbers, so you
-want a theory in which they live. To state the axioms you already use a logic,
-a notion of set or type, and a background structure rich enough to interpret
-them. G\"odel's second incompleteness theorem \cite{godel1931} says that no such
-theory strong enough to carry arithmetic can prove its own consistency from
-inside; Gentzen's consistency proof for arithmetic \cite{gentzen1936} buys the
-missing fact only by assuming transfinite induction the theory itself does not
-contain. Reverse mathematics \cite{simpson2009} measures exactly how much
-existence each theorem needs, and the answer is never zero. The construction
-presupposes belief in a structure it cannot first justify.
+The setting is the credence algebra of Parts~1--3~\cite{part1,part2}:
+values in $[0,1]$ with negation $\negc c = 1 - c$, product conjunction
+$c_1 \conjc c_2 = c_1 c_2$, and De Morgan disjunction
+$c_1 \disjc c_2 = c_1 + c_2 - c_1 c_2$.
+Conditioning is primitive, governed by the chain rule
+$\cred(A \mid B) \conjc \cred(B) = \cred(A \land B)$ in the tradition of
+R\'enyi~\cite{renyi1955}, Popper~\cite{popper1959}, and
+de Finetti~\cite{definetti1936}, without division and without a measure
+space.
+The joint credence is an input, not a function of the marginals; the
+algebra does not manufacture dependence.
 
-These are the same situation seen twice. The measurement needs a prior; the
-foundation needs a seed. In both, the opening move is a commitment that the
-machinery downstream cannot generate, because the machinery runs only after the
-commitment is in place. We call this the \emph{irreducible commitment}, and we
-state the organizing claim plainly: no inference, justification, or construction
-proceeds from nothing. Something is assumed at the start. The assumption cannot
-be removed; the trilemma of Albert \cite{albert1968} closes the three escapes,
-regress, circle, and arbitrary stop, and Neurath's image of rebuilding the boat
-plank by plank at sea \cite{neurath1932} names the condition we are left in. The
-point is older still in spirit: Quine's rejection of a foundation immune to
-revision \cite{quine1951}, Wittgenstein's hinges that stand fast so that
-inquiry can move \cite{wittgenstein1969}, and Carnap's distinction between
-questions inside a framework and the practical choice of the framework itself
-\cite{carnap1950}. We discovered none of this. We restate it.
+\textbf{Main results.}
+\Cref{thm:trichotomy} classifies the admissible set
+$\Cond(j,e) = \{c \in [0,1] : c \cdot e = j\}$:
+a singleton for positive evidence, the full interval for $e = j = 0$,
+empty otherwise.
+\Cref{thm:cromwell} proves Cromwell's rule inside the algebra: a prior
+of $0$ or $1$ is unmoved by any coherent evidence, and zero evidence is
+absorbing; the same annihilator identity $c \cdot 0 = 0$ that yields
+no-ex-falso~\cite{part2} yields the unrecoverable zero.
+\Cref{thm:seq-batch} proves that sequential and batch updates agree for
+a fixed joint model: coherence is path independence in the data
+grouping, not convergence.
+\Cref{thm:contraction} gives a contraction model separating the two:
+the seed determines every finite stage exactly, yet the orbit converges
+to the target from every seed.
+\Cref{thm:condset-positive,thm:condset-zero} characterize the credal
+set obtained by ranging the supplied joint over a class of priors, and
+\Cref{thm:bartlett,thm:lindley} derive the Bartlett and Lindley limits
+exactly for a Gaussian location model: the Occam factor in the marginal
+likelihood $m(x) = \int p(x \mid \theta)\, d\pi(\theta)$ vanishes as the
+prior widens, so a diffuse-enough seed loses every comparison.
 
-What the commitment cannot do is hide. The honest response is not to abolish the
-seed but to manage it: make it explicit, so a reader sees what was assumed;
-minimize it, so the assumption is as weak as the task allows; and test it for
-self-consistency, so the assumed structure does not collapse under its own
-rules. Explicitness is the de Bruijn criterion in proof checking
-\cite{debruijn1970}, where a small trusted kernel records every axiom a proof
-leans on. Minimality is the working ideal of reverse mathematics
-\cite{simpson2009} and of objective Bayesian priors \cite{berger1985,jaynes2003}.
-Self-consistency is what Tarski's undefinability theorem \cite{tarski1936} and
-the diagonal lemma force us to check, since a structure that can name its own
-truth predicate breaks. The diagonal pattern itself is one mechanism, made
-uniform by Lawvere \cite{lawvere1969} and by Yanofsky \cite{yanofsky2003}: the
-liar, Russell's set, G\"odel's sentence, and Curry's paradox are instances of a
-single fixed-point construction. Where a classical foundation meets such a fixed
-point it must either restrict comprehension or absorb a contradiction.
+\textbf{Scope.}
+The credence-algebra results are machine-checked in Lean~4 with Mathlib
+(\cref{app:lean}); the Gaussian computations of
+\cref{sec:modelcomparison} are classical and not formalized.
+The three-way correspondence of \cref{sec:synthesis} (prior, seed,
+supplied joint) is an organizing analogy between systems, stated as
+remarks; we claim no functor between them and no contribution to the
+justification of Bayesian inference itself.
+The M\"unchhausen trilemma~\cite{albert1968} and Neurath's
+boat~\cite{neurath1932} frame the discussion; they prove nothing here.
 
-The credence algebra of Parts~1--3 \cite{part1,part2} gives a setting where the
-seed and its self-tests can be written down and checked. Values live in $[0,1]$
-with $\negc c = 1-c$, $a \conjc b = ab$, and
-$a \disjc b = a + b - ab$. Conditioning is not a connective but the external
-admissibility relation $\Cond(j,e) = \{c \in [0,1] : ce = j\}$, supplied from
-outside the object language. This separation is what lets a fixed point be an
-equation rather than an explosion: the liar's credence $c = 1 - c$ has the unique
-solution $\tfrac12$, and conditioning on impossible evidence, $e = 0$, leaves the
-conditional value unconstrained instead of licensing everything. The supplied
-conditioning is a seed of exactly the kind this paper studies, an input the
-algebra requires and cannot manufacture. Turing's ordinal logics
-\cite{turing1939} and Feferman's recursive progressions \cite{feferman1962} are
-the precedent for adding such seeds in a controlled, iterated way, and
-Solomonoff's universal prior \cite{solomonoff1964} is the limiting attempt to
-fix the very first one.
+\textbf{Outline.}
+\Cref{sec:chainrule} defines the chain rule and classifies the
+admissible set.
+\Cref{sec:valuations} isolates the supplied joint.
+\Cref{sec:update} defines Bayesian and Jeffrey updates and their
+zero-evidence underdetermination.
+\Cref{sec:coherence} proves sequential-equals-batch coherence.
+\Cref{sec:cromwell} proves Cromwell's rule and its no-ex-falso tie.
+\Cref{sec:contraction} gives the contraction model.
+\Cref{sec:modelcomparison} develops credal sets and the model-comparison
+boundary.
+\Cref{sec:synthesis} states the synthesis.
+\Cref{app:lean} maps results to the Lean formalization.
 
-This paper is a synthesis, not a discovery. We claim no new theorem about
-priors, about provability, or about the world. We claim that one structural fact,
-the irreducible opening commitment, recurs across probability, many-valued logic,
-and foundations, and that it is worth seeing the three instances side by side and
-in machine-checked form. The foundations instance is formalized in Lean: the seed
-appears as an explicit hypothesis to a structure, the self-consistency checks
-appear as theorems, and a small trusted kernel records what each derivation
-assumes. Section~\ref{sec:correspondence} sets out the prior and the seed in
-turn; the remaining sections develop the explicit-minimal-tested discipline and
-its mechanization. The reward is modest and concrete: not a foundation without
-assumptions, which the trilemma forbids, but a foundation whose assumptions are
-named, bounded, and checked.
+%=============================================================================
+\section{The Chain Rule and the Admissible Set}
+\label{sec:chainrule}
+%=============================================================================
 
-\section{The Correspondence}
-\label{sec:correspondence}
+\begin{definition}[Credence algebra~\cite{part1}]
+\label[definition]{def:credence}
+A \emph{credence} is a real number $c \in [0,1]$.
+Negation, conjunction, and disjunction are
+\[
+\negc c = 1 - c, \qquad
+c_1 \conjc c_2 = c_1 c_2, \qquad
+c_1 \disjc c_2 = \negc(\negc c_1 \conjc \negc c_2) = c_1 + c_2 - c_1 c_2 .
+\]
+\end{definition}
 
-The earlier sections kept three layers apart: truth values, consequence, and
-conditioning.
-That separation buys a dictionary.
-Bayesian model selection, the trusted-base discipline of formal foundations,
-and Cred conditioning all answer one question: what does a body of evidence
-admit, and at what cost?
-The columns name three readings of the same admissibility bookkeeping.
-We collect them in Table~\ref{tab:correspondence} and explain each row.
+\begin{definition}[Conditioning structure]
+\label[definition]{def:conditioning}
+A \emph{conditioning structure} for a pair $(j, e) \in [0,1]^2$ of
+\emph{joint} and \emph{evidence} credences is a credence
+$c \in [0,1]$ satisfying the chain rule
+\[
+c \conjc e = j .
+\]
+In propositional notation, with $j = \cred(A \land B)$ and
+$e = \cred(B)$: $\condc{A}{B} \conjc \cred(B) = \cred(A \land B)$.
+(Machine-checked, \texttt{Conditioning}.)
+\end{definition}
 
-\begin{table}[t]
+The joint $j$ is supplied as a parameter; it is not computed from
+marginals.
+\Cref{sec:valuations} returns to this point.
+
+\begin{definition}[Admissible set]
+\label[definition]{def:cond}
+The \emph{admissible set} of conditional credences for $(j,e)$ is
+\[
+\Cond(j, e) = \{ c \in [0,1] : c \cdot e = j \} .
+\]
+(Machine-checked, \texttt{Cond}.)
+\end{definition}
+
+\begin{proposition}[Membership]
+\label[proposition]{prop:membership}
+$c \in \Cond(j,e)$ if and only if $c$ is a conditioning structure
+for $(j,e)$.
+\end{proposition}
+\begin{proof}
+Both sides assert the equation $c \cdot e = j$.
+(Machine-checked, \texttt{mem\_cond\_iff}.)
+\end{proof}
+
+\begin{lemma}[Coherence bound]
+\label[lemma]{lem:coherence-bound}
+If $\Cond(j,e) \neq \emptyset$ then $j \leq e$.
+\end{lemma}
+\begin{proof}
+Let $c \cdot e = j$ with $c \in [0,1]$.
+Then $j = c \cdot e \leq 1 \cdot e = e$.
+(Machine-checked, \texttt{conditioning\_implies\_joint\_le\_evidence}.)
+\end{proof}
+
+\begin{theorem}[Trichotomy of the admissible set]
+\label{thm:trichotomy}
+For all $j, e \in [0,1]$:
+\begin{enumerate}[label=\textup{(\alph*)},nosep]
+\item if $e > 0$ and $j \leq e$, then
+  $\Cond(j,e) = \{ j/e \}$, a singleton;
+\item if $e = j = 0$, then $\Cond(0,0) = [0,1]$, the full interval;
+\item if $j > e$ (in particular $e = 0 < j$), then
+  $\Cond(j,e) = \emptyset$.
+\end{enumerate}
+Consequently $\Cond(j,e) \neq \emptyset$ if and only if $j \leq e$.
+\end{theorem}
+\begin{proof}
+(a)~For $e > 0$ the equation $c \cdot e = j$ is equivalent to
+$c = j/e$, and $j \leq e$ gives $j/e \in [0,1]$, so exactly one
+admissible value exists.
+(b)~For every $c \in [0,1]$, $c \cdot 0 = 0$, so the defining equation
+holds identically.
+(c)~If $c \cdot e = j$ then $j \leq e$ by
+\cref{lem:coherence-bound}, contradicting $j > e$.
+The nonemptiness criterion combines (a)--(c): for $j \leq e$ either
+$e > 0$ (case (a)) or $e = 0$, which forces $j = 0$ (case (b)).
+(Machine-checked, \texttt{cond\_singleton\_of\_pos},
+\texttt{cond\_zero\_zero\_univ}, \texttt{cond\_nonempty\_iff},
+\texttt{cond\_zero\_evidence\_ne\_empty}.)
+\end{proof}
+
+\begin{corollary}[Zero-evidence underdetermination]
+\label[corollary]{cor:zero-underdetermined}
+For every $c \in [0,1]$ there is a conditioning structure for $(0,0)$
+with conditional credence $c$: impossible evidence imposes no
+constraint, and there is no ex falso.
+Moreover, any conditioning structure with evidence $0$ forces $j = 0$.
+\end{corollary}
+\begin{proof}
+The first claim is \cref{thm:trichotomy}(b) read through
+\cref{prop:membership}; the second is \cref{lem:coherence-bound} with
+$e = 0$.
+(Machine-checked, \texttt{conditioning\_zero\_any},
+\texttt{conditioning\_zero\_forces\_joint\_zero}.)
+\end{proof}
+
+\begin{proposition}[Existence and uniqueness at positive evidence]
+\label[proposition]{prop:existence-uniqueness}
+For $e > 0$, a conditioning structure for $(j,e)$ exists if and only if
+$j \leq e$, and is then unique with value $j/e$.
+\end{proposition}
+\begin{proof}
+Immediate from \cref{thm:trichotomy}(a) and (c).
+(Machine-checked, \texttt{conditioning\_mk},
+\texttt{conditioning\_unique}.)
+\end{proof}
+
+\subsection{Fr\'echet Bounds on the Supplied Joint}
+
+The chain rule, applied in both directions, constrains which joints can
+be supplied for given marginals $a = \cred(A)$ and $b = \cred(B)$; the
+constraint is the Fr\'echet--Hoeffding interval~\cite{nelsen2006}.
+
+\begin{proposition}[Fr\'echet bounds]
+\label[proposition]{prop:frechet}
+Let $a, b, j \in [0,1]$.
+\begin{enumerate}[label=\textup{(\alph*)},nosep]
+\item \emph{Upper bound:} if conditioning structures for $(j,a)$ and
+  $(j,b)$ both exist, then $j \leq \min(a, b)$.
+\item \emph{Lower bound:} if the complement coherence
+  $1 - a - b + j \geq 0$ holds (the credence of
+  $\negc A \land \negc B$ is nonnegative), then $j \geq a + b - 1$.
+\item \emph{Realization:} if $a, b > 0$, every
+  $j \in [0, \min(a,b)]$ admits conditioning structures in both
+  directions.
+\end{enumerate}
+\end{proposition}
+\begin{proof}
+(a)~Apply \cref{lem:coherence-bound} to each direction:
+$j \leq a$ and $j \leq b$.
+(b)~Rearrange $1 - a - b + j \geq 0$.
+(c)~For $j \leq \min(a,b)$ with $a, b > 0$,
+\cref{prop:existence-uniqueness} produces the conditionals $j/a$ and
+$j/b$.
+(Machine-checked, \texttt{frechet\_upper}, \texttt{frechet\_lower},
+\texttt{frechet\_conditioning\_exists}.)
+\end{proof}
+
+\begin{figure}[ht]
+\centering
+\begin{tikzpicture}[scale=5.2, every node/.style={font=\small}]
+% Panel (a): the admissible set Cond(j,e)
+\node[anchor=west, font=\small\bfseries] at (-0.08, 0.13)
+  {(a) Admissible set $\Cond(j,e) \subseteq [0,1]$};
+% Case e > 0
+\begin{scope}[yshift=0cm]
+\draw[->] (-0.02,0) -- (1.08,0);
+\foreach \x/\l in {0/0, 1/1}
+  \draw (\x,0.015) -- (\x,-0.015) node[below] {$\l$};
+\fill (0.6,0) circle (0.012);
+\node[above] at (0.6,0.015) {$j/e$};
+\node[anchor=west] at (1.12,0) {$e>0$,\ $j\le e$: singleton};
+\end{scope}
+% Case e = j = 0
+\begin{scope}[yshift=-0.20cm]
+\draw[->] (-0.02,0) -- (1.08,0);
+\foreach \x/\l in {0/0, 1/1}
+  \draw (\x,0.015) -- (\x,-0.015) node[below] {$\l$};
+\draw[line width=2.2pt] (0,0) -- (1,0);
+\node[anchor=west] at (1.12,0) {$e=j=0$: all of $[0,1]$};
+\end{scope}
+% Case e = 0 < j
+\begin{scope}[yshift=-0.40cm]
+\draw[->] (-0.02,0) -- (1.08,0);
+\foreach \x/\l in {0/0, 1/1}
+  \draw (\x,0.015) -- (\x,-0.015) node[below] {$\l$};
+\node[anchor=west] at (1.12,0) {$j>e$ (e.g.\ $e=0<j$): $\emptyset$};
+\end{scope}
+% Panel (b): admissible joints (Frechet)
+\begin{scope}[yshift=-0.72cm]
+\node[anchor=west, font=\small\bfseries] at (-0.08, 0.13)
+  {(b) Admissible joints for marginals $a=0.7$, $b=0.5$};
+\draw[->] (-0.02,0) -- (1.08,0);
+\foreach \x/\l in {0/0, 1/1}
+  \draw (\x,0.015) -- (\x,-0.015) node[below] {$\l$};
+\draw[line width=2.2pt] (0,0) -- (0.5,0);
+\draw (0.5,0.03) -- (0.5,-0.03) node[below] {$\min(a,b)$};
+\draw (0.2,0.03) -- (0.2,-0.03) node[below] {$a{+}b{-}1$};
+\node[anchor=west] at (1.12,0)
+  {chain rule: $j \in [0,\min(a,b)]$};
+\node[anchor=west, text width=5.2cm] at (1.12,-0.18)
+  {\footnotesize complement coherence sharpens\\
+   the lower end to $\max(a{+}b{-}1,0)$};
+\end{scope}
+\end{tikzpicture}
+\caption{The conditioning region.
+\textbf{(a)} The trichotomy of \cref{thm:trichotomy}: positive evidence
+pins a single conditional $j/e$; zero evidence with zero joint admits
+the whole interval; an incoherent pair admits nothing.
+\textbf{(b)} The Fr\'echet bounds of \cref{prop:frechet}: the chain rule
+alone confines the supplied joint to $[0, \min(a,b)]$, drawn for
+$a = 0.7$, $b = 0.5$; complement coherence raises the floor to
+$\max(a + b - 1, 0) = 0.2$.}
+\label{fig:conditioning-region}
+\end{figure}
+
+%=============================================================================
+\section{The Supplied Joint: Valuations}
+\label{sec:valuations}
+%=============================================================================
+
+A valuation interprets propositions as credences.
+The three valuation classes below differ only in how much dependence
+structure they carry, and the difference locates the seed exactly.
+
+\begin{definition}[Complement-preserving valuation]
+\label[definition]{def:cpval}
+A \emph{complement-preserving valuation} on a set $\alpha$ of
+propositions with a negation map $\neg : \alpha \to \alpha$ is a map
+$v : \alpha \to [0,1]$ with
+\[
+v(\neg A) = \negc v(A) = 1 - v(A) \quad \text{for all } A \in \alpha .
+\]
+(Machine-checked, \texttt{CpValuation}.)
+\end{definition}
+
+\begin{definition}[Independent valuation]
+\label[definition]{def:indepval}
+An \emph{independent valuation} is a complement-preserving valuation
+that is additionally a homomorphism for the connectives:
+\[
+v(A \land B) = v(A) \conjc v(B), \qquad
+v(A \lor B) = v(A) \disjc v(B) .
+\]
+(Machine-checked, \texttt{IndepValuation}.)
+\end{definition}
+
+\begin{definition}[Joint valuation]
+\label[definition]{def:jointval}
+A \emph{joint valuation} is a complement-preserving valuation equipped
+with a supplied joint $J : \alpha \times \alpha \to [0,1]$ satisfying
+the marginal bounds
+\[
+J(A, B) \leq v(A), \qquad J(A, B) \leq v(B)
+\quad \text{for all } A, B \in \alpha .
+\]
+(Machine-checked, \texttt{JointValuation}.)
+\end{definition}
+
+\begin{proposition}[Joint valuations satisfy the Fr\'echet upper bound]
+\label[proposition]{prop:jointval-frechet}
+For every joint valuation, $J(A,B) \leq \min(v(A), v(B))$; and whenever
+$v(B) > 0$, the conditional $\condc{A}{B}$ is uniquely determined as
+$J(A,B) / v(B)$.
+\end{proposition}
+\begin{proof}
+The bound is the conjunction of the two marginal bounds; the
+conditional is \cref{prop:existence-uniqueness} applied to
+$(J(A,B),\, v(B))$.
+(Machine-checked, \texttt{joint\_frechet\_upper},
+\texttt{JointValuation.conditioning}.)
+\end{proof}
+
+\begin{proposition}[Independence trivializes conditioning]
+\label[proposition]{prop:indep-trivial}
+Let $v$ be an independent valuation and $v(B) > 0$.
+Then the unique conditional credence of $A$ on $B$ with the
+homomorphic joint $J(A,B) = v(A) \conjc v(B)$ is
+\[
+\condc{A}{B} = \frac{v(A)\, v(B)}{v(B)} = v(A) :
+\]
+evidence never moves any credence.
+\end{proposition}
+\begin{proof}
+By \cref{prop:existence-uniqueness} the conditional is
+$J(A,B)/v(B) = v(A) v(B) / v(B) = v(A)$.
+\end{proof}
+
+\begin{remark}[The joint is the seed]
+\label[remark]{rem:joint-seed}
+\Cref{prop:indep-trivial} is the algebraic form of the irreducibility
+claim.
+If the joint is computed from the marginals by the connective algebra,
+conditioning is trivial; Part~1 shows that the only truth-functional
+joint that is symmetric, idempotent, and Bayes-consistent is
+$\min(a,b)$, and that no truth-functional choice reproduces general
+dependence~\cite{part1}.
+Nontrivial updating therefore requires the joint to be \emph{supplied}:
+$J$ in \cref{def:jointval} is an input the algebra cannot generate,
+exactly as a prior is an input Bayes' rule cannot
+generate~\cite{jaynes2003} and an axiom base is an input a proof
+calculus cannot generate~\cite{simpson2009}.
+\end{remark}
+
+%=============================================================================
+\section{Bayesian and Jeffrey Update}
+\label{sec:update}
+%=============================================================================
+
+\begin{definition}[Bayesian update]
+\label[definition]{def:bayes-update}
+For $j \leq e$ and $e > 0$, the \emph{Bayesian update} is the unique
+conditioning structure of \cref{prop:existence-uniqueness}:
+\[
+\mathrm{bayes}(j, e) = \frac{j}{e} \in [0,1] .
+\]
+(Machine-checked, \texttt{bayesianUpdate},
+\texttt{bayesianUpdate\_val}.)
+\end{definition}
+
+\begin{proposition}[Characterization of the Bayesian update]
+\label[proposition]{prop:bayes-char}
+For $j \leq e$ and $e > 0$:
+\begin{enumerate}[label=\textup{(\alph*)},nosep]
+\item $\mathrm{bayes}(j,e) \conjc e = j$ (chain rule);
+\item if $c \conjc e = j$ for any $c \in [0,1]$, then
+  $c = \mathrm{bayes}(j,e)$ (uniqueness);
+\item for a joint valuation $v$ with $v(B) > 0$, the posterior
+  $v'(A) = \mathrm{bayes}(J(A,B),\, v(B))$ satisfies the chain rule at
+  every proposition $A$.
+\end{enumerate}
+\end{proposition}
+\begin{proof}
+(a)~$(j/e) \cdot e = j$.
+(b)~\Cref{thm:trichotomy}(a): the admissible set is the singleton
+$\{j/e\}$.
+(c)~Apply (a) with $j = J(A,B)$, $e = v(B)$; the marginal bound of
+\cref{def:jointval} supplies $j \leq e$.
+(Machine-checked, \texttt{bayesianUpdate\_chain\_rule},
+\texttt{bayesianUpdate\_unique},
+\texttt{bayesianUpdateValuation\_chain\_rule}.)
+\end{proof}
+
+\begin{definition}[Jeffrey update~\cite{jeffrey1965}]
+\label[definition]{def:jeffrey}
+Given conditional credences $c_B = \condc{A}{B}$ and
+$c_{\neg B} = \condc{A}{\neg B}$ and a new evidence credence
+$q \in [0,1]$ for $B$, the \emph{Jeffrey update} is the mixture
+\[
+\mathrm{jeffrey}(c_B, c_{\neg B}, q) = c_B\, q + c_{\neg B}\, (1 - q) .
+\]
+(Machine-checked, \texttt{jeffreyUpdate}, \texttt{jeffreyUpdate\_val}.)
+\end{definition}
+
+\begin{proposition}[Jeffrey update: range and endpoints]
+\label[proposition]{prop:jeffrey-props}
+For all $c_B, c_{\neg B}, q \in [0,1]$:
+\begin{enumerate}[label=\textup{(\alph*)},nosep]
+\item $\mathrm{jeffrey}(c_B, c_{\neg B}, q) \in [0,1]$;
+\item $\mathrm{jeffrey}(c_B, c_{\neg B}, 1) = c_B$
+  (certain evidence: the Bayesian case);
+\item $\mathrm{jeffrey}(c_B, c_{\neg B}, 0) = c_{\neg B}$
+  (learning $\neg B$ with certainty).
+\end{enumerate}
+\end{proposition}
+\begin{proof}
+(a)~The mixture is a convex combination of $c_B, c_{\neg B} \in [0,1]$:
+$0 \leq c_B q + c_{\neg B}(1-q) \leq q + (1-q) = 1$.
+(b)~At $q = 1$ the second term vanishes and the first is $c_B$.
+(c)~Symmetrically at $q = 0$.
+(Machine-checked, \texttt{jeffreyUpdate\_certain},
+\texttt{jeffreyUpdate\_zero}.)
+\end{proof}
+
+\begin{theorem}[Both update rules are underdetermined at zero evidence]
+\label{thm:update-underdetermined}
+If the prior evidence credence is $0$, then:
+\begin{enumerate}[label=\textup{(\alph*)},nosep]
+\item every posterior $c \in [0,1]$ is consistent with the chain rule,
+  so the Bayesian update has no unique extension to $e = 0$;
+\item the Jeffrey mixture contains the unconstrained term
+  $c_B \in \Cond(0,0) = [0,1]$, so the Jeffrey update is likewise
+  underdetermined.
+\end{enumerate}
+\end{theorem}
+\begin{proof}
+(a)~\Cref{cor:zero-underdetermined}: $\Cond(0,0) = [0,1]$, so no value
+of the posterior is distinguished by the defining equation.
+(b)~The input $c_B = \condc{A}{B}$ of \cref{def:jeffrey} is itself a
+conditioning structure on evidence $B$; with $\cred(B) = 0$ it ranges
+over all of $[0,1]$ by (a), and distinct choices give distinct mixtures
+whenever $q > 0$.
+(Machine-checked, \texttt{bayesian\_underdetermined\_at\_zero},
+\texttt{jeffrey\_underdetermined\_at\_zero}.)
+\end{proof}
+
+%=============================================================================
+\section{Coherence: Sequential Equals Batch}
+\label{sec:coherence}
+%=============================================================================
+
+Fix a joint model and condition on nested evidence in one step or in
+two.
+The intermediate cancels; this is the multiplicative coherence of the
+chain rule, and it is all that ``coherence'' means here.
+
+\begin{theorem}[Sequential equals batch]
+\label{thm:seq-batch}
+Let $s \leq m \leq b$ in $[0,1]$ with $m, b > 0$ be the credences of
+nested events $A \subseteq B \subseteq C$ under a fixed joint model
+($s = \cred(A)$, $m = \cred(B)$, $b = \cred(C)$, with joints given by
+the nesting).
+Then
+\[
+\mathrm{bayes}(s, b)
+= \mathrm{bayes}(s, m) \conjc \mathrm{bayes}(m, b),
+\qquad\text{i.e.}\qquad
+\frac{s}{b} = \frac{s}{m} \cdot \frac{m}{b} .
+\]
+\end{theorem}
+\begin{proof}
+Since $m \neq 0$ and $b \neq 0$,
+$\dfrac{s}{m} \cdot \dfrac{m}{b} = \dfrac{s\,m}{m\,b} = \dfrac{s}{b}$,
+and each factor lies in $[0,1]$ by the nesting $s \leq m \leq b$, so
+both sides are the same credence.
+(Machine-checked, \texttt{sequential\_eq\_batch}.)
+\end{proof}
+
+\begin{corollary}[The sequential posterior is coherent]
+\label[corollary]{cor:seq-chain-rule}
+Under the hypotheses of \cref{thm:seq-batch}, the composed sequential
+update satisfies the same chain rule as the batch update:
+\[
+\bigl( \mathrm{bayes}(s,m) \conjc \mathrm{bayes}(m,b) \bigr)
+\conjc b = s .
+\]
+\end{corollary}
+\begin{proof}
+Rewrite the left side by \cref{thm:seq-batch} as
+$\mathrm{bayes}(s,b) \conjc b$ and apply the chain rule of
+\cref{prop:bayes-char}(a).
+(Machine-checked, \texttt{sequential\_chain\_rule}.)
+\end{proof}
+
+\begin{figure}[ht]
+\centering
+\begin{tikzpicture}[>=Stealth, node distance=2.0cm and 5.6cm,
+  every node/.style={font=\small}]
+\node (prior) {prior state $(s, m, b)$};
+\node (batch) [right=of prior] {$\dfrac{s}{b}$};
+\node (step)  [below=of prior]
+  {$\Bigl(\dfrac{s}{m},\ \dfrac{m}{b}\Bigr)$};
+\draw[->] (prior) -- node[above] {batch: condition $A$ on $C$} (batch);
+\draw[->] (prior) -- node[left, align=center]
+  {sequential:\\ condition $A$ on $B$,\\ then $B$ on $C$} (step);
+\draw[->] (step) -- node[below right] {$\conjc$\ (product)} (batch);
+\end{tikzpicture}
+\caption{The commuting computation of \cref{thm:seq-batch} for nested
+events $A \subseteq B \subseteq C$ with credences
+$s \leq m \leq b$, $m, b > 0$.
+Both routes from the prior state produce the same posterior
+$s/b$; the intermediate credence $m$ cancels in the product
+$(s/m) \conjc (m/b)$.}
+\label{fig:commuting}
+\end{figure}
+
+\begin{remark}[Coherence is not convergence]
+\label[remark]{rem:coherence-not-convergence}
+\Cref{thm:seq-batch} holds the joint model fixed and says nothing
+about which prior wins as data accumulate.
+It licenses regrouping a data stream into one effective observation; it
+does not move the prior.
+Convergence of posteriors under accumulating evidence is a separate
+theorem with separate hypotheses (Bernstein--von
+Mises~\cite{vandervaart1998}, merging of opinions~\cite{blackwell1962})
+and has sharp counterexamples in infinite-dimensional
+models~\cite{diaconis1986}.
+\Cref{sec:contraction} isolates the distinction in a model small enough
+to prove everything.
+\end{remark}
+
+%=============================================================================
+\section{Cromwell's Rule and the No-Ex-Falso Tie}
+\label{sec:cromwell}
+%=============================================================================
+
+Cromwell's rule advises never to assign prior credence $0$ or $1$ to a
+contingent proposition, because conditioning cannot revise either
+value~\cite{jaynes2003}.
+In the credence algebra this is a theorem about the annihilator
+$c \cdot 0 = 0$, and it is the \emph{same} fact that blocks ex falso.
+
+\begin{theorem}[Cromwell's rule]
+\label{thm:cromwell}
+Let $a = \cred(A)$ be a prior and $e = \cred(B) > 0$ an evidence
+credence with supplied joint $j = \cred(A \land B)$ obeying the
+Fr\'echet bounds of \cref{prop:frechet} (chain-rule upper bound and
+complement coherence).
+\begin{enumerate}[label=\textup{(\alph*)},nosep]
+\item \emph{Zero is absorbing:} if $a = 0$ then $j = 0$ and the
+  posterior is $\mathrm{bayes}(0, e) = 0$ for every $e > 0$.
+\item \emph{One is absorbing:} if $a = 1$ then $j = e$ and the
+  posterior is $\mathrm{bayes}(e, e) = 1$ for every $e > 0$.
+\item \emph{Zero evidence absorbs:} $c \conjc 0 = 0$ for every
+  $c \in [0,1]$; no conditional revises zero evidence to a positive
+  joint, and any conditioning structure on evidence $0$ has joint $0$.
+\end{enumerate}
+\end{theorem}
+\begin{proof}
+(a)~The upper Fr\'echet bound gives $j \leq \min(0, e) = 0$, so
+$j = 0$ and the unique conditional is $0/e = 0$.
+(b)~The upper bound gives $j \leq \min(1, e) = e$; complement
+coherence gives $j \geq a + e - 1 = e$; hence $j = e$ and the unique
+conditional is $e/e = 1$.
+(c)~$c \cdot 0 = 0$ identically; positivity of the product would
+contradict this, and $j = c \cdot 0 = 0$ for any structure on evidence
+$0$.
+(Machine-checked components, \texttt{cromwell\_zero\_absorbing},
+\texttt{cromwell\_no\_positive\_revision},
+\texttt{cromwell\_fixed\_point}; parts (a) and (b) assemble them with
+\cref{prop:frechet} and are not separate Lean lemmas.)
+\end{proof}
+
+\begin{theorem}[The Cromwell / no-ex-falso tie]
+\label{thm:cromwell-tie}
+For every $c \in [0,1]$, both of the following hold simultaneously:
+\[
+c \conjc 0 = 0
+\qquad\text{and}\qquad
+c \in \Cond(0,0) .
+\]
+One equation, two readings: the product erases $c$ (a zero joint can
+never be revised upward: Cromwell), and precisely because the product
+erases $c$, the equation constrains $c$ not at all (impossible evidence
+forces no conclusion: no ex falso).
+\end{theorem}
+\begin{proof}
+Both conjuncts restate $c \cdot 0 = 0$:
+the first directly, the second through \cref{def:cond}.
+(Machine-checked, \texttt{cromwell\_no\_ex\_falso\_tie};
+the same pairing phrased at the update boundary is
+\texttt{bayesian\_cromwell\_tie}.)
+\end{proof}
+
+\begin{proposition}[The update excludes the absorbing point]
+\label[proposition]{prop:update-positive}
+The Bayesian update of \cref{def:bayes-update} is defined only for
+$e > 0$; its positivity precondition excludes zero evidence outright,
+so Cromwell's rule appears in the update mechanism as a side condition,
+not as a convention about $0/0$.
+\end{proposition}
+\begin{proof}
+$\mathrm{bayes}(j,e) = j/e$ presupposes $e \neq 0$; if $e = 0$ the
+hypothesis $0 < e$ of \cref{def:bayes-update} fails.
+(Machine-checked, \texttt{bayesianUpdate\_requires\_positive\_evidence}.)
+\end{proof}
+
+\begin{remark}[Contrast with residuation]
+\label[remark]{rem:residuation-contrast}
+Product residuation $a \to b = \sup\{c : ac \leq b\}$ fills the
+zero-evidence cell with $1$ (ex falso) for every left-continuous
+t-norm~\cite{hajek1998}; classical conditional probability leaves it
+undefined~\cite{cox1961}; the chain rule leaves it unconstrained
+(\cref{cor:zero-underdetermined}).
+All three options agree at positive evidence~\cite{part1}.
+None of the three is neutral; the choice at $e = 0$ is part of the
+opening commitment.
+\end{remark}
+
+%=============================================================================
+\section{The Seed at Finite and Infinite Time: a Contraction Model}
+\label{sec:contraction}
+%=============================================================================
+
+The following one-dimensional model separates, with exact constants,
+the two claims that \cref{rem:coherence-not-convergence} insists on
+keeping apart: the seed determines every finite stage, and the seed
+washes out in the limit, except at the absorbing boundary.
+
+\begin{definition}[Averaging refinement map]
+\label[definition]{def:toymap}
+For a target $t \in [0,1]$, define $f_t : [0,1] \to [0,1]$ by
+\[
+f_t(x) = \frac{x + t}{2} .
+\]
+The orbit from seed $x_0 \in [0,1]$ is $x_n = f_t^{\,n}(x_0)$.
+(Machine-checked, \texttt{toyA}.)
+\end{definition}
+
+\begin{theorem}[Exact geometric contraction]
+\label{thm:contraction}
+For all $t, x_0 \in [0,1]$ and $n \in \Nat$,
+\[
+f_t^{\,n}(x_0) - t = \Bigl(\tfrac{1}{2}\Bigr)^{n} (x_0 - t),
+\qquad\text{hence}\qquad
+\bigl| f_t^{\,n}(x_0) - t \bigr|
+= \Bigl(\tfrac{1}{2}\Bigr)^{n} \, |x_0 - t| .
+\]
+\end{theorem}
+\begin{proof}
+Induction on $n$.
+Base: $f_t^{\,0}(x_0) - t = x_0 - t$.
+Step: $f_t(x) - t = \frac{x + t}{2} - t = \frac{x - t}{2}$, so applying
+$f_t$ once more halves the signed distance; the displayed identity
+follows, and taking absolute values gives the second form.
+(Machine-checked, \texttt{toyA\_iterate\_dist},
+\texttt{toyA\_contraction\_bound}.)
+\end{proof}
+
+\begin{corollary}[Seed matters at every finite stage]
+\label[corollary]{cor:seed-matters}
+For all seeds $x_0 \neq x_0'$ and every $n \in \Nat$,
+\[
+f_t^{\,n}(x_0) - f_t^{\,n}(x_0')
+= \Bigl(\tfrac{1}{2}\Bigr)^{n} (x_0 - x_0') \neq 0 :
+\]
+no finite number of refinement steps erases the opening commitment.
+\end{corollary}
+\begin{proof}
+Subtract the two instances of the identity in \cref{thm:contraction};
+the difference is a nonzero multiple of $x_0 - x_0'$.
+(Machine-checked instance, \texttt{toyA\_seed\_matters}.)
+\end{proof}
+
+\begin{corollary}[Seed washes out in the limit]
+\label[corollary]{cor:washout}
+For every seed $x_0 \in [0,1]$,
+$f_t^{\,n}(x_0) \to t$ as $n \to \infty$, and the limit satisfies the
+self-consistency equation $f_t(t) = t$.
+\end{corollary}
+\begin{proof}
+By \cref{thm:contraction} the distance to $t$ is
+$2^{-n}|x_0 - t| \to 0$.
+Fixed point: $f_t(t) = (t + t)/2 = t$.
+(Machine-checked, \texttt{toyA\_contraction\_tendsto},
+\texttt{toyA\_target\_fixed}, \texttt{toyA\_limit\_fixed}.)
+\end{proof}
+
+\begin{theorem}[The absorbing boundary is exempt]
+\label{thm:absorbing-orbit}
+Under the product map $g_e(x) = x \conjc e$ (one multiplicative update
+per step, any fixed $e \in [0,1]$), the zero seed is absorbing:
+\[
+g_e^{\,n}(0) = 0 \quad \text{for all } n \in \Nat ,
+\]
+and at every step the iterate is a witness of the unconstrained
+zero-evidence conditioning $\Cond(0,0)$.
+\end{theorem}
+\begin{proof}
+Induction on $n$: $g_e(0) = 0 \cdot e = 0$, and if $g_e^{\,n}(0) = 0$
+then $g_e^{\,n+1}(0) = g_e(0) = 0$.
+Each iterate equals $0 \in [0,1] = \Cond(0,0)$ by
+\cref{thm:trichotomy}(b).
+(Machine-checked, \texttt{toyA\_absorbing\_zero},
+\texttt{toyA\_absorbing\_zero\_no\_ex\_falso}.)
+\end{proof}
+
+\begin{remark}[What the model does and does not show]
+\label[remark]{rem:toy-analogy}
+\Cref{cor:washout} is the local, exactly solvable analogue of the
+washing out of priors (Bernstein--von Mises~\cite{vandervaart1998},
+merging of opinions~\cite{blackwell1962}); \cref{thm:absorbing-orbit}
+is the iterated face of Cromwell's rule.
+The analogy is illustrative, not structural: real posterior convergence
+holds under measure-theoretic hypotheses that can fail in
+infinite-dimensional models~\cite{diaconis1986}, while the contraction
+here is unconditional because the model is one-dimensional and linear.
+\end{remark}
+
+%=============================================================================
+\section{Credal Sets and the Model-Comparison Boundary}
+\label{sec:modelcomparison}
+%=============================================================================
+
+When the seed itself is uncertain, the honest posterior is a set, not a
+number~\cite{walley1991,berger1985,levi1980}.
+This section first characterizes the set obtained by ranging the
+supplied joint over a class of priors, then derives, exactly, the
+classical model-comparison boundary where a too-diffuse seed loses
+every comparison.
+
+\subsection{Credal Classes over the Supplied Joint}
+
+\begin{definition}[Induced posterior set]
+\label[definition]{def:condset}
+For a class $S \subseteq [0,1]$ of joint credences and a fixed evidence
+$e \in [0,1]$, the \emph{induced posterior set} is
+\[
+\CondSet(S, e) = \bigcup_{j \in S} \Cond(j, e) .
+\]
+(Machine-checked, \texttt{condSet}.)
+\end{definition}
+
+\begin{proposition}[Monotonicity]
+\label[proposition]{prop:condset-monotone}
+If $S \subseteq T$ then $\CondSet(S,e) \subseteq \CondSet(T,e)$:
+enlarging the prior class can only enlarge the posterior set.
+\end{proposition}
+\begin{proof}
+A union over a larger index set contains the union over the smaller.
+(Machine-checked, \texttt{condSet\_monotone\_joint}.)
+\end{proof}
+
+\begin{theorem}[Positive evidence: the posterior set is the image of
+the feasible class]
+\label{thm:condset-positive}
+For $e > 0$,
+\[
+\CondSet(S, e)
+= \Bigl\{ \tfrac{j}{e} \;:\; j \in S,\ j \leq e \Bigr\} .
+\]
+In particular, if $\CondSet(S,e) = [0,1]$ then for every
+$c \in [0,1]$ there is a feasible $j \in S$ with $j \leq e$ and
+$j/e = c$; and the full feasible class realizes everything:
+$\CondSet(\{j : j \leq e\},\, e) = [0,1]$.
+\end{theorem}
+\begin{proof}
+By \cref{thm:trichotomy}, $\Cond(j,e)$ is $\{j/e\}$ when $j \leq e$
+and $\emptyset$ when $j > e$, so the union collects exactly the values
+$j/e$ over the feasible subclass.
+For the surjectivity claim, membership of $c$ in the union produces a
+feasible $j$ with $c \cdot e = j$, hence $j/e = c$.
+For the last claim, given $c \in [0,1]$ take $j = c \cdot e$;
+then $j \leq e$ and $j/e = c$.
+(Machine-checked, \texttt{condSet\_positive\_evidence},
+\texttt{condSet\_univ\_implies\_surjective},
+\texttt{condSet\_full\_feasible\_eq\_univ}.)
+\end{proof}
+
+\begin{theorem}[Zero evidence: the posterior set is maximal]
+\label{thm:condset-zero}
+If $0 \in S$, then $\CondSet(S, 0) = [0,1]$; and for $j \neq 0$,
+$\Cond(j, 0) = \emptyset$.
+A prior class containing the degenerate joint, conditioned on
+zero-credence evidence, constrains the posterior not at all.
+\end{theorem}
+\begin{proof}
+$\Cond(0,0) = [0,1]$ by \cref{thm:trichotomy}(b), and this term alone
+already exhausts $[0,1]$ inside the union; for $j \neq 0$,
+\cref{lem:coherence-bound} makes the equation $c \cdot 0 = j$
+unsolvable.
+(Machine-checked, \texttt{condSet\_zero\_evidence\_of\_zero\_mem},
+the empty case via \cref{thm:trichotomy}(c).)
+\end{proof}
+
+\begin{remark}[Imprecise probability]
+\label[remark]{rem:imprecise}
+\Cref{thm:condset-positive,thm:condset-zero} are the algebraic face of
+the credal-set stance: where the prior class underdetermines the
+update, the posterior is the induced interval, and the degenerate case
+returns the vacuous set $[0,1]$, exactly as imprecise probability
+prescribes for null events~\cite{walley1991,troffaes2014}.
+The next subsection shows the same set-valued degeneration arising in
+orthodox Bayesian model comparison.
+\end{remark}
+
+\subsection{Marginal Likelihood and the Occam Factor}
+
+The remaining results of this section are classical computations, not
+Lean-formalized; they are included because they make the cost of the
+seed exact.
+Throughout, $\varphi(u) = (2\pi)^{-1/2} e^{-u^2/2}$ is the standard
+normal density and $\Phi$ its distribution function.
+
+\begin{definition}[Marginal likelihood and Bayes factor]
+\label[definition]{def:bayes-factor}
+For a model with parameter $\theta$, prior $\pi$, likelihood
+$p(x \mid \theta)$, and data $x$, the \emph{marginal likelihood} is
+\[
+m(x) = \int p(x \mid \theta) \, d\pi(\theta) ,
+\]
+and the \emph{Bayes factor} between models $M_1, M_0$ is
+$B_{10}(x) = m_1(x) / m_0(x)$~\cite{jeffreys1939}.
+\end{definition}
+
+\begin{lemma}[Flat-prior marginal likelihood, Gaussian location model]
+\label[lemma]{lem:gaussian-ml}
+Let $M_0$: $x \sim \mathcal{N}(0,1)$, and $M_1$:
+$g \sim \mathrm{Uniform}[0, W]$, $x \mid g \sim \mathcal{N}(g, 1)$.
+Then
+\[
+m_1(x) = \frac{1}{W} \bigl( \Phi(x) - \Phi(x - W) \bigr),
+\qquad
+B_{10}(x) = \frac{\sqrt{2\pi}}{W}\, e^{x^2/2}
+  \bigl( \Phi(x) - \Phi(x - W) \bigr) .
+\]
+For $x \in [0, W]$ the maximized likelihood is
+$p(x \mid \hat g) = \varphi(0) = (2\pi)^{-1/2}$ at $\hat g = x$, and
+\[
+m_1(x) = p(x \mid \hat g) \cdot \Omega(x, W),
+\qquad
+\Omega(x, W)
+= \frac{\sqrt{2\pi}}{W} \bigl( \Phi(x) - \Phi(x - W) \bigr)
+\leq \frac{\sqrt{2\pi}}{W} ,
+\]
+exhibiting the Occam factor $\Omega$ as the fraction of prior width the
+fitted parameter uses.
+\end{lemma}
+\begin{proof}
+Substituting $u = x - g$,
+\[
+m_1(x) = \frac{1}{W} \int_0^W \varphi(x - g)\, dg
+= \frac{1}{W} \int_{x-W}^{x} \varphi(u)\, du
+= \frac{1}{W} \bigl( \Phi(x) - \Phi(x - W) \bigr) .
+\]
+Dividing by $m_0(x) = \varphi(x) = (2\pi)^{-1/2} e^{-x^2/2}$ gives
+$B_{10}$.
+For $x \in [0,W]$ the likelihood $g \mapsto \varphi(x - g)$ attains its
+maximum $\varphi(0)$ at $g = x \in [0,W]$, and
+$m_1(x) / \varphi(0) = \sqrt{2\pi}\, m_1(x) = \Omega(x,W)$; the bound
+uses $\Phi(x) - \Phi(x-W) \leq 1$.
+\end{proof}
+
+\begin{theorem}[Bartlett's indeterminacy: the diffuse seed loses]
+\label{thm:bartlett}
+For every fixed datum $x$,
+\[
+B_{10}(x) \leq \frac{\sqrt{2\pi}\, e^{x^2/2}}{W}
+\qquad\text{and}\qquad
+\lim_{W \to \infty} B_{10}(x) = 0 :
+\]
+as the prior width grows without bound, the comparison turns against
+$M_1$ regardless of the data, and in the improper limit the Bayes
+factor has no determinate positive value~\cite{bartlett1957}.
+\end{theorem}
+\begin{proof}
+From \cref{lem:gaussian-ml},
+$B_{10}(x) = \sqrt{2\pi}\, e^{x^2/2}\,
+(\Phi(x) - \Phi(x-W)) / W
+\leq \sqrt{2\pi}\, e^{x^2/2} / W \to 0$ as $W \to \infty$, since the
+$\Phi$ difference is bounded by $1$ while the numerator is fixed.
+\end{proof}
+
+\begin{theorem}[Lindley's paradox: the fine-tuned trajectory]
+\label{thm:lindley}
+Take $n$ i.i.d.\ observations under the models of
+\cref{lem:gaussian-ml}, with sufficient statistic
+$\bar{x} \sim \mathcal{N}(g, 1/n)$.
+Along the trajectory on which the standardized statistic
+$z = \sqrt{n}\, \bar{x}$ is held fixed as $n \to \infty$,
+\[
+B_{10}(n)
+= \frac{\sqrt{2\pi}}{W \sqrt{n}}\; e^{z^2/2}\,
+  \bigl( \Phi(z) - \Phi(z - \sqrt{n}\, W) \bigr)
+\;\longrightarrow\; 0 ,
+\]
+while the frequentist tail probability $2(1 - \Phi(|z|))$ stays
+constant: the Bayesian verdict reverses against $M_1$ on a trajectory
+along which the significance test rejects $M_0$ at a fixed
+level~\cite{lindley1957}.
+\end{theorem}
+\begin{proof}
+The marginal likelihoods are computed as in \cref{lem:gaussian-ml}
+with $\varphi$ replaced by the $\mathcal{N}(g, 1/n)$ density of
+$\bar{x}$: substituting $u = \sqrt{n}(\bar{x} - g)$,
+\[
+m_1(\bar{x})
+= \frac{1}{W} \int_0^W \sqrt{n}\, \varphi\bigl(\sqrt{n}(\bar{x}-g)\bigr) dg
+= \frac{1}{W}\bigl( \Phi(\sqrt{n}\,\bar{x})
+  - \Phi(\sqrt{n}(\bar{x} - W)) \bigr),
+\]
+and $m_0(\bar{x}) = \sqrt{n}\, \varphi(\sqrt{n}\, \bar{x})
+= \sqrt{n/2\pi}\; e^{-n \bar{x}^2 / 2}$.
+With $z = \sqrt{n}\, \bar{x}$ fixed, the ratio is the displayed
+expression; it is bounded by
+$\sqrt{2\pi}\, e^{z^2/2} / (W \sqrt{n}) \to 0$.
+The frequentist statistic depends on $z$ alone, hence is constant on
+the trajectory.
+\end{proof}
+
+\begin{remark}[The implicit Occam factor of the significance test]
+\label[remark]{rem:implicit-omega}
+The likelihood-ratio statistic of the significance test is
+$e^{z^2/2}$, which is the first factor of $B_{10}$ in
+\cref{thm:lindley} with the Occam factor replaced by $1$.
+The Lindley reversal is exactly the gap between $\Omega = 1$ and the
+$\Omega \sim \sqrt{2\pi}/(W\sqrt{n})$ that a proper prior supplies;
+and the trajectory of constant $z$ is a measure-zero path in the data,
+off which $\bar{x}$ tracks $g$ and both verdicts agree
+eventually~\cite{jeffreys1939,berger1985}.
+\end{remark}
+
+\begin{remark}[Set-valued comparison under an unfixed seed]
+\label[remark]{rem:set-valued-bf}
+Range the prior width over a class $W \in [W_1, W_2]$ and
+\cref{lem:gaussian-ml} returns an interval of Bayes factors,
+monotone in $1/W$; in the improper limit the interval degenerates.
+This is the statistical image of
+\cref{thm:condset-positive,thm:condset-zero}: where the seed class
+underdetermines the comparison, the admissible answer is a set, and
+the degenerate seed yields the vacuous answer.
+The structural match is exact at the level of the two trichotomies; we
+do not claim the Gaussian model embeds in the credence algebra.
+\end{remark}
+
+\begin{figure}[ht]
+\centering
+\begin{tikzpicture}[>=Stealth, xscale=1.6, yscale=2.6,
+  every node/.style={font=\small}]
+% axes
+\draw[->] (-0.3,0) -- (6.6,0) node[below] {$g$};
+\draw[->] (0,-0.05) -- (0,1.15) node[left] {density};
+% flat prior of width W
+\draw[dashed, thick] (0,0.16) -- (6,0.16);
+\draw[dashed] (0,0) -- (0,0.16);
+\draw[dashed] (6,0) -- (6,0.16);
+\node[above] at (5.1,0.16) {prior $1/W$};
+\draw (6,0.03) -- (6,-0.03) node[below] {$W$};
+\draw (0,0.03) -- (0,-0.03) node[below] {$0$};
+% likelihood bump centered at hat g = 2.2, sd 0.4
+\draw[thick, domain=0.7:3.7, samples=120, smooth]
+  plot (\x, {exp(-(\x-2.2)^2/0.32)});
+\node[above] at (2.2,1.0) {likelihood $p(x \mid g)$};
+\draw (2.2,0.03) -- (2.2,-0.03) node[below] {$\hat g$};
+% effective width annotation
+\draw[<->] (1.7,0.55) -- (2.7,0.55);
+\node[above] at (2.2,0.55) {$\approx \sqrt{2\pi}\,\sigma$};
+% shaded overlap: prior mass under the bump
+\fill[gray, fill opacity=0.35, domain=0.7:3.7, samples=120, smooth]
+  plot (\x, {min(exp(-(\x-2.2)^2/0.32), 0.16)}) -- (0.7,0) -- cycle;
+% Omega annotation
+\node[anchor=west, text width=5.0cm] at (4.0,0.75)
+  {Occam factor:\\[2pt]
+   $\displaystyle \Omega \approx \frac{\sqrt{2\pi}\,\sigma}{W}$\\[4pt]
+   prior mass spent on the\\ data-supported region};
+\draw[->] (4.0,0.62) to[bend right=15] (2.6,0.14);
+\end{tikzpicture}
+\caption{The Occam factor of \cref{lem:gaussian-ml}.
+A flat prior of width $W$ spends density $1/W$ everywhere; the
+likelihood occupies an effective width $\approx \sqrt{2\pi}\,\sigma$
+around the fit $\hat g$ ($\sigma = 1$ in the lemma, $1/\sqrt{n}$ after
+$n$ observations).
+The marginal likelihood is the best fit times the shaded fraction
+$\Omega \approx \sqrt{2\pi}\,\sigma / W$ of prior mass the fit uses;
+widening the seed shrinks $\Omega$ and, by \cref{thm:bartlett},
+eventually loses the comparison regardless of the data.}
+\label{fig:occam}
+\end{figure}
+
+%=============================================================================
+\section{The Irreducible Commitment}
+\label{sec:synthesis}
+%=============================================================================
+
+The theorems assemble into one structural statement about the credence
+algebra, plus an analogy that we keep explicitly labeled as one.
+
+\begin{theorem}[The supplied pair is irreducible in the credence algebra]
+\label{thm:irreducible}
+Nontrivial chain-rule conditioning requires the pair $(j, e)$ as an
+input that the connective algebra does not determine:
+\begin{enumerate}[label=\textup{(\alph*)},nosep]
+\item computing $j$ from the marginals by the connective $\conjc$
+  trivializes updating (\cref{prop:indep-trivial});
+\item the admissible conditional is a function of the supplied pair
+  alone, and only on the region $e > 0$, $j \leq e$
+  (\cref{thm:trichotomy});
+\item the boundary behavior is forced, not chosen: credences $0$ and
+  $1$ absorb (\cref{thm:cromwell}), and the zero-evidence cell is
+  unconstrained rather than explosive (\cref{thm:cromwell-tie});
+\item changing the data grouping does not change the posterior
+  (\cref{thm:seq-batch}); changing the supplied pair does
+  (\cref{cor:seed-matters}).
+\end{enumerate}
+\end{theorem}
+\begin{proof}
+Each clause is the cited result; the conjunction is the claim.
+\end{proof}
+
+\begin{remark}[The dictionary, as analogy]
+\label[remark]{rem:dictionary}
+\Cref{tab:dictionary} aligns the three systems.
+Each row matches structural roles, not mathematical objects; no functor
+or bi-interpretation is claimed.
+The first two columns record standard
+results~\cite{jaynes2003,simpson2009,debruijn1970,turing1939,feferman1962};
+the third column is proved in this paper and in
+Parts~1--3~\cite{part1,part2}.
+\end{remark}
+
+\begin{table}[ht]
 \centering
 \small
-\begin{tabular}{p{0.27\linewidth}p{0.30\linewidth}p{0.30\linewidth}}
+\begin{tabular}{p{0.29\linewidth}p{0.29\linewidth}p{0.32\linewidth}}
 \toprule
-Probability & Foundations & Cred conditioning \\
+\textbf{Probability} & \textbf{Foundations} & \textbf{Credence algebra} \\
 \midrule
-prior &
-foundational seed, trusted base &
-supplied joint $j$ and evidence $e$ \\[4pt]
-marginal likelihood, Occam factor, prior-volume cost &
-trusted-base minimization, axiom strength &
-admissibility relation $\Cond(j,e)$ \\[4pt]
-sequential-Bayes convergence, the prior washes out &
-iterated reflection, ordinal progressions &
-iterated conditioning toward fixed points \\[4pt]
-Cromwell's rule, a zero prior is unrecoverable &
-G\"odel and Tarski limits &
-conditioning on credence-zero evidence is unconstrained \\
+prior $\pi$ &
+axiom base, trusted kernel &
+supplied pair $(j, e)$ (\cref{def:jointval}) \\[3pt]
+marginal likelihood, Occam factor $\Omega$
+(\cref{lem:gaussian-ml}) &
+axiom strength, reverse mathematics~\cite{simpson2009} &
+shape of $\Cond(j,e)$ (\cref{thm:trichotomy}) \\[3pt]
+posterior convergence, merging~\cite{vandervaart1998,blackwell1962} &
+iterated reflection~\cite{turing1939,feferman1962} &
+contraction to the fixed point
+(\cref{cor:washout}) \\[3pt]
+Cromwell's rule: $0$, $1$ unrevisable~\cite{jaynes2003} &
+G\"odel and Tarski limits~\cite{godel1931} &
+absorbing boundary, no ex falso
+(\cref{thm:cromwell,thm:cromwell-tie}) \\[3pt]
+imprecise-probability posterior sets~\cite{walley1991,berger1985} &
+independence: a family of models &
+credal set $\CondSet(S,e)$
+(\cref{thm:condset-positive,thm:condset-zero}) \\
 \bottomrule
 \end{tabular}
-\caption{The central dictionary.  Each row reads one admissibility
-question in three vocabularies.  The probability--foundations analogy is
-largely folklore; the third column is this paper's explicit construction.}
-\label{tab:correspondence}
+\caption{The dictionary.
+Rows match structural roles across three systems; only the third
+column is formalized here.
+The first row is the irreducible commitment in each vocabulary.}
+\label{tab:dictionary}
 \end{table}
 
-\paragraph{Prior, seed, supplied data.}
-Every column starts from something assumed before the evidence speaks.
-In Bayesian inference that is the prior over hypotheses~\cite{jaynes2003}.
-In formal foundations it is the trusted base: the seed axioms a proof system
-takes for granted, the framework one adopts before checking
-anything~\cite{carnap1950}.
-In Cred it is the pair $(j,e)$ supplied to $\Cond$: a joint credence and an
-evidence credence, both fixed from outside.
-The point of the row is structural, not metaphorical.
-Each system has a layer that is given, not derived, and the rest of the row
-describes what that layer costs and how it updates.
-
-\paragraph{Marginal likelihood, axiom cost, the admissibility relation.}
-A Bayesian scores a model by its marginal likelihood, integrating the
-likelihood against the prior.
-Spreading prior mass over a large parameter space carries a volume penalty,
-the Occam factor: a model that could have predicted anything is charged for
-the prior volume it spends~\cite{jaynes2003}.
-Foundations charges an analogous price.
-Reverse mathematics measures a theorem by the weakest axioms that prove it,
-so axiom strength becomes a currency~\cite{simpson2009}; the de Bruijn
-criterion asks that a proof reduce to checking against a small trusted
-kernel, minimizing what must be believed~\cite{debruijn1970}.
-In Cred the corresponding object is the admissibility relation
-$\Cond(j,e)=\{c\in[0,1]:ce=j\}$.
-It records exactly which conditional credences the supplied data allow, and
-nothing else.
-The volume of $\Cond(j,e)$ is the analogue of prior cost: a singleton when
-$e>0$, all of $[0,1]$ when $e=j=0$, empty when $e=0<j$.
-
-\paragraph{Convergence, reflection, iterated conditioning.}
-Run any of the three forward and ask whether it settles.
-Under repeated independent observations, Bayesian posteriors concentrate and
-the choice of prior washes out: the Bernstein--von Mises theorem makes this
-precise~\cite{vandervaart1998}, and merging-of-opinions results show two
-agents with different priors converge as evidence
-accumulates~\cite{blackwell1962}.
-Foundations has its own ascent.
-Adding consistency or reflection statements and iterating along the ordinals
-produces progressions of theories of increasing
-strength~\cite{turing1939,feferman1962}.
-In Cred the matching move is iterated conditioning.
-Repeatedly applying $\Cond$ drives a credence toward the fixed points
-of negation; the liar lands on $\tfrac12$, the
-truth-teller leaves the whole interval fixed.
-The first two columns are established; the third is the construction this
-paper supplies.
-
-\paragraph{The unrecoverable boundary.}
-Each column has a point of no return.
-Cromwell's rule warns the Bayesian never to assign prior probability zero to
-a possibility, because no finite evidence can lift a zero prior back to
-positive mass~\cite{jaynes2003}.
-Foundations meets its own walls: G\"odel's incompleteness theorems bound what
-a consistent system can prove about itself~\cite{godel1931}, and Tarski's
-theorem forbids a language from defining its own truth
-predicate~\cite{tarski1936}.
-Cred's boundary is the zero-evidence case.
-When $e=0$ the chain-rule equation $ce=j$ imposes no constraint on $c$, so
-$\Cond(0,0)=[0,1]$ and conditioning on impossible evidence is unconstrained.
-The difference is the design choice of the whole program.
-A zero prior is a trap because probability conditions by division; Cred
-conditions by the admissibility relation instead, so credence-zero evidence
-yields no value rather than a contradiction.
-There is no ex falso here, by construction.
-
-\paragraph{What is folklore and what is new.}
-The probability--foundations pairing in the first two columns is not our
-discovery.
-The link between Occam factors and description length, between Bayesian
-convergence and the washing out of priors, and between inductive inference
-and formal provability has been drawn before, from algorithmic information
-theory to the philosophy of induction.
-Our contribution is the third column and the claim that it lines up row by
-row with the other two.
-Cred conditioning is the external relation $\Cond$, not an object-language
-connective; that externality is what lets the zero-evidence row read as
-\emph{unconstrained} rather than \emph{explosive}.
-We state the correspondence as an organizing analogy, not a theorem: no
-functor or bi-interpretation is claimed between the columns.
-What is proved is the Cred column, in Lean, and its internal coherence with
-the fixed-point and no-explosion results of the preceding sections.
-
-\section{A Minimal Model}
-\label{sec:toymodel}
-
-A single iterated map on $[0,1]$ exhibits all four features of the
-framework before any logic enters.
-Fix a target credence $t \in [0,1]$ and define one refinement step:
-\[
-  f_t(x) = \frac{x + t}{2}.
-\]
-Starting from a seed $x_0$, the orbit is $x_n = f_t^n(x_0)$.
-
-\begin{example}[Toy model]
-\label{ex:toymodel}
-Take $t = \tfrac{1}{2}$ (the liar fixed point of $\negc$).
-Seed $x_0 = 0$ gives $x_1 = \tfrac{1}{4}$.
-Seed $x_0 = 1$ gives $x_1 = \tfrac{3}{4}$.
-The two orbits differ from step one.
-\end{example}
-
-Four properties hold; each is a machine-checked lemma in
-\texttt{Cred/ToyModel.lean}.
-
-\begin{theorem}[P1: Seed matters locally]
-\label{thm:p1}
-Distinct seeds produce distinct finite orbits.
-Formally, there exist seeds $x_0, x_0' \in [0,1]$ and a step $n \in \mathbb{N}$
-such that $f_t^n(x_0) \neq f_t^n(x_0')$.
-
-\emph{Lean:} \texttt{toyA\_seed\_matters}.
-For $t = \tfrac{1}{2}$, seeds $0$ and $1$ already differ at $n = 1$.
-\end{theorem}
-
-The seed is unavoidable: no finite prefix of the orbit erases the starting
-commitment.
-This is the irreducibility claim at finite time.
-
-\begin{theorem}[P2: Seed washes out]
-\label{thm:p2}
-The signed distance to the target satisfies
-\[
-  f_t^n(x_0) - t = \Bigl(\tfrac{1}{2}\Bigr)^n (x_0 - t),
-\]
-so $|f_t^n(x_0) - t| = (\tfrac{1}{2})^n |x_0 - t|$,
-and $f_t^n(x_0) \to t$ as $n \to \infty$ from any seed $x_0$.
-
-\emph{Lean:} \texttt{toyA\_contraction\_bound} (the geometric bound)
-and \texttt{toyA\_contraction\_tendsto} (the \texttt{Tendsto} statement).
-\end{theorem}
-
-The geometric decay is the local analogue of merging of opinions:
-asymptotically the prior is forgotten and only the target survives
-\cite{blackwell1962,vandervaart1998}.
-The bound is explicit and the limit is a genuine \texttt{Tendsto} statement
-in Mathlib, not just an $\epsilon$-$\delta$ argument.
-
-\begin{theorem}[P3: Zero seed is absorbing]
-\label{thm:p3}
-Under the product map $g_e(x) = x \conjc e$, the zero credence is
-absorbing: $(g_e)^n(0) = 0$ for all $n$.
-A seed of $0$ never recovers to a positive credence.
-
-\emph{Lean:} \texttt{toyA\_absorbing\_zero}.
-The companion lemma \texttt{toyA\_absorbing\_zero\_no\_ex\_falso}
-witnesses each iterate as a \texttt{Conditioning 0 0} value,
-connecting absorption directly to \texttt{conditioning\_zero\_any}.
-\end{theorem}
-
-This is the iterated face of Cromwell's rule \cite{jaynes2003}: impossible
-evidence (credence $0$) provides no constraint on belief and stays impossible
-under repeated conjunction.
-The model enforces no ex falso: the zero orbit never yields a
-non-zero credence, no matter what $e$ is applied.
-
-\begin{theorem}[P4: Limit satisfies the fixed-point equation]
-\label{thm:p4}
-The target $t$ is a genuine fixed point of $f_t$: $f_t(t) = t$.
-The orbit from any seed converges to $t$ (P2), and $t$ satisfies
-the self-consistency equation the base level converged toward.
-
-\emph{Lean:} \texttt{toyA\_target\_fixed} (the fixed-point equation)
-and \texttt{toyA\_limit\_fixed} (the conjunction of P2 and the fixed-point
-equation as a single statement).
-\end{theorem}
-
-The fixed-point check is one level up: the base-level iteration
-converges to $t$, and $t$ satisfies $f_t(t) = t$, so the meta level
-certifies the value the base level assumed.
-The model is self-consistent without any external grounding.
-
-\begin{remark}
-The four properties are independent by construction.
-P1 and P2 together say that the seed matters at every finite stage but
-not in the limit: local irreducibility coexists with global convergence.
-P3 isolates the boundary behavior that would otherwise cause explosion in a
-conditional logic.
-P4 closes the loop between levels.
-All lemmas are proved in Lean~4 with Mathlib and carry zero \texttt{sorry}.
+\begin{remark}[Trilemma and boat]
+\label[remark]{rem:trilemma}
+That the opening commitment cannot be derived inside the system it
+grounds is the regress horn of the M\"unchhausen
+trilemma~\cite{albert1968}; that it can nonetheless be revised in
+flight is Neurath's boat~\cite{neurath1932}; that adopting it is a
+practical choice rather than an internal theorem is Carnap's
+external question~\cite{carnap1950}.
+We add nothing to these; the theorems above only show that, within the
+credence algebra, the commitment can be \emph{located} (the supplied
+pair), \emph{priced} (the Occam factor, the width of $\Cond$), and
+\emph{bounded} (the trichotomy and the absorbing boundary).
 \end{remark}
 
-\section{Iteration: Sequential Evidence and Iterated Reflection}
-\label{sec:iteration}
-
-Two procedures repeat a single step and approach a limit. Sequential
-conditioning repeats Bayesian update. Iterated reflection repeats adding the
-soundness of a theory to that theory. The procedures are not the same. They
-share a shape worth stating, and they break at different boundaries.
-
-\subsection{Updating forgets the prior}
-
-Start with one parameter and a stream of observations. The prior is a
-credence over the parameter. Each new datum multiplies it through the chain
-rule and renormalizes. Run this on independent, identically distributed data
-and the posterior concentrates on the truth.
-
-Two theorems make the convergence precise. Doob's consistency result,
-sharpened by the Bernstein-von Mises theorem, says the posterior is
-asymptotically normal around the truth and shrinks at rate $1/\sqrt{n}$
-\cite{vandervaart1998}. The proper prior survives in the
-$1/\sqrt{n}$ correction and then washes out. A second result speaks to
-disagreement between observers. If two agents assign positive credence to the
-same events, their posteriors merge as evidence accumulates
-\cite{blackwell1962}. Different starting credences converge to the same limit.
-
-The slogan is that data forget the prior. The prior is not erased at any
-finite stage; its weight decays. In the limit only the likelihood speaks.
-
-\subsection{Reflection adds soundness}
-
-Now replace data by proofs about proofs. A consistent theory $T$ strong enough
-for arithmetic cannot prove its own consistency \cite{godel1931}. It can,
-however, be extended. Add to $T$ the statement that $T$ is sound, or the
-reflection principle ``if $T$ proves $\varphi$ then $\varphi$.'' Call the
-result $T_1$. The new theory proves the consistency $T$ could not.
-
-Iterate. Each $T_{n+1}$ adds the soundness of $T_n$ on top of $T_n$.
-Continue past the finite stages into the transfinite, indexed by ordinals,
-taking unions at limit ordinals. Turing studied the first ordinals of such a
-progression \cite{turing1939}; Feferman developed the transfinite recursive
-progression in full \cite{feferman1962}. Each step is sound if the previous
-theory was. The sequence climbs toward a limit theory that settles more
-arithmetic than any finite extension.
-
-\subsection{Where the analogy holds}
-
-Both procedures iterate one operator and read off a limit. In updating the
-operator is conditioning on the next datum; in reflection it is adjoining the
-soundness of the current level. Both limits are stronger than every finite
-stage and licensed by the stages below. Neither limit is reached at a finite
-step. Both formalize the same intuition: standing where you are, you can see
-that your present position is sound, and saying so moves you forward.
-
-\subsection{Where it breaks}
-
-The convergence is a theorem with hypotheses, and the hypotheses fail. Doob's
-theorem secures consistency only outside a prior-null set; the null set can be
-large. In infinite-dimensional models a prior can place that null set on the
-truth, and the posterior then concentrates on the wrong value no matter how
-much data arrive \cite{diaconis1986}. Merging needs both agents to grant
-positive credence to the truth; a dogmatic prior that excludes it never
-merges. Convergence is contingent on the prior, not automatic.
-
-Reflection breaks against a different wall. Each added soundness statement
-is itself an arithmetic sentence, so the new theory is again incomplete by the
-same theorem that forced the first extension \cite{godel1931}. The
-progression never closes into a complete theory; the incompleteness boundary
-moves with it. Worse, the route through the ordinals depends on how each
-ordinal is named, and the naming smuggles in strength. The limit is not a
-single canonical theory but a family indexed by notations
-\cite{feferman1962}.
-
-So the analogy holds in shape and fails in kind. One iteration forgets a
-finite-weight prior under a measure-theoretic condition that can fail in large
-models. The other adds genuine deductive strength under a syntactic condition
-that can never terminate. The first has a limit theorem with a sharp
-counterexample; the second has a limit construction with no completion. Reading
-them together sets a frame for the conditioning boundary of
-Section~\ref{sec:boundaries}: convergence and consistency are earned
-under stated hypotheses, never by fiat, and both run out exactly where their
-hypotheses do.
-
-\section{Two Boundaries}
-\label{sec:boundaries}
-
-The credence algebra meets probability and statistics at two boundaries where
-a multiplicative update degenerates. One sits at evidence value zero. The
-other sits where a prior loses width. Both are facts about the limit of a
-product, not separate pathologies. This section states each as such and marks
-which ties are this paper's sharpenings rather than prior results.
-
-\subsection{The Unrecoverable Zero}
-\label{sec:zero}
-
-Start with a prior credence of zero on a hypothesis $A$. No finite evidence
-moves it. Cromwell's rule names this: a probability set to zero or one is
-never revised by conditioning~\cite{jaynes2003}. The mechanism is
-multiplication. Update multiplies the prior by a likelihood ratio, and zero
-times anything is zero.
-
-The same arithmetic governs the evidence side. The chain rule is
-\[
-  \cred(A\mid B)\conjc\cred(B)=\cred(A\wedge B).
-\]
-When $\cred(B)=0$ the equation reads $\cred(A\mid B)\conjc 0=0$. Every value
-in $[0,1]$ satisfies it. Conditioning on impossible evidence is unconstrained:
-\[
-  \Cond(0,0)=\{c\in[0,1]:c\conjc 0=0\}=[0,1].
-\]
-Zero is absorbing under $\conjc$, so the boundary works in both directions. A
-zero prior cannot be moved. Zero evidence cannot move anything. One absorbing
-element produces both readings.
-
-\begin{remark}
-The two faces are dual. A zero in the multiplicand fixes the product at zero
-regardless of the multiplier; a zero in the position that update would divide
-by leaves the quotient free. Division would force a choice on the null set, by
-convention or by a limit. The chain rule, taken as primitive, declines to
-choose. The admissible set is the whole interval.
+\begin{remark}[The de Bruijn discipline]
+\label[remark]{rem:debruijn}
+Mechanization relocates trust; it does not eliminate it.
+Every theorem of
+\cref{sec:chainrule,sec:valuations,sec:update,sec:coherence,sec:cromwell,sec:contraction}
+and the credal-set results of \cref{sec:modelcomparison} are checked by
+the Lean kernel against Mathlib's axioms, which is the de Bruijn
+criterion: a small trusted core re-checks each proof, so the reader
+trusts the checker, not the author~\cite{debruijn1970}.
+Gentzen's consistency proof~\cite{gentzen1936} is the canonical
+precedent for such relocation: the unprovable statement is exchanged
+for a stronger principle held outside the system.
+The relocation here is to a smaller, public, re-runnable core, not to
+no core at all.
 \end{remark}
 
-This is why impossible evidence neither forces a conclusion nor can be forced
-to one. No ex falso enters. From $A$ and $\negc A$ the calculus derives no
-unrelated positive conclusion; Lean records this as
-\texttt{labelled\_no\_ex\_falso}. The zero-conditioning fact is
-\texttt{cond\_zero\_zero\_univ}, with the underlying value-level statement
-\texttt{conditioning\_zero\_any}. The contrast with a residuated implication is
-sharp: an implication connective would let the impossible antecedent discharge
-any consequent. The external conditioning judgment $c\in\Cond(j,e)$ keeps the
-antecedent outside the formula language, so the discharge never happens.
-
-The result is conservative. We did not discover that zero is absorbing or that
-Cromwell's rule holds. The sharpening is to read both as one boundary of the
-multiplicative update and to certify the no-explosion consequence in Lean.
-
-\subsection{The Measure-Zero Verdict}
-\label{sec:occam}
-
-The second boundary is where a prior loses width. Compare two models by their
-marginal likelihoods. For a model with parameter $\theta$, prior $\pi$, and
-data $x$,
-\[
-  m(x)=\int p(x\mid\theta)\,\pi(\theta)\,d\theta
-  \;\approx\; p(x\mid\hat\theta)\cdot\Omega,
-\]
-where $\hat\theta$ maximizes the likelihood and $\Omega$ is the Occam factor:
-how much of its prior width the fitted parameter actually uses. The Bayes
-factor multiplies the maximized likelihood ratio by the ratio of Occam
-factors.
-
-Width controls $\Omega$. Widen the prior on a parameter that the data pin down
-and $\Omega$ shrinks, penalizing the larger model. Send the prior width to
-infinity, the improper limit, and $\Omega\to 0$ at a rate the prior does not
-fix. The Bayes factor then has no determinate value. Bartlett stated this
-against a flat prior: the answer depends on a width that the improper prior
-refuses to name~\cite{bartlett1957}. Jeffreys had already built the point into
-his test design, placing a proper prior of fixed scale on the alternative so
-that $\Omega$ stays defined~\cite{jeffreys1939}.
-
-Lindley's paradox is the same factor read along a trajectory~\cite{lindley1957}.
-Fix a test statistic at a borderline value, say $Z$ two standard errors from
-the null, and let the sample size $n$ grow. The frequentist verdict is
-constant: reject at the chosen level. The Bayesian verdict reverses, because
-$\Omega$ falls like $1/\sqrt{n}$ as the posterior concentrates while the
-likelihood ratio stays put. The two verdicts agree only on a fine-tuned path
-that holds $Z$ fixed as $n$ grows. That path is a set of measure zero in the
-data. Off it, with $Z$ free to track the data, the divergence does not arise.
-
-The frequentist test is a Bayes factor with the Occam factor set to one. A $Z$
-or $\chi^2$ test rejects on the maximized likelihood ratio,
-\[
-  \exp\!\big(Z^2/2\big),
-\]
-which is exactly the Bayes factor's first term with $\Omega=1$. The test keeps
-the model's best fit and drops the width penalty. Lindley's reversal is the
-gap between $\Omega=1$ and the $\Omega$ that a proper prior supplies. Naming
-that implicit $\Omega=1$ is this paper's sharpening; the likelihood-ratio form
-of the test statistic is standard.
-
-Under uncertainty about the prior, the honest object is not a number. It is an
-interval. Range the prior over a class and the Bayes factor ranges over the
-induced set of values. Imprecise probability takes this set as primitive
-rather than selecting one prior~\cite{walley1991}; robust Bayesian analysis
-reads the same set as sensitivity to the prior
-class~\cite{berger1985}. The interval of Bayes factors is the statistical
-image of set-valued admissible conditioning. Where evidence underdetermines
-the update, $\Cond$ returns a set; where the prior class underdetermines the
-comparison, the Bayes factor returns a set. The two boundaries share the form:
-a multiplicative update degenerates, and the admissible answer is an interval,
-not a point.
-
-\begin{remark}
-What we claim is narrow. The Occam factor, Bartlett's improper-prior
-indeterminacy, Lindley's paradox, and the imprecise-probability interval are
-prior results, cited as such. The sharpenings are three ties: the implicit
-$\Omega=1$ inside the frequentist test, the measure-zero character of the
-agreement trajectory, and the match between the Bayes-factor interval and the
-set-valued $\Cond$. None of these requires a new statistical mechanism. Each
-reads an existing one as a boundary of the same product.
-\end{remark}
-
-\section{Relation to Existing Syntheses}
-\label{sec:relation}
-
-Two unifications already cover most of the ground this paper stands on.
-Each takes a face of the problem and shows it to be one thing.
-Neither covers the join we make here, and we claim only the join.
-
-\subsection{Self-reference as one diagonal fact}
-
-Lawvere proved that Cantor's theorem, Russell's paradox, the liar, G\"odel's
-first incompleteness theorem, Tarski's undefinability of truth, and Curry's
-paradox are instances of a single fixed-point lemma in a cartesian closed
-category~\cite{lawvere1969,godel1931,tarski1936}.
-A point-surjective map $A\to B^A$ forces every endomap of $B$ to have a fixed
-point; when $B$ carries a fixed-point-free map, no such surjection exists.
-Yanofsky restated this without category theory, as one diagonal argument that
-generates each paradox by choosing the objects and the map~\cite{yanofsky2003}.
-The synthesis is structural.
-It says these phenomena share a shape.
-It does not assign the liar a value or say what a theory should do once the
-shape appears.
-
-Our solution-set reading sits downstream of that lemma.
-The negation map on $[0,1]$ has the unique fixed point $\tfrac12$, so the
-liar and Russell equations have solution $\{\tfrac12\}$; the identity map has
-every point fixed, so the truth-teller has solution $[0,1]$.
-Lawvere guarantees a fixed point exists.
-The credence algebra says which one, and how many, on a concrete carrier.
-
-\subsection{Probability as the logic of plausible inference}
-
-Cox derived the sum and product rules from consistency requirements on a
-real-valued degree of belief~\cite{cox1946}, and Jaynes built probability
-theory as the unique consistent extension of Boolean logic to graded
-plausibility~\cite{jaynes2003}.
-This unifies the other face: deductive logic is the certainty limit of one
-calculus of belief, not a separate subject.
-The product rule $\cred(A\wedge B)=\cred(A\mid B)\,\cred(B)$ is the chain rule
-we take as primitive.
-
-Cox and Jaynes fix the conditional by division, $\cred(A\mid B)=\cred(A\wedge
-B)/\cred(B)$, and leave the case $\cred(B)=0$ undefined or excluded by a
-regularity convention.
-That convention is exactly where explosion re-enters: a vacuously true
-conditional on impossible evidence licenses any conclusion.
-
-\subsection{What remains open, and what we add}
-
-Neither synthesis settles the boundary.
-Lawvere classifies the paradox; Cox and Jaynes classify the inference; the
-seam between them, conditioning on evidence that has been ruled out, is left
-to convention on each side.
-This paper works that seam.
-
-The contribution is a three-way correspondence and its mechanization.
-The same admissible set
-\[
-  \Cond(j,e)=\{c\in[0,1]:c\conjc e=j\}
-\]
-reads three ways.
-As a prior, $c$ is the credence updated by positive evidence $e$ toward joint
-$j$.
-As a seed, it is the starting value a self-referential equation must satisfy.
-As a supplied joint, it is the dependence a valuation must fix before a
-conjunction has a value.
-For $e>0$ the set is the singleton $\{j/e\}$; for $e=j=0$ it is all of
-$[0,1]$; for $e=0<j$ it is empty.
-
-Two classical results sharpen the boundary.
-The Cromwell rule, that a prior of $0$ or $1$ can never move, is here the
-no-ex-falso theorem: impossible evidence imposes no constraint, so it cannot
-force a conclusion.
-Lindley's paradox, where a sharp null and a diffuse alternative pull a verdict
-apart~\cite{lindley1957,bartlett1957,jeffreys1939}, is here the move from a
-single posterior to the admissible set $\Cond(j,e)$: when the chain rule does
-not pin a value, the honest answer is the whole interval, not an arbitrary
-point. This matches the imprecise-probability stance on null
-events~\cite{walley1991}.
-
-The components are not ours.
-The fixed-point lemma is Lawvere's and Yanofsky's; the inference calculus is
-Cox's and Jaynes's; the admissible-set boundary draws on primitive
-conditional probability and coherence.
-What is new is the join: one carrier on which the diagonal lemma and the
-chain rule meet, with the zero-evidence boundary made explicit rather than
-conventional, and the whole separation checked in Lean.
-Every theorem named in this paper type-checks against the Lean kernel with no
-\texttt{sorry}.
-The kernel plays de Bruijn's role: a small trusted core re-checks each
-proof, so the reader trusts the checker, not the author~\cite{debruijn1970}.
-
-\subsection{Two further relocations}
-
-Solomonoff's universal prior makes Occam's razor a prior: shorter programs get
-more weight, so simpler hypotheses start ahead~\cite{solomonoff1964}.
-The universality has a price.
-The prior is universal only up to a multiplicative constant that depends on
-the chosen reference machine, and that constant is not bounded across machines.
-This is the same pattern we keep flagging.
-A modelling choice that looks canonical (a universal prior, a regular
-conditional on a null set, a value for an independent statement) hides a free
-parameter.
-The credence algebra forces the parameter into the open, as the supplied
-joint or as the admissible interval.
-
-Gentzen proved the consistency of arithmetic by transfinite induction up to
-$\varepsilon_0$, trading one unprovable statement for a stronger principle the
-original theory could not reach~\cite{gentzen1936}.
-Trust is relocated, not eliminated; this is the regress that the
-M\"unchhausen trilemma names in general~\cite{albert1968}.
-Our mechanization relocates trust the same way.
-It does not certify the credence algebra from nothing.
-It moves trust from informal argument to the Lean kernel and the mathlib
-axioms it rests on.
-We claim the relocation is to a smaller, public, re-runnable core, not that it
-is to no core at all.
-
+%=============================================================================
 \section{Conclusion}
 \label{sec:conclusion}
+%=============================================================================
 
-The product De Morgan triplet on $[0,1]$ (product conjunction,
-probabilistic-sum disjunction, standard complement) sits at an
-intersection that is easy to miss: it satisfies every axiom shared by
-Bayesian probability~\cite{cox1961,jaynes2003} and product
-logic~\cite{hajek1998}, yet commits to neither convention at the one
-point where they diverge.
-At positive evidence, chain-rule conditioning agrees with Bayesian
-division and with product residuation; at zero evidence, it imposes no
-value.
-The annihilator identity $c \cdot 0 = 0$ is the whole story: it forces
-no posterior when evidence is impossible, provides the paraconsistency
-witness ($v(A) = \tfrac{1}{2}$ satisfies both $A$ and $\negc A$ as
-positive without constraining $B$), and explains why the collapse
-homomorphism cannot extend to conditioning, since collapsed values discard
-the ratio information that the conditional requires.
+The chain rule $c \conjc e = j$, taken as the defining identity of
+conditioning, yields a complete and elementary account of the opening
+commitment in the credence algebra.
+The admissible set obeys an exact trichotomy
+(\cref{thm:trichotomy}); the boundary values absorb and the same
+annihilator blocks ex falso (\cref{thm:cromwell,thm:cromwell-tie});
+coherence is path independence in the data grouping and nothing more
+(\cref{thm:seq-batch}); the seed governs every finite stage and washes
+out in the limit, except at the absorbing boundary
+(\cref{thm:contraction,thm:absorbing-orbit}); and ranging the seed over
+a class produces exactly the set-valued posteriors of imprecise
+probability, with the Gaussian model-comparison boundary
+(\cref{thm:bartlett,thm:lindley}) as the classical statistical face of
+the same degeneration.
 
-What this paper contributed, beyond collecting known components, is
-fourfold.
-First, a dictionary: LP consequence on the Kleene lattice is
-\emph{exactly} positivity consequence on $[0,1]$, and K$_3$ is exactly
-certainty consequence (the Lean bridge theorems \texttt{lp\_formula\_bridge}
-and \texttt{k3\_formula\_bridge}).
-An LP logician is implicitly doing positivity reasoning over $[0,1]$;
-a K$_3$ logician is implicitly doing certainty reasoning.
-The collapse is the Rosetta stone, and it works in both directions.
-Second, a machine-checked toy model: every result is verified in
-Lean~4 with Mathlib and zero \texttt{sorry}, meeting the de Bruijn
-criterion~\cite{debruijn1970} that a claimed proof can be checked by
-an independent verifier.
-Third, two boundary sharpenings of the conditional impossibility
-(the Lean results \texttt{cond\_bridge\_boundary} and \texttt{cond\_bridge\_fails\_interior}): the bridge
-fails precisely when both conclusion and evidence are interior and the
-conclusion is less credible than the evidence; it holds whenever at
-least one is at a boundary.
-Fourth, an honest positioning: the paper does not claim a
-reconciliation of probability and many-valued logic, only a shared
-algebra and an explicit account of where they part company.
+Every framework that conditions must commit to something at evidence
+zero, and to a seed before the first update: probability leaves the
+cell undefined and demands a prior; residuated implication fills the
+cell with $1$ and demands a t-norm; the chain rule leaves the cell
+unconstrained and demands the pair $(j,e)$.
+None of these is neutral.
+The defensible position, and the only one the theorems support, is to
+make the one unavoidable commitment explicit, minimal, and checked:
+here it is $c \cdot 0 = 0$ together with a named, supplied pair,
+machine-verified down to the kernel.
 
-The practical reading is this.
-Any framework that handles conditioning must commit to something at
-evidence zero: Bayesian probability leaves the conditional undefined,
-product residuation fills it with $1$ (ex falso), and chain-rule
-conditioning leaves it unconstrained.
-None of these is the neutral option.
-A system's worth is not that it has no commitment at this point, but
-that it makes its one unavoidable commitment explicit, minimal, and
-checkable.
-The product De Morgan triplet with chain-rule conditioning makes that
-commitment as small as arithmetic allows: $c \cdot 0 = 0$, nothing
-more.
+\section*{Acknowledgements}
 
-\appendix
+Anthropic's Claude was used as an assistant for both the Lean
+formalization and the manuscript preparation.
 
-\section{Priors as seeds: informative, reference, and model volume}
-\label{sec:priorseed}
-
-The prior is the Bayesian name for the seed. Before the first datum, an inference
-already holds a credence over hypotheses, and no reading fixes it from inside.
-Part~4 argued this in the abstract; here we read the prior as one concrete
-instance of the irreducible commitment, and we follow it into model comparison,
-where the seed acquires a price.
-
-\paragraph{No prior is neutral.}
-An informative prior commits a lot. It names where the parameter is likely to
-sit and how tightly, and it pays for a wrong guess with slow convergence. A
-reference prior commits less: Jeffreys' rule, the flat prior, the maximum-entropy
-prior under stated constraints all aim to let the data speak with least
-interference~\cite{jaynes2003}. Less is not none. A flat prior on a parameter is
-not flat after reparametrization; maximum entropy fixes a measure and a
-constraint set; Jeffreys' rule fixes an invariance. Each choice is a commitment
-dressed as the absence of one. The reference prior is the seed held as small as
-the task allows, never the seed removed.
-
-\paragraph{Prior volume is the Occam factor.}
-The commitment becomes a number when two models are compared. Section~\ref{sec:occam}
-wrote the marginal likelihood as $m(x)\approx p(x\mid\hat\theta)\cdot\Omega$, with
-$\Omega$ the Occam factor: the fraction of its prior width the fitted parameter
-uses. A broad prior spreads credence over a large parameter space, so $\Omega$ is
-small, and the broad model is charged for the volume it spends~\cite{lindley1957}.
-A model with a diffuse prior is therefore a \emph{larger} model, not a neutral
-one. Widen the prior toward the improper limit and $\Omega\to0$ at a rate the
-prior never names, so the Bayes factor loses a determinate value; Bartlett read
-this off the flat prior directly~\cite{bartlett1957}. The seed that looked least
-committal turns out to commit the most, by claiming the most volume.
-
-This is the same accounting as $\Cond$. The admissible set
-$\Cond(j,e)=\{c\in[0,1]:c\conjc e=j\}$ records what the supplied data leave open;
-its width is the analogue of prior volume. A broad prior buys a large $\Omega$
-penalty exactly as a degenerate $e$ buys a wide $\Cond$. Width is the currency in
-both columns, and width is never free.
-
-\paragraph{The reference-prior dream and its machine.}
-Push the reference prior to its limit and you reach Solomonoff's universal prior:
-weight each hypothesis by the length of the shortest program that generates it, so
-simpler hypotheses start ahead and Occam's razor becomes the seed
-itself~\cite{solomonoff1964}. This is the cleanest attempt to fix the very first
-commitment once and for all. The price is the same one the flat prior pays in a
-cruder form. Universality holds only up to a multiplicative constant set by the
-chosen reference machine, and that constant is unbounded across machines. The
-seed is minimal in description length and still machine-dependent. Even the prior
-built to be canonical carries a free parameter, relocated from the shape of a
-distribution to the choice of a universal machine.
-
-The lesson tracks the Part~4 thesis without adding to it. Every prior is a seed
-the inference cannot derive from its data. Making it informative commits more;
-making it diffuse commits more volume, not less; making it universal commits to a
-machine. The honest move is not to find the neutral prior, which does not exist,
-but to name the seed, hold it small, and let the comparison expose what its width
-costs.
-
-\section{A worked example: does gravity exist?}
-\label{sec:gravity}
-
-Everything above runs on one experiment. We measure a downward acceleration and
-ask whether a gravitational effect exists at all. The two boundaries of
-Section~\ref{sec:boundaries} (the Occam factor and the washing out of a proper
-prior) and the coherence theorem of Section~\ref{sec:iteration} all show up in
-explicit numbers.
-
-Set up two models for a single reading $x$ of the acceleration, in units where
-the noise has standard deviation $\sigma = 1$.
-\begin{itemize}
-\item $M_0$: no effect. The acceleration is exactly $g = 0$, so
-$x \sim \mathcal{N}(0,1)$.
-\item $M_1$: an effect of unknown size. The acceleration is some
-$g \in [0, W]$, with a flat prior of width $W$, and $x \sim \mathcal{N}(g,1)$.
-\end{itemize}
-The width $W$ is the prior on $M_1$. It is the seed of Section~\ref{sec:correspondence}:
-chosen before the reading, not read off it.
-
-The marginal likelihood of $M_1$ factors the way Section~\ref{sec:occam}
-describes,
-\[
-  m_1(x) = \int_0^W \frac{1}{W}\, \frac{1}{\sqrt{2\pi}}\,
-  e^{-(x-g)^2/2}\, dg
-  \;\approx\; \underbrace{\frac{1}{\sqrt{2\pi}}\, e^{-(x-\hat g)^2/2}}_{\text{best fit}}
-  \cdot \underbrace{\frac{\sqrt{2\pi}}{W}}_{\Omega},
-\]
-with $\hat g = x$ when $x$ lands inside $[0,W]$. The Occam factor
-$\Omega = \sqrt{2\pi}/W$ is the fraction of its prior width that the fitted
-parameter uses. The Bayes factor is the maximized likelihood ratio times that
-factor:
-\[
-  B_{10} = \frac{m_1(x)}{m_0(x)}
-  \;\approx\; \underbrace{e^{x^2/2}}_{\text{likelihood ratio}}
-  \cdot \underbrace{\frac{\sqrt{2\pi}}{W}}_{\Omega}.
-\]
-
-\begin{example}[A broad prior loses on a datum that favors gravity]
-\label{ex:gravity-lindley}
-Read $x = 2$: two standard errors from zero, so the datum favors $g \neq 0$.
-The likelihood ratio is $e^{2} \approx 7.39$, decisive against $M_0$ on its
-own. Now feel the width.
-\begin{itemize}
-\item Narrow prior, $W = 5$: $\Omega = \sqrt{2\pi}/5 \approx 0.50$, so
-$B_{10} \approx 7.39 \cdot 0.50 \approx 3.7$. Evidence for gravity.
-\item Broad prior, $W = 100$: $\Omega \approx 0.025$, so
-$B_{10} \approx 7.39 \cdot 0.025 \approx 0.18$. Evidence \emph{against}
-gravity, with the same datum.
-\end{itemize}
-The reading did not change. The seed did. A prior too broad on $g$ charges
-$M_1$ for parameter space it never used, and $M_1$ loses even though the datum
-favors $g \neq 0$. This is the Lindley--Bartlett effect
-\cite{lindley1957,jeffreys1939}: a sharp null beats a diffuse alternative not
-on the fit but on the width.
-\end{example}
-
-Push $W \to \infty$, the improper limit, and $\Omega \to 0$ at a rate no
-finite reading fixes; $B_{10} \to 0$ regardless of $x$. The comparison is no
-longer underdetermined, it is ill-posed: the answer depends on a width the
-improper prior declines to name \cite{bartlett1957}. Jeffreys' fix is to keep
-the prior proper, of fixed scale, so $\Omega$ stays defined \cite{jeffreys1939}.
-
-\paragraph{Coherence is not convergence.}
-Now take $n$ readings $x_1, \dots, x_n$ instead of one. Three claims must be kept
-apart. The first is \emph{fixed-seed coherence}: with the prior held fixed,
-updating one datum at a time equals updating the whole batch, because the
-intermediate posterior cancels. This is the machine-checked theorem
-\texttt{sequential\_eq\_batch} (Section~\ref{sec:iteration}): with the joint
-model fixed, $\cred(\theta \mid x_{1:n})$ is one object whether assembled in $n$
-steps or one. That is all it says. It moves no prior and forgets no width; it is
-path independence in the data grouping, not a statement about which prior wins.
-What it licenses is reading $n$ readings as a single effective measurement of
-mean $\bar x$ with noise $1/\sqrt{n}$.
-
-\begin{example}[Accumulating data washes out a broad proper prior]
-\label{ex:gravity-washout}
-Keep the broad prior $W = 100$ that lost in
-Example~\ref{ex:gravity-lindley}, and suppose the true acceleration is
-$g = 2$, so $\bar x \to 2$. The effective likelihood ratio for $n$ readings is
-$e^{n\bar x^2/2} = e^{2n}$, while the Occam factor on the concentrated
-posterior is $\Omega_n \approx \sqrt{2\pi/n}\,/\,W$. So
-\[
-  B_{10}^{(n)} \;\approx\; e^{2n}\cdot \frac{\sqrt{2\pi/n}}{100}.
-\]
-At $n = 1$ this is $\approx 0.18$ (gravity loses, as before). At $n = 4$ it is
-$e^{8}\cdot\sqrt{\pi/2}/100 \approx 2981 \cdot 0.0125 \approx 37$. At $n = 10$
-it is astronomically large. The exponential growth of the likelihood ratio
-overruns the fixed width penalty in the denominator. The broad-but-proper prior
-that lost on one datum is forgotten once the data accumulate. This is the
-\emph{second}, separate claim, convergence under assumptions: the
-Bernstein--von Mises behavior of Section~\ref{sec:iteration}, where the posterior
-concentrates at rate $1/\sqrt{n}$ and the prior washes out
-\cite{vandervaart1998}. The forgetting is the work of the growing likelihood
-ratio $e^{2n}$, not of the coherence theorem; the \emph{third} claim, the Occam
-factor $\Omega_n$, still divides every term, and prior-volume sensitivity is
-removed by no theorem here. Coherence guarantees only that the sequential and
-batch routes to this verdict agree.
-\end{example}
-
-The contrast with the improper case is the whole point. A proper prior of any
-finite width, however badly chosen, is recoverable: enough readings drive
-$B_{10}^{(n)}$ to its data-driven verdict, and the coherence theorem guarantees
-that the sequential accumulation reaching that verdict is the same as the batch
-one. An improper prior, $W = \infty$, has no such limit to recover toward. The
-$\Omega = \infty^{-1}$ that made one reading ill-posed makes every reading
-ill-posed; no amount of accumulated data names the width, because there was
-never a width to name. The seed must be proper for the data to forget it.
-
-This is the same boundary, read on one experiment, that the dictionary of
-Section~\ref{sec:correspondence} reads three ways. A finite width is a prior
-the evidence can revise (singleton conditioning, $e > 0$). An infinite width is
-the unrecoverable case: not the zero of Section~\ref{sec:zero}, but its dual at
-the other end, a prior so spread that no finite evidence concentrates it. In
-both, the honest report under an unfixed seed is not a number but the set of
-verdicts the admissible seeds allow.
+%=============================================================================
+% Bibliography
+%=============================================================================
 
 \bibliographystyle{plain}
 \bibliography{../cred}
+
+%=============================================================================
+% APPENDICES
+%=============================================================================
+\appendix
+
+%=============================================================================
+\section{Lean Formalization}
+\label{app:lean}
+%=============================================================================
+
+All credence-algebra results are formalized in Lean~4 with Mathlib;
+verification is \texttt{cd lean \&\& lake build} with toolchain
+Lean~4.16.0 and Mathlib~4.16.0, zero \texttt{sorry}.
+The Gaussian computations of \cref{sec:modelcomparison}
+(\cref{lem:gaussian-ml,thm:bartlett,thm:lindley}) are classical and not
+formalized.
+
+\textbf{File map.}
+\begin{itemize}[nosep]
+\item \texttt{Cred/Cond/Admissible.lean}: the \texttt{Conditioning}
+  structure, the admissible set \texttt{Cond}, the trichotomy, and the
+  Fr\'echet bounds (\cref{sec:chainrule}).
+\item \texttt{Cred/Valuation.lean}: \texttt{CpValuation},
+  \texttt{IndepValuation}, \texttt{JointValuation}
+  (\cref{sec:valuations}).
+\item \texttt{Cred/Update.lean}: Bayesian and Jeffrey updates and
+  zero-evidence underdetermination (\cref{sec:update}).
+\item \texttt{Cred/Coherence.lean}: sequential-equals-batch coherence
+  (\cref{sec:coherence}).
+\item \texttt{Cred/Cromwell.lean}: Cromwell's rule and the
+  no-ex-falso tie (\cref{sec:cromwell}).
+\item \texttt{Cred/ToyModel.lean}: the contraction model
+  (\cref{sec:contraction}).
+\item \texttt{Cred/Lindley.lean}: credal classes over the supplied
+  joint (\cref{sec:modelcomparison}).
+\end{itemize}
+
+\textbf{Design choices.}
+\texttt{Credence} is a structure carrying explicit \texttt{nonneg} and
+\texttt{le\_one} proofs.
+\texttt{Conditioning joint evidence} is a dependent type packaging the
+conditional credence with its chain-rule proof, so existence and
+uniqueness statements are statements about inhabitants of a type.
+\texttt{Cond j e} is the plain solution set
+$\{c \mid c \conjc e = j\}$; the equivalence of the two views is
+\texttt{mem\_cond\_iff}.
+The Bayesian update \texttt{bayesianUpdate} takes the positivity
+hypothesis $0 < e$ as an argument, so the absorbing point is excluded
+by type discipline rather than by a runtime convention
+(\cref{prop:update-positive}).
+
+\medskip
+\noindent
+\texttt{structure Conditioning (joint evidence : Credence) where}\\
+\null\quad \texttt{condCred : Credence}\\
+\null\quad \texttt{chainRule : condCred}~$\conjc$~\texttt{evidence = joint}
+
+\medskip
+\noindent
+\texttt{def Cond (j e : Credence) : Set Credence := \{c | c}~$\conjc$~\texttt{e = j\}}
+
+\medskip
+\textbf{Key theorems (this paper).}
+\begin{itemize}[nosep]
+\item Trichotomy: \texttt{cond\_singleton\_of\_pos},
+  \texttt{cond\_zero\_zero\_univ}, \texttt{cond\_nonempty\_iff}
+\item Zero evidence: \texttt{conditioning\_zero\_any},
+  \texttt{conditioning\_zero\_forces\_joint\_zero}
+\item Fr\'echet: \texttt{frechet\_upper}, \texttt{frechet\_lower},
+  \texttt{frechet\_conditioning\_exists}
+\item Update: \texttt{bayesianUpdate\_chain\_rule},
+  \texttt{bayesianUpdate\_unique}, \texttt{jeffreyUpdate\_certain},
+  \texttt{jeffreyUpdate\_zero},
+  \texttt{bayesian\_underdetermined\_at\_zero}
+\item Coherence: \texttt{sequential\_eq\_batch},
+  \texttt{sequential\_chain\_rule}
+\item Cromwell: \texttt{cromwell\_zero\_absorbing},
+  \texttt{cromwell\_fixed\_point}, \texttt{cromwell\_no\_ex\_falso\_tie}
+\item Contraction: \texttt{toyA\_iterate\_dist},
+  \texttt{toyA\_contraction\_tendsto}, \texttt{toyA\_absorbing\_zero}
+\item Credal sets: \texttt{condSet\_monotone\_joint},
+  \texttt{condSet\_positive\_evidence},
+  \texttt{condSet\_full\_feasible\_eq\_univ},
+  \texttt{condSet\_zero\_evidence\_of\_zero\_mem}
+\end{itemize}
 
 \end{document}

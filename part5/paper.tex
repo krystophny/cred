@@ -1,7 +1,8 @@
-% What Is...? A Conceptual Guide to Credence-Based Reasoning
-% Part 5: didactic guide to the Cred series
+% The Credence Algebra: A Primer
+% Part 5: rigorous entry point to the Cred series
 %
-% References to Lean formalization: lean/Cred/
+% References to Lean formalization: lean/Cred/Core, lean/Cred/Collapse,
+% lean/Cred/Cond, lean/Cred/Bridge, lean/Cred/Fixpoint
 
 \documentclass[11pt,a4paper]{article}
 
@@ -9,18 +10,26 @@
 \usepackage{mathtools}
 \usepackage{enumitem}
 \usepackage{booktabs}
+\usepackage{caption}
 \usepackage{hyperref}
 \hypersetup{
     colorlinks=true,
     linkcolor=blue,
     citecolor=blue,
     urlcolor=blue,
-    pdfauthor={Anonymous},
-    pdftitle={What Is...? A Conceptual Guide to Credence-Based Reasoning}
+    pdfauthor={Christopher Albert},
+    pdftitle={The Credence Algebra: A Primer}
 }
 \usepackage{cleveref}
 \usepackage[margin=1in]{geometry}
+\emergencystretch=3em
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta,positioning,shapes}
+\usepackage{graphicx}
+\usepackage{pgfplots}
+\pgfplotsset{compat=1.18}
 
+% Theorem environments
 \newtheorem{theorem}{Theorem}[section]
 \newtheorem{lemma}[theorem]{Lemma}
 \newtheorem{proposition}[theorem]{Proposition}
@@ -29,19 +38,23 @@
 \newtheorem{example}[theorem]{Example}
 \newtheorem{remark}[theorem]{Remark}
 
+% Custom commands
 \newcommand{\cred}{\mathsf{cred}}
-\newcommand{\Cond}{\mathsf{Cond}}
-\newcommand{\Sol}{\mathsf{Sol}}
 \newcommand{\negc}{\mathord{\sim}}
 \newcommand{\conjc}{\otimes}
 \newcommand{\disjc}{\sqcup}
+\newcommand{\condc}[2]{({#1} \mid {#2})}
+\newcommand{\Cond}{\mathsf{Cond}}
+\newcommand{\Sol}{\mathsf{Sol}}
+\newcommand{\Kl}{\mathbb{K}}
 \newcommand{\Real}{\mathbb{R}}
-\newcommand{\Bool}{\mathbb{B}}
+\newcommand{\Nat}{\mathbb{N}}
 
-\title{\textbf{What Is...?}\\[0.5em]
-\large A Conceptual Guide to Credence-Based Reasoning}
+\title{The Credence Algebra: A Primer}
 
-\author{Anonymous for blind review}
+\author{Christopher Albert\\
+\small Institute for Theoretical and Computational Physics\\
+\small Graz University of Technology}
 \date{June 2026}
 
 \begin{document}
@@ -49,7 +62,33 @@
 \maketitle
 
 \begin{abstract}
-A newcomer to formal epistemology faces a tangle of near-synonyms: truth, certainty, high credence, proof, conditioning, entailment. This guide untangles them by keeping three levels apart. The \emph{value level} assigns numbers in $[0,1]$ to propositions via the operations $\negc c = 1-c$, $a \conjc b = ab$, and $a \disjc b = a + b - ab$. The \emph{consequence level} asks which value assignments propagate above a threshold. The \emph{conditioning level} asks which conditional credences are consistent with a given joint, via the admissibility relation $\Cond(j,e) = \{c : ce = j\}$. Keeping the three levels apart resolves eight foundational questions, from the status of contradiction to the meaning of paradox, without invoking explosion. Every claim in the guide is grounded in the machine-checked results of the Cred series.
+This primer is a self-contained development of the credence algebra
+used throughout the Cred series: the unit interval $[0,1]$ with
+complement $\negc c = 1 - c$, product conjunction
+$a \conjc b = ab$, and the De Morgan dual disjunction
+$a \disjc b = a + b - ab$.
+We prove the De Morgan triplet laws, locate the idempotents and the
+unique negation fixed point $\tfrac{1}{2}$, and measure the exact
+failure of distributivity.
+The map sending $0$ to $0$, $1$ to $1$, and the interior to
+$\tfrac{1}{2}$ is shown to be a surjective homomorphism onto the
+Kleene lattice $\{0, \tfrac{1}{2}, 1\}$; no analogous map exists onto
+classical, G\"odel, or \L ukasiewicz targets.
+Designation then yields the consequence relations K$_3$ and LP and
+their graded refinements, with explosion failing below threshold
+$\tfrac{1}{2}$ and excluded middle holding up to $\tfrac{3}{4}$.
+Conditioning enters as the solution set
+$\Cond(j,e) = \{c : c \conjc e = j\}$ of the chain rule, which is a
+singleton, the full interval, or empty; on crisp values it diverges
+from the material conditional exactly at impossible evidence.
+Finally, self-referential sentences are read as fixed-point equations,
+and the product residuum is shown to be incompatible with contraction,
+which blocks Curry's paradox.
+Every result is elementary and proved in full; all are machine-checked
+in Lean~4 with Mathlib.
+The primer is the entry point to
+Parts~1--4~\cite{part1,part2}, which develop the congruence
+classification, the probability bridge, and the foundational calculus.
 \end{abstract}
 
 %=============================================================================
@@ -57,1049 +96,1220 @@ A newcomer to formal epistemology faces a tangle of near-synonyms: truth, certai
 \label{sec:intro}
 %=============================================================================
 
-Start with a small table.
-A proposition $A$ can have any credence in $[0,1]$.
-Three values stand out: $0$ (impossible), $1$ (certain), and $\tfrac{1}{2}$ (the
-unique fixed point of negation).
-The table below shows what each value means at each level.
+A \emph{credence} is a real number in $[0,1]$ recording degree of
+belief~\cite{definetti1937,jaynes2003}.
+The Cred series studies one specific algebra on these values: the
+\emph{product De Morgan triplet}~\cite{klement2000,hajek1998},
+consisting of the complement $\negc c = 1 - c$, the product
+$a \conjc b = ab$, and the dual disjunction
+$a \disjc b = a + b - ab$,
+together with \emph{chain-rule conditioning}, the constraint
+$\cred(A \mid B) \cdot \cred(B) = \cred(A \land B)$ taken as
+primitive rather than derived from division.
+This primer develops the structure from scratch.
+Every notion gets a formula, every claim a proof; the reader needs
+only real arithmetic.
 
-\begin{center}
-\begin{tabular}{lccc}
-\toprule
- & $\cred(A) = 0$ & $\cred(A) = \tfrac{1}{2}$ & $\cred(A) = 1$ \\
-\midrule
-Value level & impossible & half-credence & certain \\
-K3 designation & not designated & not designated & designated \\
-LP designation & not designated & designated & designated \\
-Conditioning on $A$ & unconstrained & constrains & singleton \\
-\bottomrule
-\end{tabular}
-\end{center}
+Three levels organize the material.
+The \emph{value level} (Sections~\ref{sec:algebra}
+and~\ref{sec:fixed}) is the algebra itself: operations, order,
+idempotents, fixed points.
+The \emph{consequence level} (Sections~\ref{sec:collapse}
+and~\ref{sec:consequence}) asks which value assignments propagate
+designated status from premises to conclusions; the three-element
+quotient $\{0, \tfrac{1}{2}, 1\}$ and the logics K$_3$ and LP live
+here.
+The \emph{conditioning level} (Section~\ref{sec:conditioning}) asks
+which conditional credences are consistent with a given joint and
+evidence; the answer is a solution set, not a connective.
+Section~\ref{sec:fixpoint} applies all three levels to
+self-referential sentences.
 
-\noindent
-The table already answers three questions a newcomer might ask.
-\emph{What is falsehood?} Credence $0$, not a separate truth value.
-\emph{What is contradiction?} Holding $\cred(A) = \tfrac{1}{2}$ simultaneously
-for $A$ and $\negc A$, because $\negc\tfrac{1}{2} = \tfrac{1}{2}$.
-\emph{What happens if evidence is impossible?}
-Nothing is forced: $\Cond(0,0) = [0,1]$, which is the content of
-\texttt{conditioning\_zero\_any}.
+Two design choices drive everything.
+First, conjunction is the \emph{product}, not the minimum, so the
+interior $(0,1)$ is closed under all three operations
+(Theorem~\ref{thm:collapse-hom}) and the only idempotents are the
+endpoints (Proposition~\ref{prop:idempotent}).
+Second, conditioning is the \emph{chain rule}, so impossible evidence
+constrains nothing: $c \cdot 0 = 0$ holds for every $c$, and no ex
+falso is built in (Theorem~\ref{thm:trichotomy}).
+The interaction of the two choices is the recurring theme: the
+negation fixed point $\tfrac{1}{2}$ forces the Kleene lattice as the
+collapse target, the unconstrained zero-evidence case separates
+conditioning from the material conditional, and the product residuum
+refuses contraction.
 
-This guide answers eight such questions in order.
-Each is a point where everyday logic, probability, and many-valued logic talk
-past each other because they conflate two of the three levels.
+Each result carries its Lean~4 name once, in the form
+``(machine-checked, \texttt{name})''; the proofs in the text stand on
+their own.
+Appendix~\ref{app:lean} locates the names in the repository.
+This primer states no new theorems: everything here is either
+classical~\cite{kleene1952,hajek1998,klement2000} or proved in
+Parts~1--4~\cite{part1,part2}.
+What is new is the arrangement: one document, full proofs, no
+prerequisites.
 
-\begin{enumerate}
-  \item \textbf{What is truth?} A value of $1$ at the value level, not a designation
-        or a certainty consequence.
-  \item \textbf{What is falsehood?} A value of $0$.
-  \item \textbf{What is contradiction?} A pair $A$, $\negc A$ both holding above a
-        threshold. Contradiction does not force explosion: by
-        \texttt{graded\_no\_explosion}, for any threshold $t \le \tfrac{1}{2}$
-        there is a valuation making both $A$ and $\negc A$ designated while
-        some unrelated $B$ falls below threshold.
-  \item \textbf{What is ex falso?} The inference from a contradiction to an
-        arbitrary conclusion. It fails here by design. The admissibility
-        relation imposes no constraint when evidence credence is $0$, so
-        impossible premises provide no grip on conclusions.
-  \item \textbf{What is tertium non datur?} The claim that $\cred(A \disjc \negc A)$
-        exceeds threshold $t$ for every $A$. By
-        \texttt{threshold\_excluded\_middle\_iff}, this holds exactly when
-        $t \le \tfrac{3}{4}$, so excluded middle is a threshold-sensitive fact,
-        not a logical law.
-  \item \textbf{What is proof?} A derivation that the premise set has no
-        countermodel at threshold $t$, which is exactly
-        \texttt{reductio\_iff\_countermodels\_empty}: the entailment holds
-        if and only if the set of valuations satisfying the premises while
-        dropping the conclusion below $t$ is empty. The legitimate ground
-        for asserting a conclusion is countermodel elimination, not explosion.
-  \item \textbf{What is a paradox?} A self-referential equation whose solution set
-        reveals what the algebra can tolerate. The liar equation
-        $c = \negc c$ has the unique solution $\{\tfrac{1}{2}\}$, by
-        \texttt{solutions\_neg\_eq\_singleton}. The truth-teller equation
-        $c = c$ has all of $[0,1]$, matching the zero-evidence admissibility
-        $\Cond(0,0)$, as shown by \texttt{truth\_teller\_same\_shape\_as\_zero\_evidence}.
-        Russell's self-membership yields $\tfrac{1}{2}$ by
-        \texttt{russell\_mem\_eq\_half}. Curry's equation requires a product
-        residuum not present in the base algebra, and its paradoxical fixed
-        point appears only at positive evidence, as shown by
-        \texttt{curry\_block}.
-  \item \textbf{What is the difference between implication, entailment, and
-        conditioning?} Implication is a connective in the object language.
-        Entailment is a relation between premise sets and conclusions,
-        parametrized by threshold. Conditioning is the admissibility
-        relation $\Cond$, external to the value algebra. By
-        \texttt{no\_truthfunctional\_cond\_bridge}, no truth function on
-        three values can represent conditional credence; conditioning cannot
-        be collapsed into the object language.
-\end{enumerate}
+%=============================================================================
+\section{The Value Algebra}
+\label{sec:algebra}
+%=============================================================================
 
-The guide is didactic and not a research paper.
-Every definition is stated informally first, then given its Lean name.
-Every claim is either a theorem from the series or an immediate consequence
-of one.
-Readers wanting full proofs should consult Parts~1--4 \cite{part1,part2};
-readers wanting the Lean source can inspect
-\texttt{lean/Cred/} directly.
+\subsection{Operations}
 
-The three levels, value, consequence, and conditioning, are not merely a
-classification.
-They mark the boundary between what the algebra decides and what must be
-supplied externally.
-Classical logic lives in the crisp fragment $\{0,1\}$, by
-\texttt{crisp\_certainty\_iff\_classical} and
-\texttt{crisp\_positivity\_iff\_classical}.
-The one divergence from classical logic at that fragment is conditioning on
-empty evidence: where classical logic assigns vacuous truth, the credence
-algebra leaves the conditional value underdetermined.
-That single gap, \texttt{cond\_underdetermined\_iff} and
-\texttt{material\_divergence}, explains every place where the guide's answers
-differ from a classical textbook.
-
-The rest of the paper proceeds question by question.
-Section~\ref{sec:values} covers the value level and the three special points.
-Section~\ref{sec:contradiction} covers the consequence level and the threshold
-structure.
-Section~\ref{sec:exfalso} covers explosion and why it fails.
-Section~\ref{sec:tnd} covers excluded middle and its threshold window.
-Section~\ref{sec:proof} covers reductio and its relation to countermodels.
-Section~\ref{sec:paradox} covers paradoxes as equations.
-Section~\ref{sec:conditioning} covers the three-way distinction between
-implication, entailment, and conditioning.
-An appendix collects a one-page glossary of every term the guide uses,
-with its Lean name and the section where it appears.
-
-
-\section{Truth, falsehood, and value}
-\label{sec:values}
-
-Classical logic offers two slots for a sentence: true or false. This guide
-works with a wider scale. A sentence carries a \emph{credence}, a number in the
-closed interval $[0,1]$. The number records how strongly the sentence is held,
-not what camp it belongs to. The two classical slots survive as the endpoints
-of that scale.
-
-\subsection{The scale}
-
-Write $\cred(A)$ for the credence of a sentence $A$.
-
-\begin{definition}[Credence value]
-A credence value is a real number $c\in[0,1]$. The value $1$ is
-\emph{certainty}; the value $0$ is \emph{impossibility}.
+\begin{definition}[Credence]
+\label{def:credence}
+A \emph{credence} is a real number $c \in [0,1]$.
+The value $0$ is \emph{impossibility}, the value $1$ is
+\emph{certainty}.
+(Machine-checked as the structure \texttt{Credence}, a real with
+proofs $0 \leq c$ and $c \leq 1$.)
 \end{definition}
 
-Certainty plays the role of truth: a sentence at value $1$ is held without
-reservation. Impossibility plays the role of falsehood: a sentence at value $0$
-is ruled out. Everything strictly between is a genuine middle. The midpoint
-$\tfrac12$ is the most balanced of these: it is the unique value fixed by
-negation, since $\negc c=1-c$ forces $c=\tfrac12$.
-
-The following table fixes intuition before we generalize. Read each row as one
-sentence and the verdict its value records.
-
-\begin{center}
-\begin{tabular}{lll}
-\hline
-sentence & $\cred$ & reading \\
-\hline
-$2+2=4$ & $1.0$ & certainty (classical truth) \\
-``it will rain tomorrow'' & $0.7$ & leaning yes \\
-the liar sentence & $0.5$ & perfectly balanced \\
-``this fair coin lands heads'' & $0.5$ & balanced, but by chance \\
-``it rains and it does not'' & $0.2$ & leaning no \\
-$2+2=5$ & $0.0$ & impossibility (classical falsehood) \\
-\hline
-\end{tabular}
-\end{center}
-
-Two rows sit at $0.5$ for different reasons. The liar lands there because its
-negation must match it. The coin lands there because the evidence splits evenly.
-The scale does not distinguish these by value alone; the distinction is in how
-the value arises, not in the number.
-
-\subsection{Designation: which values count}
-
-A value is just a position on the scale. To do logic we must say which positions
-license assertion. That choice is \emph{designation}: a sentence is asserted
-when its value lies in the designated set. The same scale supports more than one
-such choice, and each yields a different logic.
-
-Two choices matter here.
-
-\begin{definition}[Positivity and certainty]
-A sentence is \emph{positive} when $\cred(A)>0$, that is, not ruled out. It is
-\emph{certain} when $\cred(A)=1$.
+\begin{definition}[Negation]
+\label{def:neg}
+The \emph{negation} of $c$ is
+\[
+\negc c = 1 - c.
+\]
+Since $c \in [0,1]$ implies $1 - c \in [0,1]$, negation maps
+credences to credences.
 \end{definition}
 
-Positivity designates every value above $0$. Certainty designates only the top.
-A consequence is then \emph{valid} when every assignment that designates all
-premises also designates the conclusion. Swapping the designated set swaps the
-logic without touching a single value.
+\begin{definition}[Conjunction]
+\label{def:conj}
+The \emph{conjunction} of $a$ and $b$ is the product
+\[
+a \conjc b = a \cdot b.
+\]
+For $a, b \in [0,1]$ we have $0 \leq ab \leq a \leq 1$, so $\conjc$
+maps $[0,1]^2$ to $[0,1]$.
+\end{definition}
 
-The two choices reconstruct two known three-valued logics. Collapse the scale to
-three coarse grades: ruled out ($0$), middle ($0<c<1$), and certain ($1$).
-Designating the middle along with the top gives the Logic of Paradox
-\cite{priest1979}; designating only the top gives strong Kleene logic. Belnap's
-four-valued setting motivates the same separation between ``at least somewhat
-in'' and ``fully in'' \cite{belnap1977}.
+The product is the product t-norm of fuzzy
+logic~\cite{klement2000,hajek1998}; Goguen~\cite{goguen1969} used it
+as the conjunction of his logic of inexact concepts.
+It is an operation on credence \emph{values}.
+It does not compute the joint credence of two propositions: that
+requires dependence information and is supplied separately in
+Section~\ref{sec:conditioning}.
 
-\begin{example}[Designation changes the verdict]
-Take $A$ with $\cred(A)=\tfrac12$. Under positivity, $A$ is asserted: its value
-exceeds $0$. Under certainty, $A$ is not asserted: its value falls short of $1$.
-The value did not move. The standard for assertion did.
+\begin{definition}[Disjunction]
+\label{def:disj}
+The \emph{disjunction} of $a$ and $b$ is the De Morgan dual of
+conjunction:
+\[
+a \disjc b
+  = \negc(\negc a \conjc \negc b)
+  = 1 - (1-a)(1-b)
+  = a + b - ab.
+\]
+Since $(1-a)(1-b) \in [0,1]$, the dual stays in $[0,1]$.
+\end{definition}
+
+The formula $a + b - ab$ is the \emph{probabilistic sum}.
+Figure~\ref{fig:surfaces} plots both binary operations over the unit
+square.
+The triple $(\negc, \conjc, \disjc)$ is the product De Morgan
+triplet.
+
+\begin{figure}[ht]
+\centering
+\begin{tikzpicture}
+\begin{axis}[
+  width=0.46\textwidth,
+  view={125}{28},
+  domain=0:1, y domain=0:1,
+  samples=21, samples y=21,
+  xlabel={$a$}, ylabel={$b$},
+  zmin=0, zmax=1,
+  zlabel={$a \conjc b$},
+  title={$a \conjc b = ab$}]
+\addplot3[surf] {x*y};
+\end{axis}
+\end{tikzpicture}
+\hfill
+\begin{tikzpicture}
+\begin{axis}[
+  width=0.46\textwidth,
+  view={125}{28},
+  domain=0:1, y domain=0:1,
+  samples=21, samples y=21,
+  xlabel={$a$}, ylabel={$b$},
+  zmin=0, zmax=1,
+  zlabel={$a \disjc b$},
+  title={$a \disjc b = a + b - ab$}]
+\addplot3[surf] {x+y-x*y};
+\end{axis}
+\end{tikzpicture}
+\caption{The two binary operations on $[0,1]^2$.
+Left: the product conjunction, zero on the boundary edges
+$a = 0$ and $b = 0$ and equal to the identity along $b = 1$.
+Right: the De Morgan dual, one along $a = 1$ and $b = 1$ and equal to
+the identity along $b = 0$.
+Both surfaces map the open square into the open interval $(0,1)$,
+the closure property behind Theorem~\ref{thm:collapse-hom}.}
+\label{fig:surfaces}
+\end{figure}
+
+\begin{definition}[Order]
+\label{def:order}
+Credences carry the order of $\Real$: $a \leq b$ as real numbers.
+This is a partial (indeed total) order with least element $0$ and
+greatest element $1$.
+\end{definition}
+
+\begin{example}[Worked values]
+\label{ex:values}
+Let $a = 0.6$ and $b = 0.7$.
+Then
+$\negc a = 0.4$,
+$a \conjc b = 0.42$, and
+$a \disjc b = 0.6 + 0.7 - 0.42 = 0.88$.
+The dual route agrees:
+$\negc(\negc a \conjc \negc b) = 1 - (0.4)(0.3) = 0.88$.
+Note $a \conjc b \leq \min(a,b)$ and
+$a \disjc b \geq \max(a,b)$, with strict inequality here.
 \end{example}
 
-\subsection{The bridge to LP and K3}
+\subsection{The De Morgan triplet laws}
 
-These two designations are not loose analogies. Each coincides exactly with a
-three-valued consequence relation, and the coincidence is machine-checked.
+\begin{proposition}[Triplet laws]
+\label{prop:laws}
+For all $a, b, c \in [0,1]$:
+\begin{enumerate}[label=(\alph*),nosep]
+\item $\negc\negc a = a$; \quad $\negc 0 = 1$; \quad $\negc 1 = 0$
+  \hfill (involution, boundary)
+\item $a \conjc b = b \conjc a$; \quad
+  $(a \conjc b) \conjc c = a \conjc (b \conjc c)$; \quad
+  $a \conjc 1 = a$; \quad $a \conjc 0 = 0$
+  \hfill (commutative monoid)
+\item $a \disjc b = b \disjc a$; \quad
+  $(a \disjc b) \disjc c = a \disjc (b \disjc c)$; \quad
+  $a \disjc 0 = a$; \quad $a \disjc 1 = 1$
+  \hfill (dual monoid)
+\item $\negc(a \conjc b) = \negc a \disjc \negc b$; \quad
+  $\negc(a \disjc b) = \negc a \conjc \negc b$
+  \hfill (De Morgan)
+\item $a \leq b \iff \negc b \leq \negc a$; \quad
+  $a \leq a' \Rightarrow a \conjc b \leq a' \conjc b$
+  and $a \disjc b \leq a' \disjc b$
+  \hfill (order)
+\end{enumerate}
+\end{proposition}
 
-\begin{theorem}[Designation bridge]
-On the credence scale, positivity consequence agrees with LP consequence, and
-certainty consequence agrees with K3 consequence.
-\end{theorem}
+\begin{proof}
+(a) $1 - (1 - a) = a$; the boundary values are immediate.
+(b) Commutativity and associativity are those of real
+multiplication; $a \cdot 1 = a$ and $a \cdot 0 = 0$.
+(c) In the form $a \disjc b = 1 - (1-a)(1-b)$, all four identities
+transport from (b) through the substitution $x \mapsto 1 - x$:
+for associativity,
+$(a \disjc b) \disjc c = 1 - (1-a)(1-b)(1-c) = a \disjc (b \disjc c)$.
+(d) $\negc(a \conjc b) = 1 - ab$ and
+$\negc a \disjc \negc b = (1-a) + (1-b) - (1-a)(1-b) = 1 - ab$;
+the second law follows by applying (a) to the first.
+(e) $a \leq b \iff 1 - b \leq 1 - a$; multiplication by $b \geq 0$
+preserves $\leq$; monotonicity of $\disjc$ follows from that of
+$\conjc$ through (d) and the antitonicity of $\negc$.
+(Machine-checked, \texttt{neg\_neg}, \texttt{neg\_zero},
+\texttt{neg\_one}, \texttt{conj\_comm}, \texttt{conj\_assoc},
+\texttt{conj\_one}, \texttt{conj\_zero}, \texttt{disj\_comm},
+\texttt{disj\_assoc}, \texttt{disj\_zero}, \texttt{disj\_one},
+\texttt{de\_morgan\_conj}, \texttt{de\_morgan\_disj},
+\texttt{neg\_le\_neg\_iff}.)
+\end{proof}
 
-In the formalization, \texttt{lp\_formula\_bridge} proves that LP consequence
-holds for a list of premises and a conclusion exactly when positivity
-consequence holds for the same data: an LP-designated valuation is one whose
-collapsed value is positive. Dually, \texttt{k3\_formula\_bridge} proves that K3
-consequence agrees with certainty consequence, since a K3-designated valuation
-is one whose value is exactly $1$. Both are stated over arbitrary atoms and
-proved as biconditionals, so neither direction is assumed.
+The structure is two commutative monoids exchanged by an involution.
+It is not a lattice and not a De Morgan algebra: the operations are
+not idempotent, and distributivity fails.
+Both failures are quantitative, and both have exact formulas.
 
-The payoff is a single algebra serving two readings. Keep the values fixed and
-move the designated set: positivity gives a paraconsistent logic, where a
-contradiction need not entail everything, and certainty gives a paracomplete
-logic, where excluded middle is not guaranteed. The next sections build on this
-split. For now the point is narrow. Truth and falsehood are the endpoints $1$
-and $0$ of one scale, and the choice of which other values count as assertable
-is what selects a logic.
+\begin{proposition}[Idempotents]
+\label{prop:idempotent}
+$a \conjc a = a$ if and only if $a \in \{0,1\}$, and likewise
+$a \disjc a = a$ if and only if $a \in \{0,1\}$.
+\end{proposition}
 
-\section{Contradiction, noncontradiction, ex falso, and tertium non datur}
-\label{sec:contradiction}
+\begin{proof}
+$a^2 = a$ rewrites to $a(a-1) = 0$, so $a = 0$ or $a = 1$.
+Dually, $a \disjc a = 2a - a^2$, and $2a - a^2 = a$ rewrites to
+$a(1-a) = 0$.
+(Machine-checked, \texttt{conj\_idempotent\_iff}.)
+\end{proof}
 
-A logic that explodes treats one broken inference as a license to assert
-everything. From $A$ and $\negc A$ it derives an arbitrary $B$. Classical and
-intuitionistic logic accept this; the dialetheist tradition rejects it
-\cite{priest1979,asenjo1966}. This section takes the rejection apart. Ex falso
-is a claim about consequence, not a fact read off a truth table. The credence
-algebra keeps four notions separate that the classical picture fuses: a
-contradiction in the premises, explosion as a rule, conditioning on impossible
-evidence, and the laws of noncontradiction and excluded middle. Each gets a
-sharp threshold or a witness.
+\begin{proposition}[Distributivity defect]
+\label{prop:defect}
+For all $a, b, c \in [0,1]$:
+\begin{align}
+(a \conjc b) \disjc (a \conjc c) - a \conjc (b \disjc c)
+  &= abc\,(1-a) \;\geq\; 0,
+\label{eq:defect-conj}\\
+a \disjc (b \conjc c) - (a \disjc b) \conjc (a \disjc c)
+  &= a\,(1-a)(1-b)(1-c) \;\geq\; 0.
+\label{eq:defect-disj}
+\end{align}
+In particular $\conjc$ sub-distributes over $\disjc$ and $\disjc$
+sub-distributes over $\conjc$, with equality in
+\eqref{eq:defect-conj} if and only if $a \in \{0,1\}$ or $bc = 0$,
+and in \eqref{eq:defect-disj} if and only if $a \in \{0,1\}$ or
+$b = 1$ or $c = 1$.
+\end{proposition}
 
-\subsection{Explosion is a rule, not a row}
-\label{sec:exfalso}
+\begin{proof}
+For \eqref{eq:defect-conj}:
+$a \conjc (b \disjc c) = a(b + c - bc) = ab + ac - abc$, while
+$(a \conjc b) \disjc (a \conjc c) = ab + ac - a^2bc$;
+the difference is $abc - a^2bc = abc(1-a)$.
+For \eqref{eq:defect-disj}:
+expanding $(a + b - ab)(a + c - ac)$ and subtracting from
+$a + bc - abc$ gives
+$a(1-a)(1 - b - c + bc) = a(1-a)(1-b)(1-c)$.
+Both products of factors in $[0,1]$ are nonnegative, and each
+vanishes exactly when one factor does.
+\end{proof}
 
-Start with a worked valuation. Take two atoms, $A$ and $B$, and set
+\begin{example}[Numeric counterexample to distributivity]
+\label{ex:nondistrib}
+Take $a = b = c = \tfrac{1}{2}$.
+Then
 \[
-  \cred(A)=\tfrac12,\qquad \cred(\negc A)=1-\tfrac12=\tfrac12,\qquad
-  \cred(B)=0.
+a \conjc (b \disjc c)
+  = \tfrac{1}{2}\bigl(\tfrac{1}{2} + \tfrac{1}{2} - \tfrac{1}{4}\bigr)
+  = \tfrac{3}{8}
+  = \tfrac{6}{16},
+\qquad
+(a \conjc b) \disjc (a \conjc c)
+  = \tfrac{1}{4} + \tfrac{1}{4} - \tfrac{1}{16}
+  = \tfrac{7}{16},
 \]
-Both $A$ and its negation sit at $\tfrac12$. Whatever designation we use that
-counts $\tfrac12$ as good, both premises are designated. Yet $B$ is at $0$.
-Explosion would require $B$ to inherit a high value from the premises. It does
-not. The valuation is a countermodel: premises in, conclusion out.
+and the gap $\tfrac{1}{16}$ is the defect
+$abc(1-a) = \tfrac{1}{8} \cdot \tfrac{1}{2}$ from
+Proposition~\ref{prop:defect}.
+(The counterexample is machine-checked,
+\texttt{conj\_disj\_not\_distrib}; the closed-form defect is
+elementary and verified here by hand.)
+\end{example}
 
-This is the LP reading, where the designated set is $\{1,\tfrac12\}$
-\cite{priest1979,asenjo1966}. The Lean theorem \texttt{lp\_no\_explosion}
-records exactly the valuation above: $A$ at $\tfrac12$, $\negc A$ at $\tfrac12$,
-$B$ at $0$, with $B$ not designated. Nothing in the truth tables for $\negc$,
-$\conjc$, $\disjc$ changes. The tables are the same product De Morgan
-operations used everywhere in this development. What changes is the consequence
-relation layered on top: which rows count as premises-satisfied, which as
-conclusion-satisfied.
+\subsection{Spread and certainty}
 
-The point generalizes off the single value $\tfrac12$. Read consequence at a
-threshold $t$: a premise counts when its credence lands in $[t,1]$, and the
-conclusion is entailed when it must also land in $[t,1]$. For any positive
-threshold up to one half, the explosion sequent $A,\negc A\vdash B$ fails.
+Applying conjunction to a credence and its own negation yields a
+quantity with a classical name: the Bernoulli variance.
 
-\begin{theorem}[Graded no-explosion]
-For every threshold $t$ with $0<t\le\tfrac12$ there is a valuation with
-$\cred(A)\ge t$, $\cred(\negc A)\ge t$, and $\cred(B)<t$.
-\end{theorem}
+\begin{definition}[Spread and certainty]
+\label{def:spread}
+The \emph{spread} of $c$ is $c \conjc \negc c = c(1-c)$; the
+\emph{certainty} of $c$ is its De Morgan dual,
+$c \disjc \negc c = 1 - c(1-c)$.
+\end{definition}
 
-The Lean name is \texttt{graded\_no\_explosion}. The witness is the same
-$A=\tfrac12$, $B=0$. Both $\tfrac12\ge t$ and $1-\tfrac12\ge t$ hold because
-$t\le\tfrac12$, while $0<t$ keeps $B$ below threshold. So at any threshold the
-algebra admits, the contradiction $A\conjc\negc A$ is allowed to be present in
-the premises without dragging an unrelated $B$ up with it.
-
-\subsection{The sharp boundary at one half}
-
-The bound $t\le\tfrac12$ is not a convenience. It is exactly the range where a
-countermodel can exist, and the algebra fixes the cutoff.
-
-\begin{theorem}[Explosion cutoff]
-A countermodel to $A,\negc A\vdash B$ at positive threshold $t$ exists if and
-only if $t\le\tfrac12$.
-\end{theorem}
-
-This is \texttt{threshold\_explosion\_countermodel\_iff}. The reason is one
-identity. A credence and its negation sum to one:
+\begin{proposition}[Quarter cap, three-quarter floor]
+\label{prop:spread}
+For all $c \in [0,1]$,
 \[
-  \cred(A)+\cred(\negc A)=\cred(A)+\bigl(1-\cred(A)\bigr)=1.
+c \conjc \negc c
+  = \tfrac{1}{4} - \bigl(c - \tfrac{1}{2}\bigr)^2
+  \leq \tfrac{1}{4},
+\qquad
+c \disjc \negc c
+  = \tfrac{3}{4} + \bigl(c - \tfrac{1}{2}\bigr)^2
+  \geq \tfrac{3}{4},
 \]
-To keep both premises in $[t,1]$ we need $\cred(A)\ge t$ and
-$1-\cred(A)\ge t$, hence $2t\le 1$. Above one half the two demands collide:
-no value can keep both $A$ and $\negc A$ designated. The premise set becomes
-unsatisfiable, so the sequent holds vacuously, and explosion returns by
-default, not by force. Below one half the contradiction is genuinely
-expressible, and the conclusion is genuinely free. The interesting logic lives
-in the lower window; the upper window is where a contradiction simply cannot
-be stated at full strength.
+with equality in both exactly at $c = \tfrac{1}{2}$, and
+$c \disjc \negc c = 1$ exactly at $c \in \{0,1\}$.
+\end{proposition}
 
-\subsection{Reductio rests on emptiness, not on contradiction}
+\begin{proof}
+Complete the square: $c(1-c) = \tfrac{1}{4} - (c - \tfrac{1}{2})^2$.
+The certainty statement is the complement.
+Equality holds where the square vanishes; the value $1$ requires
+$c(1-c) = 0$.
+(Machine-checked, \texttt{spread\_le\_quarter},
+\texttt{certainty\_ge\_three\_quarters},
+\texttt{certainty\_eq\_one\_iff}.)
+\end{proof}
 
-Why does a contradiction among the premises fail to license $B$? Because the
-legitimate engine of reductio is not the presence of a contradiction. It is
-the emptiness of the countermodel set. To establish $\Gamma\vdash\varphi$,
-refute every valuation that keeps $\Gamma$ designated while dropping $\varphi$
-below threshold. If no such valuation survives, the entailment holds. This is
-\texttt{reductio\_iff\_countermodels\_empty}: threshold consequence is exactly
-emptiness of the reductio countermodel set.
+Figure~\ref{fig:spread} plots both curves.
+The two constants $\tfrac{1}{4}$ and $\tfrac{3}{4}$ return in
+Section~\ref{sec:consequence} as the exact thresholds for
+noncontradiction and excluded middle.
 
-Now the contrast is clean. The explosion sequent does have a contradiction in
-its premises. But by the theorem above, for $0<t\le\tfrac12$ its countermodel
-set is nonempty. So reductio never fires, and $B$ is never derived. The broken
-branch generates no information about $B$. A contradiction is a feature of one
-valuation; entailment is a quantifier over all of them. Conflating the two is
-what makes ex falso look like a law of logic instead of an artifact of how
-classical consequence quantifies.
+\begin{figure}[ht]
+\centering
+\begin{tikzpicture}
+\begin{axis}[
+  width=0.62\textwidth, height=0.45\textwidth,
+  xmin=0, xmax=1, ymin=0, ymax=1.05,
+  xlabel={$c$},
+  legend pos=outer north east,
+  legend cell align=left,
+  domain=0:1, samples=101]
+\addplot[thick] {x*(1-x)};
+\addlegendentry{spread $c \conjc \negc c$}
+\addplot[thick, dashed] {1 - x*(1-x)};
+\addlegendentry{certainty $c \disjc \negc c$}
+\addplot[dotted] {0.25};
+\addlegendentry{$\tfrac{1}{4}$}
+\addplot[dotted] {0.75};
+\addlegendentry{$\tfrac{3}{4}$}
+\end{axis}
+\end{tikzpicture}
+\caption{Spread $c(1-c)$ and certainty $1 - c(1-c)$.
+The spread is capped at $\tfrac{1}{4}$, the certainty floored at
+$\tfrac{3}{4}$, both extremal at the negation fixed point
+$c = \tfrac{1}{2}$ (Proposition~\ref{prop:spread}).
+These two constants reappear as the explosion and excluded-middle
+thresholds in Section~\ref{sec:consequence}.}
+\label{fig:spread}
+\end{figure}
 
-\subsection{Two ways to break a branch: contradiction and impossible evidence}
+%=============================================================================
+\section{Fixed Points and Equilibria}
+\label{sec:fixed}
+%=============================================================================
 
-Explosion from $A\conjc\negc A$ is one way an inference can break. Conditioning
-on impossible evidence is another, and the algebra keeps them apart. Recall the
-chain rule:
+\begin{lemma}[Unique negation fixed point]
+\label{lem:fixed}
+$\negc c = c$ if and only if $c = \tfrac{1}{2}$.
+\end{lemma}
+
+\begin{proof}
+$1 - c = c$ rewrites to $2c = 1$.
+(Machine-checked, \texttt{liar\_fixed\_point} and
+\texttt{neg\_fixed\_point\_unique}.)
+\end{proof}
+
+The lemma is one line, and most of the primer depends on it.
+On the two-element set $\{0,1\}$ the same equation $\negc c = c$ has
+no solution; the interval supplies exactly one, at the midpoint.
+Figure~\ref{fig:negation} shows the geometry.
+
+\begin{figure}[ht]
+\centering
+\begin{tikzpicture}
+\begin{axis}[
+  width=0.55\textwidth, height=0.55\textwidth,
+  xmin=0, xmax=1, ymin=0, ymax=1,
+  xlabel={$c$},
+  legend pos=outer north east,
+  legend cell align=left,
+  domain=0:1, samples=101]
+\addplot[thick] {1-x};
+\addlegendentry{$\negc c = 1 - c$}
+\addplot[dashed] {x};
+\addlegendentry{identity}
+\addplot[dotted, thick] {x*x};
+\addlegendentry{$c \conjc c = c^2$}
+\addplot[dash dot] {2*x - x*x};
+\addlegendentry{$c \disjc c = 2c - c^2$}
+\addplot[only marks, mark=*] coordinates {(0.5,0.5)};
+\node at (axis cs:0.5,0.5) [anchor=south west]
+  {$\bigl(\tfrac{1}{2},\tfrac{1}{2}\bigr)$};
+\end{axis}
+\end{tikzpicture}
+\caption{The negation line $\negc c = 1 - c$ meets the identity only
+at $c = \tfrac{1}{2}$ (Lemma~\ref{lem:fixed}).
+Self-conjunction $c^2$ lies strictly below the identity on $(0,1)$
+and self-disjunction $2c - c^2$ strictly above
+(Proposition~\ref{prop:dynamics}); all three curves agree only at the
+equilibria of Proposition~\ref{prop:equilibria}.}
+\label{fig:negation}
+\end{figure}
+
+\begin{proposition}[Interior dynamics]
+\label{prop:dynamics}
+For $0 < c < 1$,
 \[
-  \cred(A\mid B)\conjc\cred(B)=\cred(A\wedge B).
+c \conjc c < c < c \disjc c,
 \]
-When $\cred(B)=0$, the left side is $\cred(A\mid B)\cdot 0=0$ for any value of
-$\cred(A\mid B)$. The equation constrains nothing. Every conditional credence
-is admissible.
+and the powers $c^{n}$ decrease strictly in $n$.
+\end{proposition}
 
-\begin{theorem}[Zero evidence is unconstrained]
-For every credence $c$ there is a conditioning witness with $\cred(B)=0$,
-$\cred(A\wedge B)=0$, and conditional value $c$.
-\end{theorem}
+\begin{proof}
+$c^2 - c = c(c-1) < 0$ and $(2c - c^2) - c = c(1-c) > 0$ for
+interior $c$.
+For the powers, $c^{n+1} = c^n \cdot c < c^n$ since $0 < c < 1$ and
+$c^n > 0$.
+(Machine-checked, \texttt{self\_conj\_lt}, \texttt{self\_disj\_gt},
+\texttt{pow\_strictly\_decreasing}.)
+\end{proof}
 
-The Lean name is \texttt{conditioning\_zero\_any}. Compare the two breakages.
-The contradiction case starts from premises that overshoot ($A$ and $\negc A$
-both designated) and asks whether that forces a conclusion; it does not,
-because a countermodel survives. The zero-evidence case starts from evidence
-that cannot occur and asks what it conditions to; the answer is anything,
-because the constraint vanishes. Both refuse to manufacture content from a dead
-branch, but for different reasons: one is about consequence over all
-valuations, the other about a single equation losing its grip when multiplied
-by zero. Keeping them separate is what lets the algebra block explosion without
-collapsing conditioning into material implication.
+\begin{proposition}[Equilibria]
+\label{prop:equilibria}
+$c \conjc c = c$ or $\negc c = c$ holds if and only if
+$c \in \{0, \tfrac{1}{2}, 1\}$.
+\end{proposition}
 
-\subsection{Noncontradiction and excluded middle, graded}
-\label{sec:tnd}
+\begin{proof}
+Combine Proposition~\ref{prop:idempotent} (idempotents $\{0,1\}$)
+with Lemma~\ref{lem:fixed} (fixed point $\tfrac{1}{2}$).
+(Machine-checked, \texttt{equilibria\_characterization}.)
+\end{proof}
 
-The classical laws are two-valued absolutes: $\negc(A\wedge\negc A)$ is true,
-$A\vee\negc A$ is true. In the credence algebra both become graded statements
-with their own sharp thresholds. Take noncontradiction first. The credence of
-$A\conjc\negc A$ is
+The three equilibria $\{0, \tfrac{1}{2}, 1\}$ are the candidate
+carrier of any small quotient of the algebra.
+The next section shows that they carry exactly one.
+
+%=============================================================================
+\section{The Kleene Collapse}
+\label{sec:collapse}
+%=============================================================================
+
+\subsection{The Kleene lattice}
+
+\begin{definition}[Kleene lattice]
+\label{def:kleene}
+The \emph{Kleene lattice} is the three-element set
+$\Kl = \{0, \tfrac{1}{2}, 1\}$ with operations
 \[
-  \cred(A)\cdot\bigl(1-\cred(A)\bigr),
-\]
-maximized at $\cred(A)=\tfrac12$, where it equals $\tfrac14$. So the
-contradiction's credence never exceeds one quarter, and its negation
-$\negc(A\conjc\negc A)$ never drops below $\tfrac34$. A contradiction is not
-forbidden; it is merely capped. This is the graded face of the law of
-noncontradiction.
-
-Excluded middle is the De Morgan dual, and it has the matching cutoff. The
-credence of $A\disjc\negc A$ is
-\[
-  \cred(A)+\bigl(1-\cred(A)\bigr)-\cred(A)\bigl(1-\cred(A)\bigr)
-  =1-\cred(A)\bigl(1-\cred(A)\bigr),
-\]
-minimized at $\cred(A)=\tfrac12$, where it equals $\tfrac34$. So
-$A\disjc\negc A$ never falls below three quarters.
-
-\begin{theorem}[Excluded-middle cutoff]
-Threshold consequence validates $A\disjc\negc A$ at threshold $t$ if and only
-if $t\le\tfrac34$.
-\end{theorem}
-
-This is \texttt{threshold\_excluded\_middle\_iff}. Excluded middle holds for
-every threshold up to three quarters and fails above it. The two laws sit at
-complementary corners of the same parabola $\cred(A)(1-\cred(A))$:
-noncontradiction is capped at $\tfrac14$ from above, excluded middle floored at
-$\tfrac34$ from below, both extreme at $\cred(A)=\tfrac12$. Neither is asserted
-as an absolute, and neither is abandoned. Each holds to a stated degree, and
-the degree is the same number read from two sides.
-
-Putting the thresholds together draws a small map of consequence. Below
-$\tfrac12$, contradictions are expressible and explosion fails. Between
-$\tfrac12$ and $\tfrac34$, contradictory premises become unsatisfiable so
-explosion is vacuous, while excluded middle still holds. Above $\tfrac34$,
-excluded middle fails too. The classical laws are recovered at the top of the
-scale and dissolve smoothly as the threshold drops, with $\tfrac12$ as the
-fixed point where $A$ and $\negc A$ meet.
-
-\paragraph{A clopen set is not a contradiction.} Definitions decide before the
-non-explosion language applies. A set $A$ is closed when its complement is open,
-$\mathrm{Closed}\,A := \mathrm{Open}(A^{c})$, not when $A$ fails to be open. So a
-\emph{clopen} set, open and closed at once, means
-$\mathrm{Open}\,A \wedge \mathrm{Open}(A^{c})$, a consistent conjunction, not
-$\mathrm{Open}\,A \wedge \neg\,\mathrm{Open}\,A$. The empty set and the whole
-space are clopen in the standard topology of the reals, and in the discrete
-topology every set is; clopen-ness even depends on the ambient space. The point
-is machine-checked (\texttt{isClosed\_iff\_isOpen\_compl},
-\texttt{isClopen\_iff\_isOpen\_and\_isOpen\_compl}; see Part~7), and it sets a
-discipline: before reaching for graded or non-explosive language, expand the
-definitions. Cred sharpens distinctions; a name that sounds paradoxical is often
-a consistent predicate misread.
-
-\section{Proof, and proof by contradiction as crossing out}
-\label{sec:proof}
-
-Take two atoms, $A$ and $B$, and ask whether $A \conjc B$ entails $B$.
-A valuation $v$ assigns each atom a credence in $[0,1]$.
-Fix a designation threshold $t$ with $0 < t \le 1$: a formula counts as
-asserted when its credence sits in $[t,1]$.
-The entailment $A \conjc B \vdash_t B$ asks every valuation a yes-or-no
-question. Does $v$ that designates the premise also designate $B$?
-
-\begin{center}
-\begin{tabular}{cccc}
-$\cred(A)$ & $\cred(B)$ & $\cred(A\conjc B)=\cred(A)\,\cred(B)$ & premise $\ge t$? \\
-\hline
-$0.9$ & $0.9$ & $0.81$ & yes \\
-$0.9$ & $0.1$ & $0.09$ & no (if $t>0.09$) \\
-$1.0$ & $t$ & $t$ & yes \\
-\end{tabular}
-\end{center}
-
-The middle row keeps $B$ below threshold, but its premise also drops below
-threshold, so it never tests the entailment. Cross it out.
-Every surviving row has $\cred(A)\,\cred(B) \ge t$, and since $\cred(A) \le 1$
-this forces $\cred(B) \ge t$. No row both designates $A \conjc B$ and drops
-$B$. The entailment holds.
-
-\subsection*{Proof as a checked derivation}
-
-We use \emph{proof} in a fixed sense: a derivation built from a finite set of
-declared rules, each rule a step that a checker accepts or rejects.
-A proof of $\Gamma \vdash_t \varphi$ is such a tree whose leaves are
-hypotheses from $\Gamma$ and whose root is $\varphi$.
-The formalization carries this as a soundness contract: every accepted
-derivation denotes a true consequence. The threshold calculus satisfies
-reflexivity, monotonicity, and cut
-(\texttt{threshold\_reflexivity}, \texttt{threshold\_monotonicity},
-\texttt{threshold\_cut}). Cut is the chaining step. If $\Gamma \vdash_t \varphi$
-and $\varphi,\Gamma \vdash_t \psi$, then $\Gamma \vdash_t \psi$.
-A checked derivation is what makes a claim a theorem rather than an assertion.
-
-\subsection*{Reductio as crossing out}
-
-Proof by contradiction has a model-side reading that needs no explosion.
-To establish $\Gamma \vdash_t \varphi$, suppose the conclusion fails. List
-every valuation that designates all of $\Gamma$ yet drops $\varphi$ below $t$.
-Call these the \emph{countermodels}. Each one is an admissible case that, if it
-existed, would refute the entailment. Cross out each as impossible. If none
-survives, the conclusion holds in every remaining case, so the entailment holds.
-
-\begin{definition}[Reductio countermodels]
-For threshold $t$, premises $\Gamma$, and conclusion $\varphi$, the countermodel
-set is
-\[
-  \{\, v : (\forall p \in \Gamma,\ t \le \cred_v(p))\ \text{and}\ \cred_v(\varphi) < t \,\}.
+\mathrm{neg}(x) = 1 - x,
+\qquad
+\mathrm{conj}(x,y) = \min(x,y),
+\qquad
+\mathrm{disj}(x,y) = \max(x,y).
 \]
 \end{definition}
 
-\begin{theorem}[Reductio is countermodel emptiness]
-$\Gamma \vdash_t \varphi$ holds if and only if its countermodel set is empty.
+This is the value structure shared by Kleene's strong three-valued
+logic K$_3$~\cite{kleene1952}, Priest's Logic of Paradox
+LP~\cite{priest1979,asenjo1966}, and RM3~\cite{meyer1972}; the three
+logics differ only in designation (Section~\ref{sec:consequence}).
+On $\Kl$ the De Morgan laws
+$1 - \min(x,y) = \max(1-x, 1-y)$ hold, $\min$ and $\max$ are
+idempotent, and each distributes over the other.
+
+\begin{definition}[Collapse]
+\label{def:collapse}
+The \emph{collapse} $\kappa : [0,1] \to \Kl$ is
+\[
+\kappa(c) =
+\begin{cases}
+0 & \text{if } c = 0,\\
+\tfrac{1}{2} & \text{if } 0 < c < 1,\\
+1 & \text{if } c = 1.
+\end{cases}
+\]
+\end{definition}
+
+\begin{theorem}[Collapse homomorphism]
+\label{thm:collapse-hom}
+The collapse is surjective and preserves all three operations:
+for all $a, b \in [0,1]$,
+\[
+\kappa(\negc a) = \mathrm{neg}(\kappa(a)),
+\qquad
+\kappa(a \conjc b) = \min(\kappa(a), \kappa(b)),
+\qquad
+\kappa(a \disjc b) = \max(\kappa(a), \kappa(b)).
+\]
 \end{theorem}
 
-This biconditional is the machine-checked
-\texttt{reductio\_iff\_countermodels\_empty}. Read left to right, a valid
-entailment leaves nothing to cross out. Read right to left, an empty
-countermodel set is exactly a proof by contradiction: the refuted hypothesis is
-the conclusion's failure $\cred_v(\varphi) < t$, and ruling it out for every
-designating $v$ gives the entailment.
-The operational form \texttt{reductio\_of\_no\_failing\_valuation} states the
-same crossing-out as a single sweep: show no premise-satisfying valuation drops
-the conclusion.
+\begin{proof}
+Surjectivity: $\kappa(0) = 0$, $\kappa(\tfrac{1}{2}) = \tfrac{1}{2}$,
+$\kappa(1) = 1$.
 
-The crossing-out is countermodel elimination, not explosion.
-It never says ``a contradiction appears among the premises, therefore the
-conclusion.'' It says ``no admissible case refutes the conclusion.''
-The two come apart precisely when a contradictory premise pair still leaves a
-surviving case.
+\emph{Negation.}
+$\negc$ swaps $0$ and $1$ and maps the interior to itself
+($0 < c < 1$ iff $0 < 1 - c < 1$); $\mathrm{neg}$ acts the same way
+on $\Kl$.
 
-\subsection*{A worked tautology and a surviving case}
+\emph{Conjunction.}
+If $a = 0$ or $b = 0$ then both sides are $0$
+(the product vanishes; $\min$ with $0$ is $0$).
+If $a = 1$ then $a \conjc b = b$ and
+$\min(1, \kappa(b)) = \kappa(b)$; symmetrically for $b = 1$.
+In the remaining case $a, b \in (0,1)$:
+then $0 < ab \leq a < 1$, so
+$\kappa(a \conjc b) = \tfrac{1}{2} =
+\min(\tfrac{1}{2}, \tfrac{1}{2})$.
 
-Take $\neg(A \conjc \negc A)$, the law of non-contradiction, with no premises.
-Its credence under $v$ is $\cred(A) \disjc \negc\cred(A)$, the De Morgan
-certainty of $\cred(A)$, which never falls below $\tfrac34$.
-So for any $t \le \tfrac34$ every row sits above threshold; every
-countermodel is crossed out. The formula is a threshold tautology
-(\texttt{notContradiction\_tautology}, via
-\texttt{notContradiction\_no\_countermodel}).
-The same crossing-out proves the entailment $A \conjc B \vdash_t B$ from the
-table above (\texttt{conjAB\_to\_B\_by\_crossing\_out}): the premise eliminates
-every row where $B$ falls short.
+\emph{Disjunction.}
+If $a = 1$ or $b = 1$ then $a \disjc b = 1$ and the maximum is $1$.
+If $a = 0$ then $a \disjc b = b$, matching
+$\max(0, \kappa(b))$; symmetrically for $b = 0$.
+For $a, b \in (0,1)$ write $a \disjc b = 1 - (1-a)(1-b)$;
+since $(1-a)(1-b) \in (0,1)$, the value lies in $(0,1)$ and both
+sides are $\tfrac{1}{2}$.
+(Machine-checked, \texttt{collapse\_neg}, \texttt{collapse\_conj},
+\texttt{collapse\_disj}, \texttt{collapse\_surjective}.)
+\end{proof}
 
-Now the contrast. Explosion is the sequent $A, \negc A \vdash_t B$ for an
-unrelated $B$. At $t = \tfrac12$ consider the row $\cred(A)=\tfrac12$,
-$\cred(B)=0$. Both $A$ and $\negc A$ evaluate to $\tfrac12$, so both premises
-are designated. Yet $B$ sits at $0$, below threshold. This row is a genuine
-countermodel. It does not get crossed out.
+\begin{remark}[Quotient, not subalgebra]
+\label{rem:not-subalgebra}
+The set $\{0, \tfrac{1}{2}, 1\}$ is not closed under $\conjc$:
+$\tfrac{1}{2} \conjc \tfrac{1}{2} = \tfrac{1}{4}$ leaves it
+(machine-checked, \texttt{three\_val\_conj\_not\_closed}).
+The Kleene lattice is therefore a \emph{quotient} of the credence
+algebra along $\kappa$, not a subalgebra.
+By contrast $\{0,1\}$ \emph{is} a subalgebra: Boolean values are
+closed under $\negc$, $\conjc$, $\disjc$
+(machine-checked, \texttt{boolean\_conj\_closed} and its negation and
+disjunction companions).
+Classical logic embeds upward into the algebra; three-valued logic is
+reached downward by collapsing.
+Figure~\ref{fig:tower} shows both maps.
+\end{remark}
 
-\begin{center}
-\begin{tabular}{ccccc}
-$\cred(A)$ & $\cred(\negc A)$ & $\cred(B)$ & premises $\ge \tfrac12$? & $B \ge \tfrac12$? \\
-\hline
-$\tfrac12$ & $\tfrac12$ & $0$ & yes & no \quad(survives) \\
-\end{tabular}
-\end{center}
+\subsection{Impossibility of other targets}
 
-The countermodel set is nonempty (\texttt{explosion\_row\_survives}), so by the
-biconditional the entailment fails
-(\texttt{no\_explosion\_at\_half\_by\_surviving\_row}).
-A contradiction sits in the premises, yet reductio does not fire, because the
-ground of reductio is emptiness of the countermodel set, not the mere presence
-of a contradiction (\texttt{reductio\_ground\_is\_emptiness\_not\_contradiction}).
-This is the move that classical explosion makes and Cred refuses
-(\texttt{graded\_no\_explosion}).
-The two regimes hold together in \texttt{crossing\_out\_vs\_explosion}:
-for $t \le \tfrac34$ the non-contradiction tautology holds, while at
-$t = \tfrac12$ the explosion sequent fails.
+The Kleene target is forced.
+Each alternative fails on the fixed point of Lemma~\ref{lem:fixed}.
 
-\subsection*{When it stays valid}
+\begin{proposition}[No collapse to classical logic]
+\label{prop:no-classical}
+No map $\varphi : [0,1] \to \{0,1\}$ satisfies
+$\varphi(\negc c) = 1 - \varphi(c)$ for all $c$.
+\end{proposition}
 
-Crossing-out reductio stays valid in Cred whenever the countermodel set is
-genuinely empty, and the sharp thresholds say when that happens.
-Excluded middle and non-contradiction survive for $t \le \tfrac34$, since
-certainty $c \disjc \negc c \ge \tfrac34$
-(\texttt{threshold\_excluded\_middle\_iff}).
-The simple explosion countermodel exists exactly when $0 < t \le \tfrac12$
-(\texttt{threshold\_explosion\_countermodel\_iff}); above $\tfrac12$ it
-disappears, but raising $t$ also strengthens premises and conclusions alike.
-On the crisp fragment, where every atom takes value $0$ or $1$, the surviving
-half-credence row cannot arise: a contradictory premise pair leaves no case at
-all, every countermodel is crossed out, and classical proof by contradiction
-returns in full. The graded layer keeps the same proof discipline and drops
-only the inference from impossible evidence to an arbitrary conclusion.
+\begin{proof}
+At $c = \tfrac{1}{2}$, Lemma~\ref{lem:fixed} gives
+$\varphi(\tfrac{1}{2}) = 1 - \varphi(\tfrac{1}{2})$, which has no
+solution in $\{0,1\}$.
+(Machine-checked, \texttt{no\_boolean\_neg\_retraction}.)
+\end{proof}
 
-\section{Implication, entailment, and conditioning}
+\begin{proposition}[No collapse to G\"odel negation]
+\label{prop:no-godel}
+Equip $\Kl$ with the G\"odel negation~\cite{godel1932}
+$\neg_G(0) = 1$ and $\neg_G(x) = 0$ for $x > 0$.
+No map $\varphi : [0,1] \to \Kl$ satisfies
+$\varphi(\negc c) = \neg_G(\varphi(c))$ for all $c$.
+\end{proposition}
+
+\begin{proof}
+$\neg_G$ has no fixed point: $\neg_G(0) = 1 \neq 0$,
+$\neg_G(\tfrac{1}{2}) = 0 \neq \tfrac{1}{2}$,
+$\neg_G(1) = 0 \neq 1$.
+But $\varphi(\tfrac{1}{2}) = \varphi(\negc\tfrac{1}{2}) =
+\neg_G(\varphi(\tfrac{1}{2}))$ would be one.
+(Machine-checked, \texttt{no\_godel\_collapse}.)
+\end{proof}
+
+\begin{proposition}[No collapse to \L ukasiewicz conjunction]
+\label{prop:no-luk}
+Equip $\Kl$ with the Kleene negation and the \L ukasiewicz
+conjunction~\cite{lukasiewicz1920}
+$x \conjc_{\text{\L}} y = \max(x + y - 1, 0)$.
+No map $\varphi : [0,1] \to \Kl$ preserves both.
+\end{proposition}
+
+\begin{proof}
+Negation preservation forces $\varphi(\tfrac{1}{2})$ to be a fixed
+point of the Kleene negation on $\Kl$, hence
+$\varphi(\tfrac{1}{2}) = \tfrac{1}{2}$.
+Set $c = \sqrt{1/2}$, so that $c \conjc c = \tfrac{1}{2}$.
+Then
+$\tfrac{1}{2} = \varphi(c \conjc c)
+  = \varphi(c) \conjc_{\text{\L}} \varphi(c)$.
+But $x \conjc_{\text{\L}} x = \max(2x - 1, 0)$ takes the values
+$0, 0, 1$ on $x = 0, \tfrac{1}{2}, 1$, never $\tfrac{1}{2}$.
+(Machine-checked, \texttt{no\_luk\_collapse}.)
+\end{proof}
+
+\begin{figure}[ht]
+\centering
+\begin{tikzpicture}[node distance=9mm and 16mm, >=Stealth]
+% Hasse diagram of the Kleene lattice
+\node (k0) {$0$};
+\node (kh) [above=of k0] {$\tfrac{1}{2}$};
+\node (k1) [above=of kh] {$1$};
+\draw (k0) -- (kh) -- (k1);
+\draw[{Stealth}-{Stealth}, dashed, bend left=60] (k0) to
+  node[left, font=\small] {$\mathrm{neg}$} (k1);
+\path (kh) edge [->, dashed, loop right] (kh);
+\node [below=3mm of k0, font=\small]
+  {Kleene lattice $\Kl$: order, $\mathrm{neg}$};
+% Tower
+\begin{scope}[xshift=62mm]
+\node (I)  {$[0,1]$};
+\node (K) [right=of I] {$\{0,\tfrac{1}{2},1\}$};
+\node (B) [right=of K] {$\{0,1\}$};
+\draw[->>] (I) to node[above, font=\small] {$\kappa$} (K);
+\draw[->] (K) to node[above, font=\small] {$\times$}
+  node[below, font=\small] {no $\mathrm{neg}$-map} (B);
+\draw[{Hooks[right]}-{Stealth}, bend left=28] (B) to
+  node[below, font=\small] {subalgebra} (I);
+\node [below=12mm of K, font=\small, text width=58mm, align=center]
+  {Tower: $\kappa$ is a surjective homomorphism
+   (Theorem~\ref{thm:collapse-hom}); no negation-preserving map
+   reaches $\{0,1\}$ (Proposition~\ref{prop:no-classical});
+   $\{0,1\}$ embeds back as a subalgebra
+   (Remark~\ref{rem:not-subalgebra}).};
+\end{scope}
+\end{tikzpicture}
+\caption{Left: the Kleene lattice as a Hasse diagram, with negation
+swapping $0$ and $1$ and fixing $\tfrac{1}{2}$.
+Right: the collapse tower.
+The second leg is crossed out: negation has no fixed point in
+$\{0,1\}$, so the tower stops at three elements.}
+\label{fig:tower}
+\end{figure}
+
+\begin{remark}[Uniqueness]
+\label{rem:uniqueness}
+Part~1~\cite{part1} sharpens these impossibility results to a
+classification: among all three-element quotients compatible with
+$\negc$ and $\conjc$, the Kleene lattice with partition
+$\{0\}, (0,1), \{1\}$ is the only one, and no two-element quotient
+exists.
+The primer needs only the existence direction
+(Theorem~\ref{thm:collapse-hom}) and
+Proposition~\ref{prop:no-classical}.
+\end{remark}
+
+%=============================================================================
+\section{Designation and Consequence}
+\label{sec:consequence}
+%=============================================================================
+
+A valuation assigns values; a logic additionally says which values
+license assertion.
+That choice is \emph{designation}, and it is independent of the
+algebra~\cite{belnap1977,priest2008}.
+
+\begin{definition}[Designation]
+\label{def:designation}
+On $\Kl$, the \emph{K$_3$ designated set} is $\{1\}$ and the
+\emph{LP designated set} is $\{\tfrac{1}{2}, 1\}$.
+(Machine-checked, \texttt{isDesignatedK3},
+\texttt{isDesignatedLP}.)
+\end{definition}
+
+\begin{definition}[Graded consequence]
+\label{def:graded}
+Fix a threshold $t \in (0,1]$ and a set $\alpha$ of atoms.
+A \emph{valuation} is a map $v : \alpha \to [0,1]$.
+The premises $\Gamma \subseteq \alpha$ \emph{entail} the conclusion
+$\varphi \in \alpha$ at threshold $t$, written
+$\Gamma \vDash_t \varphi$, when every valuation with $v(p) \geq t$
+for all $p \in \Gamma$ also has $v(\varphi) \geq t$.
+(Machine-checked, \texttt{gradedConsequence}.)
+\end{definition}
+
+Designation on $\Kl$ and thresholds on $[0,1]$ match across the
+collapse: K$_3$ designation corresponds to $t = 1$ (certainty) and
+LP designation to positivity; the formal bridges are proved in
+Part~2~\cite{part2}.
+Here we work directly on $[0,1]$ and prove the two facts a newcomer
+needs: contradictions do not explode, and excluded middle holds only
+up to a sharp threshold.
+
+\begin{theorem}[No explosion below $\tfrac{1}{2}$]
+\label{thm:no-explosion}
+Let $0 < t \leq \tfrac{1}{2}$.
+There is a valuation $v$ with
+\[
+v(A) \geq t,
+\qquad
+\negc v(A) \geq t,
+\qquad
+v(B) < t.
+\]
+Hence the premises $A$ and $\negc A$ do not entail an unrelated $B$
+at any threshold up to $\tfrac{1}{2}$.
+\end{theorem}
+
+\begin{proof}
+Take $v(A) = \tfrac{1}{2}$ and $v(B) = 0$.
+Then $v(A) = \negc v(A) = \tfrac{1}{2} \geq t$, while
+$v(B) = 0 < t$.
+(Machine-checked, \texttt{graded\_no\_explosion}; the LP instance on
+$\Kl$ is \texttt{lp\_no\_explosion}.)
+\end{proof}
+
+\begin{proposition}[Vacuity above $\tfrac{1}{2}$]
+\label{prop:vacuity}
+For $t > \tfrac{1}{2}$, no valuation satisfies both $v(A) \geq t$ and
+$\negc v(A) \geq t$; the explosion sequent then holds vacuously.
+\end{proposition}
+
+\begin{proof}
+$v(A) + \negc v(A) = 1$, so both values at least $t$ would force
+$1 \geq 2t > 1$.
+(Machine-checked, \texttt{graded\_explosion\_vacuous}.)
+\end{proof}
+
+The boundary is exactly $\tfrac{1}{2}$, the negation fixed point:
+below it a contradiction is expressible and harmless, above it a
+contradiction cannot be stated at full strength.
+Excluded middle has the complementary boundary.
+
+\begin{corollary}[Excluded-middle window]
+\label{cor:tnd}
+The formula $A \disjc \negc A$ is valid at threshold $t$, in the
+sense that $v(A) \disjc \negc v(A) \geq t$ for every valuation, if
+and only if $t \leq \tfrac{3}{4}$.
+\end{corollary}
+
+\begin{proof}
+By Proposition~\ref{prop:spread},
+$c \disjc \negc c \geq \tfrac{3}{4}$ for every $c$, with value
+exactly $\tfrac{3}{4}$ at $c = \tfrac{1}{2}$.
+So validity holds for $t \leq \tfrac{3}{4}$, and the valuation
+$v(A) = \tfrac{1}{2}$ refutes it for $t > \tfrac{3}{4}$.
+(Machine-checked, \texttt{threshold\_excluded\_middle\_iff}.)
+\end{proof}
+
+\begin{proposition}[K$_3$ has no tautologies, LP keeps excluded middle]
+\label{prop:k3-lp}
+On $\Kl$:
+(i) the constant valuation $w \equiv \tfrac{1}{2}$ assigns
+$\tfrac{1}{2}$ to every formula built from $\mathrm{neg}$, $\min$,
+$\max$, so no formula is K$_3$-valid;
+(ii) $\max(x, 1-x) \in \{\tfrac{1}{2}, 1\}$ for every $x \in \Kl$,
+so $A \disjc \negc A$ is LP-valid.
+\end{proposition}
+
+\begin{proof}
+(i) The singleton $\{\tfrac{1}{2}\}$ is closed under all three
+operations: $1 - \tfrac{1}{2} = \tfrac{1}{2}$ and
+$\min, \max$ of equal arguments are that argument.
+By induction every formula evaluates to $\tfrac{1}{2}$, which is not
+K$_3$-designated.
+(ii) Check the three cases: $x = 0$ and $x = 1$ give $1$,
+$x = \tfrac{1}{2}$ gives $\tfrac{1}{2}$; both are LP-designated.
+(Machine-checked, \texttt{k3\_no\_tautology},
+\texttt{lp\_excluded\_middle}; the Lean statement of (i) is for
+atomic conclusions, and the inductive extension is the closure
+computation displayed here.)
+\end{proof}
+
+\begin{example}[The map of thresholds]
+\label{ex:thresholds}
+Reading Theorem~\ref{thm:no-explosion},
+Proposition~\ref{prop:vacuity}, and Corollary~\ref{cor:tnd} together:
+for $0 < t \leq \tfrac{1}{2}$ contradictions are expressible and
+explosion fails; for $\tfrac{1}{2} < t \leq \tfrac{3}{4}$
+contradictory premises are unsatisfiable while excluded middle still
+holds; for $t > \tfrac{3}{4}$ excluded middle fails as well.
+The two boundary numbers are the cap and floor of
+Figure~\ref{fig:spread}.
+\end{example}
+
+%=============================================================================
+\section{Conditioning as a Solution Set}
 \label{sec:conditioning}
+%=============================================================================
 
-Three different things in this book wear the same English word ``if.'' Run them together and the paradoxes return through the back door. So separate them first, by a concrete test.
+\subsection{The chain rule and the admissible set}
 
-\begin{example}[Three questions about one situation]
-Let $A$ be ``the coin landed heads'' and $B$ ``the coin was fair.'' Ask:
-\begin{enumerate}
-\item Is the sentence $A \to B$ true, and what is its credence?
-\item Does $A$ \emph{entail} $B$ in our logic?
-\item Given $B$, what credence may I assign to $A$?
-\end{enumerate}
-Question 1 is about a connective inside the language: it builds a new sentence from two old ones, and that sentence has its own credence. Question 2 is about the consequence relation, which lives in our metalanguage and judges arguments. Question 3 is about conditioning: from a joint credence and the evidence $B$, which values of $\cred(A\mid B)$ are admissible. The three answers need not agree, and forcing them to agree is what breaks.
-\end{example}
+Conditional credence is governed by one equation, taken as primitive
+in the tradition of R\'enyi~\cite{renyi1955} and
+Popper~\cite{popper1959}.
 
-Priest draws this as a level distinction \cite{priest1979,priest2008}. The object language is where connectives live: $\negc$, $\conjc$, $\disjc$, and any conditional you choose to add. The metalanguage is where you state entailment, soundness, and proof rules. Conditioning, in Cred, is a third thing again, neither a connective nor the consequence relation.
-
-\subsection{The object-language connective}
-
-A connective is a function on credences. Negation is $\negc c = 1-c$; conjunction is $a \conjc b = ab$; disjunction is the De Morgan dual $a \disjc b = a+b-ab$. Each takes credences in and returns a credence. A conditional connective, if Cred had one, would be a function $f:[0,1]\times[0,1]\to[0,1]$ that reads off $\cred(A\to B)$ from $\cred(A)$ and $\cred(B)$ alone. That is the content of \emph{truth-functional}: the output depends only on the input values, on nothing else.
-
-The earlier chapters already used such connectives freely. They distribute, they have fixed points, they obey the De Morgan laws. What they do \emph{not} do is express dependence between $A$ and $B$. Two coins each fair give $\cred(A)=\cred(B)=\tfrac12$ whether they are glued together or tossed independently. A truth-functional connective sees only $\tfrac12$ and $\tfrac12$. It cannot tell the cases apart.
-
-\subsection{The metalanguage consequence relation}
-
-Entailment is not a connective. It is a relation between premises and a conclusion, defined by quantifying over all valuations. Certainty consequence ($\Gamma$ entails $A$ when every valuation that makes all of $\Gamma$ certain makes $A$ certain) and positivity consequence (the same with ``certain'' weakened to ``positive'') are the two relations used here. The Lean module \texttt{Cred.Core.Consequence} defines both, as \texttt{certaintyConsequence} and \texttt{positivityConsequence}, alongside the graded family \texttt{gradedConsequence}.
-
-The level matters for the paradoxes. A contradiction $A,\negc A$ at credence $\tfrac12$ does not entail an arbitrary $B$: this is \texttt{lp\_no\_explosion} and, in graded form, \texttt{graded\_no\_explosion}. The failure of explosion is a fact about the consequence relation, the metalanguage object. It says nothing about whether some connective $\to$ inside the language validates $A,A\to B \vdash B$. Keep the two apart and no tension arises. Confuse them and you will look for explosion in the wrong place.
-
-\subsection{Conditioning is external and set-valued}
-
-Conditioning is the third level. Cred treats it as primitive through the chain rule
+\begin{definition}[Chain rule]
+\label{def:chain}
+A \emph{conditioning witness} for the pair
+$(j, e) \in [0,1]^2$, with $j$ the \emph{joint} credence
+$\cred(A \land B)$ and $e$ the \emph{evidence} credence $\cred(B)$,
+is a credence $c$ satisfying the \emph{chain rule}
 \[
-  \cred(A\mid B)\conjc \cred(B) = \cred(A\wedge B),
+c \conjc e = j,
+\qquad\text{in propositional notation}\quad
+\condc{A}{B} \conjc \cred(B) = \cred(A \land B).
 \]
-and reads off not a value but a set. Given joint credence $j=\cred(A\wedge B)$ and evidence $e=\cred(B)$, the admissible conditional credences form
-\[
-  \Cond(j,e) = \{\, c\in[0,1] : c\conjc e = j \,\}.
-\]
-This is the admissibility relation, defined as \texttt{Cred.Credence.Cond} in \texttt{Cred.Cond.Admissible}. It is external: it does not build a sentence, and it does not appear among $\negc,\conjc,\disjc$. It is set-valued by design.
-
-\begin{example}[Why a set, not a value]
-When $e>0$ the chain rule pins one value: $\Cond(j,e)=\{j/e\}$ as a singleton (\texttt{cond\_singleton\_of\_pos}). When $e=0$ and $j=0$ the equation $c\conjc 0 = 0$ holds for every $c$, so $\Cond(0,0)=[0,1]$, the whole interval (\texttt{cond\_zero\_zero\_univ}, witnessed pointwise by \texttt{conditioning\_zero\_any}). Impossible evidence constrains nothing; it does not explode. A value-returning conditioning operator would have to invent a number here. The set just reports that every number is admissible.
-\end{example}
-
-This is conditioning in de Finetti's sense \cite{definetti1937}: a coherence constraint linking joint and marginal credences, not a division that demands a defined quotient. Division by zero is undefined; the constraint $c\conjc 0 = 0$ is simply slack. Returning a set absorbs the slack without special cases.
-
-\subsection{No total internal conditional}
-
-Could we still fold conditioning back into a connective, a single total function $f$ on $[0,1]^2$ that mimics it? Two results say no, from two directions.
-
-First, no truth-functional connective tracks conditioning even on positive evidence. The bridge $\cred(A\mid B) = f(\cred(B),\cred(A))$ would force $f$ to return two different values on the same input. Take $\cred(A)=0.3,\cred(B)=0.7$ and then $\cred(A)=0.7,\cred(B)=0.3$. Both inputs collapse to the interior value $\tfrac12$, yet the admissible conditional is $3/7$ in one case and $1$ in the other. The function $f$ would have to give $f(\tfrac12,\tfrac12)$ two answers. This is \texttt{no\_truthfunctional\_cond\_bridge}: dependence cannot be read off marginals.
-
-Second, even granting a non-truth-functional residuum, the natural conditional cannot also contract. A conditional that validates modus ponens (MP) and the deduction property (CP, conditional proof) is pinned, on positive antecedents, to the product residuum. Add contraction, the rule $A\to(A\to B)\vdash A\to B$, and the three demands are jointly unsatisfiable. This is \texttt{curry\_block}:
-\[
-  \neg\,\exists f.\ \mathrm{MP}(f)\wedge\mathrm{CP}(f)\wedge\mathrm{Contraction}(f).
-\]
-The witness is sharp: $f(\tfrac12,\tfrac14)=\tfrac12$ from the residuum, $f(\tfrac12,\tfrac12)=1$, and contraction would demand $f(\tfrac12,\tfrac14)\ge f(\tfrac12,\tfrac12)=1$, which $\tfrac12$ refuses. Contraction is exactly the rule Curry's paradox needs. Blocking it blocks the paradox, and the cost is giving up a total internal conditional that contracts.
-
-The two no-go results pull the same way. Keep conditioning external (a set-valued admissibility relation, not a connective) and the explosion at zero evidence and the Curry collapse both stay out. Internalize it into one total truth-functional connective and you reintroduce exactly what the level distinction was meant to prevent. The separation of implication, entailment, and conditioning is not bookkeeping. It is what makes the system safe.
-
-\section{Paradox and the unknown}
-\label{sec:paradox}
-
-A paradox looks like a wall. Self-reference seems to leave no room: the liar is both true and false, so the system breaks. In a graded credence algebra the wall is a door. A self-referential sentence is an equation, and its admissible meanings are the solutions of that equation. Some equations have one solution, some have many, some have none. None of them explode.
-
-\subsection{Paradoxes are solution sets}
-
-Treat a self-referential definition as a fixed-point equation $c=\Phi(c)$ on $[0,1]$. The sentence does not assert a single value. It constrains its own credence. The admissible values form the solution set
-\[
-  \Sol(\Phi)=\{c\in[0,1]:\Phi(c)=c\}.
-\]
-Lean names this set \texttt{solutions} and proves \texttt{solutions\_eq\_fixedPoints}: the solution set is exactly the set of fixed points.
-
-The liar says ``this sentence is false.'' Its credence equals its own negation:
-\[
-  c=\negc c=1-c.
-\]
-One value satisfies this, $c=\tfrac12$. The solution set is a singleton,
-\[
-  \Sol(\negc)=\{\tfrac12\},
-\]
-proved as \texttt{solutions\_neg\_eq\_singleton}. The classical paradox came from forcing $c\in\{0,1\}$, where $\neg b=b$ has no solution (\texttt{bool\_neg\_solutions\_empty}). The graded interval keeps the equation solvable. The liar is not a contradiction. It is the negation fixed point, the one value that equals its own complement.
-
-The truth-teller says ``this sentence is true.'' Its credence equals itself:
-\[
-  c=c.
-\]
-Every value solves this. The solution set is the whole interval,
-\[
-  \Sol(\mathsf{id})=[0,1],
-\]
-proved as \texttt{solutions\_id\_eq\_univ}. The liar pins one value; the truth-teller pins none. Same machinery, opposite outcome. The truth-teller is underdetermined because its equation is the identity: it carries no information about $c$.
-
-The two paradoxes mark the two extremes of a single mechanism. A self-referential equation can cut the interval down to a point or leave it untouched. Russell's diagonal sits with the liar. For a self-membership reading $\mathit{selfMem}$, the Russell object assigns each point the negation of its self-membership, and at a Russell point the membership degree solves $c=1-c$. So it is $\tfrac12$:
-\[
-  (\mathsf{russell}\ \mathit{selfMem}).\mathsf{mem}\ r=\tfrac12,
-\]
-the content of \texttt{russell\_mem\_eq\_half}. Belonging to the set of non-self-members is half true, half false. The diagonal has a determinate value, not a catastrophe.
-
-\subsection{A taxonomy of the unknown}
-
-``Unknown'' is one word for several things. The solution-set view separates them. Some unknowns are a single missing number. Some are a whole set of admissible values. Some live below the level of a value, at the branching of cases. Naming the kind tells you what would resolve it and what shape the answer has.
-
-\begin{example}[Lack of information]
-You hold a biased coin but do not know the bias. The credence $\cred(\text{heads})$ has a definite but unrecorded value. The unknown is \emph{scalar}: one number, currently unmeasured. More data would fix it. Nothing about the algebra is undetermined; only your record is incomplete.
-\end{example}
-
-\begin{example}[Irrelevant condition]
-Condition on something with no bearing on the question: $\cred(\text{rain tomorrow}\mid \text{a coin in Vienna landed heads})$. The condition is a genuine event, but it does not move the credence. The unknown here is not in the value at all; the value is whatever it already was. The conditioning step is \emph{scalar} and inert. This is different from the next case, where the condition is not irrelevant but impossible.
-\end{example}
-
-\begin{example}[Underdetermined admissible value]
-Take zero-credence evidence. The chain rule $c\conjc e=j$ with $e=0$ forces $j=0$ and then constrains $c$ not at all:
-\[
-  \Cond(0,0)=[0,1],
-\]
-proved as \texttt{cond\_zero\_zero\_univ}, with the witness \texttt{conditioning\_zero\_any} that every credence is admissible. The unknown is \emph{set-valued}: the answer is the full interval, not a missing number. No further measurement narrows it, because impossible evidence supplies no constraint. This is exactly why there is no ex falso: an impossible condition licenses every value, hence no particular one (see \texttt{conditioning\_zero\_any}).
-\end{example}
-
-The truth-teller is the same set-valued unknown reached from self-reference rather than from evidence. Its solution set and the zero-evidence admissible set coincide:
-\[
-  \Sol(\mathsf{id})=[0,1]=\Cond(0,0),
-\]
-recorded as \texttt{truth\_teller\_same\_shape\_as\_zero\_evidence}. The shapes match; the readings differ. The truth-teller's equation supplies no information; the zero-evidence chain rule supplies no conditional value. Both leave the interval whole.
-
-\begin{example}[Branch-dependent status]
-Conditioning splits on whether the evidence is possible. With positive evidence the admissible set is a singleton,
-\[
-  \Cond(j,e)=\{j/e\}\quad(e>0,\ j\le e),
-\]
-proved as \texttt{cond\_singleton\_of\_pos}; with zero evidence it is the whole interval. The status of $\cred(A\mid B)$ depends on which branch $\cred(B)$ lands in. The unknown is \emph{branch-level}: before you know the branch, you do not know whether the answer is one number or a full interval. Settling $\cred(B)>0$ versus $\cred(B)=0$ settles the shape.
-\end{example}
-
-\begin{example}[Inadmissible branch]
-Some pairs admit no conditional at all. The admissible set is nonempty exactly when $j\le e$:
-\[
-  \Cond(j,e)\neq\varnothing \iff \cred(A\wedge B)\le \cred(B),
-\]
-proved as \texttt{cond\_nonempty\_iff}. If a joint credence exceeds its marginal, the chain rule has no solution. The unknown is again \emph{branch-level}, but the branch is empty: there is no admissible value because the inputs are incoherent. This is not a missing number and not a full interval. It is the absence of any solution, and the right response is to reject the inputs, not to guess.
-\end{example}
-
-\begin{example}[Fixed-point value]
-The liar and Russell give a determinate but self-generated value. No external measurement produces $\tfrac12$; the equation $c=1-c$ does. The unknown was never about missing data. It was about which value is consistent with the sentence's own content, and the answer is \emph{scalar}: the single fixed point $\tfrac12$ (\texttt{russell\_mem\_eq\_half}). Contrast this with lack of information, where a definite value exists and waits to be read off. Here the value exists only because the equation pins it.
-\end{example}
-
-\subsection{Reading the taxonomy}
-
-The six cases fall into three shapes. Lack of information, irrelevant conditioning, and the fixed-point value are \emph{scalar}: the answer is one number, whether unrecorded, unchanged, or self-generated. The underdetermined admissible value and the truth-teller are \emph{set-valued}: the answer is the full interval $[0,1]$. Branch-dependent status and the inadmissible branch are \emph{branch-level}: the question is which case obtains, singleton versus interval versus empty, and only after that does a value or interval appear.
-
-The common thread is $\Cond$ and $\Sol$. Both are solution sets, both can be a singleton, a full interval, or empty, and neither produces an arbitrary conclusion from a degenerate input. A paradox is the case where the equation is self-referential; the unknown is the case where the inputs leave the solution set wider than a point. Reading the wall as a door means reading both as solution sets and asking only which shape the set has.
-
-\section{Admissible states}
-\label{sec:admissible}
-
-Start with a single concrete question.
-You assign credences $\cred(A)=\tfrac{1}{2}$ and $\cred(B)=\tfrac{1}{2}$.
-What values can $\cred(A \mid B)$ take?
-The chain rule requires
-\[
-  \cred(A \mid B)\conjc\cred(B) \;=\; \cred(A \wedge B),
-\]
-so the answer depends on a second input: the joint credence $\cred(A \wedge B)$.
-The set of \emph{admissible} conditional values is defined by that equation.
+(Machine-checked as the structure \texttt{Conditioning}.)
+\end{definition}
 
 \begin{definition}[Admissible set]
-For joint credence $j\in[0,1]$ and evidence credence $e\in[0,1]$,
+\label{def:cond}
+The \emph{admissible set} of the pair $(j,e)$ is the solution set of
+the chain rule,
 \[
-  \Cond(j,e) \;=\; \{c\in[0,1] : c\conjc e = j\} \;=\; \{c\in[0,1] : ce = j\}.
+\Cond(j, e) = \{\, c \in [0,1] : c \conjc e = j \,\}.
 \]
-A value $c$ is \emph{admissible} for the pair $(j,e)$ when $c\in\Cond(j,e)$.
 \end{definition}
 
-Lean names the membership criterion \texttt{mem\_cond\_iff}: $c\in\Cond(j,e)$
-exactly when a \texttt{Conditioning} structure with \texttt{condCred}$\,=c$
-exists, that is, when the chain rule is witnessed.
+\begin{proposition}[Membership criterion]
+\label{prop:mem}
+$c \in \Cond(j,e)$ if and only if $c \conjc e = j$, if and only if
+there is a conditioning witness for $(j,e)$ whose conditional value
+is $c$.
+\end{proposition}
 
-\paragraph{The trichotomy.}
-The shape of $\Cond(j,e)$ has three cases, proved as
-\texttt{cond\_singleton\_of\_pos}, \texttt{cond\_zero\_zero\_univ}, and
-\texttt{cond\_nonempty\_iff}.
+\begin{proof}
+The first equivalence is Definition~\ref{def:cond}; the second packs
+the equation into the witness and back.
+(Machine-checked, \texttt{mem\_cond\_iff}.)
+\end{proof}
 
-\begin{theorem}[Admissible-set trichotomy]
-Let $j,e\in[0,1]$.
-\begin{enumerate}
-  \item If $e>0$ and $j\le e$, then $\Cond(j,e)=\{j/e\}$: one admissible value.
-  \item If $e=0$ and $j=0$, then $\Cond(0,0)=[0,1]$: every value is admissible.
-  \item If $j>e$ (in particular $e=0$ with $j>0$), then $\Cond(j,e)=\emptyset$: no admissible value.
+\begin{theorem}[Trichotomy]
+\label{thm:trichotomy}
+For $j, e \in [0,1]$:
+\begin{enumerate}[label=\textup{(\arabic*)},nosep]
+\item if $e > 0$ and $j \leq e$, then
+  $\Cond(j,e) = \{j/e\}$, a singleton;
+\item if $e = 0$ and $j = 0$, then $\Cond(0,0) = [0,1]$, the full
+  interval;
+\item if $j > e$ (which includes $e = 0$ with $j > 0$), then
+  $\Cond(j,e) = \emptyset$.
 \end{enumerate}
+Consequently $\Cond(j,e) \neq \emptyset$ if and only if $j \leq e$.
 \end{theorem}
 
-\begin{example}
-Return to $e=\tfrac{1}{2}$.
+\begin{proof}
+(1) For $e > 0$ the real equation $ce = j$ has the unique solution
+$c = j/e$, and $j \leq e$ places it in $[0,1]$.
+(2) $c \cdot 0 = 0$ holds for every $c$: the equation imposes no
+constraint.
+(3) Any solution satisfies
+$j = ce \leq 1 \cdot e = e$, so $j > e$ admits none.
+For the final equivalence: if $j \leq e$ and $e > 0$ apply (1); if
+$j \leq e = 0$ then $j = 0$ and (2) applies.
+(Machine-checked, \texttt{cond\_singleton\_of\_pos},
+\texttt{cond\_zero\_zero\_univ}, \texttt{cond\_nonempty\_iff};
+pointwise freedom at zero evidence is
+\texttt{conditioning\_zero\_any}, uniqueness at positive evidence is
+\texttt{conditioning\_unique}.)
+\end{proof}
+
+Case (2) is the design choice of the series.
+Probability leaves $P(A \mid B)$ undefined at $P(B) = 0$; residuated
+fuzzy implications force the value $1$ there
+(ex falso, see Section~\ref{sec:fixpoint});
+the chain rule leaves the value \emph{unconstrained}.
+Dubois and Prade's conditional possibility instead defaults to $1$ at
+zero evidence~\cite{dubois1988}; the admissible set records the
+freedom rather than resolving it.
+
+\begin{example}[Admissible sets at evidence $\tfrac{1}{2}$]
+\label{ex:cond-table}
+Fix $e = \tfrac{1}{2}$ and vary the joint:
 \begin{center}
 \begin{tabular}{ccl}
 \toprule
-$j$ & $\Cond(j,\tfrac{1}{2})$ & comment \\
+$j$ & $\Cond(j, \tfrac{1}{2})$ & case in
+  Theorem~\ref{thm:trichotomy} \\
 \midrule
-$0$           & $\{0\}$    & $c\cdot\tfrac{1}{2}=0 \Rightarrow c=0$ \\
-$\tfrac{1}{4}$ & $\{\tfrac{1}{2}\}$ & $c=\tfrac{1}{4}/\tfrac{1}{2}$ \\
-$\tfrac{1}{2}$ & $\{1\}$    & $c=1$ \\
-$\tfrac{3}{4}$ & $\emptyset$ & $j>e$, incoherent \\
+$0$ & $\{0\}$ & (1): $c = 0/\tfrac{1}{2}$ \\
+$\tfrac{1}{4}$ & $\{\tfrac{1}{2}\}$
+  & (1): $c = \tfrac{1}{4}/\tfrac{1}{2}$ \\
+$\tfrac{1}{2}$ & $\{1\}$ & (1): $c = 1$ \\
+$\tfrac{3}{4}$ & $\emptyset$ & (3): $j > e$, incoherent inputs \\
 \bottomrule
 \end{tabular}
 \end{center}
-The joint credence $\cred(A\wedge B)$ selects which row applies.
-Positive evidence pins $\cred(A\mid B)$ to a unique value; the apparent
-ambiguity in the opening question was missing information about the joint,
-not a property of conditioning itself.
+Positive evidence pins the conditional to one value; the joint
+selects which.
+At $e = 0$ the entire column collapses to the two degenerate rows
+$\Cond(0,0) = [0,1]$ and $\Cond(j,0) = \emptyset$ for $j > 0$.
 \end{example}
 
-\paragraph{Admissible versus designated.}
-A value is \emph{designated} under a consequence relation when it counts as
-``accepted'' for the purpose of entailment.
-LP designates $\{1,\tfrac{1}{2}\}$; K3 designates $\{1\}$; threshold
-consequence at level $t$ designates $[t,1]$ (\texttt{thresholdConsequence}).
-Designation is a property of a single formula under a single valuation.
-Admissibility is a relational property: $c$ is admissible for the
-\emph{pair} $(j,e)$, not for $c$ alone.
-A value can be designated without being admissible for any particular
-conditioning problem, and admissible values need not be designated.
-At $e=0=j$ every $c\in[0,1]$ is admissible (\texttt{conditioning\_zero\_any}),
-yet most are not designated under K3 or any positive threshold.
+\subsection{Divergence from the material conditional}
 
-\paragraph{Admissible versus crisp.}
-A \emph{crisp} credence is $0$ or $1$.
-The crisp fragment $\{0,1\}$ embeds classical logic
-(\texttt{crisp\_eval\_eq}, \texttt{crisp\_certainty\_iff\_classical}).
-An admissible state need not be crisp: the unique admissible value for
-$(j,e)=(\tfrac{1}{4},\tfrac{1}{2})$ is $\tfrac{1}{2}$, which is neither
-$0$ nor $1$.
-Conversely, a crisp value is admissible only when the chain-rule equation is
-satisfied: $\cred(A\mid B)=1$ is admissible only when $j=e$, that is, when
-$\cred(A\wedge B)=\cred(B)$.
+On crisp values the algebra is classical
+(Remark~\ref{rem:not-subalgebra}), with one exception, and the
+exception is exactly the zero-evidence case.
 
-\paragraph{Zero evidence and no explosion.}
-Case~2 of the trichotomy is where the system departs from classical and
-from RM3 conditioning.
-When $e=0$, the product $ce=0$ for every $c$, so no chain-rule equation
-selects a value.
-Impossible evidence imposes no constraint.
-This is the mechanism behind \texttt{lp\_no\_explosion} and
-\texttt{graded\_no\_explosion}: a contradiction $A,\negc A$ at credence
-$\tfrac{1}{2}$ does not force an arbitrary conclusion, because conditioning
-on a zero-credence event leaves the posterior unconstrained.
-The admissible set $\Cond(0,0)=[0,1]$ is the algebraic record of that
-freedom \cite{priest2008,jaynes2003}.
+\begin{definition}[Crisp embedding and material conditional]
+\label{def:material}
+Write $\iota(\mathsf{false}) = 0$ and $\iota(\mathsf{true}) = 1$ for
+the crisp embedding.
+The \emph{material conditional} of evidence $e$ and joint $j$ in
+$\{\mathsf{true}, \mathsf{false}\}$ is
+$\mathrm{mat}(j,e) = \lnot e \lor j$; as a credence value it is
+$\negc \iota(e) \disjc \iota(j)$.
+\end{definition}
 
-\paragraph{Admissibility as a model constraint.}
-An \emph{admissible state} for a system of conditioning claims is a
-credence assignment that makes every chain-rule equation satisfied.
-Formally: given a list of triples $(c_i,j_i,e_i)$, the state is admissible
-when $c_i\in\Cond(j_i,e_i)$ for each $i$.
-Consequence then asks which conclusions hold in every admissible state in
-which the premises hold; this is the reading behind
-\texttt{reductio\_iff\_countermodels\_empty}, where threshold consequence
-is equivalent to the emptiness of the set of valuations that satisfy the
-premises but not the conclusion.
-Admissibility supplies the constraint; designation supplies the acceptance
-condition; together they yield the entailment.
-
-
-\section{From the 2018 notes to Cred}
-\label{sec:history}
-
-Cred grew out of an earlier attempt to fix one connective. A set of
-2018 notes tried to repair the material conditional by patching its
-truth table. The repair failed for a reason worth stating plainly,
-and the failure shaped the present design. This section reconstructs
-the old attempt, states Priest's objection to it, and shows how Cred
-answers that objection by moving conditioning out of the truth table
-entirely.
-
-\subsection*{The 2018 repair}
-
-Start with the embarrassment that motivated the notes. The material
-conditional $A\to B$, read as $\negc A\disjc B$, is true whenever $A$
-is false. So ``if the moon is cheese then $2+2=5$'' comes out true.
-The antecedent is false, the whole conditional is vacuously true, and
-the connection between the two clauses plays no role. This is one of
-the paradoxes of material implication.
-
-The 2018 fix kept implication a connective on truth values and added
-a third value for the irrelevant case. Write $i$ for irrelevant. The
-truth table gained a row: when the antecedent is false, $A\to B$
-returns $i$ rather than true. The hope was that $i$ would mark
-``no claim made'' and block the bad inference.
-
-\begin{example}[A row that does not settle anything]
-Take $A$ false, $B$ true. Material implication returns true. The
-patched table returns $i$. Now chain two such conditionals, or feed
-$A\to B$ into a disjunction, and you must say what $i\disjc \text{true}$
-is, what $\negc i$ is, what follows from a premise valued $i$. Every
-answer recreates a paradox somewhere else, because $i$ is still a
-truth value and the connectives still compose.
-\end{example}
-
-The patch treats irrelevance as a value a sentence can have. But
-irrelevance is a relation between premise and conclusion, not a
-property of either one. A truth-functional table cannot see that
-relation: it sees only the values of the parts. Adding a value does
-not add the missing information.
-
-\subsection*{Priest's three levels}
-
-Priest gives the clean diagnosis. The word ``if'' and its formal
-cousins live on three different levels, and conflating them is the
-standard source of trouble \cite{priest1979,priest2008}.
-
-\begin{enumerate}
-\item An \emph{object-language conditional}: a connective inside the
-  logic, taking two formulas to a formula. Its job is to have a
-  truth value.
-\item \emph{Metalanguage entailment}: the relation $\Gamma\vDash B$
-  that holds when every model of $\Gamma$ is a model of $B$. It is
-  not a formula and has no truth value; it is a fact about the
-  semantics.
-\item The English ``if'': ordinary indicative usage, which tracks
-  evidential support and is not committed to either of the formal
-  readings.
-\end{enumerate}
-
-The 2018 patch tried to make one object-language connective carry all
-three loads. It wanted the connective to (i) have a value like a
-formula, (ii) report when the conclusion really follows, the work of
-entailment, and (iii) match the English intuition that a false
-antecedent makes ``if'' idle. No single truth-functional connective
-does all three, because (ii) is not truth-functional at all. The
-title of Priest's textbook, \emph{From If to Is}, names exactly this
-slide from the conditional to consequence \cite{priest2008}.
-
-\subsection*{What Cred separates}
-
-Cred keeps the three levels apart by construction. It does not repair
-the conditional connective; it removes the conditional from the
-object language and assigns each level its own object.
-
-Consequence is level two, and it is handled in the metalanguage by
-thresholds, never by a connective. A conclusion follows from premises
-when its credence stays at least $t$ in every valuation that keeps the
-premises at least $t$. Designation at $t=1$ gives certainty
-consequence; positivity, credence above $\tfrac12$, gives the
-LP-style reading. Neither admits explosion: a contradictory premise
-does not license an arbitrary conclusion, proved as
-\texttt{lp\_no\_explosion} and \texttt{graded\_no\_explosion}. There
-is no formula $A\to B$ whose value is being computed; there is a
-relation between lists of formulas, decided by inequalities.
-
-Conditioning is the third object, and it is external and set-valued.
-It is not a connective and returns no truth value. Given a joint
-credence $j$ and evidence $e$, the admissible set is
+\begin{theorem}[Material divergence]
+\label{thm:material}
+Let $j, e$ be crisp and coherent
+($j = \mathsf{true}$ implies $e = \mathsf{true}$).
+Then
 \[
-  \Cond(j,e)=\{\,c\in[0,1] : c\,e = j\,\},
+\Cond\bigl(\iota(j), \iota(e)\bigr)
+  = \{\iota(\mathrm{mat}(j,e))\}
+\quad\iff\quad
+e = \mathsf{true}.
 \]
-the credences consistent with the chain rule $c\,e=j$. For $e>0$ this
-is the singleton $\{j/e\}$. For $e=0=j$ it is all of $[0,1]$: zero
-evidence constrains nothing, the content of
-\texttt{conditioning\_zero\_any} and
-\texttt{zero\_evidence\_underdetermined}. The false antecedent that
-made material implication vacuously true now makes conditioning
-\emph{underdetermined} instead of vacuously satisfied. Idle evidence
-yields a full interval of admissible values, not a forced truth.
+\end{theorem}
 
-This also answers the irrelevance the 2018 notes chased. The patched
-table tried to mark irrelevance with a value $i$. Cred marks it with
-the size of $\Cond(j,e)$. A singleton means the evidence pins the
-credence; the whole interval means it says nothing. Irrelevance is a
-property of the relation, recorded by the set, never squeezed into a
-truth value.
+\begin{proof}
+If $e = \mathsf{true}$: $c \conjc 1 = c$, so
+$\Cond(\iota(j), 1) = \{\iota(j)\}$, and
+$\mathrm{mat}(j, \mathsf{true}) = j$.
+If $e = \mathsf{false}$: coherence forces $j = \mathsf{false}$, and
+Theorem~\ref{thm:trichotomy}(2) gives $\Cond(0,0) = [0,1]$, which is
+not the singleton $\{1\} = \{\iota(\mathrm{mat}(j,\mathsf{false}))\}$.
+(Machine-checked, \texttt{material\_divergence}; the
+characterization of full underdetermination on crisp inputs is
+\texttt{cond\_underdetermined\_iff}.)
+\end{proof}
 
-One more guard rail follows. Because conditioning is not a connective,
-it cannot be made truth-functional even in principle. No function on
-the collapsed three values reproduces the conditioned credence across
-all inputs; this is \texttt{no\_truthfunctional\_cond\_bridge}. The
-2018 hope, a connective that behaves like conditioning, is provably
-unavailable. On the crisp fragment $\{0,1\}$ the picture stays
-classical except at the empty antecedent, where the admissible set
-splits from the material conditional exactly when the evidence is
-false, recorded in \texttt{material\_divergence} and
-\texttt{cond\_underdetermined\_iff}.
+\begin{example}[The moon and the sum]
+\label{ex:moon}
+Let $B$ be ``the moon is made of cheese'' and $A$ be ``$2+2=5$'',
+with $\cred(B) = 0$, $\cred(A) = 0$, and joint
+$\cred(A \land B) = 0$.
+Read as a material conditional, ``if $B$ then $A$'' has value
+\[
+\negc \cred(B) \disjc \cred(A \land B) = 1 \disjc 0 = 1:
+\]
+designated under every designation of
+Section~\ref{sec:consequence}.
+This is the ex falso row: the connective computes its value from the
+marginals, and a false antecedent forces the output $1$ regardless of
+the consequent; on the Kleene quotient the same row appears in the
+RM3 implication table (machine-checked, \texttt{rm3\_ex\_falso}).
+Read as conditioning, the sentence asks for $\Cond(0,0)$, which by
+Theorem~\ref{thm:trichotomy}(2) is all of $[0,1]$: every conditional
+credence is admissible and none is forced
+(machine-checked, \texttt{cred\_no\_ex\_falso}).
+The material reading designates the sentence because vacuous truth is
+hard-coded into the connective; the conditioning reading reports that
+impossible evidence supports nothing, including the sentence itself.
+Theorem~\ref{thm:material} says these two readings agree everywhere
+else.
+\end{example}
 
-\begin{table}[h]
-\centering
-\begin{tabular}{@{}lll@{}}
-\toprule
- & 2018 notes & Cred \\
-\midrule
-Conditional & object-language connective & none in the object language \\
-Repair of vacuity & extra truth value $i$ & external, set-valued conditioning \\
-Consequence & read off the connective & metalanguage thresholds \\
-False antecedent & returns $i$ & $\Cond(j,e)$ underdetermined \\
-Irrelevance & a value a sentence has & size of the admissible set \\
-Truth-functional & assumed & ruled out, \texttt{no\_truthfunctional\_cond\_bridge} \\
-\bottomrule
-\end{tabular}
-\caption{The old patch loaded one connective with three jobs; Cred
-gives each job its own object.}
-\label{tab:before-after}
-\end{table}
+%=============================================================================
+\section{Fixed-Point Equations and the Curry Block}
+\label{sec:fixpoint}
+%=============================================================================
 
-The lesson Priest states and Cred enforces is a separation, not a
-better table. Once the object-language value, the entailment relation,
-and the evidential ``if'' are distinct objects, the paradoxes of
-material implication have nowhere left to form. The conditional stops
-being a connective that must lie when its antecedent is false, and
-becomes an admissibility question with an honest answer: which
-credences are consistent with this evidence, and how many.
+\subsection{Self-reference as an equation}
 
-\appendix
-\section{Glossary of foundational terms}
-\label{sec:glossary}
+A self-referential sentence specifies its own credence as a function
+of itself.
+The algebra treats it as an equation and reports the solutions.
 
-The terms below appear throughout the series.
-Each definition matches the usage in the body and is stated for a reader without a logic background.
+\begin{definition}[Solution set]
+\label{def:solutions}
+For $\Phi : [0,1] \to [0,1]$, the \emph{solution set} is
+\[
+\Sol(\Phi) = \{\, c \in [0,1] : \Phi(c) = c \,\},
+\]
+the fixed-point set of $\Phi$.
+(Machine-checked, \texttt{solutions},
+\texttt{solutions\_eq\_fixedPoints}.)
+\end{definition}
 
-\begin{description}
+\begin{proposition}[Liar and truth-teller]
+\label{prop:liar-tt}
+$\Sol(\negc) = \{\tfrac{1}{2}\}$ and
+$\Sol(\mathrm{id}) = [0,1]$.
+On the crisp fragment $\{0,1\}$ the liar equation $\lnot b = b$ has
+no solution.
+\end{proposition}
 
-\item[Truth.]
-A formula receives the credence $1$ under a valuation.
-In the crisp fragment $\{0,1\}$ this coincides with the classical truth value \textit{true};
-on the full interval $[0,1]$, a credence of $1$ is certainty, not an on/off switch.
+\begin{proof}
+The first claim is Lemma~\ref{lem:fixed}; the second is immediate
+since every $c$ satisfies $c = c$; the third is the two-case check
+$\lnot\mathsf{true} \neq \mathsf{true}$,
+$\lnot\mathsf{false} \neq \mathsf{false}$.
+(Machine-checked, \texttt{solutions\_neg\_eq\_singleton},
+\texttt{solutions\_id\_eq\_univ},
+\texttt{bool\_neg\_solutions\_empty}.)
+\end{proof}
 
-\item[Falsehood.]
-A formula receives the credence $0$ under a valuation.
-Zero is impossibility: $\negc 0 = 1$.
-A false formula is not merely unproved; every valuation assigns it the minimum value.
+The liar (``this sentence is false'') pins one value; the
+truth-teller (``this sentence is true'') pins none.
+The truth-teller's solution set coincides with the zero-evidence
+admissible set:
+\[
+\Sol(\mathrm{id}) = [0,1] = \Cond(0,0)
+\]
+(machine-checked,
+\texttt{truth\_teller\_same\_shape\_as\_zero\_evidence}).
+An uninformative equation and impossible evidence leave the same
+freedom, reached from different levels.
 
-\item[Value.]
-An element of $[0,1]$ assigned to a formula by a valuation.
-The operations on values are negation $\negc c = 1-c$, conjunction $a \conjc b = ab$,
-and disjunction $a \disjc b = a + b - ab$.
-These are the product De Morgan triplet, verified in \texttt{Cred.Core.Value}.
+\subsection{The product residuum and contraction}
 
-\item[Designation.]
-A threshold condition that marks a value as sufficiently supported.
-K3 designates only $1$; LP designates $\{1, \tfrac{1}{2}\}$; threshold consequence
-at $t$ designates every value in $[t,1]$.
-Designation determines which premises count as established in a consequence relation.
-See \texttt{isDesignatedK3}, \texttt{isDesignatedLP}, and \texttt{thresholdConsequence}.
+Curry's paradox needs an internal conditional with three properties:
+modus ponens, conditional proof, and contraction.
+The algebra grants any two and refuses the third.
 
-\item[Consequence.]
-A metalinguistic relation $\Gamma \models \varphi$ saying that every valuation
-making all premises designated also makes the conclusion designated.
-Reflexivity, monotonicity, and cut hold for every threshold.
-The two endpoint relations are certainty consequence ($t = 1$, \texttt{formulaCertainty})
-and positivity consequence (\texttt{formulaPositivity}).
-Consequence is a relation between formula lists, not a formula constructor.
+\begin{definition}[Product residuum]
+\label{def:resid}
+The \emph{product residuum} is
+\[
+a \to b =
+\begin{cases}
+1 & \text{if } a = 0,\\
+\min\bigl(b/a,\, 1\bigr) & \text{if } a > 0.
+\end{cases}
+\]
+(Machine-checked, \texttt{prodResid}.)
+\end{definition}
 
-\item[Proof.]
-A finite derivation witnessing a consequence claim.
-In Cred, proof certificates are type-level objects (see \texttt{Kernel.Proof} and
-\texttt{Structure.FoundationProof}) that erase to labelled derivations and satisfy
-soundness: every proved sequent is semantically valid.
-Proof does not internalize conditioning; conditioning enters as a side judgment.
+This is the residuated implication of H\'ajek's product
+logic~\cite{hajek1998}.
+Note $0 \to b = 1$: the residuum hard-codes ex falso, in contrast to
+$\Cond$ (Theorem~\ref{thm:trichotomy}).
 
-\item[Contradiction.]
-A pair of formulas $\varphi$ and $\negc\varphi$ both designated under the same valuation.
-At $\tfrac{1}{2}$ both $A$ and $\negc A$ have value $\tfrac{1}{2}$, so both are LP-designated.
-This is a genuine contradiction, but it does not make every formula designated:
-explosion fails for every positive threshold $t \le \tfrac{1}{2}$, witnessed by
-\texttt{graded\_no\_explosion}.
+\begin{definition}[MP, CP, contraction]
+\label{def:mp-cp}
+For $f : [0,1]^2 \to [0,1]$:
+\begin{enumerate}[label=(\roman*),nosep]
+\item \emph{Modus ponens}, $\mathrm{MP}(f)$:\quad
+  $f(a,b) \conjc a \leq b$ for all $a, b$.
+\item \emph{Conditional proof}, $\mathrm{CP}(f)$:\quad
+  $c \conjc a \leq b$ implies $c \leq f(a,b)$, for all $a, b, c$.
+\item \emph{Contraction}, $\mathrm{Contr}(f)$:\quad
+  $f(a, f(a,b)) \leq f(a,b)$ for all $a, b$.
+\end{enumerate}
+\end{definition}
 
-\item[Paradox.]
-A self-referential specification that assigns a formula's credence to a function of itself.
-In Cred, a paradox is classified by its solution set: the liar equation $c = 1-c$ has
-the singleton solution $\{\tfrac{1}{2}\}$ (\texttt{solutions\_neg\_eq\_singleton}),
-the truth-teller $c = c$ has all of $[0,1]$ (\texttt{solutions\_id\_eq\_univ}),
-and Curry's variant under the product residuum has a positive solution only when the
-target is positive (\texttt{curry\_sqrt\_solution}).
-Nothing explodes; the equation either has a value or it does not.
+\begin{lemma}[MP and CP pin the residuum]
+\label{lem:resid-unique}
+If $f$ satisfies $\mathrm{MP}(f)$ and $\mathrm{CP}(f)$, then for all
+$a > 0$ and all $b$,
+$f(a,b) = \min(b/a, 1) = (a \to b)$.
+\end{lemma}
 
-\item[Admissibility.]
-A credence $c$ is admissible for joint $j$ and evidence $e$ when the chain rule
-$c \conjc e = j$ holds.
-The admissible set $\Cond(j,e) = \{c \in [0,1] : c \conjc e = j\}$ is a singleton
-when $e > 0$ and $j \le e$, all of $[0,1]$ when $e = j = 0$, and empty when
-$e = 0 < j$ (\texttt{cond\_singleton\_of\_pos}, \texttt{cond\_zero\_zero\_univ},
-\texttt{cond\_nonempty\_iff}).
-Admissibility replaces the division formula for conditional probability and avoids
-the need to choose a value at zero evidence.
+\begin{proof}
+MP and CP together say $c \conjc a \leq b \iff c \leq f(a,b)$:
+the forward direction is CP, and from $c \leq f(a,b)$ monotonicity of
+$\conjc$ (Proposition~\ref{prop:laws}(e)) gives
+$c \conjc a \leq f(a,b) \conjc a \leq b$.
+So $f(a,b)$ is the greatest $c$ with $ca \leq b$.
+For $a > 0$ that maximum is $\min(b/a, 1)$:
+it satisfies $\min(b/a,1)\,a \leq (b/a)a = b$, and any $c$ with
+$ca \leq b$ has $c \leq b/a$ and $c \leq 1$.
+(Machine-checked, \texttt{residuation\_unique},
+\texttt{prodResid\_unique\_positive}.)
+\end{proof}
 
-\item[Branch.]
-A case in a proof by case analysis on the three regions of $[0,1]$: the boundary
-$0$, the boundary $1$, and the open interior $(0,1)$.
-The theorem \texttt{credence\_cases} makes this trichotomy available as an induction
-principle.
-Classical proof by cases survives intact on the crisp fragment; in the interior,
-excluded middle degrades but never below $\tfrac{3}{4}$
-(\texttt{threshold\_excluded\_middle\_iff}).
+\begin{theorem}[Curry block]
+\label{thm:curry}
+No $f : [0,1]^2 \to [0,1]$ satisfies $\mathrm{MP}(f)$,
+$\mathrm{CP}(f)$, and $\mathrm{Contr}(f)$ simultaneously.
+\end{theorem}
 
-\item[Update.]
-A rule that revises a prior credence in light of new evidence.
-Bayesian update for positive evidence, Jeffrey conditionalization for uncertain
-evidence, and the qualitative three-valued update (via the Godel implication)
-are developed in \texttt{Cred.Update} and \texttt{Cred.Bridge.CondBridge}.
-At zero evidence no canonical posterior exists; the admissible set returns the
-full interval $[0,1]$, consistent with imprecise probability \cite{walley1991}.
+\begin{proof}
+Suppose $f$ satisfies all three.
+By Lemma~\ref{lem:resid-unique},
+\[
+f\bigl(\tfrac{1}{2}, \tfrac{1}{4}\bigr)
+  = \min\bigl(\tfrac{1/4}{1/2},\, 1\bigr) = \tfrac{1}{2},
+\qquad
+f\bigl(\tfrac{1}{2}, \tfrac{1}{2}\bigr)
+  = \min(1, 1) = 1.
+\]
+Contraction at $(a,b) = (\tfrac{1}{2}, \tfrac{1}{4})$ demands
+\[
+f\bigl(\tfrac{1}{2},\, f(\tfrac{1}{2}, \tfrac{1}{4})\bigr)
+  = f\bigl(\tfrac{1}{2}, \tfrac{1}{2}\bigr)
+  = 1
+  \;\leq\;
+  f\bigl(\tfrac{1}{2}, \tfrac{1}{4}\bigr)
+  = \tfrac{1}{2},
+\]
+a contradiction.
+(Machine-checked, \texttt{curry\_block}; the residuum's own
+contraction failure at the same point is
+\texttt{prod\_resid\_no\_contraction}.)
+\end{proof}
 
-\item[Conditional.]
-A relation $c \in \Cond(j, e)$ stating that $c$ is an admissible conditional
-credence of some event given evidence with credence $e$ and joint credence $j$.
-The conditional is external: there is no formula constructor $\varphi \Rightarrow \psi$
-whose truth-value in $[0,1]$ can be fed back into its own antecedent.
-This design is forced by two machine-checked obstructions:
-the no-go theorem \texttt{no\_truthfunctional\_cond\_bridge}
-rules out truth-functional conditioning, and \texttt{curry\_block}
-rules out a total internal conditional with modus ponens, conditional proof, and
-contraction.
+\begin{remark}[Curry fixed points]
+\label{rem:curry-fixed}
+The Curry sentence ``if this sentence is true then $B$'' becomes the
+equation $c = (c \to b)$ under the residuum.
+For $b > 0$ it has the solution $c = \sqrt{b}$:
+since $\sqrt{b} > 0$,
+$\sqrt{b} \to b = \min(b/\sqrt{b}, 1) = \min(\sqrt{b}, 1) = \sqrt{b}$
+(machine-checked, \texttt{curry\_fixed\_point\_positive}).
+For $b = 0$ there is none: $c = 0$ gives $0 \to 0 = 1 \neq 0$, and
+$c > 0$ gives $c \to 0 = 0 \neq c$
+(machine-checked, \texttt{curry\_no\_fixed\_point\_zero}).
+The paradoxical step is never the fixed point; it is contraction,
+and Theorem~\ref{thm:curry} removes it.
+\end{remark}
 
-\end{description}
+\begin{example}[Residuum values]
+\label{ex:resid}
+$\tfrac{4}{5} \to \tfrac{1}{5} = \min(\tfrac{1}{4}, 1) =
+\tfrac{1}{4}$:
+strong evidence, weak joint, small conditional.
+$\tfrac{1}{5} \to \tfrac{4}{5} = \min(4, 1) = 1$:
+when $b \geq a$ the residuum saturates.
+Both values agree with the singleton case of
+Theorem~\ref{thm:trichotomy} when the joint is $\min(a,b)$, the
+maximally dependent choice; the two notions part company only at
+$a = 0$, where the residuum says $1$ and $\Cond$ says everything.
+\end{example}
+
+%=============================================================================
+\section{Scope and Further Reading}
+\label{sec:scope}
+%=============================================================================
+
+The primer proved:
+the De Morgan triplet laws with their exact distributivity defect
+(Propositions~\ref{prop:laws} and~\ref{prop:defect});
+the unique negation fixed point and the equilibria
+(Lemma~\ref{lem:fixed}, Proposition~\ref{prop:equilibria});
+the Kleene collapse and the impossibility of classical, G\"odel, and
+\L ukasiewicz targets
+(Theorem~\ref{thm:collapse-hom},
+Propositions~\ref{prop:no-classical}--\ref{prop:no-luk});
+the explosion and excluded-middle thresholds
+(Theorem~\ref{thm:no-explosion}, Corollary~\ref{cor:tnd});
+the conditioning trichotomy and the material divergence
+(Theorems~\ref{thm:trichotomy} and~\ref{thm:material});
+and the Curry block (Theorem~\ref{thm:curry}).
+
+What the primer does not do:
+it does not classify the congruences of the triplet (the Kleene
+partition is the unique three-element quotient, and the four-class
+case is open; Part~1~\cite{part1});
+it does not develop the formula-level bridges between threshold
+consequence and K$_3$/LP, Bayesian and Jeffrey updating, or the
+copula uniqueness theorem (Part~2~\cite{part2});
+and it does not treat graded predicates, quantifiers, the labelled
+sequent calculus, or proof certificates (Parts~3 and~4).
+Each of those developments starts from the algebra assembled here.
+
+\section*{Acknowledgements}
+
+Anthropic's Claude was used as an assistant for both the Lean
+formalization and the manuscript preparation.
+
+%=============================================================================
+% Bibliography
+%=============================================================================
 
 \bibliographystyle{plain}
 \bibliography{../cred}
+
+%=============================================================================
+% APPENDIX
+%=============================================================================
+\appendix
+
+%=============================================================================
+\section{Lean Formalization}
+\label{app:lean}
+%=============================================================================
+
+All results are machine-checked in Lean~4 with Mathlib; the names
+cited in the text resolve in the following modules of the repository.
+
+\begin{itemize}[nosep]
+\item \texttt{Cred/Core/Value.lean}: operations, order, triplet laws,
+  idempotents, fixed points, spread and certainty, interior dynamics
+  (Sections~\ref{sec:algebra} and~\ref{sec:fixed}).
+\item \texttt{Cred/Collapse/ThreeVal.lean} and
+  \texttt{Cred/Collapse/Hom.lean}: the Kleene lattice, the collapse
+  homomorphism, the no-go results for Boolean, G\"odel, and
+  \L ukasiewicz targets, the RM3 implication table
+  (Section~\ref{sec:collapse}, Example~\ref{ex:moon}).
+\item \texttt{Cred/Core/Consequence.lean}: designation, graded
+  consequence, the no-explosion and vacuity results
+  (Section~\ref{sec:consequence}).
+\item \texttt{Cred/Threshold.lean}: the sharp excluded-middle window
+  (Corollary~\ref{cor:tnd}).
+\item \texttt{Cred/Cond/Admissible.lean}: the chain rule, the
+  admissible set, the trichotomy
+  (Section~\ref{sec:conditioning}).
+\item \texttt{Cred/Bridge/Crisp.lean}: the crisp embedding and the
+  material divergence (Theorem~\ref{thm:material}).
+\item \texttt{Cred/Fixpoint.lean} and \texttt{Cred/Bridge/Curry.lean}:
+  solution sets, liar and truth-teller, the residuum, the Curry block
+  (Section~\ref{sec:fixpoint}).
+\end{itemize}
+
+Verification: \texttt{cd lean \&\& lake build}.
+Toolchain: Lean 4.16.0 with Mathlib 4.16.0.
 
 \end{document}
