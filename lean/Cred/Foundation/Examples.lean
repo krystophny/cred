@@ -91,6 +91,14 @@ theorem forallElimCertificateTree_checks [DecidableEq Func] [DecidableEq Pred]
     applyFoundationRuleUnchecked, FoundationRulePayload.childCount,
     FoundationRulePayload.code, FoundationRuleCode.childCount]
 
+theorem forallElimCertificateTree_shapeOK
+    (φ : Formula Func Pred) (τ : Term Func) :
+    (forallElimCertificateTree φ τ).shapeOK = true := by
+  simp [forallElimCertificateTree, FoundationCertificateTree.shapeOK,
+    FoundationCertificateTree.shapeOKList,
+    FoundationRulePayload.childCount, FoundationRulePayload.code,
+    FoundationRuleCode.childCount]
+
 theorem forallElimCertificateTree_missing_child_fails
     [DecidableEq Func] [DecidableEq Pred]
     (t : Credence) (τ : Term Func) :
@@ -100,6 +108,15 @@ theorem forallElimCertificateTree_missing_child_fails
   simp [checkFoundationCertificate, checkFoundationCertificateList,
     applyFoundationRule, FoundationRulePayload.childCount,
     FoundationRulePayload.code, FoundationRuleCode.childCount]
+
+theorem forallElimCertificateTree_missing_child_shape_fails
+    (τ : Term Func) :
+    (FoundationCertificateTree.node
+      (FoundationRulePayload.forallElim (Func := Func) (Pred := Pred) τ)
+      []).shapeOK = false := by
+  simp [FoundationCertificateTree.shapeOK,
+    FoundationRulePayload.childCount, FoundationRulePayload.code,
+    FoundationRuleCode.childCount]
 
 def equalitySubstitutionCertificateTree
     (τ υ : Term Func) (φ : Formula Func Pred) :
@@ -120,6 +137,14 @@ theorem equalitySubstitutionCertificateTree_checks
     applyFoundationRuleUnchecked, FoundationRulePayload.childCount,
     FoundationRulePayload.code, FoundationRuleCode.childCount]
 
+theorem equalitySubstitutionCertificateTree_shapeOK
+    (τ υ : Term Func) (φ : Formula Func Pred) :
+    (equalitySubstitutionCertificateTree τ υ φ).shapeOK = true := by
+  simp [equalitySubstitutionCertificateTree,
+    FoundationCertificateTree.shapeOK, FoundationCertificateTree.shapeOKList,
+    FoundationRulePayload.childCount, FoundationRulePayload.code,
+    FoundationRuleCode.childCount]
+
 theorem equalitySubstitutionCertificateTree_missing_child_fails
     [DecidableEq Func] [DecidableEq Pred]
     (t : Credence) (τ υ : Term Func) (φ : Formula Func Pred) :
@@ -133,6 +158,17 @@ theorem equalitySubstitutionCertificateTree_missing_child_fails
     applyFoundationRule, applyFoundationRuleUnchecked,
     FoundationRulePayload.childCount, FoundationRulePayload.code,
     FoundationRuleCode.childCount]
+
+theorem equalitySubstitutionCertificateTree_missing_child_shape_fails
+    (τ υ : Term Func) (φ : Formula Func Pred) :
+    (FoundationCertificateTree.node
+      (FoundationRulePayload.equalitySubst τ υ φ)
+      [.node
+        (FoundationRulePayload.hyp
+          [Formula.equal τ υ, Formula.instantiate τ φ]
+          (Formula.equal τ υ)) []]).shapeOK = false := by
+  simp [FoundationCertificateTree.shapeOK, FoundationRulePayload.childCount,
+    FoundationRulePayload.code, FoundationRuleCode.childCount]
 
 end Structure
 

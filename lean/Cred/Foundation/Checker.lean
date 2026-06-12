@@ -212,6 +212,34 @@ def FoundationCertificateTree.arityMatches
     (tree : FoundationCertificateTree Func Pred) : Prop :=
   tree.children.length = tree.childCount
 
+mutual
+
+def FoundationCertificateTree.shapeOK :
+    FoundationCertificateTree Func Pred → Bool
+  | .node payload children =>
+      (children.length == payload.childCount) &&
+        FoundationCertificateTree.shapeOKList children
+
+def FoundationCertificateTree.shapeOKList :
+    List (FoundationCertificateTree Func Pred) → Bool
+  | [] => true
+  | tree :: trees => tree.shapeOK && FoundationCertificateTree.shapeOKList trees
+
+end
+
+theorem FoundationCertificateTree.shapeOK_true_arityMatches
+    {tree : FoundationCertificateTree Func Pred}
+    (h : tree.shapeOK = true) :
+    tree.arityMatches := by
+  cases tree with
+  | node payload children =>
+      simp [FoundationCertificateTree.shapeOK,
+        FoundationCertificateTree.arityMatches,
+        FoundationCertificateTree.children,
+        FoundationCertificateTree.childCount,
+        FoundationCertificateTree.ruleCode] at h
+      exact h.left
+
 theorem FoundationCertificateTree.ruleName_roundtrip
     (tree : FoundationCertificateTree Func Pred) :
     FoundationRuleCode.ofName tree.ruleName = some tree.ruleCode := by
