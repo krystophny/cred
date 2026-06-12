@@ -60,7 +60,7 @@ theorem FoundationRulePayload.childCount_eq_code
     (payload : FoundationRulePayload Func Pred) :
     payload.childCount = payload.code.childCount := rfl
 
-def applyFoundationRule [DecidableEq Func] [DecidableEq Pred]
+def applyFoundationRuleUnchecked [DecidableEq Func] [DecidableEq Pred]
     (t : Credence) :
     FoundationRulePayload Func Pred →
       List (CheckedFoundationProof t Func Pred) →
@@ -162,6 +162,27 @@ def applyFoundationRule [DecidableEq Func] [DecidableEq Pred]
       else
         none
   | _, _ => none
+
+def applyFoundationRule [DecidableEq Func] [DecidableEq Pred]
+    (t : Credence)
+    (payload : FoundationRulePayload Func Pred)
+    (children : List (CheckedFoundationProof t Func Pred)) :
+    Option (CheckedFoundationProof t Func Pred) :=
+  if children.length = payload.childCount then
+    applyFoundationRuleUnchecked t payload children
+  else
+    none
+
+theorem applyFoundationRule_some_childCount
+    [DecidableEq Func] [DecidableEq Pred]
+    {t : Credence} {payload : FoundationRulePayload Func Pred}
+    {children : List (CheckedFoundationProof t Func Pred)}
+    {checked : CheckedFoundationProof t Func Pred}
+    (h : applyFoundationRule t payload children = some checked) :
+    children.length = payload.childCount := by
+  by_cases hcount : children.length = payload.childCount
+  · exact hcount
+  · simp [applyFoundationRule, hcount] at h
 
 inductive FoundationCertificateTree (Func : Type u) (Pred : Type v) where
   | node :

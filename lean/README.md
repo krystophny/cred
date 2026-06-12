@@ -110,6 +110,7 @@ lake build
 | `Foundation.Structure.FoundationRuleCode.childCount` | Trusted rule codes state the required number of checked children |
 | `Foundation.Structure.mem_trustedFoundationRules` | Every trusted foundation rule code is listed |
 | `Foundation.Structure.FoundationRulePayload.childCount_eq_code` | Rule payloads use the child count of their trusted code |
+| `Foundation.Structure.applyFoundationRule_some_childCount` | Successful rule application has the arity declared by its rule code |
 | `Foundation.Structure.applyFoundationRule` | One-step checker from rule payloads and checked children to typed certificates |
 | `Foundation.Structure.checkFoundationCertificate` | Recursive checker from certificate trees to typed certificates |
 

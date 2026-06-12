@@ -240,7 +240,9 @@ Foundation checker (from Foundation/Checker.lean):
 - `Structure.CheckedFoundationProof`
 - `Structure.FoundationRulePayload`
 - `FoundationRulePayload.code`, `FoundationRulePayload.childCount`
+- `applyFoundationRuleUnchecked`
 - `applyFoundationRule`
+- `applyFoundationRule_some_childCount`
 - `Structure.FoundationCertificateTree`
 - `checkFoundationCertificate`, `checkFoundationCertificateList`
 

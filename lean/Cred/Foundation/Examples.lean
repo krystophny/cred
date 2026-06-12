@@ -84,10 +84,12 @@ def forallElimCertificateTree (φ : Formula Func Pred) (τ : Term Func) :
 
 theorem forallElimCertificateTree_checks [DecidableEq Func] [DecidableEq Pred]
     (t : Credence) (φ : Formula Func Pred) (τ : Term Func) :
-    (checkFoundationCertificate t
+  (checkFoundationCertificate t
       (forallElimCertificateTree φ τ)).isSome := by
   simp [forallElimCertificateTree, checkFoundationCertificate,
-    checkFoundationCertificateList, applyFoundationRule]
+    checkFoundationCertificateList, applyFoundationRule,
+    applyFoundationRuleUnchecked, FoundationRulePayload.childCount,
+    FoundationRulePayload.code, FoundationRuleCode.childCount]
 
 def equalitySubstitutionCertificateTree
     (τ υ : Term Func) (φ : Formula Func Pred) :
@@ -101,10 +103,12 @@ def equalitySubstitutionCertificateTree
 theorem equalitySubstitutionCertificateTree_checks
     [DecidableEq Func] [DecidableEq Pred]
     (t : Credence) (τ υ : Term Func) (φ : Formula Func Pred) :
-    (checkFoundationCertificate t
+  (checkFoundationCertificate t
       (equalitySubstitutionCertificateTree τ υ φ)).isSome := by
   simp [equalitySubstitutionCertificateTree, checkFoundationCertificate,
-    checkFoundationCertificateList, applyFoundationRule]
+    checkFoundationCertificateList, applyFoundationRule,
+    applyFoundationRuleUnchecked, FoundationRulePayload.childCount,
+    FoundationRulePayload.code, FoundationRuleCode.childCount]
 
 end Structure
 
