@@ -105,6 +105,7 @@ lake build
 | `Foundation.Structure.equalitySymmetryCertificate`, `equalitySubstitutionCertificate` | Example foundation equality certificates |
 | `Foundation.Structure.forallElimCertificate`, `existsIntroCertificate` | Example foundation quantifier certificates |
 | `Foundation.Structure.forallElimCertificateTree_checks`, `equalitySubstitutionCertificateTree_checks` | Recursive checker examples that accept certificate trees |
+| `Foundation.Structure.forallElimCertificateTree_sound`, `equalitySubstitutionCertificateTree_sound` | Checked certificate tree examples yield sound foundation consequences |
 | `Foundation.Structure.forallElimCertificateTree_shapeOK`, `equalitySubstitutionCertificateTree_shapeOK` | Structural certificate precheck examples that accept well-formed trees |
 | `Foundation.Structure.forallElimCertificateTree_missing_child_fails`, `equalitySubstitutionCertificateTree_missing_child_fails` | Recursive checker examples that reject certificate trees with missing children |
 | `Foundation.Structure.forallElimCertificateTree_missing_child_shape_fails`, `equalitySubstitutionCertificateTree_missing_child_shape_fails` | Structural certificate precheck examples that reject missing children |
