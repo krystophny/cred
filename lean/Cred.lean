@@ -59,3 +59,4 @@ import Cred.Cromwell
 import Cred.CrossingOut
 import Cred.ReflectionTower
 import Cred.SeededSystem
+import Cred.Lindley
