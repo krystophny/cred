@@ -229,10 +229,15 @@ Foundation examples (from Foundation/Examples.lean):
 - `forallElimCertificateTree_checks_to`, `equalitySubstitutionCertificateTree_checks_to`
 - `forallElimCertificateTree_sound`, `equalitySubstitutionCertificateTree_sound`
 - `forallElimCertificateTree_shapeOK`, `equalitySubstitutionCertificateTree_shapeOK`
+- `forallElimCertificateTree_header_shapeOK`
+- `equalitySubstitutionCertificateTree_header_shapeOK`
 - `forallElimCertificateTree_missing_child_fails`
 - `equalitySubstitutionCertificateTree_missing_child_fails`
 - `forallElimCertificateTree_missing_child_shape_fails`
 - `equalitySubstitutionCertificateTree_missing_child_shape_fails`
+- `forallElimCertificateTree_missing_child_header_fails`
+- `equalitySubstitutionCertificateTree_missing_child_header_fails`
+- `unknownFoundationCertificateHeader_fails`
 - `equality_symmetry_certificate_sound`, `equality_substitution_certificate_sound`
 - `forall_elim_certificate_sound`, `exists_intro_certificate_sound`
 

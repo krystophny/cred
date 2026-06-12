@@ -108,8 +108,10 @@ lake build
 | `Foundation.Structure.forallElimCertificateTree_checks_to`, `equalitySubstitutionCertificateTree_checks_to` | Recursive checker examples with exact checked outputs |
 | `Foundation.Structure.forallElimCertificateTree_sound`, `equalitySubstitutionCertificateTree_sound` | Checked certificate tree examples yield sound foundation consequences |
 | `Foundation.Structure.forallElimCertificateTree_shapeOK`, `equalitySubstitutionCertificateTree_shapeOK` | Structural certificate precheck examples that accept well-formed trees |
+| `Foundation.Structure.forallElimCertificateTree_header_shapeOK`, `equalitySubstitutionCertificateTree_header_shapeOK` | Header examples that accept well-formed roots |
 | `Foundation.Structure.forallElimCertificateTree_missing_child_fails`, `equalitySubstitutionCertificateTree_missing_child_fails` | Recursive checker examples that reject certificate trees with missing children |
 | `Foundation.Structure.forallElimCertificateTree_missing_child_shape_fails`, `equalitySubstitutionCertificateTree_missing_child_shape_fails` | Structural certificate precheck examples that reject missing children |
+| `Foundation.Structure.forallElimCertificateTree_missing_child_header_fails`, `equalitySubstitutionCertificateTree_missing_child_header_fails`, `unknownFoundationCertificateHeader_fails` | Header examples that reject bad arity or unknown rule names |
 | `Foundation.Structure.FoundationRuleCode` | Trusted rule names for the foundation certificate checker boundary |
 | `Foundation.Structure.FoundationRuleCode.ofName_name` | Rule-code string names parse back to their source code |
 | `Foundation.Structure.FoundationRuleCode.childCount` | Trusted rule codes state the required number of checked children |
