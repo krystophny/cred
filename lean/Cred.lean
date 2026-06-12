@@ -77,6 +77,7 @@ import Cred.SelfRep
 import Cred.Foundation.Reflect
 import Cred.Foundation.CodeChecker
 import Cred.Foundation.Representability
+import Cred.Foundation.SigmaOne
 import Cred.Approx.Structure
 import Cred.Approx.Positivity
 import Cred.Approx.Simplex
