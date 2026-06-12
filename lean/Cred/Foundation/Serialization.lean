@@ -29,6 +29,18 @@ def SerializedFoundationHeader.decode
   else
     none
 
+def SerializedFoundationHeader.decodeForPayload
+    (header : SerializedFoundationHeader)
+    (payload : FoundationRulePayload Func Pred) :
+    Option FoundationCertificateHeader :=
+  match header.decode with
+  | some typed =>
+      if typed.matchesPayload payload then
+        some typed
+      else
+        none
+  | none => none
+
 theorem SerializedFoundationHeader.decode_ofRuleCode
     (code : FoundationRuleCode) :
     (SerializedFoundationHeader.mk code.name code.childCount).decode =
@@ -83,6 +95,47 @@ theorem SerializedFoundationHeader.decode_some_childCount
     header.childCount = code.childCount :=
   FoundationCertificateHeader.childCount_eq_of_shapeOK hcode
     (SerializedFoundationHeader.decode_some_shapeOK h)
+
+theorem SerializedFoundationHeader.decodeForPayload_payload_header
+    (payload : FoundationRulePayload Func Pred) :
+    (SerializedFoundationHeader.mk
+      payload.code.name payload.childCount).decodeForPayload payload =
+        some payload.header := by
+  cases payload <;> rfl
+
+theorem SerializedFoundationHeader.decodeForPayload_some_decode
+    {raw : SerializedFoundationHeader}
+    {payload : FoundationRulePayload Func Pred}
+    {header : FoundationCertificateHeader}
+    (h : raw.decodeForPayload payload = some header) :
+    raw.decode = some header := by
+  unfold SerializedFoundationHeader.decodeForPayload at h
+  cases hdecode : raw.decode with
+  | none =>
+      simp [hdecode] at h
+  | some typed =>
+      by_cases hmatch : typed.matchesPayload payload = true
+      · simp [hdecode, hmatch] at h
+        subst header
+        rfl
+      · simp [hdecode, hmatch] at h
+
+theorem SerializedFoundationHeader.decodeForPayload_some_matchesPayload
+    {raw : SerializedFoundationHeader}
+    {payload : FoundationRulePayload Func Pred}
+    {header : FoundationCertificateHeader}
+    (h : raw.decodeForPayload payload = some header) :
+    header.matchesPayload payload = true := by
+  unfold SerializedFoundationHeader.decodeForPayload at h
+  cases hdecode : raw.decode with
+  | none =>
+      simp [hdecode] at h
+  | some typed =>
+      by_cases hmatch : typed.matchesPayload payload = true
+      · simp [hdecode, hmatch] at h
+        cases h
+        exact hmatch
+      · simp [hdecode, hmatch] at h
 
 end Structure
 

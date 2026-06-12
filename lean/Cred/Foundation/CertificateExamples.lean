@@ -82,6 +82,18 @@ theorem serialized_bad_arity_header_fails :
     (SerializedFoundationHeader.mk "forallElim" 0).decode = none := by
   rfl
 
+theorem serialized_header_decodes_for_matching_payload
+    (τ : Term Func) :
+    (SerializedFoundationHeader.mk "forallElim" 1).decodeForPayload
+        (.forallElim τ : FoundationRulePayload Func Pred) =
+      some (FoundationCertificateHeader.ofRuleCode .forallElim) := by
+  rfl
+
+theorem serialized_header_fails_for_wrong_payload :
+    (SerializedFoundationHeader.mk "forallElim" 1).decodeForPayload
+        (.conjElimLeft : FoundationRulePayload Func Pred) = none := by
+  rfl
+
 end Structure
 
 end Foundation

@@ -317,12 +317,16 @@ Foundation certificate envelopes (from Foundation/Certificate.lean):
 - `forallElimEnvelope_bad_header_localShapeFails`
 - `forallElimEnvelope_bad_header_fails`
 - `SerializedFoundationHeader.decode`
+- `SerializedFoundationHeader.decodeForPayload`
 - `SerializedFoundationHeader.decode_some_shapeOK`
 - `SerializedFoundationHeader.decode_none_of_unknown`
 - `SerializedFoundationHeader.decode_none_of_bad_childCount`
+- `SerializedFoundationHeader.decodeForPayload_payload_header`
+- `SerializedFoundationHeader.decodeForPayload_some_matchesPayload`
 - `serialized_forall_elim_header_decodes`
 - `serialized_unknown_header_fails`
 - `serialized_bad_arity_header_fails`
+- `serialized_header_fails_for_wrong_payload`
 
 ## Philosophy
 
