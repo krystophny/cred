@@ -91,6 +91,19 @@ theorem forallElimCertificateTree_checks [DecidableEq Func] [DecidableEq Pred]
     applyFoundationRuleUnchecked, FoundationRulePayload.childCount,
     FoundationRulePayload.code, FoundationRuleCode.childCount]
 
+theorem forallElimCertificateTree_checks_to
+    [DecidableEq Func] [DecidableEq Pred]
+    (t : Credence) (φ : Formula Func Pred) (τ : Term Func) :
+    checkFoundationCertificate t (forallElimCertificateTree φ τ) =
+      some (CheckedFoundationProof.mk
+        [Formula.forallE φ] (Formula.instantiate τ φ)
+        (forallElimCertificate t φ τ)) := by
+  simp [forallElimCertificateTree, checkFoundationCertificate,
+    checkFoundationCertificateList, applyFoundationRule,
+    applyFoundationRuleUnchecked, FoundationRulePayload.childCount,
+    FoundationRulePayload.code, FoundationRuleCode.childCount,
+    forallElimCertificate]
+
 theorem forallElimCertificateTree_sound
     [DecidableEq Func] [DecidableEq Pred]
     (t : Credence) (φ : Formula Func Pred) (τ : Term Func) :
@@ -101,12 +114,7 @@ theorem forallElimCertificateTree_sound
     (checked := CheckedFoundationProof.mk
       [Formula.forallE φ] (Formula.instantiate τ φ)
       (forallElimCertificate t φ τ))
-    (by
-      simp [forallElimCertificateTree, checkFoundationCertificate,
-        checkFoundationCertificateList, applyFoundationRule,
-        applyFoundationRuleUnchecked, FoundationRulePayload.childCount,
-        FoundationRulePayload.code, FoundationRuleCode.childCount,
-        forallElimCertificate])
+    (forallElimCertificateTree_checks_to t φ τ)
 
 theorem forallElimCertificateTree_shapeOK
     (φ : Formula Func Pred) (τ : Term Func) :
@@ -154,6 +162,21 @@ theorem equalitySubstitutionCertificateTree_checks
     applyFoundationRuleUnchecked, FoundationRulePayload.childCount,
     FoundationRulePayload.code, FoundationRuleCode.childCount]
 
+theorem equalitySubstitutionCertificateTree_checks_to
+    [DecidableEq Func] [DecidableEq Pred]
+    (t : Credence) (τ υ : Term Func) (φ : Formula Func Pred) :
+    checkFoundationCertificate t
+      (equalitySubstitutionCertificateTree τ υ φ) =
+      some (CheckedFoundationProof.mk
+        [@Formula.equal Func Pred τ υ, Formula.instantiate τ φ]
+        (Formula.instantiate υ φ)
+        (equalitySubstitutionCertificate t τ υ φ)) := by
+  simp [equalitySubstitutionCertificateTree, checkFoundationCertificate,
+    checkFoundationCertificateList, applyFoundationRule,
+    applyFoundationRuleUnchecked, FoundationRulePayload.childCount,
+    FoundationRulePayload.code, FoundationRuleCode.childCount,
+    equalitySubstitutionCertificate]
+
 theorem equalitySubstitutionCertificateTree_sound
     [DecidableEq Func] [DecidableEq Pred]
     (t : Credence) (τ υ : Term Func) (φ : Formula Func Pred) :
@@ -166,12 +189,7 @@ theorem equalitySubstitutionCertificateTree_sound
       [@Formula.equal Func Pred τ υ, Formula.instantiate τ φ]
       (Formula.instantiate υ φ)
       (equalitySubstitutionCertificate t τ υ φ))
-    (by
-      simp [equalitySubstitutionCertificateTree, checkFoundationCertificate,
-        checkFoundationCertificateList, applyFoundationRule,
-        applyFoundationRuleUnchecked, FoundationRulePayload.childCount,
-        FoundationRulePayload.code, FoundationRuleCode.childCount,
-        equalitySubstitutionCertificate])
+    (equalitySubstitutionCertificateTree_checks_to t τ υ φ)
 
 theorem equalitySubstitutionCertificateTree_shapeOK
     (τ υ : Term Func) (φ : Formula Func Pred) :
