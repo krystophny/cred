@@ -83,9 +83,11 @@ consequence (`checkBool_true_sound`), and `checkBool exampleTree = true` holds b
 `rfl` depending only on `propext`. `Main.lean` runs it: `lake env lean --run
 Main.lean` prints the verdict. So the runtime trusted base for the checker is the
 small structural `checkBool`, with no reals; soundness stays certified in Lean.
-The native binary `lake exe cred` builds, but its execution on this host is
-blocked by a Lean-v4.16-toolchain versus newer-macOS `dyld` segment-flag
-mismatch, an environment issue that resolves on a compatible toolchain or OS.
+The native binary `lake exe cred` builds and runs: linking with
+`-Wl,-no_data_const` (in `lakefile.toml`) omits the `__DATA_CONST` segment that
+the newer macOS `dyld` rejected, so `./.lake/build/bin/cred` prints the real-free
+verdict (`checkBool exampleTree = true`, exit 0). The runtime trusted base for
+the executable is the structural `checkBool`, with no reals.
 
 ## Architecture decision: the proof assistant
 
@@ -116,6 +118,4 @@ Remaining, genuine multi-session research:
 - the internal Dedekind completion of the rational value algebra to the full unit
   interval, with completeness for the inf/sup quantifiers;
 - the second-incompleteness boundary via full arithmetic representability of the
-  provability predicate;
-- a runnable native binary on this host (a toolchain/OS update; the checker is
-  already real-free and runs via the evaluator).
+  provability predicate.
