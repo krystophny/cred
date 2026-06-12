@@ -403,6 +403,30 @@ a topological summary of a filtration, stable under input perturbation
 \cite{edelsbrunner2010}, the kind of structural status these readings are built to
 record.
 
+\section{Arithmetic and analysis with graded status}
+\label{sec:ordinary-math}
+
+The status scale also reads ordinary mathematics. A theorem of arithmetic or analysis is certain on its crisp content and drops to a lower status exactly where it leans on a branch the evidence does not fix. The four modules \texttt{Cred/Math/} make this concrete: naturals, reals, metric limits, and a robustness audit, each machine-checked.
+
+\subsection{Naturals and reals at certainty}
+
+Equality of naturals is scored crisply by \texttt{natEqScore}, which is $1$ when the two numbers agree and $0$ otherwise. The defining laws hold at certainty: $0 + n = n$ and $n + 0 = n$ score $1$ (\texttt{add\_zero\_left\_certain}, \texttt{add\_zero\_right\_certain}), the successor is injective at certainty (\texttt{succ\_inj\_certain}), and $3 \le 7$ scores $1$ (\texttt{three\_lt\_seven\_certain}). Equality is exactly preserved in the sense of Section~\ref{sec:structure-preservation}: \texttt{exactPreserves\_natEq}. The reals behave the same way through \texttt{realScore}: reflexivity of $\le$, $a + 0 = a$, $a \cdot 1 = a$, and $a^2 \ge 0$ all score $1$ (\texttt{le\_refl\_certain}, \texttt{add\_zero\_certain}, \texttt{mul\_one\_certain}, \texttt{sq\_nonneg\_certain}). The crisp fragment of standard mathematics sits at the top of the scale, where structure degree equals $1$.
+
+\subsection{Limits agree with the standard ones}
+
+Closeness is graded: \texttt{cClose}\,$x\,y$ is a credence that is $1$ exactly when $x = y$ (\texttt{cClose\_eq\_one\_iff}), symmetric (\texttt{cClose\_comm}), and orders the way a metric does (\texttt{le\_cClose\_iff}). A graded limit \texttt{TLimit} asks the closeness of $f(n)$ to $L$ to clear every threshold below $1$ eventually. This is not a weaker notion: it coincides with the mathlib limit.
+
+\begin{theorem}[Graded limits are the standard limits]
+\label{thm:tlimit}
+For every sequence $f$ and value $L$, \texttt{TLimit}\,$f\,L$ at all thresholds holds iff $f \to L$ in the usual sense: \texttt{tlimit\_all\_iff\_tendsto}. The worked case $1/n \to 0$ holds on both sides: \texttt{tendsto\_one\_div\_of\_tlimit} and \texttt{one\_div\_tlimit\_and\_classical}.
+\end{theorem}
+
+The graded layer adds vocabulary, not a new analysis. A limit statement is certain; an approximation at a fixed tolerance is a threshold statement on the same scale.
+
+\subsection{A robustness audit}
+
+A statement is \emph{robust} when it stays certain across every admissible branch of an audit, where a branch assigns a credence to each atom and admissibility rules out the inconsistent ones. Crisp logic is robust: excluded middle scores $1$ on every crisp branch (\texttt{excluded\_middle\_certain\_crisp}) and so is robust (\texttt{excluded\_middle\_robust}). A choice-style audit is not: its verdict depends on the branch (\texttt{choice\_audit\_branch\_dependent}) and so fails robustness (\texttt{choice\_not\_robust}). Inconsistent premises are inadmissible rather than explosive (\texttt{inconsistent\_inadmissible}), and the audit verdicts partition cleanly: a statement is robust, branch-dependent, or inadmissible, never two at once (\texttt{audit\_verdicts\_exclusive}). The audit is the status language applied to mathematics itself: a result certain in every admissible branch is robust, one that turns on an extra posit is branch-dependent, and the audit records which.
+
 \section{Positioning and what is genuinely new}
 
 A symplectic Euler step on the harmonic oscillator preserves a discrete energy for arbitrarily long times, while explicit Euler grows the norm by a factor of $1 + h^2$ each step. Both schemes have local value error of order $h^2$. The long-time difference is structural, not a matter of accuracy. Geometric integration explained this decades ago, and it did not need credences to do so. We state the boundary plainly: this paper invents none of that mathematics.
