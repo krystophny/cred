@@ -109,13 +109,17 @@ Done since the first draft: completeness and cut admissibility for the labelled
 calculus (`Completeness.lean`, `CutElim.lean`); the value algebra abstracted
 (`Algebra.lean`) and constructed off the reals on the rational unit interval
 (`Algebra/Rational.lean`); the minimal kernel (`MinimalKernel.lean`); the
-self-representation substrate (`SelfRep.lean`); and a real-free executable checker
-(`CheckBool.lean`, above).
+self-representation substrate (`SelfRep.lean`); a real-free executable checker
+(`CheckBool.lean`, above) that runs as a native binary; the code-level checker
+that runs on the system's own Goedel codes and coincides with the verified checker
+(`CodeChecker.lean`, `Reflect.lean`); the completion of the rational value algebra
+to the complete hosted interval, with density and quantifier completeness reused
+from mathlib (`Algebra/Completion.lean`); and the recursion-theoretic
+representability of provability, a total computable decision
+(`Representability.lean`).
 
-Remaining, genuine multi-session research:
-- the full reflective self-checker: a code-level checker function that does not
-  call the meta checker, with a coincidence proof (Stage 4b);
-- the internal Dedekind completion of the rational value algebra to the full unit
-  interval, with completeness for the inf/sup quantifiers;
-- the second-incompleteness boundary via full arithmetic representability of the
-  provability predicate.
+Remaining, the genuinely deeper classical formalization, beyond what mathlib
+provides off the shelf:
+- a PA-internal Sigma-1 arithmetic formula representing provability inside the
+  object language (the recursion-theoretic representability above is in place; the
+  object-language arithmetization is the classical second-incompleteness lift).
