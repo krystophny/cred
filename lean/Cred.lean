@@ -77,3 +77,11 @@ import Cred.SelfRep
 import Cred.Foundation.Reflect
 import Cred.Foundation.CodeChecker
 import Cred.Foundation.Representability
+import Cred.Approx.Structure
+import Cred.Approx.Positivity
+import Cred.Approx.Simplex
+import Cred.Approx.Monotonicity
+import Cred.Approx.MaxPrinciple
+import Cred.Approx.NormCircle
+import Cred.Approx.Invariant
+import Cred.Approx.FirstIntegral
