@@ -104,6 +104,18 @@ the newer macOS `dyld` rejected, so `./.lake/build/bin/cred` prints the real-fre
 verdict (`checkBool exampleTree = true`, exit 0). The runtime trusted base for
 the executable is the structural `checkBool`, with no reals.
 
+The binary is a usable certificate checker, not a fixed example. `cred check
+FILE` reads a single decimal Goedel code of a foundation certificate, decodes it
+with the fuel-bounded `checkCode` path, and exits 0 (accepted), 1 (rejected), or
+2 (malformed input); `cred check --explain FILE` prints the decoded root rule and
+verdict; `cred examples` emits a bundled accepted code. The accepting verdict is
+sound for any code: `checkCodeNat_sound` (from the general `checkCode_true_sound`)
+proves that a `true` recovers a verified `CheckedFoundationProof` and its
+threshold consequence, and under-fuel can only reject, never falsely accept. The
+behavioral test suite `lean/test/checker_cli_test.sh` (target `make
+checker-test`) covers the accept, reject, malformed, missing-file, and usage
+paths.
+
 ## Architecture decision: the proof assistant
 
 Decision: formulate inside Lean as a deep embedding (the current state), grow a

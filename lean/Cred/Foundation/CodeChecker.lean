@@ -704,6 +704,60 @@ theorem exampleCode_sound :
     idDecode_id idDecode_id (1 : Credence) (treeSize exampleTree)
     exampleTree (Nat.le_refl _) checkCode_exampleCode
 
+/-! ## General soundness on arbitrary codes, and a CLI-facing checker
+
+The soundness above is stated for codes of the form `gnumTree gf gp tree`. For a
+usable command-line artifact the input is an arbitrary natural number, so the
+guarantee must hold for any code: whatever a code decodes to, an accepting verdict
+recovers a verified certificate. Under-fuel can only make `decodeTree` fail and the
+verdict reject, never falsely accept, so the soundness is fuel-independent. -/
+
+/-- An accepting verdict on any code recovers the decoded tree together with a
+    verified certificate and its object-level consequence at threshold `t`. -/
+theorem checkCode_true_sound [DecidableEq Func] [DecidableEq Pred]
+    (df : Nat → Option Func) (dp : Nat → Option Pred)
+    (t : Credence) (fuel n : Nat)
+    (h : checkCode df dp fuel n = true) :
+    ∃ tree : FoundationCertificateTree Func Pred,
+      decodeTree df dp fuel n = some tree ∧
+      ∃ checked : CheckedFoundationProof t Func Pred,
+        checkFoundationCertificate t tree = some checked ∧
+        FoundationThresholdConsequence.{u, v, w} t
+          checked.premises checked.conclusion := by
+  rw [checkCode] at h
+  split at h
+  next tree heq => exact ⟨tree, heq, checkBool_true_sound t tree h⟩
+  next => exact Bool.noConfusion h
+
+/-- CLI-facing checker on a raw code: identity numbering on `Nat`, fuel set to the
+    code itself. Over-fuel is harmless, under-fuel only rejects. -/
+def checkCodeNat (code : Nat) : Bool := checkCode idDecode idDecode code code
+
+/-- The command-line verdict is sound: an accepting `checkCodeNat` recovers a
+    verified certificate and the threshold-`1` consequence it certifies. -/
+theorem checkCodeNat_sound (code : Nat) (h : checkCodeNat code = true) :
+    ∃ tree : FoundationCertificateTree Nat Nat,
+      decodeTree idDecode idDecode code code = some tree ∧
+      ∃ checked : CheckedFoundationProof (1 : Credence) Nat Nat,
+        checkFoundationCertificate (1 : Credence) tree = some checked ∧
+        FoundationThresholdConsequence.{0, 0, w} (1 : Credence)
+          checked.premises checked.conclusion :=
+  checkCode_true_sound idDecode idDecode (1 : Credence) code code h
+
+/-- A human-readable verdict for the `--explain` mode of the CLI. -/
+def explainCode (code : Nat) : String :=
+  match decodeTree idDecode idDecode code code with
+  | some tree =>
+      if checkBool tree then
+        s!"accepted: root rule {tree.ruleName}, {tree.childCount} child(ren)"
+      else
+        s!"rejected: decoded to rule {tree.ruleName} but the checker rejected it"
+  | none => "rejected: code did not decode within fuel"
+
+-- The CLI checker accepts the bundled example code, by computation.
+#eval checkCodeNat exampleCode
+#eval explainCode exampleCode
+
 end Structure
 end Foundation
 end Cred

@@ -1,9 +1,12 @@
-.PHONY: all lean part1 part2 part3 part4 part5 part6 part7 clean
+.PHONY: all lean checker-test part1 part2 part3 part4 part5 part6 part7 clean
 
 all: lean part1 part2 part3 part4 part5 part6 part7
 
 lean:
 	cd lean && lake build
+
+checker-test:
+	bash lean/test/checker_cli_test.sh
 
 part1: part1/paper.pdf
 
