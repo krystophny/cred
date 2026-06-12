@@ -63,6 +63,7 @@ import Cred.Lindley
 import Cred.Algebra
 import Cred.Coherence
 import Cred.SelfValidation
+import Cred.MetaBootstrap
 import Cred.MinimalKernel
 import Cred.Completeness
 import Cred.CutElim
