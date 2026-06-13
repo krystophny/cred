@@ -1,5 +1,5 @@
 /-
-  Cred Cond: Bayes Consistency and Copula Uniqueness on [0,1]
+  Cred Cond: Bayes Consistency and Dependence Policies on [0,1]
 
   PAPER CROSS-REFERENCES (part1/paper.tex):
   -----------------------------------------
@@ -22,9 +22,13 @@ namespace Cred
 
 /-! ## Bayes Consistency on [0,1]
 
-Formalizes the paper's pen-and-paper proofs: product residuated Bayes
-consistency, Gödel failure on the continuum, copula connection, and
-t-norm conditioning uniqueness.
+Formalizes the paper's pen-and-paper proofs: product-residuated Bayes
+consistency, Gödel failure on the continuum, the copula/dependence boundary,
+and t-norm conditioning uniqueness.
+
+Terminology discipline: a t-norm or truth-functional joint is a fixed coupling
+policy on scalar values.  General probability does not fix the joint from the
+marginals; it supplies event/proposition-specific dependence data.
 -/
 
 namespace Credence
@@ -70,8 +74,9 @@ theorem godel_not_bayes_consistent_real :
 
 end Credence
 
-/-- Any symmetric function yields a Bayes-consistent arrow
-    when both marginals are positive (copula connection) -/
+/-- Any symmetric scalar coupling gives a Bayes-consistent arrow when both
+    marginals are positive.  This is a value-level coupling statement, not a
+    claim that probability joints are truth-functional in general. -/
 theorem symmetric_bayes_consistent (C : ℝ → ℝ → ℝ)
     (hsymm : ∀ x y, C x y = C y x)
     (a b : Credence) (ha : a.val ≠ 0) (hb : b.val ≠ 0) :
@@ -126,14 +131,21 @@ theorem rm3_not_bayes_consistent_real :
   simp only [rm3_impl_real, Credence.half_val, Credence.zero_val]
   norm_num
 
-/-! ## Maximum Dependence (Min Copula) and Independence (Product)
+/-! ## Fixed scalar couplings: max dependence (min) and independence (product)
 
-The following theorems formalize the key uniqueness results from Part 1:
-- min_bayes_consistent: The min copula is Bayes consistent
-- prod_trivial_conditioning: Product (independence) gives trivial conditioning
+The following theorems formalize the boundary between truth-functional fuzzy
+connectives and probability-style dependence:
+- min_bayes_consistent: the min coupling is Bayes-consistent;
+- prod_trivial_conditioning: the product coupling is independence and gives
+  trivial conditioning;
+- the uniqueness results below say that if one insists on one idempotent,
+  symmetric, copula-like scalar joint function for all proposition pairs, then
+  the coupling is forced to be min.
 
-These complete the proof that maximum dependence (min) is the unique truth-functional
-joint that is both Bayes-consistent AND non-trivial.
+This is not a statement that general copulas collapse to min.  It is a warning
+that probability-style reasoning requires abandoning truth-functionality: the
+joint must be allowed to depend on the events/propositions, not only on their
+marginal scalar values.
 -/
 
 /-- Min copula is Bayes consistent: min(a,b)/a * a = min(b,a)/b * b.
@@ -159,14 +171,17 @@ theorem min_nontrivial_conditioning :
   · simp only [Credence.quarter_val, Credence.half_val]
     norm_num
 
-/-! ## Uniqueness of Min Copula
+/-! ## Uniqueness of the idempotent scalar copula-like joint
 
-The following theorems prove that the min copula is the UNIQUE function satisfying
-symmetry (Bayes consistency), idempotence, boundary conditions, and the 2-increasing
-property of copulas.
+The following theorems prove that min is the unique scalar function satisfying
+symmetry, idempotence, boundary conditions, and the 2-increasing copula
+condition.  This is a truth-functionality boundary, not a denial of the rich
+family of probabilistic copulas.
 
-This answers the question: "Is there a family of copulas between independence and
-max-dependence that satisfies all our requirements?" The answer is NO - min is unique.
+Correct reading: no intermediate scalar truth-function for conjunction can be
+both idempotent and copula-like under these assumptions.  To represent general
+probabilistic dependence, do not use a single function ℝ × ℝ → ℝ for every pair;
+supply the joint on propositions/events.
 -/
 
 /-- The 2-increasing property for a joint function.
@@ -200,7 +215,7 @@ theorem symmetric_idempotent_2incr_ge_min (j : ℝ → ℝ → ℝ)
 
 /-- Main uniqueness theorem: If j is symmetric, idempotent, has zero boundary,
     is bounded above by min, and is 2-increasing, then j = min.
-    This proves min is the UNIQUE copula-like function with these properties. -/
+    This proves min is the unique scalar copula-like function with these properties. -/
 theorem min_copula_unique (j : ℝ → ℝ → ℝ)
     (hsymm : ∀ a b, j a b = j b a)
     (hidemp : ∀ a, j a a = a)
@@ -232,10 +247,10 @@ theorem copula_frechet_upper (j : ℝ → ℝ → ℝ)
     simp only [hone_left b hb hb', hzero_right] at h
     linarith
 
-/-- Corollary: No intermediate copula between independence and max-dependence
-    can satisfy both idempotence and the copula axioms.
-    Specifically, if j(a,a) = a and j is a valid copula, then j = min.
-    Independence (product) fails idempotence; other copulas fail to equal min. -/
+/-- Corollary: No intermediate scalar copula-like truth function between
+    independence and max-dependence can satisfy both idempotence and the copula axioms.
+    Specifically, if j(a,a) = a and j is a scalar copula-like function, then j = min.
+    Independence (product) fails idempotence except at Boolean values. -/
 theorem no_intermediate_idempotent_copula (j : ℝ → ℝ → ℝ)
     (hsymm : ∀ a b, j a b = j b a)
     (hidemp : ∀ a, j a a = a)
@@ -252,16 +267,14 @@ theorem no_intermediate_idempotent_copula (j : ℝ → ℝ → ℝ)
 
 /-! ## Mixed Dependence Structures
 
-Can we mix dependence structures - e.g., use independence for some pairs and
-max-dependence for others? This would mean the joint function j depends not
-just on the marginal VALUES but also on WHICH propositions are involved.
+Can we mix dependence structures -- e.g. use independence for some pairs and
+max-dependence for others?  Yes, but then the joint depends not just on the
+marginal VALUES but also on WHICH propositions are involved.
 
-Theorem: If we allow different j for different pairs, we lose truth-functionality.
-The joint becomes a function j : Prop × Prop → ℝ (not just ℝ × ℝ → ℝ).
-This is exactly the probability-style approach where P(A∧B) depends on
-the specific events A and B, not just P(A) and P(B).
+This is the probability-style approach: P(A∧B) depends on the specific events
+A and B, not just P(A) and P(B).  It is exactly what truth-functionality forbids.
 
-The following theorem shows that if we want the SAME j for all pairs
+The following theorem shows that if we want the SAME scalar j for all pairs
 (truth-functionality), then Bayes consistency + idempotence forces j = min.
 -/
 
@@ -284,12 +297,14 @@ theorem truth_functional_forces_min :
 
 /-! ## World Partitioning: Independence Between Worlds
 
-We now analyze the possibility of partitioning propositions into "worlds"
-with different dependence structures. Key results:
+We analyze value-level partitioning of proposition pairs into dependence classes.
+The key results are:
 
-1. Independence (product) WITHIN a world forces credences to {0,1} (classical logic)
-2. Independence BETWEEN worlds is consistent but trivializes cross-world inference
-3. Max-dependence (min) within worlds with any copula between worlds is consistent
+1. Product/independence WITHIN a self-pair world forces credences to {0,1}, because
+   idempotence j(a,a)=a conflicts with product j(a,a)=a² away from the boundary.
+2. Product/independence BETWEEN worlds is consistent but trivializes cross-world inference.
+3. If one insists on a single truth-functional idempotent scalar joint within a world,
+   max-dependence (min) is forced by the copula-like assumptions.
 -/
 
 /-- Independence within a world forces classical credences.
@@ -319,8 +334,8 @@ theorem cross_world_independence_trivial (a b : ℝ) (hb : b ≠ 0) :
     (a * b) / b = a := by
   field_simp
 
-/-- Max-dependence within world is forced by idempotence + copula axioms.
-    This is just a restatement connecting to the world-partitioning interpretation. -/
+/-- Max-dependence within a truth-functional scalar world is forced by
+    idempotence + copula-like assumptions. -/
 theorem within_world_max_dependence_forced (j : ℝ → ℝ → ℝ)
     (hsymm : ∀ a b, j a b = j b a)
     (hidemp : ∀ a, j a a = a)
@@ -330,35 +345,32 @@ theorem within_world_max_dependence_forced (j : ℝ → ℝ → ℝ)
     ∀ a b, 0 ≤ a → 0 ≤ b → j a b = min a b :=
   min_copula_unique j hsymm hidemp hzero hupper h2incr
 
-/-! ## Probability as Foundation of Mathematics
+/-! ## Probability as dependence-enriched logic
 
-Can probability serve as the foundation for mathematical reasoning?
-The key issue is how to consistently assign joint probabilities.
+Can probability serve as a generalization of logical reasoning?  The key issue
+is how to assign joint probabilities.
 
-1. Standard probability: P(A∧B) depends on the SPECIFIC propositions A, B
-   (not just P(A) and P(B)). This is exactly what truth-functionality forbids.
+1. Standard probability: P(A∧B) depends on the SPECIFIC propositions/events A, B
+   (not just P(A) and P(B)).  This is exactly what truth-functionality forbids.
 
-2. To use probability for math, we'd need consistent joint assignments.
-   For mathematical propositions, we expect:
-   - P(A|A) = 1 (tautological self-implication)
-   - P(A∧A) = P(A) (idempotence of conjunction)
-   - The second forces product copula out: P(A)² = P(A) only at {0,1}
+2. If one insists on a value-only truth-functional conjunction for mathematical
+   propositions, idempotence P(A∧A)=P(A) rules out the product coupling except at
+   Boolean values, because P(A)²=P(A) only for {0,1}.
 
-3. If we want credences strictly between 0 and 1 for mathematical propositions,
-   we MUST use max-dependence (min copula) within the mathematical world.
+3. Under the scalar copula-like assumptions above, idempotence forces the min
+   coupling.  That identifies the maximally dependent truth-functional boundary,
+   not the full probabilistic setting.
 
-4. The Fréchet bounds provide the only consistent framework:
-   - Upper bound: j(a,b) ≤ min(a,b)
-   - Lower bound: j(a,b) ≥ max(0, a+b-1)
-   - With idempotence, upper bound is tight: j(a,b) = min(a,b)
+4. To move toward probability-as-logic, free the joint from truth-functionality:
+   supply J(A,B) as dependence data, subject to Fréchet/coherence constraints.
 -/
 
 /-- Probability-style reasoning requires abandoning truth-functionality.
     If we want j to vary based on proposition pairs (not just values),
     then j is a function on Prop × Prop, not ℝ × ℝ.
 
-    This theorem shows that ANY truth-functional approach with idempotence
-    must use min, regardless of attempts at partitioning. -/
+    This theorem shows that any truth-functional scalar approach with idempotence
+    and the stated copula-like assumptions must use min. -/
 theorem truth_functional_idempotent_implies_max_dependence :
     ∀ j : ℝ → ℝ → ℝ,
       (∀ a, j a a = a) →              -- Idempotence (mathematical world requirement)
