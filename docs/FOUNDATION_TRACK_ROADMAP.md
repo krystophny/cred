@@ -191,6 +191,12 @@ in n dimensions; the differential-geometric superstructure above it is future.
   and symplectic layers. NOT general Hamiltonian mechanics (abstract symplectic
   form, Hamilton's equations for general H, Poisson brackets, Liouville) -- those
   need symplectic-form infrastructure mathlib does not yet provide.
+- Diffeomorphism layer (real, not a seed): `Cred/Topology/DiffeoLayer.lean`.
+  `diffeoStatus_eq_one_iff` recovers a mathlib `Diffeomorph` witness (smooth iso),
+  completing the smooth-map layer (ContMDiff = morphisms, Diffeomorph = isos):
+  forward and inverse `ContMDiff` (`diffeoStatus_contMDiff`,
+  `diffeoStatus_contMDiff_symm`), identity (`diffeoStatus_id`), continuous-linear-equiv
+  witness (`clmDiffeoStatus_eq_one`), composition closure (`diffeoStatus_comp`).
 - The recovery stops at mathlib's frontier. Differential forms, de Rham
   cohomology, connections, curvature, and integration on manifolds have NO
   mathlib target in this version, so a graded layer over them would be an

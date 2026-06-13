@@ -109,6 +109,7 @@ import Cred.Topology.Fuzzy
 import Cred.Topology.Manifold
 import Cred.Topology.ManifoldN
 import Cred.Topology.Differential
+import Cred.Topology.DiffeoLayer
 import Cred.Topology.IntegralCurveLayer
 import Cred.Topology.HamiltonianFlow
 import Cred.Topology.TangentBundleLayer

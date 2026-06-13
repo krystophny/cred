@@ -51,6 +51,7 @@ import Cred.Math.Dimension
 import Cred.Topology.Manifold
 import Cred.Topology.ManifoldN
 import Cred.Topology.Differential
+import Cred.Topology.DiffeoLayer
 import Cred.Topology.IntegralCurveLayer
 import Cred.Topology.HamiltonianFlow
 import Cred.Topology.TangentBundleLayer
@@ -187,6 +188,15 @@ import Cred.Probability.CoxUniqueness
 -- Quot.sound.
 #print axioms Cred.Differential.mdiffStatus_eq_one_iff
 #print axioms Cred.Differential.mdiffStatus_mdifferentiable
+
+-- Topology/DiffeoLayer: the diffeomorphism-status recovery -- the graded status
+-- of a map equals certainty iff it is the underlying map of a genuine Mathlib
+-- Diffeomorph (C^∞ smooth isomorphism), rounding out the smooth-map layer
+-- (ContMDiff = morphisms, Diffeomorph = isos); and the concrete identity witness
+-- via Diffeomorph.refl. Both ride the Credence carrier and Mathlib's Diffeomorph
+-- development. Measured: propext, Classical.choice, Quot.sound.
+#print axioms Cred.DiffeoLayer.diffeoStatus_eq_one_iff
+#print axioms Cred.DiffeoLayer.diffeoStatus_id
 
 -- Topology/TangentBundleLayer: the three tangent-bundle recoveries as statuses --
 -- the tangent bundle is a Mathlib smooth manifold (Bundle.TotalSpace.isManifold),

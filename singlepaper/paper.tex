@@ -2080,7 +2080,12 @@ map and of a constant the zero map.  On the model spaces the status
 reduces to ordinary Fr\'echet smoothness,
 $\mathrm{status}=1\iff\mathrm{ContDiff}\,\mathbb R\,\infty\,f$
 (\Lean{mdiffStatus\_modelMap\_eq\_one\_iff}), tying the manifold
-differential back to the analysis layer.
+differential back to the analysis layer.  The isomorphisms complete the
+map layer: a diffeomorphism status is $1$ iff $f$ is a mathlib
+\texttt{Diffeomorph} (\Lean{diffeoStatus\_eq\_one\_iff}), with the
+identity and composites diffeomorphisms and the inverse smooth
+(\Lean{diffeoStatus\_id}, \Lean{diffeoStatus\_comp},
+\Lean{diffeoStatus\_contMDiff\_symm}).
 
 \paragraph{Tangent bundle and sections.}
 The recovery reaches the bundle itself.  For a smooth manifold $M$ over
