@@ -21,8 +21,41 @@ or, classically, that $A\to B$ is valid.  The last formulation is useful
 but dangerous as prose: it internalizes a metalinguistic consequence
 relation as an object-language material conditional.
 
-Cred keeps the first two readings and rejects the third as a primitive.
-For a threshold $t$, the sequent is
+A safe informal reading is therefore:
+\[
+\boxed{\text{if $A$ is designated, then $B$ must be designated;
+if $A$ is not designated, this sequent imposes no constraint.}}
+\]
+For the classical two-valued case, ``designated'' means true.  Thus
+$A\models B$ checks only the rows in which $A$ is true.  Rows in which
+$A$ is false are irrelevant for this particular sequent.  This is the
+semantic reason why the material conditional can be used classically:
+$A\to B$ is true exactly when the forbidden row $A=1,B=0$ is absent.
+The danger is to read this internal formula as a genuine connection
+between $A$ and $B$ rather than as a compact encoding of a countermodel
+test.
+
+The same pattern has three useful value-level forms:
+\[
+\begin{array}{@{}lll@{}}
+\text{Boolean} & A,B\in\{0,1\}: & A\models B\iff
+  \text{no valuation has }A=1,\ B=0.\\[1mm]
+\text{Three-valued} & A,B\in\{0,\half,1\}: &
+  \text{choose designated values, e.g. }\{\half,1\}\text{ for LP or }\{1\}\text{ for K}_3.\\[1mm]
+\text{Continuous} & A,B\in[0,1]: & A\models_t B\iff
+  t\le\val{A}_v\Rightarrow t\le\val{B}_v\text{ for every }v.
+\end{array}
+\]
+In the three-valued case, the forbidden rows depend on the designation
+policy.  LP forbids a designated antecedent with an undesignated
+conclusion, so antecedent values $\half$ and $1$ both matter.  K$_3$
+forbids only a certain antecedent with a non-certain conclusion, so only
+antecedent value $1$ matters.  In the continuous case, the designation
+policy is a threshold: one inspects all valuations where $A$ reaches the
+chosen status $t$ and requires $B$ to reach the same status.
+
+Cred keeps these sequent readings and rejects the material conditional
+as a primitive.  For a threshold $t$, the sequent is
 \[
   A\models_t B
   \quad\Longleftrightarrow\quad
