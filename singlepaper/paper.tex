@@ -423,9 +423,12 @@ One might hope to compute the joint truth-functionally, $j=F(a,b)$.
 Two choices are natural: the product $F=ab$ and the minimum
 $F=\min(a,b)$.  Read as joints, the product is independence and the
 minimum is maximum positive dependence.  The product trivializes
-conditioning, since $ab/b=a$ leaves the evidence irrelevant; and among
-symmetric idempotent scalar joints satisfying the copula axioms the
-minimum is forced (\Lean{Cred.min\_copula\_unique},
+conditioning, since $ab/b=a$ leaves the evidence irrelevant.  The
+minimum is the other extreme, and it is forced once one asks for an
+idempotent coupling: idempotence pins the diagonal at $F(a,a)=a$, the
+Fr\'echet upper bound caps every copula at $\min(a,b)$, and the only
+copula whose diagonal already reaches that cap is the comonotone one
+$F=\min$ (\Lean{Cred.min\_copula\_unique},
 \Lean{Cred.truth\_functional\_forces\_min}).  So a single
 truth-functional $F(a,b)$ is never the general dependence: it is either
 independence or the comonotone extreme.  The joint
@@ -1892,7 +1895,7 @@ completeness, a provenance DAG over the object language, real analysis).
 What Cred adds is not a new truth table but a Lean-checked layer that names
 each commitment and recovers the classical one exactly.
 
-\section{Graded Structure Status}
+\section{Graded Structure Status and the Foundation Track}
 \label{sec:graded-structure}
 
 One pattern unifies fuzzy sets, structure-preserving numerics, and
@@ -1933,19 +1936,27 @@ $t$-cut recovers a classical set; for a crisp $\mu_A$ it is exactly $A$
 \label{fig:fuzzy-cut}
 \end{figure}
 
-\paragraph{Structure-preserving numerics.}
-A numerical scheme that preserves a structure exactly has degree $1$: a
-symplectic step keeps the form
-(\Lean{symplectic\_exact\_degree\_one}), and likewise a first integral
-and finite-volume mass (\texttt{Cred.Approx}; see the inventory).
-Near-preservation is reported by the residual-to-score recipe
-$\mathrm{score}_\varepsilon(r)=\max(0,1-r/\varepsilon)$
-(\Lean{scoreEps}: $\mathrm{score}_\varepsilon(0)=1$, $0$ at $r\ge\varepsilon$,
-antitone).  For the explicit Euler step the symplectic residual is
-$|\det-1|=h^2$, so the degree is below $1$ for any nonzero step and
-collapses to $0$ at the full step
-(\Lean{explicitEuler\_degree\_lt\_one}).  The degree is the conservation
-residual, not a label.
+\paragraph{Structure-preserving numerics: exact is canonical, near is
+recipe-relative.}
+Preservation of a structure is a yes/no predicate, and only the exact
+case is a canonical degree, namely $1$.  Symplecticity is the clean
+example.  A $2\times2$ map preserves the form iff $\det=1$
+(\Lean{symplectic\_iff\_det}), so its structure score is two-valued:
+$1$ exactly when the map is symplectic
+(\Lean{symplectic\_exact\_degree\_one}).  The semi-implicit Euler step
+scores $1$; the explicit step fails outright for every nonzero $h$
+(\Lean{explicitEulerMatrix\_not\_symplectic}, $\det=1+h^2$).  There is no
+intrinsic ``how symplectic'': a non-symplectic map is not partly
+symplectic.  What is genuinely graded is a \emph{residual}, a chosen
+defect $r$ (a form-deviation norm, an invariant drift) read through the
+recipe $\mathrm{score}_\varepsilon(r)=\max(0,1-r/\varepsilon)$
+(\Lean{scoreEps}).  That number depends on the chosen residual and
+tolerance $\varepsilon$; only its endpoints
+($r=0\Rightarrow1$, $r\ge\varepsilon\Rightarrow0$) and its ordering
+(\Lean{scoreEps\_antitone}) are recipe-independent.  It ranks defect
+under a named recipe; it is not a unique invariant.  The point sharpens
+above two dimensions, where volume preservation is strictly weaker than
+symplecticity, so no determinant-based number measures the form.
 
 \begin{figure}[h]
 \centering
@@ -1965,20 +1976,96 @@ and a tolerance.}
 \label{fig:score-ramp}
 \end{figure}
 
-\paragraph{Fractal dimension.}
-The Cantor set is a graded-structure benchmark with an exact value and a
-finite estimate.  Its similarity dimension is the unique Moran solution
-of $2\,(1/3)^s=1$, namely $s=\log 2/\log 3$
-(\Lean{cantor\_moran}, \Lean{cantor\_moran\_unique} in
-\texttt{Cred.Examples.Fractal}); at stage $k$ the box count is $2^k$ and
-the finite box-dimension estimate $\log(2^k)/\log(3^k)$ equals
-$\log2/\log3$ exactly (\Lean{box\_estimate\_eq\_dim}).  Exact
-self-similarity is degree $1$; coarser resolutions report a graded
-status.
+\paragraph{From metric to continuity, with exact recovery.}
+The same boundary discipline runs through analysis.  Read the real
+distance as a credence-valued closeness
+$\mathrm{cClose}(x,y)=1-\min(|x-y|,1)$, certain at coincidence and
+floored at unit distance.  A threshold $t<1$ gives a band of radius
+$1-t$, and $f$ is $t$-continuous at $x$ when its values stay eventually
+$t$-close to $f(x)$.  A single threshold is strictly coarser than
+continuity; the meet over all thresholds is exact:
+\[
+  \bigl(\forall t<1,\ \mathrm{TContinuousAt}\,f\,x\,t\bigr)
+  \iff \mathrm{ContinuousAt}\,f\,x
+\]
+(\Lean{tcontinuousAt\_all\_iff\_continuousAt}, globally
+\Lean{tcontinuous\_all\_iff\_continuous} in \texttt{Cred.Math}), the same
+recovery the limit notion has (\Lean{tlimit\_all\_iff\_tendsto}).
+Nothing graded survives the meet: the crisp fragment is exactly
+mathlib's \texttt{ContinuousAt}.
 
-This is a status layer over classical structures, recovering the
-classical predicate at degree $1$.  It is not a development of topology,
-differential geometry, or fractal geometry; the staged plan is in
+\begin{figure}[h]
+\centering
+\begin{tikzpicture}[x=3.1cm,y=3.1cm]
+  \draw[->] (-0.03,0) -- (1.18,0) node[right] {$y$};
+  \draw[->] (0,-0.03) -- (0,1.15) node[above] {$f(y)$};
+  % output band of radius 1-t around f(x)
+  \fill[red!10] (0,0.50) rectangle (1.12,0.74);
+  \node[red!60!black,right] at (1.12,0.62) {\footnotesize band $1-t$};
+  % induced input neighbourhood (delta)
+  \fill[blue!10] (0.42,0) rectangle (0.66,1.05);
+  \node[blue!60!black] at (0.54,1.10) {\footnotesize $\delta(t)$};
+  % curve
+  \draw[very thick] (0.04,0.18) .. controls (0.4,0.5) and (0.62,0.72) .. (1.06,0.96);
+  % point x, f(x)
+  \draw[dashed] (0.54,0) node[below] {$x$} -- (0.54,0.62);
+  \draw[dashed] (0,0.62) node[left] {$f(x)$} -- (0.54,0.62);
+  \fill (0.54,0.62) circle (0.6pt);
+\end{tikzpicture}
+\caption{Threshold continuity.  At threshold $t$ the output band has
+radius $1-t$ and pulls back to an input neighbourhood $\delta(t)$.  As
+$t\to1$ the band shrinks to $\{f(x)\}$; the meet over all $t<1$ is
+exactly $\mathrm{ContinuousAt}\,f\,x$
+(\Lean{tcontinuousAt\_all\_iff\_continuousAt}).}
+\label{fig:threshold-continuity}
+\end{figure}
+
+\paragraph{A differentiability degree.}
+Differentiability is again a predicate, so its status is two-valued:
+$\mathrm{diffStatus}(f,x)=1$ iff $f$ is differentiable at $x$
+(\Lean{diffStatus\_eq\_one\_iff}), $0$ otherwise, never an interior
+value (\Lean{diffStatus\_crisp}).  Smooth maps score $1$
+(\Lean{diffStatus\_id}, \Lean{diffStatus\_const}); the witness of
+failure is $|x|$ at the origin (\Lean{diffStatus\_abs\_zero}).  This is a
+status over mathlib's \texttt{DifferentiableAt}, not a new calculus; a
+graded degree would once more be a residual (a finite-difference defect)
+under a named recipe.
+
+\paragraph{Similarity dimension for an iterated function system.}
+The Cantor benchmark generalizes.  For $n$ contractions of equal ratio
+$r\in(0,1)$, the similarity dimension is $s=\log n/\log(1/r)$, the unique
+solution of the Moran equation $n\,r^{s}=1$
+(\Lean{moran\_general}, \Lean{moran\_general\_unique} in
+\texttt{Cred.Math.Dimension}); the finite box estimate
+$\log(n^{k})/\log((1/r)^{k})$ equals $s$ exactly at every scale $k\ge1$,
+the $k$'s cancelling (\Lean{box\_estimate\_eq\_dim}).  The middle-thirds
+Cantor set is the instance $n=2$, $r=1/3$, recovering $\log2/\log3$
+(\Lean{cantor\_is\_instance}; the concrete construction with its box
+count is \Lean{cantor\_moran}, \Lean{cantor\_moran\_unique} in
+\texttt{Cred.Examples.Fractal}).  The dimension is the named Moran
+source, not a fitted exponent.
+
+\paragraph{An atlas seed.}
+A first cut toward differential geometry, honest about its scope.  A
+graded chart is a coordinate map into the one-dimensional model
+$\mathbb{R}$; a supplied transition $\tau:\mathbb{R}\to\mathbb{R}$ carries
+a smoothness status, $1$ iff $\tau$ is $C^\infty$
+(\Lean{transitionSmoothness\_eq\_one\_iff}), closed under composition
+(\Lean{transitionSmoothness\_comp}).  An atlas aggregates per-transition
+statuses by the product meet, and the crisp recovery returns every
+transition as a genuine smooth map once the aggregate status is $1$
+(\Lean{smooth\_atlas\_recovery} in \texttt{Cred.Manifold}).  There is no
+cover, Hausdorff, or second-countability condition: those are exactly
+what a manifold theory adds, and they are absent on purpose.
+
+These layers share one shape: a degree map $P:X\to[0,1]$ whose value $1$
+recovers the classical predicate exactly, machine-checked.  Metric
+closeness, the limit, and continuity recover their mathlib counterparts
+at the boundary; differentiability and smoothness are two-valued status;
+dimension is the named Moran source; the atlas is a labelled seed.  What
+remains is genuine manifold theory (charts with cover and Hausdorff
+conditions, tangent bundles, differential forms) and measure-theoretic
+dimension (Hausdorff measure, Moran's theorem).  The staged plan is in
 \texttt{docs/FOUNDATION\_TRACK\_ROADMAP.md}.
 
 \section{Lean Artifact}
