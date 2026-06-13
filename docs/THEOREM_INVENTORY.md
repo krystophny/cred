@@ -200,6 +200,7 @@ Worlds/valuations/forall/measure programme. All entries are Lean theorems with z
 | Generic forall consequence with reflexivity, weakening, cut | `Consequence`, `consequence_refl`, `consequence_mono`, `consequence_cut` | `Aggregation/ForallConsequence.lean` | theorem |
 | Native product-De Morgan value algebra; positivity/certainty as consequence | `nativeCred_value_algebra`, `positivity_is_consequence`, `certainty_is_consequence` | `Aggregation/ForallConsequence.lean` | theorem |
 | Boolean specialization is classical; LP=positive, K3=certain; product instance | `boolean_forall_consequence_is_classical`, `lp_designation_as_positive`, `k3_designation_as_certain`, `product_deMorgan_instance` | `Aggregation/Specializations.lean` | theorem |
+| Gödel and Łukasiewicz De Morgan value algebras host the forall layer | `godel_value_algebra`, `lukasiewicz_deMorgan`, `godel_forall_consequence_instance`, `lukasiewicz_forall_consequence_instance` | `Aggregation/ManyValued.lean` | theorem |
 
 ### Native Cred and rigidity (`Cred/Native/`)
 

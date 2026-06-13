@@ -14,12 +14,10 @@
   Each carrier instance reads the abstract `designated` predicate as the
   notion appropriate to it: classical truth, positivity, or certainty.
 
-  Godel and Lukasiewicz carriers are not added here: their residuated
-  implications are arrows, not part of the negation/conjunction/disjunction
-  triplet this layer aggregates, so they have no clean De Morgan-triplet
-  witness at this level.
-  -- TODO: add Godel/Lukasiewicz value-algebra carriers if a clean
-  --       implication-free triplet presentation is found.
+  Godel and Lukasiewicz carriers are added in `Cred.Aggregation.ManyValued`
+  as De Morgan triplets (min/max and bounded sum/difference with the
+  complement). Their residuated implications are deliberately omitted: this
+  layer aggregates only the negation/conjunction/disjunction triplet.
 -/
 
 import Cred.Aggregation.ForallConsequence

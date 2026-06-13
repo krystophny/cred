@@ -134,6 +134,7 @@ import Cred.Math.Order
 import Cred.Examples.MathSeed
 import Cred.Probability.Valuations
 import Cred.Aggregation.ForallConsequence
+import Cred.Aggregation.ManyValued
 import Cred.Aggregation.Specializations
 import Cred.Native.Basic
 import Cred.Native.Rigidity
