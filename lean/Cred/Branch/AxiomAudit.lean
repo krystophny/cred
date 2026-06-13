@@ -51,6 +51,7 @@ import Cred.Math.Dimension
 import Cred.Topology.Manifold
 import Cred.Topology.ManifoldN
 import Cred.Topology.Differential
+import Cred.Topology.IntegralCurveLayer
 import Cred.Topology.TangentBundleLayer
 import Cred.Topology.LieGroupLayer
 import Cred.Probability.CoxUniqueness
@@ -212,3 +213,17 @@ import Cred.Probability.CoxUniqueness
 -- plausibility agree on every event. Finite rational sums, inheriting the three
 -- axioms through Mathlib. Measured: propext, Classical.choice, Quot.sound.
 #print axioms Cred.Probability.cox_representation_unique
+
+-- Topology/IntegralCurveLayer: the integral-curve / flow recoveries as statuses.
+-- integralCurveStatus_eq_one_iff recovers Mathlib's IsIntegralCurve predicate;
+-- integralCurve_exists carries Mathlib's Picard-Lindelof local existence
+-- (exists_isIntegralCurveAt_of_contMDiffAt_boundaryless); integralCurve_unique
+-- carries Mathlib's global uniqueness (isIntegralCurve_eq_of_contMDiff); and
+-- constField_integralCurve_status is the concrete model-space translation flow,
+-- proved by reducing the manifold-derivative condition to HasFDerivAt. Each
+-- rides the Credence carrier and Mathlib's integral-curve / ODE development.
+-- Measured: propext, Classical.choice, Quot.sound.
+#print axioms Cred.FlowLayer.integralCurveStatus_eq_one_iff
+#print axioms Cred.FlowLayer.integralCurve_exists
+#print axioms Cred.FlowLayer.integralCurve_unique
+#print axioms Cred.FlowLayer.constField_integralCurve_status

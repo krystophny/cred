@@ -2103,6 +2103,19 @@ negation, and left and right translation all recovered at status $1$
 (\Lean{groupAddStatus\_eq\_one}, \Lean{groupNegStatus\_eq\_one},
 \Lean{leftAddTransStatus\_eq\_one}).
 
+\paragraph{Integral curves and flows.}
+Dynamics closes the track.  A curve $\gamma:\mathbb R\to M$ is an
+integral curve of a vector field $v$ when $\gamma'(t)=v(\gamma(t))$; the
+status is $1$ exactly when $\gamma$ is a mathlib integral curve
+(\Lean{integralCurveStatus\_eq\_one\_iff}).  At a $C^\infty$ field the
+Picard--Lindel\"of existence theorem gives an integral curve through each
+point (\Lean{integralCurve\_exists}), and on a Hausdorff manifold two
+status-$1$ curves with the same initial condition agree
+(\Lean{integralCurve\_unique}).  The constant field on $\mathbb R^n$ has
+the explicit translation flow $\gamma(t)=x_0+t\,c$
+(\Lean{constField\_integralCurve\_status}), the simplest Hamiltonian-style
+phase flow.
+
 These layers share one shape: a degree map $P:X\to[0,1]$ whose value $1$
 recovers the classical object exactly, machine-checked.  Metric
 closeness, the limit, and continuity recover their mathlib counterparts
@@ -2110,8 +2123,10 @@ at the boundary; differentiability is two-valued status; dimension is the
 named Moran source; the atlas status recovers a genuine smooth manifold;
 the differential layer recovers $\mathrm{ContMDiff}$ and the tangent
 pushforward $\mathrm{mfderiv}$; the tangent bundle, its projection, and
-the zero section are recovered as smooth objects; and a Lie group with
-its smooth operations is recovered.  The recovery stops
+the zero section are recovered as smooth objects; a Lie group with its
+smooth operations is recovered; and integral curves of vector fields,
+with existence and uniqueness, recover the dynamical layer.  The recovery
+stops
 where mathlib's own library does: the higher differential-geometric
 superstructure (differential forms, de Rham cohomology, connections,
 curvature) and measure-theoretic dimension (Hausdorff measure, Moran's

@@ -176,6 +176,13 @@ in n dimensions; the differential-geometric superstructure above it is future.
   negation (`groupNegStatus_eq_one`), and left/right translation
   (`leftAddTransStatus_eq_one`, `rightAddTransStatus_eq_one`) recovered. Distinct
   from `Cred/Approx/LieGroup.lean` (discrete-group-step preservation).
+- Integral-curve / flow layer (real, not a seed): `Cred/Topology/IntegralCurveLayer.lean`.
+  `integralCurveStatus_eq_one_iff` recovers mathlib's `IsIntegralCurve`;
+  `integralCurve_exists` recovers Picard-Lindelof existence (CompleteSpace +
+  boundaryless + C^∞ field); `integralCurve_unique` recovers uniqueness on a
+  Hausdorff manifold; `constField_integralCurve_status` proves the explicit
+  translation flow of a constant field on the model. Future: the global flow map
+  (t,x) -> phi_t x, one-parameter groups, completeness, Hamiltonian dynamics.
 - The recovery stops at mathlib's frontier. Differential forms, de Rham
   cohomology, connections, curvature, and integration on manifolds have NO
   mathlib target in this version, so a graded layer over them would be an
