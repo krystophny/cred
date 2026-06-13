@@ -1,12 +1,14 @@
-.PHONY: all lean checker-test part1 part2 part3 part4 part5 part6 part7 clean
+.PHONY: all lean checker-test singlepaper part1 part2 part3 part4 part5 part6 part7 clean
 
-all: lean part1 part2 part3 part4 part5 part6 part7
+all: lean singlepaper part1 part2 part3 part4 part5 part6 part7
 
 lean:
 	cd lean && lake build
 
 checker-test:
 	bash lean/test/checker_cli_test.sh
+
+singlepaper: singlepaper/paper.pdf
 
 part1: part1/paper.pdf
 
@@ -21,6 +23,9 @@ part5: part5/paper.pdf
 part6: part6/paper.pdf
 
 part7: part7/paper.pdf
+
+singlepaper/paper.pdf: singlepaper/paper.tex cred.bib singlepaper/refs.bib
+	cd singlepaper && latexmk -pdf -interaction=nonstopmode -halt-on-error paper.tex
 
 part1/paper.pdf: part1/paper.tex cred.bib part1/figures/path_dependence.pdf
 	cd part1 && latexmk -pdf -interaction=nonstopmode -halt-on-error paper.tex
@@ -44,6 +49,7 @@ part7/paper.pdf: part7/paper.tex cred.bib
 	cd part7 && latexmk -pdf -interaction=nonstopmode -halt-on-error paper.tex
 
 clean:
+	cd singlepaper && latexmk -C
 	cd part1 && latexmk -C
 	cd part2 && latexmk -C
 	cd part3 && latexmk -C
