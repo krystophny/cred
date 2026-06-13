@@ -401,6 +401,22 @@ This is the whole non-explosion mechanism.  From impossible evidence
 one obtains no arbitrary conclusion because no conclusion is selected.
 The equation has lost rank.
 
+\subsection{Why no scalar joint is general}
+One might hope to compute the joint truth-functionally, $j=F(a,b)$.
+Two choices are natural: the product $F=ab$ and the minimum
+$F=\min(a,b)$.  Read as joints, the product is independence and the
+minimum is maximum positive dependence.  The product trivializes
+conditioning, since $ab/b=a$ leaves the evidence irrelevant; and among
+symmetric idempotent scalar joints satisfying the copula axioms the
+minimum is forced (\Lean{Cred.min\_copula\_unique},
+\Lean{Cred.truth\_functional\_forces\_min}).  So a single
+truth-functional $F(a,b)$ is never the general dependence: it is either
+independence or the comonotone extreme.  The joint
+$j=\cred(A\wedge B)$ must therefore be supplied as data, free in the
+Fr\'echet interval $[\max(a+b-1,0),\min(a,b)]$, and the conditional is
+the fiber $\Cond(j,e)$.  Worlds and measures, introduced later, sit at
+the level that fixes $j$; the value layer leaves it open.
+
 \section{Binary and Continuous Cred}
 \label{sec:binary-continuous}
 
