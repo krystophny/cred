@@ -4,19 +4,27 @@ This audit records the correction after the copula / fuzzy-logic discussion.
 
 ## Correct doctrine
 
-Probability is not obtained by merely replacing `{0,1}` with `[0,1]`.  That move
-gives many-valued semantics.  Probability also requires supplied joint/dependence
-structure.
+Probability is not fuzzy logic with numbers.  Replacing `{0,1}` with `[0,1]` gives
+many-valued semantics; probability is logic plus dependence.  Fuzzy logic
+generalizes classical logic by grading truth values.  Cred additionally generalizes
+the joint, keeping it as supplied structure rather than fixing it by a truth
+function.
 
-- A t-norm is a fixed scalar coupling policy.
-- The product t-norm corresponds to independence when it is used as a joint:
-  `J(A,B)=cred(A) cred(B)`.
-- The min t-norm corresponds to maximum positive dependence / comonotone coupling
-  when it is used as a joint.
-- General probability does not choose one scalar function `R x R -> R` for all
-  proposition pairs.  It supplies the joint on events/propositions.
-- Cred's chain-rule kernel is `Adm(c;j,e) <-> c e = j`, which operates once the
-  joint `j` has been supplied.
+- The joint `j = cred(A and B)` is supplied dependence data, never a value function
+  of the marginals.  `cred(A)` and `cred(B)` do not determine it.
+- A t-norm is one fixed scalar coupling policy, not the general joint.
+- The product t-norm picks independence when used as a joint: `j = cred(A) cred(B)`.
+- The min t-norm picks maximum positive dependence / comonotone coupling.
+- A general joint is any point of the Fréchet interval
+  `[max(cred(A)+cred(B)-1,0), min(cred(A),cred(B))]`, fixed by the
+  propositions, not by their scalar values.  Probability does not choose one
+  scalar function `R x R -> R` for all proposition pairs.
+- Cred's chain-rule kernel is `Adm(c;j,e) <-> c e = j`, the interface that consumes
+  the supplied joint and returns the admissible conditional.
+- Honesty: Cred does not subsume probability or fuzzy logic.  It factors out the
+  shared conditioning core and proves where each tradition commits to something
+  extra: a measure; a truth-functional conditional plus ex falso; a designation
+  policy.
 
 ## Corrected files
 

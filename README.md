@@ -6,7 +6,7 @@ Cred is two axes plus an interface, machine-checked in Lean 4.
 - **Axis B: graded credence semantics.** The value space `[0,1]` with the product De Morgan triplet (product conjunction, probabilistic-sum disjunction, standard complement), its Kleene quotient `{0, ½, 1}`, and the LP/K3 consequence bridges.
 - **The interface.** The axes combine above the propositional layer and stay independent: `no_truthfunctional_cond_bridge` proves that no truth-functional conditional on the collapsed values reproduces admissible conditioning. The axes do not reduce to each other, even after collapse.
 
-The current dependence discipline is important: the product operation is an algebraic operation on scalar values, not the universal joint of two propositions. A joint `J(A,B)` is supplied dependence data. Product joints express independence; min joints express maximal positive dependence; general probability requires freeing the joint from truth-functionality.
+The dependence discipline is central: the product `⊗` is one coupling policy, not the joint of two propositions. The joint `j = cred(A ∧ B)` is supplied dependence data, never a value function of the marginals. `cred(A)` and `cred(B)` do not determine it. The product picks independence; min picks maximum positive dependence; a general joint is any point of the Fréchet interval `[max(a+b-1,0), min(a,b)]`. Fuzzy logic generalizes classical logic by grading truth values. Cred additionally generalizes the joint, keeping it as supplied structure rather than fixing it by a truth function.
 
 This repo contains:
 - a Lean 4 formalization with zero `sorry` (`lean/`)
@@ -46,20 +46,20 @@ The foundation route starts with `Foundation.Formula`: a first-order language wi
 ```
 Values:       [0,1]
 Negation:     ~c = 1 - c
-Conjunction:  c₁ ⊗ c₂ = c₁·c₂        (product operation on values; not a universal joint)
+Conjunction:  c₁ ⊗ c₂ = c₁·c₂        (one coupling policy: independence; not the universal joint)
 Disjunction:  c₁ ⊔ c₂ = ~(~c₁ ⊗ ~c₂)  (De Morgan dual; equals c₁ + c₂ - c₁·c₂)
 Conditioning: cred(A|B) ⊗ cred(B) = cred(A ∧ B)  (chain rule; joint supplied explicitly)
 ```
 
 ## Dependence discipline
 
-Probability is not obtained by merely replacing `{0,1}` with `[0,1]`. That gives many-valued semantics. Probability also carries a joint/dependence structure: the marginals `cred(A)` and `cred(B)` do not determine `cred(A ∧ B)`. Cred therefore treats the joint as supplied data.
+Probability is not fuzzy logic with numbers. Replacing `{0,1}` with `[0,1]` gives many-valued semantics; probability is logic plus dependence. The marginals `cred(A)` and `cred(B)` do not determine `cred(A ∧ B)`, so the joint `j = cred(A ∧ B)` is supplied data, never a value function of the marginals. The chain-rule fiber `Cond(j,e) = {c | c ⊗ e = j}` is the interface: it consumes the supplied joint and returns the admissible conditional.
 
-- Product joint: `J(A,B)=cred(A)·cred(B)` expresses independence and gives trivial conditioning `cred(A|B)=cred(A)` when `cred(B)>0`.
-- Min joint: `J(A,B)=min(cred(A),cred(B))` expresses maximum positive dependence / comonotone coupling.
-- General probability: `J(A,B)` depends on the events/propositions, not only on their scalar values.
+- Product joint: `j = cred(A)·cred(B)` picks independence and gives trivial conditioning `cred(A|B)=cred(A)` when `cred(B)>0`.
+- Min joint: `j = min(cred(A),cred(B))` picks maximum positive dependence / comonotone coupling.
+- General joint: `j` is any point of the Fréchet interval `[max(cred(A)+cred(B)-1,0), min(cred(A),cred(B))]`, fixed by the propositions, not by their scalar values.
 
-This is the intended relation to copulas and fuzzy logic: a t-norm is a fixed coupling policy, not the general probabilistic joint. Cred's scalar kernel is the chain-rule fiber `Cond(j,e)`, which works once the joint has been supplied.
+A t-norm is one fixed coupling policy, not the general joint. Cred does not subsume probability or fuzzy logic. It factors out the conditioning core they share and proves where each tradition commits to something extra: probability commits to a measure, a truth-functional many-valued logic commits to a truth-functional conditional plus ex falso, and a consequence relation commits to a designation policy.
 
 ## Key Results (Lean)
 
@@ -109,7 +109,7 @@ The collapse is a surjective homomorphism. It faithfully preserves propositional
 
 ## Claim Discipline
 
-Each ingredient has its own literature: paraconsistency (Priest 1979; Carnielli and Coniglio 2016), graded truth (Zadeh 1965; Hájek 1998), primitive conditional probability (Rényi 1955; Popper 1959), defective conditionals (de Finetti 1936; Égré, Rossi and Sprenger 2021), imprecise probability (Walley 1991), and copulas/dependence modeling (Nelsen 2006). Cred claims the combination and its formalization: zero-evidence underdetermination as a logical principle, the LP/K3 collapse bridges, a no-go theorem against truth-functional reconstruction of conditioning, and the explicit separation of value, consequence, supplied dependence, and conditioning, all machine-checked.
+Each ingredient has its own literature: paraconsistency (Priest 1979; Carnielli and Coniglio 2016), graded truth (Zadeh 1965; Hájek 1998), primitive conditional probability (Rényi 1955; Popper 1959), defective conditionals (de Finetti 1936; Égré, Rossi and Sprenger 2021), imprecise probability (Walley 1991), and copulas/dependence modeling (Nelsen 2006). Cred does not subsume probability or fuzzy logic. It claims the combination and its formalization: zero-evidence underdetermination as a logical principle, the LP/K3 collapse bridges, a no-go theorem against truth-functional reconstruction of conditioning, and the explicit separation of value, consequence, supplied dependence, and conditioning, all machine-checked. The point of that separation is to factor out the shared conditioning core and pin down where each tradition commits to something extra: a measure, a truth-functional conditional plus ex falso, or a designation policy.
 
 ## Repo Layout
 
