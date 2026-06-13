@@ -8,6 +8,8 @@ Use this checklist before release or submission. Every item should either be ans
 - `docs/RELEASE_AUDIT.md`: reproducible build of the Lean source, papers, checker binary, and axiom ledger.
 - `docs/VALUE_ALGEBRA.md`: real-dependence inventory and the choice-free fragment.
 - `docs/DEPENDENCE_POSITIONING_AUDIT.md`: copula/fuzzy/probability positioning guardrails.
+- `docs/CLAIM_STATUS.md`: per-claim status ledger (Lean theorem / example / target / not claimed).
+- `docs/LITERATURE_POSITIONING_MATRIX.md`: Cred vs neighbouring traditions, with anchors and overclaim risks.
 - `docs/BOOTSTRAP_POSITIONING.md`: the claim hierarchy for the bootstrap schema.
 - `docs/SUBMISSION.md`: per-paper venue plan.
 - `docs/MILESTONES.md`: what is formalized, what is trusted, what remains.
