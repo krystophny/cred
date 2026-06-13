@@ -3,6 +3,7 @@
 import Cred.Core.Value
 import Cred.Core.Consequence
 import Cred.Cond.Admissible
+import Cred.Cond.Proof
 import Cred.Cond.Copula
 import Cred.Collapse.ThreeVal
 import Cred.Collapse.Hom

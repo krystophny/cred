@@ -43,6 +43,7 @@
 \newcommand{\Real}{\mathbb{R}}
 \newcommand{\val}[1]{\llbracket #1 \rrbracket}
 \newcommand{\Lean}[1]{\texttt{#1}}
+\newcommand{\seq}{\vdash}
 
 \title{Credence, Conditioning, and the Logic of Impossible Evidence}
 \author{Christopher Albert\\
@@ -222,11 +223,17 @@ admissibility judgment
 \]
 This judgment needs equality and conjunction.  It does not need sets.
 After the surrounding mathematics has predicates or sets, one may
-write the fiber
+write the fiber.  For fixed evidence $e$, put
 \[
-  \Cond_V(j,e)=\{c\in V:\Adm_V(c;j,e)\}.
+  m_e(c)=c\conjc e.
 \]
-The paper uses this set notation as metalanguage.
+Then
+\[
+  \Cond_V(j,e)=\{c\in V:\Adm_V(c;j,e)\}=m_e^{-1}(j).
+\]
+The word fiber is used only in this ordinary mathematical sense:
+preimage under the multiplication-by-$e$ map.  The paper uses this set
+notation as metalanguage.
 
 For the Boolean carrier $\mathbf 2=\{0,1\}$ with $\conjc=\wedge$:
 \[
@@ -813,6 +820,92 @@ Boolean fragment uses $\mathbf 2$.  A three-valued fragment uses the
 Kleene carrier or the quotient collapse.  The conditioning rule itself
 is the algebraic equation $c\conjc e=j$ on the chosen carrier.
 
+\section{Proof Theory}
+
+The proof layer has two judgment forms.  The scalar form proves
+admissibility:
+\[
+  \Sigma\seq\Adm(c;j,e).
+\]
+The formula form proves labelled sequents:
+\[
+  \Gamma;\Sigma\seq_k\varphi,
+\]
+where $k$ is positive, certain, or a threshold $t$.
+
+The scalar rules are deliberately small:
+\[
+\frac{\Adm(c;j,e)\in\Sigma}{\Sigma\seq\Adm(c;j,e)}
+\quad
+\frac{c\conjc e=j}{\Sigma\seq\Adm(c;j,e)}
+\quad
+\frac{}{\Sigma\seq\Adm(c;0,0)}
+\]
+and, for positive evidence,
+\[
+\frac{0<e\quad j\le e}{\Sigma\seq
+  \Adm\!\left((j/e);j,e\right)}.
+\]
+Weakening and cut are structural:
+\[
+\frac{\Sigma\seq A\qquad A,\Sigma\seq B}{\Sigma\seq B}.
+\]
+
+Lean verifies scalar soundness and closed completeness:
+\[
+  \seq\Adm(c;j,e)
+  \quad\Longleftrightarrow\quad
+  c\in\Cond(j,e).
+\]
+It also verifies the boundary facts:
+\[
+  \seq\Adm(c;0,0)\quad\text{for every }c,
+\]
+and
+\[
+  0<e,\quad
+  \seq\Adm(c_1;j,e),\quad
+  \seq\Adm(c_2;j,e)
+  \quad\Longrightarrow\quad
+  c_1=c_2.
+\]
+\begin{quote}\scriptsize
+\begin{tabular}{@{}l@{}}
+Lean anchors: \\
+\Lean{Cred.Credence.AdmDerivation.closed\_iff\_mem\_cond}\\
+\Lean{Cred.Credence.zeroEvidence\_derivable}\\
+\Lean{Cred.Credence.closed\_unique\_of\_pos}
+\end{tabular}
+\end{quote}
+
+The formula calculus keeps conditioning external.  Its chain rule is a
+cut between an admissibility side judgment and a formula bound:
+\[
+\frac{
+  \Gamma;\Sigma\seq_t E
+  \qquad
+  \Sigma\seq\Adm(c;J,E)
+  \qquad
+  \ell\le c
+}{
+  \Gamma;\Sigma\seq_{\ell\conjc t} J
+}.
+\]
+There is no rule introducing an implication formula $E\to J$.
+Lean proves soundness for the labelled calculus and for kernel
+certificates:
+\[
+  \Gamma;\Sigma\seq_k\varphi
+  \quad\Longrightarrow\quad
+  \text{every model of }\Gamma,\Sigma\text{ satisfies }k(\varphi).
+\]
+The cut-free fragment embeds into the full calculus, and cut is
+semantically admissible.  Completeness holds for the closed threshold,
+certainty, and positivity fragments because the corresponding semantic
+consequence relation is available as a proof rule.  This is the exact
+proof-theoretic status: sound external conditioning, no internal arrow,
+and no ex-falso derivation.
+
 \section{Relation to Existing Work}
 
 \paragraph{Fuzzy and many-valued logic.}
@@ -841,9 +934,10 @@ by the chain rule.
 Primitive conditional probabilities go back to R\'enyi and Popper
 \cite{renyi1955,popper1959,krauss1968,dubins1975}.  Imprecise
 probability studies sets of probabilities as first-class objects
-\cite{walley1991,troffaes2014}.  Here the imprecision is narrower:
-the set $\Cond(j,e)$ is the fiber of one scalar equation.  It becomes
-wide exactly when evidence is zero.
+\cite{walley1991,troffaes2014}.  Disintegration accounts condition by
+measures on level sets of a statistic \cite{chang1997}.  Here the
+fiber is narrower: $\Cond(j,e)$ is the preimage of one scalar equation.
+It becomes wide exactly when evidence is zero.
 
 \paragraph{Conditional-event algebras.}
 Gilio and Sanfilippo analyze conditional random quantities and
@@ -867,7 +961,8 @@ claims:
 \text{(N2)} & \Cond(0,0)=[0,1]\text{ as the exact no-ex-falso mechanism};\\[1mm]
 \text{(N3)} & \text{LP/K$_3$ collapse bridges for full formulas};\\[1mm]
 \text{(N4)} & \text{no truth-functional bridge for conditioning};\\[1mm]
-\text{(N5)} & \text{Curry block explaining why no internal arrow is added.}
+\text{(N5)} & \text{scalar admissibility proof theory, sound and closed-complete};\\[1mm]
+\text{(N6)} & \text{Curry block explaining why no internal arrow is added.}
 \end{array}
 \]
 Together they give a clean separation theorem in words:
@@ -890,10 +985,14 @@ development under `lean/Cred`.  The core files are:
 \begin{array}{ll}
 \text{values} & \Lean{Cred/Core/Value.lean},\\
 \text{conditioning} & \Lean{Cred/Cond/Admissible.lean},\\
+\text{admissibility proof theory} & \Lean{Cred/Cond/Proof.lean},\\
 \text{collapse} & \Lean{Cred/Collapse/Hom.lean},\\
 \text{LP/K$_3$ bridge} & \Lean{Cred/Bridge/LPK3.lean},\\
 \text{conditional no-go} & \Lean{Cred/Bridge/CondBridge.lean},\\
 \text{Curry block} & \Lean{Cred/Bridge/Curry.lean},\\
+\text{labelled sequents} & \Lean{Cred/Sequent.lean},\\
+\text{kernel certificates} & \Lean{Cred/Kernel.lean},\\
+\text{cut and completeness} & \Lean{Cred/CutElim.lean}, \Lean{Cred/Completeness.lean},\\
 \text{solution sets} & \Lean{Cred/Fixpoint.lean},\\
 \text{thresholds} & \Lean{Cred/Threshold.lean}.
 \end{array}
