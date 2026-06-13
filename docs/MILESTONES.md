@@ -17,6 +17,9 @@ Core algebra and conditioning
   singleton / interval / empty trichotomy (`Cond/Admissible.lean`).
 - No ex falso: conditioning on credence zero is unconstrained
   (`conditioning_zero_any`).
+- Dependence discipline: `⊗` is a scalar value operation, not a universal joint;
+  probability-style reasoning supplies `J(A,B)` separately (`Valuation.lean`,
+  `Cond/Copula.lean`).
 
 Consequence and bridges
 - LP / K3 / threshold consequence and the no-explosion results
@@ -25,6 +28,9 @@ Consequence and bridges
 - The conditional-bridge no-go as an iff (`Bridge/CondBridgeIff.lean`).
 - Reductio as countermodel emptiness, distinct from explosion
   (`Reductio.lean`, `CrossingOut.lean`).
+- Truth-functional scalar joint boundary: under idempotence and copula-like
+  assumptions, a single value-only joint is forced to min; general probability
+  escapes by using event/proposition-specific joints (`Cond/Copula.lean`).
 
 Set theory and paradox
 - `CredSet` graded-membership set theory, classical recovery on crisp data,
@@ -70,8 +76,13 @@ criterion.
 
 The nontrivial mathematical content remains the Cred-specific formal results:
 admissible conditioning, no-ex-falso, LP/K3 bridges, the truth-functional
-conditional no-go, the Curry block, provability/reflection boundaries, and the
-real-free checker soundness bridge.
+conditional no-go, the Curry block, the dependence/joint separation, provability/
+reflection boundaries, and the real-free checker soundness bridge.
+
+The probability slogan must be stated carefully: probability is not just fuzzy
+truth values. It is dependence-enriched logic: graded/crisp values plus supplied
+joint/dependence structure. T-norms are fixed scalar coupling policies, not the
+general probabilistic joint.
 
 See `docs/BOOTSTRAP_POSITIONING.md` for the claim hierarchy and
 `docs/REVIEW_CHECKLIST.md` for the adversarial review questions.
@@ -166,5 +177,4 @@ beta-function lemma; and `treeFormula_represents` proves an explicit object-lang
 Sigma-1 formula is designated in the standard model exactly when `isTree n` holds.
 Object-language Sigma-1 representability of a recursively-defined predicate is
 proven; the specific `checkCodeNat` instance reuses this machinery with the
-checker's decode equations. The approach mirrors FormalizedFormalLogic/Foundation,
-transported to the graded semantics.
+checker's decode equations. 
