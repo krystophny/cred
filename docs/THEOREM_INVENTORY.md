@@ -229,3 +229,10 @@ Worlds/valuations/forall/measure programme. All entries are Lean theorems with z
 | Claim | Lean name | Module | Status |
 |---|---|---|---|
 | Binary, ternary, and continuous worked proof galleries | `binary_truthset_proof_gallery`, `ternary_proof_gallery`, `continuous_proof_gallery` | `Examples/ProofGallery.lean` | theorem |
+
+### Practical audit calculus (`Cred/Audit/`, `Cred/Examples/FalsePrecision.lean`)
+
+| Claim | Lean name | Module | Status |
+|---|---|---|---|
+| Assumption ledger: joint/conditioning policies; independence makes evidence irrelevant; robust-vs-sensitive verdict | `InferenceCommitments`, `assumesIndependence`, `independence_makes_evidence_irrelevant`, `robustnessVerdict`, `audit_robust_or_sensitive` | `Audit/AssumptionLedger.lean` | theorem |
+| False-precision case study: hidden independence (3/5) and hidden min (6/7) straddle 4/5; Cred reports the interval [3/7,6/7] | `hidden_independence_conditional`, `hidden_min_conditional`, `cred_audit_interval`, `threshold_four_fifths_sensitive`, `threshold_one_third_robust` | `Examples/FalsePrecision.lean` | theorem |

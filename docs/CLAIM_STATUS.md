@@ -59,6 +59,15 @@ below. This ledger keeps the paper from drifting into unsupported claims. See
 | Chain-rule-faithful conditional coincides with the fiber | Lean theorem | `chainRuleFaithful_eq_Cond` | faithfulness as defined |
 | Native continuum rigidity / classical recovery | Lean theorem | `nativeCred_crisp_closed`, `nativeCred_unique_three_quotient` | as in the cited results |
 
+## Practical audit calculus
+
+| Claim | Category | Lean anchor | Assumptions |
+|---|---|---|---|
+| Assumption ledger over inference commitments | Lean theorem | `InferenceCommitments`, `assumesIndependence` | none |
+| Independence assumption makes evidence irrelevant | Lean theorem | `independence_makes_evidence_irrelevant` | product joint |
+| False precision: hidden independence/min straddle a threshold; Cred reports the interval | Lean example | `hidden_independence_conditional`, `hidden_min_conditional`, `cred_audit_interval`, `threshold_four_fifths_sensitive` | a=3/5, b=7/10 |
+| Cred audits systems (PSL/MLN/ProbLog/imprecise), does not replace or subsume them | paper definition | (positioning) | n/a |
+
 ## Explicitly not claimed
 
 - Cred is **not** claimed to be the unique many-valued logic, nor "better fuzzy logic".

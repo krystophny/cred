@@ -175,6 +175,21 @@ fiber at zero evidence is a set of admissible values.  Logical
 consequence is the same inclusion read over valuations rather than
 values; one operator covers both, and a later section makes it explicit.
 
+\paragraph{What the system is for.}
+Cred is an audit calculus for uncertain inference.  Its practical use is
+to expose hidden semantic commitments and the false precision they
+produce.  A step from marginals to a conditional silently fixes a joint
+policy, a way of reading the conditional off the joint, and a semantic
+frame for the verdict.  Cred names those commitments and computes the
+admissible set they leave open (\Lean{Audit.InferenceCommitments}).  The
+practical target is false precision: a single confident number that
+depends on an unstated joint, when the honest answer is an interval.
+Cred audits such a step; it does not replace probabilistic, fuzzy, or
+soft-logic systems and does not subsume them.  Those systems carry
+inference and learning machinery Cred has no analogue for.  Cred adds
+the Lean-checked factorization of the layers and the no-go and
+uniqueness results that pin each layer down.
+
 \begin{figure}[h]
 \centering
 \begin{tikzpicture}[>=Latex,node distance=4.2mm,
@@ -1495,9 +1510,18 @@ and no ex-falso derivation.
 
 \section{Relation to Existing Work}
 
-The table below places Cred against neighbouring traditions along the
-layers it factors.  The full positioning, with Lean anchors and overclaim risks,
-is in the repository's literature positioning matrix.
+Most ingredients here pre-exist.  The product t-norm, the Kleene
+lattice, primitive conditional probability, conditioning over fibers,
+set-valued probability, and the copula bounds are all established.
+Cred's addition is the Lean-checked factorization of value, dependence,
+and conditioning into separate layers, with the no-go and uniqueness
+results that fix each one.  The section reads as an audit of where the
+existing commitments sit, governed by one rule: Cred audits an inference
+step, it does not replace the systems below.
+
+The table places Cred against neighbouring traditions along the layers
+it factors.  The full positioning, with Lean anchors and overclaim
+risks, is in the repository's literature positioning matrix.
 
 \begin{table}[h]
 \centering
@@ -1578,9 +1602,32 @@ a different route.  It does not add a conditional truth table.  It
 treats conditional credence as the admissibility relation determined
 by the chain rule.
 
+\paragraph{Cox and Jaynes.}
+Cox derives the sum and product rules from desiderata on a real
+plausibility, and Jaynes builds probability as extended logic on that
+base \cite{cox1946,cox1961,jaynes2003}.  Cox's product rule
+$p(AB\mid C)=p(A\mid BC)\,p(B\mid C)$ is the chain rule, Cred's closest
+classical relative.  Halpern's counterexample shows the derivation needs
+a dense domain and smoothness; a finite plausibility can satisfy the
+functional equations without being probability \cite{halpern1999}.  Cred
+takes that conservative reading as a license.  It keeps the chain rule
+$c\conjc e=j$ as primitive, drops the universality and smoothness axioms,
+and refuses the division step, so $e=0$ leaves the conditional
+unconstrained rather than ill-posed.
+
+\paragraph{Copulas and the dependence bounds.}
+Sklar's theorem factors every joint as a copula applied to the margins,
+so the copula carries all dependence \cite{sklar1959}.  The
+Fr\'echet--Hoeffding bounds $W\le C\le M$ frame the joint between the
+countermonotone and comonotone corners, with the product copula $\Pi$ at
+independence \cite{nelsen2006,dhaene2002}.  Cred fixes $\conjc$ to $\Pi$
+and uses $W$ and $M$ as the admissible range for the supplied joint; the
+min copula $M$ is the unique idempotent one, which is why $\min$ is the
+boundary case and product the interior case.  When dependence matters,
+Cred supplies the joint rather than reading it off one truth function.
+
 \paragraph{Probability and imprecision.}
-Cox and Jaynes read probability as extended logic
-\cite{cox1961,jaynes2003}.  Standard conditional probability uses
+Standard conditional probability uses
 division at positive evidence, and H\'ajek gives reasons not to treat
 that ratio as the whole concept \cite{hajek2003conditional}.  R\'enyi
 and Popper instead take
@@ -1610,6 +1657,158 @@ compound conditionals and probabilities over them.  Cred is narrower.
 It keeps the scalar value, the supplied joint, and the admissible
 fiber.  The same chain-rule fiber works on $[0,1]$, on the Boolean
 carrier, and on three-valued variants.
+
+\paragraph{Practical probabilistic and soft-logic systems.}
+PSL, MLN, ProbLog, Bayesian networks, and credal networks are deployed
+inference and learning engines
+\cite{bach2017,richardson2006,deraedt2007,pearl1988,cozman2000}.  Cred
+provides none of their machinery: no hinge-loss density, no weight
+learning, no weighted model counting, no bound optimization.  It does
+not subsume them.  The next subsections audit their commitments in Cred
+vocabulary, which locates Cred's design choices against theirs without
+any claim of dominance.
+
+\subsection{Old ingredients and the one new layer}
+\label{sec:old-vs-new}
+
+Cred reuses standing constructions and adds one thing: the Lean-checked
+factorization with its no-go and uniqueness theorems.
+\Cref{tab:old-vs-new} keeps the reuse and the addition in separate
+columns.  Namespaces
+are stated once: anchors live in \texttt{Cred.Credence},
+\texttt{Cred.Collapse}, \texttt{Cred.Native}, and \texttt{Cred.Audit}.
+
+\begin{table}[h]
+\centering
+\resizebox{\textwidth}{!}{%
+\footnotesize
+\begin{tabular}{@{}p{2.2cm}p{2.9cm}p{2.4cm}p{4.2cm}p{2.9cm}@{}}
+\toprule
+component & existing literature & Cred reuse & Cred addition & anchor \\
+\midrule
+continuous values $[0,1]$ & Zadeh, Goguen \cite{zadeh1965,goguen1969} & yes, as credence & reading as credence, not membership & \Lean{Credence} \\
+t-norm logics & H\'ajek, Esteva--Godo \cite{hajek1998,esteva2001} & product $\conjc$, De Morgan dual & $\conjc$ barred from fixing $\cred(A\wedge B)$ & \Lean{conj} \\
+LP / K$_3$ & Kleene, Priest \cite{kleene1952,priest1979} & three-value tables & exact bridge: LP positivity, K$_3$ certainty & \Lean{kleeneCongruence} \\
+possible-world probability & Pearl \cite{pearl1988} & chain-rule shape & conditioning primitive, not a ratio & \Lean{Adm} \\
+Cox / Jaynes & \cite{cox1946,jaynes2003,halpern1999} & chain rule as primitive & no division, no universality axiom & \Lean{conditioning\_mk} \\
+de Finetti & \cite{definetti1936,renyi1955,popper1959} & conditional-first, void at zero & free at $e=0$ as a theorem & \Lean{conditioning\_}\allowbreak\Lean{zero\_any} \\
+imprecise / credal & Walley \cite{walley1991,augustin2014} & interval-valued conditional & one scale, imprecision only at the conditional & \Lean{cond\_zero\_}\allowbreak\Lean{zero\_univ} \\
+PSL & Bach et al. \cite{bach2017} & none (contrast) & product not \L ukasiewicz conjunction & n/a \\
+the $\Cond$ fiber & Frechet bounds \cite{gilio2021,nelsen2006} & Frechet trichotomy & preimage of one scalar equation & \Lean{cond\_}\allowbreak\Lean{singleton\_}\allowbreak\Lean{of\_pos} \\
+supplied joint & copulas \cite{sklar1959} & $W,M$ as bounds & joint is an input, not a rule & \Lean{ExactJoint}\allowbreak\Lean{Context} \\
+all-measures entailment & probabilistic worlds \cite{pearl1988} & $\forall$ over valuations & entailment as the all-measures corner & \Lean{entails\_iff\_}\allowbreak\Lean{cond\_one} \\
+Lean-checked factorization & n/a & n/a & the layered package itself, machine-verified & \Lean{Inference}\allowbreak\Lean{Commitments} \\
+\bottomrule
+\end{tabular}%
+}
+\caption{Old ingredients versus the one new layer.  The fourth column is
+deliberately thin: most rows reuse a standing construction, and Cred's
+addition is the verified factorization and the obstruction results, not
+a new operation.}
+\label{tab:old-vs-new}
+\end{table}
+
+\subsection{Mapping practical systems to Cred commitments}
+\label{sec:system-mapping}
+
+Each deployed system fixes a joint policy and a conditioning policy that
+Cred can name.  \Cref{tab:system-mapping} records the mapping.  It is not
+a subsumption claim: the systems carry inference and learning Cred does
+not.  The mapping only states which commitment each system makes in
+Cred's vocabulary.  ProbLog assumes independence of base facts, so its
+fact joint is the product, with dependence only through rules
+\cite{sato1995,deraedt2007,fierens2015}.  PSL relaxes conjunction with
+the \L ukasiewicz t-norm rather than the product \cite{bach2017,kimmig2012}.
+MLN normalizes a log-linear measure over crisp worlds, with correlation
+from learned weights \cite{richardson2006}.  Imprecise and credal
+methods carry sets of measures \cite{walley1991,cozman2000,maua2020}.
+
+\begin{table}[h]
+\centering
+\footnotesize
+\begin{tabular}{@{}p{2.3cm}p{3.7cm}p{2.6cm}p{3.6cm}@{}}
+\toprule
+system & joint commitment & conditioning & Cred reading \\
+\midrule
+ProbLog & independence of base facts & Bayesian, $0/0$ at zero & \Lean{JointPolicy.product} \\
+PSL & \L ukasiewicz conjunction & relaxed rule penalty & non-product t-norm joint \\
+MLN & normalized measure over worlds & Bayesian, $0/0$ on hard evidence & measure frame, \Lean{usesMeasure} \\
+imprecise / credal & set of factorizing joints & lower/upper extension & credal frame, \Lean{usesCredal} \\
+\bottomrule
+\end{tabular}
+\caption{Practical systems and their commitment in Cred vocabulary.  The
+right column names the Cred ledger field, not a reduction of the system
+to Cred.}
+\label{tab:system-mapping}
+\end{table}
+
+\subsection{A false-precision audit}
+\label{sec:false-precision}
+
+Take marginals $\cred(A)=\tfrac35$ and $\cred(B)=\tfrac{7}{10}$.  Two
+analysts each report a single confident $\cred(A\mid B)$, differing only
+in an unstated joint.  Hidden independence sets the joint to
+$\tfrac35\conjc\tfrac{7}{10}=\tfrac{21}{50}$, so the conditional is
+$\tfrac{21}{50}\big/\tfrac{7}{10}=\tfrac35$: the posterior equals the
+prior and the evidence did nothing
+(\Lean{hidden\_independence\_value}).  Hidden maximal dependence sets the
+joint to $\min(\tfrac35,\tfrac{7}{10})=\tfrac35$, so the conditional is
+$\tfrac35\big/\tfrac{7}{10}=\tfrac67$ (\Lean{hidden\_min\_conditional}).
+
+The audit refuses both single numbers.  The joint is known only to its
+Fr\'echet band $[\tfrac{3}{10},\tfrac35]$, so the conditional is the band
+$[\tfrac37,\tfrac67]$ (\Lean{cred\_audit\_interval}).  Both point
+estimates sit inside it (\Lean{hidden\_points\_in\_band}).  A threshold
+test at $\tfrac45$ is dependence-sensitive: $\tfrac35<\tfrac45<\tfrac67$,
+so the verdict flips with the unstated joint
+(\Lean{threshold\_four\_fifths\_sensitive}).  A test at $\tfrac13$ is
+robust: $\tfrac13$ sits at or below the whole band
+(\Lean{threshold\_one\_third\_robust}).  Anchors are in
+\texttt{Cred.Examples.FalsePrecision}.
+
+\begin{table}[h]
+\centering
+\footnotesize
+\begin{tabular}{@{}lll@{}}
+\toprule
+reading & hidden joint & reported $\cred(A\mid B)$ \\
+\midrule
+hidden independence & $\tfrac{21}{50}$ & $\tfrac35$ \\
+hidden maximal dependence & $\tfrac35$ & $\tfrac67$ \\
+Cred audit & Fr\'echet band $[\tfrac{3}{10},\tfrac35]$ & band $[\tfrac37,\tfrac67]$ \\
+\midrule
+threshold $\tfrac45$ & either & dependence-sensitive (flips) \\
+threshold $\tfrac13$ & either & robust \\
+\bottomrule
+\end{tabular}
+\caption{The false-precision audit.  Two confident point estimates
+straddle the threshold $\tfrac45$; the audit reports the band and flags
+the threshold as dependence-sensitive.}
+\label{tab:false-precision}
+\end{table}
+
+\subsection{How to run a Cred audit}
+\label{sec:cookbook}
+
+A step from marginals to a conditional is audited in four moves.
+
+\begin{enumerate}[leftmargin=*,nosep]
+\item Identify the value layer.  Decide whether the numbers are
+  credences in $[0,1]$, crisp truth values, or a measure over worlds, and
+  whether a downstream collapse to three values is intended.
+\item Name the joint policy.  State whether $\cred(A\wedge B)$ is the
+  product, the min, a Fr\'echet interval, or an explicitly supplied
+  value (\Lean{JointPolicy}).  An unstated policy is the usual source of
+  false precision.
+\item Check robust versus dependence-sensitive.  Compute the conditional
+  band the joint policy allows and test the claim against it.  A verdict
+  that survives the whole band is robust; one that flips is
+  dependence-sensitive (\Lean{Audit.audit\_robust\_or\_sensitive}).
+\item Check zero-evidence handling.  When $\cred(B)=0$, the chain rule
+  constrains nothing, so the conditional is the full interval; report
+  that, not a default value or an undefined ratio
+  (\Lean{cond\_zero\_zero\_univ}).
+\end{enumerate}
 
 \section{Toward a Foundation for Mathematics}
 \label{sec:foundations}
@@ -1723,6 +1922,18 @@ The formal core is therefore not a new truth table.  Consequence and
 conditioning are one inference, the inclusion of the admissible set the
 constraints cut out; the separation is that only the value fibration
 resists collapse to a truth-functional connective.
+
+The use is an audit.  Cred reads an uncertain inference step, names the
+joint policy and the conditioning policy it commits to, and reports the
+admissible set instead of a single number.  The practical target is
+false precision: a confident point estimate whose value rests on an
+unstated joint.  When the joint is unknown, the verdict is an interval,
+and the audit flags any threshold the interval straddles
+(\Lean{Audit.audit\_robust\_or\_sensitive}).  Cred audits a step; it
+does not replace the probabilistic, fuzzy, and soft-logic systems that
+do inference and learning.  Its contribution over the prior art is the
+Lean-checked factorization of value, dependence, and conditioning, with
+the no-go and uniqueness results that fix each layer.
 
 \bibliographystyle{alpha}
 \bibliography{../cred,refs}
