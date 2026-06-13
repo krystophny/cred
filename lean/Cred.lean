@@ -115,6 +115,7 @@ import Cred.Dependence.Conditioning
 import Cred.Dependence.RobustCollapse
 import Cred.ProofTheory.Labels
 import Cred.ProofTheory.Generative
+import Cred.ProofTheory.GenerativeQuant
 import Cred.ProofTheory.Provenance
 import Cred.ProofTheory.Branches
 import Cred.Math.Parity
@@ -125,3 +126,4 @@ import Cred.Examples.RobustConditioning
 import Cred.Examples.ProofProvenance
 import Cred.Examples.Branches
 import Cred.Examples.Sqrt2Branch
+import Cred.Examples.Elegant
