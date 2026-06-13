@@ -7,6 +7,7 @@ Use this checklist before release or submission. Every item should either be ans
 - `docs/THEOREM_INVENTORY.md`: every paper claim mapped to a Lean theorem, citation, or analogy, with the axiom ledger.
 - `docs/RELEASE_AUDIT.md`: reproducible build of the Lean source, papers, checker binary, and axiom ledger.
 - `docs/VALUE_ALGEBRA.md`: real-dependence inventory and the choice-free fragment.
+- `docs/DEPENDENCE_POSITIONING_AUDIT.md`: copula/fuzzy/probability positioning guardrails.
 - `docs/BOOTSTRAP_POSITIONING.md`: the claim hierarchy for the bootstrap schema.
 - `docs/SUBMISSION.md`: per-paper venue plan.
 - `docs/MILESTONES.md`: what is formalized, what is trusted, what remains.
@@ -41,6 +42,17 @@ Use this checklist before release or submission. Every item should either be ans
 - Is the LP/K3 bridge stated at the right threshold/positivity/certainty level?
 - Is the truth-functional conditional no-go separated from ordinary material/residuated implication results?
 - Is the Curry block stated at the correct level and not overgeneralized?
+
+## Dependence, copulas, and fuzzy logic
+
+- Does the text distinguish scalar value operations from proposition/event joints?
+- Does it avoid saying or implying that `a ⊗ b = ab` is the general meaning of `cred(A ∧ B)`?
+- Are product and min described as fixed coupling policies, not as the whole probability story?
+- Does every min-copula uniqueness claim include the truth-functionality/idempotence/coplula-like-assumptions caveat?
+- Does any phrase like "no intermediate copula" actually mean "no intermediate truth-functional idempotent scalar joint under the stated assumptions"?
+- Does the text avoid implying that fuzzy truth values alone give probability?
+- Is probability-as-logic stated as dependence-enriched logic: values plus event algebra/measure plus supplied dependence?
+- Is the supplied joint identified as the probability-side dependence input?
 
 ## Foundations, self-reference, and arithmetic
 
@@ -81,4 +93,5 @@ Ask each reviewer to identify one place where:
 2. a hidden assumption is not named;
 3. a structured analogy is presented too much like a result;
 4. a citation is missing;
-5. the checker/trusted-base story is ambiguous.
+5. the checker/trusted-base story is ambiguous;
+6. a copula/fuzzy/probability sentence conflates truth values with supplied dependence.
