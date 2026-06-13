@@ -639,16 +639,20 @@ accepts a conclusion exactly when it holds across the whole set.
 
 Fix the value object $([0,1],\conjc,\le)$ and read a threshold $t$ as
 the up-set ${\uparrow}t=[t,1]$.  A \emph{constraint} on a point set $X$
-is a pair $(f,S)$ with $f:X\to[0,1]$ and $S\subseteq[0,1]$; its
+is a pair $(f,S)$ with $f:X\to[0,1]$ and $S\subseteq[0,1]$: it holds at a
+point $x$ when the score $f(x)$ lands in the allowed set $S$, so its
 admissible set is the preimage $f^{-1}(S)$.  For a family $\Gamma$ of
-constraints, $\mathrm{Mod}(\Gamma)=\bigcap_{(f,S)\in\Gamma}f^{-1}(S)$.
-Inference is inclusion of admissible sets:
+constraints, the admissible set is the intersection
+$\mathrm{Mod}(\Gamma)=\bigcap_{(f,S)\in\Gamma}f^{-1}(S)$, the points that
+meet every constraint.  Inference is inclusion of admissible sets:
 \[
 \boxed{\;\Gamma\vdash(g,T)\quad:\Longleftrightarrow\quad
   \mathrm{Mod}(\Gamma)\subseteq g^{-1}(T).\;}
 \]
-This is the closure of the Galois connection between constraints and
-points, the ordinary shape of semantic consequence.  Cred's two
+Adding premises shrinks the admissible set, and the conclusions that
+hold across it grow in step; this antitone pairing between constraints
+and points is a Galois connection, and its closure is the ordinary
+shape of semantic consequence.  Cred's two
 inferences are its valuation-level and value-level instances, and the
 two words are not synonyms.  A \emph{valuation} is a whole assignment of
 values to the atoms, one possible world; a \emph{value} is a single
