@@ -11,17 +11,26 @@ All parts share the notation macros (`\cred`, `\Cond`, `\conjc` for the product,
 (Lean 4.16.0 + Mathlib 4.16.0). The bibliography is the single shared `cred.bib`,
 deduplicated, with all citations resolving.
 
+A cross-series positioning rule now applies: do not state that fuzzy truth values
+alone make probability a generalization of logic.  Probability requires supplied
+joint/dependence structure.  A t-norm is a fixed scalar coupling policy, not the
+general probabilistic joint.  The submission line is that Cred supplies the scalar
+chain-rule interface between many-valued consequence and dependence-enriched
+probability.
+
 ## Per-paper targets
 
 - **Part 1 (congruence classification of the product De Morgan triplet).** Algebra
   and many-valued logic. Targets: Fuzzy Sets and Systems, Studia Logica, or an
-  algebra-of-logic venue. The result is a clean classification theorem.
+  algebra-of-logic venue. The result is a clean classification theorem, with the
+  caveat that the product operation is a value operation and not a universal joint.
 
 - **Part 2 (chain-rule conditioning as a probability / many-valued bridge).**
   Formal epistemology and approximate reasoning. Targets: the Review of Symbolic
   Logic, the Journal of Philosophical Logic, or the International Journal of
   Approximate Reasoning. The no-go theorem against a truth-functional conditional
-  bridge is the headline.
+  bridge is the headline; the probability bridge must be presented as dependence-
+  enriched, not as fuzzy truth-functionality.
 
 - **Part 3 (paradox without explosion).** Nonclassical logic and foundations.
   Targets: the Journal of Philosophical Logic, the Notre Dame Journal of Formal
@@ -31,7 +40,8 @@ deduplicated, with all citations resolving.
 - **Part 4 (the irreducible commitment).** Philosophy of science and Bayesian
   foundations. Targets: Synthese, Erkenntnis, or the British Journal for the
   Philosophy of Science. Positioned as synthesis with a formal core, not as a new
-  statistics result.
+  statistics result. The supplied joint should be emphasized as the probability-side
+  analogue of an irreducible input.
 
 - **Part 5 (didactic guide and glossary).** A reader entry point. Best as an arXiv
   companion to the series, or folded into a monograph; not a standalone research
