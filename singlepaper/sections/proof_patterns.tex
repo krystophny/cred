@@ -171,6 +171,101 @@ countermodel elimination, and external conditioning judgments.}
 \label{tab:proof-patterns}
 \end{table}
 
+\subsection{Where Cred Is More Elegant}
+
+The valuable differences are not obtained by rejecting classical proof.
+They come from making hidden bookkeeping explicit and local.  The most
+important differences are the following.
+
+\paragraph{1. Entailment is stated directly, not via a material arrow.}
+Classically, one often proves $A\models B$ by proving the tautology
+$A\to B$.  This is correct but invites a misleading reading of $A\to B$
+as a connection.  Cred writes the sequent itself:
+\[
+  A\models_t B.
+\]
+The proof obligation is exactly the absence of a graded countermodel
+$t\le\val{A}_v$ and $\val{B}_v<t$.  This is more transparent because the
+object being ruled out is visible in the statement.
+
+\emph{Example.}  To show $A\models B$ classically, one checks that the
+row $A=1,B=0$ cannot occur.  To show $A\models_t B$ in Cred, one checks
+that no valuation has $A$ at least at status $t$ while $B$ falls below
+$t$.  The same proof idea works for Boolean truth, LP positivity, K$_3$
+certainty, and arbitrary thresholds.
+
+\paragraph{2. Proof status is labelled instead of hidden in prose.}
+Classical mathematics usually says simply ``assume $A$'' or ``prove
+$B$.''  Cred records whether the proof transports positivity, certainty,
+or a threshold.  This prevents accidental changes of strength.
+
+\emph{Example.}  Positivity consequence asks for $\val{A}_v>0\Rightarrow
+\val{B}_v>0$.  Certainty consequence asks for $\val{A}_v=1\Rightarrow
+\val{B}_v=1$.  These are different proof obligations.  Cred keeps them
+separate, while the Kleene collapse explains them as LP and K$_3$
+consequence.
+
+\paragraph{3. Reductio is countermodel elimination, not explosion.}
+In classical logic, reductio and explosion are close because an
+inconsistent premise set has no models.  Cred separates the legitimate
+part from the dangerous part.  Reductio is valid when the countermodel
+set for the target is empty.  A contradiction among premises is not by
+itself a license to infer everything.
+
+\emph{Example.}  To prove $A\models_t B$ indirectly, assume a graded
+countermodel: $t\le\val{A}_v$ and $\val{B}_v<t$.  Derive impossibility.
+This proves the sequent.  But if both $A$ and $\negc A$ are merely
+designated at a paraconsistent threshold, Cred may still have valuations
+where $B$ fails.  Thus explosion is blocked because a countermodel
+survives.
+
+\paragraph{4. Conditioning is a side judgment, not an implication formula.}
+Classical-looking proofs often blur ``$B$ follows from $A$'' with
+``the conditional $B\mid A$ has value $1$.''  Cred keeps these apart.
+Entailment is a statement over all valuations.  Conditioning is the
+external admissibility equation
+\[
+  \Adm(c;j,e)\quad\Longleftrightarrow\quad c e=j.
+\]
+
+\emph{Example.}  If $e>0$, the equation gives the unique value
+$c=j/e$.  If $e=j=0$, the equation gives every $c\in[0,1]$.  Thus zero
+evidence does not prove every conclusion; it fails to determine a
+conditional value.
+
+\paragraph{5. Case splits become fiber propagation.}
+Classical case splits usually collapse each branch to true or false.
+Cred can instead carry the remaining admissible set.
+
+\emph{Example.}  For positive evidence, the fiber is the singleton
+$\{j/e\}$.  For zero evidence and zero joint, the fiber is $[0,1]$.
+For incoherent data $j>e$, the fiber is empty.  Later reasoning maps,
+intersects, or preserves these sets.  This is more informative than
+choosing an arbitrary default value at the singular case.
+
+\paragraph{6. Dependence is supplied explicitly.}
+Classical truth tables only see the values of $A$ and $B$ at a row.
+They do not encode whether $A$ and $B$ are probabilistically or
+semantically connected.  Cred makes the probability analogy explicit:
+the marginals do not determine the joint.
+
+\emph{Example.}  If the supplied joint is the product joint
+$j=\cred(A)\cred(B)$ and $\cred(B)>0$, then
+\[
+  \cred(A\mid B)=\cred(A),
+\]
+so the evidence does not update the conclusion.  If the joint is not
+the product joint, the same marginal truth values may yield a nontrivial
+update.  Thus coincident truth values never manufacture a connection.
+
+Together, these differences make the proof language cleaner.  A
+classical proof often works by encoding consequence as a material
+conditional and relying on the reader to remember the semantic
+translation.  A Cred proof states the semantic translation directly:
+which valuations are being ruled out, which status is being transported,
+which dependence data are supplied, and whether conditioning is uniquely
+determined or only a fiber.
+
 The conceptual improvement is not that classical proof techniques are
 invalid.  Direct proof, case split, reductio, and threshold consequence
 remain ordinary semantic methods.  The improvement is that Cred states
