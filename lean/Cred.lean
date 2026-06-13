@@ -143,3 +143,5 @@ import Cred.Probability.FuzzyObservable
 import Cred.Probability.Cox
 import Cred.Examples.ProofGallery
 import Cred.Cond.Uniqueness
+import Cred.Audit.AssumptionLedger
+import Cred.Examples.FalsePrecision
