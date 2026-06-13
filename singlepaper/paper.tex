@@ -16,7 +16,7 @@
   citecolor=blue,
   urlcolor=blue,
   pdfauthor={Christopher Albert},
-  pdftitle={Credence, Conditioning, and the Logic of Impossible Evidence}
+  pdftitle={Conditioning by Fibers: A Chain-Rule Semantics for Probability, Many-Valued Logic, and Impossible Evidence}
 }
 
 \emergencystretch=3em
@@ -45,7 +45,9 @@
 \newcommand{\Lean}[1]{\texttt{#1}}
 \newcommand{\seq}{\vdash}
 
-\title{Credence, Conditioning, and the Logic of Impossible Evidence}
+\title{Conditioning by Fibers:\\
+\large A Chain-Rule Semantics for Probability, Many-Valued Logic, and
+Impossible Evidence}
 \author{Christopher Albert\\
 \small Institute for Theoretical and Computational Physics\\
 \small Graz University of Technology}
@@ -93,7 +95,11 @@ the same shape as zero-evidence conditioning, the whole interval.
 
 The useful contribution is the separation principle: truth values,
 dependence data, and conditional inference are distinct inputs.  The
-formal results are machine-checked in Lean 4 with Mathlib; theorem
+same fiber construction works on the continuum, on the Boolean carrier,
+and on three-valued variants once the carrier and conjunction are
+fixed.  A non-singleton fiber is propagated: subsequent rules carry the
+admissible values instead of selecting a quotient at zero evidence.
+The formal results are machine-checked in Lean 4 with Mathlib; theorem
 names are cited in the text.
 \end{abstract}
 
@@ -111,8 +117,9 @@ developments are useful only when they support that mechanism.
 Rank & Component & Reason \\
 \midrule
 1 & Chain-rule conditioning as an admissibility judgment &
-It gives a precise, non-explosive account of zero evidence:
-$\Cond(0,0)=[0,1]$.  This is the mathematical hinge. \\
+It gives the uniform object: the fiber of $c\conjc e=j$.  At positive
+coherent evidence it is ordinary division; at zero evidence it is
+non-explosive: $\Cond(0,0)=[0,1]$. \\
 2 & Collapse and LP/K$_3$ bridge &
 It explains why the same real-valued semantics has a paraconsistent
 reading at positivity and a paracomplete reading at certainty. \\
@@ -148,6 +155,16 @@ constrains none.}}
 
 That thesis is elementary.  Its force comes from the surrounding
 no-go results.
+
+The title phrase \emph{conditioning by fibers} is literal.  Fix the
+evidence value $e$.  Multiplication by $e$, or the chosen conjunction
+with $e$, is a map from candidate conditionals to joint values.  A
+conditional is admissible exactly when it lies in the preimage of the
+given joint value.  At positive coherent evidence, probability theory
+has a singleton fiber and writes a quotient.  Boolean and many-valued
+variants restrict the carrier; the same preimage construction still
+applies.  A truth table would have to choose one value.  The singular
+fiber at zero evidence is a set of admissible values.
 
 \section{The Setting}
 
@@ -313,6 +330,20 @@ Since $c\le1$, existence requires $j\le e$.
 If $e=0$, the equation is $0=j$.  For $j=0$ every $c$ solves it.
 For $j>0$ none does.  The last case is included in $j>e$.
 \end{proof}
+
+When the fiber is not a singleton, later reasoning need not stop.
+The next step carries the set of admissible values.  A positive
+evidence step carries a singleton and therefore behaves like ordinary
+Bayes division.  A zero-evidence step carries the whole interval.  A
+downstream rule then maps that interval, intersects it with new
+constraints, or leaves it unchanged.  This is the same discipline used
+by interval and credal-set methods: compute with the set until extra
+structure selects a value.  Here the set is the fiber of the
+chain-rule equation itself, not a prior ignorance model.
+The price is explicit: conditioning is no longer a total function at
+singular evidence.  Later rules must carry sets of possible values.
+This bookkeeping is the mechanism.  It replaces division by zero and
+ex falso with propagation of the remaining admissible values.
 
 \begin{figure}[h]
 \centering
@@ -910,11 +941,14 @@ and no ex-falso derivation.
 
 \paragraph{Fuzzy and many-valued logic.}
 Product logic uses the product t-norm and its residuum
-\cite{hajek1998,esteva2001,cintula2011}.  The present system keeps the
-product and De Morgan complement, but refuses to make residuation the
-conditional.  That refusal is not cosmetic: the Curry block shows that
-the full residuated package is incompatible with contraction on this
-carrier.
+\cite{hajek1998,esteva2001,cintula2011}.  More generally, fuzzy
+logics choose a carrier and a conjunction-like operation, then study
+the induced connectives.  The present system uses that algebraic data
+for a different purpose.  It forms the external fiber
+$\{c:c\conjc e=j\}$ and propagates that set when it is not a singleton.
+It therefore does not identify conditioning with the product residuum.
+The Curry block shows why: the full residuated package is incompatible
+with contraction on this carrier.
 
 \paragraph{Paraconsistent and three-valued logic.}
 LP and K$_3$ arise through the collapse to
@@ -922,6 +956,18 @@ $\{0,\half,1\}$ \cite{kleene1952,asenjo1966,priest1979,belnap1977}.
 The new claim is the exact formula-level bridge:
 LP is positivity, K$_3$ is certainty.  The bridge is then shown to fail
 for conditioning.
+
+\paragraph{Connectives and consequence.}
+Non-classical logic already separates an object-language conditional
+from a metalanguage consequence relation \cite{priest2008,anderson1975}.
+Classical logic can hide the distinction because $A\models B$ coincides
+with validity of $A\supset B$.  That coincidence is not structural.  It
+fails or changes in many non-classical settings.  Cred uses the
+separation as a design rule: conditioning is the external judgment
+$\Adm(c;j,e)$, not a new truth-functional connective.  The additional
+claim is algebraic.  The external relation is fixed by $c\conjc e=j$,
+and its zero-evidence fiber cannot be represented by any collapsed
+truth function.
 
 \paragraph{Conditionals.}
 The de Finettian line studies trivalent truth conditions and their
@@ -931,34 +977,47 @@ treats conditional credence as the admissibility relation determined
 by the chain rule.
 
 \paragraph{Probability and imprecision.}
-Primitive conditional probabilities go back to R\'enyi and Popper
-\cite{renyi1955,popper1959,krauss1968,dubins1975}.  Imprecise
-probability studies sets of probabilities as first-class objects
-\cite{walley1991,troffaes2014}.  Disintegration accounts condition by
-measures on level sets of a statistic \cite{chang1997}.  Here the
-fiber is narrower: $\Cond(j,e)$ is the preimage of one scalar equation.
-It becomes wide exactly when evidence is zero.
+Cox and Jaynes read probability as extended logic
+\cite{cox1961,jaynes2003}.  Standard conditional probability then uses
+division at positive evidence.  R\'enyi and Popper instead take
+conditional probability as primitive
+\cite{renyi1955,popper1959,krauss1968,dubins1975}.  Disintegration and
+Markov-kernel accounts condition by families of measures over fibers or
+level sets \cite{chang1997,fritz2020}.  De Finetti-style conditional
+events make the false-antecedent case void, and coherence theory studies
+compounds of such conditionals
+\cite{definetti1936,gilio2013,gilio2014,flaminio2020conditionals}.
+Imprecise probability studies sets of probabilities as first-class
+objects \cite{walley1991,troffaes2014}.  These schools already supply
+most ingredients: positive-evidence division, primitive conditionals,
+conditioning over fibers, void antecedents, and set-valued updating.
+Cred puts a smaller invariant under them.  The set $\Cond(j,e)$ is the
+preimage of one scalar equation.  It becomes wide exactly when
+evidence is zero.  Its width records loss of constraint, not subjective
+indecision.
 
 \paragraph{Conditional-event algebras.}
-Gilio and Sanfilippo analyze conditional random quantities and
-compounds of conditionals in a coherence setting \cite{gilio2014}.
-Flaminio, Godo, and Hosni build Boolean algebras of conditionals and
-probability measures over them \cite{flaminio2020conditionals}.  The
-present construction is more austere: it keeps only the scalar value,
-the supplied joint, and the admissible fiber.
+Conditional-event algebras are richer object theories: they build
+compound conditionals and probabilities over them.  Cred is narrower.
+It keeps the scalar value, the supplied joint, and the admissible
+fiber.  The same chain-rule fiber works on $[0,1]$, on the Boolean
+carrier, and on three-valued variants.
 
 \section{What Is Actually Novel}
 
 The novelty is not the product t-norm, the Kleene lattice, primitive
-conditional probability, or paraconsistency.  Those are established.
-The publishable contribution is the verified conjunction of six
+conditional probability, set-valued probability, or paraconsistency.
+Those are established.  The publishable contribution is the verified
+conjunction of six
 claims:
 \[
 \begin{array}{ll}
 \text{(N1)} &
 \Adm_V(c;j,e)\Longleftrightarrow c\conjc e=j
-\text{ as external conditional semantics};\\[1mm]
-\text{(N2)} & \Cond(0,0)=[0,1]\text{ as the exact no-ex-falso mechanism};\\[1mm]
+\text{ as a carrier-uniform fiber semantics};\\[1mm]
+\text{(N2)} &
+\text{propagation of non-singleton fibers, with }
+\Cond(0,0)=[0,1]\text{ as no ex falso};\\[1mm]
 \text{(N3)} & \text{LP/K$_3$ collapse bridges for full formulas};\\[1mm]
 \text{(N4)} & \text{no truth-functional bridge for conditioning};\\[1mm]
 \text{(N5)} & \text{scalar admissibility proof theory, sound and closed-complete};\\[1mm]
