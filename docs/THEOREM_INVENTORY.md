@@ -55,7 +55,7 @@ decidability of real equality), not through the logic of Cred.
 | Bridge holds at boundaries, fails interior | `cond_bridge_boundary`, `cond_bridge_fails_interior` | `Bridge/CondBridge.lean` | theorem |
 | Bayesian update inherits the bridge | `update_bridge` | `Bridge/CondBridge.lean` | theorem |
 | Zero-evidence triple | `zero_evidence_duality` | `Bridge/CondBridge.lean` | theorem |
-| Min-copula uniqueness on Bayes consistency | `Cond/Copula.lean` results | `Cond/Copula.lean` | theorem |
+| Truth-functional idempotent scalar joint is forced to min under copula-like assumptions; general probability must supply event-specific joints | `min_copula_unique`, `truth_functional_forces_min`, `truth_functional_idempotent_implies_max_dependence` | `Cond/Copula.lean` | theorem |
 
 ## Part 3: paradox without explosion, and the arithmetic layer
 
