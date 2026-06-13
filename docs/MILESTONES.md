@@ -10,6 +10,11 @@ All Lean results build under `lake build` with zero `sorry`. Load-bearing
 theorems are checked with `#print axioms` and depend only on
 `propext`, `Classical.choice`, `Quot.sound` (no `sorryAx`).
 
+The foundation-layer issue set #633–#645 (dependence contexts, robust collapse,
+generative proof theory, proof provenance, branch semantics, finite-world and
+sqrt2 examples, paper integration, architecture discipline) is implemented and
+closed. Anchors are registered in `THEOREM_INVENTORY.md`.
+
 Core algebra and conditioning
 - Credence value algebra: negation, product conjunction, De Morgan disjunction,
   order, fixed points (`Core/Value.lean`).
@@ -242,4 +247,30 @@ side condition for that fragment. Remaining: quantifiers, equality, and inductio
 the generative calculus, and the full real-number development.
 
 A related open item already noted elsewhere is the four-valued (FDE) extension that
-would separate "both" from "neither"; the three-valued carrier cannot. 
+would separate "both" from "neither"; the three-valued carrier cannot.
+
+Framing, stated once and held throughout. The joint `j = cred(A ∧ B)` is supplied
+dependence data, not a value function of the marginals: `cred(A)` and `cred(B)` do
+not determine it. The product `⊗` is one coupling policy (independence), `min` is
+another (maximum positive dependence), and a general joint is any point of the
+Fréchet interval. Fuzzy logic generalizes classical logic by grading truth values;
+Cred additionally generalizes the joint, keeping it as supplied structure rather
+than fixing it by a truth function. Probability is not fuzzy logic with numbers; it
+is logic plus dependence, and the chain-rule fiber `c ⊗ e = j` is the interface.
+
+## Foundations roadmap: what remains for a working basis
+
+The kernel is a serious semantic foundation, not yet a complete basis for everyday
+mathematics. The honest remaining work, in dependency order:
+
+1. Generative proof theory: extend the connective fragment with equality
+   substitution, quantifier introduction/elimination, definitions, and induction,
+   with direct soundness, retiring the semantic-oracle rule of the labelled calculus.
+2. Proof provenance over the real foundation language (not just the toy proof type),
+   with a used-assumption DAG.
+3. Branch semantics for `T + R` over genuine theories, preserving the dependency
+   chain through a localized contradiction.
+4. Dependence networks: credal/joint families over many propositions, beyond the
+   single two-proposition context.
+5. A mathematics-library seed past sqrt2: order, finite sets, and further
+   number theory, then a real-number development.
