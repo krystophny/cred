@@ -62,10 +62,13 @@ Probability and Many-Valued Logic}
 \maketitle
 
 \begin{abstract}
-Probability theory and many-valued logic share the same core algebra
+Probability theory and many-valued logic share scalar operations
 on $[0,1]$: the product De Morgan triplet (product conjunction,
 probabilistic-sum disjunction, standard complement).
-They diverge on the conditional.
+They are not the same theory.  Probability supplies an event-specific
+joint that no truth-functional triplet fixes; product conjunction is
+one coupling policy (independence), not the general value of
+$\cred(A \land B)$.  The two also diverge on the conditional.
 Probability divides and is undefined at zero; product residuation
 forces ex falso at zero; chain-rule conditioning
 ($\condc{A}{B} \conjc \cred(B) = \cred(A \land B)$)
@@ -114,14 +117,19 @@ $\min(b/a,\, 1)$; but at $a = 0$, the supremum is $1$.
 Ex falso quodlibet is built into every residuated
 implication~\cite{hajek1998,esteva2001,cintula2011}.
 
-Both traditions share the same core algebra on $[0,1]$: the
+Both traditions use the same scalar operations on $[0,1]$: the
 \emph{product De Morgan triplet}~\cite{klement2000}.
 Product conjunction ($c_1 \conjc c_2 = c_1 \cdot c_2$),
 probabilistic-sum disjunction
 ($c_1 \disjc c_2 = c_1 + c_2 - c_1 c_2$), and standard complement
 ($\negc c = 1 - c$) are common to both.
-They differ \emph{only} in the conditional: probability uses division
-(undefined at zero), Product Logic uses residuation (ex falso at zero).
+The shared algebra is not the whole story.  Product conjunction is one
+coupling policy: $c_1 \cdot c_2$ is the joint under independence, not
+the general value of $\cred(A \land B)$.  Many-valued logic fixes the
+joint by a truth function; probability supplies it on events.
+The two differ in how the joint is supplied and in the conditional:
+probability uses division (undefined at zero), Product Logic uses
+residuation (ex falso at zero).
 
 Chain-rule conditioning offers a third answer.
 The chain rule
@@ -458,6 +466,15 @@ the \L ukasiewicz copula $C(a,b) = \max(a+b-1, 0)$ also fails
 idempotence (Lean: \texttt{luk\_not\_idempotent}).
 A comparison table appears in Appendix~\ref{app:proofs}
 (Table~\ref{tab:joint-comparison}).
+
+The uniqueness is a truth-functionality boundary, not a claim that
+probabilistic dependence collapses to $\min$.  It forces $\min$ only
+when one insists on a single symmetric idempotent scalar joint for all
+proposition pairs.  General probability keeps the joint free: it
+supplies $\cred(A \land B)$ per pair, anywhere in the
+Fr\'echet--Hoeffding interval
+$[\max(a+b-1,0),\, \min(a,b)]$, and the copula records that supplied
+dependence rather than a universal truth function.
 
 %=============================================================================
 \section{Chain-Rule Conditioning}

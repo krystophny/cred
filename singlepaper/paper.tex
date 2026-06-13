@@ -371,6 +371,71 @@ This is the whole non-explosion mechanism.  From impossible evidence
 one obtains no arbitrary conclusion because no conclusion is selected.
 The equation has lost rank.
 
+\section{Binary and Continuous Cred}
+\label{sec:binary-continuous}
+
+Write $c$ for the value of ``$A$ given $B$'', $e$ for the value of $B$,
+and $j$ for the value of ``$A$ and $B$''.  The basic relation is
+$ce=j$.  Reading it on the Boolean carrier and on $[0,1]$ separates two
+ideas that ordinary conditional probability folds together: loss of
+constraint at impossible evidence, and freedom in the joint.
+
+\subsection{Binary}
+On $\mathbf 2=\{0,1\}$ the joint is Boolean conjunction $j=A\land B$,
+fixed by the two truth values.  With $e=B$ the equation $ce=j$ gives:
+\begin{itemize}[nosep]
+\item $B=1$: then $c\cdot1=j=A$, so $c=A$.
+\item $B=0$: then $c\cdot0=0$ holds for $c=0$ and $c=1$, so $c$ is
+unconstrained.
+\end{itemize}
+\begin{center}
+\begin{tabular}{@{}cccc@{}}
+\toprule
+$A$ & $B=e$ & $j=A\land B$ & admissible $c=(A\mid B)$\\
+\midrule
+$0$ & $0$ & $0$ & $0$ or $1$\\
+$1$ & $0$ & $0$ & $0$ or $1$\\
+$0$ & $1$ & $0$ & $0$\\
+$1$ & $1$ & $1$ & $1$\\
+\bottomrule
+\end{tabular}
+\end{center}
+True evidence fixes the conditional to the value of $A$; false evidence
+leaves it free.  This is the binary form of no ex falso.  The Boolean
+carrier carries no dependence: $A$ and $B$ already determine $j$, so two
+true statements cannot be marked independent, correlated, or irrelevant.
+
+\subsection{Continuous}
+On $[0,1]$ the marginals no longer fix the joint.  For values $a,b$ the
+admissible joint ranges over the Fr\'echet interval
+\[
+  \max(a+b-1,0)\le j\le\min(a,b),
+\]
+which is the dependence freedom.  At $a=0.6$, $b=0.7$ it is
+$0.3\le j\le0.6$.  Independence is $j=ab=0.42$, giving the conditional
+$j/b=0.6$: learning $B$ does not move $A$.  Maximum positive dependence
+is $j=\min(a,b)=0.6$, giving $0.6/0.7\approx0.857$: $B$ supports $A$.
+Minimal overlap is $j=0.3$.  The supplied joint selects the dependence;
+the marginal values alone do not.
+
+\subsection{The chain rule reads both ways}
+Standard conditional probability computes the conditional from the
+joint: $j,e\Rightarrow c=j/e$ for $e>0$.  The same equation also
+computes the joint from a conditional taken as primitive:
+$c,e\Rightarrow j=ce$.  With $c=0.8$, $e=0.5$ the joint is $0.4$.  So
+the conditional is first-class: it need not be defined as a quotient.
+It is not self-sufficient, since $j=ce$ still needs the evidence.  The
+same $c=0.8$ with $e=0.1$ gives $j=0.08$.
+
+The direction that division loses is the singular one:
+$e=0$, $j=0\Rightarrow c\in[0,1]$.  Division writes $0/0$; a residuated
+implication defaults to $1$; the chain rule records the rank loss as the
+whole fiber, by the admissible-set trichotomy.  The constraint
+$ce=j$ is therefore read in both useful directions,
+$j,e\Rightarrow c$ and $c,e\Rightarrow j$, which makes the relation more
+symmetric than the ratio definition while keeping the joint as supplied
+dependence data.
+
 \section{A Running Computation}
 
 Let $a=\cred(A)$ and $b=\cred(B)$.  Suppose the joint is the
