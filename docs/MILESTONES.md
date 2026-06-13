@@ -21,6 +21,28 @@ Core algebra and conditioning
   probability-style reasoning supplies `J(A,B)` separately (`Valuation.lean`,
   `Cond/Copula.lean`).
 
+Dependence contexts and robust collapse
+- Dependence contexts carrying the joint exactly or as a Fréchet interval, with
+  product / min / Fréchet-lower instances, the image conditional interval, threshold
+  robustness, and dependence sensitivity (`Dependence/Context.lean`,
+  `Dependence/Conditioning.lean`).
+- Robust collapse of a conditional interval to a three-valued `RobustStatus`
+  (`Dependence/RobustCollapse.lean`).
+- Finite-world examples separating pointwise values and marginals from the joint
+  (`Examples/FiniteWorlds.lean`, `Examples/RobustConditioning.lean`).
+
+Proof provenance, branches, and the generative calculus
+- A toy provenance proof type with `usedAssumptions`, `provenance_sound`, and the
+  semantic-consequence gap (`theoremNode_uses_nothing`, `entails_but_unused`)
+  (`ProofTheory/Provenance.lean`, `Examples/ProofProvenance.lean`).
+- A toy branch type with `local_contradiction_no_explosion`, and the sqrt2
+  number-theoretic seed: parity, divisibility, the core contradiction, and an explicit
+  dependency chain (`ProofTheory/Branches.lean`, `Examples/Branches.lean`,
+  `Math/Parity.lean`, `Math/Divisibility.lean`, `Examples/Sqrt2Branch.lean`).
+- A generative connective calculus for the conjunction/disjunction fragment with
+  `generative_sound`, removing the semantic-oracle side condition for that fragment
+  (`ProofTheory/Labels.lean`, `ProofTheory/Generative.lean`).
+
 Consequence and bridges
 - LP / K3 / threshold consequence and the no-explosion results
   (`Core/Consequence.lean`, `Threshold.lean`).
@@ -179,30 +201,45 @@ Object-language Sigma-1 representability of a recursively-defined predicate is
 proven; the specific `checkCodeNat` instance reuses this machinery with the
 checker's decode equations.
 
-## Dependence beyond the joint: not yet formalized
+## Dependence beyond the joint: a first formalized cut
 
 The formal core treats one dependence object: the supplied scalar joint `j`, with
 the admissible conditional as the fiber of `c e = j`. Three further layers come up
-repeatedly in discussion and are deliberately not claimed as Cred results. They are
-recorded here so the scope stays honest.
+repeatedly in discussion. A first formalized cut of each now exists; the work
+recorded below is the honest remainder, not the whole layer.
 
-- Credal propagation over a Fréchet family. Carrying the joint as an interval
-  `[max(a+b-1,0), min(a,b)]` and propagating the image conditional interval is the
-  operational reading of the existing fiber/credal-set treatment, and the
-  collapse-last discipline follows from the conditional no-go. The single-fiber and
-  zero-evidence cases are formalized; a systematic interval/credal-network layer over
-  many propositions is not.
+- Credal propagation over a Fréchet family. A dependence context carries the joint
+  exactly or as an interval `[max(a+b-1,0), min(a,b)]`, with the product, min, and
+  Fréchet-lower joints as named instances (`Dependence/Context.lean`). The image
+  conditional interval, robustness above a threshold, and dependence sensitivity are
+  proven (`Dependence/Conditioning.lean`), with a worked rational case
+  (`Examples/RobustConditioning.lean`). Robust collapse maps an interval to a
+  three-valued `RobustStatus` (`Dependence/RobustCollapse.lean`). Formalized: the
+  single context and its interval image. Remaining: full credal networks over many
+  propositions.
 - Proof provenance. Which assumptions a derivation actually uses is a
   dependency-graph property, distinct from semantic consequence (a theorem `B` has
-  `A |= B` for every `A`, yet its proof need not use `A`). The labelled calculus and
-  kernel certificates certify soundness; they do not track assumption use. No
-  provenance layer is formalized, and the no-explosion result is not a substitute for
-  one.
+  `A |= B` for every `A`, yet its proof need not use `A`). A toy provenance proof type
+  tracks named assumptions, `usedAssumptions` reads off the dependency set, and
+  `provenance_sound` bounds it by the available names while `checks_semantic_sound`
+  recovers consequence; `theoremNode_uses_nothing` and `entails_but_unused` exhibit
+  the gap (`ProofTheory/Provenance.lean`, `Examples/ProofProvenance.lean`).
+  Remaining: a full provenance DAG over the foundation language.
 - Counterfactual branches. Reasoning under an assumption that contradicts the ambient
-  theory, `T + R` with `R` false, is a hypothetical-extension question. Cred keeps
-  reductio as empty-countermodel elimination and blocks contradiction-licenses-
-  everything, but it has no branch semantics that localizes which consequences arise
-  before the inconsistency. This is unformalized.
+  theory, `T + R` with `R` false, is a hypothetical-extension question. A toy branch
+  type designates formulas through a value assignment; `local_contradiction_no_explosion`
+  shows a locally contradictory branch designating both halves of a contradiction
+  without designating an unrelated formula (`ProofTheory/Branches.lean`,
+  `Examples/Branches.lean`). The sqrt2 seed gives a concrete number-theoretic branch:
+  parity and divisibility lemmas (`Math/Parity.lean`, `Math/Divisibility.lean`) feed
+  `sqrt2_core_contradiction` and an explicit dependency chain
+  (`Examples/Sqrt2Branch.lean`). Remaining: `T + R` branch semantics over real theories.
+
+The generative connective calculus is a further cut. `ProofTheory/Generative.lean`
+gives a labelled `Derives` relation for the conjunction/disjunction fragment with
+`generative_sound`, so designation follows from the rules without a semantic-oracle
+side condition for that fragment. Remaining: quantifiers, equality, and induction in
+the generative calculus, and the full real-number development.
 
 A related open item already noted elsewhere is the four-valued (FDE) extension that
 would separate "both" from "neither"; the three-valued carrier cannot. 

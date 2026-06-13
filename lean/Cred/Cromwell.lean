@@ -65,7 +65,7 @@ phrase the tie at this boundary. -/
     precondition excludes the absorbing point. This is Cromwell's rule as a
     side condition on the update. -/
 theorem bayesianUpdate_requires_positive_evidence (joint evidence : Credence)
-    (h_pos : 0 < evidence.val) (h_le : joint.val ≤ evidence.val) :
+    (h_pos : 0 < evidence.val) (_h_le : joint.val ≤ evidence.val) :
     evidence ≠ 0 := by
   intro h
   rw [h] at h_pos

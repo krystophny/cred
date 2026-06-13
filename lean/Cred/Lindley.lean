@@ -127,7 +127,7 @@ theorem condSet_univ_implies_surjective (S : Set Credence) (e : Credence)
 
 /-- With the full feasible joint class {j | j ≤ e} and e > 0, every posterior
     in [0,1] is realised. -/
-theorem condSet_full_feasible_eq_univ (e : Credence) (he : 0 < e.val) :
+theorem condSet_full_feasible_eq_univ (e : Credence) (_he : 0 < e.val) :
     condSet {j | j.val ≤ e.val} e = Set.univ := by
   apply Set.eq_univ_of_forall
   intro c

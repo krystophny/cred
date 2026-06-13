@@ -62,6 +62,19 @@ Use this checklist before release or submission. Every item should either be ans
 - Are external computability/representability and object-language arithmetization kept separate?
 - Is stratified reflection presented as level `n+1` validating level `n`, not same-level self-soundness?
 
+## Foundation layers (dependence, proof theory, toy models)
+
+- Does every new `\Lean` anchor in `singlepaper` resolve to a real declaration in the listed modules (`Cred/Dependence/{Context,Conditioning,RobustCollapse}.lean`, `Cred/ProofTheory/{Labels,Generative,Provenance,Branches}.lean`, `Cred/Examples/{FiniteWorlds,RobustConditioning,ProofProvenance,Branches,Sqrt2Branch}.lean`, `Cred/Math/{Parity,Divisibility}.lean`)?
+- Are dependence contexts and interval-fiber images stated with the supplied-joint discipline, not as `⊗` standing in for a general `cred(A ∧ B)`?
+- Is `Dependence/RobustCollapse.lean` consistent with the existing Kleene collapse, with no second collapse story?
+- Does the generative calculus in `ProofTheory/Generative.lean` avoid a rule that imports semantic consequence as a side condition (no semantic-oracle rule)?
+- Is generative-calculus soundness proved by induction on derivations, not by appeal to the target semantics?
+- Is proof provenance (`ProofTheory/Provenance.lean`) kept distinct from semantic entailment, so a provenance tag never substitutes for a soundness proof?
+- Are hypothetical-branch no-explosion results (`ProofTheory/Branches.lean`, `Examples/{Branches,Sqrt2Branch}.lean`) scoped to the branch construction, not overclaimed as full T+R semantics?
+- Do all example modules stay under `Cred/Examples/` with no core declarations depending on them?
+- Do the foundation layers add no internal conditional constructor; is conditioning still external?
+- Does `lake build` stay green on these modules with zero `sorry` and zero warnings?
+
 ## Proof checker and trusted base
 
 - Is the Lean proof trusted base separated from the runtime checker trusted base?

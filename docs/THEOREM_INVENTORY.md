@@ -122,6 +122,53 @@ appears in the rows above (for example `solutions_eq_fixedPoints`,
 | Robustness audit (robust / branch-dependent / inadmissible) | `excluded_middle_robust`, `choice_not_robust`, `audit_verdicts_exclusive` | `Math/Robustness.lean` | theorem |
 | Full nonlinear symplectic / FEEC / SSP methods | n/a | n/a | citation |
 
+## Dependence, proof theory, and toy worlds (foundation layer, issue #645)
+
+These anchors are foundation-layer toy and dependence constructions, not
+publication-grade results. They back the worked examples and the explicit
+joint-credence machinery: dependence handled by supplying a joint context
+rather than by overloading `⊗`.
+
+### Dependence (`Cred/Dependence/`)
+
+| Claim | Lean name | Module | Status |
+|---|---|---|---|
+| Joint context as exact / coherent / interval data; family of joints | `ExactJointContext`, `CoherentJointContext`, `IntervalJointContext`, `JointFamily` | `Dependence/Context.lean` | theorem |
+| Conditioning is an interval under positive evidence | `cond_interval_of_pos` | `Dependence/Conditioning.lean` | theorem |
+| Conditioning fiber on zero evidence is unconstrained | `cond_fiber_zero` | `Dependence/Conditioning.lean` | theorem |
+| Robust above threshold; threshold-sensitive dependence | `robust_above_threshold`, `dependence_sensitive` | `Dependence/Conditioning.lean` | theorem |
+| Three-valued collapse of an interval verdict | `collapseIntervalToThree`, `RobustStatus` | `Dependence/RobustCollapse.lean` | theorem |
+| Collapse characterizations (incoherent / underdetermined / robust 0,1,half) | `collapse_incoherent_iff`, `collapse_underdetermined_of_full`, `collapse_robustZero_imp`, `collapse_robustOne_iff`, `collapse_robustHalf_imp` | `Dependence/RobustCollapse.lean` | theorem |
+
+### Proof theory (`Cred/ProofTheory/`)
+
+| Claim | Lean name | Module | Status |
+|---|---|---|---|
+| Labels and their designation of credences | `Label`, `designates` | `ProofTheory/Labels.lean` | theorem |
+| Generative derivation relation, sound | `Derives`, `generative_sound` | `ProofTheory/Generative.lean` | theorem |
+| Assumption provenance tracked and sound | `usedAssumptions`, `provenance_sound` | `ProofTheory/Provenance.lean` | theorem |
+| Local contradiction does not explode | `local_contradiction_no_explosion` | `ProofTheory/Branches.lean` | theorem |
+
+### Examples (`Cred/Examples/`)
+
+| Claim | Lean name | Module | Status |
+|---|---|---|---|
+| Finite-world entailment is set inclusion | `entails_iff_subset` | `Examples/FiniteWorlds.lean` | theorem |
+| Entailment witnesses: `A` not `B`, `A` entails `C` | `A_not_entails_B`, `A_entails_C` | `Examples/FiniteWorlds.lean` | theorem |
+| Pointwise values do not determine entailment; marginals do not determine the joint | `pointwise_does_not_determine`, `joint_not_determined_by_marginals` | `Examples/FiniteWorlds.lean` | theorem |
+| Robust conditioning: Frechet bounds, product joint, conditioning interval | `frechet_lower`, `frechet_upper`, `product_joint`, `cond_interval` | `Examples/RobustConditioning.lean` | theorem |
+| Robust at low threshold, sensitive at high threshold | `robust_at_low_threshold`, `sensitive_at_high_threshold` | `Examples/RobustConditioning.lean` | theorem |
+| Provenance worked cases | `used_assumptions_example`, `entails_but_unused` | `Examples/ProofProvenance.lean` | theorem |
+| Local contradiction without explosion, worked | `local_contradiction_no_explosion_example` | `Examples/Branches.lean` | theorem |
+| Sqrt-2 core contradiction and dependency chain | `sqrt2_core_contradiction`, `sqrt2_dependency_chain` | `Examples/Sqrt2Branch.lean` | theorem |
+
+### Math (`Cred/Math/`)
+
+| Claim | Lean name | Module | Status |
+|---|---|---|---|
+| Even square implies even base | `even_square_implies_even` | `Math/Parity.lean` | theorem |
+| Sqrt-2 core: both `p` and `q` even, hence not coprime | `sqrt2_core_even_p`, `sqrt2_core_even_q`, `not_coprime_if_both_even` | `Math/Divisibility.lean` | theorem |
+
 ## Reproducing the ledger
 
 ```
