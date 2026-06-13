@@ -41,6 +41,10 @@ import Cred.Probability.FuzzyObservable
 import Cred.Foundation.ClassicalRecovery
 import Cred.Foundation.Induction
 import Cred.Foundation.HigherLayerDemo
+import Cred.Approx.ScoreRecipes
+import Cred.Set.FuzzyExamples
+import Cred.Approx.NumericsExamples
+import Cred.Examples.Fractal
 
 -- Core/Value: interval arithmetic over the Mathlib reals. The real-number
 -- order and field instances carry all three kernel axioms transitively.
@@ -113,3 +117,25 @@ import Cred.Foundation.HigherLayerDemo
 -- composing foundation kernel rules (equalitySymm + equalitySubst) through
 -- FoundationProof.sound. Measured: propext, Classical.choice, Quot.sound.
 #print axioms Cred.Foundation.Demo.higher_layer_builds_on_foundation
+
+-- Approx/ScoreRecipes: the rational residual-to-score recipe is antitone in the
+-- residual. Pure exact rational arithmetic (max, division, linarith/gcongr), but
+-- the rational order/field instances ride Mathlib. Measured: propext,
+-- Classical.choice, Quot.sound.
+#print axioms Cred.Approx.Rat.scoreEps_mono
+
+-- Set/FuzzyExamples: the crisp membership function recovers its classical set on
+-- the nose and takes only the values {0,1}. Rides the Credence carrier through
+-- credence_zero_ne_one. Measured: propext, Classical.choice, Quot.sound.
+#print axioms Cred.CredSet.fuzzy_membership_crisp_recovery
+
+-- Examples/Fractal: the finite box-count estimate log(2^k)/log(3^k) equals the
+-- Cantor similarity dimension log 2/log 3 for every k ≥ 1. Uses Mathlib Real.log;
+-- the k's cancel by log_pow. Measured: propext, Classical.choice, Quot.sound.
+#print axioms Cred.Examples.Fractal.box_estimate_eq_dim
+
+-- Approx/NumericsExamples: numerics status anchor. The full explicit-Euler step
+-- h = 1 hits the conservation scale, so the structure degree collapses to the
+-- impossibility credence. Rides the real-valued scoreEpsCredence and the
+-- Credence carrier. Measured: propext, Classical.choice, Quot.sound.
+#print axioms Cred.Approx.explicitEuler_full_step_degree_zero

@@ -150,3 +150,7 @@ import Cred.Foundation.ClassicalRecovery
 import Cred.Foundation.Induction
 import Cred.Foundation.HigherLayerDemo
 import Cred.Foundation.Benchmarks
+import Cred.Approx.ScoreRecipes
+import Cred.Set.FuzzyExamples
+import Cred.Approx.NumericsExamples
+import Cred.Examples.Fractal

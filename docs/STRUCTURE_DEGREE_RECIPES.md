@@ -82,3 +82,10 @@ implicit.
 Any new `Approx` example states its `P`, its residual `r_P`, its scale `eps` with
 a documented origin, and uses `scoreEps` (or justifies a different score in one
 line). A structure degree without a residual and a scale is not admitted.
+
+## Meaningful degrees
+
+The residual-to-score recipe is one of six allowed degree sources. The full
+classification, with the meaning and validity requirement for each source,
+lives in `MEANINGFUL_DEGREES_GUARDRAILS.md`. A degree with no named source is
+not allowed in the paper.
