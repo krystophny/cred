@@ -1,0 +1,100 @@
+\section{Proof Patterns: Classical Form and Cred Form}
+\label{sec:proof-patterns}
+
+The proof layer should keep the old lesson from the material
+conditional separate from the new conditioning mechanism.  A proof is
+not a truth table entry.  It is a way of eliminating countermodels or
+transporting bounds through verified constraints.  The following table
+summarizes the main proof patterns used in ordinary mathematics and
+how they are expressed in Cred.
+
+\begin{table}[h]
+\centering
+\begin{tabular}{@{}p{0.20\linewidth}p{0.34\linewidth}p{0.34\linewidth}@{}}
+\toprule
+Pattern & Classical reading & Cred reading \\
+\midrule
+Direct proof &
+Assume all premises in $\Gamma$ and derive $\varphi$.  Semantically,
+there is no model with $\Gamma$ true and $\varphi$ false. &
+Show that every valuation satisfying the labelled premises also
+satisfies the required label on $\varphi$: positive, certain, or
+threshold $t$.  In symbols, prove $\Gamma\models_t\varphi$. \\
+\addlinespace
+Contrapositive &
+For classical implication, prove $\neg\varphi\Rightarrow\neg\psi$ in
+place of $\psi\Rightarrow\varphi$.  This relies on involutive negation
+and the classical connection between implication and consequence. &
+Use only where the relevant semantic consequence theorem is available.
+Cred does not introduce an internal implication just to make
+contraposition syntactic.  Negation is a value operation; consequence
+is still external. \\
+\addlinespace
+Proof by contradiction / reductio &
+Assume the negation of the target and derive contradiction.  In model
+terms, every countermodel to the target is eliminated. &
+Use countermodel emptiness directly.  Reductio is legitimate exactly
+when the set of valuations satisfying the premises and failing the
+conclusion's label is empty.  A contradiction among premises alone is
+not the engine of inference. \\
+\addlinespace
+Explosion &
+From inconsistent premises $A,\neg A$, every $B$ follows, because no
+classical valuation satisfies both premises. &
+Explosion is blocked at the relevant thresholds by surviving
+countermodels.  The contradictory pair can be designated without
+forcing an arbitrary conclusion. \\
+\addlinespace
+Case split &
+Prove the conclusion under each case and combine the cases by excluded
+middle or a partition of possibilities. &
+Split the value/fiber space.  Positive evidence gives a singleton
+fiber; zero evidence gives the whole interval; incoherent pairs give
+empty fibers.  Subsequent rules map or intersect the remaining
+admissible set. \\
+\addlinespace
+Modus ponens &
+From $A$ and $A\to B$, infer $B$, where $\to$ is often internalized as
+a connective. &
+There is no internal conditional formula.  The chain rule is used as a
+side judgment: from evidence above threshold $t$ and an admissible
+conditional bounded below by $\ell$, infer the joint above
+$\ell\conjc t$. \\
+\addlinespace
+Bayesian update &
+Given $P(A\cap B)$ and $P(B)>0$, divide to get $P(A\mid B)$. &
+Use the admissible-set trichotomy.  Positive evidence gives the unique
+conditional $j/e$; zero evidence carries the non-singleton fiber rather
+than dividing by zero. \\
+\addlinespace
+Independence / irrelevance &
+If $P(A\cap B)=P(A)P(B)$ and $P(B)>0$, then $P(A\mid B)=P(A)$: the
+evidence does not update the conclusion. &
+The joint is supplied dependence data.  A product joint gives trivial
+conditioning; a non-product joint gives nontrivial update.  Truth values
+alone do not determine either case. \\
+\bottomrule
+\end{tabular}
+\caption{Classical proof patterns and their Cred counterparts.  The
+Cred column replaces internal implication by labelled consequence,
+countermodel elimination, and external conditioning judgments.}
+\label{tab:proof-patterns}
+\end{table}
+
+The conceptual improvement is not that classical proof techniques are
+invalid.  Direct proof, case split, reductio, and threshold consequence
+remain ordinary semantic methods.  The improvement is that Cred states
+what each method is actually using.  Direct proof eliminates
+countermodels.  Reductio eliminates the countermodel set of the target.
+Bayesian update inverts a chain-rule constraint only when that inverse
+is single-valued.  At zero evidence, the proof object is not an
+arbitrary conclusion but a propagated set of admissible values.
+
+This gives a clean replacement for the misleading material-conditional
+reading of proof.  Classical mathematics may continue to use material
+implication internally when appropriate.  Cred keeps a stricter
+interface: object-language formulas have values; consequence is an
+external relation over valuations; conditioning is an external
+admissibility judgment; dependence is supplied by the joint.  This is
+why the system can preserve the useful classical proof patterns without
+turning false evidence into a universal premise.
