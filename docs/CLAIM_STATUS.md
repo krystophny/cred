@@ -78,6 +78,16 @@ below. This ledger keeps the paper from drifting into unsupported claims. See
 | A higher layer composes on the foundation API | Lean example | `higher_layer_builds_on_foundation` | none |
 | Foundation benchmark suite | Lean theorem | `foundation_benchmark_master` | as per its members |
 
+## Graded structure (degrees sourced, never arbitrary)
+
+| Claim | Category | Lean anchor | Assumptions |
+|---|---|---|---|
+| Residual-to-score recipe is a valid degree source | Lean theorem | `scoreEps`, `scoreEps_mono` | residual >=0, tolerance >0 |
+| Fuzzy membership recovers the crisp set / classical cut | Lean theorem | `fuzzy_membership_crisp_recovery`, `threshold_cut_crisp` | finite type |
+| Structure preservation as graded status (exact = degree 1; near = residual score) | Lean theorem / example | `symplectic_exact_degree_one`, `explicitEuler_degree_lt_one` | the named schemes |
+| Cantor similarity dimension log2/log3 (unique Moran solution); exact box estimate | Lean theorem | `cantor_moran`, `cantor_moran_unique`, `box_estimate_eq_dim` | the Cantor construction |
+| Topology / manifolds / differential geometry as a graded status layer | conjecture / roadmap | (none yet) | future; see FOUNDATION_TRACK_ROADMAP.md |
+
 ## Explicitly not claimed
 
 - Cred is **not** claimed to be the unique many-valued logic, nor "better fuzzy logic".

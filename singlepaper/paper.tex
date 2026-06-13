@@ -1892,6 +1892,95 @@ completeness, a provenance DAG over the object language, real analysis).
 What Cred adds is not a new truth table but a Lean-checked layer that names
 each commitment and recovers the classical one exactly.
 
+\section{Graded Structure Status}
+\label{sec:graded-structure}
+
+One pattern unifies fuzzy sets, structure-preserving numerics, and
+fractal dimension.  A structure predicate becomes a degree map
+$P:X\to[0,1]$: classical mathematics asks whether $P$ holds; the graded
+layer asks to what degree, under which tolerance, and with what
+robustness.  Write $\mathrm{ExactPreserves}(P,x)\iff P(x)=1$ and
+$\mathrm{PreservesAt}(t,P,x)\iff t\le P(x)$.
+
+A degree is admitted only when it has a named source: a crisp embedding,
+a membership function, a residual-to-score recipe, a robustness radius,
+an admissible fiber, or a measure (the guardrails in
+\texttt{docs/MEANINGFUL\_DEGREES\_GUARDRAILS.md}).  An unsourced number is
+not allowed.
+
+\paragraph{Fuzzy sets with crisp recovery.}
+A crisp set's membership $\mu_A(x)=[x\in A]$ takes values in $\{0,1\}$
+and recovers the classical set, $\mu_A(x)=1\iff x\in A$, with its
+$t$-cut exactly $A$ (\Lean{fuzzy\_membership\_crisp\_recovery},
+\Lean{threshold\_cut\_crisp}, in \texttt{Cred.CredSet}).  Intermediate
+degrees are membership data, not hidden truth values.
+
+\begin{figure}[h]
+\centering
+\begin{tikzpicture}[x=10cm,y=2.2cm]
+  \draw[->] (0,0) -- (1.04,0) node[right] {$x$};
+  \draw[->] (0,0) -- (0,1.15) node[above] {$\mu_A(x)$};
+  \draw (0,1) -- (-0.01,1) node[left] {$1$};
+  \draw[dashed] (0,0.6) node[left] {$t$} -- (1,0.6);
+  \draw[very thick,blue] (0,0.1) .. controls (0.3,1.05) and (0.5,0.2) .. (0.75,0.95) .. controls (0.9,1.0) .. (1,0.3);
+  \fill[blue!12,opacity=0.5] (0.18,0) rectangle (0.42,0.6);
+  \fill[blue!12,opacity=0.5] (0.62,0) rectangle (0.86,0.6);
+  \node[blue!60!black] at (0.5,-0.13) {\footnotesize $t$-cut $\{x:t\le\mu_A(x)\}$};
+\end{tikzpicture}
+\caption{A graded membership function and its threshold cut.  The
+$t$-cut recovers a classical set; for a crisp $\mu_A$ it is exactly $A$
+(\Lean{threshold\_cut\_crisp}).}
+\label{fig:fuzzy-cut}
+\end{figure}
+
+\paragraph{Structure-preserving numerics.}
+A numerical scheme that preserves a structure exactly has degree $1$: a
+symplectic step keeps the form
+(\Lean{symplectic\_exact\_degree\_one}), and likewise a first integral
+and finite-volume mass (\texttt{Cred.Approx}; see the inventory).
+Near-preservation is reported by the residual-to-score recipe
+$\mathrm{score}_\varepsilon(r)=\max(0,1-r/\varepsilon)$
+(\Lean{scoreEps}: $\mathrm{score}_\varepsilon(0)=1$, $0$ at $r\ge\varepsilon$,
+antitone).  For the explicit Euler step the symplectic residual is
+$|\det-1|=h^2$, so the degree is below $1$ for any nonzero step and
+collapses to $0$ at the full step
+(\Lean{explicitEuler\_degree\_lt\_one}).  The degree is the conservation
+residual, not a label.
+
+\begin{figure}[h]
+\centering
+\begin{tikzpicture}[x=7cm,y=2.2cm]
+  \draw[->] (0,0) -- (1.05,0) node[right] {residual $r$};
+  \draw[->] (0,0) -- (0,1.15) node[above] {$\mathrm{score}_\varepsilon(r)$};
+  \draw (0,1) -- (-0.012,1) node[left] {$1$};
+  \draw (0.7,0.03) -- (0.7,-0.03) node[below] {$\varepsilon$};
+  \draw[very thick,red] (0,1) -- (0.7,0) -- (1.02,0);
+  \fill (0,1) circle (0.5pt); \fill (0.7,0) circle (0.5pt);
+  \node[red!60!black] at (0.45,0.62) {\footnotesize $1-r/\varepsilon$};
+\end{tikzpicture}
+\caption{The residual-to-score recipe $\mathrm{score}_\varepsilon$:
+exact ($r=0$) is degree $1$, at the tolerance ($r=\varepsilon$) degree
+$0$, antitone between.  A structure degree is sourced from a residual
+and a tolerance.}
+\label{fig:score-ramp}
+\end{figure}
+
+\paragraph{Fractal dimension.}
+The Cantor set is a graded-structure benchmark with an exact value and a
+finite estimate.  Its similarity dimension is the unique Moran solution
+of $2\,(1/3)^s=1$, namely $s=\log 2/\log 3$
+(\Lean{cantor\_moran}, \Lean{cantor\_moran\_unique} in
+\texttt{Cred.Examples.Fractal}); at stage $k$ the box count is $2^k$ and
+the finite box-dimension estimate $\log(2^k)/\log(3^k)$ equals
+$\log2/\log3$ exactly (\Lean{box\_estimate\_eq\_dim}).  Exact
+self-similarity is degree $1$; coarser resolutions report a graded
+status.
+
+This is a status layer over classical structures, recovering the
+classical predicate at degree $1$.  It is not a development of topology,
+differential geometry, or fractal geometry; the staged plan is in
+\texttt{docs/FOUNDATION\_TRACK\_ROADMAP.md}.
+
 \section{Lean Artifact}
 
 All formal claims cited above are present in the current Lean

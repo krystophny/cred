@@ -246,3 +246,15 @@ Worlds/valuations/forall/measure programme. All entries are Lean theorems with z
 | Induction soundness in the standard model; the left identity `0+x=x` | `foundation_induction_sound`, `induction_example` | `Foundation/Induction.lean` | theorem |
 | A higher layer composes on the foundation API | `higher_layer_builds_on_foundation` | `Foundation/HigherLayerDemo.lean` | theorem |
 | Foundation benchmark suite (master + per-fragment anchors) | `foundation_benchmark_master`, `foundation_benchmark_*` | `Foundation/Benchmarks.lean` | theorem |
+
+### Graded structure (`Cred/Approx/`, `Cred/Set/`, `Cred/Examples/Fractal.lean`)
+
+Every degree below is sourced (residual-to-score, membership, crisp embedding, or exact
+value), per `docs/MEANINGFUL_DEGREES_GUARDRAILS.md`.
+
+| Claim | Lean name | Module | Status |
+|---|---|---|---|
+| Residual-to-score recipe `max(0,1-r/eps)`: zero, ge-eps, monotone, unit | `scoreEps`, `scoreEps_zero`, `scoreEps_ge_eps`, `scoreEps_mono` | `Approx/ScoreRecipes.lean` | theorem |
+| Fuzzy membership recovers the crisp set; threshold cut is classical | `fuzzy_membership_crisp_recovery`, `threshold_cut_crisp` | `Set/FuzzyExamples.lean` | theorem |
+| Structure-preserving numerics at degree 1; residual-sourced near-preservation | `symplectic_exact_degree_one`, `first_integral_preserved_status`, `finite_volume_conserves_status`, `explicitEuler_degree_lt_one`, `explicitEuler_full_step_degree_zero` | `Approx/NumericsExamples.lean` | theorem |
+| Cantor similarity dimension `log2/log3` as the unique Moran solution; box count `2^k`; exact box estimate | `cantorDim`, `cantor_moran`, `cantor_moran_unique`, `cantorBoxCount`, `box_estimate_eq_dim` | `Examples/Fractal.lean` | theorem |
