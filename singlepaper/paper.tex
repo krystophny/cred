@@ -106,12 +106,14 @@ Consequence and conditioning are then one inverse-image-inclusion
 operator; a finite measure on valuations grades it, with ordinary
 probability as the single-measure case and logical entailment as the
 all-measures corner, so the universal quantifier is a special case of a
-measure.  Finite
-toy models give a first formalized cut at a foundation: dependence
-contexts, proof provenance, hypothetical branches without explosion, a
-generative connective calculus, and the $\sqrt2$ number-theoretic seed.
-The formal results are machine-checked in Lean 4 with Mathlib; theorem
-names are cited in the text.
+measure.  On this base Cred is a Lean-checked foundation layer: it
+recovers classical reasoning exactly at the crisp boundary, carries a
+sound consequence, equality, quantifier, and induction calculus with
+arithmetic benchmarks (including the left identity $0+x=x$ that $Q$
+cannot prove without induction), and exports an interface that higher
+Lean developments build on.  It is not a replacement for set theory or
+the Lean kernel.  The formal results are machine-checked in Lean 4 with
+Mathlib; theorem names are cited in the text.
 \end{abstract}
 
 \tableofcontents
@@ -1150,8 +1152,8 @@ no threshold countermodel while excluded middle still holds.}
 
 The interval $\half<t\le3/4$ is the non-explosive band that still
 validates excluded middle: contradiction licenses nothing, yet excluded
-middle stays designated.  It is a status calculus for graded
-consequence, not a foundation for mathematics.
+middle stays designated.  This is a status calculus for graded
+consequence; the foundation-layer claim is made precisely later.
 
 \section{Toy Models and Worked Examples}
 \label{sec:toy-models}
@@ -1810,18 +1812,23 @@ A step from marginals to a conditional is audited in four moves.
   (\Lean{cond\_zero\_zero\_univ}).
 \end{enumerate}
 
-\section{Toward a Foundation for Mathematics}
+\section{Cred as a Foundation Layer}
 \label{sec:foundations}
 
-The scalar kernel is not yet a foundation.  A foundation must keep four
-structures separate: the value of a formula, semantic consequence over
-all valuations, the supplied dependence (a joint or family of joints),
-and proof provenance (which assumptions a derivation uses).  Ordinary
-prose collapses these; the toy modules above formalize a first cut of
-each missing layer.  The table records status against the Lean
-development; anchors are bare names in the \texttt{Cred.Dependence},
-\texttt{Cred.ProofTheory}, \texttt{Cred.Examples}, and \texttt{Cred.Math}
-namespaces.
+Cred is a Lean-checked foundation \emph{layer}: not a replacement for set
+theory or the Lean kernel, but a formalized base that higher developments
+build on.  It separates four structures that ordinary prose collapses: the
+value of a formula, semantic consequence over all valuations, supplied
+dependence (a joint or family of joints), and proof provenance.  On that
+base it recovers classical reasoning exactly at the crisp boundary and
+carries a sound consequence, equality, quantifier, and induction calculus
+with arithmetic benchmarks.  The layer is exported as
+\Lean{Cred.Foundation.CredFoundation} with the native instance
+\Lean{Cred.Foundation.nativeFoundation}; a higher layer composing on it is
+\Lean{Cred.Foundation.Demo.higher\_layer\_builds\_on\_foundation}.  The table
+records what is formalized against what remains (anchors are bare names in
+the \texttt{Cred.Dependence}, \texttt{Cred.ProofTheory}, \texttt{Cred.Examples},
+\texttt{Cred.Math}, and \texttt{Cred.Foundation} namespaces).
 
 \begin{center}
 \begin{tabular}{@{}p{0.27\linewidth}p{0.40\linewidth}p{0.27\linewidth}@{}}
@@ -1842,10 +1849,10 @@ Hypothetical branches &
 \Lean{local\_contradiction\_no\_explosion} &
 $T+R$ over genuine theories \\[2pt]
 Generative calculus &
-local connective rules (conjunction introduction and elimination,
-disjunction introduction, double negation) with \Lean{generative\_sound},
-no semantic-oracle rule &
-quantifiers, equality, induction; syntactic completeness \\[2pt]
+connective rules with \Lean{generative\_sound}; first-order equality,
+forall-elim, exists-intro (\Lean{GenDerives}); induction soundness
+(\Lean{foundation\_induction\_sound}) &
+full syntactic completeness \\[2pt]
 Mathematics seed &
 parity, divisibility, the $\sqrt2$ core contradiction
 (\Lean{Cred.Math}, \Lean{Cred.Examples.Sqrt2Branch}) &
@@ -1857,13 +1864,33 @@ full real-number development \\
 Two honesty markers.  The labelled calculus of the previous section is
 sound and closed-complete because the semantic consequence relation is
 admitted as a proof rule; that is an interface result, not a deep
-syntactic completeness theorem.  The new generative fragment
+syntactic completeness theorem.  The generative fragment
 (\Lean{Cred.ProofTheory.Generative}) removes the oracle rule for the
-connective fragment and proves soundness directly, but it does not yet
-cover quantifiers, equality, or induction.  Classical mathematics is
-recovered at certainty on crisp structures; probability enters when the
-joint context is supplied or learned; ternary and binary views are
-robust summary layers, not places where dependence is invented.
+connective fragment; \Lean{Cred.ProofTheory.GenerativeQuant} adds equality
+substitution and the quantifier rules, and \Lean{Cred.Foundation.Induction}
+adds induction soundness in the standard model.  What remains is full
+syntactic completeness.  Classical mathematics is recovered at certainty on
+crisp structures; probability enters when the joint context is supplied or
+learned; ternary and binary views are robust summary layers, not places
+where dependence is invented.
+
+\subsection{Foundation benchmarks}
+The foundation-like results are collected as a benchmark suite in
+\texttt{Cred.Foundation}, with master fact
+\Lean{foundation\_benchmark\_master}, bundling: classical propositional
+recovery at the crisp boundary
+(\Lean{classical\_propositional\_is\_fragment}); threshold and certainty
+consequence with reflexivity and cut; equality substitution and the
+quantifier rules; induction soundness, with the left identity $0+x=x$ that
+$Q$ cannot prove without it (\Lean{induction\_example}); the $\sqrt2$ core
+contradiction; the G\"odel boundary (\Lean{no\_internal\_loeb\_arrow}); no
+ex falso at zero evidence; and the conditioning trichotomy.  These play
+three roles at once: already-formalized foundation fragments; benchmarks
+showing the added value (graded status, robustness, provenance) over a
+yes/no foundation; and a marked frontier of future work (full syntactic
+completeness, a provenance DAG over the object language, real analysis).
+What Cred adds is not a new truth table but a Lean-checked layer that names
+each commitment and recovers the classical one exactly.
 
 \section{Lean Artifact}
 

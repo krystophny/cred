@@ -236,3 +236,13 @@ Worlds/valuations/forall/measure programme. All entries are Lean theorems with z
 |---|---|---|---|
 | Assumption ledger: joint/conditioning policies; independence makes evidence irrelevant; robust-vs-sensitive verdict | `InferenceCommitments`, `assumesIndependence`, `independence_makes_evidence_irrelevant`, `robustnessVerdict`, `audit_robust_or_sensitive` | `Audit/AssumptionLedger.lean` | theorem |
 | False-precision case study: hidden independence (3/5) and hidden min (6/7) straddle 4/5; Cred reports the interval [3/7,6/7] | `hidden_independence_conditional`, `hidden_min_conditional`, `cred_audit_interval`, `threshold_four_fifths_sensitive`, `threshold_one_third_robust` | `Examples/FalsePrecision.lean` | theorem |
+
+### Foundation layer (`Cred/Foundation/`)
+
+| Claim | Lean name | Module | Status |
+|---|---|---|---|
+| Exported foundation interface + native instance (higher layers build on it) | `CredFoundation`, `nativeFoundation` | `Foundation/Interface.lean` | theorem |
+| Classical propositional reasoning recovered at the crisp boundary | `classical_propositional_is_fragment` | `Foundation/ClassicalRecovery.lean` | theorem |
+| Induction soundness in the standard model; the left identity `0+x=x` | `foundation_induction_sound`, `induction_example` | `Foundation/Induction.lean` | theorem |
+| A higher layer composes on the foundation API | `higher_layer_builds_on_foundation` | `Foundation/HigherLayerDemo.lean` | theorem |
+| Foundation benchmark suite (master + per-fragment anchors) | `foundation_benchmark_master`, `foundation_benchmark_*` | `Foundation/Benchmarks.lean` | theorem |

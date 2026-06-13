@@ -68,12 +68,24 @@ below. This ledger keeps the paper from drifting into unsupported claims. See
 | False precision: hidden independence/min straddle a threshold; Cred reports the interval | Lean example | `hidden_independence_conditional`, `hidden_min_conditional`, `cred_audit_interval`, `threshold_four_fifths_sensitive` | a=3/5, b=7/10 |
 | Cred audits systems (PSL/MLN/ProbLog/imprecise), does not replace or subsume them | paper definition | (positioning) | n/a |
 
+## Foundation layer
+
+| Claim | Category | Lean anchor | Assumptions |
+|---|---|---|---|
+| Cred is a Lean-checked foundation layer (interface higher layers build on) | Lean theorem | `CredFoundation`, `nativeFoundation` | none |
+| Classical propositional reasoning recovered at the crisp boundary | Lean theorem | `classical_propositional_is_fragment` | atoms in {0,1} |
+| Induction soundness in the standard model; 0+x=x (unprovable in Q without it) | Lean theorem | `foundation_induction_sound`, `induction_example` | standard model |
+| A higher layer composes on the foundation API | Lean example | `higher_layer_builds_on_foundation` | none |
+| Foundation benchmark suite | Lean theorem | `foundation_benchmark_master` | as per its members |
+
 ## Explicitly not claimed
 
 - Cred is **not** claimed to be the unique many-valued logic, nor "better fuzzy logic".
 - Cred is **not** claimed to subsume probability, imprecise probability, or fuzzy logic.
 - The full Cox/Jaynes functional-equation uniqueness is **not** claimed; only the
   conservative finite additivity-implies-measure representation.
+- Cred is a foundation **layer**, **not** a from-scratch replacement for set theory
+  or Lean's type-theoretic kernel; higher developments build on it.
 - Continuum / measure-theoretic probability is **not** formalized; only finite measures.
 - Proof provenance and `T+R` branch semantics are toy/first-cut, **not** a full
   dependency DAG or theory-extension semantics.
