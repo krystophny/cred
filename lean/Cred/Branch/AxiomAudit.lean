@@ -38,6 +38,9 @@ import Cred.Native.Basic
 import Cred.Cond.Uniqueness
 import Cred.Probability.Cox
 import Cred.Probability.FuzzyObservable
+import Cred.Foundation.ClassicalRecovery
+import Cred.Foundation.Induction
+import Cred.Foundation.HigherLayerDemo
 
 -- Core/Value: interval arithmetic over the Mathlib reals. The real-number
 -- order and field instances carry all three kernel axioms transitively.
@@ -95,3 +98,18 @@ import Cred.Probability.FuzzyObservable
 -- Classical.choice, Quot.sound.
 #print axioms Cred.Probability.cox_finite_representation
 #print axioms Cred.Probability.expectation_indicator
+
+-- Foundation/ClassicalRecovery: classical propositional logic is exactly the
+-- crisp fragment. The crisp bridge branches under `classical` and rides the
+-- Credence carrier. Measured: propext, Classical.choice, Quot.sound.
+#print axioms Cred.Foundation.classical_propositional_is_fragment
+
+-- Foundation/Induction: induction soundness in the standard arithmetic model,
+-- by `Nat.rec` lifted to object formulas through Mathlib reals.
+-- Measured: propext, Classical.choice, Quot.sound.
+#print axioms Cred.Foundation.arithQ.foundation_induction_sound
+
+-- Foundation/HigherLayerDemo: a higher layer derives a classical consequence by
+-- composing foundation kernel rules (equalitySymm + equalitySubst) through
+-- FoundationProof.sound. Measured: propext, Classical.choice, Quot.sound.
+#print axioms Cred.Foundation.Demo.higher_layer_builds_on_foundation

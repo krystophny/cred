@@ -145,3 +145,8 @@ import Cred.Examples.ProofGallery
 import Cred.Cond.Uniqueness
 import Cred.Audit.AssumptionLedger
 import Cred.Examples.FalsePrecision
+import Cred.Foundation.Interface
+import Cred.Foundation.ClassicalRecovery
+import Cred.Foundation.Induction
+import Cred.Foundation.HigherLayerDemo
+import Cred.Foundation.Benchmarks
