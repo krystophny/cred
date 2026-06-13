@@ -177,4 +177,32 @@ beta-function lemma; and `treeFormula_represents` proves an explicit object-lang
 Sigma-1 formula is designated in the standard model exactly when `isTree n` holds.
 Object-language Sigma-1 representability of a recursively-defined predicate is
 proven; the specific `checkCodeNat` instance reuses this machinery with the
-checker's decode equations. 
+checker's decode equations.
+
+## Dependence beyond the joint: not yet formalized
+
+The formal core treats one dependence object: the supplied scalar joint `j`, with
+the admissible conditional as the fiber of `c e = j`. Three further layers come up
+repeatedly in discussion and are deliberately not claimed as Cred results. They are
+recorded here so the scope stays honest.
+
+- Credal propagation over a Fréchet family. Carrying the joint as an interval
+  `[max(a+b-1,0), min(a,b)]` and propagating the image conditional interval is the
+  operational reading of the existing fiber/credal-set treatment, and the
+  collapse-last discipline follows from the conditional no-go. The single-fiber and
+  zero-evidence cases are formalized; a systematic interval/credal-network layer over
+  many propositions is not.
+- Proof provenance. Which assumptions a derivation actually uses is a
+  dependency-graph property, distinct from semantic consequence (a theorem `B` has
+  `A |= B` for every `A`, yet its proof need not use `A`). The labelled calculus and
+  kernel certificates certify soundness; they do not track assumption use. No
+  provenance layer is formalized, and the no-explosion result is not a substitute for
+  one.
+- Counterfactual branches. Reasoning under an assumption that contradicts the ambient
+  theory, `T + R` with `R` false, is a hypothetical-extension question. Cred keeps
+  reductio as empty-countermodel elimination and blocks contradiction-licenses-
+  everything, but it has no branch semantics that localizes which consequences arise
+  before the inconsistency. This is unformalized.
+
+A related open item already noted elsewhere is the four-valued (FDE) extension that
+would separate "both" from "neither"; the three-valued carrier cannot. 

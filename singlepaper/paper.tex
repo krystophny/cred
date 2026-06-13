@@ -734,9 +734,26 @@ reason to choose.
 
 This locates the framework relative to imprecise probability
 \cite{walley1991,troffaes2014,debock2015,wheeler2021}.  A set of
-possible posteriors appears only when the supplied constraint fails to
+possible posteriors appears when the supplied constraint fails to
 determine a point.  The set is not psychological indecision.  It is the
 fiber of an equation.
+
+Unknown dependence is a second source of a set, and it does not need
+zero evidence.  Suppose the marginals $a,b$ are given but the joint is
+not.  Coherence confines the joint to the Fr\'echet interval
+$[\max(a+b-1,0),\,\min(a,b)]$, so for $b>0$ the admissible conditionals
+are the image
+\[
+  \left\{\frac{j}{b}:\max(a+b-1,0)\le j\le\min(a,b)\right\}
+  =\left[\frac{\max(a+b-1,0)}{b},\,\frac{\min(a,b)}{b}\right].
+\]
+A conclusion at a demanded threshold holds for every admissible joint
+when this whole interval lies above the threshold, and is
+dependence-sensitive when the interval straddles it.  The no-go theorem
+of the previous section shows the collapse to $\three$ discards the
+ratio $a/b$, so the order of work is fixed: carry the joint, or its
+interval, check it against the threshold, and collapse only the
+conclusions the quotient cannot distort.
 
 \section{Self-Reference as Equations}
 
