@@ -127,3 +127,8 @@ import Cred.Examples.ProofProvenance
 import Cred.Examples.Branches
 import Cred.Examples.Sqrt2Branch
 import Cred.Examples.Elegant
+import Cred.Dependence.Network
+import Cred.ProofTheory.FoundationProvenance
+import Cred.ProofTheory.TheoryBranch
+import Cred.Math.Order
+import Cred.Examples.MathSeed
