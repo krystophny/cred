@@ -4,9 +4,52 @@
 The proof layer should keep the old lesson from the material
 conditional separate from the new conditioning mechanism.  A proof is
 not a truth table entry.  It is a way of eliminating countermodels or
-transporting bounds through verified constraints.  The following table
-summarizes the main proof patterns used in ordinary mathematics and
-how they are expressed in Cred.
+transporting bounds through verified constraints.  The central example
+is the ordinary sequent
+\[
+  A\models B,
+\]
+read as ``$B$ follows from $A$'' or ``$B$ if $A$ is given.''  In
+classical propositional logic this can be checked by a truth table, but
+one need not compare the whole table symmetrically.  The only forbidden
+row for $A\models B$ is
+\[
+  A=1,\qquad B=0.
+\]
+Equivalently, $A\models B$ says that $A\land\neg B$ is unsatisfiable,
+or, classically, that $A\to B$ is valid.  The last formulation is useful
+but dangerous as prose: it internalizes a metalinguistic consequence
+relation as an object-language material conditional.
+
+Cred keeps the first two readings and rejects the third as a primitive.
+For a threshold $t$, the sequent is
+\[
+  A\models_t B
+  \quad\Longleftrightarrow\quad
+  \forall v,\; t\le \val{A}_v \Rightarrow t\le \val{B}_v.
+\]
+The forbidden object is the graded countermodel
+\[
+  t\le \val{A}_v,
+  \qquad
+  \val{B}_v<t.
+\]
+Thus a Cred proof of $B$ from $A$ is still countermodel elimination,
+but the countermodels are labelled by the demanded status: positive,
+certain, or threshold $t$.  No formula $A\to B$ is introduced for this
+purpose.
+
+There are therefore three different statements that natural language
+may blur:
+\[
+\begin{array}{ll}
+\text{entailment:} & A\models_t B,\\[1mm]
+\text{conditional credence:} & \Adm(c;j,e)\text{ with }e=\cred(A),\ j=\cred(A\land B),\\[1mm]
+\text{internal implication:} & A\to B\text{ as a formula, not primitive in Cred.}
+\end{array}
+\]
+Only the first is proof-theoretic consequence.  Only the second is
+conditioning.  The third is deliberately absent from the core.
 
 \begin{table}[h]
 \centering
@@ -14,36 +57,50 @@ how they are expressed in Cred.
 \toprule
 Pattern & Classical reading & Cred reading \\
 \midrule
-Direct proof &
-Assume all premises in $\Gamma$ and derive $\varphi$.  Semantically,
-there is no model with $\Gamma$ true and $\varphi$ false. &
-Show that every valuation satisfying the labelled premises also
-satisfies the required label on $\varphi$: positive, certain, or
-threshold $t$.  In symbols, prove $\Gamma\models_t\varphi$. \\
+Direct proof of $A\models B$ &
+Assume $A$ and derive $B$.  Semantically, show that no valuation has
+$A=1$ and $B=0$.  In a truth table, inspect only the rows where $A$ is
+true and check that $B$ is true there. &
+Assume the labelled premise $t\le\val{A}_v$ and derive the labelled
+conclusion $t\le\val{B}_v$.  Equivalently, prove
+$A\models_t B$ by showing that every valuation satisfying the premise
+label also satisfies the conclusion label. \\
+\addlinespace
+Countermodel proof / disproof &
+To refute $A\models B$, exhibit one row/model with $A=1$ and $B=0$. &
+To refute $A\models_t B$, exhibit one valuation with
+$t\le\val{A}_v$ and $\val{B}_v<t$.  The countermodel may be graded; it
+need not be Boolean. \\
+\addlinespace
+Indirect proof / reductio &
+Assume $A$ and $\neg B$ and derive contradiction.  In model terms,
+show that $A\land\neg B$ has no model. &
+Assume the graded countermodel conditions
+$t\le\val{A}_v$ and $\val{B}_v<t$ and show they are impossible.  Reductio
+is legitimate because the countermodel set is empty, not because
+contradiction itself licenses arbitrary conclusions. \\
 \addlinespace
 Contrapositive &
-For classical implication, prove $\neg\varphi\Rightarrow\neg\psi$ in
-place of $\psi\Rightarrow\varphi$.  This relies on involutive negation
-and the classical connection between implication and consequence. &
-Use only where the relevant semantic consequence theorem is available.
-Cred does not introduce an internal implication just to make
-contraposition syntactic.  Negation is a value operation; consequence
-is still external. \\
+Use $A\models B$ iff $\neg B\models\neg A$, relying on classical
+negation and the classical consequence relation. &
+Use only when the corresponding semantic bridge is available.  Cred has
+involutive negation as a value operation, but it does not add an
+internal implication merely to make contraposition syntactic. \\
 \addlinespace
-Proof by contradiction / reductio &
-Assume the negation of the target and derive contradiction.  In model
-terms, every countermodel to the target is eliminated. &
-Use countermodel emptiness directly.  Reductio is legitimate exactly
-when the set of valuations satisfying the premises and failing the
-conclusion's label is empty.  A contradiction among premises alone is
-not the engine of inference. \\
+Tautology check &
+Check that $A\to B$ is true on every row.  This is classically
+equivalent to $A\models B$. &
+Avoid this as the primitive proof form.  The primitive proof form is the
+external sequent $A\models_t B$ or a labelled derivation.  The absence
+of an internal arrow prevents the material-conditional reading from
+being mistaken for dependence. \\
 \addlinespace
 Explosion &
 From inconsistent premises $A,\neg A$, every $B$ follows, because no
 classical valuation satisfies both premises. &
 Explosion is blocked at the relevant thresholds by surviving
-countermodels.  The contradictory pair can be designated without
-forcing an arbitrary conclusion. \\
+countermodels.  A contradictory pair can be designated without forcing
+an arbitrary conclusion. \\
 \addlinespace
 Case split &
 Prove the conclusion under each case and combine the cases by excluded
@@ -84,11 +141,12 @@ countermodel elimination, and external conditioning judgments.}
 The conceptual improvement is not that classical proof techniques are
 invalid.  Direct proof, case split, reductio, and threshold consequence
 remain ordinary semantic methods.  The improvement is that Cred states
-what each method is actually using.  Direct proof eliminates
-countermodels.  Reductio eliminates the countermodel set of the target.
-Bayesian update inverts a chain-rule constraint only when that inverse
-is single-valued.  At zero evidence, the proof object is not an
-arbitrary conclusion but a propagated set of admissible values.
+what each method is actually using.  Direct proof transports a labelled
+bound from premises to conclusion.  Reductio eliminates the
+countermodel set of the target.  Bayesian update inverts a chain-rule
+constraint only when that inverse is single-valued.  At zero evidence,
+the proof object is not an arbitrary conclusion but a propagated set of
+admissible values.
 
 This gives a clean replacement for the misleading material-conditional
 reading of proof.  Classical mathematics may continue to use material
