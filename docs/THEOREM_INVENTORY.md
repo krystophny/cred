@@ -149,6 +149,7 @@ rather than by overloading `⊗`.
 | Generative derivation relation, sound | `Derives`, `generative_sound` | `ProofTheory/Generative.lean` | theorem |
 | Conjunction introduction at threshold `s⊗t`; per-rule soundness | `conjIntro`, `conjIntro_sound`, `conjElimLeft_sound`, `conjElimRight_sound`, `disjIntroLeft_sound`, `disjIntroRight_sound` | `ProofTheory/Generative.lean` | theorem |
 | Generative first-order calculus (equality substitution, forall-elim, exists-intro) with soundness | `GenDerives`, `genDerives_sound`, `equalitySubst_sound`, `forallElim_sound`, `existsIntro_sound` | `ProofTheory/GenerativeQuant.lean` | theorem |
+| Probability over valuations: finite measure, entailment as conditional-prob-one and as domination under all measures, the measured chain rule | `FinMeasure`, `P`, `Pcond`, `entails_iff_cond_one`, `entails_iff_dominated`, `cond_chain_rule`, `zero_evidence_unconstrained` | `Probability/Valuations.lean` | theorem |
 | Provenance over the first-order language: used hypotheses, soundness, theorem-uses-nothing witness | `foundationUsedHyps`, `foundation_provenance_sound`, `foundation_theorem_uses_no_hyp` | `ProofTheory/FoundationProvenance.lean` | theorem |
 | Theory branch `T+R`: local inconsistency does not threshold-entail an unrelated formula | `TheoryBranch`, `LocallyInconsistent`, `theory_branch_no_explosion` | `ProofTheory/TheoryBranch.lean` | theorem |
 | Assumption provenance tracked and sound | `usedAssumptions`, `provenance_sound` | `ProofTheory/Provenance.lean` | theorem |

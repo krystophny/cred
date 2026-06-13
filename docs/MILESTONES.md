@@ -58,6 +58,12 @@ Consequence and bridges
 - Truth-functional scalar joint boundary: under idempotence and copula-like
   assumptions, a single value-only joint is forced to min; general probability
   escapes by using event/proposition-specific joints (`Cond/Copula.lean`).
+- Probability over valuations as a finite measure layer: entailment equals
+  conditional probability one under every measure (`entails_iff_cond_one`) and
+  domination under every measure (`entails_iff_dominated`), so the universal
+  quantifier is the all-measures corner of a measure; the measured conditional
+  obeys the same chain rule `c e = j` as the value fiber (`cond_chain_rule`,
+  `zero_evidence_unconstrained`) (`Probability/Valuations.lean`).
 
 Set theory and paradox
 - `CredSet` graded-membership set theory, classical recovery on crisp data,

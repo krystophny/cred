@@ -101,7 +101,12 @@ fixed.  A non-singleton fiber is propagated: subsequent rules carry the
 admissible values instead of selecting a quotient at zero evidence.
 Unknown dependence is handled the same way: with the joint confined to
 its Fr\'echet interval, the conditional propagates as an interval that
-is either robust or dependence-sensitive against a threshold.  Finite
+is either robust or dependence-sensitive against a threshold.
+Consequence and conditioning are then one inverse-image-inclusion
+operator; a finite measure on valuations grades it, with ordinary
+probability as the single-measure case and logical entailment as the
+all-measures corner, so the universal quantifier is a special case of a
+measure.  Finite
 toy models give a first formalized cut at a foundation: dependence
 contexts, proof provenance, hypothetical branches without explosion, a
 generative connective calculus, and the $\sqrt2$ number-theoretic seed.
@@ -118,7 +123,7 @@ novelty is not the product t-norm, the Kleene lattice, primitive
 conditional probability, conditioning along fibers, set-valued
 probability, fuzzy probability logic, conditional-event algebra, or
 paraconsistency; those are established.  The claim is the verified
-conjunction of eight statements:
+conjunction of nine statements:
 \[
 \begin{array}{ll}
 \text{(N1)} &
@@ -135,12 +140,16 @@ conjunction of eight statements:
 \text{(N7)} & \text{value, dependence, and conditioning as separate inputs:}\\
   & \text{the joint is supplied, and unknown dependence propagates an interval};\\[1mm]
 \text{(N8)} & \text{a first formalized cut of the foundation layers}\\
-  & \text{(dependence contexts, robust collapse, provenance, branches).}
+  & \text{(dependence contexts, robust collapse, provenance, branches)};\\[1mm]
+\text{(N9)} & \text{logic, probability, and imprecise probability as one}\\
+  & \text{measured aggregation; the universal quantifier is its}\\
+  & \text{all-measures corner (\Lean{entails\_iff\_cond\_one}).}
 \end{array}
 \]
 Consequence (N3) and conditioning (N4) are the two instances of one
-inverse-image-inclusion operator; the separation theorem is that only
-the value-level instance resists collapse:
+inverse-image-inclusion operator; a measure on valuations grades it,
+with entailment as its all-measures corner (N9).  The separation theorem
+is that only the value-level instance resists collapse:
 \[
 \boxed{\text{truth-functional consequence can collapse;
 conditional inference cannot.}}
@@ -718,6 +727,81 @@ values: no truth function on $\{0,\half,1\}$ reproduces it.  The two
 fibrations share a closure operator while the value fibration resists
 internalization as an object-language conditional.  Unification at the
 level of consequence; separation at the level of connectives.
+
+\subsection{Probability over valuations: $\forall$ as a measure}
+\label{sec:measure-layer}
+
+Inclusion is itself a special case.  Reading
+$\mathrm{Mod}(\Gamma)\subseteq\mathrm{Mod}(\varphi)$ as ``the conclusion
+holds at every premise point'' is a yes/no verdict.  Put a finite
+measure $\mu$ on the point space and grade it:
+\[
+  P_\mu(\varphi\mid\Gamma)
+  =\frac{\mu\bigl(\mathrm{Mod}(\Gamma)\cap\mathrm{Mod}(\varphi)\bigr)}
+        {\mu\bigl(\mathrm{Mod}(\Gamma)\bigr)}\in[0,1].
+\]
+The aggregation operator chooses the layer.  One measure $\mu$ makes
+$P_\mu(\varphi\mid\Gamma)$ ordinary conditional probability over the
+valuation space.  A set $\mathbb{M}$ of measures makes
+$\inf_{\mu\in\mathbb{M}}P_\mu(\varphi\mid\Gamma)$ a lower probability
+(imprecise probability).  Quantifying over \emph{all} measures recovers
+logic: the universal quantifier is the all-measures corner, and
+entailment is conditional probability one under every measure,
+\[
+  \mathrm{Mod}(\Gamma)\subseteq\mathrm{Mod}(\varphi)
+  \iff
+  \forall\mu,\ \mu(\mathrm{Mod}(\Gamma))>0\Rightarrow
+  P_\mu(\varphi\mid\Gamma)=1,
+\]
+equivalently $\mathrm{Mod}(\Gamma)\subseteq\mathrm{Mod}(\varphi)\iff
+\forall\mu,\ P_\mu(\mathrm{Mod}(\Gamma))\le P_\mu(\mathrm{Mod}(\varphi))$
+(\Lean{entails\_iff\_cond\_one}, \Lean{entails\_iff\_dominated} in
+\texttt{Cred.Probability}, over a finite valuation space).
+
+The chain rule reappears as the aggregate identity
+\[
+  P_\mu(\varphi\mid\Gamma)\cdot\mu(\mathrm{Mod}(\Gamma))
+  =\mu\bigl(\mathrm{Mod}(\Gamma)\cap\mathrm{Mod}(\varphi)\bigr),
+\]
+which is the value equation $c\conjc e=j$ with $c=P_\mu(\varphi\mid\Gamma)$,
+$e=\mu(\mathrm{Mod}(\Gamma))$, and joint
+$j=\mu(\mathrm{Mod}(\Gamma)\cap\mathrm{Mod}(\varphi))$
+(\Lean{cond\_chain\_rule}); zero-measure evidence leaves it unconstrained
+(\Lean{zero\_evidence\_unconstrained}), the measure-layer image of
+$\Cond(0,0)=[0,1]$.
+
+\begin{figure}[h]
+\centering
+\resizebox{\textwidth}{!}{%
+\begin{tikzpicture}[>=Latex,node distance=6mm]
+  \node[draw,rounded corners,fill=gray!10,align=center] (agg)
+    {conditional aggregate\\$P_\mu(\varphi\mid\Gamma)
+      =\mu(\mathrm{Mod}\Gamma\cap\mathrm{Mod}\varphi)/\mu(\mathrm{Mod}\Gamma)$};
+  \node[draw,rounded corners,fill=red!8,align=center,below=14mm of agg] (prob)
+    {one measure $\mu$\\probability $P_\mu(\varphi\mid\Gamma)\in[0,1]$};
+  \node[draw,rounded corners,fill=orange!12,align=center,left=12mm of prob] (imp)
+    {set $\mathbb{M}$ of measures\\$\inf_{\mathbb{M}}$: lower probability};
+  \node[draw,rounded corners,fill=blue!8,align=center,right=12mm of prob] (log)
+    {all measures, $=1$\\$\mathrm{Mod}\Gamma\subseteq\mathrm{Mod}\varphi$: entailment};
+  \draw[->] (agg) -- (prob);
+  \draw[->] (agg) -| (imp);
+  \draw[->] (agg) -| (log);
+\end{tikzpicture}%
+}
+\caption{One conditional aggregate, three layers.  A single measure
+gives probability; a credal set gives lower (imprecise) probability;
+quantifying over all measures with verdict $1$ gives logical entailment.
+The universal quantifier is the all-measures corner of the measure.}
+\label{fig:three-layers}
+\end{figure}
+
+Probability proper is therefore values plus a measure on valuations, and
+that measure does two jobs at once: it grades consequence, and it
+\emph{determines} the joint $\mu(A\cap B)$ that the scalar layer leaves
+supplied.  Three layers, one operator: aggregate the conclusion over the
+premises' admissible set; $\forall$ is logic, $\int\mu$ is probability,
+$\inf_{\mathbb{M}}$ is imprecise probability, and the chain rule
+$c\conjc e=j$ relates the aggregates throughout.
 
 \section{Why the Conditional Does Not Collapse}
 \label{sec:no-cond-bridge}

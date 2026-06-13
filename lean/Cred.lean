@@ -132,3 +132,4 @@ import Cred.ProofTheory.FoundationProvenance
 import Cred.ProofTheory.TheoryBranch
 import Cred.Math.Order
 import Cred.Examples.MathSeed
+import Cred.Probability.Valuations
