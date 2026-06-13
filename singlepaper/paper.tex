@@ -2045,28 +2045,54 @@ count is \Lean{cantor\_moran}, \Lean{cantor\_moran\_unique} in
 \texttt{Cred.Examples.Fractal}).  The dimension is the named Moran
 source, not a fitted exponent.
 
-\paragraph{An atlas seed.}
-A first cut toward differential geometry, honest about its scope.  A
-graded chart is a coordinate map into the one-dimensional model
-$\mathbb{R}$; a supplied transition $\tau:\mathbb{R}\to\mathbb{R}$ carries
-a smoothness status, $1$ iff $\tau$ is $C^\infty$
-(\Lean{transitionSmoothness\_eq\_one\_iff}), closed under composition
-(\Lean{transitionSmoothness\_comp}).  An atlas aggregates per-transition
-statuses by the product meet, and the crisp recovery returns every
-transition as a genuine smooth map once the aggregate status is $1$
-(\Lean{smooth\_atlas\_recovery} in \texttt{Cred.Manifold}).  There is no
-cover, Hausdorff, or second-countability condition: those are exactly
-what a manifold theory adds, and they are absent on purpose.
+\paragraph{From an atlas seed to an $n$-dimensional recovery.}
+The geometric layer begins as a status and lands on a genuine recovery
+of mathlib's own notion.  A graded chart is a coordinate map into a
+Euclidean model; a transition carries a smoothness status, $1$ iff it is
+$C^\infty$ (one-dimensional model: \Lean{transitionSmoothness\_eq\_one\_iff},
+closed under composition \Lean{transitionSmoothness\_comp}).  In $n$
+dimensions the recovery is exact.  Over the model
+$\mathbb{R}^n=\mathrm{EuclideanSpace}\,\mathbb{R}\,(\mathrm{Fin}\,n)$, for
+any charted space $M$, the aggregate atlas smoothness status reaches
+certainty exactly when $M$ is a mathlib smooth manifold:
+\[
+  \mathrm{atlasSmoothStatus}=1
+  \iff \mathrm{IsManifold}\,\mathcal I_n\,\infty\,M,
+\]
+the right side being $M$'s membership in the $C^\infty$ structure
+groupoid; the model space itself scores $1$.  The status is not a
+relabeling: status $1$ is definitionally that groupoid membership,
+mathlib's $\mathrm{HasGroupoid}$ condition for
+$\mathrm{contDiffGroupoid}\,\infty\,\mathcal I_n$.  The anchors are
+\texttt{atlasSmoothStatus\_eq\_one\_iff\_isManifold} and
+\texttt{atlasSmoothStatus\_model\_space} in \texttt{Cred.ManifoldN}.
+
+\paragraph{The differential.}
+A map $f:M\to M'$ between charted spaces over the Euclidean models
+carries a smoothness status, $1$ iff $f$ is a mathlib $C^\infty$ map
+($\mathrm{status}=1\iff\mathrm{ContMDiff}\,\mathcal I_n\,\mathcal I_m\,\infty\,f$,
+\Lean{mdiffStatus\_eq\_one\_iff}).  At status $1$ the differential is
+genuine, not a placeholder: $f$ is $\mathrm{MDifferentiable}$
+(\Lean{mdiffStatus\_mdifferentiable}), so the pushforward
+$\mathrm{mfderiv}\,f\,x$ is the actual continuous-linear tangent map
+$T_xM\to T_{f(x)}M'$, with the differential of the identity the identity
+map and of a constant the zero map.  On the model spaces the status
+reduces to ordinary Fr\'echet smoothness,
+$\mathrm{status}=1\iff\mathrm{ContDiff}\,\mathbb R\,\infty\,f$
+(\Lean{mdiffStatus\_modelMap\_eq\_one\_iff}), tying the manifold
+differential back to the analysis layer.
 
 These layers share one shape: a degree map $P:X\to[0,1]$ whose value $1$
-recovers the classical predicate exactly, machine-checked.  Metric
+recovers the classical object exactly, machine-checked.  Metric
 closeness, the limit, and continuity recover their mathlib counterparts
-at the boundary; differentiability and smoothness are two-valued status;
-dimension is the named Moran source; the atlas is a labelled seed.  What
-remains is genuine manifold theory (charts with cover and Hausdorff
-conditions, tangent bundles, differential forms) and measure-theoretic
-dimension (Hausdorff measure, Moran's theorem).  The staged plan is in
-\texttt{docs/FOUNDATION\_TRACK\_ROADMAP.md}.
+at the boundary; differentiability is two-valued status; dimension is the
+named Moran source; the atlas status recovers a genuine smooth manifold,
+and the differential layer recovers $\mathrm{ContMDiff}$ and the tangent
+pushforward $\mathrm{mfderiv}$.  What remains is the higher
+differential-geometric superstructure (differential forms, de Rham
+cohomology), which mathlib itself does not yet fully provide, and
+measure-theoretic dimension (Hausdorff measure, Moran's theorem).  The
+staged plan is in \texttt{docs/FOUNDATION\_TRACK\_ROADMAP.md}.
 
 \section{Lean Artifact}
 

@@ -108,6 +108,7 @@ import Cred.Topology.Threshold
 import Cred.Topology.Fuzzy
 import Cred.Topology.Manifold
 import Cred.Topology.ManifoldN
+import Cred.Topology.Differential
 import Cred.Math.Nat
 import Cred.Math.Reals
 import Cred.Math.Metric

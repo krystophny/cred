@@ -154,8 +154,17 @@ in n dimensions; the differential-geometric superstructure above it is future.
   status reaches certainty exactly when M is a Mathlib C^∞ manifold. Order `∞`
   is C^∞ (this Mathlib version places `⊤ = ω` analytic strictly above `∞`). The
   model space scores 1 (`atlasSmoothStatus_model_space`).
-- Still `future`: tangent bundles, differential forms, de Rham cohomology,
-  per-orbit integrator preservation, and geometric-invariant robustness.
+- Differential layer (real, not a seed): `Cred/Topology/Differential.lean`. For a
+  map `f : M → M'` between Euclidean-model charted spaces,
+  `mdiffStatus_eq_one_iff` proves `mdiffStatus f = 1 ↔ ContMDiff I I' ∞ f`; at
+  status 1, `mdiffStatus_mdifferentiable` gives `MDifferentiable` so the
+  pushforward `mfderiv f x` is the genuine tangent map `T_xM →L T_{fx}M'`
+  (`mdiffStatus_mfderiv_isCLM`, with `mfderiv_id`/`mfderiv_const` restated), and
+  `mdiffStatus_modelMap_eq_one_iff` bridges to ordinary `ContDiff ℝ ∞` on the
+  model. id/const/composition closure proved.
+- Still `future`: differential forms, de Rham cohomology, integration on
+  manifolds (mathlib itself does not yet fully provide these), per-orbit
+  integrator preservation, and geometric-invariant robustness.
 - Structure-preservation scores for geometric integrators: `future`. A
   per-step preservation credence for a symplectic or variational integrator
   over a trajectory, extending the single-step scores of Stage 2 to a score

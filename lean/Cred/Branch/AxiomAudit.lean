@@ -50,6 +50,7 @@ import Cred.Math.Smoothness
 import Cred.Math.Dimension
 import Cred.Topology.Manifold
 import Cred.Topology.ManifoldN
+import Cred.Topology.Differential
 import Cred.Probability.CoxUniqueness
 
 -- Core/Value: interval arithmetic over the Mathlib reals. The real-number
@@ -172,6 +173,16 @@ import Cred.Probability.CoxUniqueness
 -- contDiffGroupoid / IsManifold development. Measured: propext, Classical.choice,
 -- Quot.sound.
 #print axioms Cred.ManifoldN.atlasSmoothStatus_eq_one_iff_isManifold
+
+-- Topology/Differential: the headline smooth-map recovery — the graded
+-- smoothness status of a map equals certainty iff it is a genuine Mathlib
+-- ContMDiff (C^∞) map; and the differential-recovery theorem, which turns
+-- status 1 into MDifferentiable so the mfderiv pushforward is the actual
+-- differential. Both ride the Credence carrier and Mathlib's ContMDiff /
+-- MDifferentiable / mfderiv development. Measured: propext, Classical.choice,
+-- Quot.sound.
+#print axioms Cred.Differential.mdiffStatus_eq_one_iff
+#print axioms Cred.Differential.mdiffStatus_mdifferentiable
 
 -- Probability/CoxUniqueness: any two finite measures representing the same
 -- plausibility agree on every event. Finite rational sums, inheriting the three
