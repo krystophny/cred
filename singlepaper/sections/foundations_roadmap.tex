@@ -1,0 +1,119 @@
+\section{Toward a Foundation for Mathematics}
+\label{sec:foundations-roadmap}
+
+The preceding sections give the scalar kernel.  They are not yet a full
+foundation for mathematics.  A usable foundation must distinguish four kinds of
+structure that ordinary prose often collapses:
+\[
+\text{value},\qquad
+\text{semantic consequence},\qquad
+\text{dependence},\qquad
+\text{proof provenance}.
+\]
+Values may be Boolean, three-valued, or continuous.  Consequence is a global
+relation over valuations or models.  Dependence is supplied by joints, joint
+families, or copulas.  Proof provenance records which assumptions are actually
+used in a derivation.  These structures answer different mathematical questions.
+
+\paragraph{Semantic consequence.}
+To prove ``$B$ from $A$'', the primitive object is not an implication truth
+value.  It is the absence of a countermodel:
+\[
+  A\models_t B
+  \quad\Longleftrightarrow\quad
+  \forall v,\; t\le \val{A}_v \Rightarrow t\le \val{B}_v.
+\]
+The current labelled calculus captures this external reading.  Its formula
+language has no internal conditional.  Its labels distinguish positivity,
+certainty, and arbitrary thresholds.  This is enough to state graded consequence
+cleanly, but not yet enough for a mature proof theory of mathematics.
+
+\paragraph{Dependence.}
+To update $A$ on evidence $B$, the primitive object is not the truth value of
+$A$ or $B$ alone.  One needs a joint value or a family of possible joint values:
+\[
+  j=\text{value of }A\land B.
+\]
+The chain-rule judgment
+\[
+  c e=j
+\]
+then constrains the conditional value $c$.  If the joint is unknown, the result
+is an interval or set of admissible conditionals.  This is the probability-side
+lesson: fuzzy truth values alone are not enough; probability is logic enriched by
+joint/dependence structure.
+
+\paragraph{Proof provenance.}
+To ask whether one theorem depends on another theorem, semantic consequence is
+not enough.  If $B$ is already a theorem, then $A\models B$ for every $A$, but a
+particular proof of $B$ may not use $A$.  A foundation for mathematics therefore
+needs proof objects with dependency annotations.  The dependency question is:
+which assumptions, lemmas, definitions, and side judgments occur in the proof
+DAG?  This is a proof-theoretic question, not a truth-value question.
+
+\paragraph{Hypothetical branches.}
+Mathematical practice also uses inconsistent or counterfactual branches.  For
+example, in the usual proof that $\sqrt2$ is irrational, one assumes the false
+hypothesis that $\sqrt2$ is rational and derives a structured chain ending in
+contradiction.  Classical explosion says that after contradiction everything
+follows.  A useful foundation must preserve the dependency chain:
+\[
+  R \Rightarrow \text{coprime representation}
+    \Rightarrow p^2=2q^2
+    \Rightarrow p\text{ even}
+    \Rightarrow q\text{ even}
+    \Rightarrow \bot.
+\]
+The goal is not to make the false branch true.  The goal is to record what is
+used, where inconsistency appears, and which conclusions are robust before
+collapse.
+
+\paragraph{Current status.}
+The current Lean development already has the scalar conditioning kernel, labelled
+external consequence, no-ex-falso examples, a first-order formula layer, equality
+and quantifier interfaces, proof certificates, and a real-free checker path.  But
+some proof-theoretic results are deliberately shallow: semantic consequence is
+available as a proof rule, so completeness for that layer is a faithful interface
+result rather than a deep syntactic completeness theorem.  This is honest and
+useful, but it is not yet the final proof theory for mathematics.
+
+\paragraph{Missing components.}
+A serious foundation-building path should add the following modules or sections.
+
+\begin{enumerate}[label=(F\arabic*),leftmargin=2.5em]
+\item \textbf{Dependence contexts.}  A context should carry exact joints, interval
+joints, or families of admissible joints.  Rules should propagate conditional
+fibers through these contexts and mark conclusions as robust or dependence-sensitive.
+
+\item \textbf{Proof provenance.}  Proof objects should expose the set or DAG of
+used assumptions and side judgments.  This separates ``$A$ semantically entails
+$B$'' from ``this proof of $B$ uses $A$.''
+
+\item \textbf{Branch semantics.}  Hypothetical contexts such as $T+A$ should be
+first-class, even when inconsistent.  The branch should support countermodel
+elimination, local inconsistency detection, and no-explosion dependency tracing.
+
+\item \textbf{Generative proof calculus.}  The labelled calculus should be extended
+from a semantic-interface calculus to a more generative natural-deduction or sequent
+calculus: introduction and elimination rules for the connectives, quantifiers,
+equality, substitution, definitions, and induction where appropriate.  Semantic
+imports should be isolated as oracle rules or removed from the core fragment.
+
+\item \textbf{Robust collapse.}  Binary and three-valued collapse should happen only
+after dependence-sensitive reasoning.  A collapsed statement should record whether
+its status is robust for all admissible joints or depends on a chosen coupling.
+
+\item \textbf{Mathematical library seed.}  The first target examples should be small:
+parity, divisibility, order, finite sets, and simple contradiction proofs.  The
+$\sqrt2$ irrationality proof is an ideal benchmark because it requires hypothetical
+branching, equality/substitution, number theory lemmas, and provenance of the
+contradiction.
+\end{enumerate}
+
+The resulting basis for mathematics is therefore not a single new truth table.
+It is an architecture: formulas have values, theories generate model classes,
+proofs carry provenance, dependence contexts carry joints or joint families, and
+conditionals are constrained by the chain-rule fiber.  Classical mathematics is
+recovered at certainty on crisp structures.  Probability enters when the joint
+context is supplied or learned.  Ternary and binary views are then robust summary
+layers, not places where dependence information is invented.
