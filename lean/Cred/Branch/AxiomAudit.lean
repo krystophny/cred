@@ -52,6 +52,7 @@ import Cred.Topology.Manifold
 import Cred.Topology.ManifoldN
 import Cred.Topology.Differential
 import Cred.Topology.IntegralCurveLayer
+import Cred.Topology.HamiltonianFlow
 import Cred.Topology.TangentBundleLayer
 import Cred.Topology.LieGroupLayer
 import Cred.Probability.CoxUniqueness
@@ -227,3 +228,16 @@ import Cred.Probability.CoxUniqueness
 #print axioms Cred.FlowLayer.integralCurve_exists
 #print axioms Cred.FlowLayer.integralCurve_unique
 #print axioms Cred.FlowLayer.constField_integralCurve_status
+
+-- Topology/HamiltonianFlow: the concrete planar harmonic-oscillator phase flow.
+-- oscillator_isIntegralCurve proves the clockwise rotation is a genuine Mathlib
+-- IsIntegralCurve of X_H = (p, -q), reducing the manifold-derivative condition to
+-- the sin/cos HasDerivAt; oscillator_energy_conserved is energy conservation
+-- H(γ t) = H(q₀, p₀) via sin² + cos² = 1; oscillator_flow_symplectic shows the
+-- time-t flow map is Cred.Approx.Symplectic (det 1). Each rides the Credence
+-- carrier and Mathlib's trig / integral-curve / determinant development.
+-- Measured: propext, Classical.choice, Quot.sound.
+#print axioms Cred.Hamiltonian.oscillator_isIntegralCurve
+#print axioms Cred.Hamiltonian.oscillator_flow_status
+#print axioms Cred.Hamiltonian.oscillator_energy_conserved
+#print axioms Cred.Hamiltonian.oscillator_flow_symplectic

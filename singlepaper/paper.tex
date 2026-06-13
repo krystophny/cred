@@ -2113,8 +2113,41 @@ point (\Lean{integralCurve\_exists}), and on a Hausdorff manifold two
 status-$1$ curves with the same initial condition agree
 (\Lean{integralCurve\_unique}).  The constant field on $\mathbb R^n$ has
 the explicit translation flow $\gamma(t)=x_0+t\,c$
-(\Lean{constField\_integralCurve\_status}), the simplest Hamiltonian-style
-phase flow.
+(\Lean{constField\_integralCurve\_status}), the simplest explicit flow.
+
+\paragraph{A worked Hamiltonian flow.}
+The dynamical and symplectic layers meet on one concrete system: the
+harmonic oscillator $H(q,p)=\tfrac12(q^2+p^2)$ with Hamiltonian vector
+field $X_H=(p,-q)$.  Its phase flow
+$\gamma(t)=(q_0\cos t+p_0\sin t,\,-q_0\sin t+p_0\cos t)$ is a genuine
+integral curve of $X_H$ (\Lean{oscillator\_isIntegralCurve}, at status
+$1$), it conserves the energy $H(\gamma(t))=H(q_0,p_0)$ along the orbit
+(\Lean{oscillator\_energy\_conserved}), and each time-$t$ map is
+symplectic (\Lean{oscillator\_flow\_symplectic}, $\det=1$, in the sense
+of \texttt{Cred.Approx}).  One worked system ties three layers together:
+the integral-curve recovery, energy conservation, and the symplectic
+structure score.
+
+\begin{figure}[h]
+\centering
+\begin{tikzpicture}[scale=1.05,>=Stealth]
+  \draw[->] (-2.3,0)--(2.3,0) node[right]{$q$};
+  \draw[->] (0,-2.3)--(0,2.3) node[above]{$p$};
+  \foreach \r in {0.7,1.3,1.9} \draw[gray!45] (0,0) circle (\r);
+  \fill (1.3,0) circle (1.1pt);
+  \draw[->,thick,blue] (1.3,0)--(1.3,-0.75);
+  \node[blue,right] at (1.32,-0.5) {\footnotesize $X_H=(p,-q)$};
+  \draw[->,red!70,thick] (0.92,0.92) arc (45:10:1.3);
+  \node[red!70] at (1.7,0.78) {\footnotesize flow};
+  \node[gray!70,above right] at (1.34,1.37) {\footnotesize $H=\text{const}$};
+\end{tikzpicture}
+\caption{The harmonic-oscillator phase flow.  Orbits are the energy level
+sets $H=\tfrac12(q^2+p^2)$ (circles); the Hamiltonian field $X_H=(p,-q)$
+is tangent to them, so the flow rotates and conserves $H$
+(\Lean{oscillator\_energy\_conserved}), and each time-$t$ map is
+symplectic (\Lean{oscillator\_flow\_symplectic}).}
+\label{fig:hamiltonian-flow}
+\end{figure}
 
 These layers share one shape: a degree map $P:X\to[0,1]$ whose value $1$
 recovers the classical object exactly, machine-checked.  Metric
@@ -2125,8 +2158,9 @@ the differential layer recovers $\mathrm{ContMDiff}$ and the tangent
 pushforward $\mathrm{mfderiv}$; the tangent bundle, its projection, and
 the zero section are recovered as smooth objects; a Lie group with its
 smooth operations is recovered; and integral curves of vector fields,
-with existence and uniqueness, recover the dynamical layer.  The recovery
-stops
+with existence and uniqueness, recover the dynamical layer, capped by a
+worked Hamiltonian flow that unifies integration, conservation, and
+symplecticity.  The recovery stops
 where mathlib's own library does: the higher differential-geometric
 superstructure (differential forms, de Rham cohomology, connections,
 curvature) and measure-theoretic dimension (Hausdorff measure, Moran's

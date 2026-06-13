@@ -183,6 +183,14 @@ in n dimensions; the differential-geometric superstructure above it is future.
   Hausdorff manifold; `constField_integralCurve_status` proves the explicit
   translation flow of a constant field on the model. Future: the global flow map
   (t,x) -> phi_t x, one-parameter groups, completeness, Hamiltonian dynamics.
+- Hamiltonian flow capstone: `Cred/Topology/HamiltonianFlow.lean`. The harmonic
+  oscillator H = (q^2+p^2)/2, field X_H = (p,-q): `oscillator_isIntegralCurve`
+  (the rotation phase flow is a genuine integral curve), `oscillator_energy_conserved`
+  (H constant along the orbit), `oscillator_flow_symplectic` (time-t map symplectic,
+  det 1, via Cred.Approx). One worked system unifying the integral-curve, energy,
+  and symplectic layers. NOT general Hamiltonian mechanics (abstract symplectic
+  form, Hamilton's equations for general H, Poisson brackets, Liouville) -- those
+  need symplectic-form infrastructure mathlib does not yet provide.
 - The recovery stops at mathlib's frontier. Differential forms, de Rham
   cohomology, connections, curvature, and integration on manifolds have NO
   mathlib target in this version, so a graded layer over them would be an
