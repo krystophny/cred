@@ -169,6 +169,13 @@ in n dimensions; the differential-geometric superstructure above it is future.
   and `zeroSectionStatus_eq_one` that the zero section is a smooth section
   (`Bundle.contMDiff_zeroSection`, `ContMDiffSection`); each with iff-recovery and
   a model-space corollary.
+- Lie group layer (real, not a seed): `Cred/Topology/LieGroupLayer.lean`.
+  `lieGroupStatus_eq_one_iff` / `lieAddGroupStatus_eq_one_iff` recover mathlib's
+  `LieGroup` / `LieAddGroup`; the Euclidean additive group is a concrete witness
+  (`lieAddGroupStatus_model_space`), with smooth addition (`groupAddStatus_eq_one`),
+  negation (`groupNegStatus_eq_one`), and left/right translation
+  (`leftAddTransStatus_eq_one`, `rightAddTransStatus_eq_one`) recovered. Distinct
+  from `Cred/Approx/LieGroup.lean` (discrete-group-step preservation).
 - The recovery stops at mathlib's frontier. Differential forms, de Rham
   cohomology, connections, curvature, and integration on manifolds have NO
   mathlib target in this version, so a graded layer over them would be an

@@ -2092,14 +2092,26 @@ smooth section (\Lean{zeroSectionStatus\_eq\_one}, via mathlib's
 \texttt{ContMDiffSection}).  Each status is crisp, and its certainty is
 equivalent to the underlying mathlib smoothness fact.
 
+\paragraph{Lie groups.}
+Symmetry enters the same way.  A group that is also a smooth manifold
+with smooth operations is a mathlib Lie group; the status is $1$ exactly
+when that holds (\Lean{lieGroupStatus\_eq\_one\_iff}, additively
+\Lean{lieAddGroupStatus\_eq\_one\_iff}).  The Euclidean group
+$\mathbb{R}^n$ under addition is a concrete witness
+(\Lean{lieAddGroupStatus\_model\_space}), with smooth addition,
+negation, and left and right translation all recovered at status $1$
+(\Lean{groupAddStatus\_eq\_one}, \Lean{groupNegStatus\_eq\_one},
+\Lean{leftAddTransStatus\_eq\_one}).
+
 These layers share one shape: a degree map $P:X\to[0,1]$ whose value $1$
 recovers the classical object exactly, machine-checked.  Metric
 closeness, the limit, and continuity recover their mathlib counterparts
 at the boundary; differentiability is two-valued status; dimension is the
 named Moran source; the atlas status recovers a genuine smooth manifold;
 the differential layer recovers $\mathrm{ContMDiff}$ and the tangent
-pushforward $\mathrm{mfderiv}$; and the tangent bundle, its projection,
-and the zero section are recovered as smooth objects.  The recovery stops
+pushforward $\mathrm{mfderiv}$; the tangent bundle, its projection, and
+the zero section are recovered as smooth objects; and a Lie group with
+its smooth operations is recovered.  The recovery stops
 where mathlib's own library does: the higher differential-geometric
 superstructure (differential forms, de Rham cohomology, connections,
 curvature) and measure-theoretic dimension (Hausdorff measure, Moran's

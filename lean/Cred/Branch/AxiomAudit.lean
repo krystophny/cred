@@ -52,6 +52,7 @@ import Cred.Topology.Manifold
 import Cred.Topology.ManifoldN
 import Cred.Topology.Differential
 import Cred.Topology.TangentBundleLayer
+import Cred.Topology.LieGroupLayer
 import Cred.Probability.CoxUniqueness
 
 -- Core/Value: interval arithmetic over the Mathlib reals. The real-number
@@ -194,6 +195,18 @@ import Cred.Probability.CoxUniqueness
 #print axioms Cred.TangentLayer.tangentBundleStatus_eq_one
 #print axioms Cred.TangentLayer.tangentProjStatus_eq_one
 #print axioms Cred.TangentLayer.zeroSectionStatus_eq_one
+
+-- Topology/LieGroupLayer: the Lie-group recoveries as statuses -- the abstract
+-- Lie-add-group status equals certainty iff Mathlib's LieAddGroup holds; the
+-- Euclidean additive group is a Lie additive group (instNormedSpaceLieAddGroup);
+-- and addition and negation on it are C^∞ (contMDiff_add, contMDiff_neg). Each
+-- rides the Credence carrier and Mathlib's LieGroup / ContMDiffAdd development.
+-- Measured: propext, Classical.choice, Quot.sound.
+#print axioms Cred.LieLayer.lieAddGroupStatus_eq_one_iff
+#print axioms Cred.LieLayer.lieAddGroupStatus_model_space
+#print axioms Cred.LieLayer.groupAddStatus_eq_one
+#print axioms Cred.LieLayer.groupNegStatus_eq_one
+#print axioms Cred.LieLayer.leftAddTransStatus_eq_one
 
 -- Probability/CoxUniqueness: any two finite measures representing the same
 -- plausibility agree on every event. Finite rational sums, inheriting the three
