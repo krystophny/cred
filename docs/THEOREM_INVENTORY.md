@@ -139,6 +139,7 @@ rather than by overloading `⊗`.
 | Robust above threshold; threshold-sensitive dependence | `robust_above_threshold`, `dependence_sensitive` | `Dependence/Conditioning.lean` | theorem |
 | Three-valued collapse of an interval verdict | `collapseIntervalToThree`, `RobustStatus` | `Dependence/RobustCollapse.lean` | theorem |
 | Collapse characterizations (incoherent / underdetermined / robust 0,1,half) | `collapse_incoherent_iff`, `collapse_underdetermined_of_full`, `collapse_robustZero_imp`, `collapse_robustOne_iff`, `collapse_robustHalf_imp` | `Dependence/RobustCollapse.lean` | theorem |
+| Beyond two propositions: pairwise marginals and joints do not fix the triple joint | `triple_joint_not_determined_by_pairwise`, `TripleContext`, `JointFamily3` | `Dependence/Network.lean` | theorem |
 
 ### Proof theory (`Cred/ProofTheory/`)
 
@@ -148,6 +149,8 @@ rather than by overloading `⊗`.
 | Generative derivation relation, sound | `Derives`, `generative_sound` | `ProofTheory/Generative.lean` | theorem |
 | Conjunction introduction at threshold `s⊗t`; per-rule soundness | `conjIntro`, `conjIntro_sound`, `conjElimLeft_sound`, `conjElimRight_sound`, `disjIntroLeft_sound`, `disjIntroRight_sound` | `ProofTheory/Generative.lean` | theorem |
 | Generative first-order calculus (equality substitution, forall-elim, exists-intro) with soundness | `GenDerives`, `genDerives_sound`, `equalitySubst_sound`, `forallElim_sound`, `existsIntro_sound` | `ProofTheory/GenerativeQuant.lean` | theorem |
+| Provenance over the first-order language: used hypotheses, soundness, theorem-uses-nothing witness | `foundationUsedHyps`, `foundation_provenance_sound`, `foundation_theorem_uses_no_hyp` | `ProofTheory/FoundationProvenance.lean` | theorem |
+| Theory branch `T+R`: local inconsistency does not threshold-entail an unrelated formula | `TheoryBranch`, `LocallyInconsistent`, `theory_branch_no_explosion` | `ProofTheory/TheoryBranch.lean` | theorem |
 | Assumption provenance tracked and sound | `usedAssumptions`, `provenance_sound` | `ProofTheory/Provenance.lean` | theorem |
 | Local contradiction does not explode | `local_contradiction_no_explosion` | `ProofTheory/Branches.lean` | theorem |
 
@@ -173,6 +176,8 @@ rather than by overloading `⊗`.
 |---|---|---|---|
 | Even square implies even base | `even_square_implies_even` | `Math/Parity.lean` | theorem |
 | Sqrt-2 core: both `p` and `q` even, hence not coprime | `sqrt2_core_even_p`, `sqrt2_core_even_q`, `not_coprime_if_both_even` | `Math/Divisibility.lean` | theorem |
+| Order / divisibility / gcd lemmas; no coprimality with a common prime | `nat_dvd_trans`, `nat_dvd_gcd`, `not_coprime_of_common_prime` | `Math/Order.lean` | theorem |
+| Sqrt-3 core contradiction and recorded dependency chain | `sqrt3_core_contradiction`, `sqrt3_dependency_chain` | `Examples/MathSeed.lean` | theorem |
 
 ## Reproducing the ledger
 

@@ -261,16 +261,26 @@ is logic plus dependence, and the chain-rule fiber `c ⊗ e = j` is the interfac
 ## What remains for a working basis
 
 The kernel is a serious semantic foundation, not yet a complete basis for everyday
-mathematics. The honest remaining work, in dependency order:
+mathematics. A first verified cut of each item below now exists; what remains is the
+general theory, in dependency order:
 
-1. Generative proof theory: extend the connective fragment with equality
-   substitution, quantifier introduction/elimination, definitions, and induction,
-   with direct soundness, retiring the semantic-oracle rule of the labelled calculus.
-2. Proof provenance over the real foundation language (not just the toy proof type),
-   with a used-assumption DAG.
-3. Branch semantics for `T + R` over genuine theories, preserving the dependency
-   chain through a localized contradiction.
-4. Dependence networks: credal/joint families over many propositions, beyond the
-   single two-proposition context.
-5. A mathematics-library seed past sqrt2: order, finite sets, and further
-   number theory, then a real-number development.
+1. Generative proof theory. Done: a first-order generative calculus `GenDerives`
+   (`ProofTheory/GenerativeQuant.lean`) with equality reflexivity/substitution,
+   forall-elimination, and exists-introduction, sound by induction with no
+   semantic-oracle rule. Remaining: definitions, induction, unifying the propositional
+   connective fragment under a shared per-premise label layer, and syntactic completeness.
+2. Proof provenance. Done: over the real first-order proof type, `foundationUsedHyps`
+   with `foundation_provenance_sound` (used hyps are declared) and
+   `foundation_theorem_uses_no_hyp` (a theorem proved from no hypothesis)
+   (`ProofTheory/FoundationProvenance.lean`). Remaining: a full DAG also tracking
+   lemmas, definitions, and side judgments.
+3. Branch semantics for `T + R`. Done: `TheoryBranch` with `LocallyInconsistent` and
+   `theory_branch_no_explosion` over Foundation formulas (`ProofTheory/TheoryBranch.lean`).
+   Remaining: preserving the full dependency chain through a localized contradiction.
+4. Dependence networks. Done: a three-proposition model where pairwise marginals and
+   pairwise joints do not fix the triple joint (`triple_joint_not_determined_by_pairwise`,
+   `Dependence/Network.lean`). Remaining: general credal/joint families over many
+   propositions.
+5. Mathematics-library seed. Done: order/divisibility/gcd lemmas (`Math/Order.lean`) and
+   a second irrationality benchmark, the sqrt3 core contradiction with a recorded
+   dependency chain (`Examples/MathSeed.lean`). Remaining: a real-number development.
