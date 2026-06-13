@@ -146,6 +146,7 @@ rather than by overloading `⊗`.
 |---|---|---|---|
 | Labels and their designation of credences | `Label`, `designates` | `ProofTheory/Labels.lean` | theorem |
 | Generative derivation relation, sound | `Derives`, `generative_sound` | `ProofTheory/Generative.lean` | theorem |
+| Conjunction introduction at threshold `s⊗t`; per-rule soundness | `conjIntro`, `conjIntro_sound`, `conjElimLeft_sound`, `conjElimRight_sound`, `disjIntroLeft_sound`, `disjIntroRight_sound` | `ProofTheory/Generative.lean` | theorem |
 | Assumption provenance tracked and sound | `usedAssumptions`, `provenance_sound` | `ProofTheory/Provenance.lean` | theorem |
 | Local contradiction does not explode | `local_contradiction_no_explosion` | `ProofTheory/Branches.lean` | theorem |
 
@@ -156,6 +157,8 @@ rather than by overloading `⊗`.
 | Finite-world entailment is set inclusion | `entails_iff_subset` | `Examples/FiniteWorlds.lean` | theorem |
 | Entailment witnesses: `A` not `B`, `A` entails `C` | `A_not_entails_B`, `A_entails_C` | `Examples/FiniteWorlds.lean` | theorem |
 | Pointwise values do not determine entailment; marginals do not determine the joint | `pointwise_does_not_determine`, `joint_not_determined_by_marginals` | `Examples/FiniteWorlds.lean` | theorem |
+| Issue-anchor restatements; product/independence witness | `truthSet_subset_iff_entails`, `finite_pointwise_truth_not_connection`, `finite_same_marginals_different_joint`, `finite_independence_example` | `Examples/FiniteWorlds.lean` | theorem |
+| Interval collapse worked cases (half / sensitive / underdetermined / incoherent) | `collapse_interval_interior_robust_half`, `collapse_interval_boundary_sensitive`, `zero_evidence_collapse_underdetermined`, `empty_fiber_collapse_incoherent` | `Examples/RobustCollapse.lean` | theorem |
 | Robust conditioning: Frechet bounds, product joint, conditioning interval | `frechet_lower`, `frechet_upper`, `product_joint`, `cond_interval` | `Examples/RobustConditioning.lean` | theorem |
 | Robust at low threshold, sensitive at high threshold | `robust_at_low_threshold`, `sensitive_at_high_threshold` | `Examples/RobustConditioning.lean` | theorem |
 | Provenance worked cases | `used_assumptions_example`, `entails_but_unused` | `Examples/ProofProvenance.lean` | theorem |

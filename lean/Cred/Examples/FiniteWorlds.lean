@@ -143,4 +143,31 @@ theorem joint_not_determined_by_marginals :
   refine ⟨marginal_A_eq, marginal_B_eq, ?_⟩
   rw [joint_μ1, joint_μ2]; norm_num
 
+/-! ## Issue #638 anchor names
+
+The following names are the exact anchors the paper cites; they restate the
+results above. -/
+
+/-- Truth-set inclusion is entailment (issue anchor for `entails_iff_subset`). -/
+theorem truthSet_subset_iff_entails (A B : BoolProp) :
+    truthSet A ⊆ truthSet B ↔ Entails A B :=
+  (entails_iff_subset A B).symm
+
+/-- Pointwise truth at one world does not establish the entailment connection. -/
+theorem finite_pointwise_truth_not_connection :
+    A 0 = true ∧ B 0 = true ∧ ¬ Entails A B :=
+  pointwise_does_not_determine
+
+/-- Equal marginals, different joint: marginals do not fix the joint credence. -/
+theorem finite_same_marginals_different_joint :
+    P μ1 A = P μ2 A ∧ P μ1 B = P μ2 B ∧
+      P μ1 (conjProp A B) ≠ P μ2 (conjProp A B) :=
+  joint_not_determined_by_marginals
+
+/-- Independence witness: under the uniform weighting `μ1` the joint
+    `P (A∧B) = 1/4` equals the product of marginals `P A · P B = 1/2 · 1/2`. -/
+theorem finite_independence_example :
+    P μ1 (conjProp A B) = P μ1 A * P μ1 B := by
+  norm_num [P, conjProp, A, B, μ1, Fin.sum_univ_four]
+
 end Cred.Examples.FiniteWorlds

@@ -120,6 +120,7 @@ import Cred.ProofTheory.Branches
 import Cred.Math.Parity
 import Cred.Math.Divisibility
 import Cred.Examples.FiniteWorlds
+import Cred.Examples.RobustCollapse
 import Cred.Examples.RobustConditioning
 import Cred.Examples.ProofProvenance
 import Cred.Examples.Branches

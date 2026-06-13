@@ -985,6 +985,56 @@ The three-valued summary of an interval is
 \Lean{Cred.Dependence.RobustStatus} that records robustness or
 sensitivity.
 
+\subsection{Fuzzy t-norms as fixed dependence policies}
+A t-norm used as the joint is one coupling policy, not the general
+joint.  With $a=\tfrac35$, $b=\tfrac{7}{10}$ the admissible joint ranges
+over the Fr\'echet interval $[\tfrac{3}{10},\tfrac35]$; three named
+t-norms pick three points of it.
+\begin{center}
+\begin{tabular}{@{}lccl@{}}
+\toprule
+policy (t-norm) & joint $j$ & conditional $j/b$ & dependence \\
+\midrule
+\L ukasiewicz $\max(a{+}b{-}1,0)$ & $\tfrac{3}{10}$ & $\tfrac37$ & minimal overlap \\
+product $a\cdot b$ & $\tfrac{21}{50}$ & $\tfrac35=a$ & independence \\
+minimum $\min(a,b)$ & $\tfrac35$ & $\tfrac67$ & maximum positive \\
+\bottomrule
+\end{tabular}
+\end{center}
+Lean fixes the three joint values:
+\Lean{Cred.Examples.RobustConditioning.frechet\_lower} ($\tfrac{3}{10}$),
+\Lean{Cred.Examples.RobustConditioning.product\_joint} ($\tfrac{21}{50}$),
+\Lean{Cred.Examples.RobustConditioning.frechet\_upper} ($\tfrac35$).
+Each is a valid coupling, and the product policy makes the evidence
+irrelevant ($j/b=a$).  None is the general joint: the supplied
+$j=\cred(A\wedge B)$ may be any point of $[\tfrac{3}{10},\tfrac35]$, and
+only that supplied value fixes the conditional.
+
+\subsection{Robust three-valued collapse}
+An interval verdict collapses to a \Lean{Cred.Dependence.RobustStatus}
+through \Lean{Cred.Dependence.collapseIntervalToThree}, which records
+whether a conclusion survives every admissible joint.  Four worked
+cases:
+\begin{center}
+\begin{tabular}{@{}lll@{}}
+\toprule
+interval & verdict & Lean \\
+\midrule
+$[\tfrac12,\tfrac12]$ & robust half &
+  \Lean{Cred.Examples.RobustCollapse.collapse\_interval\_interior\_robust\_half}\\
+$[\tfrac37,\tfrac67]$ & dependence-sensitive &
+  \Lean{Cred.Examples.RobustCollapse.collapse\_interval\_boundary\_sensitive}\\
+$[0,1]$ & underdetermined &
+  \Lean{Cred.Examples.RobustCollapse.zero\_evidence\_collapse\_underdetermined}\\
+$[1,0]$ & incoherent &
+  \Lean{Cred.Examples.RobustCollapse.empty\_fiber\_collapse\_incoherent}\\
+\bottomrule
+\end{tabular}
+\end{center}
+The collapse happens after the dependence reasoning, not before: a
+ternary status is a summary of an interval of joints, never a place
+where dependence is invented.
+
 \subsection{Semantic entailment is not proof use}
 A toy proof object carries named assumptions, and
 \Lean{Cred.ProofTheory.usedAssumptions} extracts the set actually used;
@@ -1267,8 +1317,9 @@ Hypothetical branches &
 \Lean{Cred.ProofTheory.local\_contradiction\_no\_explosion} &
 $T+R$ over genuine theories \\[2pt]
 Generative calculus &
-local intro/elim fragment with
-\Lean{Cred.ProofTheory.generative\_sound} (no semantic-oracle rule) &
+local connective rules (conjunction introduction at threshold
+$s\conjc t$ and elimination, disjunction introduction, double negation)
+with \Lean{Cred.ProofTheory.generative\_sound}, no semantic-oracle rule &
 quantifiers, equality, induction; syntactic completeness \\[2pt]
 Mathematics seed &
 parity, divisibility, the $\sqrt2$ core contradiction

@@ -101,6 +101,12 @@ inductive Derives : List (LForm α) → Label → Formula α → Prop where
   /-- Cut on a derived intermediate formula at level `k`. -/
   | cut {Γ : List (LForm α)} {k : Label} {mid φ : Formula α} :
       Derives Γ k mid → Derives (⟨k, mid⟩ :: Γ) k φ → Derives Γ k φ
+  /-- Conjunction introduction: from `φ` at threshold `s` and `ψ` at threshold
+      `t`, conclude `φ ∧ ψ` at threshold `s ⊗ t`.  Sound because conjunction
+      evaluates as the product `s.val * t.val ≤ (eval φ).val * (eval ψ).val`. -/
+  | conjIntro {Γ : List (LForm α)} {s t : Credence} {φ ψ : Formula α} :
+      Derives Γ (.threshold s) φ → Derives Γ (.threshold t) ψ →
+      Derives Γ (.threshold (s ⊗ t)) (.conj φ ψ)
   /-- Conjunction elimination (left), at any threshold. -/
   | conjElimLeft {Γ : List (LForm α)} {t : Credence} {φ ψ : Formula α} :
       Derives Γ (.threshold t) (.conj φ ψ) → Derives Γ (.threshold t) φ
@@ -160,6 +166,12 @@ theorem generative_sound {Γ : List (LForm α)} {k : Label} {φ : Formula α}
       rcases List.mem_cons.mp hb with rfl | hb'
       · exact hmid
       · exact hΓ b hb'
+  | conjIntro _ _ ihφ ihψ =>
+      intro v hΓ
+      have hφ := ihφ v hΓ
+      have hψ := ihψ v hΓ
+      simp only [Label.designates, eval, Credence.conj_val] at hφ hψ ⊢
+      exact conj_mono hφ hψ
   | conjElimLeft _ ih =>
       intro v hΓ
       have hc := ih v hΓ
@@ -209,5 +221,46 @@ theorem generative_sound {Γ : List (LForm α)} {k : Label} {φ : Formula α}
       have hc := ih v hΓ
       cases k <;>
         simp only [Label.designates, eval, Credence.neg_neg] at hc ⊢ <;> exact hc
+
+/-! ## Per-rule soundness corollaries
+
+Each names the soundness consequence of one rule directly, as a one-line
+specialization of `generative_sound`. -/
+
+/-- Conjunction introduction is sound: premises designated at thresholds `s`, `t`
+    designate the conjunction at threshold `s ⊗ t`. -/
+theorem conjIntro_sound {Γ : List (LForm α)} {s t : Credence} {φ ψ : Formula α}
+    (hφ : Derives Γ (.threshold s) φ) (hψ : Derives Γ (.threshold t) ψ) :
+    ∀ v : α → Credence, Designated v Γ →
+      (Label.threshold (s ⊗ t)).designates (eval v (.conj φ ψ)) :=
+  generative_sound (Derives.conjIntro hφ hψ)
+
+/-- Conjunction elimination (left) is sound. -/
+theorem conjElimLeft_sound {Γ : List (LForm α)} {t : Credence} {φ ψ : Formula α}
+    (h : Derives Γ (.threshold t) (.conj φ ψ)) :
+    ∀ v : α → Credence, Designated v Γ →
+      (Label.threshold t).designates (eval v φ) :=
+  generative_sound (Derives.conjElimLeft h)
+
+/-- Conjunction elimination (right) is sound. -/
+theorem conjElimRight_sound {Γ : List (LForm α)} {t : Credence} {φ ψ : Formula α}
+    (h : Derives Γ (.threshold t) (.conj φ ψ)) :
+    ∀ v : α → Credence, Designated v Γ →
+      (Label.threshold t).designates (eval v ψ) :=
+  generative_sound (Derives.conjElimRight h)
+
+/-- Disjunction introduction (left) is sound. -/
+theorem disjIntroLeft_sound {Γ : List (LForm α)} {t : Credence} {φ ψ : Formula α}
+    (h : Derives Γ (.threshold t) φ) :
+    ∀ v : α → Credence, Designated v Γ →
+      (Label.threshold t).designates (eval v (.disj φ ψ)) :=
+  generative_sound (Derives.disjIntroLeft h)
+
+/-- Disjunction introduction (right) is sound. -/
+theorem disjIntroRight_sound {Γ : List (LForm α)} {t : Credence} {φ ψ : Formula α}
+    (h : Derives Γ (.threshold t) ψ) :
+    ∀ v : α → Credence, Designated v Γ →
+      (Label.threshold t).designates (eval v (.disj φ ψ)) :=
+  generative_sound (Derives.disjIntroRight h)
 
 end Cred.ProofTheory
