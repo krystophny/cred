@@ -959,6 +959,36 @@ $P(A)=P(B)=\tfrac12$ but different joints
 $P(A\wedge B)=\tfrac14$ and $\tfrac12$
 (\Lean{Cred.Examples.FiniteWorlds.joint\_not\_determined\_by\_marginals}).
 
+\begin{figure}[h]
+\centering
+\begin{tikzpicture}[scale=1]
+  \foreach \x/\name in {0/w_0, 2/w_1, 4/w_2, 6/w_3} {
+    \node at (\x,2.3) {$\name$};
+  }
+  % C: all worlds
+  \draw[rounded corners,draw=green!55!black,thick,fill=green!8]
+    (-0.7,-0.5) rectangle (6.7,0.55);
+  \node[green!45!black,anchor=west] at (6.8,0) {$C=\{w_0,w_1,w_2,w_3\}$};
+  % A: w0,w1
+  \draw[rounded corners,draw=blue!70,thick,fill=blue!12]
+    (-0.55,0.7) rectangle (2.55,1.7);
+  \node[blue!70,anchor=west] at (6.8,1.2) {$A=\{w_0,w_1\}$};
+  % B: w0,w2
+  \draw[rounded corners,draw=red!70,thick,fill=red!10]
+    (-0.45,1.85) rectangle (4.45,2.85);
+  \node[red!70,anchor=west] at (6.8,2.35) {$B=\{w_0,w_2\}$};
+  \foreach \x/\name in {0/w_0, 2/w_1, 4/w_2, 6/w_3} {
+    \fill (\x,0) circle (0.06);
+    \node[below] at (\x,-0.1) {$\name$};
+  }
+\end{tikzpicture}
+\caption{Truth sets in $W=\{w_0,\dots,w_3\}$ for $A=[1,1,0,0]$,
+$B=[1,0,1,0]$, $C=[1,1,1,1]$.  $A\subseteq C$, so $A\models C$, but
+$A\not\subseteq B$: world $w_1\in A\setminus B$ is the countermodel that
+breaks $A\models B$ even though both hold at $w_0$.}
+\label{fig:finite-worlds}
+\end{figure}
+
 \subsection{Robust conditioning from a Fr\'echet interval}
 Take $a=\tfrac35$, $b=\tfrac{7}{10}$.  The joint is confined to
 $[\tfrac{3}{10},\tfrac35]$
@@ -984,6 +1014,45 @@ The three-valued summary of an interval is
 \Lean{Cred.Dependence.collapseIntervalToThree}, returning a
 \Lean{Cred.Dependence.RobustStatus} that records robustness or
 sensitivity.
+
+\begin{figure}[h]
+\centering
+\begin{tikzpicture}[scale=1,x=11cm]
+  % joint axis: from 0 to 1, but show the relevant window 0.25..0.65
+  % map joint value j to x via x=j
+  \def\jlo{0.3}   % 3/10
+  \def\jprod{0.42} % 21/50
+  \def\jhi{0.6}   % 3/5
+  % joint number line
+  \draw[->] (0.22,0) -- (0.7,0) node[right] {joint $j=\cred(A\wedge B)$};
+  \draw[very thick,blue!70] (\jlo,0) -- (\jhi,0);
+  \foreach \x in {\jlo,\jprod,\jhi} { \fill (\x,0) circle (0.6pt); }
+  \node[below=4pt] at (\jlo,0) {$\tfrac{3}{10}$};
+  \node[below=4pt] at (\jprod,0) {$\tfrac{21}{50}$};
+  \node[below=4pt] at (\jhi,0) {$\tfrac{3}{5}$};
+  \node[above=2pt,align=center] at (\jlo,0.05) {\footnotesize\L uk.};
+  \node[above=2pt,align=center] at (\jprod,0.05) {\footnotesize product};
+  \node[above=2pt,align=center] at (\jhi,0.05) {\footnotesize min};
+  \node[blue!70,above=16pt] at (\jprod,0) {admissible joint $[\tfrac{3}{10},\tfrac35]$};
+  % conditional axis below: cond = j/(7/10)
+  \draw[->] (0.22,-1.3) -- (0.7,-1.3) node[right] {conditional $j/b$};
+  \draw[very thick,red!70] ({3/7*0.7},-1.3) -- ({6/7*0.7},-1.3);
+  \foreach \v in {3,6} { \fill ({\v/7*0.7},-1.3) circle (0.6pt); }
+  \node[below=4pt] at ({3/7*0.7},-1.3) {$\tfrac{3}{7}$};
+  \node[below=4pt] at ({6/7*0.7},-1.3) {$\tfrac{6}{7}$};
+  \node[red!70,above=14pt] at ({4.5/7*0.7},-1.3) {induced $[\tfrac37,\tfrac67]$};
+  % divide-by-b arrows
+  \draw[->,gray] (\jlo,-0.12) -- ({3/7*0.7},-1.18);
+  \draw[->,gray] (\jhi,-0.12) -- ({6/7*0.7},-1.18);
+  \node[gray,right] at (0.5,-0.72) {\footnotesize $\div\,b=\tfrac{7}{10}$};
+\end{tikzpicture}
+\caption{Fr\'echet band and its induced conditional interval for
+$a=\tfrac35$, $b=\tfrac{7}{10}$.  The joint is confined to
+$[\tfrac{3}{10},\tfrac35]$ with the three named couplings as marked
+points.  Dividing by $b$ maps the band onto the conditional interval
+$[\tfrac37,\tfrac67]$.}
+\label{fig:frechet-interval}
+\end{figure}
 
 \subsection{Fuzzy t-norms as fixed dependence policies}
 A t-norm used as the joint is one coupling policy, not the general
@@ -1044,6 +1113,31 @@ valid formula $B\disjc\negc B$ uses no assumption
 it is valid, so any premise entails it.  Which theorem depends on which is therefore a
 proof-provenance question, not an entailment one.
 
+\begin{figure}[h]
+\centering
+\begin{tikzpicture}[
+    >=Stealth,node distance=10mm,
+    pnasm/.style={draw,rounded corners,fill=gray!12,inner sep=3pt},
+    pnstep/.style={draw,fill=blue!8,inner sep=3pt},
+    pnconcl/.style={draw,thick,fill=green!12,inner sep=3pt}]
+  \node[pnasm] (A) {assume $A$};
+  \node[pnasm,right=16mm of A] (D) {assume $D$};
+  \node[pnstep,below=of A] (s1) {$A\disjc B$};
+  \node[pnstep,below=of D] (s2) {$D\conjc E$};
+  \node[pnconcl,below=14mm of $(s1)!0.5!(s2)$] (g) {$B\disjc\negc B$ (valid)};
+  \draw[->] (A) -- (s1);
+  \draw[->] (D) -- (s2);
+  % conclusion is valid: no edge into it from assumptions
+  \node[align=center,right=18mm of g] {valid formula:\\ \emph{no} assumption feeds it};
+\end{tikzpicture}
+\caption{Proof-provenance DAG.  Edges record which nodes a derivation
+actually consumes.  The assumptions $A,D$ feed their own consequences,
+but the valid conclusion $B\disjc\negc B$ has no incoming edge: its
+\Lean{Cred.ProofTheory.usedAssumptions} set is empty, so any premise
+trivially entails it without being used.}
+\label{fig:provenance-dag}
+\end{figure}
+
 \subsection{Local contradiction without explosion}
 A branch whose assumptions contain both $A$ and $\negc A$ is locally
 contradictory, yet the generative calculus, which has no explosion rule,
@@ -1066,6 +1160,34 @@ recorded step list
 contradiction to the coprimality step: the false assumption is the
 rational representation, and inconsistency enters at one named step
 rather than spreading by explosion.
+
+\begin{figure}[h]
+\centering
+\begin{tikzpicture}[
+    >=Stealth,
+    nd/.style={draw,rounded corners,fill=blue!8,inner sep=3.5pt,
+               minimum height=8mm,align=center},
+    bad/.style={draw,thick,fill=red!12,inner sep=3.5pt,
+                minimum height=8mm,align=center}]
+  \node[nd] (r) {$\sqrt2\in\mathbb{Q}$};
+  \node[nd,right=8mm of r] (c) {coprime\\$p,q$};
+  \node[nd,right=8mm of c] (sq) {$p^2=2q^2$};
+  \node[nd,below=8mm of sq] (pe) {$p$ even};
+  \node[nd,left=8mm of pe] (qe) {$q$ even};
+  \node[bad,left=8mm of qe] (bot) {$\bot$};
+  \draw[->] (r) -- (c);
+  \draw[->] (c) -- (sq);
+  \draw[->] (sq) -- (pe);
+  \draw[->] (pe) -- (qe);
+  \draw[->,red!70,thick] (qe) -- node[above,font=\footnotesize,red!70]{vs.\ coprime} (bot);
+\end{tikzpicture}
+\caption{The $\sqrt2$ dependency chain.  Each node depends only on its
+predecessor.  The contradiction enters at the single red step where
+``$p,q$ both even'' meets the coprimality assumption; the false
+assumption is the rational representation $\sqrt2\in\mathbb{Q}$ at the
+head of the chain.}
+\label{fig:sqrt2-chain}
+\end{figure}
 
 \section{Foundational Status}
 
