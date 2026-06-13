@@ -170,7 +170,9 @@ given joint value.  At positive coherent evidence, probability theory
 has a singleton fiber and writes a quotient.  Boolean and many-valued
 variants restrict the carrier; the same preimage construction still
 applies.  A truth table would have to choose one value.  The singular
-fiber at zero evidence is a set of admissible values.
+fiber at zero evidence is a set of admissible values.  Logical
+consequence is the same inclusion read over valuations rather than
+values; one operator covers both, and a later section makes it explicit.
 
 \section{The Setting}
 
@@ -519,7 +521,7 @@ Lean: \Lean{Cred.collapse\_neg},
 \Lean{Cred.collapse\_conj},
 \Lean{Cred.collapse\_disj}.
 
-The collapse is not cosmetic.  It is forced at three values.
+This collapse is rigid.
 
 \begin{theorem}[Three-element quotient]
 \label{thm:three-quotient}
@@ -628,10 +630,99 @@ Lean anchors: \\
 \end{tabular}
 \end{quote}
 
-\section{Why the Conditional Does Not Collapse}
+\section{Inference as Inverse-Image Inclusion}
+\label{sec:inference-principle}
 
-The previous section is a positive bridge theorem.  The next theorem
-shows the collapse does not extend to conditioning.
+Conditioning and consequence are one construction.  Each fixes
+constraints, forms the set of points those constraints admit, and
+accepts a conclusion exactly when it holds across the whole set.
+
+Fix the value object $([0,1],\conjc,\le)$ and read a threshold $t$ as
+the up-set ${\uparrow}t=[t,1]$.  A \emph{constraint} on a point set $X$
+is a pair $(f,S)$ with $f:X\to[0,1]$ and $S\subseteq[0,1]$; its
+admissible set is the preimage $f^{-1}(S)$.  For a family $\Gamma$ of
+constraints, $\mathrm{Mod}(\Gamma)=\bigcap_{(f,S)\in\Gamma}f^{-1}(S)$.
+Inference is inclusion of admissible sets:
+\[
+\boxed{\;\Gamma\vdash(g,T)\quad:\Longleftrightarrow\quad
+  \mathrm{Mod}(\Gamma)\subseteq g^{-1}(T).\;}
+\]
+This is the closure of the Galois connection between constraints and
+points, the ordinary shape of semantic consequence.  Cred's two
+inferences are its valuation-level and value-level instances.
+\begin{center}
+\begin{tabular}{@{}llll@{}}
+\toprule
+ & points $X$ & evaluation $f$ & target $S$ \\
+\midrule
+consequence $\Gamma\models_t\varphi$ & valuations $v$ &
+  $v\mapsto\val{\varphi}_v$ & ${\uparrow}t$ \\
+conditioning $\Cond(j,e)$ & values $c\in[0,1]$ &
+  $c\mapsto c\conjc e$ & $\{j\}$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+For consequence the admissible set is
+$\bigcap_{\gamma\in\Gamma}\val{\gamma}^{-1}({\uparrow}t)$ and the query
+is $\val{\varphi}^{-1}({\uparrow}t)$; this is the formula bridge and
+threshold consequence.  For conditioning the admissible set is the
+fiber $m_e^{-1}(j)=\Cond(j,e)$ of the chain rule, and a threshold query
+$c\ge t$ is warranted exactly when $\Cond(j,e)\subseteq{\uparrow}t$,
+which is the robust and dependence-sensitive split below.  The value
+carrier plays both roles: it is the codomain of every evaluation and,
+for conditioning, the point set itself.
+
+\begin{figure}[h]
+\centering
+\begin{tikzpicture}[>=Latex]
+  \node[draw,rounded corners,fill=gray!10,align=center] (op)
+    {one operator\\$\mathrm{Mod}(\Gamma)\subseteq g^{-1}(T)$};
+  \node[draw,rounded corners,fill=blue!8,align=center,
+        below left=12mm and 2mm of op] (ent)
+    {consequence\\points: valuations $v$\\$f=\val{\cdot}_v$,\quad $S={\uparrow}t$};
+  \node[draw,rounded corners,fill=red!8,align=center,
+        below right=12mm and 2mm of op] (con)
+    {conditioning\\points: values $c$\\$f=(\,\cdot\,)\conjc e$,\quad $S=\{j\}$};
+  \draw[->] (op) -- (ent);
+  \draw[->] (op) -- (con);
+  \draw[<->,thick,gray] (con) -- node[below,align=center,font=\footnotesize]
+    {chain-rule cut} (ent);
+\end{tikzpicture}
+\caption{Two fibrations of one consequence operator.  Entailment runs
+over valuations, conditioning over values; the chain-rule cut pushes a
+value fiber forward into the valuation consequence, turning evidence
+above $t$ and a conditional at least $\ell$ into a joint above
+$\ell\conjc t$.}
+\label{fig:two-fibrations}
+\end{figure}
+
+The three shapes of an admissible set are the same on both sides.  A
+singleton forces one answer: positive evidence $c=j/e$, or premises
+that pin the conclusion.  The full set forces nothing: zero evidence
+gives $\Cond(0,0)=[0,1]$, and a glut leaves a surviving counter-valuation.
+The empty set is incoherence: $j>e$ on the value side, no countermodel on
+the valuation side, which is reductio.  No explosion is then not an extra
+axiom.  Classical ex falso is the step ``the admissible set is empty,
+therefore everything''; the principle declines it by reporting the empty
+and full sets faithfully instead of collapsing either to anything.
+
+One instance does not reduce to the other.  The conditioning evaluation
+$m_e=(\,\cdot\,)\conjc e$ is a genuine map on values, but the next
+section shows it does not descend to a connective on the collapsed
+values: no truth function on $\{0,\half,1\}$ reproduces it.  The two
+fibrations share a closure operator while the value fibration resists
+internalization as an object-language conditional.  Unification at the
+level of consequence; separation at the level of connectives.
+
+\section{Why the Conditional Does Not Collapse}
+\label{sec:no-cond-bridge}
+
+Consequence is the inclusion $\mathrm{Mod}(\Gamma)\subseteq
+\val{\varphi}^{-1}({\uparrow}t)$ of the previous section, and it
+descends to the Kleene quotient.  Conditioning is the same inclusion on
+the value fibration, and the next theorem shows it does \emph{not}
+descend: the evaluation $m_e$ is no truth function on the collapsed
+values.
 
 \begin{theorem}[No truth-functional conditional bridge]
 \label{thm:no-cond-bridge}
@@ -916,11 +1007,10 @@ no threshold countermodel while excluded middle still holds.}
 \label{fig:thresholds}
 \end{figure}
 
-The interval $\half<t\le3/4$ is philosophically useful.  It is a
-controlled middle region: contradiction does not license everything,
-yet excluded middle remains designated.  One should not oversell this
-as a new foundation for mathematics.  It is a status calculus for
-graded consequence.
+The interval $\half<t\le3/4$ is the non-explosive band that still
+validates excluded middle: contradiction licenses nothing, yet excluded
+middle stays designated.  It is a status calculus for graded
+consequence, not a foundation for mathematics.
 
 \section{Toy Models and Worked Examples}
 \label{sec:toy-models}
@@ -1083,20 +1173,20 @@ only that supplied value fixes the conditional.
 An interval verdict collapses to a \Lean{Cred.Dependence.RobustStatus}
 through \Lean{Cred.Dependence.collapseIntervalToThree}, which records
 whether a conclusion survives every admissible joint.  Four worked
-cases:
+cases, with anchors in \texttt{Cred.Examples.RobustCollapse}:
 \begin{center}
 \begin{tabular}{@{}lll@{}}
 \toprule
-interval & verdict & Lean \\
+interval & verdict & anchor \\
 \midrule
 $[\tfrac12,\tfrac12]$ & robust half &
-  \Lean{Cred.Examples.RobustCollapse.collapse\_interval\_interior\_robust\_half}\\
+  \Lean{collapse\_interval\_interior\_robust\_half}\\
 $[\tfrac37,\tfrac67]$ & dependence-sensitive &
-  \Lean{Cred.Examples.RobustCollapse.collapse\_interval\_boundary\_sensitive}\\
+  \Lean{collapse\_interval\_boundary\_sensitive}\\
 $[0,1]$ & underdetermined &
-  \Lean{Cred.Examples.RobustCollapse.zero\_evidence\_collapse\_underdetermined}\\
+  \Lean{zero\_evidence\_collapse\_underdetermined}\\
 $[1,0]$ & incoherent &
-  \Lean{Cred.Examples.RobustCollapse.empty\_fiber\_collapse\_incoherent}\\
+  \Lean{empty\_fiber\_collapse\_incoherent}\\
 \bottomrule
 \end{tabular}
 \end{center}
@@ -1191,22 +1281,13 @@ head of the chain.}
 
 \section{Foundational Status}
 
-The continuous presentation uses the real interval as semantics.  That
-choice is not a claim that the object language already contains real
-numbers, subsets, or a prior set theory.  The primitive conditional
-form is the judgment
-\[
-  \Adm_V(c;j,e)\quad\Longleftrightarrow\quad c\conjc e=j.
-\]
-Only after a predicate or set layer is available do we identify its
-fiber with $\Cond_V(j,e)$.  Before that point, $\Cond$ is notation in
-the metatheory, not an object-language set former.
-
-The same distinction applies to the carrier.  Using $[0,1]\subset\Real$
-gives order, topology, and multiplication for the semantic model.  A
-Boolean fragment uses $\mathbf 2$.  A three-valued fragment uses the
-Kleene carrier or the quotient collapse.  The conditioning rule itself
-is the algebraic equation $c\conjc e=j$ on the chosen carrier.
+The real interval is a semantic carrier, not an object-language
+ontology.  Using $[0,1]\subset\Real$ supplies order, topology, and
+multiplication for the model; the Boolean and three-valued fragments use
+$\mathbf 2$ and the Kleene carrier.  The conditioning rule is the same
+equation $c\conjc e=j$ on whichever carrier is chosen, and
+$\Cond_V(j,e)$ is its fiber in the metatheory, not an object-language
+set former.
 
 \section{Proof Theory}
 
@@ -1515,8 +1596,10 @@ The no-go theorem explains why conditioning does not extend to
 that collapse.  The Curry block explains why the system should not add
 an internal arrow to repair this.
 
-The formal core is therefore not a new truth table.  It is a separation
-between collapseable consequence and non-collapseable conditioning.
+The formal core is therefore not a new truth table.  Consequence and
+conditioning are one inference, the inclusion of the admissible set the
+constraints cut out; the separation is that only the value fibration
+resists collapse to a truth-functional connective.
 
 \bibliographystyle{alpha}
 \bibliography{../cred,refs}
