@@ -111,56 +111,48 @@ names are cited in the text.
 
 \tableofcontents
 
-\section{Contribution Hierarchy}
+\section{Contribution and Claims}
 
-The paper keeps one mechanism and the obstructions around it.  Adjacent
-developments are useful only when they support that mechanism.
-
-\begin{table}[h]
-\centering
-\begin{tabular}{@{}p{0.08\linewidth}p{0.29\linewidth}p{0.50\linewidth}@{}}
-\toprule
-Rank & Component & Reason \\
-\midrule
-1 & Chain-rule conditioning as an admissibility judgment &
-It gives the uniform object: the fiber of $c\conjc e=j$.  At positive
-coherent evidence it is ordinary division; at zero evidence it is
-non-explosive: $\Cond(0,0)=[0,1]$. \\
-2 & Collapse and LP/K$_3$ bridge &
-It explains why the same real-valued semantics has a paraconsistent
-reading at positivity and a paracomplete reading at certainty. \\
-3 & No truth-functional conditional bridge &
-It is a finite obstruction, not a philosophical preference: two
-interior pairs force two different outputs for the same collapsed
-input $(\half,\half)$. \\
-4 & Curry block &
-It explains why conditioning must stay external.  A total internal
-arrow with modus ponens, conditional proof, and contraction cannot
-exist on this carrier. \\
-5 & Solution sets for self-reference &
-It gives a compact foundations payoff: paradoxes become equations
-with solution sets. \\
-\midrule
-Scope boundary & Arithmetic coding, bootstrapping analogies, graded numerical analysis &
-They do not support the central theorem package.  They need separate
-venues and separate motivation. \\
-\bottomrule
-\end{tabular}
-\caption{Claim hierarchy.  The paper keeps the formal core and separates
-adjacent material unless it supports the same theorem package.}
-\label{tab:claims}
-\end{table}
-
-The resulting submission has one thesis:
-
+The paper keeps one mechanism and the obstructions around it.  The
+novelty is not the product t-norm, the Kleene lattice, primitive
+conditional probability, conditioning along fibers, set-valued
+probability, fuzzy probability logic, conditional-event algebra, or
+paraconsistency; those are established.  The claim is the verified
+conjunction of eight statements:
 \[
-\boxed{
-\text{inference constrains admissible values; impossible evidence
-constrains none.}}
+\begin{array}{ll}
+\text{(N1)} &
+\Adm_V(c;j,e)\Longleftrightarrow c\conjc e=j
+\text{ as a carrier-uniform fiber semantics};\\[1mm]
+\text{(N2)} &
+\text{propagation of non-singleton fibers, with }
+\Cond(0,0)=[0,1]\text{ as no ex falso};\\[1mm]
+\text{(N3)} & \text{LP/K$_3$ collapse bridges for full formulas};\\[1mm]
+\text{(N4)} & \text{no truth-functional bridge for conditioning};\\[1mm]
+\text{(N5)} & \text{scalar admissibility proof theory (sound, closed-complete},\\
+  & \text{plus a generative connective and first-order fragment)};\\[1mm]
+\text{(N6)} & \text{Curry block explaining why no internal arrow is added};\\[1mm]
+\text{(N7)} & \text{value, dependence, and conditioning as separate inputs:}\\
+  & \text{the joint is supplied, and unknown dependence propagates an interval};\\[1mm]
+\text{(N8)} & \text{a first formalized cut of the foundation layers}\\
+  & \text{(dependence contexts, robust collapse, provenance, branches).}
+\end{array}
 \]
-
-That thesis is elementary.  Its force comes from the surrounding
-no-go results.
+Consequence (N3) and conditioning (N4) are the two instances of one
+inverse-image-inclusion operator; the separation theorem is that only
+the value-level instance resists collapse:
+\[
+\boxed{\text{truth-functional consequence can collapse;
+conditional inference cannot.}}
+\]
+The underlying thesis is elementary:
+\[
+\boxed{\text{inference constrains admissible values;
+impossible evidence constrains none.}}
+\]
+Its force comes from the no-go results, N4 and N6.  Adjacent material,
+arithmetic coding, bootstrapping analogies, and graded numerical
+analysis, does not support this package and belongs in separate venues.
 
 The title phrase \emph{conditioning by fibers} is literal.  Fix the
 evidence value $e$.  Multiplication by $e$, or the chosen conjunction
@@ -684,6 +676,7 @@ for conditioning, the point set itself.
 
 \begin{figure}[h]
 \centering
+\resizebox{\textwidth}{!}{%
 \begin{tikzpicture}[>=Latex]
   \node[draw,rounded corners,fill=gray!10,align=center] (op)
     {one operator\\$\mathrm{Mod}(\Gamma)\subseteq g^{-1}(T)$};
@@ -697,7 +690,8 @@ for conditioning, the point set itself.
   \draw[->] (op) -- (con);
   \draw[<->,thick,gray] (con) -- node[below,align=center,font=\footnotesize]
     {chain-rule cut} (ent);
-\end{tikzpicture}
+\end{tikzpicture}%
+}
 \caption{Two fibrations of one consequence operator.  Entailment runs
 over valuations (whole worlds), conditioning over values (single
 numbers); the chain-rule cut pushes a
@@ -1091,30 +1085,24 @@ breaks $A\models B$ even though both hold at $w_0$.}
 \end{figure}
 
 \subsection{Robust conditioning from a Fr\'echet interval}
-Take $a=\tfrac35$, $b=\tfrac{7}{10}$.  The joint is confined to
-$[\tfrac{3}{10},\tfrac35]$
-(\Lean{Cred.Examples.RobustConditioning.frechet\_lower},
-\Lean{Cred.Examples.RobustConditioning.frechet\_upper}); the
-independence joint is $\tfrac{21}{50}$
-(\Lean{Cred.Examples.RobustConditioning.product\_joint}).  For $b>0$ the
-admissible conditional ranges over the image interval
+Take $a=\tfrac35$, $b=\tfrac{7}{10}$; the example anchors are in
+\texttt{Cred.Examples.RobustConditioning}.  The joint is confined to
+$[\tfrac{3}{10},\tfrac35]$ (\Lean{frechet\_lower},
+\Lean{frechet\_upper}); the independence joint is $\tfrac{21}{50}$
+(\Lean{product\_joint}).  For $b>0$ the admissible conditional ranges
+over the image interval
 \[
   \left[\frac{3/10}{7/10},\,\frac{3/5}{7/10}\right]
   =\left[\tfrac37,\tfrac67\right]
 \]
-(\Lean{Cred.Examples.RobustConditioning.cond\_interval}; the general
-image map is
-\Lean{Cred.Dependence.cond\_interval\_of\_pos}).  The whole interval
-clears the threshold $\tfrac13$, so that conclusion holds for every
-admissible joint
-(\Lean{Cred.Examples.RobustConditioning.robust\_at\_low\_threshold});
-the threshold $\tfrac45$ lands inside the interval, so that conclusion
-is dependence-sensitive
-(\Lean{Cred.Examples.RobustConditioning.sensitive\_at\_high\_threshold}).
-The three-valued summary of an interval is
-\Lean{Cred.Dependence.collapseIntervalToThree}, returning a
-\Lean{Cred.Dependence.RobustStatus} that records robustness or
-sensitivity.
+(\Lean{cond\_interval}; the general image map is
+\Lean{cond\_interval\_of\_pos} in \texttt{Cred.Dependence}).  The whole
+interval clears the threshold $\tfrac13$, so that conclusion holds for
+every admissible joint (\Lean{robust\_at\_low\_threshold}); the threshold
+$\tfrac45$ lands inside it, so that conclusion is dependence-sensitive
+(\Lean{sensitive\_at\_high\_threshold}).  The three-valued summary is
+\Lean{collapseIntervalToThree} into \Lean{RobustStatus} (both in
+\texttt{Cred.Dependence}), recording robustness or sensitivity.
 
 \begin{figure}[h]
 \centering
@@ -1171,18 +1159,17 @@ minimum $\min(a,b)$ & $\tfrac35$ & $\tfrac67$ & maximum positive \\
 \bottomrule
 \end{tabular}
 \end{center}
-Lean fixes the three joint values:
-\Lean{Cred.Examples.RobustConditioning.frechet\_lower} ($\tfrac{3}{10}$),
-\Lean{Cred.Examples.RobustConditioning.product\_joint} ($\tfrac{21}{50}$),
-\Lean{Cred.Examples.RobustConditioning.frechet\_upper} ($\tfrac35$).
+Lean fixes the three joint values \Lean{frechet\_lower} ($\tfrac{3}{10}$),
+\Lean{product\_joint} ($\tfrac{21}{50}$), and \Lean{frechet\_upper}
+($\tfrac35$), again in \texttt{Cred.Examples.RobustConditioning}.
 Each is a valid coupling, and the product policy makes the evidence
 irrelevant ($j/b=a$).  None is the general joint: the supplied
 $j=\cred(A\wedge B)$ may be any point of $[\tfrac{3}{10},\tfrac35]$, and
 only that supplied value fixes the conditional.
 
 \subsection{Robust three-valued collapse}
-An interval verdict collapses to a \Lean{Cred.Dependence.RobustStatus}
-through \Lean{Cred.Dependence.collapseIntervalToThree}, which records
+An interval verdict collapses to a \Lean{RobustStatus} through
+\Lean{collapseIntervalToThree} (\texttt{Cred.Dependence}), which records
 whether a conclusion survives every admissible joint.  Four worked
 cases, with anchors in \texttt{Cred.Examples.RobustCollapse}:
 \begin{center}
@@ -1206,12 +1193,12 @@ ternary status is a summary of an interval of joints, never a place
 where dependence is invented.
 
 \subsection{Semantic entailment is not proof use}
-A toy proof object carries named assumptions, and
-\Lean{Cred.ProofTheory.usedAssumptions} extracts the set actually used;
-soundness is \Lean{Cred.ProofTheory.provenance\_sound}.  A proof of the
-valid formula $B\disjc\negc B$ uses no assumption
-(\Lean{Cred.Examples.ProofProvenance.entails\_but\_unused}), even though
-it is valid, so any premise entails it.  Which theorem depends on which is therefore a
+A toy proof object carries named assumptions, and \Lean{usedAssumptions}
+extracts the set actually used; soundness is \Lean{provenance\_sound}
+(\texttt{Cred.ProofTheory}).  A proof of the valid formula
+$B\disjc\negc B$ uses no assumption (\Lean{entails\_but\_unused} in
+\texttt{Cred.Examples.ProofProvenance}), even though it is valid, so any
+premise entails it.  Which theorem depends on which is therefore a
 proof-provenance question, not an entailment one.
 
 \begin{figure}[h]
@@ -1234,33 +1221,32 @@ proof-provenance question, not an entailment one.
 \caption{Proof-provenance DAG.  Edges record which nodes a derivation
 actually consumes.  The assumptions $A,D$ feed their own consequences,
 but the valid conclusion $B\disjc\negc B$ has no incoming edge: its
-\Lean{Cred.ProofTheory.usedAssumptions} set is empty, so any premise
-trivially entails it without being used.}
+\Lean{usedAssumptions} set is empty, so any premise trivially entails it
+without being used.}
 \label{fig:provenance-dag}
 \end{figure}
 
 \subsection{Local contradiction without explosion}
 A branch whose assumptions contain both $A$ and $\negc A$ is locally
 contradictory, yet the generative calculus, which has no explosion rule,
-does not derive an unrelated atom $U$
-(\Lean{Cred.Examples.Branches.local\_contradiction\_no\_explosion\_example};
-the general statement is
-\Lean{Cred.ProofTheory.local\_contradiction\_no\_explosion}).
+does not derive an unrelated atom $U$.  The worked witness is
+\Lean{local\_contradiction\_no\_explosion\_example}
+(\texttt{Cred.Examples.Branches}); the general statement is
+\Lean{local\_contradiction\_no\_explosion} (\texttt{Cred.ProofTheory}).
 This is the proof-theoretic image of $\Cond(0,0)=[0,1]$.
 
 \subsection{The $\sqrt2$ dependency chain}
 The number-theoretic core of the irrationality proof is a benchmark for
-hypothetical branching.  From coprime $p,q$ with $p^2=2q^2$ and
-$q\neq0$: $p$ is even
-(\Lean{Cred.Math.sqrt2\_core\_even\_p}), hence $q$ is even
-(\Lean{Cred.Math.sqrt2\_core\_even\_q}), contradicting coprimality
-(\Lean{Cred.Math.not\_coprime\_if\_both\_even}); the chain closes at
-\Lean{Cred.Examples.Sqrt2Branch.sqrt2\_core\_contradiction}.  The
-recorded step list
-\Lean{Cred.Examples.Sqrt2Branch.sqrt2\_dependency\_chain} localizes the
-contradiction to the coprimality step: the false assumption is the
-rational representation, and inconsistency enters at one named step
-rather than spreading by explosion.
+hypothetical branching; the anchors are in \texttt{Cred.Math} and
+\texttt{Cred.Examples.Sqrt2Branch}.  From coprime $p,q$ with $p^2=2q^2$
+and $q\neq0$: $p$ is even (\Lean{sqrt2\_core\_even\_p}), hence $q$ is
+even (\Lean{sqrt2\_core\_even\_q}), contradicting coprimality
+(\Lean{not\_coprime\_if\_both\_even}); the chain closes at
+\Lean{sqrt2\_core\_contradiction}.  The recorded step list
+\Lean{sqrt2\_dependency\_chain} localizes the contradiction to the
+coprimality step: the false assumption is the rational representation,
+and inconsistency enters at one named step rather than spreading by
+explosion.
 
 \begin{figure}[h]
 \centering
@@ -1461,44 +1447,6 @@ It keeps the scalar value, the supplied joint, and the admissible
 fiber.  The same chain-rule fiber works on $[0,1]$, on the Boolean
 carrier, and on three-valued variants.
 
-\section{What Is Actually Novel}
-
-The novelty is not the product t-norm, the Kleene lattice, primitive
-conditional probability, conditioning along fibers, set-valued
-probability, fuzzy probability logic, conditional-event algebra, or
-paraconsistency.  Those are established.  The claim is the verified
-conjunction of eight statements:
-\[
-\begin{array}{ll}
-\text{(N1)} &
-\Adm_V(c;j,e)\Longleftrightarrow c\conjc e=j
-\text{ as a carrier-uniform fiber semantics};\\[1mm]
-\text{(N2)} &
-\text{propagation of non-singleton fibers, with }
-\Cond(0,0)=[0,1]\text{ as no ex falso};\\[1mm]
-\text{(N3)} & \text{LP/K$_3$ collapse bridges for full formulas};\\[1mm]
-\text{(N4)} & \text{no truth-functional bridge for conditioning};\\[1mm]
-\text{(N5)} & \text{scalar admissibility proof theory (sound, closed-complete},\\
-  & \text{plus a generative connective fragment with direct soundness)};\\[1mm]
-\text{(N6)} & \text{Curry block explaining why no internal arrow is added};\\[1mm]
-\text{(N7)} & \text{value, dependence, and conditioning as separate inputs:}\\
-  & \text{the joint is supplied, and unknown dependence propagates an interval};\\[1mm]
-\text{(N8)} & \text{a first formalized cut of the foundation layers}\\
-  & \text{(dependence contexts, robust collapse, provenance, branches).}
-\end{array}
-\]
-Together they give a clean separation theorem in words:
-
-\[
-\boxed{
-\text{truth-functional consequence can collapse;
-conditional inference cannot.}}
-\]
-
-This is the submission line.  Adjacent material belongs in appendices
-only if a referee asks for it, or in separate papers with different
-venues.
-
 \section{Toward a Foundation for Mathematics}
 \label{sec:foundations}
 
@@ -1508,7 +1456,9 @@ all valuations, the supplied dependence (a joint or family of joints),
 and proof provenance (which assumptions a derivation uses).  Ordinary
 prose collapses these; the toy modules above formalize a first cut of
 each missing layer.  The table records status against the Lean
-development.
+development; anchors are bare names in the \texttt{Cred.Dependence},
+\texttt{Cred.ProofTheory}, \texttt{Cred.Examples}, and \texttt{Cred.Math}
+namespaces.
 
 \begin{center}
 \begin{tabular}{@{}p{0.27\linewidth}p{0.40\linewidth}p{0.27\linewidth}@{}}
@@ -1520,20 +1470,18 @@ exact/coherent/interval contexts and joint families, with the
 interval-to-fiber image (\Lean{Cred.Dependence}) &
 credal networks over many propositions \\[2pt]
 Robust collapse &
-\Lean{Cred.Dependence.collapseIntervalToThree} into
-\Lean{Cred.Dependence.RobustStatus} &
+\Lean{collapseIntervalToThree} into \Lean{RobustStatus} &
 status-preserving rule propagation \\[2pt]
 Proof provenance &
-\Lean{Cred.ProofTheory.usedAssumptions},
-\Lean{Cred.ProofTheory.provenance\_sound} &
+\Lean{usedAssumptions}, \Lean{provenance\_sound} &
 full DAG over the foundation language \\[2pt]
 Hypothetical branches &
-\Lean{Cred.ProofTheory.local\_contradiction\_no\_explosion} &
+\Lean{local\_contradiction\_no\_explosion} &
 $T+R$ over genuine theories \\[2pt]
 Generative calculus &
-local connective rules (conjunction introduction at threshold
-$s\conjc t$ and elimination, disjunction introduction, double negation)
-with \Lean{Cred.ProofTheory.generative\_sound}, no semantic-oracle rule &
+local connective rules (conjunction introduction and elimination,
+disjunction introduction, double negation) with \Lean{generative\_sound},
+no semantic-oracle rule &
 quantifiers, equality, induction; syntactic completeness \\[2pt]
 Mathematics seed &
 parity, divisibility, the $\sqrt2$ core contradiction
