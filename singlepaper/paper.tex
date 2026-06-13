@@ -280,13 +280,15 @@ Conditional probability is usually introduced by division:
 \[
   P(A\mid B)=\frac{P(A\land B)}{P(B)},\qquad P(B)>0.
 \]
-R\'enyi and Popper instead treat conditional probability as primitive
+H\'ajek argues that this ratio is not a general analysis of
+conditional probability \cite{hajek2003conditional}.  R\'enyi and
+Popper instead treat conditional probability as primitive
 \cite{renyi1955,popper1959,krauss1968,dubins1975}.  De Finetti's
 conditional-event tradition makes the same point in a betting idiom:
 if the antecedent fails, the bet is void rather than true
 \cite{definetti1936,egre2020part1,egre2021}.  Current work on
-indicative conditionals still turns on this boundary between
-truth, probability, and undefinedness \cite{egre2025}.
+indicative conditionals still turns on this boundary between truth,
+probability, and undefinedness \cite{egre2025}.
 
 Here the primitive is the chain rule alone:
 \[
@@ -666,9 +668,10 @@ constraint.  One can add a convention after the fact, for example
 reason to choose.
 
 This locates the framework relative to imprecise probability
-\cite{walley1991,troffaes2014}.  A set of possible posteriors appears
-only when the supplied constraint fails to determine a point.  The set
-is not psychological indecision.  It is the fiber of an equation.
+\cite{walley1991,troffaes2014,debock2015,wheeler2021}.  A set of
+possible posteriors appears only when the supplied constraint fails to
+determine a point.  The set is not psychological indecision.  It is the
+fiber of an equation.
 
 \section{Self-Reference as Equations}
 
@@ -941,10 +944,13 @@ and no ex-falso derivation.
 
 \paragraph{Fuzzy and many-valued logic.}
 Product logic uses the product t-norm and its residuum
-\cite{hajek1998,esteva2001,cintula2011}.  More generally, fuzzy
-logics choose a carrier and a conjunction-like operation, then study
-the induced connectives.  The present system uses that algebraic data
-for a different purpose.  It forms the external fiber
+\cite{hajek1998,esteva2001,cintula2011}.  Probabilistic fuzzy logics
+and coherent conditional-probability logics also use many-valued
+languages to reason about probability operators
+\cite{hajek1995,flaminio2009,godo2006}.  More generally, fuzzy logics
+choose a carrier and a conjunction-like operation, then study the
+induced connectives.  The present system uses that algebraic data for
+a different purpose.  It forms the external fiber
 $\{c:c\conjc e=j\}$ and propagates that set when it is not a singleton.
 It therefore does not identify conditioning with the product residuum.
 The Curry block shows why: the full residuated package is incompatible
@@ -978,8 +984,10 @@ by the chain rule.
 
 \paragraph{Probability and imprecision.}
 Cox and Jaynes read probability as extended logic
-\cite{cox1961,jaynes2003}.  Standard conditional probability then uses
-division at positive evidence.  R\'enyi and Popper instead take
+\cite{cox1961,jaynes2003}.  Standard conditional probability uses
+division at positive evidence, and H\'ajek gives reasons not to treat
+that ratio as the whole concept \cite{hajek2003conditional}.  R\'enyi
+and Popper instead take
 conditional probability as primitive
 \cite{renyi1955,popper1959,krauss1968,dubins1975}.  Disintegration and
 Markov-kernel accounts condition by families of measures over fibers or
@@ -988,12 +996,16 @@ events make the false-antecedent case void, and coherence theory studies
 compounds of such conditionals
 \cite{definetti1936,gilio2013,gilio2014,flaminio2020conditionals}.
 Imprecise probability studies sets of probabilities as first-class
-objects \cite{walley1991,troffaes2014}.  These schools already supply
-most ingredients: positive-evidence division, primitive conditionals,
+objects \cite{walley1991,troffaes2014}.  Natural and regular extension
+handle lower-probability-zero updating, and full conditional
+probabilities can force imprecision
+\cite{debock2015,wheeler2021}.  These schools already supply most
+ingredients: positive-evidence division, primitive conditionals,
 conditioning over fibers, void antecedents, and set-valued updating.
-Cred puts a smaller invariant under them.  The set $\Cond(j,e)$ is the
-preimage of one scalar equation.  It becomes wide exactly when
-evidence is zero.  Its width records loss of constraint, not subjective
+The word ``fiber'' is therefore not new here.  Cred puts a smaller
+invariant under these ingredients.  The set $\Cond(j,e)$ is the
+preimage of one scalar equation.  It becomes wide exactly when evidence
+is zero.  Its width records loss of constraint, not subjective
 indecision.
 
 \paragraph{Conditional-event algebras.}
@@ -1006,10 +1018,10 @@ carrier, and on three-valued variants.
 \section{What Is Actually Novel}
 
 The novelty is not the product t-norm, the Kleene lattice, primitive
-conditional probability, set-valued probability, or paraconsistency.
-Those are established.  The publishable contribution is the verified
-conjunction of six
-claims:
+conditional probability, conditioning along fibers, set-valued
+probability, fuzzy probability logic, conditional-event algebra, or
+paraconsistency.  Those are established.  The claim is the verified
+conjunction of six statements:
 \[
 \begin{array}{ll}
 \text{(N1)} &
