@@ -1,0 +1,937 @@
+\documentclass[11pt,a4paper]{article}
+
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath,amssymb,amsthm,mathtools}
+\usepackage{stmaryrd}
+\usepackage{booktabs}
+\usepackage{enumitem}
+\usepackage{hyperref}
+\usepackage[capitalize]{cleveref}
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta,calc,positioning,shapes.geometric}
+
+\hypersetup{
+  colorlinks=true,
+  linkcolor=blue,
+  citecolor=blue,
+  urlcolor=blue,
+  pdfauthor={Christopher Albert},
+  pdftitle={Credence, Conditioning, and the Logic of Impossible Evidence}
+}
+
+\emergencystretch=3em
+
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{example}[theorem]{Example}
+\newtheorem{remark}[theorem]{Remark}
+
+\newcommand{\cred}{\mathsf{cred}}
+\newcommand{\Cond}{\mathsf{Cond}}
+\newcommand{\Adm}{\mathsf{Adm}}
+\newcommand{\Sol}{\mathsf{Sol}}
+\newcommand{\collapse}{\kappa}
+\newcommand{\negc}{\mathord{\sim}}
+\newcommand{\conjc}{\otimes}
+\newcommand{\disjc}{\sqcup}
+\newcommand{\half}{\tfrac12}
+\newcommand{\quarter}{\tfrac14}
+\newcommand{\three}{\mathbf{3}}
+\newcommand{\Real}{\mathbb{R}}
+\newcommand{\val}[1]{\llbracket #1 \rrbracket}
+\newcommand{\Lean}[1]{\texttt{#1}}
+
+\title{Credence, Conditioning, and the Logic of Impossible Evidence}
+\author{Christopher Albert\\
+\small Institute for Theoretical and Computational Physics\\
+\small Graz University of Technology}
+\date{June 2026}
+
+\begin{document}
+
+\maketitle
+
+\begin{center}
+\small
+Transparenzhinweis: Mit Unterstützung von Claude- und GPT-Modellen erstellt; Inhalt, Auswahl und fachliche Prüfung verantwortet der Autor.
+\end{center}
+
+\begin{abstract}
+This paper isolates a small formal core for reasoning with impossible
+evidence.  Values usually live in $[0,1]$ with complement
+$\negc c=1-c$, product conjunction $a\conjc b=ab$, and De Morgan
+disjunction $a\disjc b=a+b-ab$.  The primitive conditional object is
+the admissibility judgment
+\[
+  \Adm(c;j,e)\quad\Longleftrightarrow\quad c e=j.
+\]
+The displayed set
+\[
+  \Cond(j,e)=\{c\in[0,1]:ce=j\}.
+\]
+is the external fiber of that relation.  It is a singleton $\{j/e\}$
+when $e>0$ and $j\le e$; it is all of $[0,1]$ when $j=e=0$; it is
+empty when $j>e$.  Impossible evidence therefore does not imply
+everything.  It imposes no equation.
+
+The paper proves three consequences of that small observation.  First,
+the product De Morgan triplet collapses to the Kleene lattice
+$\{0,\half,1\}$, and the collapse matches LP consequence with
+positivity on $[0,1]$, and K$_3$ consequence with certainty.  Second,
+that bridge cannot be extended to conditioning: no truth function on
+$\{0,\half,1\}$ reproduces min-copula conditioning after collapse.
+Third, adding a total internal conditional with modus ponens,
+conditional proof, and contraction is impossible; the product residuum
+is forced at positive antecedents and violates contraction.  Liar and
+Russell equations become solution sets rather than detonators:
+$c=1-c$ has the unique solution $\half$, while the truth-teller has
+the same shape as zero-evidence conditioning, the whole interval.
+
+The useful contribution is the separation principle: truth values,
+dependence data, and conditional inference are distinct inputs.  The
+formal results are machine-checked in Lean 4 with Mathlib; theorem
+names are cited in the text.
+\end{abstract}
+
+\tableofcontents
+
+\section{Contribution Hierarchy}
+
+The paper keeps one mechanism and the obstructions around it.  Adjacent
+developments are useful only when they support that mechanism.
+
+\begin{table}[h]
+\centering
+\begin{tabular}{@{}p{0.08\linewidth}p{0.29\linewidth}p{0.50\linewidth}@{}}
+\toprule
+Rank & Component & Reason \\
+\midrule
+1 & Chain-rule conditioning as an admissibility judgment &
+It gives a precise, non-explosive account of zero evidence:
+$\Cond(0,0)=[0,1]$.  This is the mathematical hinge. \\
+2 & Collapse and LP/K$_3$ bridge &
+It explains why the same real-valued semantics has a paraconsistent
+reading at positivity and a paracomplete reading at certainty. \\
+3 & No truth-functional conditional bridge &
+It is a finite obstruction, not a philosophical preference: two
+interior pairs force two different outputs for the same collapsed
+input $(\half,\half)$. \\
+4 & Curry block &
+It explains why conditioning must stay external.  A total internal
+arrow with modus ponens, conditional proof, and contraction cannot
+exist on this carrier. \\
+5 & Solution sets for self-reference &
+It gives a compact foundations payoff: paradoxes become equations
+with solution sets. \\
+\midrule
+Scope boundary & Arithmetic coding, bootstrapping analogies, graded numerical analysis &
+They do not support the central theorem package.  They need separate
+venues and separate motivation. \\
+\bottomrule
+\end{tabular}
+\caption{Claim hierarchy.  The paper keeps the formal core and separates
+adjacent material unless it supports the same theorem package.}
+\label{tab:claims}
+\end{table}
+
+The resulting submission has one thesis:
+
+\[
+\boxed{
+\text{inference constrains admissible values; impossible evidence
+constrains none.}}
+\]
+
+That thesis is elementary.  Its force comes from the surrounding
+no-go results.
+
+\section{The Setting}
+
+\subsection{Values and Operations}
+
+\begin{definition}[Credence value]
+A credence is a real number $c\in[0,1]$.
+\end{definition}
+
+The basic operations are
+\[
+  \negc c=1-c,\qquad
+  a\conjc b=ab,\qquad
+  a\disjc b=\negc(\negc a\conjc\negc b)=a+b-ab.
+\]
+The product is the product t-norm; the disjunction is its De Morgan
+dual.  These operations are standard in many-valued and fuzzy logic
+\cite{zadeh1965,goguen1969,hajek1998,klement2000,cintula2011}.
+They are also familiar probabilistic expressions: if $A$ and $B$ are
+independent, then
+\[
+  P(A\cap B)=P(A)P(B),\qquad
+  P(A\cup B)=P(A)+P(B)-P(A)P(B).
+\]
+The paper never assumes independence by default.  The product
+$a\conjc b$ is an algebraic operation on values.  A joint credence
+$j=\cred(A\land B)$ is separate data.
+
+\begin{figure}[h]
+\centering
+\begin{tikzpicture}[x=11cm,y=1.2cm]
+  \draw[->] (0,0) -- (1.03,0) node[right] {$c$};
+  \draw (0,0.08) -- (0,-0.08) node[below] {$0$};
+  \draw (0.5,0.08) -- (0.5,-0.08) node[below] {$\half$};
+  \draw (1,0.08) -- (1,-0.08) node[below] {$1$};
+  \draw[very thick,blue] (0,0) -- (1,0);
+  \draw[very thick,red,-{Latex[length=3mm]}] (0.13,0.42) -- (0.87,0.42);
+  \draw[very thick,red,-{Latex[length=3mm]}] (0.87,0.42) -- (0.13,0.42);
+  \node[above] at (0.5,0.48) {$\negc c=1-c$};
+  \draw[fill=black] (0.5,0) circle (0.012);
+  \node[above] at (0.5,0.02) {unique fixed point};
+\end{tikzpicture}
+\caption{The complement reverses the unit interval and fixes only
+$\half$.  Lean: \Lean{Cred.Credence.neg\_fixed\_point\_unique}.}
+\label{fig:unit-interval}
+\end{figure}
+
+The verified algebraic facts are routine but important:
+\[
+\begin{gathered}
+\negc\negc c=c,\quad
+a\conjc b=b\conjc a,\quad
+(a\conjc b)\conjc c=a\conjc(b\conjc c),\\
+a\conjc 1=a,\quad a\conjc 0=0,\quad
+\negc(a\conjc b)=\negc a\disjc\negc b.
+\end{gathered}
+\]
+Conjunction is idempotent only at the Boolean boundary:
+\[
+  c\conjc c=c \quad\Longleftrightarrow\quad c\in\{0,1\}.
+\]
+Lean: \Lean{Cred.Credence.conj\_idempotent\_iff}.  Thus intermediate
+credences are not hidden truth values.
+
+\subsection{Algebraic Form}
+
+The construction is carrier-independent.  Let $V$ be a value carrier
+with a conjunction-like operation $\conjc$, bottom $0$, and top $1$.
+Given evidence $e\in V$ and joint value $j\in V$, define the primitive
+admissibility judgment
+\[
+  \Adm_V(c;j,e)\quad:\Longleftrightarrow\quad c\conjc e=j.
+\]
+This judgment needs equality and conjunction.  It does not need sets.
+After the surrounding mathematics has predicates or sets, one may
+write the fiber
+\[
+  \Cond_V(j,e)=\{c\in V:\Adm_V(c;j,e)\}.
+\]
+The paper uses this set notation as metalanguage.
+
+For the Boolean carrier $\mathbf 2=\{0,1\}$ with $\conjc=\wedge$:
+\[
+  \Cond_{\mathbf 2}(j,1)=\{j\},\qquad
+  \Cond_{\mathbf 2}(0,0)=\{0,1\},\qquad
+  \Cond_{\mathbf 2}(1,0)=\varnothing.
+\]
+Classical conditioning on true fixes the value.  Conditioning on
+false leaves the conditional unconstrained unless the joint value is
+impossible.
+
+For the Kleene carrier $\three=\{0,\half,1\}$, the same schema applies
+with the chosen three-valued conjunction:
+\[
+  \Cond_{\three}(j,e)=\{c\in\three:c\wedge e=j\}
+\]
+for the usual strong-Kleene/Godel conjunction $\wedge=\min$.
+There is a closure caveat.  The literal set
+$\{0,\half,1\}\subset[0,1]$ is not closed under product, since
+$\half\cdot\half=\quarter$.  A three-valued product reading is
+therefore a quotient of the continuum, while an internal three-valued
+logic uses its own closed conjunction, usually $\min$.
+
+\subsection{Conditioning as a Relation}
+
+Conditional probability is usually introduced by division:
+\[
+  P(A\mid B)=\frac{P(A\land B)}{P(B)},\qquad P(B)>0.
+\]
+R\'enyi and Popper instead treat conditional probability as primitive
+\cite{renyi1955,popper1959,krauss1968,dubins1975}.  De Finetti's
+conditional-event tradition makes the same point in a betting idiom:
+if the antecedent fails, the bet is void rather than true
+\cite{definetti1936,egre2020part1,egre2021}.  Current work on
+indicative conditionals still turns on this boundary between
+truth, probability, and undefinedness \cite{egre2025}.
+
+Here the primitive is the chain rule alone:
+\[
+  \cred(A\mid B)\,\cred(B)=\cred(A\land B).
+\]
+Given joint value $j$ and evidence value $e$, define
+\[
+  \Adm(c;j,e)\quad:\Longleftrightarrow\quad c e=j.
+\]
+The associated fiber is
+\[
+  \Cond(j,e)=\{c\in[0,1]:c e=j\}.
+\]
+This is the weak-definition move: keep the identity that survives the
+singular case, rather than the quotient that requires $e>0$.  The
+analogy stops at uniqueness.  At $e=j=0$, the fiber is genuinely
+underdetermined.
+
+\begin{theorem}[Admissible-set trichotomy]
+\label{thm:trichotomy}
+For $j,e\in[0,1]$:
+\[
+\Cond(j,e)=
+\begin{cases}
+\{j/e\}, & e>0\ \text{and}\ j\le e,\\[2mm]
+[0,1], & e=0,\ j=0,\\[1mm]
+\varnothing, & j>e.
+\end{cases}
+\]
+\end{theorem}
+
+\noindent
+Lean:
+\Lean{Cred.Credence.cond\_singleton\_of\_pos},
+\Lean{Cred.Credence.cond\_zero\_zero\_univ},
+\Lean{Cred.Credence.cond\_nonempty\_iff}.
+
+\begin{proof}
+If $e>0$, the equation $ce=j$ has the unique solution $c=j/e$.
+Since $c\le1$, existence requires $j\le e$.
+If $e=0$, the equation is $0=j$.  For $j=0$ every $c$ solves it.
+For $j>0$ none does.  The last case is included in $j>e$.
+\end{proof}
+
+\begin{figure}[h]
+\centering
+\begin{tikzpicture}[scale=5]
+  \fill[blue!7] (0,0) -- (1,0) -- (1,1) -- cycle;
+  \draw[->] (0,0) -- (1.08,0) node[right] {$e$};
+  \draw[->] (0,0) -- (0,1.08) node[above] {$j$};
+  \draw[thick] (0,0) -- (1,1) node[above right] {$j=e$};
+  \draw[fill=black] (0,0) circle (0.008);
+  \node[below left] at (0,0) {$(0,0)$};
+  \node[align=center] at (0.66,0.30) {singleton\\$\{j/e\}$};
+  \node[align=center] at (0.28,0.76) {empty\\$j>e$};
+  \node[align=left] at (0.08,0.11) {$[0,1]$};
+  \draw[thick,red] (0,0) circle (0.03);
+\end{tikzpicture}
+\caption{The chain rule as geometry.  The coherent region is
+$j\le e$.  Positive evidence gives a point.  The origin gives the
+whole vertical fiber of possible conditionals.}
+\label{fig:cond-geometry}
+\end{figure}
+
+This is the whole non-explosion mechanism.  From impossible evidence
+one obtains no arbitrary conclusion because no conclusion is selected.
+The equation has lost rank.
+
+\section{A Running Computation}
+
+Let $a=\cred(A)$ and $b=\cred(B)$.  Suppose the joint is the
+Fr\'echet upper bound
+\[
+  j=\min(a,b).
+\]
+For $b>0$ the conditional is
+\[
+  U(a,b)=\frac{\min(a,b)}{b}
+  =
+  \begin{cases}
+  a/b, & a<b,\\
+  1, & b\le a.
+  \end{cases}
+\]
+This is the min-copula conditional.  It is not the only possible
+conditional.  It is a clean test case because it turns dependence into
+a visible formula.
+
+Two interior pairs show the problem:
+\[
+  U(0.3,0.7)=\frac37,\qquad
+  U(0.7,0.3)=1.
+\]
+Both inputs collapse to the same qualitative pair
+$(\half,\half)$, but their conditionals collapse to different values.
+
+\section{The Kleene Collapse}
+
+Define
+\[
+\collapse(c)=
+\begin{cases}
+0,&c=0,\\
+1,&c=1,\\
+\half,&0<c<1.
+\end{cases}
+\]
+The image is the Kleene lattice $\three=\{0,\half,1\}$.
+On $\three$, negation fixes $\half$, and conjunction/disjunction
+become min/max.
+
+\begin{figure}[h]
+\centering
+\begin{tikzpicture}[node distance=1.4cm]
+  \node[circle,draw,minimum size=8mm] (z) {$0$};
+  \node[circle,draw,minimum size=8mm,right=of z] (h) {$\half$};
+  \node[circle,draw,minimum size=8mm,right=of h] (o) {$1$};
+  \draw[thick] (z) -- node[below] {interior class} (h) -- (o);
+  \draw[->,bend left=40,red] (z) to node[above] {$\negc$} (o);
+  \draw[->,bend left=40,red] (o) to node[below] {$\negc$} (z);
+  \draw[->,loop above,red] (h) to (h);
+  \node[below=1.0cm of h,align=center] {$\collapse^{-1}(0)=\{0\}$,\quad
+  $\collapse^{-1}(\half)=(0,1)$,\quad
+  $\collapse^{-1}(1)=\{1\}$};
+\end{tikzpicture}
+\caption{The Kleene collapse keeps the two boundaries and identifies
+all interior values.}
+\label{fig:collapse}
+\end{figure}
+
+\begin{theorem}[Collapse homomorphism]
+\label{thm:collapse}
+For all $a,b\in[0,1]$,
+\[
+  \collapse(\negc a)=\negc\collapse(a),\qquad
+  \collapse(a\conjc b)=\collapse(a)\wedge\collapse(b),\qquad
+  \collapse(a\disjc b)=\collapse(a)\vee\collapse(b).
+\]
+\end{theorem}
+
+\noindent
+Lean: \Lean{Cred.collapse\_neg},
+\Lean{Cred.collapse\_conj},
+\Lean{Cred.collapse\_disj}.
+
+The collapse is not cosmetic.  It is forced at three values.
+
+\begin{theorem}[Three-element quotient]
+\label{thm:three-quotient}
+Any surjective map $\phi:[0,1]\to\three$ that preserves complement
+and product sends $\half$ to $\half$ and, up to swapping $0$ and $1$,
+sends the boundary values to the boundary values.  The Kleene quotient
+is therefore the unique non-trivial three-element quotient of this
+signature.
+\end{theorem}
+
+\noindent
+Lean: \Lean{Cred.three\_element\_quotient\_unique}.
+
+A sharper rigidity result holds if multiplication is allowed by
+arbitrary real scalars rather than only by unit-interval values.
+
+\begin{theorem}[No finite real-multiplicative quotient]
+\label{thm:real-quotient}
+No non-trivial finite quotient compatible with complement and
+unrestricted real multiplication exists.
+\end{theorem}
+
+\noindent
+Lean: \Lean{Cred.RealCongruence.no\_nontrivial\_finite\_quotient}.
+
+The proof is a scaling argument.  A finite quotient makes powers of
+$1/2$ cycle.  Unrestricted multiplication cancels the earlier power,
+forcing $1\sim(1/2)^p$.  Complement then gives
+$0\sim 1-(1/2)^p$, a positive value.  That collapses every value to
+$0$.
+
+\section{Consequence: Positivity and Certainty}
+
+Let formulas be built from atoms using $\negc,\conjc,\disjc$.
+For a valuation $v:\alpha\to[0,1]$, write $\val{\varphi}_v$ for
+evaluation.
+
+There are two natural designation thresholds:
+\[
+  \text{positive: }\val{\varphi}_v>0,\qquad
+  \text{certain: }\val{\varphi}_v=1.
+\]
+LP designates $\half$ and $1$; K$_3$ designates only $1$.
+
+\begin{theorem}[Formula bridge]
+\label{thm:formula-bridge}
+For every list of premises $\Gamma$ and conclusion $\varphi$:
+\[
+\Gamma\models_{\mathrm{LP}}\varphi
+\quad\Longleftrightarrow\quad
+\forall v\,
+\bigl((\forall\gamma\in\Gamma,\ \val{\gamma}_v>0)
+\Rightarrow \val{\varphi}_v>0\bigr),
+\]
+and
+\[
+\Gamma\models_{\mathrm{K3}}\varphi
+\quad\Longleftrightarrow\quad
+\forall v\,
+\bigl((\forall\gamma\in\Gamma,\ \val{\gamma}_v=1)
+\Rightarrow \val{\varphi}_v=1\bigr).
+\]
+\end{theorem}
+
+\noindent
+Lean: \Lean{Cred.lp\_formula\_bridge},
+\Lean{Cred.k3\_formula\_bridge}.
+
+\begin{figure}[h]
+\centering
+\begin{tikzpicture}[node distance=2.0cm,>=Latex]
+  \node[draw,rounded corners,align=center] (r) {$[0,1]$ formulas\\
+  $\negc,\conjc,\disjc$};
+  \node[draw,rounded corners,align=center,right=of r] (k) {Kleene formulas\\
+  min/max};
+  \node[draw,rounded corners,align=center,below=of r] (p) {positivity\\
+  $>0$};
+  \node[draw,rounded corners,align=center,below=of k] (lp) {LP designation\\
+  $\{\half,1\}$};
+  \node[draw,rounded corners,align=center,below=1.2cm of p] (c) {certainty\\
+  $=1$};
+  \node[draw,rounded corners,align=center,below=1.2cm of lp] (k3) {K$_3$ designation\\
+  $\{1\}$};
+  \draw[->,thick] (r) -- node[above] {$\collapse$} (k);
+  \draw[<->,thick] (p) -- node[above] {LP bridge} (lp);
+  \draw[<->,thick] (c) -- node[above] {K$_3$ bridge} (k3);
+  \draw[->] (r) -- (p);
+  \draw[->] (k) -- (lp);
+  \draw[->] (p) -- (c);
+  \draw[->] (lp) -- (k3);
+\end{tikzpicture}
+\caption{The propositional bridge.  Collapse commutes with formula
+evaluation, and the two designation policies become positivity and
+certainty on the real interval.}
+\label{fig:bridge}
+\end{figure}
+
+Classical logic is still present.  Restrict valuations to $\{0,1\}$.
+Then positivity and certainty coincide with ordinary Boolean truth.
+\begin{quote}\scriptsize
+\begin{tabular}{@{}l@{}}
+Lean anchors: \\
+\Lean{Cred.crisp\_embedding}\\
+\Lean{Cred.crisp\_certainty\_iff\_classical}\\
+\Lean{Cred.crisp\_positivity\_iff\_classical}
+\end{tabular}
+\end{quote}
+
+\section{Why the Conditional Does Not Collapse}
+
+The previous section is a positive bridge theorem.  The next theorem is
+the reason this paper is not just fuzzy logic with a quotient.
+
+\begin{theorem}[No truth-functional conditional bridge]
+\label{thm:no-cond-bridge}
+There is no function
+$f:\three\times\three\to\three$ such that for every $a,b\in[0,1]$
+with $b>0$,
+\[
+  \collapse\!\left(\frac{\min(a,b)}{b}\right)
+  =f(\collapse(b),\collapse(a)).
+\]
+\end{theorem}
+
+\noindent
+Lean: \Lean{Cred.no\_truthfunctional\_cond\_bridge}.
+
+\begin{proof}
+Take $(a_1,b_1)=(0.3,0.7)$ and $(a_2,b_2)=(0.7,0.3)$.
+All four inputs are interior, so
+\[
+  (\collapse(b_1),\collapse(a_1))
+  =(\half,\half)
+  =(\collapse(b_2),\collapse(a_2)).
+\]
+But
+\[
+  \collapse\!\left(\frac{\min(0.3,0.7)}{0.7}\right)
+  =\collapse(3/7)=\half,
+\]
+while
+\[
+  \collapse\!\left(\frac{\min(0.7,0.3)}{0.3}\right)
+  =\collapse(1)=1.
+\]
+Thus $f(\half,\half)$ would have to be both $\half$ and $1$.
+\end{proof}
+
+\begin{figure}[h]
+\centering
+\begin{tikzpicture}[>=Latex,node distance=2.2cm]
+  \node[draw,rounded corners,align=center] (a) {$(0.3,0.7)$\\
+  $U=3/7$};
+  \node[draw,rounded corners,align=center,right=of a] (b) {$(0.7,0.3)$\\
+  $U=1$};
+  \node[draw,rounded corners,align=center,below=1.2cm of a] (ca) {collapsed input\\
+  $(\half,\half)$};
+  \node[draw,rounded corners,align=center,below=1.2cm of b] (cb) {collapsed input\\
+  $(\half,\half)$};
+  \node[draw,rounded corners,align=center,below=1.2cm of ca] (oa) {output\\
+  $\half$};
+  \node[draw,rounded corners,align=center,below=1.2cm of cb] (ob) {output\\
+  $1$};
+  \draw[->,thick] (a) -- node[left] {$\collapse$} (ca);
+  \draw[->,thick] (b) -- node[right] {$\collapse$} (cb);
+  \draw[->,thick] (ca) -- (oa);
+  \draw[->,thick] (cb) -- (ob);
+  \draw[red,thick] (oa) -- node[below] {same input, different output} (ob);
+\end{tikzpicture}
+\caption{The obstruction to a truth-functional conditional on the
+collapsed values.}
+\label{fig:no-conditional}
+\end{figure}
+
+The obstruction is a small Lewis-style triviality result
+\cite{lewis1976,vanfraassen1976,adams1975,mcgee1985}.  It differs
+from the classical probability-of-conditionals problem in one respect:
+the failure is visible in a finite quotient.  The quotient has thrown
+away the ratio $a/b$, and no truth table can recover it.
+
+The bridge does hold at boundaries:
+\[
+  a=0,\quad a=1,\quad b=1,\quad b\le a.
+\]
+Lean: \Lean{Cred.cond\_bridge\_boundary}.  These are exactly the
+cases where the min-copula conditional lands on a boundary value or
+where evidence is certain.
+
+\section{Zero Evidence}
+
+At zero evidence the chain rule is
+\[
+  c\cdot0=0.
+\]
+The equation holds for every $c$.  Three consequences share this one
+root.
+
+\begin{theorem}[Zero-evidence triple]
+\label{thm:zero-triple}
+The identity $c\cdot0=0$ yields:
+\begin{enumerate}[label=(\roman*),nosep]
+\item $\Cond(0,0)=[0,1]$;
+\item LP explosion has a countermodel, witnessed by $\half$;
+\item no collapsed truth function can recover the conditional value at
+zero evidence.
+\end{enumerate}
+\end{theorem}
+
+\noindent
+Lean: \Lean{Cred.zero\_evidence\_duality},
+\Lean{Cred.zero\_evidence\_duality\_cond}.
+
+The philosophical point is austere.  Impossible evidence is not false
+evidence plus a magic implication rule.  It is a rank-deficient
+constraint.  One can add a convention after the fact, for example
+``choose $1$'' or ``choose $\half$'', but the chain rule itself has no
+reason to choose.
+
+This locates the framework relative to imprecise probability
+\cite{walley1991,troffaes2014}.  A set of possible posteriors appears
+only when the supplied constraint fails to determine a point.  The set
+is not psychological indecision.  It is the fiber of an equation.
+
+\section{Self-Reference as Equations}
+
+Let $\Phi:[0,1]\to[0,1]$.  A self-referential sentence governed by
+$c=\Phi(c)$ has meaning
+\[
+  \Sol(\Phi)=\{c\in[0,1]:\Phi(c)=c\}.
+\]
+
+\begin{proposition}[Basic solution sets]
+\label{prop:solution-sets}
+\[
+  \Sol(\negc)=\{\half\},\qquad
+  \Sol(\mathrm{id})=[0,1],\qquad
+  \Sol(\mathrm{id})=\Cond(0,0).
+\]
+\end{proposition}
+
+\noindent
+\begin{quote}\scriptsize
+\begin{tabular}{@{}l@{}}
+Lean anchors: \\
+\Lean{Cred.Credence.solutions\_neg\_eq\_singleton}\\
+\Lean{Cred.Credence.solutions\_id\_eq\_univ}\\
+\Lean{Cred.Credence.truth\_teller\_same\_shape\_as\_zero\_evidence}
+\end{tabular}
+\end{quote}
+
+The liar and the scalar Russell equation have the same form:
+\[
+  c=1-c.
+\]
+The unique solution is $c=\half$.  Classical logic sees no Boolean
+solution.  The credence algebra sees one fixed point.
+
+The truth-teller is
+\[
+  c=c.
+\]
+Every value solves it.  Its solution set is the same as zero-evidence
+conditioning.  That is not a coincidence in the formal system: both
+are unconstrained equations.
+
+\section{Why the Conditional Must Stay External}
+
+One might try to internalize conditioning as a binary connective
+$a\Rightarrow b$.  Product logic does this by residuation
+\cite{hajek1998,esteva2001,galatos2007}:
+\[
+  a\Rightarrow_{\Pi} b=
+  \begin{cases}
+    1, & a=0,\\
+    \min(1,b/a), & a>0.
+  \end{cases}
+\]
+This operation is forced by modus ponens plus conditional proof.
+Let
+\[
+\begin{aligned}
+\mathrm{MP}(f)&:\quad f(a,b)\conjc a\le b,\\
+\mathrm{CP}(f)&:\quad c\conjc a\le b\Rightarrow c\le f(a,b),\\
+\mathrm{Contraction}(f)&:\quad f(a,f(a,b))\le f(a,b).
+\end{aligned}
+\]
+
+\begin{theorem}[Curry block]
+\label{thm:curry-block}
+No total function $f:[0,1]^2\to[0,1]$ satisfies
+\[
+  \mathrm{MP}(f)\ \wedge\ \mathrm{CP}(f)\ \wedge\
+  \mathrm{Contraction}(f).
+\]
+\end{theorem}
+
+\noindent
+Lean: \Lean{Cred.Credence.curry\_block}.
+
+\begin{proof}
+MP and CP give full residuation.  Hence for $a>0$,
+\[
+  f(a,b)=\min(1,b/a).
+\]
+Choose $a=\half$ and $b=\quarter$.  Then
+\[
+  f(\half,\quarter)=\half,\qquad
+  f(\half,f(\half,\quarter))=f(\half,\half)=1.
+\]
+Contraction would require $1\le\half$, contradiction.
+\end{proof}
+
+This explains the design decision.  The object language has negation,
+conjunction, and disjunction.  Conditioning is a side judgment, a
+constraint on supplied joint and evidence values.  Adding a total
+internal conditional restores the very structural package that creates
+Curry trouble.
+
+\section{Threshold Consequence}
+
+For $t\in[0,1]$, define
+\[
+  \Gamma\models_t\varphi
+  \quad\Longleftrightarrow\quad
+  \forall v\,
+  \left(
+  \forall\gamma\in\Gamma,\ t\le\val{\gamma}_v
+  \right)
+  \Rightarrow
+  t\le\val{\varphi}_v.
+\]
+This consequence relation has reflexivity, monotonicity, and cut.
+\begin{quote}\scriptsize
+\begin{tabular}{@{}l@{}}
+Lean anchors: \\
+\Lean{Cred.threshold\_reflexivity}\\
+\Lean{Cred.threshold\_monotonicity}\\
+\Lean{Cred.threshold\_cut}
+\end{tabular}
+\end{quote}
+
+Two thresholds are sharp:
+\[
+\text{explosion countermodel exists}
+\quad\Longleftrightarrow\quad
+0<t\le\half,
+\]
+and
+\[
+\text{excluded middle holds at threshold }t
+\quad\Longleftrightarrow\quad
+t\le\frac34.
+\]
+\begin{quote}\scriptsize
+\begin{tabular}{@{}l@{}}
+Lean anchors: \\
+\Lean{Cred.threshold\_explosion\_countermodel\_iff}\\
+\Lean{Cred.threshold\_excluded\_middle\_iff}
+\end{tabular}
+\end{quote}
+
+\begin{figure}[h]
+\centering
+\begin{tikzpicture}[x=11cm,y=1cm]
+  \draw[->] (0,0) -- (1.05,0) node[right] {$t$};
+  \draw[very thick,blue] (0,0) -- (0.5,0);
+  \draw[very thick,green!60!black] (0,0.32) -- (0.75,0.32);
+  \draw (0.5,0.08) -- (0.5,-0.08) node[below] {$\half$};
+  \draw (0.75,0.40) -- (0.75,0.24) node[below] {$\frac34$};
+  \draw (1,0.08) -- (1,-0.08) node[below] {$1$};
+  \node[above] at (0.25,0.05) {explosion countermodels};
+  \node[above] at (0.38,0.37) {excluded middle};
+  \node[align=center] at (0.625,-0.45) {non-explosive\\and excluded-middle};
+\end{tikzpicture}
+\caption{Sharp threshold facts.  For $\half<t\le 3/4$, explosion has
+no threshold countermodel while excluded middle still holds.}
+\label{fig:thresholds}
+\end{figure}
+
+The interval $\half<t\le3/4$ is philosophically useful.  It is a
+controlled middle region: contradiction does not license everything,
+yet excluded middle remains designated.  One should not oversell this
+as a new foundation for mathematics.  It is a status calculus for
+graded consequence.
+
+\section{Foundational Status}
+
+The continuous presentation uses the real interval as semantics.  That
+choice is not a claim that the object language already contains real
+numbers, subsets, or a prior set theory.  The primitive conditional
+form is the judgment
+\[
+  \Adm_V(c;j,e)\quad\Longleftrightarrow\quad c\conjc e=j.
+\]
+Only after a predicate or set layer is available do we identify its
+fiber with $\Cond_V(j,e)$.  Before that point, $\Cond$ is notation in
+the metatheory, not an object-language set former.
+
+The same distinction applies to the carrier.  Using $[0,1]\subset\Real$
+gives order, topology, and multiplication for the semantic model.  A
+Boolean fragment uses $\mathbf 2$.  A three-valued fragment uses the
+Kleene carrier or the quotient collapse.  The conditioning rule itself
+is the algebraic equation $c\conjc e=j$ on the chosen carrier.
+
+\section{Relation to Existing Work}
+
+\paragraph{Fuzzy and many-valued logic.}
+Product logic uses the product t-norm and its residuum
+\cite{hajek1998,esteva2001,cintula2011}.  The present system keeps the
+product and De Morgan complement, but refuses to make residuation the
+conditional.  That refusal is not cosmetic: the Curry block shows that
+the full residuated package is incompatible with contraction on this
+carrier.
+
+\paragraph{Paraconsistent and three-valued logic.}
+LP and K$_3$ arise through the collapse to
+$\{0,\half,1\}$ \cite{kleene1952,asenjo1966,priest1979,belnap1977}.
+The new claim is the exact formula-level bridge:
+LP is positivity, K$_3$ is certainty.  The bridge is then shown to fail
+for conditioning.
+
+\paragraph{Conditionals.}
+The de Finettian line studies trivalent truth conditions and their
+proof theory \cite{egre2020part1,egre2021,egre2025}.  This paper takes
+a different route.  It does not add a conditional truth table.  It
+treats conditional credence as the admissibility relation determined
+by the chain rule.
+
+\paragraph{Probability and imprecision.}
+Primitive conditional probabilities go back to R\'enyi and Popper
+\cite{renyi1955,popper1959,krauss1968,dubins1975}.  Imprecise
+probability studies sets of probabilities as first-class objects
+\cite{walley1991,troffaes2014}.  Here the imprecision is narrower:
+the set $\Cond(j,e)$ is the fiber of one scalar equation.  It becomes
+wide exactly when evidence is zero.
+
+\paragraph{Conditional-event algebras.}
+Gilio and Sanfilippo analyze conditional random quantities and
+compounds of conditionals in a coherence setting \cite{gilio2014}.
+Flaminio, Godo, and Hosni build Boolean algebras of conditionals and
+probability measures over them \cite{flaminio2020conditionals}.  The
+present construction is more austere: it keeps only the scalar value,
+the supplied joint, and the admissible fiber.
+
+\section{What Is Actually Novel}
+
+The novelty is not the product t-norm, the Kleene lattice, primitive
+conditional probability, or paraconsistency.  Those are established.
+The publishable contribution is the verified conjunction of five
+claims:
+\[
+\begin{array}{ll}
+\text{(N1)} &
+\Adm_V(c;j,e)\Longleftrightarrow c\conjc e=j
+\text{ as external conditional semantics};\\[1mm]
+\text{(N2)} & \Cond(0,0)=[0,1]\text{ as the exact no-ex-falso mechanism};\\[1mm]
+\text{(N3)} & \text{LP/K$_3$ collapse bridges for full formulas};\\[1mm]
+\text{(N4)} & \text{no truth-functional bridge for conditioning};\\[1mm]
+\text{(N5)} & \text{Curry block explaining why no internal arrow is added.}
+\end{array}
+\]
+Together they give a clean separation theorem in words:
+
+\[
+\boxed{
+\text{truth-functional consequence can collapse;
+conditional inference cannot.}}
+\]
+
+This is the submission line.  Adjacent material belongs in appendices
+only if a referee asks for it, or in separate papers with different
+venues.
+
+\section{Lean Artifact}
+
+All formal claims cited above are present in the current Lean
+development under `lean/Cred`.  The core files are:
+\[
+\begin{array}{ll}
+\text{values} & \Lean{Cred/Core/Value.lean},\\
+\text{conditioning} & \Lean{Cred/Cond/Admissible.lean},\\
+\text{collapse} & \Lean{Cred/Collapse/Hom.lean},\\
+\text{LP/K$_3$ bridge} & \Lean{Cred/Bridge/LPK3.lean},\\
+\text{conditional no-go} & \Lean{Cred/Bridge/CondBridge.lean},\\
+\text{Curry block} & \Lean{Cred/Bridge/Curry.lean},\\
+\text{solution sets} & \Lean{Cred/Fixpoint.lean},\\
+\text{thresholds} & \Lean{Cred/Threshold.lean}.
+\end{array}
+\]
+
+The intended verification command is:
+\[
+  \texttt{cd lean \&\& lake build}.
+\]
+The manuscript itself is built by:
+\begin{quote}\small\ttfamily
+cd singlepaper\\
+latexmk -pdf -interaction=nonstopmode -halt-on-error paper.tex
+\end{quote}
+
+\section{Conclusion}
+
+The algebra is small:
+\[
+  \negc c=1-c,\qquad a\conjc b=ab,\qquad
+  a\disjc b=a+b-ab,\qquad \Adm(c;j,e)\Longleftrightarrow ce=j.
+\]
+The lesson is also small.  A conditional is not a truth value waiting
+to be tabulated.  It is a constraint that may determine one value,
+many values, or none.  The set $\Cond(j,e)$ is the fiber of that
+constraint, once the surrounding mathematics permits set notation.
+
+At positive evidence, the chain rule recovers ordinary division.  At
+zero evidence, it refuses to manufacture information.  The Kleene
+collapse explains why positivity gives LP and certainty gives K$_3$.
+The no-go theorem explains why conditioning does not ride along with
+that collapse.  The Curry block explains why the system should not add
+an internal arrow to repair this.
+
+The formal core is therefore not a new truth table.  It is a separation
+between collapseable consequence and non-collapseable conditioning.
+
+\bibliographystyle{alpha}
+\bibliography{../cred,refs}
+
+\end{document}
