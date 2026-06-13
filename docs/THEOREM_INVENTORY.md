@@ -188,3 +188,43 @@ lake build
 lake env lean --run Cred/Branch/AxiomAudit.lean   # prints the axiom ledger
 rg -n 'sorry|admit' Cred --glob '*.lean'           # expect no tactic sorry/admit
 ```
+## Flagship epic anchors (#646-#662)
+
+Worlds/valuations/forall/measure programme. All entries are Lean theorems with zero
+`sorry`; axiom-audit lines for the load-bearing ones are in `Branch/AxiomAudit.lean`.
+
+### Forall-consequence layer (`Cred/Aggregation/`)
+
+| Claim | Lean name | Module | Status |
+|---|---|---|---|
+| Generic forall consequence with reflexivity, weakening, cut | `Consequence`, `consequence_refl`, `consequence_mono`, `consequence_cut` | `Aggregation/ForallConsequence.lean` | theorem |
+| Native product-De Morgan value algebra; positivity/certainty as consequence | `nativeCred_value_algebra`, `positivity_is_consequence`, `certainty_is_consequence` | `Aggregation/ForallConsequence.lean` | theorem |
+| Boolean specialization is classical; LP=positive, K3=certain; product instance | `boolean_forall_consequence_is_classical`, `lp_designation_as_positive`, `k3_designation_as_certain`, `product_deMorgan_instance` | `Aggregation/Specializations.lean` | theorem |
+
+### Native Cred and rigidity (`Cred/Native/`)
+
+| Claim | Lean name | Module | Status |
+|---|---|---|---|
+| Native conditioning: positive singleton, zero univ | `nativeCred_cond_positive_singleton`, `nativeCred_cond_zero` | `Native/Basic.lean` | theorem |
+| Product residuum vs Cred fiber: agree at positive evidence, diverge at zero | `prodResiduum_eq_one`, `residuum_vs_fiber_positive`, `residuum_vs_fiber_zero` | `Native/Basic.lean` | theorem |
+| Crisp closure/classical recovery; unique three-quotient; no finite real quotient | `nativeCred_crisp_closed`, `nativeCred_unique_three_quotient`, `nativeCred_no_finite_real_quotient` | `Native/Rigidity.lean` | theorem |
+
+### Conditioning uniqueness (`Cred/Cond/Uniqueness.lean`)
+
+| Claim | Lean name | Module | Status |
+|---|---|---|---|
+| Any chain-rule-faithful conditional coincides with the fiber `Cond(j,e)` | `ChainRuleFaithful`, `chainRuleFaithful_eq_Cond`, `uniqueness_positive`, `uniqueness_zero`, `uniqueness_incoherent` | `Cond/Uniqueness.lean` | theorem |
+
+### Probability, credal, and observables (`Cred/Probability/`)
+
+| Claim | Lean name | Module | Status |
+|---|---|---|---|
+| Finite credal family with lower/upper probability; precise iff singleton | `FinMeasureFamily`, `lowerP`, `upperP`, `lowerP_le_upperP`, `lowerP_eq_upperP_of_singleton`, `entails_le_lowerP` | `Probability/Credal.lean` | theorem |
+| Fuzzy observable expectation; expectation of an indicator is the probability; lower/upper expectations | `Expectation`, `expectation_indicator`, `lowerE`, `upperE`, `lowerE_indicator` | `Probability/FuzzyObservable.lean` | theorem |
+| Conservative finite Cox representation: additivity implies a measure | `Plausibility`, `cox_finite_representation` | `Probability/Cox.lean` | theorem (conservative; not the full Cox derivation) |
+
+### Proof gallery (`Cred/Examples/ProofGallery.lean`)
+
+| Claim | Lean name | Module | Status |
+|---|---|---|---|
+| Binary, ternary, and continuous worked proof galleries | `binary_truthset_proof_gallery`, `ternary_proof_gallery`, `continuous_proof_gallery` | `Examples/ProofGallery.lean` | theorem |

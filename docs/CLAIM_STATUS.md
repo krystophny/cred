@@ -10,7 +10,7 @@ below. This ledger keeps the paper from drifting into unsupported claims. See
 - **Lean example / witness**: a concrete finite or rational instance, proved.
 - **paper definition**: a definition or framing, not a theorem.
 - **literature-known**: an established result or ingredient, cited, not a Cred claim.
-- **conjecture / target**: a stated goal not yet fully proved; named as such.
+- **Lean theorem**: a stated goal not yet fully proved; named as such.
 - **not claimed**: explicitly disclaimed to forestall misreading.
 
 ## Core claims
@@ -45,19 +45,19 @@ below. This ledger keeps the paper from drifting into unsupported claims. See
 | Entailment = conditional probability one under every measure | Lean theorem | `entails_iff_cond_one` | finite valuation space |
 | Entailment = domination under every measure | Lean theorem | `entails_iff_dominated` | finite valuation space |
 | Measured conditional obeys the chain rule `c·e=j` | Lean theorem | `cond_chain_rule` | positive evidence |
-| Imprecise probability: finite credal family, lower/upper probability | conjecture / target | `lowerP`, `upperP` | finite family |
-| Fuzzy observables and lower/upper expectations | conjecture / target | `Expectation`, `lowerE`, `upperE` | finite, rational |
-| Cox/Jaynes finite representation (additivity implies measure) | conjecture / target | `cox_finite_representation` | normalization, nonnegativity, finite additivity; **not** the full Cox functional-equation derivation |
+| Imprecise probability: finite credal family, lower/upper probability | Lean theorem | `lowerP`, `upperP` | finite family |
+| Fuzzy observables and lower/upper expectations | Lean theorem | `Expectation`, `lowerE`, `upperE` | finite, rational |
+| Cox/Jaynes finite representation (additivity implies measure) | Lean theorem (conservative) | `cox_finite_representation` | normalization, nonnegativity, finite additivity; **not** the full Cox functional-equation derivation |
 
 ## Architecture and uniqueness tracks
 
 | Claim | Category | Lean anchor | Assumptions |
 |---|---|---|---|
-| Generic forall-consequence layer (value algebra + designation) | conjecture / target | `Consequence`, `consequence_cut` | abstract value algebra |
-| Boolean/Kleene specializations of the forall layer | conjecture / target | `boolean_forall_consequence_is_classical`, `lp_designation_as_positive` | the named carriers |
-| Product residuum vs Cred fiber, made explicit | conjecture / target | `residuum_vs_fiber` | positive evidence; boundary cases |
-| Chain-rule-faithful conditional coincides with the fiber | conjecture / target | `chainRuleFaithful_eq_Cond` | faithfulness as defined |
-| Native continuum rigidity / classical recovery | conjecture / target | `nativeCred_crisp_closed`, `nativeCred_unique_three_quotient` | as in the cited results |
+| Generic forall-consequence layer (value algebra + designation) | Lean theorem | `Consequence`, `consequence_cut` | abstract value algebra |
+| Boolean/Kleene specializations of the forall layer | Lean theorem | `boolean_forall_consequence_is_classical`, `lp_designation_as_positive` | the named carriers |
+| Product residuum vs Cred fiber, made explicit | Lean theorem | `residuum_vs_fiber_positive`, `residuum_vs_fiber_zero` | positive evidence; zero-evidence divergence |
+| Chain-rule-faithful conditional coincides with the fiber | Lean theorem | `chainRuleFaithful_eq_Cond` | faithfulness as defined |
+| Native continuum rigidity / classical recovery | Lean theorem | `nativeCred_crisp_closed`, `nativeCred_unique_three_quotient` | as in the cited results |
 
 ## Explicitly not claimed
 
@@ -69,5 +69,6 @@ below. This ledger keeps the paper from drifting into unsupported claims. See
 - Proof provenance and `T+R` branch semantics are toy/first-cut, **not** a full
   dependency DAG or theory-extension semantics.
 
-Status note: entries marked "conjecture / target" become "Lean theorem" once the
-corresponding module integrates green; `THEOREM_INVENTORY.md` is updated in step.
+Status note: the flagship-epic tracks (#648, #649, #651, #652, #653, #654, #655,
+#656, #657) integrated green, so their entries are Lean theorems above;
+`THEOREM_INVENTORY.md` carries the full anchor list.
