@@ -649,7 +649,13 @@ Inference is inclusion of admissible sets:
 \]
 This is the closure of the Galois connection between constraints and
 points, the ordinary shape of semantic consequence.  Cred's two
-inferences are its valuation-level and value-level instances.
+inferences are its valuation-level and value-level instances, and the
+two words are not synonyms.  A \emph{valuation} is a whole assignment of
+values to the atoms, one possible world; a \emph{value} is a single
+number.  Entailment ranges over worlds: it asks what holds in every
+valuation that designates the premises.  Conditioning fixes the two
+numbers $j$ and $e$ and ranges over the candidate values $c$ of one
+conditional.  Same operator, different point space.
 \begin{center}
 \begin{tabular}{@{}llll@{}}
 \toprule
@@ -679,17 +685,18 @@ for conditioning, the point set itself.
     {one operator\\$\mathrm{Mod}(\Gamma)\subseteq g^{-1}(T)$};
   \node[draw,rounded corners,fill=blue!8,align=center,
         below left=12mm and 2mm of op] (ent)
-    {consequence\\points: valuations $v$\\$f=\val{\cdot}_v$,\quad $S={\uparrow}t$};
+    {consequence\\points: valuations $v$ (whole worlds)\\$f=\val{\cdot}_v$,\quad $S={\uparrow}t$};
   \node[draw,rounded corners,fill=red!8,align=center,
         below right=12mm and 2mm of op] (con)
-    {conditioning\\points: values $c$\\$f=(\,\cdot\,)\conjc e$,\quad $S=\{j\}$};
+    {conditioning\\points: values $c$ (numbers; $j,e$ fixed)\\$f=(\,\cdot\,)\conjc e$,\quad $S=\{j\}$};
   \draw[->] (op) -- (ent);
   \draw[->] (op) -- (con);
   \draw[<->,thick,gray] (con) -- node[below,align=center,font=\footnotesize]
     {chain-rule cut} (ent);
 \end{tikzpicture}
 \caption{Two fibrations of one consequence operator.  Entailment runs
-over valuations, conditioning over values; the chain-rule cut pushes a
+over valuations (whole worlds), conditioning over values (single
+numbers); the chain-rule cut pushes a
 value fiber forward into the valuation consequence, turning evidence
 above $t$ and a conditional at least $\ell$ into a joint above
 $\ell\conjc t$.}
