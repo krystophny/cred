@@ -10,7 +10,7 @@ All Lean results build under `lake build` with zero `sorry`. Load-bearing
 theorems are checked with `#print axioms` and depend only on
 `propext`, `Classical.choice`, `Quot.sound` (no `sorryAx`).
 
-The foundation-layer issue set #633–#645 (dependence contexts, robust collapse,
+The foundation-layer issue set #633-#645 (dependence contexts, robust collapse,
 generative proof theory, proof provenance, branch semantics, finite-world and
 sqrt2 examples, paper integration, architecture discipline) is implemented and
 closed. Anchors are registered in `THEOREM_INVENTORY.md`.
@@ -258,7 +258,7 @@ Cred additionally generalizes the joint, keeping it as supplied structure rather
 than fixing it by a truth function. Probability is not fuzzy logic with numbers; it
 is logic plus dependence, and the chain-rule fiber `c ⊗ e = j` is the interface.
 
-## Foundations roadmap: what remains for a working basis
+## What remains for a working basis
 
 The kernel is a serious semantic foundation, not yet a complete basis for everyday
 mathematics. The honest remaining work, in dependency order:
