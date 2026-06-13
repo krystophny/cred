@@ -175,6 +175,27 @@ fiber at zero evidence is a set of admissible values.  Logical
 consequence is the same inclusion read over valuations rather than
 values; one operator covers both, and a later section makes it explicit.
 
+\begin{figure}[h]
+\centering
+\begin{tikzpicture}[>=Latex,node distance=4.2mm,
+    lyr/.style={draw,rounded corners,fill=blue!6,align=center,
+                inner sep=3pt,text width=0.62\linewidth}]
+  \node[lyr] (v) {value algebra: $[0,1]$ with $\negc,\conjc,\disjc$};
+  \node[lyr,below=of v] (w) {valuation / world space: $V=\mathrm{Atom}\to[0,1]$};
+  \node[lyr,below=of w] (f) {$\forall$ consequence over valuations + designation};
+  \node[lyr,below=of f] (d) {supplied dependence: the joint $j=\cred(A\wedge B)$};
+  \node[lyr,below=of d] (c) {conditioning fiber: $\Cond(j,e)=\{c:c\conjc e=j\}$};
+  \node[lyr,below=of c] (m) {optional measure on valuations: probability / imprecise};
+  \draw[->] (v)--(w); \draw[->] (w)--(f); \draw[->] (f)--(d);
+  \draw[->] (d)--(c); \draw[->] (c)--(m);
+\end{tikzpicture}
+\caption{The layers Cred factors.  Each is a separate input, with its own Lean
+anchors (generic \texttt{Consequence}; \texttt{ExactJointContext}; \texttt{Cond};
+\texttt{FinMeasure}).  Classical, Kleene, and fuzzy logics live at the consequence
+layer; probability and imprecise probability enter only at the measure layer.}
+\label{fig:layer-stack}
+\end{figure}
+
 \section{The Setting}
 
 \subsection{Values and Operations}
