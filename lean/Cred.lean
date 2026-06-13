@@ -106,6 +106,7 @@ import Cred.Topology.Clopen
 import Cred.Topology.Graded
 import Cred.Topology.Threshold
 import Cred.Topology.Fuzzy
+import Cred.Topology.Manifold
 import Cred.Math.Nat
 import Cred.Math.Reals
 import Cred.Math.Metric
@@ -120,6 +121,9 @@ import Cred.ProofTheory.Provenance
 import Cred.ProofTheory.Branches
 import Cred.Math.Parity
 import Cred.Math.Divisibility
+import Cred.Math.Continuity
+import Cred.Math.Smoothness
+import Cred.Math.Dimension
 import Cred.Examples.FiniteWorlds
 import Cred.Examples.RobustCollapse
 import Cred.Examples.RobustConditioning
@@ -141,6 +145,7 @@ import Cred.Native.Rigidity
 import Cred.Probability.Credal
 import Cred.Probability.FuzzyObservable
 import Cred.Probability.Cox
+import Cred.Probability.CoxUniqueness
 import Cred.Examples.ProofGallery
 import Cred.Cond.Uniqueness
 import Cred.Audit.AssumptionLedger

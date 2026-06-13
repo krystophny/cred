@@ -258,3 +258,16 @@ value), per `docs/MEANINGFUL_DEGREES_GUARDRAILS.md`.
 | Fuzzy membership recovers the crisp set; threshold cut is classical | `fuzzy_membership_crisp_recovery`, `threshold_cut_crisp` | `Set/FuzzyExamples.lean` | theorem |
 | Structure-preserving numerics at degree 1; residual-sourced near-preservation | `symplectic_exact_degree_one`, `first_integral_preserved_status`, `finite_volume_conserves_status`, `explicitEuler_degree_lt_one`, `explicitEuler_full_step_degree_zero` | `Approx/NumericsExamples.lean` | theorem |
 | Cantor similarity dimension `log2/log3` as the unique Moran solution; box count `2^k`; exact box estimate | `cantorDim`, `cantor_moran`, `cantor_moran_unique`, `cantorBoxCount`, `box_estimate_eq_dim` | `Examples/Fractal.lean` | theorem |
+
+### Foundation track: graded analysis and atlas seed (`Cred/Math/`, `Cred/Topology/Manifold.lean`)
+
+The meet over thresholds recovers each classical analytic notion exactly; predicates
+(differentiability) stay two-valued; the atlas is an honest one-dimensional seed.
+
+| Claim | Lean name | Module | Status |
+|---|---|---|---|
+| Graded continuity; meet over thresholds = `ContinuousAt`, globally `Continuous` | `TContinuousAt`, `tcontinuousAt_all_iff_continuousAt`, `tcontinuous_all_iff_continuous`, `tcontinuousAt_const` | `Math/Continuity.lean` | theorem |
+| Differentiability status two-valued; recovers `DifferentiableAt`; abs at 0 fails | `diffStatus`, `diffStatus_eq_one_iff`, `diffStatus_crisp`, `diffStatus_id`, `diffStatus_abs_zero` | `Math/Smoothness.lean` | theorem |
+| General n-map IFS similarity dimension `log n/log(1/r)`; unique Moran solution; exact box estimate; Cantor instance | `similarityDim`, `moran_general`, `moran_general_unique`, `similarityDim_lt_one_iff`, `box_estimate_eq_dim`, `cantor_is_instance` | `Math/Dimension.lean` | theorem |
+| Graded atlas seed: smoothness status, composition closure, crisp recovery to `ContDiff` | `transitionSmoothness`, `transitionSmoothness_eq_one_iff`, `transitionSmoothness_comp`, `atlasStatus`, `smooth_atlas_recovery` | `Topology/Manifold.lean` | theorem |
+| Finite Cox uniqueness: representing measure unique; atomic weights nonnegative, sum one | `cox_representation_unique`, `finite_probability_unique_from_atoms`, `finite_plausibility_atomic_weights_nonneg`, `finite_plausibility_atomic_weights_sum_one` | `Probability/CoxUniqueness.lean` | theorem |

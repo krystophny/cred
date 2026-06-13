@@ -107,15 +107,49 @@ boundary), a numerical sensitivity interval, and a step-by-step provenance
 chain that localizes any contradiction instead of trivializing the whole
 construction.
 
-## Stage 4: graded geometry (future)
+## Stage 4: graded analysis (metric, continuity, differentiability, dimension)
 
-No Lean anchor yet. This stage names the targets the earlier stages build
-toward.
+Lean anchor: `Cred/Math/Metric.lean`, `Cred/Math/Continuity.lean`,
+`Cred/Math/Smoothness.lean`, `Cred/Math/Dimension.lean`.
 
-- Graded manifold and atlas status: `future`. A chart membership credence
-  and an atlas-coverage degree on top of Mathlib's `ChartedSpace`, with the
-  crisp collapse recovering the classical atlas. Stage 1's graded openness
-  and threshold cuts are the intended starting point.
+Classical asks: is a sequence convergent, is a function continuous at a
+point, is it differentiable, what is the dimension of a self-similar set.
+Each is a proposition or a single real.
+
+Cred adds a threshold reading whose meet recovers the classical notion
+exactly. Closeness `cClose x y = 1 - min(|x-y|,1)` reads distance as a
+credence; `TLimit` and `TContinuousAt` hold at a threshold `t < 1` with a
+band of radius `1-t`, and the meet over all thresholds is exact:
+`tlimit_all_iff_tendsto` recovers Mathlib's `Tendsto`, and
+`tcontinuousAt_all_iff_continuousAt` recovers `ContinuousAt` (globally
+`tcontinuous_all_iff_continuous`). Differentiability is a predicate, so
+`diffStatus` is two-valued, 1 exactly when `DifferentiableAt` holds
+(`diffStatus_eq_one_iff`, `diffStatus_crisp`), with `|x|` at 0 the failure
+witness (`diffStatus_abs_zero`). Dimension is sourced from the Moran
+equation: for `n` maps of ratio `r`, `similarityDim n r = log n / log(1/r)`
+is the unique solution of `n r^s = 1` (`moran_general`,
+`moran_general_unique`), and the finite box estimate equals it at every
+scale (`box_estimate_eq_dim`); the Cantor set is the instance `n=2, r=1/3`
+(`cantor_is_instance`).
+
+Benchmark: each analytic predicate has a graded threshold reading whose
+crisp fragment is exactly the Mathlib notion; the only intrinsic degrees are
+the boundary (exact) and the ordering, never a free-floating interior value.
+
+## Stage 5: graded geometry (atlas seed present, manifold theory future)
+
+The atlas seed has a first Lean anchor; the manifold theory above it is
+future.
+
+- Graded manifold and atlas status: first cut in `Cred/Topology/Manifold.lean`.
+  A `GradedChart` maps a carrier into the one-dimensional model `ℝ`;
+  `transitionSmoothness τ` is 1 iff the supplied transition is `C^∞`
+  (`transitionSmoothness_eq_one_iff`), closed under composition
+  (`transitionSmoothness_comp`); an atlas aggregates per-transition statuses
+  by the product meet, and `smooth_atlas_recovery` returns every transition as
+  a genuine `ContDiff` map at aggregate status 1. Still `future`: charts with
+  cover and Hausdorff conditions on top of Mathlib's `ChartedSpace`, an
+  atlas-coverage degree, tangent bundles, and differential forms.
 - Structure-preservation scores for geometric integrators: `future`. A
   per-step preservation credence for a symplectic or variational integrator
   over a trajectory, extending the single-step scores of Stage 2 to a score
@@ -135,5 +169,7 @@ crisp or exact case collapses to the classical answer.
 2. Structure-preserving numerics. Anchor: `Cred/Approx`.
 3. Fractal and self-similarity status. Anchor: `Cred/Examples`,
    `Cred/Dependence/RobustCollapse.lean`.
-4. Graded geometry: manifold and atlas status, integrator preservation
-   scores, invariant robustness. `future`.
+4. Graded analysis: metric, continuity, differentiability, dimension.
+   Anchor: `Cred/Math/{Metric,Continuity,Smoothness,Dimension}.lean`.
+5. Graded geometry: atlas seed in `Cred/Topology/Manifold.lean`; full
+   manifold theory, tangent bundles, forms, invariant robustness `future`.

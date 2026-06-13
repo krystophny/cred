@@ -48,6 +48,7 @@ below. This ledger keeps the paper from drifting into unsupported claims. See
 | Imprecise probability: finite credal family, lower/upper probability | Lean theorem | `lowerP`, `upperP` | finite family |
 | Fuzzy observables and lower/upper expectations | Lean theorem | `Expectation`, `lowerE`, `upperE` | finite, rational |
 | Cox/Jaynes finite representation (additivity implies measure) | Lean theorem (conservative) | `cox_finite_representation` | normalization, nonnegativity, finite additivity; **not** the full Cox functional-equation derivation |
+| The representing measure is unique; atomic weights nonnegative and sum to one | Lean theorem | `cox_representation_unique`, `finite_probability_unique_from_atoms`, `finite_plausibility_atomic_weights_nonneg`, `finite_plausibility_atomic_weights_sum_one` | finite world set |
 
 ## Architecture and uniqueness tracks
 
@@ -84,9 +85,14 @@ below. This ledger keeps the paper from drifting into unsupported claims. See
 |---|---|---|---|
 | Residual-to-score recipe is a valid degree source | Lean theorem | `scoreEps`, `scoreEps_mono` | residual >=0, tolerance >0 |
 | Fuzzy membership recovers the crisp set / classical cut | Lean theorem | `fuzzy_membership_crisp_recovery`, `threshold_cut_crisp` | finite type |
-| Structure preservation as graded status (exact = degree 1; near = residual score) | Lean theorem / example | `symplectic_exact_degree_one`, `explicitEuler_degree_lt_one` | the named schemes |
-| Cantor similarity dimension log2/log3 (unique Moran solution); exact box estimate | Lean theorem | `cantor_moran`, `cantor_moran_unique`, `box_estimate_eq_dim` | the Cantor construction |
-| Topology / manifolds / differential geometry as a graded status layer | conjecture / roadmap | (none yet) | future; see FOUNDATION_TRACK_ROADMAP.md |
+| Symplecticity is binary; exact preservation is the canonical degree 1 (crisp score) | Lean theorem | `symplectic_iff_det`, `symplectic_exact_degree_one`, `explicitEulerMatrix_not_symplectic` | 2x2 real matrices |
+| Near-preservation degree is residual-relative (recipe-named), not a unique invariant | Lean theorem | `scoreEps`, `scoreEps_antitone`, `scoreEps_eq_one_iff` | chosen residual and tolerance >0 |
+| Graded continuity meets classical exactly (meet over thresholds = ContinuousAt) | Lean theorem | `tcontinuousAt_all_iff_continuousAt`, `tcontinuous_all_iff_continuous`, `tlimit_all_iff_tendsto` | functions on the reals |
+| Differentiability status is two-valued; recovers DifferentiableAt; abs at 0 fails | Lean theorem | `diffStatus_eq_one_iff`, `diffStatus_crisp`, `diffStatus_abs_zero` | functions on the reals |
+| General n-map IFS similarity dimension log n / log(1/r) (unique Moran solution); exact box estimate | Lean theorem | `moran_general`, `moran_general_unique`, `box_estimate_eq_dim`, `cantor_is_instance` | n maps of equal ratio r in (0,1) |
+| Cantor instance log2/log3 with its concrete box count | Lean theorem | `cantor_moran`, `cantor_moran_unique` | the Cantor construction |
+| Graded atlas seed: 1-dim charts, smoothness status, crisp recovery to ContDiff | Lean theorem | `transitionSmoothness_eq_one_iff`, `transitionSmoothness_comp`, `smooth_atlas_recovery` | 1-dim model, transitions supplied |
+| Full manifolds / tangent bundles / forms / Hausdorff measure as graded layers | conjecture / roadmap | (none yet) | future; see FOUNDATION_TRACK_ROADMAP.md |
 
 ## Explicitly not claimed
 

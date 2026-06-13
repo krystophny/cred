@@ -45,6 +45,11 @@ import Cred.Approx.ScoreRecipes
 import Cred.Set.FuzzyExamples
 import Cred.Approx.NumericsExamples
 import Cred.Examples.Fractal
+import Cred.Math.Continuity
+import Cred.Math.Smoothness
+import Cred.Math.Dimension
+import Cred.Topology.Manifold
+import Cred.Probability.CoxUniqueness
 
 -- Core/Value: interval arithmetic over the Mathlib reals. The real-number
 -- order and field instances carry all three kernel axioms transitively.
@@ -139,3 +144,28 @@ import Cred.Examples.Fractal
 -- impossibility credence. Rides the real-valued scoreEpsCredence and the
 -- Credence carrier. Measured: propext, Classical.choice, Quot.sound.
 #print axioms Cred.Approx.explicitEuler_full_step_degree_zero
+
+-- Math/Continuity: classical ε-δ continuity is the meet over all threshold
+-- continuities. The recovery rides the Credence carrier and Mathlib's metric
+-- topology. Measured: propext, Classical.choice, Quot.sound.
+#print axioms Cred.Math.tcontinuousAt_all_iff_continuousAt
+
+-- Math/Smoothness: the load-bearing kink witness, status 0 at the |·| corner,
+-- via Mathlib's not_differentiableAt_abs_zero. Measured: propext,
+-- Classical.choice, Quot.sound.
+#print axioms Cred.Math.diffStatus_abs_zero
+
+-- Math/Dimension: the Moran / open-set-condition equation for an n-map
+-- equal-ratio IFS, generalizing the Cantor instance. Uses Mathlib Real.rpow/log.
+-- Measured: propext, Classical.choice, Quot.sound.
+#print axioms Cred.Math.moran_general
+
+-- Topology/Manifold: the identity transition carries smooth status, the seed
+-- closure fact through ContDiff. Rides the Credence carrier and Mathlib ContDiff.
+-- Measured: propext, Classical.choice, Quot.sound.
+#print axioms Cred.Manifold.transitionSmoothness_id
+
+-- Probability/CoxUniqueness: any two finite measures representing the same
+-- plausibility agree on every event. Finite rational sums, inheriting the three
+-- axioms through Mathlib. Measured: propext, Classical.choice, Quot.sound.
+#print axioms Cred.Probability.cox_representation_unique
