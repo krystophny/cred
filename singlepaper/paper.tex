@@ -1458,6 +1458,36 @@ and no ex-falso derivation.
 
 \section{Relation to Existing Work}
 
+The table below places Cred against neighbouring traditions along the
+layers it factors.  The full positioning, with Lean anchors and overclaim risks,
+is in the repository's literature positioning matrix.
+
+\begin{table}[h]
+\centering
+\resizebox{\textwidth}{!}{%
+\footnotesize
+\begin{tabular}{@{}lllll@{}}
+\toprule
+tradition & conjunction / joint & conditional & zero evidence & aggregation \\
+\midrule
+classical logic & $\wedge$ & material $\supset$ / entailment & vacuous & $\forall$ worlds \\
+Kleene / LP / K$_3$ & $\min$ & designation, no internal $\to$ & n/a & $\forall$ + designation \\
+product fuzzy logic & product (as joint) & residuum $j/e$ & residuum $=1$ & truth-functional \\
+G\"odel / \L ukasiewicz & $\min$ / $\max(a{+}b{-}1,0)$ & residuum & residuum $=1$ & truth-functional \\
+probabilistic worlds & event $\cap$ & ratio $j/e$ & undefined $0/0$ & one measure \\
+imprecise / credal & joint interval & conditional interval & full interval & set of measures \\
+de Finetti conditionals & event $\cap$ & conditional event & void & coherence \\
+\textbf{native Cred} & \textbf{supplied $j$} & \textbf{fiber $\Cond(j,e)$} & \textbf{$[0,1]$} & \textbf{$\forall$ / measure} \\
+\bottomrule
+\end{tabular}%
+}
+\caption{Cred against neighbouring traditions.  The product is one coupling policy,
+not the joint; the conditional is the external fiber, not a residuum; zero evidence
+gives the whole interval, not a default value or an undefined ratio; and
+$\forall$ consequence is the all-measures corner of the measure aggregation.}
+\label{tab:comparison}
+\end{table}
+
 \paragraph{Fuzzy and many-valued logic.}
 Product logic uses the product t-norm and its residuum
 \cite{hajek1998,esteva2001,cintula2011}.  Probabilistic fuzzy logics
@@ -1469,7 +1499,20 @@ induced connectives.  The present system uses that algebraic data for
 a different purpose.  It forms the external fiber
 $\{c:c\conjc e=j\}$ and propagates that set when it is not a singleton.
 It therefore does not identify conditioning with the product residuum.
-The Curry block shows why: the full residuated package is incompatible
+Explicitly, for evidence $e$ and joint $j$ the residuum returns one
+value while the fiber is a set,
+\[
+\begin{aligned}
+  e\to_\Pi j&=
+  \begin{cases}1,&e\le j,\\ j/e,&e>j,\end{cases}\\
+  \Cond(j,e)&=\{c:c\conjc e=j\}.
+\end{aligned}
+\]
+At positive coherent evidence both give the value $j/e$
+(\Lean{residuum\_vs\_fiber\_positive}); at $e=j=0$ the residuum returns
+$1$ while $\Cond(0,0)=[0,1]$ (\Lean{residuum\_vs\_fiber\_zero}, in
+\texttt{Cred.Native}).  The Curry block shows
+why the residuated package cannot be internalized: it is incompatible
 with contraction on this carrier.
 
 \paragraph{Paraconsistent and three-valued logic.}
