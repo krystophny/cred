@@ -136,20 +136,26 @@ Benchmark: each analytic predicate has a graded threshold reading whose
 crisp fragment is exactly the Mathlib notion; the only intrinsic degrees are
 the boundary (exact) and the ordering, never a free-floating interior value.
 
-## Stage 5: graded geometry (atlas seed present, manifold theory future)
+## Stage 5: graded geometry (n-D manifold recovery present, superstructure future)
 
-The atlas seed has a first Lean anchor; the manifold theory above it is
-future.
+The graded manifold layer now recovers Mathlib's own smooth-manifold notion
+in n dimensions; the differential-geometric superstructure above it is future.
 
-- Graded manifold and atlas status: first cut in `Cred/Topology/Manifold.lean`.
-  A `GradedChart` maps a carrier into the one-dimensional model `ℝ`;
-  `transitionSmoothness τ` is 1 iff the supplied transition is `C^∞`
-  (`transitionSmoothness_eq_one_iff`), closed under composition
-  (`transitionSmoothness_comp`); an atlas aggregates per-transition statuses
-  by the product meet, and `smooth_atlas_recovery` returns every transition as
-  a genuine `ContDiff` map at aggregate status 1. Still `future`: charts with
-  cover and Hausdorff conditions on top of Mathlib's `ChartedSpace`, an
-  atlas-coverage degree, tangent bundles, and differential forms.
+- 1-D atlas seed: `Cred/Topology/Manifold.lean`. A `GradedChart` maps a carrier
+  into the one-dimensional model `ℝ`; `transitionSmoothness τ` is 1 iff the
+  supplied transition is `C^∞` (`transitionSmoothness_eq_one_iff`,
+  `transitionSmoothness_comp`); `smooth_atlas_recovery` returns the transitions
+  as genuine `ContDiff` maps at aggregate status 1.
+- n-D recovery (real, not a seed): `Cred/Topology/ManifoldN.lean`. Over the
+  Euclidean model `EuclideanSpace ℝ (Fin n)` with boundaryless `𝓘(ℝ, E)` and an
+  abstract `[ChartedSpace E M]`, the per-transition status reads
+  `contDiffGroupoid ∞` membership, and `atlasSmoothStatus_eq_one_iff_isManifold`
+  proves `atlasSmoothStatus = 1 ↔ IsManifold (𝓘(ℝ,E)) ∞ M`, i.e. the graded
+  status reaches certainty exactly when M is a Mathlib C^∞ manifold. Order `∞`
+  is C^∞ (this Mathlib version places `⊤ = ω` analytic strictly above `∞`). The
+  model space scores 1 (`atlasSmoothStatus_model_space`).
+- Still `future`: tangent bundles, differential forms, de Rham cohomology,
+  per-orbit integrator preservation, and geometric-invariant robustness.
 - Structure-preservation scores for geometric integrators: `future`. A
   per-step preservation credence for a symplectic or variational integrator
   over a trajectory, extending the single-step scores of Stage 2 to a score
@@ -171,5 +177,7 @@ crisp or exact case collapses to the classical answer.
    `Cred/Dependence/RobustCollapse.lean`.
 4. Graded analysis: metric, continuity, differentiability, dimension.
    Anchor: `Cred/Math/{Metric,Continuity,Smoothness,Dimension}.lean`.
-5. Graded geometry: atlas seed in `Cred/Topology/Manifold.lean`; full
-   manifold theory, tangent bundles, forms, invariant robustness `future`.
+5. Graded geometry: n-D manifold recovery in `Cred/Topology/ManifoldN.lean`
+   (atlas status = 1 iff mathlib C^∞ manifold), 1-D seed in
+   `Cred/Topology/Manifold.lean`; tangent bundles, forms, de Rham, invariant
+   robustness `future`.

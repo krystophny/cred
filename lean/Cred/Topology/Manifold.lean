@@ -12,7 +12,7 @@
   WHAT IS GRADED vs THE CRISP REDUCTION.
   The graded datum is `transitionSmoothness τ`, a STATUS credence reading whether
   the supplied transition is smooth. In this first cut the status is two-valued
-  (1 when `τ` is `ContDiff ℝ ⊤`, else 0): it records the classical smoothness
+  (1 when `τ` is `ContDiff ℝ ∞`, else 0): it records the classical smoothness
   predicate as a credence rather than interpolating between smooth and non-smooth.
   The CRISP REDUCTION is `transitionSmoothness_eq_one_iff`: status 1 is logically
   equivalent to ordinary mathlib smoothness, so the classical compatibility
@@ -20,9 +20,9 @@
   pushes this through a `GradedAtlas`: a smooth status (built from per-transition
   status 1) returns the underlying transitions as genuine `ContDiff` functions.
 
-  The smoothness-order literal is `⊤ : WithTop ℕ∞`, the top of mathlib's order
-  scale; `contDiff_id`, `contDiff_const`, and `ContDiff.comp` are order-generic,
-  so they apply at `⊤` unchanged.
+  The smoothness-order literal is `∞ : WithTop ℕ∞` (the C^∞ order; in this
+  Mathlib version `⊤ = ω` is analytic, strictly above `∞`); `contDiff_id`,
+  `contDiff_const`, and `ContDiff.comp` are order-generic, so they apply at `∞`.
 -/
 
 import Cred.Core.Value
@@ -34,6 +34,7 @@ namespace Manifold
 
 open Credence
 open Classical
+open scoped ContDiff
 
 /-! ## Charts over the one-dimensional model
 
@@ -53,15 +54,15 @@ smooth, impossible (0) otherwise. It is two-valued by design; interpolation
 between smooth and rough is left to a later cut. -/
 
 /-- Smoothness STATUS of a supplied transition `τ : ℝ → ℝ`, as a credence:
-`1` when `τ` is `ContDiff ℝ ⊤`, `0` otherwise. -/
+`1` when `τ` is `ContDiff ℝ ∞`, `0` otherwise. -/
 noncomputable def transitionSmoothness (τ : ℝ → ℝ) : Credence :=
-  if ContDiff ℝ (⊤ : WithTop ℕ∞) τ then 1 else 0
+  if ContDiff ℝ (∞ : WithTop ℕ∞) τ then 1 else 0
 
 /-- Crisp reduction: status `1` is exactly ordinary mathlib smoothness. -/
 theorem transitionSmoothness_eq_one_iff (τ : ℝ → ℝ) :
-    transitionSmoothness τ = 1 ↔ ContDiff ℝ (⊤ : WithTop ℕ∞) τ := by
+    transitionSmoothness τ = 1 ↔ ContDiff ℝ (∞ : WithTop ℕ∞) τ := by
   unfold transitionSmoothness
-  by_cases h : ContDiff ℝ (⊤ : WithTop ℕ∞) τ
+  by_cases h : ContDiff ℝ (∞ : WithTop ℕ∞) τ
   · simp only [h, if_true, iff_true]
   · simp only [h, if_false, iff_false]
     intro hcontra
@@ -148,7 +149,7 @@ theorem conj_eq_one_iff (a b : Credence) :
 /-- Crisp recovery for a single transition: smooth status `1` returns the
 supplied transition as a genuine `ContDiff` function. -/
 theorem smooth_transition_recovery {τ : ℝ → ℝ}
-    (h : transitionSmoothness τ = 1) : ContDiff ℝ (⊤ : WithTop ℕ∞) τ :=
+    (h : transitionSmoothness τ = 1) : ContDiff ℝ (∞ : WithTop ℕ∞) τ :=
   (transitionSmoothness_eq_one_iff τ).mp h
 
 /-- Crisp recovery for the atlas: aggregate smooth status `1` returns every
@@ -157,7 +158,7 @@ graded status back to ordinary smooth compatibility. -/
 theorem smooth_atlas_recovery {U : Type*}
     (charts : List (GradedChart U)) (transitions : List (ℝ → ℝ))
     (h : (GradedAtlas.ofTransitions charts transitions).smoothStatus = 1) :
-    ∀ τ ∈ transitions, ContDiff ℝ (⊤ : WithTop ℕ∞) τ := by
+    ∀ τ ∈ transitions, ContDiff ℝ (∞ : WithTop ℕ∞) τ := by
   -- Unfold the aggregate status; induct over the transition list. The status
   -- hypothesis mentions `transitions`, so generalize it into the motive.
   have hstatus : atlasStatus transitions = 1 := h

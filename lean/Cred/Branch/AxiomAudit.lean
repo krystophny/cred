@@ -49,6 +49,7 @@ import Cred.Math.Continuity
 import Cred.Math.Smoothness
 import Cred.Math.Dimension
 import Cred.Topology.Manifold
+import Cred.Topology.ManifoldN
 import Cred.Probability.CoxUniqueness
 
 -- Core/Value: interval arithmetic over the Mathlib reals. The real-number
@@ -164,6 +165,13 @@ import Cred.Probability.CoxUniqueness
 -- closure fact through ContDiff. Rides the Credence carrier and Mathlib ContDiff.
 -- Measured: propext, Classical.choice, Quot.sound.
 #print axioms Cred.Manifold.transitionSmoothness_id
+
+-- Topology/ManifoldN: the n-dimensional headline recovery — atlas smoothness
+-- status equals certainty iff M is a genuine Mathlib IsManifold for the Euclidean
+-- model at the analytic order. Rides the Credence carrier and Mathlib's
+-- contDiffGroupoid / IsManifold development. Measured: propext, Classical.choice,
+-- Quot.sound.
+#print axioms Cred.ManifoldN.atlasSmoothStatus_eq_one_iff_isManifold
 
 -- Probability/CoxUniqueness: any two finite measures representing the same
 -- plausibility agree on every event. Finite rational sums, inheriting the three

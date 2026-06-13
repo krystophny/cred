@@ -92,7 +92,8 @@ below. This ledger keeps the paper from drifting into unsupported claims. See
 | General n-map IFS similarity dimension log n / log(1/r) (unique Moran solution); exact box estimate | Lean theorem | `moran_general`, `moran_general_unique`, `box_estimate_eq_dim`, `cantor_is_instance` | n maps of equal ratio r in (0,1) |
 | Cantor instance log2/log3 with its concrete box count | Lean theorem | `cantor_moran`, `cantor_moran_unique` | the Cantor construction |
 | Graded atlas seed: 1-dim charts, smoothness status, crisp recovery to ContDiff | Lean theorem | `transitionSmoothness_eq_one_iff`, `transitionSmoothness_comp`, `smooth_atlas_recovery` | 1-dim model, transitions supplied |
-| Full manifolds / tangent bundles / forms / Hausdorff measure as graded layers | conjecture / roadmap | (none yet) | future; see FOUNDATION_TRACK_ROADMAP.md |
+| n-D manifold recovery: graded atlas smoothness status = 1 iff M is a mathlib C-infinity manifold | Lean theorem | `atlasSmoothStatus_eq_one_iff_isManifold`, `atlasSmoothStatus_model_space` | model EuclideanSpace R (Fin n), order ∞ (C-infinity), any ChartedSpace M |
+| Tangent bundles / differential forms / de Rham / Hausdorff measure as graded layers | conjecture / roadmap | (none yet) | future; see FOUNDATION_TRACK_ROADMAP.md |
 
 ## Explicitly not claimed
 
