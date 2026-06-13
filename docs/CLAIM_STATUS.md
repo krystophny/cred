@@ -94,7 +94,8 @@ below. This ledger keeps the paper from drifting into unsupported claims. See
 | Graded atlas seed: 1-dim charts, smoothness status, crisp recovery to ContDiff | Lean theorem | `transitionSmoothness_eq_one_iff`, `transitionSmoothness_comp`, `smooth_atlas_recovery` | 1-dim model, transitions supplied |
 | n-D manifold recovery: graded atlas smoothness status = 1 iff M is a mathlib C-infinity manifold | Lean theorem | `atlasSmoothStatus_eq_one_iff_isManifold`, `atlasSmoothStatus_model_space` | model EuclideanSpace R (Fin n), order ∞ (C-infinity), any ChartedSpace M |
 | Differential layer: smoothness status = 1 iff ContMDiff; at status 1 the pushforward mfderiv is the genuine tangent map | Lean theorem | `mdiffStatus_eq_one_iff`, `mdiffStatus_mdifferentiable`, `mdiffStatus_mfderiv_isCLM`, `mdiffStatus_modelMap_eq_one_iff` | maps between Euclidean-model charted spaces, order ∞ |
-| Tangent bundles / differential forms / de Rham / Hausdorff measure as graded layers | conjecture / roadmap | (none yet) | future; see FOUNDATION_TRACK_ROADMAP.md |
+| Tangent bundle layer: TM is a mathlib smooth manifold; projection is smooth; zero section is a smooth section | Lean theorem | `tangentBundleStatus_eq_one`, `tangentProjStatus_eq_one`, `zeroSectionStatus_eq_one` (each with `_eq_one_iff`) | M a C-infinity manifold over EuclideanSpace R (Fin n) |
+| Differential forms / de Rham / connections / curvature / Hausdorff measure as graded layers | conjecture / roadmap | (none yet) | future; no mathlib target to recover; see FOUNDATION_TRACK_ROADMAP.md |
 
 ## Explicitly not claimed
 

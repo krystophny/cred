@@ -2082,17 +2082,30 @@ $\mathrm{status}=1\iff\mathrm{ContDiff}\,\mathbb R\,\infty\,f$
 (\Lean{mdiffStatus\_modelMap\_eq\_one\_iff}), tying the manifold
 differential back to the analysis layer.
 
+\paragraph{Tangent bundle and sections.}
+The recovery reaches the bundle itself.  For a smooth manifold $M$ over
+the model, the tangent bundle $TM$ is a genuine mathlib smooth manifold
+(status $1$, \Lean{tangentBundleStatus\_eq\_one}, witnessed by
+\texttt{Bundle.TotalSpace.isManifold}); its projection $\pi:TM\to M$ is
+$C^\infty$ (\Lean{tangentProjStatus\_eq\_one}); and the zero section is a
+smooth section (\Lean{zeroSectionStatus\_eq\_one}, via mathlib's
+\texttt{ContMDiffSection}).  Each status is crisp, and its certainty is
+equivalent to the underlying mathlib smoothness fact.
+
 These layers share one shape: a degree map $P:X\to[0,1]$ whose value $1$
 recovers the classical object exactly, machine-checked.  Metric
 closeness, the limit, and continuity recover their mathlib counterparts
 at the boundary; differentiability is two-valued status; dimension is the
-named Moran source; the atlas status recovers a genuine smooth manifold,
-and the differential layer recovers $\mathrm{ContMDiff}$ and the tangent
-pushforward $\mathrm{mfderiv}$.  What remains is the higher
-differential-geometric superstructure (differential forms, de Rham
-cohomology), which mathlib itself does not yet fully provide, and
-measure-theoretic dimension (Hausdorff measure, Moran's theorem).  The
-staged plan is in \texttt{docs/FOUNDATION\_TRACK\_ROADMAP.md}.
+named Moran source; the atlas status recovers a genuine smooth manifold;
+the differential layer recovers $\mathrm{ContMDiff}$ and the tangent
+pushforward $\mathrm{mfderiv}$; and the tangent bundle, its projection,
+and the zero section are recovered as smooth objects.  The recovery stops
+where mathlib's own library does: the higher differential-geometric
+superstructure (differential forms, de Rham cohomology, connections,
+curvature) and measure-theoretic dimension (Hausdorff measure, Moran's
+theorem) have no mathlib target to recover, so they are genuine future
+work, not status layers asserted here.  The staged plan is in
+\texttt{docs/FOUNDATION\_TRACK\_ROADMAP.md}.
 
 \section{Lean Artifact}
 

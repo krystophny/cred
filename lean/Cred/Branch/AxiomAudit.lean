@@ -51,6 +51,7 @@ import Cred.Math.Dimension
 import Cred.Topology.Manifold
 import Cred.Topology.ManifoldN
 import Cred.Topology.Differential
+import Cred.Topology.TangentBundleLayer
 import Cred.Probability.CoxUniqueness
 
 -- Core/Value: interval arithmetic over the Mathlib reals. The real-number
@@ -183,6 +184,16 @@ import Cred.Probability.CoxUniqueness
 -- Quot.sound.
 #print axioms Cred.Differential.mdiffStatus_eq_one_iff
 #print axioms Cred.Differential.mdiffStatus_mdifferentiable
+
+-- Topology/TangentBundleLayer: the three tangent-bundle recoveries as statuses --
+-- the tangent bundle is a Mathlib smooth manifold (Bundle.TotalSpace.isManifold),
+-- the bundle projection is C^∞ (Bundle.contMDiff_proj), and the zero section is
+-- C^∞ (Bundle.contMDiff_zeroSection). Each rides the Credence carrier and
+-- Mathlib's vector-bundle / tangent-bundle development. Measured: propext,
+-- Classical.choice, Quot.sound.
+#print axioms Cred.TangentLayer.tangentBundleStatus_eq_one
+#print axioms Cred.TangentLayer.tangentProjStatus_eq_one
+#print axioms Cred.TangentLayer.zeroSectionStatus_eq_one
 
 -- Probability/CoxUniqueness: any two finite measures representing the same
 -- plausibility agree on every event. Finite rational sums, inheriting the three

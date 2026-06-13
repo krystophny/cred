@@ -162,9 +162,19 @@ in n dimensions; the differential-geometric superstructure above it is future.
   (`mdiffStatus_mfderiv_isCLM`, with `mfderiv_id`/`mfderiv_const` restated), and
   `mdiffStatus_modelMap_eq_one_iff` bridges to ordinary `ContDiff ℝ ∞` on the
   model. id/const/composition closure proved.
-- Still `future`: differential forms, de Rham cohomology, integration on
-  manifolds (mathlib itself does not yet fully provide these), per-orbit
-  integrator preservation, and geometric-invariant robustness.
+- Tangent bundle layer (real, not a seed): `Cred/Topology/TangentBundleLayer.lean`.
+  For a C^∞ manifold M over the model, `tangentBundleStatus_eq_one` recovers that
+  the tangent bundle TM is a mathlib smooth manifold (`Bundle.TotalSpace.isManifold`),
+  `tangentProjStatus_eq_one` that the bundle projection is C^∞ (`Bundle.contMDiff_proj`),
+  and `zeroSectionStatus_eq_one` that the zero section is a smooth section
+  (`Bundle.contMDiff_zeroSection`, `ContMDiffSection`); each with iff-recovery and
+  a model-space corollary.
+- The recovery stops at mathlib's frontier. Differential forms, de Rham
+  cohomology, connections, curvature, and integration on manifolds have NO
+  mathlib target in this version, so a graded layer over them would be an
+  unanchored seed; they are genuine future work, not asserted here. Likewise
+  measure-theoretic (Hausdorff) dimension, per-orbit integrator preservation,
+  and geometric-invariant robustness.
 - Structure-preservation scores for geometric integrators: `future`. A
   per-step preservation credence for a symplectic or variational integrator
   over a trajectory, extending the single-step scores of Stage 2 to a score
